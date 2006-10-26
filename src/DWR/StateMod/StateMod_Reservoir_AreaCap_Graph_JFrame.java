@@ -37,8 +37,8 @@ import org.jfree.chart.title.TextTitle;
 import org.jfree.data.xy.DefaultTableXYDataset;
 import org.jfree.data.xy.XYSeries;
 
-import org.jfree.ui.HorizontalAlignment;
-import org.jfree.ui.RectangleEdge;
+//import org.jfree.ui.HorizontalAlignment;
+//import org.jfree.ui.RectangleEdge;
 
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.Message.Message;
