@@ -1,0 +1,982 @@
+<!-- 
+================================================================================
+Ant build.xml file for creating the StateMod files
+================================================================================
+2003-06-03	J. Thomas Sapienza, RTi	Initial Version
+2003-07-30	Steven A. Malers, RTi	* Add StateMod_Diversion_Node.
+					* Copy StateMod_RiverInfo to
+					  StateMod_RiverNetworkNode.
+					* Rename StateMod_RiverInfo to
+					  StateMod_RiverStation.
+					* Remove StateMod_DataSet_JTree_Node.
+					* Add StateMod_Diversion_Node.
+					* Add StateMod_Reservoir_Node.
+					* Add StateMod_InstreamFlow_Node.
+					* Add StateMod_Well_Node.
+					* Add StateMod_RiverStation_Node.
+					* Add StateMod_Other_Node.
+					* Remove StateMod_Response.
+					* Remove StateMod_Control.
+					* Rename StateMod_RiverBaseFlow to
+					  StateMod_BaseFlowCoefficients.
+					* Add
+					  StateMod_DataSetComponent_CellRenderer
+					  and
+					  StateMod_DataSetComponent_TableModel.
+2003-08-14	SAM, RTi		* Add StateMod_BaseFlowStation to
+					  contain the River Baseflow Stations.
+					* Rename *_ClimateStation_ to
+					  _ReservoirClimate_ because this is
+					  really a secondary data window for
+					  reservoirs.
+2003-08-26	JTS, RTi		* Add StateMod_DeltaPlot
+					* Add StateMod_DeltaPlotNode
+2003-08-26	SAM, RTi		* Add StateMod_DataSet_WindowManager
+2003-09-10	JTS, RTi		* Add StateMod_Response_*
+					* Add StateMod_Save_*
+2003-09-11	SAM, RTi		* Rename StateMod_RiverStation* to
+					  StateMod_StreamGage*
+					* Rename StateMod_RiverBaseflow* to
+					  StateMod_StreamEstimate*
+2003-10-06	JTS, RTi		Default compiler is now 1.4.2.
+2003-10-14	SAM, RTi		* Add StateMod_GUIUpdatable interface.
+2003-10-20	SAM, RTi		* Add StateMod_BTS.
+2003-10-26	SAM, RTi		* Remove StateMod_GraphNode - its
+					  contents are being moved to other
+					  classes.
+2004-08-13	SAM, RTi		* Add StateMod_PrfGageData - moved from
+					  the HydroBaseDMI package.
+2004-10-25	SAM, RTi		* Add StateMod_QueryTool_JFrame.
+					* Add
+					  StateMod_Diversion_InputFilter_JPanel.
+					* Split StateMod_Diversion_TableModel
+					  and StateMod_Diversion_CellRenderer
+					  into separate table models for
+					  diversion stations, rights, and
+					  return flows.
+					* Similar for instream flows, wells, and
+					  reservoirs.  The resulting code is
+					  more explicit and easier to maintain.
+2005-08-30	SAM, RTi		* Add writeStateMod_Command and
+					  writeStateMod_JDialog.
+2005-09-02	SAM, RTi		* Add readStateMod_Command and
+					  readStateMod_JDialog.
+2005-09-29	SAM, RTi		* Add readStateModB_Command and
+					  readStateModB_JDialog.
+2006-02-28	SAM, RTi		* Add StateMod_Reservoir_AreaCap_
+					  Graph_JFrame.
+2006-04-09	SAM, RTi		* Add StateMod_Parcel.
+2006-08-22	SAM, RTi		* Add StateMod_Plan.
+================================================================================
+EndHeader
+-->
+
+<project name="StateMod" default="compile" basedir="..\..\..">
+
+<description>
+	Build file for the StateMod
+</description>
+
+<!--
+================================================================================
+	Global Build Properties
+================================================================================
+-->
+<property name="package" value="DWR/StateMod"/>
+<property name="src" location="src"/>
+<!-- the next property ("build") should not have a trailing / on the path.
+     ie, it can be "classes", but not "classes/".  Otherwise, alternate version
+     compilation won't work. -->
+<property name="build" location="classes"/>
+
+<property name="latest_version" value="JDK 1.4.2"/>
+
+<!--
+================================================================================
+INIT
+	Initialization of environment variables for using JDK 1.4.2
+================================================================================
+-->
+<target name="init_142"
+	description="Set-up of the environment variables for a JDK 1.4.2 build">
+	<property name="jdk_home" location="i:\develop\jdk_142"/>
+	<property name="jre_home" location="i:\develop\jre_142"/>
+	<property name="build_subversion" value="_142"/>
+	<property name="includes"
+		value="
+		${package}\StateMod_BTS.java
+
+		${package}\StateMod_DataSet.java
+		${package}\StateMod_DataSetComponent_CellRenderer.java
+		${package}\StateMod_DataSetComponent_TableModel.java
+		${package}\StateMod_DataSet_WindowManager.java
+
+		${package}\StateMod_Data.java
+
+		${package}\StateMod_StreamEstimate.java
+		${package}\StateMod_StreamEstimate_CellRenderer.java
+		${package}\StateMod_StreamEstimate_JFrame.java
+		${package}\StateMod_StreamEstimate_TableModel.java
+
+		${package}\StateMod_StreamEstimate_Coefficients.java
+	${package}\StateMod_StreamEstimate_Coefficients_CellRenderer.java
+		${package}\StateMod_StreamEstimate_Coefficients_TableModel.java
+
+		${package}\StateMod_DelayTable.java
+		${package}\StateMod_DeltaPlot.java
+		${package}\StateMod_DeltaPlotNode.java
+		${package}\StateMod_Diversion.java
+		${package}\StateMod_Diversion_InputFilter_JPanel.java
+		${package}\StateMod_Diversion_Node.java
+		${package}\StateMod_DiversionRight.java
+		${package}\StateMod_InstreamFlow.java
+		${package}\StateMod_InstreamFlow_Node.java
+		${package}\StateMod_InstreamFlowRight.java
+		${package}\StateMod_OperationalRight.java
+		${package}\StateMod_Other_Node.java
+
+		${package}\StateMod_Parcel.java
+
+		${package}\StateMod_Plan.java
+		${package}\StateMod_Plan_JFrame.java
+		${package}\StateMod_Plan_CellRenderer.java
+		${package}\StateMod_Plan_TableModel.java
+
+		${package}\StateMod_PrfGageData.java
+
+		${package}\StateMod_Reservoir.java
+		${package}\StateMod_ReservoirAccount.java
+		${package}\StateMod_ReservoirAreaCap.java
+		${package}\StateMod_ReservoirClimate.java
+		${package}\StateMod_Reservoir_Node.java
+		${package}\StateMod_ReservoirRight.java		
+
+		${package}\StateMod_Response_JFrame.java
+		${package}\StateMod_Response_TableModel.java
+		${package}\StateMod_Response_CellRenderer.java
+
+		${package}\StateMod_ReturnFlow.java
+		${package}\StateMod_ReturnFlow_TableModel.java
+		${package}\StateMod_ReturnFlow_CellRenderer.java
+
+		${package}\StateMod_RiverNetworkNode.java
+		${package}\StateMod_RiverNetworkNode_CellRenderer.java
+		${package}\StateMod_RiverNetworkNode_JFrame.java
+		${package}\StateMod_RiverNetworkNode_TableModel.java
+
+		${package}\StateMod_StreamGage.java
+		${package}\StateMod_StreamGage_CellRenderer.java
+		${package}\StateMod_StreamGage_JFrame.java
+		${package}\StateMod_StreamGage_TableModel.java
+		${package}\StateMod_StreamGage_Node.java
+
+		${package}\StateMod_Save_JDialog.java
+		${package}\StateMod_Save_CellRenderer.java
+		${package}\StateMod_Save_TableModel.java
+
+		${package}\StateMod_TS.java
+		${package}\StateMod_Well.java
+		${package}\StateMod_Well_Node.java
+		${package}\StateMod_WellRight.java
+
+		${package}\StateMod_DataSet_JTree.java
+
+		${package}\StateMod_Util.java
+
+		${package}\StateMod_Diversion_CellRenderer.java
+		${package}\StateMod_Diversion_JFrame.java
+		${package}\StateMod_Diversion_TableModel.java
+		${package}\StateMod_Diversion_Right_JFrame.java
+		${package}\StateMod_DiversionRight_TableModel.java
+		${package}\StateMod_DiversionRight_CellRenderer.java
+		${package}\StateMod_Diversion_ReturnFlow_JFrame.java
+	
+		${package}\StateMod_DelayTable_JFrame.java
+		${package}\StateMod_DelayTable_TableModel.java
+		${package}\StateMod_DelayTable_CellRenderer.java
+
+		${package}\StateMod_InstreamFlow_JFrame.java
+		${package}\StateMod_InstreamFlow_TableModel.java
+		${package}\StateMod_InstreamFlow_CellRenderer.java
+		${package}\StateMod_InstreamFlow_Right_JFrame.java
+		${package}\StateMod_InstreamFlowRight_TableModel.java
+		${package}\StateMod_InstreamFlowRight_CellRenderer.java
+
+		${package}\StateMod_OutputFiles_JFrame.java
+
+		${package}\StateMod_OperationalRight_JFrame.java
+		${package}\StateMod_OperationalRight_CellRenderer.java
+		${package}\StateMod_OperationalRight_TableModel.java		
+
+		${package}\StateMod_Reservoir_JFrame.java
+		${package}\StateMod_Reservoir_CellRenderer.java
+		${package}\StateMod_Reservoir_TableModel.java
+		${package}\StateMod_Reservoir_Right_JFrame.java
+		${package}\StateMod_ReservoirRight_TableModel.java
+		${package}\StateMod_ReservoirRight_CellRenderer.java
+		${package}\StateMod_Reservoir_AreaCap_JFrame.java
+		${package}\StateMod_Reservoir_AreaCap_Graph_JFrame.java
+		${package}\StateMod_ReservoirAreaCap_TableModel.java
+		${package}\StateMod_ReservoirAreaCap_CellRenderer.java
+		${package}\StateMod_Reservoir_Climate_JFrame.java
+		${package}\StateMod_ReservoirClimate_TableModel.java
+		${package}\StateMod_ReservoirClimate_CellRenderer.java
+		${package}\StateMod_Reservoir_Owner_JFrame.java		
+		${package}\StateMod_ReservoirAccount_TableModel.java		
+		${package}\StateMod_ReservoirAccount_CellRenderer.java		
+
+		${package}\StateMod_Well_JFrame.java
+		${package}\StateMod_Well_CellRenderer.java
+		${package}\StateMod_Well_TableModel.java
+		${package}\StateMod_Well_Right_JFrame.java
+		${package}\StateMod_WellRight_TableModel.java
+		${package}\StateMod_WellRight_CellRenderer.java
+		${package}\StateMod_Well_ReturnFlow_JFrame.java
+		${package}\StateMod_Well_Depletion_JFrame.java		
+
+		${package}\StateMod_Control_JFrame.java
+
+		${package}\StateMod_GraphingTool_JFrame.java
+		${package}\StateMod_GraphingTool_CellRenderer.java
+		${package}\StateMod_GraphingTool_TableModel.java		
+
+		${package}\StateMod_QueryTool_JFrame.java
+
+		${package}\StateMod_OutputControl_JFrame.java
+		${package}\StateMod_OutputControl_CellRenderer.java
+		${package}\StateMod_OutputControl_TableModel.java		
+
+		${package}\StateMod_RunReport_JFrame.java
+
+		${package}\StateMod_RunDeltaPlot_CellRenderer.java
+		${package}\StateMod_RunDeltaPlot_JFrame.java
+		${package}\StateMod_RunDeltaPlot_TableModel.java
+		${package}\StateMod_GUIUtil.java
+		${package}\StateMod_GUIUpdatable.java
+
+		${package}\StateMod_Network_JFrame.java
+		${package}\StateMod_Network_JComponent.java
+		${package}\StateMod_NetworkReference_JComponent.java
+		${package}\StateMod_Network_AddNode_JDialog.java
+		${package}\StateMod_Network_AddLink_JDialog.java
+		${package}\StateMod_Network_NodeProperties_JDialog.java
+		${package}\StateMod_Network_AnnotationProperties_JDialog.java
+		
+	${package}\StateMod_Data_JFrame.java
+
+	${package}\StateMod_Diversion_Data_JFrame.java
+	${package}\StateMod_Diversion_Data_CellRenderer.java
+	${package}\StateMod_Diversion_Data_TableModel.java
+
+	${package}\StateMod_Diversion_Collection_Data_JFrame.java
+	${package}\StateMod_Diversion_Collection_Data_CellRenderer.java
+	${package}\StateMod_Diversion_Collection_Data_TableModel.java
+
+	${package}\StateMod_Diversion_DelayTableAssignment_Data_JFrame.java
+       ${package}\StateMod_Diversion_DelayTableAssignment_Data_CellRenderer.java
+	${package}\StateMod_Diversion_DelayTableAssignment_Data_TableModel.java	
+
+	${package}\StateMod_DiversionRight_Data_JFrame.java
+	${package}\StateMod_DiversionRight_Data_TableModel.java
+	${package}\StateMod_DiversionRight_Data_CellRenderer.java
+		
+	${package}\StateMod_DelayTable_Data_JFrame.java
+	${package}\StateMod_DelayTable_Data_TableModel.java
+	${package}\StateMod_DelayTable_Data_CellRenderer.java
+
+	${package}\StateMod_InstreamFlow_Data_JFrame.java
+	${package}\StateMod_InstreamFlow_Data_CellRenderer.java		
+	${package}\StateMod_InstreamFlow_Data_TableModel.java
+
+	${package}\StateMod_InstreamFlowRight_Data_JFrame.java
+	${package}\StateMod_InstreamFlowRight_Data_TableModel.java
+	${package}\StateMod_InstreamFlowRight_Data_CellRenderer.java
+
+	${package}\StateMod_OperationalRight_Data_JFrame.java
+	${package}\StateMod_OperationalRight_Data_CellRenderer.java
+	${package}\StateMod_OperationalRight_Data_TableModel.java
+
+	${package}\StateMod_Reservoir_Data_JFrame.java
+	${package}\StateMod_Reservoir_Data_CellRenderer.java
+	${package}\StateMod_Reservoir_Data_TableModel.java
+
+	${package}\StateMod_ReservoirAccount_Data_JFrame.java
+	${package}\StateMod_ReservoirAccount_Data_CellRenderer.java
+	${package}\StateMod_ReservoirAccount_Data_TableModel.java
+
+	${package}\StateMod_ReservoirAreaCap_Data_JFrame.java
+	${package}\StateMod_ReservoirAreaCap_Data_CellRenderer.java
+	${package}\StateMod_ReservoirAreaCap_Data_TableModel.java
+
+	${package}\StateMod_ReservoirClimate_Data_JFrame.java
+	${package}\StateMod_ReservoirClimate_Data_CellRenderer.java
+	${package}\StateMod_ReservoirClimate_Data_TableModel.java
+
+	${package}\StateMod_ReservoirRight_Data_JFrame.java
+	${package}\StateMod_ReservoirRight_Data_CellRenderer.java
+	${package}\StateMod_ReservoirRight_Data_TableModel.java
+	
+	${package}\StateMod_Reservoir_Collection_Data_JFrame.java
+	${package}\StateMod_Reservoir_Collection_Data_CellRenderer.java
+	${package}\StateMod_Reservoir_Collection_Data_TableModel.java
+
+	${package}\StateMod_ReturnFlow_Data_JFrame.java
+	${package}\StateMod_ReturnFlow_Data_CellRenderer.java
+	${package}\StateMod_ReturnFlow_Data_TableModel.java
+
+	${package}\StateMod_RiverNetworkNode_Data_JFrame.java
+	${package}\StateMod_RiverNetworkNode_Data_CellRenderer.java
+	${package}\StateMod_RiverNetworkNode_Data_TableModel.java
+
+	${package}\StateMod_StreamEstimate_Data_JFrame.java
+	${package}\StateMod_StreamEstimate_Data_CellRenderer.java
+	${package}\StateMod_StreamEstimate_Data_TableModel.java
+
+	${package}\StateMod_StreamEstimateCoefficients_Data_JFrame.java
+	${package}\StateMod_StreamEstimateCoefficients_Data_CellRenderer.java
+	${package}\StateMod_StreamEstimateCoefficients_Data_TableModel.java
+
+	${package}\StateMod_StreamGage_Data_JFrame.java
+	${package}\StateMod_StreamGage_Data_CellRenderer.java
+	${package}\StateMod_StreamGage_Data_TableModel.java		
+
+	${package}\StateMod_Well_Data_JFrame.java
+	${package}\StateMod_Well_Data_CellRenderer.java
+	${package}\StateMod_Well_Data_TableModel.java
+
+	${package}\StateMod_Well_Collection_Data_JFrame.java
+	${package}\StateMod_Well_Collection_Data_CellRenderer.java
+	${package}\StateMod_Well_Collection_Data_TableModel.java
+
+	${package}\StateMod_Well_DelayTableAssignment_Data_JFrame.java
+	${package}\StateMod_Well_DelayTableAssignment_Data_CellRenderer.java
+	${package}\StateMod_Well_DelayTableAssignment_Data_TableModel.java
+
+	${package}\StateMod_WellRight_Data_JFrame.java
+	${package}\StateMod_WellRight_Data_CellRenderer.java
+	${package}\StateMod_WellRight_Data_TableModel.java
+
+	${package}\readStateMod_Command.java
+	${package}\readStateMod_JDialog.java
+	${package}\readStateModB_Command.java
+	${package}\readStateModB_JDialog.java
+	${package}\writeStateMod_Command.java
+	${package}\writeStateMod_JDialog.java
+
+		"/>
+	
+	<property name="includes_sam"
+		value="		
+		${package}\StateMod_GUIUtil.java
+
+		${package}\StateMod_Reservoir.java
+		${package}\StateMod_ReservoirAccount.java
+		${package}\StateMod_ReservoirAreaCap.java
+		${package}\StateMod_ReservoirClimate.java
+		${package}\StateMod_Reservoir_Node.java
+		${package}\StateMod_ReservoirRight.java		
+
+		${package}\StateMod_Reservoir_JFrame.java
+		${package}\StateMod_Reservoir_CellRenderer.java
+		${package}\StateMod_Reservoir_TableModel.java
+		${package}\StateMod_Reservoir_Right_JFrame.java
+		${package}\StateMod_Reservoir_AreaCap_JFrame.java
+		${package}\StateMod_Reservoir_Climate_JFrame.java
+		${package}\StateMod_Reservoir_Owner_JFrame.java		
+
+		"/>
+	<property name="compiler" value="modern"/>
+	<property name="executable" value="${jdk_home}\bin\javac"/>
+	<property name="jre_home" location="i:\develop\jdk_142\jre"/>
+	<property name="blessed_dir" 
+		location="\CDSS\develop\classes${build_subversion}"/>
+	<property name="blessed_javadoc_dir" 
+		location="\CDSS\develop\javadoc${build_subversion}"/>
+	<path id="classpath">
+	<pathelement location="j:\cdss\develop\libHydroBaseDMIJava\classes_142"/>
+	<pathelement location="i:\develop\gis\libGeoViewJava\classes_142"/>
+	<pathelement location="${build}${build_subversion}"/>
+	<pathelement location="i:\develop\classes${build_subversion}"/>
+	<pathelement location="${blessed_dir}"/>		
+	<pathelement location="i:\develop\ant\lib\xercesImpl.jar"/>	
+	<pathelement location="i:\develop\ant\lib\xml-apis.jar"/>		
+	<pathelement location="j:\cdss\bin\jfreechart.jar"/>	
+	<pathelement location="j:\cdss\bin\jcommon.jar"/>	
+	</path>
+</target>
+
+<!--
+================================================================================
+INIT
+	Initialization of environment variables for using JDK 1.4.0
+================================================================================
+-->
+<target name="init_140"
+	description="Set-up of the environment variables for a JDK 1.4.0 build">
+	<property name="jdk_home" location="i:\develop\jdk_140"/>
+	<property name="jre_home" location="i:\develop\jre_140"/>
+	<property name="build_subversion" value="_140"/>
+	<property name="includes"
+		value="
+		${package}\StateMod_DataSet.java
+		${package}\StateMod_DataSetComponent_CellRenderer.java
+		${package}\StateMod_DataSetComponent_TableModel.java
+		${package}\StateMod_DataSet_WindowManager.java
+
+		${package}\StateMod_Data.java
+
+		${package}\StateMod_StreamEstimate.java
+		${package}\StateMod_StreamEstimate_CellRenderer.java
+		${package}\StateMod_StreamEstimate_JFrame.java
+		${package}\StateMod_StreamEstimate_TableModel.java
+
+		${package}\StateMod_StreamEstimate_Coefficients.java
+		${package}\StateMod_StreamEstimate_Coefficients_CellRenderer.java
+		${package}\StateMod_StreamEstimate_Coefficients_TableModel.java
+
+		${package}\StateMod_DelayTable.java
+		${package}\StateMod_DeltaPlot.java
+		${package}\StateMod_DeltaPlotNode.java
+		${package}\StateMod_Diversion.java
+		${package}\StateMod_Diversion_Node.java
+		${package}\StateMod_DiversionRight.java
+		${package}\StateMod_InstreamFlow.java
+		${package}\StateMod_InstreamFlow_Node.java
+		${package}\StateMod_InstreamFlowRight.java
+		${package}\StateMod_OperationalRight.java
+		${package}\StateMod_Other_Node.java
+
+		${package}\StateMod_Reservoir.java
+		${package}\StateMod_ReservoirAccount.java
+		${package}\StateMod_ReservoirAreaCap.java
+		${package}\StateMod_ReservoirClimate.java
+		${package}\StateMod_Reservoir_Node.java
+		${package}\StateMod_ReservoirRight.java		
+
+		${package}\StateMod_Response_JFrame.java
+		${package}\StateMod_Response_TableModel.java
+		${package}\StateMod_Response_CellRenderer.java
+
+		${package}\StateMod_ReturnFlow.java
+		${package}\StateMod_ReturnFlow_TableModel.java
+		${package}\StateMod_ReturnFlow_CellRenderer.java
+
+		${package}\StateMod_RiverNetworkNode.java
+		${package}\StateMod_RiverNetworkNode_CellRenderer.java
+		${package}\StateMod_RiverNetworkNode_JFrame.java
+		${package}\StateMod_RiverNetworkNode_TableModel.java
+
+		${package}\StateMod_StreamGage.java
+		${package}\StateMod_StreamGage_CellRenderer.java
+		${package}\StateMod_StreamGage_JFrame.java
+		${package}\StateMod_StreamGage_TableModel.java
+		${package}\StateMod_StreamGage_Node.java
+
+		${package}\StateMod_Save_JDialog.java
+		${package}\StateMod_Save_CellRenderer.java
+		${package}\StateMod_Save_TableModel.java
+
+		${package}\StateMod_TS.java
+		${package}\StateMod_Well.java
+		${package}\StateMod_Well_Node.java
+		${package}\StateMod_WellRight.java
+
+		${package}\StateMod_DataSet_JTree.java
+
+		${package}\StateMod_Util.java
+
+		${package}\StateMod_Diversion_JFrame.java
+		${package}\StateMod_Diversion_TableModel.java
+		${package}\StateMod_Diversion_CellRenderer.java
+		${package}\StateMod_Diversion_Right_JFrame.java
+		${package}\StateMod_DiversionRight_TableModel.java
+		${package}\StateMod_DiversionRight_CellRenderer.java
+		${package}\StateMod_Diversion_ReturnFlow_JFrame.java
+	
+		${package}\StateMod_DelayTable_JFrame.java
+		${package}\StateMod_DelayTable_TableModel.java
+		${package}\StateMod_DelayTable_CellRenderer.java
+
+		${package}\StateMod_InstreamFlow_JFrame.java
+		${package}\StateMod_InstreamFlow_TableModel.java
+		${package}\StateMod_InstreamFlow_CellRenderer.java
+		${package}\StateMod_InstreamFlow_Right_JFrame.java
+		${package}\StateMod_InstreamFlowRight_TableModel.java
+		${package}\StateMod_InstreamFlowRight_CellRenderer.java
+
+		${package}\StateMod_OutputFiles_JFrame.java
+
+		${package}\StateMod_OperationalRight_JFrame.java
+		${package}\StateMod_OperationalRight_CellRenderer.java
+		${package}\StateMod_OperationalRight_TableModel.java		
+
+		${package}\StateMod_Reservoir_JFrame.java
+		${package}\StateMod_Reservoir_CellRenderer.java
+		${package}\StateMod_Reservoir_TableModel.java
+		${package}\StateMod_Reservoir_Right_JFrame.java
+		${package}\StateMod_Reservoir_AreaCap_JFrame.java
+		${package}\StateMod_Reservoir_Climate_JFrame.java
+		${package}\StateMod_Reservoir_Owner_JFrame.java		
+
+		${package}\StateMod_Well_JFrame.java
+		${package}\StateMod_Well_CellRenderer.java
+		${package}\StateMod_Well_TableModel.java
+		${package}\StateMod_Well_Right_JFrame.java
+		${package}\StateMod_Well_ReturnFlow_JFrame.java
+		${package}\StateMod_Well_Depletion_JFrame.java		
+
+		${package}\StateMod_Control_JFrame.java
+
+		${package}\StateMod_GraphingTool_JFrame.java
+		${package}\StateMod_GraphingTool_CellRenderer.java
+		${package}\StateMod_GraphingTool_TableModel.java		
+
+		${package}\StateMod_OutputControl_JFrame.java
+		${package}\StateMod_OutputControl_CellRenderer.java
+		${package}\StateMod_OutputControl_TableModel.java		
+
+		${package}\StateMod_RunReport_JFrame.java
+
+		${package}\StateMod_RunDeltaPlot_CellRenderer.java
+		${package}\StateMod_RunDeltaPlot_JFrame.java
+		${package}\StateMod_RunDeltaPlot_TableModel.java
+		${package}\StateMod_GUIUtil.java
+		"/>
+	
+	<property name="includes_sam"
+		value="		
+		${package}\StateMod_GUIUtil.java
+
+		${package}\StateMod_Reservoir.java
+		${package}\StateMod_ReservoirAccount.java
+		${package}\StateMod_ReservoirAreaCap.java
+		${package}\StateMod_ReservoirClimate.java
+		${package}\StateMod_Reservoir_Node.java
+		${package}\StateMod_ReservoirRight.java		
+
+		${package}\StateMod_Reservoir_JFrame.java
+		${package}\StateMod_Reservoir_CellRenderer.java
+		${package}\StateMod_Reservoir_TableModel.java
+		${package}\StateMod_Reservoir_Right_JFrame.java
+		${package}\StateMod_Reservoir_AreaCap_JFrame.java
+		${package}\StateMod_Reservoir_Climate_JFrame.java
+		${package}\StateMod_Reservoir_Owner_JFrame.java		
+
+		"/>
+	<property name="compiler" value="modern"/>
+	<property name="executable" value="${jdk_home}\bin\javac"/>
+	<property name="jre_home" location="i:\develop\jdk_140\jre"/>
+	<property name="blessed_dir" 
+		location="\CDSS\develop\classes${build_subversion}"/>
+	<property name="blessed_javadoc_dir" 
+		location="\CDSS\develop\javadoc${build_subversion}"/>
+	<path id="classpath">
+	<pathelement location="${build}${build_subversion}"/>
+	<pathelement location="i:\develop\classes${build_subversion}"/>
+	<pathelement location="${blessed_dir}"/>		
+	</path>
+</target>
+
+<!--
+================================================================================
+COMPILE
+	Generic routine to compile for a given version
+================================================================================
+-->
+<target name="compile_generic"
+	description="Generic target for compiling source code">
+
+	<tstamp/>
+	<mkdir dir="${build}${build_subversion}"/>
+<echo>
+generic compile: ${build}${build_subversion}
+</echo>
+	<!-- Compile the java code from ${src} into ${build} -->
+<!--
+-->
+	<javac srcdir="${src}"
+		fork="yes"
+		includes="${includes}"
+		destdir="${build}${build_subversion}"
+		listfiles="true"
+		verbose="false"
+		deprecation="true"
+		debug="on"
+		executable="${executable}"
+		compiler="${compiler}">
+		<classpath refid="classpath"/>
+	</javac>
+</target>
+
+<!--
+================================================================================
+COMPILE
+	[Default Target]
+	This is the default target.  This is executed when ant is run without
+	any other arguments.  When a new JDk version is used and a target built
+	for it, the 'depends' argument in this target should be changed to point
+	to the new target.
+================================================================================
+-->
+<target name="compile"
+	depends="init_142, compile_generic"
+	description="Compile target for JDK 1.4.2"/>
+<!--
+	depends="140"
+	description="Compile target for the latest java version"/>
+-->
+
+
+
+<target name="compile_generic_sam"
+	description="Generic target for compiling source code">
+
+	<tstamp/>
+	<mkdir dir="${build}${build_subversion}"/>
+<echo>
+generic compile: ${build}${build_subversion}
+</echo>
+	<!-- Compile the java code from ${src} into ${build} -->
+	<javac srcdir="${src}"
+		fork="yes"
+		includes="${includes_sam}"
+		destdir="${build}${build_subversion}"
+		verbose="false"
+		listfiles="true"
+		deprecation="true"
+		debug="on"
+		executable="${executable}"
+		compiler="${compiler}">
+		<classpath refid="classpath"/>
+	</javac>
+</target>
+
+<target name="sam"
+	depends="init_142, compile_generic_sam"
+	description="Compile target for JDK 1.4.2"/>
+
+<!--
+================================================================================
+COMPILE
+	Version 1.4.2 Compile
+================================================================================
+-->
+<target name="142"
+	depends="init_142, compile_generic"
+	description="Compile target for JDK 1.4.2"/>
+
+<!--
+================================================================================
+COMPILE
+	Version 1.4.0 Compile
+================================================================================
+-->
+<target name="140"
+	depends="init_140, compile_generic"
+	description="Compile target for JDK 1.4.0"/>
+
+<!--
+================================================================================
+JAVADOC
+	Generic target for handling javadocing for a given version
+================================================================================
+-->
+<target name="javadoc_generic"
+	description="Target for creating Javadocs">
+	<javadoc
+		destdir="${basedir}\javadoc${build_subversion}">
+		<classpath refid="classpath"/>
+		<fileset dir="${src}"
+			includes="${includes}"/>
+	</javadoc>
+</target>	
+
+<!-- 
+================================================================================
+JAVADOC
+	Latest version Javadoc.  When a new JDK is added, the 'depends' 
+	argument should be updated to point to the new target.
+================================================================================
+-->
+<target name="javadoc"
+	depends="javadoc_142"
+	description="Target for creating Javadocs for latest JDK"/>
+
+<!-- 
+================================================================================
+JAVADOC
+	Javadoc for JDK 1.4.2
+================================================================================
+-->
+<target name="javadoc_142"
+	depends="init_142, javadoc_generic"
+	description="Target for creating Javadocs for 1.4.2"/>
+
+<!-- 
+================================================================================
+JAVADOC
+	Javadoc for JDK 1.4.0
+================================================================================
+-->
+<target name="javadoc_140"
+	depends="init_140, javadoc_generic"
+	description="Target for creating Javadocs for 1.4.0"/>
+
+<!-- 
+================================================================================
+CLEAN
+	Generic target for doing a clean for a given version
+================================================================================
+-->
+<target name="clean_generic"
+	description="Generic target for deleting class files">
+	<!-- Delete the ${build} tree -->
+	<delete dir="${build}${build_subversion}"/>
+	<delete dir="javadoc{build_subversion}"/>	
+</target>
+
+<!-- 
+================================================================================
+CLEAN
+	Latest version clean.  When a new JDk is added, the 'depends' argument
+	should be updated to point to the new target.
+================================================================================
+-->
+<target name="clean"
+	depends="clean_142"
+	description="Target for deleting the latest version's class files"/>
+
+<!-- 
+================================================================================
+CLEAN
+	Version 1.4.2 clean
+================================================================================
+-->
+<target name="clean_142" 
+	depends="init_142, clean_generic"	
+	description="Target for deleting JDK 1.4.2 class files"/>
+
+<!-- 
+================================================================================
+CLEAN
+	Version 1.4.0 clean
+================================================================================
+-->
+<target name="clean_140" 
+	depends="init_140, clean_generic"	
+	description="Target for deleting JDK 1.4.0 class files"/>
+
+<!-- 
+================================================================================
+INSTALL
+	Generic target for doing an install for a given version
+================================================================================
+-->
+<target name="install_generic"
+	description="Generic target for installing class files">
+	<copy todir="${blessed_dir}\${package}"
+		overwrite="yes">
+		<fileset dir="${build}${build_subversion}\${package}">
+			<include name="*.class"/>
+		</fileset>
+	</copy>
+	<copy 
+		file="J:\\CDSS\\develop\\doc\\graphics\\StateModIcon32.gif"
+		todir="${blessed_dir}/DWR/StateModGUI"/>
+	<copy 
+		file="J:\\CDSS\\develop\\doc\\graphics\\StateViewIcon32.gif"
+		todir="${blessed_dir}/DWR/StateModGUI"/>		
+</target>
+
+<!-- 
+================================================================================
+INSTALL
+	Latest version install.  When a new JDK version is used, the 'depends'
+	argument should be updated to point to the new target.
+================================================================================
+-->
+<target name="install"
+	depends="install_142"
+	description="Target for installing the latest version's classes"/>
+
+<!-- 
+================================================================================
+INSTALL
+	Version 1.4.2 install
+================================================================================
+-->
+<target name="install_142"
+	depends="init_142, install_generic"
+	description="Target for installing JDK 1.4.2 classes"/>
+
+<!-- 
+================================================================================
+INSTALL
+	Version 1.4.0 install
+================================================================================
+-->
+<target name="install_140"
+	depends="init_140, install_generic"
+	description="Target for installing JDK 1.4.0 classes"/>
+
+<!-- 
+================================================================================
+INSTALL JAVADOC
+	Generic target for doing a Javadoc install for a given version
+================================================================================
+-->
+<target name="install_javadoc_generic"
+	description="Target for installing javadoc files">
+	<copy todir="${blessed_javadoc_dir}"
+		overwrite="yes">
+		<fileset dir="${basedir}\javadoc${build_subversion}">
+			<include name="RTi\**"/>
+		</fileset>
+	</copy>
+</target>
+
+<!-- 
+================================================================================
+INSTALL JAVADOC
+	Latest version Javadoc install.  When a new JDK is used, the 'depends'
+	arguments should be changed to point to the new target.
+================================================================================
+-->
+<target name="install_javadoc"
+	depends="install_javadoc_142"
+	description="Target for installing latest javadoc files"/>
+
+<!-- 
+================================================================================
+INSTALL JAVADOC
+	Target for installing JDK 1.4.2 Javadocs
+================================================================================
+-->
+<target name="install_javadoc_142"
+	depends="init_142, install_javadoc_generic"
+	description="Target for installing JDK 1.4.2 files"/>
+
+<!-- 
+================================================================================
+INSTALL JAVADOC
+	Target for installing JDK 1.4.0 Javadocs
+================================================================================
+-->
+<target name="install_javadoc_140"
+	depends="init_140, install_javadoc_generic"
+	description="Target for installing JDK 1.4.0 files"/>
+
+<!-- 
+================================================================================
+RUN
+	Generic target for handling runs for a given version
+================================================================================
+-->
+<target name="run_generic"
+	description="Generic target for running the class">
+	<java classname="DWR.StateModGUI.StateModGUI"
+		fork="true"
+		jvm="${jre_home}\bin\java.exe"
+		dir="\cdss\develop\classes_140">
+		<jvmarg value="-mx128m"/>
+		<jvmarg value="-Djava.compiler=NONE"/>
+		<arg value="-home"/>
+		<arg value="\cdss"/>
+		<arg value="-w10"/>		
+		<classpath refid="classpath"/>		
+	</java>
+</target>
+
+<!-- 
+================================================================================
+RUN
+	Target for running the latest JDK version.  When a new JDK is used,
+	the 'depends' argument should be changed to point to the new target.
+================================================================================
+-->
+<target name="run"
+	depends="run_142"
+	description="Target for running with the latest classes"/>
+
+<!-- 
+================================================================================
+RUN
+	Target for running the program with JDK 1.4.2
+================================================================================
+-->
+<target name="run_142"
+	depends="init_142, run_generic"
+	description="Target for running with JDK 1.4.2 classes"/>
+
+<!-- 
+================================================================================
+RUN
+	Target for running the program with JDK 1.4.0
+================================================================================
+-->
+<target name="run_140"
+	depends="init_140, run_generic"
+	description="Target for running with JDK 1.4.0 classes"/>
+
+<!-- 
+================================================================================
+FULL
+	Target for doing a full run for the latest JDK version.  When a new JDK
+	is used, the 'depends' argument should be changed to point to the new
+	target.
+================================================================================
+-->
+<target name="full"
+	depends="full_142"
+	description="Cleans, builds, javadocs and installs the latest JDK"/>
+
+<!-- 
+================================================================================
+FULL
+	Target for doing a full run for JDK 1.4.2
+================================================================================
+-->
+<target name="full_142"
+	depends="init_142, clean_142, 142, javadoc_142, install_142, 
+		install_javadoc_142"
+	description="Cleans, builds, javadocs and installs JDK 1.4.2"/>
+
+<!-- 
+================================================================================
+FULL
+	Target for doing a full run for JDK 1.4.0
+================================================================================
+-->
+<target name="full_140"
+	depends="init_140, clean_140, 140, javadoc_140, install_140, 
+		install_javadoc_140"
+	description="Cleans, builds, javadocs and installs JDK 1.4.0"/>
+
+<!-- 
+================================================================================
+HELP
+	Help
+================================================================================
+-->
+<target name="help"
+	description="Help on the targets that can be run in this build file">
+<echo>
+Valid targets are:
+[default]           - compiles with ${latest_version}
+140                 - compiles with JDK 1.4.0
+javadoc             - creates javadoc documentation for ${latest_version}
+javadoc_140         - creates javadoc documentation for JDK 1.4.0
+install             - copies ${latest_version} classes to blessed dir
+install_140         - copies JDK 1.4.0 classes to blessed dir
+install_javadoc     - installs the ${latest_version} javadocs
+install_javadoc_140 - installs the JDK 1.4.0 javadocs
+clean               - deletes ${latest_version} classes directory
+clean_140           - deletes JDK 1.4.0 classes directory
+run                 - runs ${latest_version} ...
+run_140             - runs JDK 1.4.0 ...
+full                - cleans, builds, javadocs and installs ${latest_version}
+full_140            - cleans, builds, javadocs and installs JDK 1.4.0
+</echo>
+</target>
+
+</project>
