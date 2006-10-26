@@ -8,5 +8,6 @@
 	<classpathentry kind="lib" path="externals/StateCU_142.jar"/>
 	<classpathentry kind="lib" path="externals/jfreechart.jar"/>
 	<classpathentry kind="lib" path="externals/StateModGUI_142.jar"/>
+	<classpathentry kind="lib" path="externals/jcommon.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
