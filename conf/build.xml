@@ -92,13 +92,20 @@
 	<property name="command_file"    value="Regression.StateMod" />
 	
 	<!--================ Dependencies ==================-->
-	<property name="RTi_jar"	  value="${ext.dir}${sep}RTi_142.jar" />
-	<property name="xerces_jar"	  value="${ext.dir}${sep}xerces.jar" />
-	<property name="StateCU_jar"  value="${ext.dir}${sep}StateCU_142.jar" />
-	<property name="StateGUI_jar" value="${ext.dir}${sep}StateModGUI_142.jar" />
-	<property name="Hydro_jar"	  value="${ext.dir}${sep}HydroBaseDMI_142.jar" />
-	<property name="jfree_jar"	  value="${ext.dir}${sep}jfreechart.jar" />
-	<property name="jcommon_jar"  value="${ext.dir}${sep}jcommon.jar" />
+	<property name="RTi_jar"	  
+			value="${ext.dir}${sep}RTi_Common${sep}RTi_142.jar" />
+	<property name="xerces_jar"	  
+			value="${ext.dir}${sep}xerces.jar" />
+	<property name="StateCU_jar"  
+			value="${ext.dir}${sep}StateCU${sep}StateCU_142.jar" />
+	<property name="StateGUI_jar" 
+			value="${ext.dir}${sep}StateModGUI_142.jar" />
+	<property name="Hydro_jar"	  
+			value="${ext.dir}${sep}HydroBaseDMI${sep}HydroBaseDMI_142.jar" />
+	<property name="jfree_jar"	  
+			value="${ext.dir}${sep}jfreechart.jar" />
+	<property name="jcommon_jar"  
+			value="${ext.dir}${sep}jcommon.jar" />
 	
 	
 	<!-- =========== Compiler Properties ===============-->
