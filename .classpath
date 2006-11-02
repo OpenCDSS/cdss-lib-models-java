@@ -7,7 +7,7 @@
 	<classpathentry kind="lib" path="externals/StateModGUI_142.jar"/>
 	<classpathentry kind="lib" path="externals/jcommon.jar"/>
 	<classpathentry kind="lib" path="externals/HydroBaseDMI/HydroBaseDMI_142.jar"/>
-	<classpathentry kind="lib" path="externals/RTi_Common/RTi_142.jar"/>
 	<classpathentry kind="lib" path="externals/StateCU/StateCU_142.jar"/>
+	<classpathentry kind="lib" path="externals/RTi_Common/RTi_Common_142.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
