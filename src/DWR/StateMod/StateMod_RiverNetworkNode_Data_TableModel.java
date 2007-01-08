@@ -9,6 +9,11 @@
 // 2004-01-22	JTS, RTi		Removed the row count column and 
 //					changed all the other column numbers.
 // 2004-10-28	SAM, RTi		Change setValueAt() to support sort.
+// 2007-01-07   Kurt Tometich, RTi
+//								Added new fields for the data model for
+//								RiverNetworkNode.  Added Downstream Node ID
+//								and Maximum Recharge Limit.  Formatted the
+//								fields to match other commands.
 // ----------------------------------------------------------------------------
 // EndHeader
 
@@ -27,15 +32,16 @@ extends JWorksheet_AbstractRowTableModel {
 /**
 Number of columns in the table model.
 */
-private final int __COLUMNS = 2;
-
+	private final int __COLUMNS = 5;
 /**
 References to columns.
 */
 public final static int
-	COL_ID =	0,
-	COL_NAME =	1,
-	COL_COMMENT = 	2;
+	COL_ID =	0,		// ID
+	COL_NAME =	1,		// Name
+	COL_COMMENT = 3,	// Comment field
+	COL_CSTADN = 2,		// Downstream River Node ID
+	COL_GWMAXR = 4;		// Maximum Recharge Limit (CFS)
 
 /**
 Constructor.  
@@ -60,6 +66,8 @@ public Class getColumnClass (int columnIndex) {
 		case COL_ID:		return String.class;
 		case COL_NAME:		return String.class;
 		case COL_COMMENT:	return String.class;
+		case COL_CSTADN:	return String.class;
+		case COL_GWMAXR:	return Double.class;
 		default:		return String.class;
 	}
 }
@@ -82,6 +90,8 @@ public String getColumnName(int columnIndex) {
 		case COL_ID:		return "RIVER NODE ID";
 		case COL_NAME:		return "STATION NAME";
 		case COL_COMMENT:	return "COMMENT";
+		case COL_CSTADN:	return "DOWNSTREAM \nRIVER NODE ID";
+		case COL_GWMAXR:	return "MAX RECHARGE \nLIMIT (CFS)";
 		default:		return " ";
 	}	
 }
@@ -99,7 +109,9 @@ public String getFormat(int column) {
 		case COL_ID:		return "%-12.12s";
 		case COL_NAME:		return "%-24.24s";
 		case COL_COMMENT:	return "%-80.80s";
-		default:		return "%-8s";
+		case COL_CSTADN:	return "%-12.12s";
+		case COL_GWMAXR:	return "%12.2f";
+		default:			return "%-8s";
 	}
 }
 
@@ -125,11 +137,13 @@ public Object getValueAt(int row, int col) {
 
 	StateMod_RiverNetworkNode r = (StateMod_RiverNetworkNode)
 		_data.elementAt(row);
-
+	
 	switch (col) {
 		case COL_ID:	return r.getID();
 		case COL_NAME:	return r.getName();
 		case COL_COMMENT: return r.getComment();
+		case COL_CSTADN:	return r.getCstadn();
+		case COL_GWMAXR:	return new Double(r.getGwmaxr());
 		default:	return "";
 	}
 }
@@ -146,7 +160,10 @@ public int[] getColumnWidths() {
 	}
 	widths[COL_ID] = 11;
 	widths[COL_NAME] = 23;
-
+	widths[COL_CSTADN] = 11;
+	widths[COL_GWMAXR] = 11;
+	widths[COL_COMMENT] = 16;
+	
 	return widths;
 }
 

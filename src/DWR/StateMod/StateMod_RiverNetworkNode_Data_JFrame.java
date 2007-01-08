@@ -7,6 +7,9 @@
 // History:
 // 
 // 2005-04-05	J. Thomas Sapienza, RTi	Initial version.
+// 2007-01-07   Kurt Tometich, RTi
+//								Changed the width from 386 to 720 to support
+//								the new fields added.
 // ----------------------------------------------------------------------------
 
 package DWR.StateMod;
@@ -34,7 +37,7 @@ which case an empty worksheet is shown.
 public StateMod_RiverNetworkNode_Data_JFrame(Vector data, String titleString)
 throws Exception {
 	super(data, titleString, false);
-	setSize(386, getHeight());
+	setSize(720, getHeight());
 }
 
 /**

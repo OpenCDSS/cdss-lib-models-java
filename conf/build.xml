@@ -167,17 +167,9 @@
 ====================================================-->
 <target name="compile" >
 
-	<echo>
-********* COMPILING SOURCE ************
-	  destdir     : ${buildwork.dir}
-	  executable  : ${executable}
-	  compiler    : ${compiler}
-***************************************
-	</echo>
-
 	<mkdir dir="${buildwork.dir}" />
 	
-	<javac srcdir 		= "${src.dir}${sep}${package}"
+	<javac srcdir 		= "${src.dir}"
            destdir 		= "${buildwork.dir}"
 		   classpathref = "classpath"
            debug 		= "on"
@@ -196,15 +188,6 @@
 	Function: to compile the code under test/src
 ==========================================================-->
 <target name="compileTest" depends="compile">
-
-	<echo>
-********* COMPILING TEST ************
-	  srcdir      : ${test.dir}${sep}${package}
-	  destdir     : ${build.dir}${sep}test
-	  executable  : ${executable}
-	  compiler    : ${compiler}
-***************************************
-	</echo>
 
 	<mkdir dir="${build.dir}${sep}test" />
 	
@@ -245,9 +228,7 @@
 			  testing
 ====================================================-->
 <target name="runDev" depends="compile">
-	
-	<echo message="HOME:   ${testOp.dir}" />
-	
+		
 	<java classname="${classname}" fork="true">
 		<jvmarg    value = "-mx256m" />
 		<jvmarg    value = "-Djava.compiler=NONE" />
@@ -264,10 +245,8 @@
 	Function: runs the executable from the dist jar
 			  for operational testing
 ====================================================-->
-	<target name="runOp" depends="jar">
-		
-		<echo message="HOME:   ${testOp.dir}" />
-		
+<target name="runOp" depends="jar">
+			
 		<java classname="${classname}" fork="true">
 			<jvmarg    value = "-mx256m" />
 			<jvmarg    value = "-Djava.compiler=NONE" />
@@ -276,7 +255,7 @@
 			<classpath refid = "classpathOp" />   
 		</java>	
 
-	</target>
+</target>
 	
 	
 <!--===================================================
@@ -285,13 +264,6 @@
 ====================================================-->
 <target name="javadoc">
 
-	<echo>
-********** Creating Javadocs **************
-   Destination:     ${jdoc.dir}
-   From Dir   :     ${src.dir}${sep}${package} 
-*******************************************
-	</echo>
-	
 	<!-- cleanup old javadocs -->
 	<delete dir="${jdoc.dir}" />
 
@@ -314,15 +286,6 @@
 =======================================================-->
 <target name="jar" depends="compile" >
     
-	<echo>
-********** Creating jar file *****************
-   Destination:    ${dist.dir}
-   source dir :    ${buildwork.dir}
-   jar filename:   ${jarfname}
-**********************************************
-	</echo>
-
-	
 	<copy todir="${buildwork.dir}" >
 		<fileset dir="graphics" />
 	</copy>
