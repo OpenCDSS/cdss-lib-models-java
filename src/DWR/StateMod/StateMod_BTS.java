@@ -99,6 +99,9 @@
 // 2006-07-06	SAM, RTi		* Fix bug where month data were not
 //					  being properly initialized for
 //					  irrigation year data (Nov-Oct).
+// 2007-01-17	SAM, RTi		* Fix bug where determining the file
+//					  version needed to use different bytes
+//					  because the previous test was failing.
 // ----------------------------------------------------------------------------
 // EndHeader
 
@@ -1615,14 +1618,20 @@ throws IOException
 		
 	}
 	// Files before version 11 have year start and year end (2 integers)
-	// in the first record.  Therefore, if byte [8] has a null, then it is
-	// an old-style file...
+	// in the first record.  Therefore, check the characters used for the
+	// date and see if at least two are non-null.  If non-null, assume the
+	// new 11+ format.  If null, assume the old format.
 	boolean pre_11 = false;
-	__fp.seek ( 8 );
+	__fp.seek ( 16 );	// First '/' in date if YYYY/MM/DD
 	char test_char = __fp.readLittleEndianChar1();
 	if ( test_char == '\0' ) {
 		pre_11 = true;
-	}
+		__fp.seek ( 19 );	// Second '/' in date if YYYY/MM/DD
+		test_char = __fp.readLittleEndianChar1();
+		if ( test_char == '\0' ) {
+			pre_11 = true;
+		}
+	}	// Else both characters were non-null so pretty sure it is 11+
 	if ( Message.isDebugOn ) {
 		if ( pre_11 ) {
 			Message.printDebug ( dl, routine,
