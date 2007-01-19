@@ -102,6 +102,12 @@
 // 2007-01-17	SAM, RTi		* Fix bug where determining the file
 //					  version needed to use different bytes
 //					  because the previous test was failing.
+// 2007-01-18	SAM, RTi		* Allow lookup of station that is of
+//					  type "other" (only in river network
+//					  file *rin) to be looked up.
+//					* Fix so dash in identifier is allowed
+//					  for other than reservoirs (and
+//					  reservoirs use for account).
 // ----------------------------------------------------------------------------
 // EndHeader
 
@@ -1916,7 +1922,8 @@ throws Exception
 	// account.  Since the StateMod binary file does not merge these fields,
 	// replace the identifier with only the main identifier...
 	String req_account = null;
-	if ( tsident_regexp_loc.indexOf("-") >= 0 ) {
+	if (	(tsident_regexp_loc.indexOf("-") >= 0) &&
+		(__comp_type==StateMod_DataSet.COMP_RESERVOIR_STATIONS) ) {
 		req_account=StringUtil.getToken(tsident_regexp_loc,"-",0,1);
 		tsident_regexp.setLocation(
 			StringUtil.getToken(tsident_regexp_loc,"-",0,0) );
@@ -1948,11 +1955,12 @@ throws Exception
 				// be converted from CFS to ACFT.
 	// Loop through the lists of stations:
 	//
-	//	0=diversions
-	//	1=instream flows
-	//	2=reservoirs
-	//	3=baseflow stations
-	//	4=wells
+	int DIV = 0;	// Diversion stations
+	int ISF = 1;	// Instream flow stations
+	int RES = 2;	// Reservoir stations
+	int BF = 3;	// Baseflow stations
+	int WEL = 4;	// Wells
+	int RIV = 5;	// River nodes (to find nodes only in RIN file)
 	//
 	// The original file that was opened indicated what
 	// type of data the file contains and inappropriate types are skipped
@@ -1963,53 +1971,62 @@ throws Exception
 				// the pattern.
 	TSIdent tsident = null;	// Used when creating new time series.
 					
-	for ( int istatype = 0; istatype < 5; istatype++ ) {
+	for ( int istatype = 0; istatype < 6; istatype++ ) {
 		// First check to see if we even need to search the station list
 		// for this loop index...
+		// Diversion stations file has div, isf, baseflow, other (river
+		// nodes that are not another station type)
 		if (	(__comp_type==StateMod_DataSet.COMP_DIVERSION_STATIONS)
-			&& (istatype != 0) && (istatype != 1) &&
-			(istatype != 3) ) {
+			&& (istatype != DIV) && (istatype != ISF) &&
+			(istatype != BF) && (istatype != RIV)) {
 			continue;
 		}
 		else if ((__comp_type==StateMod_DataSet.COMP_RESERVOIR_STATIONS)
-			&& (istatype != 2) ) {
+			&& (istatype != RES) ) {
 			continue;
 		}
 		else if ((__comp_type==StateMod_DataSet.COMP_WELL_STATIONS)
-			&& (istatype != 4) ) {
+			&& (istatype != WEL) ) {
 			continue;
 		}
 		// If here then the correct station list type has been
 		// determined.  Assign the references to the arrays to search...
-		if ( istatype == 0 ) {
+		if ( istatype == DIV ) {
 			// Search diversions...
 			ids = __cdivid;
 			names = __divnam;
 			numids = __numdiv;
 		}
-		else if ( istatype == 1 ) {
+		else if ( istatype == ISF ) {
 			// Search instream flows...
 			ids = __cifrid;
 			names = __xfrnam;
 			numids = __numifr;
 		}
-		else if ( istatype == 2 ) {
+		else if ( istatype == RES ) {
 			// Search reservoirs...
 			ids = __cresid;
 			names = __resnam;
 			numids = __numres;
 		}
-		else if ( istatype == 3 ) {
+		else if ( istatype == BF ) {
 			// Baseflows (stream gage + stream estimate)...
 			ids = __crunid;
 			names = __runnam;
 			numids = __numrun;
 		}
-		else if ( istatype == 4 ) {
+		else if ( istatype == WEL ) {
 			// Wells...
 			ids = __cdividw;
 			names = __divnamw;
 			numids = __numdivw;
+		}
+		else if ( istatype == RIV ) {
+			// River nodes (nodes not other station will be
+			// found)...
+			ids = __cstaid;
+			names = __stanam;
+			numids = __numsta;
 		}
 		// Loop through the ids in the list...
 		for ( int iid = 0; iid < numids; iid++ ) {
@@ -2070,19 +2087,19 @@ throws Exception
 				// where the station and river node IDs are the
 				// same.
 				ista = -1;	// To allow check below.
-				if ( istatype == 0 ) {
+				if ( istatype == DIV ) {
 					// Diversions...
 					ista = __idvsta[iid] - 1;
 					ista2 = ista;
 					match_found = true;
 				}
-				else if ( istatype == 1 ) {
+				else if ( istatype == ISF ) {
 					// Instream flow...
 					ista = __ifrsta[iid] - 1;
 					ista2 = ista;
 					match_found = true;
 				}
-				else if ( istatype == 2 ) {
+				else if ( istatype == RES ) {
 					// Reservoirs...
 					ista = __irssta[iid] - 1;
 					ista2 = iid;
@@ -2119,16 +2136,22 @@ throws Exception
 					}
 					}
 				}
-				else if ( istatype == 3 ) {
+				else if ( istatype == BF ) {
 					// Baseflows (stream gage and
 					// estimate)...
 					ista = __irusta[iid] - 1;
 					ista2 = ista;
 					match_found = true;
 				}
-				else if ( istatype == 4 ) {
+				else if ( istatype == WEL ) {
 					// Wells...
 					ista = __idvstw[iid] - 1;
+					ista2 = iid;
+					match_found = true;
+				}
+				else if ( istatype == RIV ) {
+					// Already a river node...
+					ista = iid;
 					ista2 = iid;
 					match_found = true;
 				}
@@ -2138,6 +2161,8 @@ throws Exception
 					// possible that a baseflow node is also
 					// another node type but we only want
 					// one instance of the time series.
+					// This will also ensure that river
+					// nodes are not counted twice.
 					match_found = false;
 				}
 				if ( match_found ) {	// Don't just continue
@@ -2148,7 +2173,7 @@ throws Exception
 				if ( __interval_base == TimeInterval.DAY ) {
 					convert_cfs_to_acft = false;
 				}
-				if ( istatype == 2 ) {
+				if ( istatype == RES ) {
 					// For each reservoir, have a total and
 					// a time series for each account.
 					if ( station_has_wildcard  ) {
@@ -2166,7 +2191,7 @@ throws Exception
 					nts = 1;
 				}
 				for ( its = 0; its < nts; its++ ) {
-					if ( (istatype == 2) && (its > 0) ) {	
+					if ( (istatype == RES) && (its > 0) ) {	
 						// Getting all reservoir time
 						// series for the accounts
 						// - an owner account is added
@@ -2174,7 +2199,7 @@ throws Exception
 						// etc.)...
 						owner = "-" + its;
 					}
-					else if ( (istatype == 2) &&
+					else if ( (istatype == RES) &&
 						(req_account != null) ) {
 						// A requested reservoir
 						// account...
@@ -2217,7 +2242,7 @@ throws Exception
 					// Set time series header information...
 					ts.setIdentifier ( tsident );
 					ts.setInputName ( __tsfile );
-					if ( (istatype == 2) &&
+					if ( (istatype == RES) &&
 						owner.length() > 0 ) {
 						// Put the owner in the
 						// description...
@@ -2372,7 +2397,7 @@ throws Exception
 	catch ( Exception e ) {
 		Message.printWarning ( 3, "", e );
 	}
-	// SAMX
+	// REVISIT 2007-01-18 old comment
 	// Might return null if match_found == false????
 	return tslist;
 }
