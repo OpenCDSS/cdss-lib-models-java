@@ -18,6 +18,8 @@
 //					last dialog directory in JGUIUtil.
 // 2005-09-02	SAM, RTi		Move from TSTool to StateMod package and
 //					update to the new command class design.
+// 2007-02-16	SAM, RTi		Use new CommandProcessor interface.
+//					Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 
 package DWR.StateMod;
@@ -44,17 +46,16 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import java.io.File;
-import java.util.Vector;
 
 import RTi.Util.GUI.JFileChooserFactory;
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleFileFilter;
 import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.IO.Command;
+import RTi.Util.IO.CommandProcessor;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
-import RTi.Util.String.StringUtil;
 
 public class readStateMod_JDialog extends JDialog
 implements ActionListener, KeyListener, WindowListener
@@ -78,7 +79,8 @@ private boolean		__error_wait = false;	// Is there an error that we
 						// are waiting to be cleared up
 						// or Cancel?
 private boolean		__first_time = true;
-private boolean		__use_alias = false;	// If true, then the syntax is
+// TODO SAM 2007-02-18 Evaluate whether to support alias
+//private boolean		__use_alias = false;	// If true, then the syntax is
 						// TS Alias = readStateMod().
 						// If false, it is:
 						// readStateMod().
@@ -238,12 +240,23 @@ Instantiates the GUI components.
 private void initialize ( JFrame parent, Command command )
 {	__parent_JFrame = parent;
 	__command = (readStateMod_Command)command;
-	__use_alias = false;
-	Object o =__command.getCommandProcessor().getPropContents("WorkingDir");
-	if ( o != null ) {
-		__working_dir = (String)o;
-	}
+	CommandProcessor processor = __command.getCommandProcessor();
+	// TODO SAM 2007-02-18 Evaluate whether to support
+	//__use_alias = false;
 
+	try { Object o = processor.getPropContents ( "WorkingDir" );
+		// Working directory is available so use it...
+		if ( o != null ) {
+			__working_dir = (String)o;
+		}
+	}
+	catch ( Exception e ) {
+		// Not fatal, but of use to developers.
+		String message = "Error requesting WorkingDir from processor - not using.";
+		String routine = __command.getCommandName() + "_JDialog.initialize";
+		Message.printDebug(10, routine, message );
+	}
+	
 	addWindowListener( this );
 
         Insets insetsTLBR = new Insets(2,2,2,2);
@@ -252,67 +265,66 @@ private void initialize ( JFrame parent, Command command )
 
 	JPanel main_JPanel = new JPanel();
 	main_JPanel.setLayout( new GridBagLayout() );
-	GridBagConstraints gbc = new GridBagConstraints();
 	getContentPane().add ( "North", main_JPanel );
 	int y = 0;
 
         JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"Read all the time series from a StateMod file, using " +
 		"information in the file to assign the identifier."),
-		0, y, 7, 1, 0, 0, insetsTLBR, gbc.NONE, gbc.WEST);
+		0, y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
         JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"The data source and data type will be blank in the resulting "+
 		"time series identifier (TSID)."),
-		0, ++y, 7, 1, 0, 0, insetsTLBR, gbc.NONE, gbc.WEST);
+		0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
         JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"Specify a full or relative path (relative to working " +
 		"directory)." ), 
-		0, ++y, 7, 1, 0, 0, insetsTLBR, gbc.NONE, gbc.WEST);
+		0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 	if ( __working_dir != null ) {
         	JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"The working directory is: " + __working_dir ), 
-		0, ++y, 7, 1, 0, 0, insetsTLBR, gbc.NONE, gbc.WEST);
+		0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 	}
 
         JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"StateMod file to read:" ), 
-		0, ++y, 1, 1, 0, 0, insetsTLBR, gbc.NONE, gbc.EAST);
+		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__InputFile_JTextField = new JTextField ( 50 );
 	__InputFile_JTextField.addKeyListener ( this );
         JGUIUtil.addComponent(main_JPanel, __InputFile_JTextField,
-		1, y, 5, 1, 1, 0, insetsTLBR, gbc.HORIZONTAL, gbc.WEST);
+		1, y, 5, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 	__browse_JButton = new SimpleJButton ( "Browse", this );
         JGUIUtil.addComponent(main_JPanel, __browse_JButton,
-		6, y, 1, 1, 1, 0, insetsTLBR, gbc.HORIZONTAL, gbc.CENTER);
+		6, y, 1, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
 
         JGUIUtil.addComponent(main_JPanel, new JLabel ("Input start:"), 
-		0, ++y, 1, 1, 0, 0, insetsTLBR, gbc.NONE, gbc.EAST);
+		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__InputStart_JTextField = new JTextField (20);
 	__InputStart_JTextField.addKeyListener (this);
         JGUIUtil.addComponent(main_JPanel, __InputStart_JTextField,
-		1, y, 2, 1, 0, 0, insetsTLBR, gbc.NONE, gbc.WEST);
+		1, y, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
         JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"Overrides the global input start."),
-		3, y, 3, 1, 0, 0, insetsTLBR, gbc.NONE, gbc.WEST );
+		3, y, 3, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
 
         JGUIUtil.addComponent(main_JPanel, new JLabel ( "Input end:"), 
-		0, ++y, 2, 1, 0, 0, insetsTLBR, gbc.NONE, gbc.EAST);
+		0, ++y, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__InputEnd_JTextField = new JTextField (20);
 	__InputEnd_JTextField.addKeyListener (this);
         JGUIUtil.addComponent(main_JPanel, __InputEnd_JTextField,
-		1, y, 6, 1, 0, 0, insetsTLBR, gbc.NONE, gbc.WEST);
+		1, y, 6, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
         JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"Overrides the global input end."),
-		3, y, 3, 1, 0, 0, insetsTLBR, gbc.NONE, gbc.WEST );
+		3, y, 3, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
 
         JGUIUtil.addComponent(main_JPanel, new JLabel ( "Command:"),
-		0, ++y, 1, 1, 0, 0, insetsTLBR, gbc.NONE, gbc.EAST);
+		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__command_JTextArea = new JTextArea ( 4, 55 );
 	__command_JTextArea.setLineWrap ( true );
 	__command_JTextArea.setWrapStyleWord ( true );
 	__command_JTextArea.setEditable ( false );
 	JGUIUtil.addComponent(main_JPanel, new JScrollPane(__command_JTextArea),
-		1, y, 6, 1, 1, 0, insetsTLBR, gbc.HORIZONTAL, gbc.WEST);
+		1, y, 6, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
 	// Refresh the contents...
 	refresh ();
@@ -321,7 +333,7 @@ private void initialize ( JFrame parent, Command command )
 	JPanel button_JPanel = new JPanel();
 	button_JPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
         JGUIUtil.addComponent(main_JPanel, button_JPanel, 
-		0, ++y, 8, 1, 1, 0, insetsTLBR, gbc.HORIZONTAL, gbc.CENTER);
+		0, ++y, 8, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
 
 	if ( __working_dir != null ) {
 		// Add the button to allow conversion to/from relative
@@ -348,7 +360,7 @@ Respond to KeyEvents.
 public void keyPressed ( KeyEvent event )
 {	int code = event.getKeyCode();
 
-	if ( code == event.VK_ENTER ) {
+	if ( code == KeyEvent.VK_ENTER ) {
 		refresh ();
 		checkInput ();
 		if ( !__error_wait ) {

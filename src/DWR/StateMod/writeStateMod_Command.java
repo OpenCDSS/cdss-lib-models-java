@@ -10,6 +10,8 @@
 // 2005-11-22	SAM, RTi		Fix so that a negative precision is
 //					allowed, since it is used for special
 //					formatting.
+// 2007-02-16	SAM, RTi		Use new CommandProcessor interface.
+//					Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
 
@@ -21,13 +23,13 @@ import java.util.Vector;
 import javax.swing.JFrame;
 
 import RTi.TS.TS;
-import RTi.TS.TSCommandProcessor;
 import RTi.TS.TSUtil;
 
 import RTi.Util.Message.Message;
 import RTi.Util.Message.MessageUtil;
 import RTi.Util.IO.Command;
 import RTi.Util.IO.CommandException;
+import RTi.Util.IO.CommandProcessorRequestResultsBean;
 import RTi.Util.IO.CommandWarningException;
 import RTi.Util.IO.InvalidCommandParameterException;
 import RTi.Util.IO.InvalidCommandSyntaxException;
@@ -97,8 +99,20 @@ throws InvalidCommandParameterException
 	if ( (OutputFile == null) || (OutputFile.length() == 0) ) {
 		warning += "\nThe output file must be specified.";
 	}
-	else {	String working_dir = (String)
-			_processor.getPropContents ( "WorkingDir" );
+	else {	String working_dir = null;		
+			try { Object o = _processor.getPropContents ( "WorkingDir" );
+				// Working directory is available so use it...
+				if ( o != null ) {
+					working_dir = (String)o;
+				}
+			}
+			catch ( Exception e ) {
+				// Not fatal, but of use to developers.
+				String message = "Error requesting WorkingDir from processor - not using.";
+				String routine = getCommandName() + ".checkCommandParameters";
+				Message.printDebug(10, routine, message );
+			}
+	
 		try {	String adjusted_path = IOUtil.adjustPath (
 				working_dir, OutputFile);
 			File f = new File ( adjusted_path );
@@ -123,8 +137,7 @@ throws InvalidCommandParameterException
 	if (	(OutputStart != null) && !OutputStart.equals("") &&
 		!OutputStart.equalsIgnoreCase("OutputStart") &&
 		!OutputStart.equalsIgnoreCase("OutputEnd") ) {
-		try {	DateTime OutputStart_DateTime =
-			DateTime.parse(OutputStart);
+		try {	DateTime.parse(OutputStart);
 		}
 		catch ( Exception e ) {
 			warning += 
@@ -136,8 +149,7 @@ throws InvalidCommandParameterException
 	if (	(OutputEnd != null) && !OutputEnd.equals("") &&
 		!OutputEnd.equalsIgnoreCase("OutputStart") &&
 		!OutputEnd.equalsIgnoreCase("OutputEnd") ) {
-		try {	DateTime OutputEnd_DateTime =
-				DateTime.parse( OutputEnd );
+		try {	DateTime.parse( OutputEnd );
 		}
 		catch ( Exception e ) {
 			warning +=
@@ -196,8 +208,7 @@ parameters are determined to be invalid.
 public void parseCommand (	String command_string, String command_tag,
 				int warning_level )
 throws InvalidCommandSyntaxException, InvalidCommandParameterException
-{	int warning_count = 0;
-	String routine = "writeStateMod_Command.parseCommand", message;
+{	String routine = "writeStateMod_Command.parseCommand", message;
 
 	if ( command_string.indexOf("=") > 0 ) {
 		// New syntax...
@@ -254,15 +265,25 @@ throws InvalidCommandParameterException,
 CommandWarningException, CommandException
 {	String routine = "writeStateMod_Command.runCommand", message;
 	int warning_count = 0;
+	int log_level = 3;	// Warning level for non-user log messages
 
 	// Check whether the application wants output files to be created...
 	
-	Object o = _processor.getPropContents ( "CreateOutput" );
-	if ( (o != null) && ((String)o).equalsIgnoreCase("False") ) {
-		Message.printStatus ( 2, routine,
-		"Skipping \"" + toString() +
-		"\" because output is to be ignored." );
-		return;
+	try {	Object o = _processor.getPropContents ( "CreateOutput" );
+		if ( o != null ) {
+			boolean CreateOutput_boolean = ((Boolean)o).booleanValue();
+			if  ( !CreateOutput_boolean ) {
+				Message.printStatus ( 2, routine,
+						"Skipping \"" + toString() +
+				"\" because output is to be ignored." );
+				return;
+			}
+		}
+	}
+	catch ( Exception e ) {
+		// Not fatal, but of use to developers.
+		message = "Error requesting CreateOutput from processor - not using.";
+		Message.printWarning(10, routine, message );
 	}
 
 	String TSList = _parameters.getValue ( "TSList" );
@@ -270,10 +291,42 @@ CommandWarningException, CommandException
 	String OutputFile = _parameters.getValue ( "OutputFile" );
 
 	// Get the time series to process...
-	Vector v = ((TSCommandProcessor)_processor).
-		getTimeSeriesToProcess( TSList, TSID);
-	Vector tslist = (Vector)v.elementAt(0);
-	if ( (tslist == null) && (tslist.size() == 0) ) {
+	
+	PropList request_params = new PropList ( "" );
+	request_params.set ( "TSList", TSList );
+	request_params.set ( "TSID", TSID );
+	CommandProcessorRequestResultsBean bean = null;
+	try { bean =
+		_processor.processRequest( "GetTimeSeriesToProcess", request_params);
+	}
+	catch ( Exception e ) {
+		message = "Error requesting GetTimeSeriesToProcess(TSList=\"" + TSList +
+		"\", TSID=\"" + TSID + "\" from processor.";
+		Message.printWarning(log_level,
+				MessageUtil.formatMessageTag( command_tag, ++warning_count),
+				routine, message );
+	}
+	PropList bean_PropList = bean.getResultsPropList();
+	Object o_TSList = bean_PropList.getContents ( "TSToProcessList" );
+	Vector tslist = null;
+	if ( o_TSList == null ) {
+		message = "Unable to find time series to write using TSList=\"" + TSList +
+		"\" TSID=\"" + TSID + "\".";
+		Message.printWarning ( log_level,
+		MessageUtil.formatMessageTag(
+		command_tag,++warning_count), routine, message );
+	}
+	else {	tslist = (Vector)o_TSList;
+		if ( tslist.size() == 0 ) {
+			message = "Unable to find time series to write using TSList=\"" + TSList +
+			"\" TSID=\"" + TSID + "\".";
+			Message.printWarning ( log_level,
+					MessageUtil.formatMessageTag(
+							command_tag,++warning_count), routine, message );
+		}
+	}
+	
+	if ( (tslist == null) || (tslist.size() == 0) ) {
 		message = "Unable to find time series to write using TSID \"" +
 		TSID + "\".";
 		Message.printWarning ( warning_level,
@@ -283,54 +336,126 @@ CommandWarningException, CommandException
 
 	String OutputStart = _parameters.getValue ( "OutputStart" );
 	DateTime OutputStart_DateTime = null;
-	if ( OutputStart != null ) {
-		try {	OutputStart_DateTime = ((TSCommandProcessor)_processor).
-				getDateTime(OutputStart);
-		}
-		catch ( Exception e ) {
-			message = "OutputStart \"" + OutputStart +
-				"\" is invalid.";
-			Message.printWarning ( warning_level,
-			MessageUtil.formatMessageTag(
-			command_tag,++warning_count), routine, message );
-		}
-	}
-	else {	// Get from the processor...
-		o = _processor.getPropContents ( "OutputStart" );
-		if ( o != null ) {
-			OutputStart_DateTime = (DateTime)o;
-		}
-	}
 	String OutputEnd = _parameters.getValue ( "OutputEnd" );
 	DateTime OutputEnd_DateTime = null;
+
+	if ( OutputStart != null ) {
+		try {
+		request_params = new PropList ( "" );
+		request_params.set ( "DateTime", OutputStart );
+		bean = null;
+		try { bean =
+			_processor.processRequest( "DateTime", request_params);
+		}
+		catch ( Exception e ) {
+			message = "Error requesting OutputStart DateTime(DateTime=" +
+			OutputStart + "\" from processor.";
+			Message.printWarning(log_level,
+					MessageUtil.formatMessageTag( command_tag, ++warning_count),
+					routine, message );
+			throw new InvalidCommandParameterException ( message );
+		}
+
+		bean_PropList = bean.getResultsPropList();
+		Object prop_contents = bean_PropList.getContents ( "DateTime" );
+		if ( prop_contents == null ) {
+			message = "Null value for OutputStart DateTime(DateTime=" +
+			OutputStart +	"\") returned from processor.";
+			Message.printWarning(log_level,
+				MessageUtil.formatMessageTag( command_tag, ++warning_count),
+				routine, message );
+			throw new InvalidCommandParameterException ( message );
+		}
+		else {	OutputStart_DateTime = (DateTime)prop_contents;
+		}
+	}
+	catch ( Exception e ) {
+		message = "OutputStart \"" + OutputStart + "\" is invalid.";
+		Message.printWarning(warning_level,
+				MessageUtil.formatMessageTag( command_tag, ++warning_count),
+				routine, message );
+		throw new InvalidCommandParameterException ( message );
+	}
+	}
+	else {	// Get from the processor...
+		try {	Object o = _processor.getPropContents ( "OutputStart" );
+				if ( o != null ) {
+					OutputStart_DateTime = (DateTime)o;
+				}
+		}
+		catch ( Exception e ) {
+			// Not fatal, but of use to developers.
+			message = "Error requesting OutputStart from processor - not using.";
+			Message.printDebug(10, routine, message );
+		}
+	}
 	if ( OutputEnd != null ) {
-		try {	OutputEnd_DateTime = ((TSCommandProcessor)_processor).
-				getDateTime (OutputEnd);
+			try {
+			request_params = new PropList ( "" );
+			request_params.set ( "DateTime", OutputEnd );
+			bean = null;
+			try { bean =
+				_processor.processRequest( "DateTime", request_params);
+			}
+			catch ( Exception e ) {
+				message = "Error requesting OutputEnd DateTime(DateTime=" +
+				OutputEnd + "\" from processor.";
+				Message.printWarning(log_level,
+						MessageUtil.formatMessageTag( command_tag, ++warning_count),
+						routine, message );
+				throw new InvalidCommandParameterException ( message );
+			}
+
+			bean_PropList = bean.getResultsPropList();
+			Object prop_contents = bean_PropList.getContents ( "DateTime" );
+			if ( prop_contents == null ) {
+				message = "Null value for OutputEnd DateTime(DateTime=" +
+				OutputEnd +	"\") returned from processor.";
+				Message.printWarning(log_level,
+					MessageUtil.formatMessageTag( command_tag, ++warning_count),
+					routine, message );
+				throw new InvalidCommandParameterException ( message );
+			}
+			else {	OutputEnd_DateTime = (DateTime)prop_contents;
+			}
 		}
 		catch ( Exception e ) {
 			message = "OutputEnd \"" + OutputEnd + "\" is invalid.";
-			Message.printWarning ( warning_level,
-			MessageUtil.formatMessageTag(
-			command_tag,++warning_count), routine, message );
+			Message.printWarning(warning_level,
+					MessageUtil.formatMessageTag( command_tag, ++warning_count),
+					routine, message );
+			throw new InvalidCommandParameterException ( message );
 		}
-	}
-	else {	// Get from the processor...
-		o = _processor.getPropContents ( "OutputEnd" );
-		if ( o != null ) {
-			OutputEnd_DateTime = (DateTime)o;
 		}
+		else {	// Get from the processor...
+			try {	Object o = _processor.getPropContents ( "OutputEnd" );
+					if ( o != null ) {
+						OutputEnd_DateTime = (DateTime)o;
+					}
+			}
+			catch ( Exception e ) {
+				// Not fatal, but of use to developers.
+				message = "Error requesting OutputEnd from processor - not using.";
+				Message.printDebug(10, routine, message );
+			}
 	}
 
 	String Precision = _parameters.getValue ( "Precision" );
 	String MissingValue = _parameters.getValue ( "MissingValue" );
 
-	String OutputYearType = "";
-	o = _processor.getPropContents ( "OutputYearType" );
-	if ( o != null ) {
-		OutputYearType = (String)o;
+	String OutputYearType = "Calendar";	// Default
+	try { Object o = _processor.getPropContents ( "OutputYearType" );
+		// Output year type is available so use it...
+		if ( o != null ) {
+			OutputYearType = (String)o;
+		}
 	}
-	else {	OutputYearType = "Calendar";
+	catch ( Exception e ) {
+		// Not fatal, but of use to developers.
+		message = "Error requesting OutputYearType from processor - not using.";
+		Message.printDebug(10, routine, message );
 	}
+	
 	if (	!OutputYearType.equalsIgnoreCase("Calendar") &&
 		!OutputYearType.equalsIgnoreCase("Water") ) {
 		message = "\nThe output year type (" + OutputYearType +
@@ -360,24 +485,19 @@ CommandWarningException, CommandException
 			sm_calendar = "WaterYear";
 		}
 
-		// Set the precision default precision for output (-2 generally
-		// works OK)...
-		int Precision_int = -2;
-		if ( (Precision != null) && (Precision.length() > 0) ) {
-			Precision_int = StringUtil.atoi(Precision);
-		}
-		else {	// Precision is determined from units and possibly data
-			// type...
-			Precision_int = StateMod_Util.
-				getTimeSeriesOutputPrecision ( tslist );
-		}
-
 		// Get the comments to add to the top of the file.
 
 		Vector OutputComments_Vector = null;
-		o = _processor.getPropContents ( "OutputComments" );
-		if ( o != null ) {
-			OutputComments_Vector = (Vector)o;
+		try { Object o = _processor.getPropContents ( "OutputComments" );
+			// Comments are available so use them...
+			if ( o != null ) {
+				OutputComments_Vector = (Vector)o;
+			}
+		}
+		catch ( Exception e ) {
+			// Not fatal, but of use to developers.
+			message = "Error requesting OutputComments from processor - not using.";
+			Message.printDebug(10, routine, message );
 		}
 
 		TS ts = null;	// Time series being checked.

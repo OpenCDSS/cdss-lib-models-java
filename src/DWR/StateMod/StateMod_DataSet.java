@@ -191,6 +191,7 @@
 // 2007-01-01	SAM, RTi		* Add additional check for water rights
 //					  to verify sum is the same as well
 //					  station capacity.
+// 2007-02-18	SAM, RTi		Clean up code based on Eclipse feedback.
 //-----------------------------------------------------------------------------
 // EndHeader
 
@@ -207,11 +208,6 @@ import java.util.Vector;
 
 import javax.swing.JFrame;
 
-import org.apache.xerces.parsers.DOMParser;
-import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.NodeList;
-
 import DWR.DMI.HydroBaseDMI.HydroBase_NodeNetwork;
 
 import RTi.TS.DayTS;
@@ -219,15 +215,11 @@ import RTi.TS.MonthTS;
 import RTi.TS.TS;
 import RTi.TS.TSIdent;
 
-import RTi.Util.GUI.ResponseJDialog;
-
 import RTi.Util.Message.Message;
 
 import RTi.Util.IO.DataSet;
 import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.IOUtil;
-import RTi.Util.IO.Network;
-import RTi.Util.IO.Node;
 import RTi.Util.IO.ProcessListener;
 import RTi.Util.IO.PropList;
 
@@ -1348,7 +1340,6 @@ use the output directory and base file name in output file names.
 public StateMod_DataSet(int type)
 {	super(__component_types, __component_names, __component_groups,
 		__component_group_assignments, __component_group_primaries);
-	String routine = "StateMod_DataSet";
 	try {	setDataSetType(type, true);
 	}
 	catch (Exception e) {
@@ -1718,7 +1709,6 @@ void checkComponentData_WellRights_Capacity ( Vector message_list )
 	Vector wer_Vector = (Vector)wer_comp.getData();
 	StateMod_WellRight wer_i = null;
 	StateMod_Well wes_i = null;
-	String wer_id = null;		// Well right identifier
 	int size = 0;
 	if ( wes_Vector != null ) {
 		size = wes_Vector.size();
@@ -1835,10 +1825,7 @@ private Vector checkComponentData_WellStations ( PropList props )
 
 	DataSetComponent wes_comp = getComponentForComponentType (
 		COMP_WELL_STATIONS );
-	DataSetComponent wer_comp = getComponentForComponentType (
-		COMP_WELL_RIGHTS );
 	Vector wes_Vector = (Vector)wes_comp.getData();
-	Vector wer_Vector = (Vector)wer_comp.getData();
 	int size = 0;
 	if ( wes_Vector != null ) {
 		size = wes_Vector.size();
@@ -2293,10 +2280,9 @@ private void checkForFreeFormat ( String filename )
 /**
 Create a Network from a StateMod river network data set component.
 */
+/* TODO SAM 2007-02-18 Evaluate whether needed
 private Network createNetworkFromStateModRiverNetwork()
-{	String routine =
-		"StateMod_DataSet.createNetworkFromStateModRiverNetwork";
-	Network network = new Network ();
+{	Network network = new Network ();
 	
 	DataSetComponent comp = getComponentForComponentType(
 					COMP_RIVER_NETWORK );
@@ -2390,6 +2376,7 @@ private Network createNetworkFromStateModRiverNetwork()
 
 	return network;
 }
+*/
 
 /**
 Helper method to check to see whether a file is empty.  Traditionally, StateMod
@@ -2664,7 +2651,6 @@ public Vector getDataObjectDetails ( int comp_type, String id )
 	DataSetComponent comp2;			// "2" corresponds to the first
 	Vector data2;				// level of related data
 	int size2;
-	DataSetComponent comp3;			// "3" corresponds to the second
 	Vector data3;				// level of related data
 	int size3;
 	StateMod_Diversion div;			// All these are for general use
@@ -3054,10 +3040,9 @@ public Vector getModifiedDataSummary ()
 	"Components are listed by data group and files within each group." );
 	v.addElement ( "" );
 
-	DataSetComponent comp1, comp2;
-	Vector data1, data2, data3;
-	int size1, size2, size3;
-	TS ts;
+	DataSetComponent comp1;
+	Vector data1;
+	int size1;
 
 	// Stream gage...
 
@@ -3088,7 +3073,6 @@ public Vector getModifiedDataSummary ()
 	v.addElement ( "-----------------------------------------");
 	data1 = (Vector)comp1.getData();
 	size1 = data1.size();
-	String id;
 	StateMod_Data smdata1;
 	for ( int i = 0; i < size1; i++ ) {
 		smdata1 = (StateMod_Data)data1.elementAt(i);
@@ -3112,7 +3096,6 @@ public Vector getModifiedDataSummary ()
 	v.addElement ( "-----------------------------------------");
 	data1 = (Vector)comp1.getData();
 	size1 = data1.size();
-	String id;
 	StateMod_Data smdata1;
 	for ( int i = 0; i < size1; i++ ) {
 		smdata1 = (StateMod_Data)data1.elementAt(i);
@@ -3776,7 +3759,6 @@ throws Exception
 	String interval = tsident.getInterval();
 	DataSetComponent comp = null, comp2 = null;
 	Vector data = null;
-	StateMod_Data smdata = null;
 	int pos = 0;
 	StateMod_StreamGage gage = null;
 	StateMod_StreamEstimate estimate = null;
@@ -4746,7 +4728,7 @@ public Vector getUnusedDataSummary ()
 	v.addElement ( "" );
 
 	DataSetComponent comp1, comp2;
-	Vector data1, data2, data3;
+	Vector data1, data2;
 	int size1, size2, size3;
 	TS ts;
 
@@ -5797,17 +5779,9 @@ throws Exception
 	}
 
 	String fn = "";
-	boolean old_debug = Message.isDebugOn;
 
 	int i = 0;
 	int size = 0;	// For general use
-	int error_code=0;
-	int numdivs=0;
-	int numrights=0;
-	int numres=0;
-	int numbfs=0;
-	int numinsf=0;
-	int numinsfrights=0;
 
 	DataSetComponent comp = null;
 
@@ -5838,8 +5812,6 @@ throws Exception
 	// the control file, which indicates data set properties that allow
 	// figuring out which files are being read.
 
-	String rsp_line = null;	// Lines read from response file, which are
-				// filenames if not comments.
 	boolean continue_reading = true;	// Used to indicate whether
 						// files should continue to
 						// be read.  It will normally
@@ -8309,7 +8281,7 @@ throws IOException {
 	out.println("-->");
 
 	out.println("<StateMod_DataSet "
-		+ "Type=\"" + dataset.lookupTypeName(dataset.getDataSetType())
+		+ "Type=\"" + StateMod_DataSet.lookupTypeName(dataset.getDataSetType())
 		+ "\"" + "BaseName=\"" + dataset.getBaseName() + "\">");
 	
 	int num = 0;
@@ -9326,7 +9298,6 @@ throws Exception
 	String formatf = "%8.4f";
 	String formatf1 = "%8.1f";
 	String formatf0 = "%8.0f";
-	String formats = "%-8.8s";
 	String formats12 = "%-12.12s";
 	Vector v = new Vector(1);
 
@@ -9543,7 +9514,6 @@ public static void writeStateModFile (	StateMod_DataSet dataset,
 					String[] newComments,
 					boolean free_format )
 throws Exception {
-	String routine = "StateMod_DataSet.writeStateModFile";
 	String [] comment_str = { "#" };
 	String [] ignore_comment_str = { "#>" };
 	PrintWriter out = null;
@@ -9552,7 +9522,6 @@ throws Exception {
 		newComments, comment_str, ignore_comment_str, 0);
 
 	String cmnt = "#>";
-	String iline = null;
 	DataSetComponent comp = null;
 	if ( free_format ) {
 		out.println(cmnt);
@@ -9580,7 +9549,6 @@ throws Exception {
 		}
 	}
 	else {	// Write fixed-format response file...
-		int index = 0;
 		out.println(cmnt);
 		out.println(cmnt + "  Response File");
 		out.println(cmnt);
@@ -9789,7 +9757,6 @@ throws Exception {
 	out.flush();
 	out.close();
 	out = null;
-	routine = null;
 	comment_str = null;
 	ignore_comment_str = null;
 	} 
@@ -9799,7 +9766,6 @@ throws Exception {
 			out.close();
 		}
 		out = null;
-		routine = null;
 		comment_str = null;
 		ignore_comment_str = null;
 		throw e;
