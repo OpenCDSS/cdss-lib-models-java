@@ -52,6 +52,7 @@
 //					  readStateModDelPltFile.
 //					* Renamed SMWriteDelpltFile to 
 //					  writeStateModDelPltFile.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 
 package DWR.StateMod;
@@ -61,7 +62,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import java.util.StringTokenizer;
 import java.util.Vector;
 
 import RTi.TS.TSIdent;
@@ -603,7 +603,6 @@ double statemod_version) {
 	// first, set Options to correct string list of options
 	// depending on the type
 
-	int index=0;
 	Vector Options = getGraphDataType ( type, statemod_version, true );
 	if ( Options == null ) {
 		Message.printWarning(1, "StateMod_GraphNode.getDataOutputIndex",
@@ -1072,8 +1071,7 @@ public void setYrAve ( String s )
 public static int SMDumpDelpltFile ( Vector theTemplate, String filename,
 	PrintWriter out )
 throws IOException
-{	String iline = null;
-	String rtn = "StateMod_GraphNode.SMDumpDelpltFile";
+{	String rtn = "StateMod_GraphNode.SMDumpDelpltFile";
 	String temp_cmnt = "#>";
 	String cmnt = "#";
 	StateMod_GraphNode node = null;
@@ -1150,7 +1148,6 @@ throws IOException
 		out.println ( cmnt + "     End of file indicator" );
 		out.println ( "-999" );
 	} catch (Exception e) {
-		iline = null;
 		rtn = null;
 		temp_cmnt = null;
 		cmnt = null;
@@ -1159,8 +1156,6 @@ throws IOException
 		Message.printWarning ( 2, rtn, e );
 		throw new IOException ( e.getMessage());
 	}
-	
-	iline = null;
 	rtn = null;
 	temp_cmnt = null;
 	cmnt = null;
@@ -1174,7 +1169,7 @@ throws IOException
 {	StateMod_GraphNode node = null;
 	String ident = null;
 
-	int i,j;
+	int i;
 	int num = 0;
 	out.println ( "#>" );
 	out.println ( "#> Each line below identifies a time series." );
@@ -1217,7 +1212,7 @@ throws IOException
 	StateMod_GraphNode node = null;
 	Vector v = new Vector ( 4 );
 
-	int i,j;
+	int i;
 	int num = 0;
 	if ( theOC != null ) {
 		num = theOC.size();
@@ -1314,7 +1309,7 @@ throws IOException
 	BufferedReader in = null;
 	StateMod_GraphNode aNode=null;
 
-	int i, step=0, run_type=0;
+	int step=0, run_type=0;
 
 	Message.printStatus ( 1, rtn, "Reading delplt template: " + filename );
 	try {	in = new BufferedReader ( new FileReader (filename));
@@ -1529,7 +1524,7 @@ throws IOException
 	BufferedReader in = null;
 	StateMod_GraphNode aNode = null;
 
-	int i, skipAll=0;// there are 2 "All" statements we need to skip over
+	int skipAll=0;// there are 2 "All" statements we need to skip over
 			// if a 3rd exists, we need to pass that info back
 
 	Message.printStatus ( 1, rtn, "Reading output control template: " 

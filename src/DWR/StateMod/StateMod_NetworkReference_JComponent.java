@@ -12,14 +12,13 @@
 // 2004-03-23	JTS, RTi		Javadoc'd.
 // 2004-10-20	JTS, RTi		A black separator line is now drawn
 //					around the component.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 
 package DWR.StateMod;
 
 import java.awt.Graphics;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -35,14 +34,6 @@ import RTi.GR.GRJComponentDevice;
 import RTi.GR.GRJComponentDrawingArea;
 import RTi.GR.GRLimits;
 import RTi.GR.GRText;
-
-import RTi.Util.GUI.JGUIUtil;
-
-import RTi.Util.IO.IOUtil;
-
-import RTi.Util.Math.MathUtil;
-
-import RTi.Util.Message.Message;
 
 /**
 This class draws the reference window for the network drawing code.  The 
@@ -89,7 +80,8 @@ java standard.   A scale factor of .5 means that the ER Diagram will be
 printed at 144 ppi.  A scale factor of 3 means that the ER Diagram will be 
 printed at 24 ppi.
 */
-private double __printScale = 1;
+// TODO SAM 2007-03-01 Evaluate use
+//private double __printScale = 1;
 
 /**
 The height of the drawing area, in pixels.
@@ -117,12 +109,6 @@ The drawing area on which the main network is drawn.
 private GRJComponentDrawingArea __drawingArea;
 
 /**
-Array of all the nodes in the node network.  Stored here for quick access,
-rather than iterating through the network.
-*/
-private HydroBase_Node[] __nodes;
-
-/**
 The node network read in from a makenet file.
 */
 private HydroBase_NodeNetwork __network;
@@ -144,11 +130,6 @@ private int
 	__bottomY = 0,
 	__totalHeight = 0,
 	__totalWidth = 0;
-
-/**
-The parent panel on which this device and its drawing area appears.
-*/
-private JFrame __parent;
 
 /**
 The class that draws the full network, and which interacts with the reference
@@ -267,8 +248,8 @@ private void drawNetworkLines() {
 	GRDrawingAreaUtil.setLineWidth(__drawingArea, 1);
 	
 	for (node = nodeTop; node != null; 
-	    node = __network.getDownstreamNode(
-	    node, __network.POSITION_COMPUTATIONAL)) {
+	    node = HydroBase_NodeNetwork.getDownstreamNode(
+	    node, HydroBase_NodeNetwork.POSITION_COMPUTATIONAL)) {
 	    	// move ahead and skip and blank or unknown nodes (which won't
 		// be drawn, anyways -- check buildNodeArray()), so that 
 		// connections are only between visible nodes
@@ -278,8 +259,8 @@ private void drawNetworkLines() {
 		}
 		holdNode2 = node;
 		while (node.getType() == HydroBase_Node.NODE_TYPE_UNKNOWN) {
-			node = __network.getDownstreamNode(node, 
-				__network.POSITION_COMPUTATIONAL);
+			node = HydroBase_NodeNetwork.getDownstreamNode(node, 
+				HydroBase_NodeNetwork.POSITION_COMPUTATIONAL);
 			if (node == null || node == holdNode2) {
 				GRDrawingAreaUtil.setLineWidth(__drawingArea,1);
 				return;
@@ -293,15 +274,15 @@ private void drawNetworkLines() {
 			return;
 		}
 
-		dsRealNode = __network.findNextRealOrXConfluenceDownstreamNode(
+		dsRealNode = HydroBase_NodeNetwork.findNextRealOrXConfluenceDownstreamNode(
 			node);
 
 		// if the confluence of the reach (as opposed to a trib coming
 		// in) then this is the last real node in disappearing stream.
 		// Use the end node for the downstream node.
 		dash = false;
-		if (dsRealNode == __network.getDownstreamNode(node, 
-		    __network.POSITION_REACH)) {
+		if (dsRealNode == HydroBase_NodeNetwork.getDownstreamNode(node, 
+		    HydroBase_NodeNetwork.POSITION_REACH)) {
 			dash = true;
 		}
 
@@ -702,7 +683,8 @@ Sets the nodes array to use.
 @param nodes the nodes array to use.
 */
 public void setNodesArray(HydroBase_Node[] nodes) {
-	__nodes = nodes;
+	//TODO SAM 2007-03-01 Evaluate use
+	//__nodes = nodes;
 }
 
 /**

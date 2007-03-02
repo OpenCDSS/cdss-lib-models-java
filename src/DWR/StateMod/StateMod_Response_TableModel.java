@@ -26,6 +26,7 @@
 //					  to relative paths of the main 
 //					  directory.
 // 2004-10-28	SAM, RTi		Change setValueAt() to support sort.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 // EndHeader
 
@@ -40,8 +41,6 @@ import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.IOUtil;
 
 import RTi.Util.Message.Message;
-
-import RTi.Util.String.StringUtil;
 
 /**
 This table model displays response data.
@@ -68,11 +67,6 @@ The data behind the table.  This array contains the int value of the
 data set components's type for each row.
 */
 private int[] __data;
-
-/**
-The worksheet on which this table model is being used.
-*/
-private JWorksheet __worksheet;
 
 /**
 The dataset for which to display data set component information.
@@ -110,7 +104,7 @@ throws Exception {
 			// the following makes sure that the response file 
 			// is not added here ... the response file is added
 			// below because it must always be in the GUI.
-			if (dsc.getComponentType() != __dataset.COMP_RESPONSE 
+			if (dsc.getComponentType() != StateMod_DataSet.COMP_RESPONSE 
 				&& dsc.isVisible()) {
 				ints.add(new Integer(dsc.getComponentType()));
 			}
@@ -120,7 +114,7 @@ throws Exception {
 	// now transfer the numbers of the DataSetComponents with data into
 	// an int array from the Vector.
 	__data = new int[ints.size() + 1];
-	__data[0] = __dataset.COMP_RESPONSE;
+	__data[0] = StateMod_DataSet.COMP_RESPONSE;
 	for (int i = 0; i < ints.size(); i++) {
 		__data[i + 1] = ((Integer)ints.elementAt(i)).intValue();
 	}
@@ -298,8 +292,6 @@ public void setValueAt(Object value, int row, int col)
 {	if (_sortOrder != null) {
 		row = _sortOrder[row];
 	}
-	double dval;
-	int ival;
 	switch (col) {
 		case COL_NAME:	// File name...
 			String s = ((String)value).trim();
@@ -330,11 +322,11 @@ public void setValueAt(Object value, int row, int col)
 	super.setValueAt(value, row, col);
 }
 
+// TODO SAM 2007-03-01 Evaluate use
 /**
 Sets the worksheet on which this table model is being used.
 @param worksheet the worksheet on which this table model can be used.
 */
 public void setWorksheet(JWorksheet worksheet) {
-	__worksheet = worksheet;
 }
 }

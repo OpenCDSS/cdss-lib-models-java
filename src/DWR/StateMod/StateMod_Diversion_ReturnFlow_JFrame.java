@@ -44,6 +44,7 @@
 //					* Some code referred to "rights" -
 //					  change to "return flows" (copy and
 //					  paste error?).
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
 
@@ -70,7 +71,6 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
@@ -81,8 +81,6 @@ import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.JScrollWorksheet;
 import RTi.Util.GUI.JWorksheet;
 import RTi.Util.GUI.ResponseJDialog;
-
-import RTi.Util.Help.URLHelp;
 
 import RTi.Util.IO.PropList;
 
@@ -265,7 +263,7 @@ private boolean saveData() {
 	}
 
 	__currentDiv.setReturnFlow(clone);
-	__dataset.setDirty(__dataset.COMP_DIVERSION_STATIONS, true);
+	__dataset.setDirty(StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
 
 	return true;
 }
@@ -420,8 +418,6 @@ public void setupGUI() {
 
 	addWindowListener(this);
 	
-	GridBagConstraints gbc = new GridBagConstraints();
-
 	__addReturnFlow = new JButton(__BUTTON_ADD_RETURN_FLOW);
 	__deleteReturnFlow = new JButton(__BUTTON_DEL_RETURN_FLOW);
 	__helpJButton = new JButton(__BUTTON_HELP);
@@ -434,7 +430,6 @@ public void setupGUI() {
 	JPanel bigPanel = new JPanel();
 	bigPanel.setLayout(gb);
 
-	FlowLayout fl = new FlowLayout(FlowLayout.CENTER);
 	JPanel p1 = new JPanel();
 	p1.setLayout(new FlowLayout(FlowLayout.RIGHT));
 
@@ -469,7 +464,7 @@ public void setupGUI() {
 	JScrollWorksheet jsw = null;
 	try {	
 		Vector nodes = (Vector)(__dataset.getComponentForComponentType(
-			__dataset.COMP_RIVER_NETWORK).getData());
+			StateMod_DataSet.COMP_RIVER_NETWORK).getData());
 
 		Vector v = new Vector();
 		Vector v2 = __currentDiv.getReturnFlows();
@@ -502,12 +497,12 @@ public void setupGUI() {
 		if (__dataset.getIday() == 1) {
 			delayIDs = (Vector)(__dataset
 				.getComponentForComponentType(
-				__dataset.COMP_DELAY_TABLES_DAILY).getData());
+				StateMod_DataSet.COMP_DELAY_TABLES_DAILY).getData());
 		}
 		else {
 			delayIDs = (Vector)(__dataset
 				.getComponentForComponentType(
-				__dataset.COMP_DELAY_TABLES_MONTHLY).getData());
+				StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY).getData());
 		}
 		v = StateMod_Util.createDataList(delayIDs, true);
 		__worksheet.setColumnJComboBoxValues(
@@ -529,9 +524,9 @@ public void setupGUI() {
 	main_panel.add(p1, "South");
 
 	JGUIUtil.addComponent(bigPanel, info_panel, 0, 0, 1, 1, 0, 0,
-		gbc.NONE, gbc.NORTHWEST);
+		GridBagConstraints.NONE, GridBagConstraints.NORTHWEST);
 	JGUIUtil.addComponent(bigPanel, main_panel, 0, 1, 10, 10, 1, 1,
-		gbc.BOTH, gbc.SOUTH);
+		GridBagConstraints.BOTH, GridBagConstraints.SOUTH);
 
 	__addReturnFlow.addActionListener(this);
 	__deleteReturnFlow.addActionListener(this);

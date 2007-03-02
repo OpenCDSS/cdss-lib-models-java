@@ -130,6 +130,7 @@
 //					* Changed some column reference numbers
 //					  to reflect the fact that the worksheet
 //					  column numbering is now 0-based.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
 
@@ -149,18 +150,12 @@ import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
-import java.io.File;
-
 import java.util.Vector;
 
-import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
@@ -188,11 +183,7 @@ import RTi.Util.Message.Message;
 
 import RTi.Util.String.StringUtil;
 
-import RTi.Util.Table.DataTable;
-import RTi.Util.Table.TableField;
-
 import RTi.Util.Time.DateTime;
-import RTi.Util.Time.TimeUtil;
 
 /**
 This class is a gui for displaying and editing graphing templates.
@@ -224,18 +215,7 @@ private final String
 	__BUTTON_CLOSE = "Close",
 	__BUTTON_EXPORT_DATA = "Export Time Series Data",
 	__BUTTON_GET_TIME_SERIES = "Get Time Series for Graph",
-	__BUTTON_HELP = "Help",
 	__BUTTON_GRAPH = "Graph:";
-
-/**
-Integers that refer to data types in the StateMod_GraphNode object.
-*/
-private int 
-	__DIV,
-	__RES,
-	__INS,
-	__STR,
-	__WEL;
 
 /**
 Check box for specifying to copy data from the row above to a new row when
@@ -290,18 +270,6 @@ Data set window manager.
 */
 private StateMod_DataSet_WindowManager __dataset_wm;
 
-/**
-Specific dataset components that are kept handy.
-*/
-private DataSetComponent
-	__reservoirComp = null,
-	__diversionComp = null,
-	__instreamFlowComp = null,
-	__riverNetworkComp = null,
-	__riverStationComp = null,
-	__wellComp = null,
-	__streamGageComp = null;
-
 /** 
 Table model for the worksheet.
 */
@@ -321,18 +289,6 @@ public StateMod_GraphingTool_JFrame (	StateMod_DataSet dataset,
 	__dataset = dataset;
 	__dataset_wm = dataset_wm;
 
-	__reservoirComp = __dataset.getComponentForComponentType(
-		__dataset.COMP_RESERVOIR_STATIONS);
-	__diversionComp = __dataset.getComponentForComponentType(
-		__dataset.COMP_DIVERSION_STATIONS);
-	__instreamFlowComp = __dataset.getComponentForComponentType(
-		__dataset.COMP_INSTREAM_STATIONS);
-	__riverNetworkComp = __dataset.getComponentForComponentType(
-		__dataset.COMP_RIVER_NETWORK);
-	__wellComp = __dataset.getComponentForComponentType(
-		__dataset.COMP_WELL_STATIONS);
-	__streamGageComp = __dataset.getComponentForComponentType(
-		__dataset.COMP_STREAMGAGE_STATIONS );
 	setupGUI();
 }
 
@@ -462,7 +418,6 @@ public void actionPerformed(ActionEvent ae)
 		if (!currDir.equalsIgnoreCase(lastDirectorySelected)) {
 			JGUIUtil.setLastFileDialogDirectory(currDir);
 		}
-		String filename = fc.getSelectedFile().getName();
 		String path = fc.getSelectedFile().getPath();
 
 		JGUIUtil.setWaitCursor(this, true);
@@ -630,12 +585,6 @@ throws Throwable {
 	__graphType_JComboBox = null;
 	__tsVector = null;
 	__dataset = null;
-	__reservoirComp = null;
-	__diversionComp = null;
-	__instreamFlowComp = null;
-	__riverNetworkComp = null;
-	__wellComp = null;
-	__streamGageComp = null;
 	__tableModel = null;
 }
 
@@ -1392,7 +1341,6 @@ private void setupGUI() {
 	JPanel topJPanel = new JPanel();
 	topJPanel.setLayout(gl);
 
-	GridBagConstraints gbc = new GridBagConstraints();
 	GridLayout gl2 = new GridLayout(1, 0, 2, 0);
 	gl2 = new GridLayout(2, 0, 2, 0);
 
@@ -1415,13 +1363,13 @@ private void setupGUI() {
 	int y = 0;
 	JGUIUtil.addComponent(mainJPanel, topJPanel, 
 		0, y, 10, 3, 0, 0, 
-		10, 10, 10, 10, gbc.NONE, gbc.NORTH);
+		10, 10, 10, 10, GridBagConstraints.NONE, GridBagConstraints.NORTH);
 
 	y += 3;
 	// Add grid...
 	JGUIUtil.addComponent(mainJPanel, __autoLineCopyJCheckBox,
 		0, ++y, 1, 1, 0, 0, 
-		0, 0, 0, 0, gbc.NONE, gbc.WEST);
+		0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
 
 	PropList p = 
 		new PropList("StateMod_GraphingTool_JFrame.JWorksheet");
@@ -1474,10 +1422,10 @@ private void setupGUI() {
 
 	JGUIUtil.addComponent(gridJPanel, jsw,
 		0, 0, 1, 1, 
-		1, 1, gbc.BOTH, gbc.CENTER);
+		1, 1, GridBagConstraints.BOTH, GridBagConstraints.CENTER);
 	JGUIUtil.addComponent(mainJPanel, gridJPanel, 
 		0, ++y, 10, 12, 
-		1, 1, gbc.BOTH, gbc.CENTER);
+		1, 1, GridBagConstraints.BOTH, GridBagConstraints.CENTER);
 
 	y += 11;	// To account for grid height
 
@@ -1501,7 +1449,7 @@ private void setupGUI() {
 	// Add the button panel to the frame...
 	JGUIUtil.addComponent(mainJPanel, bottomJPanel, 
 		0, ++y, 10, 1, 
-		0, 0, gbc.VERTICAL, gbc.SOUTH);
+		0, 0, GridBagConstraints.VERTICAL, GridBagConstraints.SOUTH);
 
 	// Add the main panel as the resizable content...
 	getContentPane().add("Center", mainJPanel);
@@ -1515,10 +1463,10 @@ private void setupGUI() {
 	__statusTextField.setEditable(false);
 	JGUIUtil.addComponent(messageJPanel, __messageTextField, 
 		0, 0, 9, 1, 
-		1, 0, gbc.HORIZONTAL, gbc.WEST);
+		1, 0, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 	JGUIUtil.addComponent(messageJPanel, __statusTextField, 
 		9, 0, 1, 1, 
-		0, 0, gbc.NONE, gbc.SOUTH);
+		0, 0, GridBagConstraints.NONE, GridBagConstraints.SOUTH);
 	getContentPane().add("South", messageJPanel);
 
 	if ( __dataset_wm != null ) {

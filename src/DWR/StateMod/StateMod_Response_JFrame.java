@@ -48,6 +48,7 @@
 // 2006-03-04	SAM, RTi		Fix bug where the filename for the
 //					worksheet was being requested using the
 //					wrong column.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
 
@@ -72,8 +73,6 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 
 import RTi.Util.GUI.JFileChooserFactory;
 import RTi.Util.GUI.JGUIUtil;
@@ -124,8 +123,7 @@ private SimpleJButton
 	__apply_JButton,
 	__close_JButton,
 	__browse_JButton,
-	__cancel_JButton,
-	__help_JButton;
+	__cancel_JButton;
 
 /**
 The dataset for which to display the data set components in the gui.
@@ -169,7 +167,6 @@ Responds to action performed events.
 @param ae the ActionEvent that occurred.
 */
 public void actionPerformed(ActionEvent ae) {
-	String routine = "StateMod_Response_JFrame.actionPerformed"; 
 	String action = ae.getActionCommand();
 
 	if (action.equals(__BUTTON_BROWSE)) {
@@ -243,7 +240,6 @@ private int checkInput()
 	
 	String warning = "";
 	int fatal_count = 0;
-	int nonfatal_count = 0;
 
 	// Check to make sure that no two files have the same name...
 
@@ -382,7 +378,6 @@ throws Throwable {
 	__worksheet = null;
 	__close_JButton = null;
 	__cancel_JButton = null;
-	__help_JButton = null;
 	__dataset = null;
 	__dataset_wm = null;
 	__browse_JButton = null;
@@ -424,14 +419,13 @@ private boolean saveData ()
 	// Set the file names back into the components and mark the components
 	// dirty if the name has changed.
 	int size = __worksheet.getModel().getRowCount();
-	DataSetComponent comp = null, comp2 = null;
+	DataSetComponent comp2 = null;
 	String file_name, file_name2;
 	int comp_type;
 	for ( int i = 0; i < size; i++ ) {
 		// Get the component corresponding to the line...
 		comp_type = ((StateMod_Response_TableModel)__worksheet.
 				getModel()).getComponentTypeForRow ( i );
-		comp = __dataset_copy.getComponentForComponentType (comp_type );
 		file_name = ((String)
 			__worksheet.getValueAt(i,
 			StateMod_Response_TableModel.COL_NAME )).trim();
@@ -448,7 +442,7 @@ private boolean saveData ()
 	}
 
 	if (dirty) {
-		__dataset.getComponentForComponentType(__dataset.COMP_RESPONSE)
+		__dataset.getComponentForComponentType(StateMod_DataSet.COMP_RESPONSE)
 			.setDirty(true);
 	}
 	
@@ -494,10 +488,12 @@ private void setupGUI() {
 	__worksheet.addKeyListener(this);
 	__worksheet.setHourglassJFrame(this);
 
+	/* TODO SAM 2007-03-01 Evaluate logic
 	boolean renameAllowed = false;
 	if (__tableModel != null) {
 		renameAllowed = true;
 	}
+	*/
 	
 	JPanel top_panel = new JPanel();
 	top_panel.setLayout(new GridBagLayout());

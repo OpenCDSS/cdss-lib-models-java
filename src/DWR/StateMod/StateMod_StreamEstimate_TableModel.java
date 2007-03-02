@@ -10,6 +10,7 @@
 //					changed all the other column numbers.
 // 2004-10-28	SAM, RTi		Change setValueAt() to support sort.
 // 2005-01-21	JTS, RTi		Added the editable flag.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 
 package DWR.StateMod;
@@ -186,8 +187,6 @@ public void setValueAt(Object value, int row, int col)
 {	if (_sortOrder != null) {
 		row = _sortOrder[row];
 	}
-	double dval;
-	int ival;
 	switch (col) {
 		default:	break;
 	}	

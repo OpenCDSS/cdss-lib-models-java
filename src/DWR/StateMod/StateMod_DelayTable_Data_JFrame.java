@@ -22,6 +22,7 @@
 //					  now, no fractions.
 // 2005-03-31	JTS, RTi		Added the checkbox for displaying 
 //					(or hiding) totals lines in the table.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 
 package DWR.StateMod;
@@ -39,8 +40,6 @@ import javax.swing.JPanel;
 
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.JScrollWorksheet;
-
-import RTi.Util.Message.Message;
 
 /**
 This class is a JFrame for displaying a Vector of StateMod_DelayTable data in
@@ -156,9 +155,6 @@ constructor.
 */
 protected JScrollWorksheet buildJScrollWorksheet() 
 throws Exception {
-	String routine = "StateMod_DelayTable_Data_JFrame"
-		+ ".buildJScrollWorksheet()";
-
 	StateMod_DelayTable_Data_TableModel tableModel 
 		= new StateMod_DelayTable_Data_TableModel(_data, __monthlyData, 
 		_editable);

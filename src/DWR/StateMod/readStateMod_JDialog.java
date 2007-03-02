@@ -20,6 +20,7 @@
 //					update to the new command class design.
 // 2007-02-16	SAM, RTi		Use new CommandProcessor interface.
 //					Clean up code based on Eclipse feedback.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 
 package DWR.StateMod;
@@ -65,7 +66,6 @@ private SimpleJButton	__browse_JButton = null,// File browse button
 			__ok_JButton = null,	// Ok Button
 			__path_JButton = null;	// Convert between relative and
 						// absolute paths.
-private JFrame		__parent_JFrame = null;	// parent Frame GUI class
 private readStateMod_Command __command = null;	// Command to edit
 private JTextArea	__command_JTextArea=null;// Command as TextField
 private String		__working_dir = null;	// Working directory.
@@ -227,7 +227,6 @@ throws Throwable
 	__command = null;
 	__ok_JButton = null;
 	__path_JButton = null;
-	__parent_JFrame = null;
 	__working_dir = null;
 	super.finalize ();
 }
@@ -238,8 +237,7 @@ Instantiates the GUI components.
 @param command Command to edit.
 */
 private void initialize ( JFrame parent, Command command )
-{	__parent_JFrame = parent;
-	__command = (readStateMod_Command)command;
+{	__command = (readStateMod_Command)command;
 	CommandProcessor processor = __command.getCommandProcessor();
 	// TODO SAM 2007-02-18 Evaluate whether to support
 	//__use_alias = false;

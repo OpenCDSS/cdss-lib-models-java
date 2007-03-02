@@ -88,6 +88,7 @@
 //					found in the list, it is added (in order
 //					to support multiple ways in which N/A
 //					is typed in the data).
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
 
@@ -121,16 +122,11 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-
-import javax.swing.text.JTextComponent;
 
 import RTi.GRTS.TSProduct;
 import RTi.GRTS.TSViewJFrame;
 
-import RTi.TS.DayTS;
-import RTi.TS.MonthTS;
 import RTi.TS.TS;
 
 import RTi.Util.GUI.JGUIUtil;
@@ -140,14 +136,10 @@ import RTi.Util.GUI.ResponseJDialog;
 import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.GUI.SimpleJComboBox;
 
-import RTi.Util.Help.URLHelp;
-
 import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.PropList;
 
 import RTi.Util.Message.Message;
-
-import RTi.Util.String.StringUtil;
 
 import RTi.Util.Time.StopWatch;
 
@@ -248,11 +240,6 @@ Index of the previously-selected well.
 private int __lastWellIndex;
 
 /**
-Running total of the number of selected checkboxes.
-*/
-private int __selectedCheckBoxes = 0;
-
-/**
 GUI buttons.
 */
 private JButton 
@@ -310,8 +297,7 @@ private SimpleJComboBox
 	__wellSwitch_SimpleJComboBox,
 	__useTypeSimpleJComboBox,
 	__dataTypeSwitch_SimpleJComboBox,
-	__demandSrcCodeSimpleJComboBox,
-	__useType_SimpleJComboBox;
+	__demandSrcCodeSimpleJComboBox;
 
 /**
 GUI data radio buttons for selecting among efficiencies.
@@ -396,7 +382,7 @@ public StateMod_Well_JFrame (	StateMod_DataSet dataset,
 	__dataset = dataset;
 	__dataset_wm = dataset_wm;
 	__wellComponent = __dataset.getComponentForComponentType(
-		__dataset.COMP_WELL_STATIONS);
+		StateMod_DataSet.COMP_WELL_STATIONS);
 	__wellsVector = (Vector)__wellComponent.getData();
 
 	int size = __wellsVector.size();
@@ -429,7 +415,7 @@ public StateMod_Well_JFrame (	StateMod_DataSet dataset,
 	__dataset = dataset;
 	__dataset_wm = dataset_wm;
 	__wellComponent = __dataset.getComponentForComponentType(
-		__dataset.COMP_WELL_STATIONS);
+		StateMod_DataSet.COMP_WELL_STATIONS);
 	__wellsVector = (Vector)__wellComponent.getData();
 
 	int size = __wellsVector.size();
@@ -452,8 +438,6 @@ Responds to action performed events.
 @param e the ActionEvent that happened.
 */
 public void actionPerformed(ActionEvent e) {
-	String routine="StateMod_Well_JFrame.actionPerformed"; 
-
 	String action = e.getActionCommand();
 	Object source = e.getSource();
 
@@ -480,7 +464,7 @@ public void actionPerformed(ActionEvent e) {
 			well.acceptChanges();
 		}
 		if (changed) {
-			__dataset.setDirty(__dataset.COMP_WELL_STATIONS, true);
+			__dataset.setDirty(StateMod_DataSet.COMP_WELL_STATIONS, true);
 		}
 		
 		if ( __dataset_wm != null ) {
@@ -503,7 +487,7 @@ public void actionPerformed(ActionEvent e) {
 			well.createBackup();
 		}
 		if (changed) {
-			__dataset.setDirty(__dataset.COMP_WELL_STATIONS, true);
+			__dataset.setDirty(StateMod_DataSet.COMP_WELL_STATIONS, true);
 		}
 	}
 	else if (action.equals(__BUTTON_CANCEL)) {
@@ -565,18 +549,15 @@ public void actionPerformed(ActionEvent e) {
 
 		// spreadsheet requests ...
 		if (action.equals(__BUTTON_WATER_RIGHTS)) {
-			StateMod_Well_Right_JFrame newframe = 
-				new StateMod_Well_Right_JFrame(
+			new StateMod_Well_Right_JFrame(
 				__dataset, well,__editable);
 		}
 		else if (action.equals(__BUTTON_RETURN_FLOW)) {
-			StateMod_Well_ReturnFlow_JFrame newframe = 
-				new StateMod_Well_ReturnFlow_JFrame(
+			new StateMod_Well_ReturnFlow_JFrame(
 				__dataset, well, __editable);
 		}
 		else if (action.equals(__BUTTON_DEPLETION)) {
-			StateMod_Well_Depletion_JFrame newframe = 
-				new StateMod_Well_Depletion_JFrame(
+			new StateMod_Well_Depletion_JFrame(
 				__dataset, well, __editable);
 		}
 	}
@@ -609,7 +590,7 @@ private boolean checkInput() {
 	for (int i = 0; i < errorCount; i++) {
 		label += errors.elementAt(i) + "\n";
 	}
-	ResponseJDialog dialog = new ResponseJDialog(this, 
+	new ResponseJDialog(this, 
 		"Errors encountered", label, ResponseJDialog.OK);
 	return false;
 }
@@ -767,7 +748,6 @@ throws Throwable {
 	__areaJTextField = null;
 	__wellSwitch_SimpleJComboBox = null;
 	__dataTypeSwitch_SimpleJComboBox = null;
-	__useType_SimpleJComboBox = null;
 	__graph_JButton = null;
 	__table_JButton = null;
 	__summary_JButton = null;
@@ -1047,7 +1027,6 @@ private void processTableSelection(int index) {
 
 	// idvcomw(data type switch)
 	int idvcomw = well.getIdvcomw();
-	boolean enable_idvcomwFactor = false;
 	if (idvcomw == 1) {
 		__dataTypeSwitch_SimpleJComboBox.select(__DATA_TYPE_MONTHLY);
 	}
@@ -1196,7 +1175,6 @@ private void saveInformation(int record) {
 	// if not enabled, idvcomw has been saved in itemStateChanged
 	well.setSwitch(__wellSwitch_SimpleJComboBox.getSelectedIndex());
 
-	boolean enable_idvcomwFactor = false;
 	String idvcom = __dataTypeSwitch_SimpleJComboBox.getSelected();
 	if (idvcom.equals(__DATA_TYPE_MONTHLY)) {
 		well.setIdvcomw(1);
@@ -1225,7 +1203,7 @@ private void saveInformation(int record) {
 
 	Vector dailyWellDemandTSVector = 
 		(Vector)(__dataset.getComponentForComponentType(
-		__dataset.COMP_WELL_DEMAND_TS_DAILY).getData());
+		StateMod_DataSet.COMP_WELL_DEMAND_TS_DAILY).getData());
 	well.connectDemandDayTS(dailyWellDemandTSVector);
 
 	if (__supplyComboBox.getSelected().equals(__SUPPLY_0)) {
@@ -1393,7 +1371,6 @@ private void setupGUI(int index) {
 	addWindowListener(this);
 
 	JPanel p1 = new JPanel();	// first 6 months' effeciency
-	JPanel p2 = new JPanel();	// last 6 months' effeciency
 	JPanel p3 = new JPanel();	// div sta id -> switch for diversion
 
 	JPanel left_panel = new JPanel();	// multilist and search area
@@ -1411,9 +1388,8 @@ private void setupGUI(int index) {
 		+ "diversion");
 	
 	Vector diversions = (Vector)(__dataset.getComponentForComponentType(
-		__dataset.COMP_DIVERSION_STATIONS).getData());
+		StateMod_DataSet.COMP_DIVERSION_STATIONS).getData());
 	diversions = StateMod_Util.createDataList(diversions, true);
-	int size = diversions.size();
 	DefaultComboBoxModel dcbm = new DefaultComboBoxModel(diversions);
 	__associatedDiversionsComboBox.setModel(dcbm);
 	/*

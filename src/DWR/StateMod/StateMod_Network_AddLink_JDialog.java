@@ -6,7 +6,8 @@
 // ----------------------------------------------------------------------------
 // History:
 //
-// 2004-07-12	J. Thomas Sapienza, RTi	Initial version.  
+// 2004-07-12	J. Thomas Sapienza, RTi	Initial version.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 
 package DWR.StateMod;
@@ -21,22 +22,15 @@ import java.awt.event.ItemListener;
 
 import java.util.Vector;
 
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 
 import DWR.DMI.HydroBaseDMI.HydroBase_Node;
-import DWR.DMI.HydroBaseDMI.HydroBase_NodeNetwork;
 
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleJComboBox;
-
-import RTi.Util.Message.Message;
 
 /**
 Dialog for adding nodes interactively to the network.
@@ -58,13 +52,6 @@ private HydroBase_Node[] __nodes = null;
 Ok button to accept entered values.
 */
 private JButton __okJButton = null;
-
-/**
-Dialog text fields.
-*/
-private JTextField
-	__downstreamIDJTextField,
-	__nodeNameJTextField;
 
 /**
 Dialog combo boxes.

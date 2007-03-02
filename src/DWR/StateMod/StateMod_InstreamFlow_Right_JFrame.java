@@ -45,6 +45,7 @@
 // 2004-10-28	SAM, RTi		Update to handle separate table model
 //					for rights.
 // 2005-01-21	JTS, RTi		Table model constructor changed.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
 
@@ -71,7 +72,6 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
@@ -79,8 +79,6 @@ import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.JScrollWorksheet;
 import RTi.Util.GUI.JWorksheet;
 import RTi.Util.GUI.ResponseJDialog;
-
-import RTi.Util.Help.URLHelp;
 
 import RTi.Util.IO.PropList;
 
@@ -355,8 +353,7 @@ private boolean saveData() {
 	// component Vector
 	Vector instreamFlowRights =
 		(Vector)(__dataset.getComponentForComponentType(
-		__dataset.COMP_INSTREAM_RIGHTS)).getData();
-	int holdsize1 = instreamFlowRights.size();
+		StateMod_DataSet.COMP_INSTREAM_RIGHTS)).getData();
 	int size = iv.size();
 	StateMod_InstreamFlowRight ir;
 	for (int i = 0; i < size; i++) {
@@ -380,11 +377,11 @@ private boolean saveData() {
 	// here we are sorting the full data array -- may be a performance
 	// issue
 	Vector sorted=StateMod_Util.sortStateMod_DataVector(instreamFlowRights);
-	__dataset.getComponentForComponentType(__dataset.COMP_INSTREAM_RIGHTS)
+	__dataset.getComponentForComponentType(StateMod_DataSet.COMP_INSTREAM_RIGHTS)
 		.setData(sorted);
 	__currentInstreamFlow.disconnectRights();
 	__currentInstreamFlow.connectRights(sorted);
-	__dataset.setDirty(__dataset.COMP_INSTREAM_RIGHTS, true);
+	__dataset.setDirty(StateMod_DataSet.COMP_INSTREAM_RIGHTS, true);
 	return true;
 }
 
@@ -478,8 +475,6 @@ private void setupGUI() {
 
 	addWindowListener(this);
 
-	GridBagConstraints gbc = new GridBagConstraints();
-
 	__addRight = new JButton(__BUTTON_ADD_RIGHT);
 	__deleteRight = new JButton(__BUTTON_DEL_RIGHT);
 	__deleteRight.setEnabled(false);
@@ -562,9 +557,9 @@ private void setupGUI() {
 	main_panel.add(p1, "South");
 
 	JGUIUtil.addComponent(bigPanel, info_panel, 0, 0, 1, 1, 0, 0,
-		gbc.NONE, gbc.NORTHWEST);
+		GridBagConstraints.NONE, GridBagConstraints.NORTHWEST);
 	JGUIUtil.addComponent(bigPanel, main_panel, 0, 1, 10, 10, 1, 1,
-		gbc.BOTH, gbc.SOUTH);
+		GridBagConstraints.BOTH, GridBagConstraints.SOUTH);
 	__addRight.addActionListener(this);
 	__deleteRight.addActionListener(this);
 	__helpJButton.addActionListener(this);

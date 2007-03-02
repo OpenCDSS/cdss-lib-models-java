@@ -54,24 +54,14 @@
 //					* Added setDataSet().
 // 2005-04-13	JTS, RTi		Added writeToListFile(), which is used
 //					by subclasses.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 
 package DWR.StateMod;
 
-import java.util.Vector;
-
-import RTi.TS.DayTS;
-import RTi.TS.MonthTS;
-import RTi.TS.MonthTotals;
-import RTi.TS.TS;
-import RTi.TS.TSUtil;
-
-import RTi.Util.Message.Message;
-
 import RTi.Util.String.StringUtil;
 
 import RTi.Util.Time.DateTime;
-import RTi.Util.Time.TimeUtil;
 
 /**
 Abstract object from which all other StateMod objects are derived.  
@@ -81,9 +71,6 @@ Possible values for this member come from the SMFileData class
 */
 public class StateMod_Data 
 implements Cloneable, Comparable {
-
-private static double MISSING_DOUBLE_FLOOR = 	-999.1;
-private static double MISSING_DOUBLE_CEILING = 	-998.9;
 
 public static DateTime MISSING_DATE = 		null;
 public static double MISSING_DOUBLE = 		-999.0;
@@ -573,7 +560,7 @@ public void setUTM(double x, double y) {
 		_utm_x = x;
 		_utm_y = y;
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_GEOVIEW, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_GEOVIEW, true);
 		}
 	}
 }

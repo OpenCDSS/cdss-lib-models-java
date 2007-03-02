@@ -108,12 +108,12 @@
 //					* Fix so dash in identifier is allowed
 //					  for other than reservoirs (and
 //					  reservoirs use for account).
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 // EndHeader
 
 package DWR.StateMod;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.String;
 import java.util.Enumeration;
@@ -635,6 +635,7 @@ public double getVersion ()
 Determine the index of a reservoir station in the reservoir station list.
 @param river_node_pos The river node position (1+) for the node to check.
 */
+/* TODO SAM 2007-03-01 Evaluate use
 private int indexOfReservoir ( int river_node_pos )
 {	for ( int i = 0; i < __numres; i++ ) {
 		if ( river_node_pos == __irssta[i] ) {
@@ -643,11 +644,13 @@ private int indexOfReservoir ( int river_node_pos )
 	}
 	return -1;
 }
+*/
 
 /**
 Determine the index of a well station (D&W or well) in the well station list.
 @param river_node_pos The river node position (1+) for the node to check.
 */
+/* TODO SAM 2007-03-01 Evaluate use
 private int indexOfWell ( int river_node_pos )
 {	for ( int i = 0; i < __numdivw; i++ ) {
 		if ( river_node_pos == __idvstw[i] ) {
@@ -656,6 +659,7 @@ private int indexOfWell ( int river_node_pos )
 	}
 	return -1;
 }
+*/
 
 /**
 Initialize the binary file.  The file is opened and the header is read.
@@ -928,12 +932,6 @@ Test code to print records, brute force until data runs out.
 private void printRecords0 ()
 throws Exception
 {
-	boolean do_month = true;
-	if (	StringUtil.endsWithIgnoreCase(__tsfile,"b49") ||
-		StringUtil.endsWithIgnoreCase(__tsfile,"b50") ||
-		StringUtil.endsWithIgnoreCase(__tsfile,"b65") ) {
-		do_month = false;
-	}
 	StringBuffer b = new StringBuffer();
 	double value = 0.0;
 	int iparm;
@@ -967,6 +965,7 @@ log file can be sorted and
 compared against the standard *.xdd, *.xre, etc. reports.
 @param max_stations Indicate the maximum number of stations to print.
 */
+/* TODO SAM Evaluate use
 private void printRecords ( int max_stations )
 throws Exception
 {
@@ -1004,7 +1003,6 @@ throws Exception
 	// Read the rest of the file and just print out the values...
 	// For stream/diversion/ISF, loop through river station list.
 	// For reservoirs and wells, loop through the specific lists.
-	int pos = 0;	// Position in a list
 	String [] id_array = __cstaid;
 	for ( iy = __iystr0; iy <= __iyend0; iy++ ) {
 		for ( im = 0; im < 12; im++ ) {
@@ -1068,6 +1066,7 @@ throws Exception
 		}
 	}
 }
+*/
 
 /**
 Read the header from the opened binary file and save the information in
@@ -1237,7 +1236,6 @@ throws IOException
 	__cstaid = new String[__numsta];
 	__stanam = new String[__numsta];
 	int counter = 0;
-	float f;
 	for ( int i = 0; i < __numsta; i++ ) {
 		__fp.seek ( offset2 + i*__record_length );
 		// Counter...
@@ -1258,7 +1256,6 @@ throws IOException
 	// Record 7 - diversion stations...
 
 	offset2 = (header_rec + 4 + __numsta)*__record_length;
-	String cstaid_String, stanam_String;
 	if ( __numdiv > 0 ) {
 		__cdivid = new String[__numdiv];
 		__divnam = new String[__numdiv];

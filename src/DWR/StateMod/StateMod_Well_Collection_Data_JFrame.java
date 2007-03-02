@@ -8,6 +8,7 @@
 // History:
 // 
 // 2005-04-07	J. Thomas Sapienza, RTi	Initial version.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 
 package DWR.StateMod;
@@ -17,8 +18,6 @@ import java.util.Vector;
 import DWR.StateMod.StateMod_Data_JFrame;
 
 import RTi.Util.GUI.JScrollWorksheet;
-
-import RTi.Util.Message.Message;
 
 /**
 This class is a JFrame for displaying a Vector of StateMod_Well 
@@ -63,9 +62,6 @@ constructor.
 */
 protected JScrollWorksheet buildJScrollWorksheet() 
 throws Exception {
-	String routine = "StateMod_Well_Collection_Data_JFrame"
-		+ ".buildJScrollWorksheet()";
-
 	StateMod_Well_Collection_Data_TableModel tableModel 
 		= new StateMod_Well_Collection_Data_TableModel(_data, 
 		_editable);

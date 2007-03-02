@@ -23,6 +23,7 @@
 //					one or many diversions.
 // 2005-01-24	JTS, RTi		* Touched up the javadocs.
 //					* Removed reference to a dataset.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 
 package DWR.StateMod;
@@ -320,7 +321,6 @@ public void setValueAt(Object value, int row, int col) {
 	double dval;
 	int ival;
 	int index;
-	String s;
 
 	// necessary for table models that display rights for 1+ diversions,
 	// so that the -1st column (ID) can also be displayed.  By doing it

@@ -7,6 +7,7 @@
 // History:
 //
 // 2005-04-04	J. Thomas Sapienza, RTi	Initial version.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 
 package DWR.StateMod;
@@ -318,10 +319,8 @@ public void setValueAt(Object value, int row, int col)
 {	if (_sortOrder != null) {
 		row = _sortOrder[row];
 	}
-	double dval;
 	int ival;
 	int index;
-	String s;
 
 	StateMod_Diversion smd = (StateMod_Diversion)_data.elementAt(row);
 

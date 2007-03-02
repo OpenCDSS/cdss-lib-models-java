@@ -49,6 +49,7 @@
 //					Define tool tips.
 // 2005-01-21	JTS, RTi		Added ability to display data for either
 //					one or many reservoirs.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 // EndHeader
 
@@ -57,8 +58,6 @@ package DWR.StateMod;
 import java.util.Vector;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
-
-import RTi.Util.String.StringUtil;
 
 /**
 This table model displays reservoir account data.  The model can display 

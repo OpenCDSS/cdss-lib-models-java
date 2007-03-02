@@ -92,17 +92,16 @@
 //					  Leave the data member names as they
 //					  are, but changing in the future would
 //					  be good.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
 
 package DWR.StateMod;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.GridLayout;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -126,20 +125,13 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.JTextField;
 
-import javax.swing.text.JTextComponent;
-
-import DWR.StateMod.StateMod_Data;
 import DWR.StateMod.StateMod_Reservoir;
 
 import RTi.GRTS.TSProduct;
 import RTi.GRTS.TSViewJFrame;
 
-import RTi.TS.DayTS;
-import RTi.TS.MonthTS;
 import RTi.TS.TS;
 
 import RTi.Util.GUI.JGUIUtil;
@@ -150,14 +142,10 @@ import RTi.Util.GUI.ResponseJDialog;
 import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.GUI.SimpleJComboBox;
 
-import RTi.Util.Help.URLHelp;
-
 import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.PropList;
 
 import RTi.Util.Message.Message;
-
-import RTi.Util.String.StringUtil;
 
 /**
 This class displays data for StateMod_Reservoir objects.
@@ -203,8 +191,6 @@ private JButton
 	__closeJButton = null,
 	__helpJButton = null,
 	__findNextRes = null,
-	__maximumTargetValues = null,
-	__minimumTargetValues = null,
 	__ownerAccounts = null,
 	__waterRights = null;
 
@@ -212,11 +198,6 @@ private SimpleJButton
 	__graph_JButton = null,
 	__summary_JButton = null,
 	__table_JButton = null;
-
-/**
-Running total of the number of selected checkboxes.
-*/
-private int __selectedCheckBoxes = 0;
 
 private JCheckBox
 	__ts_precipitation_monthly_JCheckBox = null,
@@ -329,7 +310,7 @@ public StateMod_Reservoir_JFrame (	StateMod_DataSet dataset,
 	__dataset = dataset;
 	__dataset_wm = dataset_wm;
 	__reservoirComponent = __dataset.getComponentForComponentType(
-		__dataset.COMP_RESERVOIR_STATIONS);
+		StateMod_DataSet.COMP_RESERVOIR_STATIONS);
 
 	__reservoirsVector = (Vector)__reservoirComponent.getData();
 
@@ -364,7 +345,7 @@ public StateMod_Reservoir_JFrame (	StateMod_DataSet dataset,
 	__dataset = dataset;
 	__dataset_wm = dataset_wm;
 	__reservoirComponent = __dataset.getComponentForComponentType(
-		__dataset.COMP_RESERVOIR_STATIONS);
+		StateMod_DataSet.COMP_RESERVOIR_STATIONS);
 
 	__reservoirsVector = (Vector)__reservoirComponent.getData();
 
@@ -424,7 +405,7 @@ public void actionPerformed(ActionEvent e) {
 			r.acceptChanges();
 		}					
 		if (changed) {
-			__dataset.setDirty(__dataset.COMP_RESERVOIR_STATIONS,
+			__dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_STATIONS,
 				true);
 		}		
 		if ( __dataset_wm != null ) {
@@ -448,7 +429,7 @@ public void actionPerformed(ActionEvent e) {
 			r.createBackup();
 		}			
 		if (changed) {
-			__dataset.setDirty(__dataset.COMP_RESERVOIR_STATIONS,
+			__dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_STATIONS,
 				true);
 		}		
 	}
@@ -485,23 +466,19 @@ public void actionPerformed(ActionEvent e) {
 			.elementAt(__currentReservoirIndex));
 
 		if (e.getSource() == __ownerAccounts) {
-			StateMod_Reservoir_Owner_JFrame newframe = 
-				new StateMod_Reservoir_Owner_JFrame(
+			new StateMod_Reservoir_Owner_JFrame(
 				__dataset, res, __editable);
 		}
 		else if (e.getSource() == __areaCapacityContent) {
-			StateMod_Reservoir_AreaCap_JFrame newframe = 
-				new StateMod_Reservoir_AreaCap_JFrame(
+			new StateMod_Reservoir_AreaCap_JFrame(
 				__dataset, res, __editable);
 		}
 		else if (e.getSource() == __climateFactors) {
-			StateMod_Reservoir_Climate_JFrame newframe = 
-				new StateMod_Reservoir_Climate_JFrame(
+			new StateMod_Reservoir_Climate_JFrame(
 				__dataset, res, __editable);
 		}
 		else if (e.getSource() == __waterRights) {
-			StateMod_Reservoir_Right_JFrame newframe = 
-				new StateMod_Reservoir_Right_JFrame(
+			new StateMod_Reservoir_Right_JFrame(
 				__dataset, res, __editable);
 		}
 	}
@@ -539,7 +516,7 @@ private boolean checkInput() {
 	for (int i = 0; i < errorCount; i++) {
 		label += errors.elementAt(i) + "\n";
 	}
-	ResponseJDialog dialog = new ResponseJDialog(this, 
+	new ResponseJDialog(this, 
 		"Errors encountered", label, ResponseJDialog.OK);
 	return false;
 }
@@ -620,7 +597,6 @@ private void displayTSViewJFrame(Object o)
 
 	int sub = 0;
 	int its = 0;
-	int pos = 0;
 	TS ts = null;
 	StateMod_Reservoir res =((StateMod_Reservoir)
 			__reservoirsVector.elementAt(__currentReservoirIndex));
@@ -1335,7 +1311,6 @@ public void setupGUI(int index) {
 	right.setLayout(gb);
 	left.setLayout(gb);
 
-	int i;
 	int y;
 	
 	PropList p = new PropList("StateMod_Reservoir_JFrame.JWorksheet");
@@ -1509,7 +1484,7 @@ public void setupGUI(int index) {
 		"Precipitation (Monthly)" );
 	__ts_precipitation_monthly_JCheckBox.addItemListener(this);
 	if (!__dataset.getComponentForComponentType(
-		__dataset.COMP_PRECIPITATION_TS_MONTHLY).hasData()) {
+		StateMod_DataSet.COMP_PRECIPITATION_TS_MONTHLY).hasData()) {
 		__ts_precipitation_monthly_JCheckBox.setEnabled(false);
 	}
 	JGUIUtil.addComponent(tsPanel, __ts_precipitation_monthly_JCheckBox,
@@ -1520,7 +1495,7 @@ public void setupGUI(int index) {
 		"Evaporation (Monthly)" );
 	__ts_evaporation_monthly_JCheckBox.addItemListener(this);
 	if (!__dataset.getComponentForComponentType(
-		__dataset.COMP_EVAPORATION_TS_MONTHLY).hasData()) {
+		StateMod_DataSet.COMP_EVAPORATION_TS_MONTHLY).hasData()) {
 		__ts_evaporation_monthly_JCheckBox.setEnabled(false);
 	}
 	JGUIUtil.addComponent(tsPanel, __ts_evaporation_monthly_JCheckBox,
@@ -1531,7 +1506,7 @@ public void setupGUI(int index) {
 		"Content, End of Month (Monthly)" );
 	__ts_content_monthly_JCheckBox.addItemListener(this);
 	if (!__dataset.getComponentForComponentType(
-		__dataset.COMP_RESERVOIR_CONTENT_TS_MONTHLY).hasData()) {
+		StateMod_DataSet.COMP_RESERVOIR_CONTENT_TS_MONTHLY).hasData()) {
 		__ts_content_monthly_JCheckBox.setEnabled(false);
 	}
 	JGUIUtil.addComponent(tsPanel, __ts_content_monthly_JCheckBox,
@@ -1543,7 +1518,7 @@ public void setupGUI(int index) {
 		"Content, End of Day (Daily)" );
 	__ts_content_daily_JCheckBox.addItemListener(this);
 	if (!__dataset.getComponentForComponentType(
-		__dataset.COMP_RESERVOIR_CONTENT_TS_MONTHLY).hasData()) {
+		StateMod_DataSet.COMP_RESERVOIR_CONTENT_TS_MONTHLY).hasData()) {
 		__ts_content_monthly_JCheckBox.setEnabled(false);
 	}
 	JGUIUtil.addComponent(tsPanel, __ts_content_daily_JCheckBox,
@@ -1563,7 +1538,7 @@ public void setupGUI(int index) {
 		"Target Maximum (Monthly)" );
 	__ts_maxtarget_monthly_JCheckBox.addItemListener(this);
 	if (!__dataset.getComponentForComponentType(
-		__dataset.COMP_RESERVOIR_TARGET_TS_MONTHLY).hasData()) {
+		StateMod_DataSet.COMP_RESERVOIR_TARGET_TS_MONTHLY).hasData()) {
 		__ts_maxtarget_monthly_JCheckBox.setEnabled(false);
 	}
 	JGUIUtil.addComponent(tsPanel, __ts_maxtarget_monthly_JCheckBox,
@@ -1574,7 +1549,7 @@ public void setupGUI(int index) {
 		"Target Minimum (Monthly)" );
 	__ts_mintarget_monthly_JCheckBox.addItemListener(this);
 	if (!__dataset.getComponentForComponentType(
-		__dataset.COMP_RESERVOIR_TARGET_TS_MONTHLY).hasData()) {
+		StateMod_DataSet.COMP_RESERVOIR_TARGET_TS_MONTHLY).hasData()) {
 		__ts_mintarget_monthly_JCheckBox.setEnabled(false);
 	}
 	JGUIUtil.addComponent(tsPanel, __ts_mintarget_monthly_JCheckBox,
@@ -1586,7 +1561,7 @@ public void setupGUI(int index) {
 		"Target Maximum (Daily)" );
 	__ts_maxtarget_daily_JCheckBox.addItemListener(this);
 	if (!__dataset.getComponentForComponentType(
-		__dataset.COMP_RESERVOIR_TARGET_TS_DAILY).hasData()) {
+		StateMod_DataSet.COMP_RESERVOIR_TARGET_TS_DAILY).hasData()) {
 		__ts_maxtarget_daily_JCheckBox.setEnabled(false);
 	}
 	JGUIUtil.addComponent(tsPanel, __ts_maxtarget_daily_JCheckBox,
@@ -1606,7 +1581,7 @@ public void setupGUI(int index) {
 		"Target Minimum (Daily)" );
 	__ts_mintarget_daily_JCheckBox.addItemListener(this);
 	if (!__dataset.getComponentForComponentType(
-		__dataset.COMP_RESERVOIR_TARGET_TS_DAILY).hasData()) {
+		StateMod_DataSet.COMP_RESERVOIR_TARGET_TS_DAILY).hasData()) {
 		__ts_mintarget_daily_JCheckBox.setEnabled(false);
 	}
 	JGUIUtil.addComponent(tsPanel, __ts_mintarget_daily_JCheckBox,
@@ -1801,7 +1776,7 @@ public void windowClosing(WindowEvent e) {
 		r.acceptChanges();
 	}					
 	if (changed) {
-		__dataset.setDirty(__dataset.COMP_RESERVOIR_STATIONS, true);
+		__dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_STATIONS, true);
 	}
 
 	if ( __dataset_wm != null ) {

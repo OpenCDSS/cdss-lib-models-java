@@ -31,6 +31,7 @@
 //					  writeArcViewFile().
 //					* Renamed SMParseDelpltOutputFile() to
 //					  readStateModDeltaOutputFile().
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 
 package DWR.StateMod;
@@ -46,8 +47,6 @@ import java.lang.Integer;
 import java.io.PrintWriter;
 
 import java.util.Vector;
-
-import RTi.Util.IO.IOUtil;
 
 import RTi.Util.Message.Message;
 
@@ -343,8 +342,6 @@ public void writeArcViewFile ( String instrfile, String outstrfile,
 	String[] new_comments )
 throws IOException
 {	String rtn = "StateMod_DeltaPlot.writeArcViewFile";
-	String [] comment_str = { "#" };
-	String [] ignore_comment_str = { "#>" };
 	PrintWriter out = null;
 
 	if ( Message.isDebugOn ) {
@@ -358,16 +355,12 @@ throws IOException
 		out.close();
 		out = null;
 		rtn = null;
-		comment_str = null;
-		ignore_comment_str = null;
 	} catch ( Exception e ) {
 		if ( out != null ) {
 			out.close();
 		}
 		out = null;
 		rtn = null;
-		comment_str = null;
-		ignore_comment_str = null;
 		Message.printWarning ( 2, rtn, e );
 		throw new IOException ( e.getMessage());
 	}

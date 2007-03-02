@@ -46,6 +46,7 @@
 // 2006-05-01	JTS, RTi		* Corrected bug where the layout combo
 //					  box was not selecting an initial 
 //					  value.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 
 package DWR.StateMod;
@@ -485,13 +486,13 @@ public void actionPerformed(ActionEvent event) {
 		__selectJButton.setSelected(false);
 		__infoJButton.setEnabled(false);
 		__infoJButton.setSelected(false);
-		__device.setMode(__device.MODE_PAN);
+		__device.setMode(StateMod_Network_JComponent.MODE_PAN);
 	}
 	else if (command.equals(MODE_SELECT)) {
 		__infoJButton.setEnabled(false);
 		__infoJButton.setSelected(false);
 		__panJButton.setSelected(false);
-		__device.setMode(__device.MODE_SELECT);
+		__device.setMode(StateMod_Network_JComponent.MODE_SELECT);
 	}
 
 }
@@ -1021,7 +1022,7 @@ Displays the information about the node in the textfields on screen.
 */
 public void displayNode(HydroBase_Node node) {
 	__nodeDescriptionTextField.setText(node.getDescription());
-	__nodeTypeTextField.setText(node.getVerboseType(node.getType()));
+	__nodeTypeTextField.setText(HydroBase_Node.getVerboseType(node.getType()));
 	displayNodeXY(node.getX(), node.getY());
 	displayNodeDBXY(node.getDBX(), node.getDBY());
 	__nodeCommonIDTextField.setText(node.getCommonID());
@@ -1293,7 +1294,7 @@ public void itemStateChanged(ItemEvent event) {
 	if (__ignoreEvents) {
 		return;
 	}
-	if (event.getStateChange() != event.SELECTED) {
+	if (event.getStateChange() != ItemEvent.SELECTED) {
 		return;
 	}
 
@@ -1400,7 +1401,6 @@ Called by the readXML code to process a StateMod Network XML file.
 */
 private void processDocumentNodeForRead(Node node)
 throws Exception {
-	String routine = "StateCU_DataSet.processDocumentNodeForRead";
 	NodeList children;
 	if (node.getNodeType() == Node.DOCUMENT_NODE) {
 		// The main data set node.  Get the data set type, etc.
@@ -1788,8 +1788,8 @@ private void setupGUI() {
 			nodeTop.getCommonID() + "\"");
 		}
 		for (node = nodeTop; node != null;
-		    node = network.getDownstreamNode(node, 
-		    network.POSITION_COMPUTATIONAL)) {
+		    node = HydroBase_NodeNetwork.getDownstreamNode(node, 
+		    HydroBase_NodeNetwork.POSITION_COMPUTATIONAL)) {
 			// Break if we are at the end of the list...
 			if (node == null) {
 				break;

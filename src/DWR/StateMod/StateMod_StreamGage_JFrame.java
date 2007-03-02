@@ -77,6 +77,7 @@
 //					  checkboxes were enabled even though
 //					  they should have been disabled always
 //					  (until software features are enabled).
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
 
@@ -117,14 +118,11 @@ import RTi.GRTS.TSViewJFrame;
 import RTi.TS.TS;
 
 import RTi.Util.GUI.JGUIUtil;
-import RTi.Util.GUI.JScrollWorksheet;
 import RTi.Util.GUI.JWorksheet;
 import RTi.Util.GUI.JWorksheet_SortListener;
 import RTi.Util.GUI.ResponseJDialog;
 import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.GUI.SimpleJComboBox;
-
-import RTi.Util.Help.URLHelp;
 
 import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.PropList;
@@ -157,11 +155,6 @@ private int
 	__currentStationIndex = -1,
 	__lastStationIndex = -1;
 	
-/**
-Running total of the number of selected checkboxes.
-*/
-private int __selectedCheckBoxes = 0;
-
 /**
 Stores the index of the record that was selected before the worksheet is sorted,
 in order to reselect it after the sort is complete.
@@ -232,8 +225,7 @@ private final String
 	__BUTTON_CANCEL = "Cancel",
 	__BUTTON_CLOSE = "Close",
 	__BUTTON_HELP = "Help",
-	__BUTTON_FIND_NEXT = "Find Next",
-	__BUTTON_MONTHLY_TS = "Monthly Time Series";
+	__BUTTON_FIND_NEXT = "Find Next";
 
 /**
 Data set containing the data for the form.
@@ -359,7 +351,7 @@ public void actionPerformed(ActionEvent e) {
 		}		
 		if (changed) {
 			__dataset.setDirty(
-				__dataset.COMP_STREAMGAGE_STATIONS,
+				StateMod_DataSet.COMP_STREAMGAGE_STATIONS,
 				true);
 		}		
 	}
@@ -373,7 +365,7 @@ public void actionPerformed(ActionEvent e) {
 		}			
 		if (__dataset_wm != null) {
 			__dataset_wm.closeWindow(
-				__dataset_wm.WINDOW_STREAMGAGE);
+				StateMod_DataSet_WindowManager.WINDOW_STREAMGAGE);
 		}
 		else {
 			JGUIUtil.close(this);
@@ -394,7 +386,7 @@ public void actionPerformed(ActionEvent e) {
 		}				
 		if (changed) {
 			__dataset.setDirty(
-				__dataset.COMP_STREAMGAGE_STATIONS,
+				StateMod_DataSet.COMP_STREAMGAGE_STATIONS,
 				true);
 		}		
 		if ( __dataset_wm != null ) {
@@ -450,7 +442,7 @@ private boolean checkInput() {
 	for (int i = 0; i < errorCount; i++) {
 		label += errors.elementAt(i) + "\n";
 	}
-	ResponseJDialog dialog = new ResponseJDialog(this, 
+	new ResponseJDialog(this, 
 		"Errors encountered", label, ResponseJDialog.OK);
 	return false;
 }
@@ -522,8 +514,6 @@ private void displayTSViewJFrame(Object o)
 	props.set("Product.TotalHeight", "400");
 
 	Vector tslist = new Vector();
-
-	String id = __idJTextField.getText().trim();
 
 	int sub = 0;
 	int its = 0;
@@ -1055,14 +1045,14 @@ private void setupGUI(int index) {
 		"Streamflow (Historical Monthly)");
 	__ts_streamflow_hist_monthly_JCheckBox.addItemListener(this);
 	if (!__dataset.getComponentForComponentType(
-		__dataset.COMP_STREAMGAGE_HISTORICAL_TS_MONTHLY).hasData()) {
+		StateMod_DataSet.COMP_STREAMGAGE_HISTORICAL_TS_MONTHLY).hasData()) {
 		__ts_streamflow_hist_monthly_JCheckBox.setEnabled(false);
 	}
 	__ts_streamflow_hist_daily_JCheckBox = new JCheckBox(
 		"Streamflow (Historical Daily)");		
 	__ts_streamflow_hist_daily_JCheckBox.addItemListener(this);
 	if (!__dataset.getComponentForComponentType(
-		__dataset.COMP_STREAMGAGE_HISTORICAL_TS_DAILY).hasData()) {
+		StateMod_DataSet.COMP_STREAMGAGE_HISTORICAL_TS_DAILY).hasData()) {
 		__ts_streamflow_hist_daily_JCheckBox.setEnabled(false);
 	}
 
@@ -1080,14 +1070,14 @@ private void setupGUI(int index) {
 		"Streamflow (Baseflow Monthly)");
 	__ts_streamflow_base_monthly_JCheckBox.addItemListener(this);
 	if (!__dataset.getComponentForComponentType(
-		__dataset.COMP_STREAMGAGE_BASEFLOW_TS_MONTHLY).hasData()) {
+		StateMod_DataSet.COMP_STREAMGAGE_BASEFLOW_TS_MONTHLY).hasData()) {
 		__ts_streamflow_base_monthly_JCheckBox.setEnabled(false);
 	}
 	__ts_streamflow_base_daily_JCheckBox = new JCheckBox(
 		"Streamflow (Baseflow Daily)");
 	__ts_streamflow_base_daily_JCheckBox.addItemListener(this);
 	if (!__dataset.getComponentForComponentType(	
-		__dataset.COMP_STREAMGAGE_BASEFLOW_TS_DAILY).hasData()) {
+		StateMod_DataSet.COMP_STREAMGAGE_BASEFLOW_TS_DAILY).hasData()) {
 		__ts_streamflow_base_daily_JCheckBox.setEnabled(false);
 	}
 	// REVISIT SAM 2006-08-31
@@ -1294,7 +1284,7 @@ public void windowClosing(WindowEvent e)
 		s.acceptChanges();
 	}				
 	if (changed) {
-		__dataset.setDirty(__dataset.COMP_STREAMGAGE_STATIONS,
+		__dataset.setDirty(StateMod_DataSet.COMP_STREAMGAGE_STATIONS,
 			true);
 	}	
 	if ( __dataset_wm != null ) {

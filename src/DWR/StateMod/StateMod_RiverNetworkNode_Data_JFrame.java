@@ -10,6 +10,7 @@
 // 2007-01-07   Kurt Tometich, RTi
 //								Changed the width from 386 to 720 to support
 //								the new fields added.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 
 package DWR.StateMod;
@@ -17,8 +18,6 @@ package DWR.StateMod;
 import java.util.Vector;
 
 import RTi.Util.GUI.JScrollWorksheet;
-
-import RTi.Util.Message.Message;
 
 /**
 This class is a JFrame for displaying a Vector of StateMod_RiverNetworkNode data

@@ -56,6 +56,7 @@
 //					* Num precip stations
 //					* Num evap stations
 //					* Num curve rows
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 // EndHeader
 
@@ -64,8 +65,6 @@ package DWR.StateMod;
 import java.util.Vector;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
-
-import RTi.Util.String.StringUtil;
 
 /**
 This table model displays reservoir station data.
@@ -381,7 +380,6 @@ public void setValueAt(Object value, int row, int col)
 {	if (_sortOrder != null) {
 		row = _sortOrder[row];
 	}
-	double dval;
 	int ival;
 	StateMod_Reservoir smr = (StateMod_Reservoir)_data.elementAt(row);
 	switch (col) {

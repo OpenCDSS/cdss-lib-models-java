@@ -43,12 +43,12 @@
 //					  capacity curves.
 //					* Change the "capacity" in the title to
 //					  "content".
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
 
 package DWR.StateMod;
 
-import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -69,7 +69,6 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
@@ -233,7 +232,7 @@ private void checkGUIState ()
 		// Check for data all one value...
 		int size = rv.size();
 		StateMod_ReservoirAreaCap ac = null;
-		double value, value_prev = -99999.0;
+		double value;
 		// REVISIT SAM 2006-08-20
 		// JFreeChart has a problem when the values are the same as
 		// the previous values.  However, for now, increment the values
@@ -257,9 +256,7 @@ private void checkGUIState ()
 					area_all_same = false;
 				}
 			}
-			value_prev = value;
 		}
-		value_prev = -99999.0;
 		for ( int i = 0; i < size; i++ ) {
 			ac = (StateMod_ReservoirAreaCap)rv.elementAt(i);
 			value = ac.getSeepage();
@@ -276,7 +273,6 @@ private void checkGUIState ()
 					seepage_all_same = false;
 				}
 			}
-			value_prev = value;
 		}
 		if ( area_all_same ) {
 			area_ok = false;
@@ -355,7 +351,7 @@ private boolean saveData() {
 	}
 
 	__currentRes.setAreaCaps(clone);
-	__dataset.setDirty(__dataset.COMP_DIVERSION_STATIONS, true);
+	__dataset.setDirty(StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
 	return true;
 }
 
@@ -468,8 +464,6 @@ private void setupGUI() {
 
 	addWindowListener(this);
 
-	GridBagConstraints gbc = new GridBagConstraints();
-
 	__addAreaCap = new JButton(__BUTTON_ADD_AREA_CAPACITY);
 	__deleteAreaCap = new JButton(__BUTTON_DEL_AREA_CAPACITY);
 	__deleteAreaCap.setEnabled(false);
@@ -571,25 +565,25 @@ private void setupGUI() {
 	JGUIUtil.addComponent(bigPanel, info_panel,
 		0, 0, 1, 1,
 		0, 0,
-		gbc.HORIZONTAL, gbc.NORTHWEST);
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.NORTHWEST);
 	JGUIUtil.addComponent(bigPanel, jsw,
 		0, 1, 10, 10,
 		1.0, 1.0,
-		gbc.BOTH, gbc.SOUTH);
+		GridBagConstraints.BOTH, GridBagConstraints.SOUTH);
 	JPanel button_panel = new JPanel();
 	button_panel.setLayout ( gb );
 	JGUIUtil.addComponent(button_panel, p0,
 		0, 0, 10, 1,
 		0, 0,
-		gbc.HORIZONTAL, gbc.SOUTHEAST);
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.SOUTHEAST);
 	JGUIUtil.addComponent(button_panel, p1,
 		0, 1, 10, 1,
 		0, 0,
-		gbc.HORIZONTAL, gbc.SOUTHEAST);
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.SOUTHEAST);
 	JGUIUtil.addComponent(bigPanel, button_panel,
 		0, 11, 10, 1,
 		0, 0,
-		gbc.HORIZONTAL, gbc.SOUTHEAST);
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.SOUTHEAST);
 	__addAreaCap.addActionListener(this);
 	__deleteAreaCap.addActionListener(this);
 	__helpJButton.addActionListener(this);

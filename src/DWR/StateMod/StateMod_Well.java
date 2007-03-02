@@ -106,6 +106,7 @@
 // 2006-04-09	SAM, RTi		Add _parcels_Vector data member and
 //					associated methods, to help with
 //					StateDMI error handling.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
 // REVISIT SAM 2006-04-09
@@ -253,7 +254,7 @@ public void addDepletion(StateMod_ReturnFlow depl)
 	_depl.addElement(depl);
 	setDirty ( true );
 	if ( !_isClone && _dataset != null ) {
-		_dataset.setDirty(_dataset.COMP_WELL_STATIONS, true);
+		_dataset.setDirty(StateMod_DataSet.COMP_WELL_STATIONS, true);
 	}
 }
 
@@ -269,7 +270,7 @@ public void addReturnFlow(StateMod_ReturnFlow rivret)
 	_rivret.addElement(rivret);
 	setDirty ( true );
 	if ( !_isClone && _dataset != null ) {
-		_dataset.setDirty(_dataset.COMP_WELL_STATIONS, true);
+		_dataset.setDirty(StateMod_DataSet.COMP_WELL_STATIONS, true);
 	}
 }
 
@@ -760,7 +761,7 @@ public void deleteDepletionAt(int index) {
 	_depl.removeElementAt(index);
 	setDirty ( true );
 	if ( !_isClone && _dataset != null ) {
-		_dataset.setDirty(_dataset.COMP_WELL_STATIONS, true);
+		_dataset.setDirty(StateMod_DataSet.COMP_WELL_STATIONS, true);
 	}
 }
 
@@ -773,7 +774,7 @@ public void deleteReturnFlowAt(int index) {
 	_rivret.removeElementAt(index);
 	setDirty ( true );
 	if ( !_isClone && _dataset != null ) {
-		_dataset.setDirty(_dataset.COMP_WELL_STATIONS, true);
+		_dataset.setDirty(StateMod_DataSet.COMP_WELL_STATIONS, true);
 	}
 }
 
@@ -1277,7 +1278,7 @@ Set default values for all arguments
 false, initialize to missing values.
 */
 private void initialize ( boolean initialize_defaults )
-{	_smdata_type 	= _dataset.COMP_WELL_STATIONS;
+{	_smdata_type 	= StateMod_DataSet.COMP_WELL_STATIONS;
 	_rivret	 	= new Vector(10);
 	_depl	 	= new Vector(10);
 	_pumping_MonthTS= null;
@@ -1486,7 +1487,7 @@ throws Exception {
 				}
 
 				aReturnNode = new StateMod_ReturnFlow(
-					_dataset.COMP_WELL_STATIONS);
+					StateMod_DataSet.COMP_WELL_STATIONS);
 				s = ((String)v.elementAt(0)).trim();
 				if (s.length()<= 0) {
 					aReturnNode.setCrtnid(s);
@@ -1514,7 +1515,7 @@ throws Exception {
 					format_4w, v);
 
 				aReturnNode = new StateMod_ReturnFlow(
-					_dataset.COMP_WELL_STATIONS);
+					StateMod_DataSet.COMP_WELL_STATIONS);
 				s = ((String)v.elementAt(0)).trim();
 				if (s.length() <= 0) {
 					aReturnNode.setCrtnid(s);
@@ -1608,7 +1609,7 @@ public void setAreaw(double area) {
 		_areaw = area;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_WELL_STATIONS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_WELL_STATIONS, true);
 		}
 	}
 }
@@ -1687,7 +1688,7 @@ public void setCdividyw(String cdividyw) {
 		_cdividyw = cdividyw.trim();
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_WELL_STATIONS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_WELL_STATIONS, true);
 		}
 	}
 }
@@ -1799,7 +1800,7 @@ public void setDemsrcw(int demsrcw) {
 		_demsrcw = demsrcw;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_WELL_STATIONS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_WELL_STATIONS, true);
 		}
 	}
 }
@@ -1842,7 +1843,7 @@ public void setDivcapw(double divcapw) {
 		_divcapw = divcapw;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_WELL_STATIONS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_WELL_STATIONS, true);
 		}
 	}
 }
@@ -1879,7 +1880,7 @@ public void setDivefcw(double divefcw) {
 		_divefcw = divefcw;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_WELL_STATIONS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_WELL_STATIONS, true);
 		}
 	}
 }
@@ -1955,7 +1956,7 @@ public void setDiveff(int index, double diveff, String yeartype )
 		setDirty(true);
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(
-			_dataset.COMP_DIVERSION_STATIONS, true);
+			StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
 		}
 	}
 }
@@ -1975,7 +1976,7 @@ public void setDiveff(int index, double diveff) {
 		_diveff[index] = diveff;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_WELL_STATIONS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_WELL_STATIONS, true);
 		}
 	}
 }
@@ -2025,7 +2026,7 @@ public void setIdvcomw(int idvcomw) {
 		_idvcomw = idvcomw;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_WELL_STATIONS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_WELL_STATIONS, true);
 		}
 	}
 }
@@ -2064,7 +2065,7 @@ public void setIdvcow2(String idvcow2) {
 		_idvcow2 = idvcow2;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_WELL_STATIONS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_WELL_STATIONS, true);
 		}
 	}
 }
@@ -2078,7 +2079,7 @@ public void setIrturnw(int irturnw) {
 		_irturnw = irturnw;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_WELL_STATIONS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_WELL_STATIONS, true);
 		}
 	}
 }
@@ -2132,7 +2133,7 @@ public void setPrimary(double primary) {
 		_primary = primary;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_WELL_STATIONS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_WELL_STATIONS, true);
 		}
 	}
 }
@@ -2181,7 +2182,6 @@ REVISIT -- Incorrect tag syntax: see RTi.Util.IO#processFileHeaders
 public static void writeStateModFile(String instrfile, String outstrfile,
 Vector theWellStations, String[] new_comments)
 throws Exception {
-	String routine = "StateMod_Well.writeWriteFile";
 	String [] comment_str = { "#" };
 	String [] ignore_comment_str = { "#>" };
 	PrintWriter out = null;
@@ -2379,13 +2379,11 @@ throws Exception {
 		
 	out.flush();
 	out.close();
-	routine = null;
 	comment_str = null;
 	ignore_comment_str = null;
 	out = null;
 	} 
 	catch (Exception e) {
-		routine = null;
 		comment_str = null;
 		ignore_comment_str = null;
 		if (out != null) {

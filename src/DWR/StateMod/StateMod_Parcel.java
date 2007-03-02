@@ -7,22 +7,11 @@
 // 
 // 2006-04-09	Steven A. Malers, RTi	Initial version.
 // 2006-04-12	SAM, RTi		Add well count and area data.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
 
 package DWR.StateMod;
-
-import java.io.PrintWriter;
-
-import java.lang.Double;
-
-import java.util.Vector;
-
-import RTi.Util.IO.IOUtil;
-
-import RTi.Util.Message.Message;
-
-import RTi.Util.String.StringUtil;
 
 /**
 This class is not part of the core StateMod classes.  Instead, it is used with

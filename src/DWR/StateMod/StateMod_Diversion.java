@@ -148,6 +148,7 @@
 // 2006-04-09	SAM, RTi		Add _parcels_Vector data member and
 //					associated methods, to help with
 //					StateDMI error handling.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
 // REVISIT SAM 2006-04-09
@@ -158,7 +159,6 @@ package DWR.StateMod;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.IOException;
 import java.io.PrintWriter;
 
 import java.lang.Double;
@@ -476,7 +476,7 @@ public void addReturnFlow(StateMod_ReturnFlow rivret)
 	_rivret.addElement(rivret);
 	setDirty(true);
 	if ( !_isClone && _dataset != null ) {
-		_dataset.setDirty(_dataset.COMP_DIVERSION_STATIONS, true);
+		_dataset.setDirty(StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
 	}
 }
 
@@ -1036,7 +1036,7 @@ public void deleteReturnFlowAt(int index)
 {	_rivret.removeElementAt(index);
 	setDirty(true);
 	if ( !_isClone && _dataset != null ) {
-		_dataset.setDirty(_dataset.COMP_DIVERSION_STATIONS, true);
+		_dataset.setDirty(StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
 	}
 }
 
@@ -1630,7 +1630,7 @@ Sets the smdata_type to _dataset.COMP_DIVERSION_STATIONS.
 If false, all data are set to missing.
 */
 private void initialize ( boolean initialize_defaults )
-{	_smdata_type = _dataset.COMP_DIVERSION_STATIONS;
+{	_smdata_type = StateMod_DataSet.COMP_DIVERSION_STATIONS;
 	if ( initialize_defaults ) {
 		_divefc	= -60.0;	// Ray Bennett, Ray Alvarado,
 					// 2003-10-07 progress mtg.
@@ -1931,7 +1931,7 @@ public void setArea(double area) {
 		setDirty(true);
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(
-			_dataset.COMP_DIVERSION_STATIONS, true);
+			StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
 		}
 	}
 }
@@ -1982,7 +1982,7 @@ public void setAWC(double awc) {
 		_awc = awc;
 		setDirty(true);
 		if (!_isClone && _dataset != null) {
-			_dataset.setDirty(_dataset.COMP_DIVERSION_STATIONS, 
+			_dataset.setDirty(StateMod_DataSet.COMP_DIVERSION_STATIONS, 
 				true);
 		}
 	}
@@ -2041,7 +2041,7 @@ public void setCdividy(String cdividy) {
 		setDirty(true);
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(
-			_dataset.COMP_DIVERSION_STATIONS, true);
+			StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
 		}
 	}
 }
@@ -2191,7 +2191,7 @@ public void setDemsrc(int demsrc) {
 		setDirty(true);
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(
-			_dataset.COMP_DIVERSION_STATIONS, true);
+			StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
 		}
 	}
 }
@@ -2225,7 +2225,7 @@ public void setDivcap(double divcap) {
 		setDirty(true);
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(
-			_dataset.COMP_DIVERSION_STATIONS, true);
+			StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
 		}
 	}
 }
@@ -2258,7 +2258,7 @@ public void setDivefc(double divefc) {
 		setDirty(true);
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(
-			_dataset.COMP_DIVERSION_STATIONS, true);
+			StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
 		}
 	}
 }
@@ -2296,7 +2296,7 @@ public void setDiveff(int index, double diveff) {
 		setDirty(true);
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(
-			_dataset.COMP_DIVERSION_STATIONS, true);
+			StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
 		}
 	}
 }
@@ -2334,7 +2334,7 @@ public void setDiveff(int index, double diveff, String yeartype )
 		setDirty(true);
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(
-			_dataset.COMP_DIVERSION_STATIONS, true);
+			StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
 		}
 	}
 }
@@ -2398,7 +2398,7 @@ public void setIdvcom(int idvcom) {
 		setDirty(true);
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(
-			_dataset.COMP_DIVERSION_STATIONS, true);
+			StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
 		}
 	}
 }
@@ -2432,7 +2432,7 @@ public void setIreptype(int ireptype) {
 		setDirty(true);
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(
-			_dataset.COMP_DIVERSION_STATIONS, true);
+			StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
 		}
 	}
 }
@@ -2466,7 +2466,7 @@ public void setIrturn(int irturn) {
 		setDirty(true);
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(
-			_dataset.COMP_DIVERSION_STATIONS, true);
+			StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
 		}
 	}
 }
@@ -2536,7 +2536,7 @@ public void setUsername(String username) {
 		setDirty(true);
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(
-			_dataset.COMP_DIVERSION_STATIONS, true);
+			StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
 		}
 	}
 }
@@ -2583,7 +2583,6 @@ throws Exception {
 		int j;
 		String iline;
 		String cmnt = "#>";
-		String routine = "StateMod_Diversion.writeStateModFile";
 		String format_1 =	// With daily ID
 			"%-12.12s%-24.24s%-12.12s%8d%#8.2F%8d%8d %-12.12s";
 		String format_1A=	// Without daily ID

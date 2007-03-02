@@ -30,6 +30,7 @@
 // 2004-10-25	SAM, RTi		Add query tool window.
 // 2006-01-18	JTS, RTi		Initial Evaporation view now a table.
 // 2006-08-22	SAM, RTi		Add WINDOW_PLAN for plans.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
 
@@ -41,21 +42,12 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.Vector;
 
-import javax.swing.JComponent;
-import javax.swing.JComboBox;
 import javax.swing.JFrame;
-import javax.swing.JTextField;
-
-import javax.swing.text.JTextComponent;
 
 import RTi.GRTS.TSViewJFrame;
 
-import RTi.TS.TS;
-
-import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.ReportJFrame;
 
-import RTi.Util.IO.ProcessManager;
 import RTi.Util.IO.PropList;
 
 import RTi.Util.Message.Message;

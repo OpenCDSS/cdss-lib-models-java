@@ -25,6 +25,7 @@
 //					  opening old data sets and removing
 //					  "dum" files from the response file.
 // 2006-08-22	SAM, RTi		* Add plans when writing.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
 
@@ -46,8 +47,6 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 
 import RTi.TS.TS;
 
@@ -137,7 +136,6 @@ Responds to action performed events.
 @param ae the ActionEvent that occurred.
 */
 public void actionPerformed(ActionEvent ae) {
-	String routine = "StateMod_Save_JDialog.actionPerformed"; 
 	String action = ae.getActionCommand();
 
 	if (action.equals(__BUTTON_CANCEL)) {
@@ -167,7 +165,6 @@ private int checkInput()
 	
 	String warning = "";
 	int fatal_count = 0;
-	int nonfatal_count = 0;
 
 	/*
 	// REVISIT - need to make sure that if a component file name has changed
@@ -659,13 +656,13 @@ throws Exception {
 		case StateMod_DataSet.COMP_WELL_PUMPING_TS_MONTHLY:
 			double missing = -999.0;
 			String year = null;
-			if (__dataset.getCyrl() == __dataset.SM_CYR) {
+			if (__dataset.getCyrl() == StateMod_DataSet.SM_CYR) {
 				year = "CYR";
 			}
-			else if (__dataset.getCyrl() == __dataset.SM_WYR) {
+			else if (__dataset.getCyrl() == StateMod_DataSet.SM_WYR) {
 				year = "WYR";
 			}
-			else if (__dataset.getCyrl() == __dataset.SM_IYR) {
+			else if (__dataset.getCyrl() == StateMod_DataSet.SM_IYR) {
 				year = "IYR";
 			}
 			int precision = 2;

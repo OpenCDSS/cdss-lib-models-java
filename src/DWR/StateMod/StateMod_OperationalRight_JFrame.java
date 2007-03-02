@@ -62,6 +62,7 @@
 // 2006-01-19	JTS, RTi		* Now implements JWorksheet_SortListener
 //					* Reselects the record that was selected
 //					  when the worksheet is sorted.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
 
@@ -90,10 +91,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-
-import javax.swing.text.JTextComponent;
 
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.JScrollWorksheet;
@@ -276,7 +274,6 @@ to be used, and then they are re-used.
 */
 private Vector
 	__reservoirIDs = null,
-	__reservoirRightIDs = null,
 	__diversionRightIDs = null,
 	__streamGageIDs = null,
 	__instreamFlowIDs = null,
@@ -367,7 +364,6 @@ Responds to action events.
 @param e the ActionEvent that happened.
 */
 public void actionPerformed(ActionEvent e) {
-	String routine = "actionPerformed";
 
 	String action = e.getActionCommand();
 
@@ -390,7 +386,7 @@ public void actionPerformed(ActionEvent e) {
 			o.acceptChanges();
 		}				
 		if (changed) {
-			__dataset.setDirty(__dataset.COMP_OPERATION_RIGHTS, 
+			__dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, 
 				true);
 		}		
 		if ( __dataset_wm != null ) {
@@ -415,7 +411,7 @@ public void actionPerformed(ActionEvent e) {
 			o.createBackup();
 		}		
 		if (changed) {
-			__dataset.setDirty(__dataset.COMP_OPERATION_RIGHTS, 
+			__dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, 
 				true);
 		}		
 	}
@@ -499,7 +495,7 @@ private boolean checkInput() {
 	for (int i = 0; i < errorCount; i++) {
 		label += errors.elementAt(i) + "\n";
 	}
-	ResponseJDialog dialog = new ResponseJDialog(this, 
+	new ResponseJDialog(this, 
 		"Errors encountered", label, ResponseJDialog.OK);
 	return false;
 }
@@ -532,7 +528,7 @@ stores the instream flow Vector from the dataset into __instreamFlows.
 */
 private void createInstreamFlowIDVector() {
 	DataSetComponent isfComp = __dataset.getComponentForComponentType(
-		__dataset.COMP_INSTREAM_STATIONS);
+		StateMod_DataSet.COMP_INSTREAM_STATIONS);
 	__instreamFlows = (Vector)isfComp.getData();
 	__instreamFlowIDs = StateMod_Util.createDataList(__instreamFlows, true);
 }
@@ -543,7 +539,7 @@ stores the diversions Vector from the dataset into __diversions.
 */
 private void createDiversionIDVector() {
 	DataSetComponent divComp = __dataset.getComponentForComponentType(
-		__dataset.COMP_DIVERSION_STATIONS);
+		StateMod_DataSet.COMP_DIVERSION_STATIONS);
 	__diversions = (Vector)divComp.getData();
 	__diversionIDs = StateMod_Util.createDataList(__diversions, true);
 }
@@ -554,7 +550,7 @@ stores the diversion rights Vector from the dataset into __diversionRights.
 */
 private void createDiversionRightIDVector() {
 	DataSetComponent divRightComp = __dataset.getComponentForComponentType(
-		__dataset.COMP_DIVERSION_RIGHTS);
+		StateMod_DataSet.COMP_DIVERSION_RIGHTS);
 	__diversionRights = (Vector)divRightComp.getData();
 	__diversionRightIDs = StateMod_Util.createDataList(__diversionRights, 
 		true);
@@ -575,7 +571,7 @@ stores the reservoir Vector from the dataset into __reservoirs.
 */
 private void createReservoirIDVector() {
 	DataSetComponent resComp = __dataset.getComponentForComponentType(
-		__dataset.COMP_RESERVOIR_STATIONS);
+		StateMod_DataSet.COMP_RESERVOIR_STATIONS);
 	__reservoirs = (Vector)resComp.getData();
 	__reservoirIDs = StateMod_Util.createDataList(__reservoirs, true);
 }
@@ -584,13 +580,16 @@ private void createReservoirIDVector() {
 Creates the reservoir right ID Vector, stores it into __reservoirRightIDs, and
 stores the reservoir rights Vector from the dataset into __reservoirRights.
 */
+/* TODO SAM 2007-03-01 Evaluate use
 private void createReservoirRightIDVector() {
 	DataSetComponent resRightComp = __dataset.getComponentForComponentType(
 		__dataset.COMP_RESERVOIR_RIGHTS);
 	__reservoirRights = (Vector)resRightComp.getData();
-	__reservoirRightIDs = StateMod_Util.createDataList(__reservoirRights, 
-		true);
+	// TODO SAM 2007-03-01 Evaluate use
+	//__reservoirRightIDs = StateMod_Util.createDataList(__reservoirRights, 
+	//	true);
 }
+*/
 
 /**
 Creates the stream gage ID Vector, stores it into __streamGageIDs, and
@@ -598,7 +597,7 @@ stores the stream gage Vector from the dataset into __streamGages.
 */
 private void createStreamGageIDVector() {
 	DataSetComponent gageComp = __dataset.getComponentForComponentType(
-		__dataset.COMP_STREAMGAGE_STATIONS);
+		StateMod_DataSet.COMP_STREAMGAGE_STATIONS);
 	__streamGages = (Vector)gageComp.getData();
 	__streamGageIDs = StateMod_Util.createDataList(__streamGages, true);
 }
@@ -645,7 +644,6 @@ private void fillDestinationAccount(int ityopr, String value) {
 	int index = 0;
 	Vector accounts = null;
 	StateMod_Reservoir r = null;
-	StateMod_ReservoirRight rr = null;
 	switch (ityopr) {
 		case 2:
 		case 3:
@@ -676,8 +674,9 @@ private void fillDestinationAccount(int ityopr, String value) {
 			index = StateMod_Util.indexOf(__reservoirRights,
 				value);
 			if (index > -1) {
-				rr = (StateMod_ReservoirRight)
-					__reservoirRights.elementAt(index);
+				// TODO SAM 2007-03-01 Evaluate logic
+				//rr = (StateMod_ReservoirRight)
+					//__reservoirRights.elementAt(index);
 				/*
 				REVISIT (JTS - 2003-09-18)
 				when rights get accounts
@@ -2155,7 +2154,6 @@ private void saveInformation(int record) {
 	opr.setItyopr(ityopr);
 
 	if (__monthSwitch[0].isEnabled()) {
-		int index = 0;
 		String value = null;
 		for (int i = 0; i < 12; i++) {
 			value = __monthSwitch[i].getSelected();
@@ -2178,8 +2176,6 @@ private void saveInformation(int record) {
 		opr.setQdebtx(__qdebtx.getText().trim());
 	}
 
-	int index = 0;
-	String value = null;
 	if (__source3.isEnabled()) {
 		opr.setCiopso3(trim(__source3.getSelected()));
 		opr.setIopsou3(trim(__sourceAccount3.getSelected()));
@@ -2381,7 +2377,6 @@ private void setupGUI(int index) {
 	__gridPanel.setLayout(gb);
 
 	int y;
-	int nlist = __operationalRights.size();
 
 	PropList p =new PropList("StateMod_OperationalRight_JFrame.JWorksheet");
 	p.add("JWorksheet.ShowPopupMenu=true");
@@ -3059,7 +3054,7 @@ public void windowClosing(WindowEvent e) {
 	}					
 	if (changed) {
 		__dataset.setDirty(
-			__dataset.COMP_OPERATION_RIGHTS, true);
+			StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 	}	
 	if ( __dataset_wm != null ) {
 		__dataset_wm.closeWindow (

@@ -22,6 +22,7 @@
 //					about special values like -2001.
 // 2007-02-16	SAM, RTi		Use new CommandProcessor interface.
 //					Clean up code based on Eclipse feedback.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 
 package DWR.StateMod;
@@ -68,7 +69,6 @@ private SimpleJButton	__browse_JButton = null,// Button to browse for file
 			__ok_JButton = null,	// Ok Button
 			__path_JButton = null;	// Convert between relative and
 						// absolute paths
-private JFrame		__parent_JFrame = null;	// parent JFrame GUI class
 private writeStateMod_Command __command = null;	// Command to edit
 private SimpleJComboBox	__TSList_JComboBox = null;
 						// Indicate how to get time
@@ -279,7 +279,6 @@ throws Throwable
 	__browse_JButton = null;
 	__ok_JButton = null;
 	__path_JButton = null;
-	__parent_JFrame = null;
 	__working_dir = null;
 	super.finalize ();
 }
@@ -290,8 +289,7 @@ Instantiates the GUI components.
 @param command Command to edit.
 */
 private void initialize ( JFrame parent, Command command )
-{	__parent_JFrame = parent;
-	__command = (writeStateMod_Command)command;
+{	__command = (writeStateMod_Command)command;
 	CommandProcessor processor = __command.getCommandProcessor();
 	
 	try { Object o = processor.getPropContents ( "WorkingDir" );

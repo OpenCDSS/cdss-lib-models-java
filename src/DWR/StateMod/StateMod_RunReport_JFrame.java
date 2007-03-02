@@ -53,6 +53,7 @@
 //					  "Run StateMod Report" is pressed, use
 //					  the selected item from the visible
 //					  panel.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
 
@@ -85,7 +86,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextField;
 
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleJComboBox;
@@ -132,9 +132,7 @@ Command buttons that appear at the bottom of the form.
 */
 private JButton 
 	__runStateModJButton,
-	__cancelJButton,
-	__helpJButton;
-
+	__cancelJButton;
 /**
 Labels for each of the radio buttons.
 */
@@ -346,7 +344,6 @@ throws Throwable {
 	
 	__runStateModJButton = null;
 	__cancelJButton = null;
-	__helpJButton = null;
 	super.finalize();
 }
 
@@ -581,7 +578,7 @@ private void setupGUI() {
 
 	Vector diversionsVector = (Vector)
 		__dataset.getComponentForComponentType(
-		__dataset.COMP_DIVERSION_STATIONS).getData();
+		StateMod_DataSet.COMP_DIVERSION_STATIONS).getData();
 	Vector list_names = StateMod_Util.createDataList (
 		diversionsVector, true );
 	int size = list_names.size();
@@ -592,7 +589,7 @@ private void setupGUI() {
 
 	Vector instreamFlowsVector = (Vector)
 		__dataset.getComponentForComponentType(
-		__dataset.COMP_INSTREAM_STATIONS).getData();
+		StateMod_DataSet.COMP_INSTREAM_STATIONS).getData();
 	list_names = StateMod_Util.createDataList ( instreamFlowsVector, true );
 	size = list_names.size();
 	for (int i = 0; i < size; i++) {
@@ -602,7 +599,7 @@ private void setupGUI() {
 
 	Vector gageVector = (Vector)
 		__dataset.getComponentForComponentType(
-		__dataset.COMP_STREAMGAGE_STATIONS).getData();
+		StateMod_DataSet.COMP_STREAMGAGE_STATIONS).getData();
 	list_names = StateMod_Util.createDataList ( gageVector, true );
 	size = list_names.size();
 	for (int i = 0; i < size; i++) {
@@ -612,7 +609,7 @@ private void setupGUI() {
 
 	Vector estimateVector = (Vector)
 		__dataset.getComponentForComponentType(
-		__dataset.COMP_STREAMESTIMATE_STATIONS).getData();
+		StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS).getData();
 	list_names = StateMod_Util.createDataList ( estimateVector, true );
 	size = list_names.size();
 	for (int i = 0; i < size; i++) {
@@ -622,7 +619,7 @@ private void setupGUI() {
 
 	Vector reservoirsVector = (Vector)
 		__dataset.getComponentForComponentType(
-		__dataset.COMP_RESERVOIR_STATIONS).getData();
+		StateMod_DataSet.COMP_RESERVOIR_STATIONS).getData();
 	list_names = StateMod_Util.createDataList ( reservoirsVector, true );
 	size = list_names.size();
 	__xrgSimpleJComboBox = new SimpleJComboBox();
@@ -633,7 +630,7 @@ private void setupGUI() {
 
 	Vector wellsVector = (Vector)
 		__dataset.getComponentForComponentType(
-		__dataset.COMP_WELL_STATIONS).getData();
+		StateMod_DataSet.COMP_WELL_STATIONS).getData();
 	list_names = StateMod_Util.createDataList ( wellsVector, true );
 	size = list_names.size();
 	__xwgSimpleJComboBox = new SimpleJComboBox();

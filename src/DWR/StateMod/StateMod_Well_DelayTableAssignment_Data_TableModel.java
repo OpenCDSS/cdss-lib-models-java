@@ -7,19 +7,15 @@
 // History:
 //
 // 2005-04-04	J. Thomas Sapienza, RTi	Initial version.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 
 package DWR.StateMod;
 
 import java.util.Vector;
 
-import RTi.DMI.DMIUtil;
-
 import RTi.Util.GUI.JWorksheet;
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
-
-import RTi.Util.Message.Message;
-
 /**
 This class is a table model for displaying delay table data.
 */
@@ -196,7 +192,6 @@ public int[] getColumnWidths() {
 	for (int i = 0; i < __COLUMNS; i++) {
 		widths[i] = 0;
 	}
-	int i = 0;
 	widths[__COL_ID] = 9;	
 	widths[__COL_NODE_ID] = 9;
 	widths[__COL_PERCENT] = 7;	

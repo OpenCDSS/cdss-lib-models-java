@@ -61,15 +61,13 @@
 //					* Clone status is checked via _isClone
 //					  when the component is marked as dirty.
 // 2005-04-18	JTS, RTi		Added writeListFile().
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 
 package DWR.StateMod;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.PrintWriter;
 
 import java.lang.Double;
@@ -141,7 +139,7 @@ public void addRet_val(Double D) {
 	_ret_val.addElement(D);
 	setNdly(_ret_val.size());
 	if ( !_isClone && _dataset != null ) {
-		_dataset.setDirty(_dataset.COMP_DELAY_TABLES_MONTHLY, true);
+		_dataset.setDirty(StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY, true);
 	}
 }
 
@@ -350,7 +348,7 @@ public String getUnits() {
 Initialize data members.
 */
 private void initialize() {
-	_smdata_type = _dataset.COMP_DELAY_TABLES_MONTHLY;
+	_smdata_type = StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY;
 	_ndly = 0;
 	_units = "PCT";
 	_ret_val = new Vector(1);
@@ -371,7 +369,7 @@ public void insertRet_val(Double D, int index) {
 	_ret_val.insertElementAt(D, index);
 	setNdly(_ret_val.size());
 	if ( !_isClone && _dataset != null ) {
-		_dataset.setDirty(_dataset.COMP_DELAY_TABLES_MONTHLY, true);
+		_dataset.setDirty(StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY, true);
 	}
 }
 
@@ -400,7 +398,7 @@ public void removeRet_val(int index) {
 	_ret_val.removeElementAt(index);
 	setNdly(_ret_val.size());
 	if ( !_isClone && _dataset != null ) {
-		_dataset.setDirty(_dataset.COMP_DELAY_TABLES_MONTHLY, true);
+		_dataset.setDirty(StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY, true);
 	}
 }
 
@@ -427,7 +425,7 @@ Set the number of return values.
 public void setNdly(int i) {
 	if (i != _ndly) {
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_DELAY_TABLES_MONTHLY,
+			_dataset.setDirty(StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY,
 			true);
 		}
 		_ndly = i;
@@ -469,7 +467,7 @@ public void setRet_val(int index, Double d) {
 			_ret_val.setElementAt(d, index);
 			if ( !_isClone && _dataset != null ) {
 				_dataset.setDirty(
-				_dataset.COMP_DELAY_TABLES_MONTHLY, true);
+				StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY, true);
 			}
 		}
 		else {	
@@ -485,7 +483,7 @@ public void setTableID(String str) {
 	if (!str.equals(_id)) {
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(
-				_dataset.COMP_DELAY_TABLES_MONTHLY, true);
+				StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY, true);
 		}
 		_id = str;
 		// Set the name to the same as the ID...
@@ -502,7 +500,7 @@ public void setUnits(String units) {
 		if (units != null) {
 			if (!_isClone && _dataset != null) {
 				_dataset.setDirty(
-				_dataset.COMP_DELAY_TABLES_MONTHLY, true);
+				StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY, true);
 			}
 			_units = units;
 		}
@@ -514,6 +512,7 @@ Returns the value for nrtn to be compared against the interv in the control
 file.  Either a value is returned (if every nrtn is the same) or a -1 is
 returned (variable values for nrtn).
 */
+/* TODO SAM 2007-03-01 Evaluate use
 private int checkDelayInterv(Vector delaysVector) {
 	int ndly = -999;
 	if (delaysVector == null) {
@@ -536,6 +535,7 @@ private int checkDelayInterv(Vector delaysVector) {
 	delayTable = null;
 	return ndly;
 }
+*/
 
 /** 
 Read delay information in and store in a java vector.  The new delay entries are
@@ -557,8 +557,7 @@ throws Exception {
 	Vector theDelays = new Vector(1);
 	StateMod_DelayTable aDelay = new StateMod_DelayTable ( is_monthly );
 	int num_read=0, total_num_to_read=0;
-	boolean reading=false; 
-	String s = null;
+	boolean reading=false;
 	BufferedReader in = null;
 	StringTokenizer split = null;
 
@@ -616,7 +615,6 @@ throws Exception {
 		routine = null;
 		iline = null;
 		aDelay = null;
-		s = null;
 		split = null;
 		if (in != null) {
 			in.close();
@@ -628,7 +626,6 @@ throws Exception {
 	routine = null;
 	iline = null;
 	aDelay = null;
-	s = null;
 	split = null;
 	if (in != null) {
 		in.close();
@@ -666,7 +663,6 @@ throws Exception {
 	String [] comment_str = { "#" };
 	String [] ignore_str = { "#>" };
 	String routine = "writeStateModFile";
-	int	ndivsta, nlines, status;
 
 	Message.printStatus(1, routine, 
 		"Writing new delay table to file \"" + outputFile 
@@ -681,9 +677,6 @@ throws Exception {
 	String month_del = null;
 	String cmnt="#>";
 	String m_format = "%8.2f";
-	String format_1 = "%8.8s%3d";
-	String format_2 = "%8.8s   ";
-	String init_info = null;
 	StringBuffer iline = new StringBuffer();
 	StateMod_DelayTable delay = null;
 	Vector v = new Vector(2);
@@ -747,12 +740,10 @@ throws Exception {
 			v.removeAllElements();
 			v.addElement(delay.getTableID());
 			v.addElement(new Integer(delay.getNdly()));
-			init_info = StringUtil.formatString(v, format_1);
 		}
 		else {
 			v.removeAllElements();
 			v.addElement(delay.getTableID());
-			init_info = StringUtil.formatString(v, format_2);
 		}
 
 		while (printing) {
@@ -776,8 +767,6 @@ throws Exception {
 				iline.append(month_del);
 			}
 			out.println(iline);
-			init_info = "           ";
-
 			num_printed += num_to_print;
 		}	
 	}
@@ -854,8 +843,6 @@ throws Exception {
 	String[] newComments = null;	
 	String id = null;
 	StringBuffer buffer = new StringBuffer();
-	Vector returnFlows = new Vector();
-	Vector temp = null;
 	
 	try {	
 		out = IOUtil.processFileHeaders(

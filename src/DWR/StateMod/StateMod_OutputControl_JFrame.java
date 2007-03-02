@@ -95,6 +95,7 @@
 //					  that are recognized.
 //					* Comment out help button since it is
 //					  not currently supported.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 //EndHeader
 
@@ -107,8 +108,6 @@ import java.awt.GridLayout;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
@@ -116,20 +115,13 @@ import java.io.File;
 
 import java.util.Vector;
 
-import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 import javax.swing.filechooser.FileFilter;
-
-import RTi.TS.MonthTS;
-import RTi.TS.TS;
-import RTi.TS.TSIdent;
 
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.JScrollWorksheet;
@@ -143,12 +135,6 @@ import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.PropList;
 
 import RTi.Util.Message.Message;
-
-import RTi.Util.Table.DataTable;
-import RTi.Util.Table.TableField;
-
-import RTi.Util.Time.DateTime;
-import RTi.Util.Time.TimeUtil;
 
 /**
 This class is a GUI for displaying and editing output control files.
@@ -230,7 +216,7 @@ public StateMod_OutputControl_JFrame(StateMod_DataSet dataset) {
 	__dataset = dataset;
 
 	__riverNetworkComp = __dataset.getComponentForComponentType(
-		__dataset.COMP_RIVER_NETWORK);
+		StateMod_DataSet.COMP_RIVER_NETWORK);
 	setupGUI();
 }
 
@@ -579,7 +565,6 @@ private void setupGUI() {
 	JPanel radio_panel = new JPanel();
 	radio_panel.setLayout(gb);
 
-	GridBagConstraints gbc = new GridBagConstraints();
 	GridLayout gl2 = new GridLayout(1, 0, 2, 0);
 	JPanel bottom_JPanel = new JPanel();
 	bottom_JPanel.setLayout(gl2);
@@ -603,13 +588,13 @@ private void setupGUI() {
 		0, y, 10, 3,
 		0, 0, 
 		10, 10, 10, 10, 
-		gbc.NONE, gbc.NORTH);
+		GridBagConstraints.NONE, GridBagConstraints.NORTH);
 
 	y += 3;
 	JGUIUtil.addComponent(main_JPanel, __useAllJCheckBox,
 		0, ++y, 1, 1, 0, 0, 
 		0, 0, 0, 0,
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
 	PropList p = 
 		new PropList("StateMod_OutputControl_JFrame.JWorksheet");
@@ -657,12 +642,12 @@ private void setupGUI() {
 
 	JGUIUtil.addComponent(grid_JPanel, jsw,
 		0, 0, 1, 1, 1, 1, 
-		gbc.BOTH, gbc.CENTER);
+		GridBagConstraints.BOTH, GridBagConstraints.CENTER);
 
 	JGUIUtil.addComponent(main_JPanel, grid_JPanel, 
 		0, ++y, 10, 12, 
 		1, 1, 
-		gbc.BOTH, gbc.CENTER);
+		GridBagConstraints.BOTH, GridBagConstraints.CENTER);
 
 	y += 11;	// To account for grid height
 
@@ -682,7 +667,7 @@ private void setupGUI() {
 		//0, gbc.RELATIVE, 10, 1, 
 		0, ++y, 10, 1, 
 		0, 0, 
-		gbc.VERTICAL, gbc.SOUTH);
+		GridBagConstraints.VERTICAL, GridBagConstraints.SOUTH);
 
 	// Add the main panel as the resizable content...
 
@@ -698,11 +683,11 @@ private void setupGUI() {
 	JGUIUtil.addComponent(message_JPanel, __messageJTextField, 
 		0, 0, 9, 1, 
 		1, 0, 
-		gbc.HORIZONTAL, gbc.WEST);
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 	JGUIUtil.addComponent(message_JPanel, __statusJTextField, 
 		9, 0, 1, 1, 
 		0, 0, 
-		gbc.HORIZONTAL, gbc.SOUTH);
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.SOUTH);
 	getContentPane().add("South", message_JPanel);
 
 	pack();

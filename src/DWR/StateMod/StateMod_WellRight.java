@@ -55,15 +55,14 @@
 // 2005-03-28	JTS, RTi		Corrected wrong class name in 
 //					createBackup().
 // 2005-04-18	JTS, RTi		Added writeListFile().
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
 
 package DWR.StateMod;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.PrintWriter;
 
 import java.lang.Double;
@@ -229,7 +228,7 @@ public String getIrtem() {
 }
 
 private void initialize() {
-	_smdata_type = _dataset.COMP_WELL_RIGHTS;
+	_smdata_type = StateMod_DataSet.COMP_WELL_RIGHTS;
 	_irtem = "99999";
 	_dcrdivw = 0;
 }
@@ -341,7 +340,7 @@ public void setDcrdivw(double dcrdivw) {
 		_dcrdivw = dcrdivw;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_WELL_RIGHTS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_WELL_RIGHTS, true);
 		}
 	}
 }
@@ -379,7 +378,7 @@ public void setIrtem(String irtem) {
 		_irtem = irtem.trim();
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_WELL_RIGHTS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_WELL_RIGHTS, true);
 		}
 	}
 }

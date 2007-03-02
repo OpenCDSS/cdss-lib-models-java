@@ -44,6 +44,7 @@
 //					  aligned in the lower-right.
 // 2004-10-28	SAM, RTi		Use new table model that contains only
 //					reservoir rights.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
 
@@ -70,7 +71,6 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
@@ -83,8 +83,6 @@ import RTi.Util.GUI.JScrollWorksheet;
 import RTi.Util.GUI.JWorksheet;
 
 import RTi.Util.GUI.ResponseJDialog;
-
-import RTi.Util.Help.URLHelp;
 
 import RTi.Util.IO.PropList;
 
@@ -250,11 +248,6 @@ private int checkInput() {
 	String name;
 	String resID;
 	String adminNum;
-	String copID;
-	String switchx;
-	String iresco;
-	String ityrstr;
-	String n2fill;
 	int fatalCount = 0;
 	for (int i = 0; i < size; i++) {
 		right = (StateMod_ReservoirRight)(v.elementAt(i));
@@ -263,7 +256,7 @@ private int checkInput() {
 		name = right.getName();
 		resID = right.getCgoto();
 		adminNum = right.getRtem();
-		copID = right.getCopid();
+		//copID = right.getCopid();
 	
 		if (id.length() > 12) {
 			warning += "\nReservoir right ID (" + id + ") is "
@@ -387,8 +380,7 @@ private boolean saveData() {
 	// at this point, remove the old diversion rights from the original
 	// component Vector
 	Vector reservoirRights =(Vector)(__dataset.getComponentForComponentType(
-		__dataset.COMP_RESERVOIR_RIGHTS)).getData();
-	int holdsize1 = reservoirRights.size();
+		StateMod_DataSet.COMP_RESERVOIR_RIGHTS)).getData();
 	int size = rv.size();
 	StateMod_ReservoirRight ir;
 	for (int i = 0; i < size; i++) {
@@ -413,11 +405,11 @@ private boolean saveData() {
 	// here we are sorting the full data array -- may be a performance
 	// issue
 	Vector sorted=StateMod_Util.sortStateMod_DataVector(reservoirRights);
-	__dataset.getComponentForComponentType(__dataset.COMP_RESERVOIR_RIGHTS)
+	__dataset.getComponentForComponentType(StateMod_DataSet.COMP_RESERVOIR_RIGHTS)
 		.setData(sorted);
 	__currentRes.disconnectRights();
 	__currentRes.connectRights(sorted);
-	__dataset.setDirty(__dataset.COMP_RESERVOIR_RIGHTS, true);
+	__dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_RIGHTS, true);
 	return true;
 }
 
@@ -509,7 +501,6 @@ public void setupGUI() {
 	String routine = "setupGUI";
 
 	addWindowListener(this);
-	GridBagConstraints gbc = new GridBagConstraints();
 
 	PropList p =
 		new PropList("StateMod_Reservoir_JFrame.JWorksheet");
@@ -631,9 +622,9 @@ public void setupGUI() {
 	main_panel.add(p1, "South");
 
 	JGUIUtil.addComponent(bigPanel, info_panel,
-		0, 0, 1, 1, 0, 0, gbc.NONE, gbc.NORTHWEST);
+		0, 0, 1, 1, 0, 0, GridBagConstraints.NONE, GridBagConstraints.NORTHWEST);
 	JGUIUtil.addComponent(bigPanel, main_panel,
-		0, 1, 10, 10, 1, 1, gbc.BOTH, gbc.SOUTH);
+		0, 1, 10, 10, 1, 1, GridBagConstraints.BOTH, GridBagConstraints.SOUTH);
 	__addRight.addActionListener(this);
 	__deleteRight.addActionListener(this);
 	__helpJButton.addActionListener(this);

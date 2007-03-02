@@ -8,16 +8,15 @@
 // 2004-10-25	Steven A. Malers, RTi	Initial version.
 // 2004-10-27	SAM, RTi		Enable the display of diversion stations
 //					via a Display button.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
 
 package DWR.StateMod;
 
-import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.GridLayout;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -28,11 +27,9 @@ import java.awt.event.WindowListener;
 
 import java.util.Vector;
 
-import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 
 import RTi.Util.GUI.InputFilter;
@@ -165,7 +162,6 @@ private void displayQueryResults()
 				__matches_Vector, false );
 			StateMod_Diversion_CellRenderer cr = new
 				StateMod_Diversion_CellRenderer ( tm );
-			PropList props = new PropList ( "StateMod" );
 			TableModel_JFrame f =
 			new TableModel_JFrame ( tm, cr,
 			(PropList)null, (PropList)null );
@@ -227,7 +223,6 @@ private void doQuery ()
 	__status_JTextField.setText ( __Wait );
 	JGUIUtil.setWaitCursor ( this, true );
 	if ( ifp instanceof StateMod_Diversion_InputFilter_JPanel ) {
-		String id = null;
 		input_int = StateMod_Util.MISSING_INT;
 		input_double = StateMod_Util.MISSING_DOUBLE;
 		input_string = StateMod_Util.MISSING_STRING;
@@ -494,7 +489,6 @@ throws Throwable
 {	__cancel_JButton = null;
 	__display_JButton = null;
 	__query_JButton = null;
-	StateMod_DataSet __dataset = null;
 
 	super.finalize();
 }
@@ -516,11 +510,10 @@ public void itemStateChanged(ItemEvent event) {
 Sets up the GUI.
 */
 private void setupGUI()
-{	String message, routine = "StateMod_QueryTool_JFrame.setupGUI";
+{	String routine = "StateMod_QueryTool_JFrame.setupGUI";
 
 	addWindowListener(this);
 	
-	GridBagConstraints gbc = new GridBagConstraints();
 	GridBagLayout gb = new GridBagLayout();
 
 	JPanel  main_JPanel = new JPanel();
@@ -549,7 +542,6 @@ private void setupGUI()
 
 	// add bottom buttons
 	FlowLayout fl = new FlowLayout(FlowLayout.CENTER);
-	JPanel bottomPanel = new JPanel();
 
 	JPanel buttonPanel = new JPanel();
 	buttonPanel.setLayout(fl);

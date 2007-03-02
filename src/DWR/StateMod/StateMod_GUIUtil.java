@@ -30,6 +30,7 @@
 //					StateMod_DataSet_WindowManager and
 //					remove from here.
 // 2003-09-24	SAM, RTi		Overload setTitle() to take a JDialog.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 
 package DWR.StateMod;
@@ -37,12 +38,9 @@ package DWR.StateMod;
 import java.util.Vector;
 
 import javax.swing.JComponent;
-import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JTextField;
-
-import javax.swing.text.JTextComponent;
 
 import RTi.GRTS.TSViewJFrame;
 

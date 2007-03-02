@@ -8,6 +8,7 @@
 // 2005-03-29	J. Thomas Sapienza, RTi	Initial version.
 // 2005-03-31	JTS, RTi		Added the code to put TOTALS lines
 //					in the worksheet.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 // EndHeader
 
@@ -269,8 +270,6 @@ public void setValueAt(Object value, int row, int col) {
 	if (_sortOrder != null) {
 		row = _sortOrder[row];
 	}
-	double dval;
-	int ival;
 	// REVISIT (JTS - 2005-01-17)
 	// not fleshed out for ID, Name
 	switch (col) {

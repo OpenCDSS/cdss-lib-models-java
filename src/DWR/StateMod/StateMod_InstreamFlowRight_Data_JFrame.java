@@ -8,6 +8,7 @@
 // History:
 // 
 // 2005-03-31	J. Thomas Sapienza, RTi	Initial version.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 
 package DWR.StateMod;
@@ -15,8 +16,6 @@ package DWR.StateMod;
 import java.util.Vector;
 
 import RTi.Util.GUI.JScrollWorksheet;
-
-import RTi.Util.Message.Message;
 
 /**
 This class is a JFrame for displaying a Vector of StateMod_InstreamFlowRight 

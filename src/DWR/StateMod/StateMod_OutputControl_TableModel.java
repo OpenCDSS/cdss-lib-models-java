@@ -11,22 +11,16 @@
 // 2004-01-21	JTS, RTi		Removed the row count column and 
 //					changed all the other column numbers.
 // 2004-10-28	SAM, RTi		Change setValueAt() to support sort.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 // EndHeader
 
 package DWR.StateMod;
 
-import java.util.Date;
 import java.util.Vector;
-
-import RTi.DMI.DMIUtil;
 
 import RTi.Util.GUI.JWorksheet;
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
-
-import RTi.Util.String.StringUtil;
-
-import RTi.Util.Time.DateTime;
 
 /**
 This table model displays output control data.
@@ -64,11 +58,6 @@ Whether the data has been edited or not.
 private boolean __dirty = false;
 
 /**
-The parent frame on which the JWorksheet for this model is displayed.
-*/
-private StateMod_OutputControl_JFrame __parent = null;
-
-/**
 The worksheet in which this table model is working.
 */
 private JWorksheet __worksheet;
@@ -99,8 +88,6 @@ Constructor.
 public StateMod_OutputControl_TableModel(StateMod_OutputControl_JFrame parent,
 Vector data, Vector riverNetwork) 
 throws Exception {
-	__parent = parent;
-
 	__riverNetwork = riverNetwork;
 	
 	if (data == null) {

@@ -34,6 +34,7 @@
 //					  some tool tips instead.
 // 2006-08-16	SAM, RTi		* Add *xpl for plan output.
 //					* Add *chk for check file.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
 
@@ -51,10 +52,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.File;
-import java.io.FileReader;
 
 import java.util.StringTokenizer;
 
@@ -98,7 +96,6 @@ GUI buttons.
 */
 private JButton 
 	__closeJButton,
-	__helpJButton,
 	__viewEditJButton;
 
 /**
@@ -130,7 +127,7 @@ public StateMod_OutputFiles_JFrame(StateMod_DataSet dataset) {
 	JGUIUtil.setIcon(this, JGUIUtil.getIconImage());
 	__dataset = dataset;
 
-	__path = __dataset.getComponentDataFilePath(__dataset.COMP_RESPONSE);
+	__path = __dataset.getComponentDataFilePath(StateMod_DataSet.COMP_RESPONSE);
 	__basinName = __dataset.getBaseName();
 	
 	int index = __path.lastIndexOf(File.separator);
@@ -146,8 +143,6 @@ Responds to action performed events.
 @param e the ActionEvent that happened.
 */
 public void actionPerformed(ActionEvent e) {
-	String routine = "StateMod_OutputFiles_JFrame.actionPerformed";
-
 	String action = e.getActionCommand();
 	
 	if (action.equals(__BUTTON_VIEW_EDIT)) {
@@ -350,7 +345,6 @@ Clean up before garbage collection.
 protected void finalize()
 throws Throwable {
 	__closeJButton = null;
-	__helpJButton = null;
 	__viewEditJButton = null;
 	__fileJList = null;
 	__dataset = null;
@@ -398,8 +392,6 @@ public void mouseReleased(MouseEvent e) {}
 Sets up the GUI.
 */
 private void setupGUI() {
-	String routine = "StateMod_OutputFiles_JFrame";
-	GridBagConstraints gbc = new GridBagConstraints();
 
 	__fileJList = new JList();
 	__fileJList.setSelectionMode ( ListSelectionModel.SINGLE_SELECTION );
@@ -438,7 +430,7 @@ private void setupGUI() {
 
 	JGUIUtil.addComponent(mainPanel, new JScrollPane(__fileJList), 
 		0, 0, 10, 12, 1, 1, 
-		gbc.BOTH, gbc.CENTER);
+		GridBagConstraints.BOTH, GridBagConstraints.CENTER);
 
 	// add contents to the list box
 	fillFileJListContents();
@@ -454,7 +446,7 @@ private void setupGUI() {
 
 	JGUIUtil.addComponent(mainPanel, final_panel, 
 		0, 12, 10, 5, 0, 0, 
-		gbc.NONE, gbc.SOUTH);
+		GridBagConstraints.NONE, GridBagConstraints.SOUTH);
 
 	getContentPane().add("Center", mainPanel);
 

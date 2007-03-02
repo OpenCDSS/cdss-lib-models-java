@@ -49,6 +49,7 @@
 // 2004-10-28	SAM, RTi		Use table model specific to the climate
 //					data.
 // 2005-01-21	JTS, RTi		Table model constructor changed.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
 
@@ -76,7 +77,6 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
@@ -84,8 +84,6 @@ import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.JScrollWorksheet;
 import RTi.Util.GUI.JWorksheet;
 import RTi.Util.GUI.ResponseJDialog;
-
-import RTi.Util.Help.URLHelp;
 
 import RTi.Util.IO.PropList;
 
@@ -108,7 +106,6 @@ private final String
 	__BUTTON_CANCEL = 			"Cancel",		
 	__BUTTON_CLOSE = 			"Close",
 	__BUTTON_DELETE_PRECIPITATION_STATION =	"Delete Station",
-	__BUTTON_DELETE_EVAPORATION_STATION = 	"Delete Evaporation station",
 	__BUTTON_HELP = 			"Help";
 
 /**
@@ -406,7 +403,7 @@ private boolean saveData() {
 	}
 
 	__currentRes.setClimates(clone);
-	__dataset.setDirty(__dataset.COMP_DIVERSION_STATIONS, true);
+	__dataset.setDirty(StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
 	return true;
 }
 
@@ -501,8 +498,6 @@ public void setupGUI() {
 
 	addWindowListener(this);
 	
-	GridBagConstraints gbc = new GridBagConstraints();
-
 	__addPrecip = new JButton(__BUTTON_ADD_PRECIPITATION_STATION);
 	__addEvap = new JButton(__BUTTON_ADD_EVAPORATION_STATION);
 	__deleteStation = new JButton(__BUTTON_DELETE_PRECIPITATION_STATION);
@@ -554,9 +549,9 @@ public void setupGUI() {
 	Vector stations = StateMod_Util.createDataList(
 		combineData(
 		(Vector)__dataset.getComponentForComponentType(
-		__dataset.COMP_PRECIPITATION_TS_MONTHLY).getData(),
+		StateMod_DataSet.COMP_PRECIPITATION_TS_MONTHLY).getData(),
 		(Vector)__dataset.getComponentForComponentType(
-		__dataset.COMP_EVAPORATION_TS_MONTHLY).getData()), true);
+		StateMod_DataSet.COMP_EVAPORATION_TS_MONTHLY).getData()), true);
 
 	try {			
 		Vector temp = 
@@ -644,7 +639,7 @@ public void setupGUI() {
 		"Precipitation Stations"));
 	JGUIUtil.addComponent(panelP, jswP,
 		0, 0, 1, 1, 1, 1, 
-		gbc.BOTH, gbc.NORTHWEST);
+		GridBagConstraints.BOTH, GridBagConstraints.NORTHWEST);
 	
 	JPanel panelE = new JPanel();
 	panelE.setLayout(gb);
@@ -652,24 +647,24 @@ public void setupGUI() {
 		"Evaporation Stations"));
 	JGUIUtil.addComponent(panelE, jswE,
 		0, 0, 1, 1, 1, 1,
-		gbc.BOTH, gbc.NORTHWEST);
+		GridBagConstraints.BOTH, GridBagConstraints.NORTHWEST);
 	
 	JGUIUtil.addComponent(worksheets, panelP,
 		0, 0, 1, 1, 1, 1, 
-		gbc.BOTH, gbc.NORTHWEST);
+		GridBagConstraints.BOTH, GridBagConstraints.NORTHWEST);
 	JGUIUtil.addComponent(worksheets, panelE,
 		0, 1, 1, 1, 1, 1,
-		gbc.BOTH, gbc.NORTHWEST);
+		GridBagConstraints.BOTH, GridBagConstraints.NORTHWEST);
 
 	main_panel.add(worksheets, "Center");
 	main_panel.add(p1, "South");
 
 	// assemble parts
 	JGUIUtil.addComponent(bigPanel, info_panel, 0, 0, 1, 1, 0, 0, 
-		gbc.NONE, gbc.NORTHWEST);
+		GridBagConstraints.NONE, GridBagConstraints.NORTHWEST);
 
 	JGUIUtil.addComponent(bigPanel, main_panel, 0, 1, 10, 10, 1, 1, 
-		gbc.BOTH, gbc.SOUTH);
+		GridBagConstraints.BOTH, GridBagConstraints.SOUTH);
 	__addEvap.addActionListener(this);
 	__addPrecip.addActionListener(this);
 	__deleteStation.addActionListener(this);

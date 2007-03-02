@@ -7,18 +7,14 @@
 // History:
 //
 // 2005-03-31	J. Thomas Sapienza, RTi	Initial version.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 
 package DWR.StateMod;
 
-import java.util.Date;
 import java.util.Vector;
 
-import RTi.DMI.DMIUtil;
-
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
-
-import RTi.Util.Time.DateTime;
 
 /**
 This table model displays instream flow data.
@@ -231,8 +227,6 @@ public void setValueAt(Object value, int row, int col) {
 	if (_sortOrder != null) {
 		row = _sortOrder[row];
 	}
-	double dval;
-	int ival;
 	StateMod_InstreamFlow isf = (StateMod_InstreamFlow)_data.elementAt(row);
 	switch (col) {
 		case COL_ID:

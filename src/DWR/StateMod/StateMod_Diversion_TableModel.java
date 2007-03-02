@@ -33,6 +33,7 @@
 //					* Renamed some fields.
 // 2005-03-28	JTS, RTi		Changed the column count to reflect the
 //					actual number of columns in the GUI.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 
 package DWR.StateMod;
@@ -91,12 +92,6 @@ Whether the table data can be edited or not.
 private boolean __editable = true;
 
 /**
-Dataset that contains the data.
-*/
-private StateMod_DataSet __dataset;
-
-
-/**
 Constructor.  This builds the Model for displaying the diversion station data.
 @param data the data that will be displayed in the table.
 @param editable whether the data can be edited or not
@@ -136,7 +131,6 @@ fields will be shown.
 public StateMod_Diversion_TableModel(StateMod_DataSet dataset, 
 Vector data, boolean editable, boolean compactForm)
 throws Exception {
-	__dataset = dataset;
 	if (data == null) {
 		throw new Exception ("Invalid data Vector passed to " 
 			+ "StateMod_Diversion_TableModel constructor.");
@@ -392,10 +386,8 @@ public void setValueAt(Object value, int row, int col)
 {	if (_sortOrder != null) {
 		row = _sortOrder[row];
 	}
-	double dval;
 	int ival;
 	int index;
-	String s;
 
 	StateMod_Diversion smd = (StateMod_Diversion)_data.elementAt(row);
 

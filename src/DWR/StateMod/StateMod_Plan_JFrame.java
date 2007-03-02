@@ -7,6 +7,7 @@
 // 
 // 2006-08-22	Steven A. Malers, RTi	Copy StateMod_Diversion_JFrame and
 //					modify for plans.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //-----------------------------------------------------------------------------
 // EndHeader
 
@@ -32,41 +33,21 @@ import java.util.Vector;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JRadioButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.JTextField;
 
-import javax.swing.text.JTextComponent;
-
-import DWR.StateCU.StateCU_IrrigationPracticeTS;
-
-import DWR.StateMod.StateMod_Data;
 import DWR.StateMod.StateMod_Plan;
-
-import RTi.GRTS.TSProduct;
-import RTi.GRTS.TSViewJFrame;
-
-import RTi.TS.DayTS;
-import RTi.TS.MonthTS;
-import RTi.TS.TS;
-import RTi.TS.TSUtil;
 
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.JScrollWorksheet;
 import RTi.Util.GUI.JWorksheet;
 import RTi.Util.GUI.JWorksheet_SortListener;
-import RTi.Util.GUI.ResponseJDialog;
 import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.GUI.SimpleJComboBox;
-
-import RTi.Util.Help.URLHelp;
 
 import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.PropList;
@@ -74,8 +55,6 @@ import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 
 import RTi.Util.String.StringUtil;
-
-import RTi.Util.Time.TimeInterval;
 
 // The layout for the GUI is as follows, for the most part using grid bag
 // layout.  Only the button_JPanel and bottom_JPanel use FlowLayout.  In this
@@ -119,8 +98,7 @@ String labels for buttons.
 private static final String 
 	__BUTTON_APPLY = "Apply",
 	__BUTTON_CANCEL = "Cancel",
-	__BUTTON_CLOSE = "Close",
-	__BUTTON_HELP = "Help";
+	__BUTTON_CLOSE = "Close";
 
 /**
 Whether itemStateChanged() should ignore next state change that occurs.
@@ -145,10 +123,6 @@ private int[] __disabled_JComponents;
 The index of the currently-selected plan.
 */
 private int __currentPlanIndex = -1;
-/**
-The index of the last-selected plan.
-*/
-private int __lastPlanIndex = -1;
 
 /**
 Stores the index of the record that was selected before the worksheet is sorted,
@@ -309,7 +283,6 @@ Responds to actionPerformed events.
 public void actionPerformed(ActionEvent e) {
 	String routine = "StateMod_Plan_JFrame.actionPerformed"; 
 
-	String action = e.getActionCommand();
 	Object source = e.getSource();
 
 	try {
@@ -330,7 +303,7 @@ public void actionPerformed(ActionEvent e) {
 			plan.acceptChanges();
 		}		
 		if (changed) {
-			__dataset.setDirty(__dataset.COMP_PLANS, true);
+			__dataset.setDirty(StateMod_DataSet.COMP_PLANS, true);
 		}
 		if ( __dataset_wm != null ) {
 			__dataset_wm.closeWindow (
@@ -352,7 +325,7 @@ public void actionPerformed(ActionEvent e) {
 			plan.createBackup();
 		}
 		if (changed) {			
-			__dataset.setDirty(__dataset.COMP_PLANS, true);
+			__dataset.setDirty(StateMod_DataSet.COMP_PLANS, true);
 		}		
 	}
 	else if ( source == __cancel_JButton ) {
@@ -400,12 +373,12 @@ non-fatal errors exist.
 */
 private int checkInput()
 {	String routine = "StateMod_Plan_JFrame.checkInput";
-	String name = __planName_JTextField.getText().trim();
+	//String name = __planName_JTextField.getText().trim();
 	String rivernode = __riverNodeID_JTextField.getText().trim();
 	String Peff = __Peff_JTextField.getText().trim();
 	String iPrf = __iPrf_JTextField.getText().trim();
 	String Psto1 = __Psto1_JTextField.getText().trim();
-	String Psource = __Psource_JTextField.getText().trim();
+	//String Psource = __Psource_JTextField.getText().trim();
 
 	String warning = "";
 	int fatal_count = 0;
@@ -546,15 +519,14 @@ public void itemStateChanged(ItemEvent e)
 		return;
 	}
 
-	boolean selected = (e.getStateChange() == e.SELECTED);
-	
 	if (__currentPlanIndex == -1) {
 		return;
 	}
 
 	// set placeholder to current plan
-	StateMod_Plan plan = (StateMod_Plan)
-		__plansVector.elementAt(__currentPlanIndex);
+	// TODO SAM 2007-03-01 Evaluate logic
+	//StateMod_Plan plan = (StateMod_Plan)
+		//__plansVector.elementAt(__currentPlanIndex);
 }
 
 /**
@@ -639,7 +611,8 @@ private void processTableSelection(int index, boolean try_to_save )
 
 	// Now switch to show data for the selected plan...
 
-	__lastPlanIndex = __currentPlanIndex;
+	// TODO SAM 2007-03-01 Evaluate logic
+	//__lastPlanIndex = __currentPlanIndex;
 	__currentPlanIndex = __worksheet.getOriginalRowNumber(index);
 	
 	if (__worksheet.getSelectedRow() == -1) {
@@ -1285,7 +1258,7 @@ public void windowClosing(WindowEvent e) {
 		plan.acceptChanges();
 	}			
 	if (changed) {
-		__dataset.setDirty(__dataset.COMP_PLANS, true);
+		__dataset.setDirty(StateMod_DataSet.COMP_PLANS, true);
 	}	
 	if ( __dataset_wm != null ) {
 		__dataset_wm.closeWindow (

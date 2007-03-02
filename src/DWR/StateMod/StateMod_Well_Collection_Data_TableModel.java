@@ -7,22 +7,14 @@
 // History:
 //
 // 2005-04-07	J. Thomas Sapienza, RTi	Initial version.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 
 package DWR.StateMod;
 
-import java.util.Date;
 import java.util.Vector;
 
-import DWR.StateMod.StateMod_WellRight;
-
-import RTi.DMI.DMIUtil;
-
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
-
-import RTi.Util.Message.Message;
-
-import RTi.Util.Time.DateTime;
 
 /**
 This class is a table model for displaying reservoir collection data.
@@ -170,7 +162,6 @@ public int[] getColumnWidths() {
 	for (int i = 0; i < __COLUMNS; i++) {
 		widths[i] = 0;
 	}
-	int i = 0;
 	widths[__COL_ID] =		8;
 	widths[__COL_YEAR] =		5;
 	widths[__COL_COL_TYPE] =	9;
@@ -200,10 +191,8 @@ Sets up the data Vectors to display the reservoir collection data in the
 GUI.
 */
 private void setupData() {
-	Integer div = null;
 	int[] years = null;
 	int len = 0;
-	int num = 0;
 	int size = _data.size();
 	int size2 = 0;
 	StateMod_Well well = null;
@@ -262,9 +251,6 @@ Inserts the specified value into the table at the given position.
 @param col the column of the cell in which to place the object.
 */
 public void setValueAt(Object value, int row, int col) {
-	double dval;
-	int ival;
-
 	switch (col) {
 	}	
 

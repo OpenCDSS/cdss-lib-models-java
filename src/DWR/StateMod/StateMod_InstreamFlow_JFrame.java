@@ -75,6 +75,7 @@
 // 2006-01-19	JTS, RTi		* Now implements JWorksheet_SortListener
 //					* Reselects the record that was selected
 //					  when the worksheet is sorted.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
 
@@ -106,16 +107,11 @@ import javax.swing.JFrame;
 import javax.swing.JRadioButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-
-import javax.swing.text.JTextComponent;
 
 import RTi.GRTS.TSProduct;
 import RTi.GRTS.TSViewJFrame;
 
-import RTi.TS.DayTS;
-import RTi.TS.MonthTS;
 import RTi.TS.TS;
 
 import RTi.Util.GUI.JGUIUtil;
@@ -145,10 +141,6 @@ private final String
 	__BUTTON_APPLY = "Apply",
 	__BUTTON_CANCEL = "Cancel",
 	__BUTTON_CLOSE = "Close",
-	__BUTTON_DEMAND_ANNUAL = "Demand - Annual...",
-	__BUTTON_DEMAND_DAILY = "Demand - Daily...",
-	__BUTTON_DEMAND_DAILY_PATTERN ="Demand - Daily Pattern...",
-	__BUTTON_DEMAND_MONTHLY = "Demand - Monthly...",
 	__BUTTON_FIND_NEXT = "Find Next",
 	__BUTTON_HELP = "Help",
 	__BUTTON_WATER_RIGHTS = "Water Rights...";
@@ -177,11 +169,6 @@ private int __currentInstreamFlowIndex = -1;
 The position in the worksheet of the last-selected instream flow.
 */
 private int __lastInstreamFlowIndex = -1;
-
-/**
-Running total of the number of selected checkboxes.
-*/
-private int __selectedCheckBoxes = 0;
 
 /**
 Stores the index of the record that was selected before the worksheet is sorted,
@@ -303,7 +290,7 @@ public StateMod_InstreamFlow_JFrame (	StateMod_DataSet dataset,
 	__dataset = dataset;
 	__dataset_wm = dataset_wm;
 	__instreamFlowComponent = __dataset.getComponentForComponentType(
-		__dataset.COMP_INSTREAM_STATIONS);
+		StateMod_DataSet.COMP_INSTREAM_STATIONS);
 
 	__instreamFlowsVector = (Vector)__instreamFlowComponent.getData();
 	int size = __instreamFlowsVector.size();
@@ -337,7 +324,7 @@ public StateMod_InstreamFlow_JFrame (	StateMod_DataSet dataset,
 	__dataset = dataset;
 	__dataset_wm = dataset_wm;
 	__instreamFlowComponent = __dataset.getComponentForComponentType(
-		__dataset.COMP_INSTREAM_STATIONS);
+		StateMod_DataSet.COMP_INSTREAM_STATIONS);
 
 	__instreamFlowsVector = (Vector)__instreamFlowComponent.getData();
 	int size = __instreamFlowsVector.size();
@@ -407,7 +394,7 @@ public void actionPerformed(ActionEvent e) {
 			isf.acceptChanges();
 		}
 		if (changed) {		
-			__dataset.setDirty(__dataset.COMP_INSTREAM_STATIONS, 
+			__dataset.setDirty(StateMod_DataSet.COMP_INSTREAM_STATIONS, 
 				true);
 		}		
 		if ( __dataset_wm != null ) {
@@ -431,7 +418,7 @@ public void actionPerformed(ActionEvent e) {
 			isf.createBackup();
 		}		
 		if (changed) {
-			__dataset.setDirty(__dataset.COMP_INSTREAM_STATIONS, 
+			__dataset.setDirty(StateMod_DataSet.COMP_INSTREAM_STATIONS, 
 				true);
 		}		
 	}
@@ -464,8 +451,7 @@ public void actionPerformed(ActionEvent e) {
 			__currentInstreamFlowIndex);
 
 		if (e.getSource() == __waterRightsJButton) {
-			StateMod_InstreamFlow_Right_JFrame newframe = 
-				new StateMod_InstreamFlow_Right_JFrame(
+			new StateMod_InstreamFlow_Right_JFrame(
 				__dataset, insf, __editable);
 		}
 	}
@@ -503,7 +489,7 @@ private boolean checkInput() {
 	for (int i = 0; i < errorCount; i++) {
 		label += errors.elementAt(i) + "\n";
 	}
-	ResponseJDialog dialog = new ResponseJDialog(this, 
+	new ResponseJDialog(this, 
 		"Errors encountered", label, ResponseJDialog.OK);
 	return false;
 }
@@ -1062,15 +1048,15 @@ private void setupGUI(int index) {
 	__dataType.add("2 - Average Monthly");
 
 	if (!__dataset.getComponentForComponentType(
-		__dataset.COMP_INSTREAM_DEMAND_TS_MONTHLY).hasData()) {
+		StateMod_DataSet.COMP_INSTREAM_DEMAND_TS_MONTHLY).hasData()) {
 		__demandsMonthlyTS.setEnabled(false);
 	}
 	if (!__dataset.getComponentForComponentType(
-		__dataset.COMP_INSTREAM_DEMAND_TS_AVERAGE_MONTHLY).hasData()) {
+		StateMod_DataSet.COMP_INSTREAM_DEMAND_TS_AVERAGE_MONTHLY).hasData()) {
 		__demandsAveMonthlyTS.setEnabled(false);
 	}
 	if (!__dataset.getComponentForComponentType(
-		__dataset.COMP_INSTREAM_DEMAND_TS_DAILY).hasData()) {
+		StateMod_DataSet.COMP_INSTREAM_DEMAND_TS_DAILY).hasData()) {
 		__demandsMonthlyTS.setEnabled(false);
 	}
 	__demandsEstDailyTS.setEnabled(false);
@@ -1396,7 +1382,7 @@ public void windowClosing(WindowEvent e) {
 		isf.acceptChanges();
 	}	
 	if (changed) {
-		__dataset.setDirty(__dataset.COMP_INSTREAM_STATIONS, true);
+		__dataset.setDirty(StateMod_DataSet.COMP_INSTREAM_STATIONS, true);
 	}	
 	if ( __dataset_wm != null ) {
 		__dataset_wm.closeWindow(

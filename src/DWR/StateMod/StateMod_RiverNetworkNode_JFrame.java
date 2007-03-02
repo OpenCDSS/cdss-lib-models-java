@@ -45,6 +45,7 @@
 // 2006-01-19	JTS, RTi		* Now implements JWorksheet_SortListener
 //					* Reselects the record that was selected
 //					  when the worksheet is sorted.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 
 package DWR.StateMod;
@@ -71,20 +72,13 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-
-import RTi.GRTS.TSViewJFrame;
-
-import RTi.TS.TS;
 
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.JScrollWorksheet;
 import RTi.Util.GUI.JWorksheet;
 import RTi.Util.GUI.JWorksheet_SortListener;
 import RTi.Util.GUI.ResponseJDialog;
-
-import RTi.Util.Help.URLHelp;
 
 import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.PropList;
@@ -146,8 +140,7 @@ private final String
 	__BUTTON_CANCEL = "Cancel",
 	__BUTTON_CLOSE = "Close",
 	__BUTTON_HELP = "Help",
-	__BUTTON_FIND_NEXT = "Find Next",
-	__BUTTON_MONTHLY_TS = "Monthly Time Series";
+	__BUTTON_FIND_NEXT = "Find Next";
 
 /**
 Data set containing the data for the form.
@@ -262,8 +255,6 @@ public void actionPerformed(ActionEvent e) {
 		"In actionPerformed: " + e.getActionCommand());
 	}
 
-	String action = e.getActionCommand();
-
 	if (e.getSource() == __closeJButton) {
 		saveCurrentRecord();
 		int size = __riverNetworkNodesVector.size();
@@ -278,7 +269,7 @@ public void actionPerformed(ActionEvent e) {
 			r.acceptChanges();
 		}				
 		if (changed) {
-			__dataset.setDirty(__dataset.COMP_RIVER_NETWORK, true);
+			__dataset.setDirty(StateMod_DataSet.COMP_RIVER_NETWORK, true);
 		}		
 		if ( __dataset_wm != null ) {
 			__dataset_wm.closeWindow (
@@ -301,7 +292,7 @@ public void actionPerformed(ActionEvent e) {
 			r.createBackup();
 		}		
 		if (changed) {
-			__dataset.setDirty(__dataset.COMP_RIVER_NETWORK, true);
+			__dataset.setDirty(StateMod_DataSet.COMP_RIVER_NETWORK, true);
 		}		
 	}
 	else if (e.getSource() == __cancelJButton) {
@@ -365,7 +356,7 @@ private boolean checkInput() {
 	for (int i = 0; i < errorCount; i++) {
 		label += errors.elementAt(i) + "\n";
 	}
-	ResponseJDialog dialog = new ResponseJDialog(this, 
+	new ResponseJDialog(this, 
 		"Errors encountered", label, ResponseJDialog.OK);
 	return false;
 }
@@ -395,6 +386,7 @@ specified id.
 @return the matching base flow coefficient object, or null if no matches could
 be found.
 */
+/* TODO SAM 2007-03-01 Evaluate use
 private StateMod_RiverNetworkNode findRiverNetworkNode(String id) {
 	StateMod_RiverNetworkNode rnn = null;
 	for (int i = 0; i < __riverNetworkNodesVector.size(); i++) {
@@ -406,6 +398,7 @@ private StateMod_RiverNetworkNode findRiverNetworkNode(String id) {
 	}
 	return null;
 }
+*/
 
 /**
 Initializes the arrays that are used when items are selected and deselected.
@@ -844,7 +837,7 @@ public void windowClosing(WindowEvent e) {
 		r.acceptChanges();
 	}					
 	if (changed) {		
-		__dataset.setDirty(__dataset.COMP_RIVER_NETWORK, true);
+		__dataset.setDirty(StateMod_DataSet.COMP_RIVER_NETWORK, true);
 	}	
 	if ( __dataset_wm != null ) {
 		__dataset_wm.closeWindow (

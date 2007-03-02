@@ -85,6 +85,7 @@
 //					they were added.
 // 2006-08-16	SAM, RTi		* Add names of operational rights 24 to
 //					  35.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
 
@@ -92,7 +93,6 @@ package DWR.StateMod;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.IOException;
 import java.io.PrintWriter;
 
 import java.lang.Double;
@@ -618,7 +618,7 @@ public double getSjmina() {
 Initializes member variables.
 */
 private void initialize() {
-	_smdata_type = _dataset.COMP_OPERATION_RIGHTS;
+	_smdata_type = StateMod_DataSet.COMP_OPERATION_RIGHTS;
 	_rtem = "0";
 	_dumx = 0;
 	_ciopde = "";
@@ -674,7 +674,8 @@ throws Exception {
 	// Consistent among all operational rights...
 	String format_0 = "s12s24x16s12s8i8x1s12s8x1s12s8x1s12s8s8";
 	// Format for intervening structures...
-	String format_interv = "x36s12s12s12s12s12s12s12s12s12s12";
+	// TODO SAM 2007-03-01 Evaluate use
+	//String format_interv = "x36s12s12s12s12s12s12s12s12s12s12";
 	// Rio Grande additional data...
 	String format_rg = "x64s8s8x1s12s8x1s12s8x1s12s8";
 	String format_sj = "x64s8s8";
@@ -685,7 +686,6 @@ throws Exception {
 	int i;
 	int dumx, ninterv, nmonsw, ntokens;
 	int type = 0;
-	boolean doneReadingTmpComments = false;
 	boolean readingTmpComments = false;
 	Vector tokens = null;
 
@@ -1258,7 +1258,7 @@ public void setCiopde(String ciopde) {
 		_ciopde = ciopde;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_OPERATION_RIGHTS,true);
+			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS,true);
 		}
 	}
 }
@@ -1271,7 +1271,7 @@ public void setCiopso1(String ciopso1) {
 		_ciopso1 = ciopso1;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_OPERATION_RIGHTS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
 	}
 }
@@ -1284,7 +1284,7 @@ public void setCiopso2(String ciopso2) {
 		_ciopso2 = ciopso2;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_OPERATION_RIGHTS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
 	}
 }
@@ -1297,7 +1297,7 @@ public void setCiopso3(String ciopso3) {
 		_ciopso3 = ciopso3;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_OPERATION_RIGHTS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
 	}
 }
@@ -1310,7 +1310,7 @@ public void setCiopso4(String ciopso4) {
 		_ciopso4 = ciopso4;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_OPERATION_RIGHTS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
 	}
 }
@@ -1323,7 +1323,7 @@ public void setCiopso5(String ciopso5) {
 		_ciopso5 = ciopso5;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_OPERATION_RIGHTS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
 	}
 }
@@ -1344,7 +1344,7 @@ public void setDumx(int dumx) {
 		_dumx = dumx;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_OPERATION_RIGHTS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
 	}
 }
@@ -1374,7 +1374,7 @@ public void setImonsw(int index, int imonsw) {
 		_imonsw[index] = imonsw;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_OPERATION_RIGHTS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
 	}
 }
@@ -1406,7 +1406,7 @@ public void setIntern(int index, String intern) {
 		_intern[index] = intern;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_OPERATION_RIGHTS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
 		if (Message.isDebugOn)
 			Message.printDebug(30, 
@@ -1441,7 +1441,7 @@ public void setIopdes(String iopdes) {
 		_iopdes = iopdes;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_OPERATION_RIGHTS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
 	}
 }
@@ -1454,7 +1454,7 @@ public void setIopsou1(String iopsou1) {
 		_iopsou1 = iopsou1;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_OPERATION_RIGHTS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
 	}
 }
@@ -1467,7 +1467,7 @@ public void setIopsou2(String iopsou2) {
 		_iopsou2 = iopsou2;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_OPERATION_RIGHTS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
 	}
 }
@@ -1480,7 +1480,7 @@ public void setIopsou3(String iopsou3) {
 		_iopsou3 = iopsou3;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_OPERATION_RIGHTS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
 	}
 }
@@ -1493,7 +1493,7 @@ public void setIopsou4(String iopsou4) {
 		_iopsou4 = iopsou4;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_OPERATION_RIGHTS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
 	}
 }
@@ -1506,7 +1506,7 @@ public void setIopsou5(String iopsou5) {
 		_iopsou5 = iopsou5;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_OPERATION_RIGHTS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
 	}
 }
@@ -1519,7 +1519,7 @@ public void setItyopr(int ityopr) {
 		_ityopr = ityopr;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_OPERATION_RIGHTS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
 	}
 }
@@ -1548,7 +1548,7 @@ public void setQdebt(double qdebt) {
 		_qdebt = qdebt;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_OPERATION_RIGHTS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
 	}
 }
@@ -1577,7 +1577,7 @@ public void setQdebtx(double qdebtx) {
 		_qdebtx = qdebtx;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_OPERATION_RIGHTS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
 	}
 }
@@ -1606,7 +1606,7 @@ public void setRtem(String rtem) {
 		_rtem = rtem;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_OPERATION_RIGHTS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
 	}
 }
@@ -1619,7 +1619,7 @@ public void setSjmina(double sjmina) {
 		_sjmina = sjmina;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_OPERATION_RIGHTS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
 	}
 }
@@ -1648,7 +1648,7 @@ public void setSjrela(double sjrela) {
 		_sjrela = sjrela;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_OPERATION_RIGHTS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
 	}
 }
@@ -1685,10 +1685,6 @@ throws Exception {
 	String [] comment_str = { "#" };
 	String [] ignore_str = { "#>" };
 	String routine = "StateMod_OperationalRight.writeStateModFile";
-
-	int ndivsta;
-	int nlines;
-	int status;
 
 	Message.printStatus(1, routine, 
 		"Writing new operational rights to file \""

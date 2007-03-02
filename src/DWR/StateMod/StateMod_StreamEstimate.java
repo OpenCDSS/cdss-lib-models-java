@@ -57,6 +57,7 @@
 //					* Clone status is checked via _isClone
 //					  when the component is marked as dirty.
 // 2005-04-18	JTS, RTi		Added writeListFile().
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
 
@@ -66,14 +67,11 @@ import java.io.FileReader;
 import java.io.BufferedReader;
 import java.io.PrintWriter;
 import java.util.Vector;
-import java.lang.Double;
-import java.lang.Integer;
 
 import RTi.GIS.GeoView.GeoRecord;
 import RTi.TS.TS;
 import RTi.TS.DayTS;
 import RTi.TS.MonthTS;
-import RTi.TS.TSUtil;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
@@ -363,11 +361,11 @@ the data are set to missing - this is suitable for StateDMI where data will
 be filled.
 */
 private void initialize ( boolean initialize_defaults )
-{	_smdata_type = _dataset.COMP_STREAMESTIMATE_STATIONS;
+{	_smdata_type = StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS;
 	_cgoto = "";
 	_baseflow_MonthTS = null;
 	_baseflow_DayTS = null;
-	_related_smdata_type = _dataset.COMP_UNKNOWN;
+	_related_smdata_type = StateMod_DataSet.COMP_UNKNOWN;
 	if ( initialize_defaults ) {
 		// Reasonable defaults...
 		_crunidy = "0";	// Estimate average daily from monthly data.
@@ -415,7 +413,7 @@ public static void processStreamData (	Vector ris_Vector,
 		nrib = rib_Vector.size();
 	}
 
-	int i, j, pos;
+	int i, j;
 	TS ts;
 	StateMod_StreamGage ris;
 	String id;
@@ -471,9 +469,8 @@ public static Vector readStateModFile ( String filename )
 throws Exception
 {	String rtn = "StateMod_StreamEstimate.readStateModFile";
 	Vector theRivs = new Vector();
-	String iline, s;
+	String iline;
 	Vector v = new Vector ( 5 );
-	int i;
 	int [] format_0;
 	int [] format_0w;
 	format_0 = new int[5];
@@ -533,7 +530,6 @@ throws Exception
 		iline = null;
 		format_0 = null;
 		format_0w = null;
-		s = null;
 		Message.printWarning ( 2, rtn,
 		"Error reading \"" + filename + "\" at line " + linecount );
 		throw e;
@@ -544,7 +540,6 @@ throws Exception
 	iline = null;
 	format_0 = null;
 	format_0w = null;
-	s = null;
 	return theRivs;
 }
 

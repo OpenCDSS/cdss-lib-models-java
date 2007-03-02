@@ -51,6 +51,7 @@
 // 2006-03-07	JTS, RTi		When refreshing the tree, fast add is
 //					used.
 // 2006-08-22	SAM, RTi		Add plans.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //-----------------------------------------------------------------------------
 // EndHeader
 
@@ -62,7 +63,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
-import java.util.Enumeration;
 import java.util.Vector;
 
 import javax.swing.Icon;
@@ -501,7 +501,6 @@ public void displayDataSet()
 	DataSetComponent comp = null;
 	boolean hadData = false;
 	boolean isGroup = false;
-	String label = "";
 	int type;
 	// Add each component group...
 	setFastAdd(true);
@@ -761,8 +760,6 @@ private void showPopupMenu(MouseEvent e)
 	// First remove the menu items that are currently in the menu...
 	__popup_JPopupMenu.removeAll();
 	Object data = null;		// Data object associated with the node
-	Vector data_Vector = null;	// Data Vector for components known to
-					// use Vector for their data.
 	DataSetComponent comp2;		// Used to check components in groups.
 	// Now reset the popup menu based on the selected node...
 	if ( __display_data_objects ) {

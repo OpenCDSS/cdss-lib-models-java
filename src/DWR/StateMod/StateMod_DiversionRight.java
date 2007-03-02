@@ -64,16 +64,14 @@
 // 					* Added restoreOriginal().
 // 2005-03-13	SAM, RTi		* Clean up output header information for
 //					  switch.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
 
 package DWR.StateMod;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.PrintWriter;
 
 import java.lang.Double;
@@ -287,7 +285,7 @@ public String getIrtem() {
 Initializes data members.
 */
 private void initialize() {
-	_smdata_type = _dataset.COMP_DIVERSION_RIGHTS;
+	_smdata_type = StateMod_DataSet.COMP_DIVERSION_RIGHTS;
 	_irtem = "99999";
 	_dcrdiv = 0;
 }
@@ -403,7 +401,7 @@ public void setDcrdiv(double dcrdiv) {
 		_dcrdiv = dcrdiv;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_DIVERSION_RIGHTS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_DIVERSION_RIGHTS, true);
 		}
 	}
 }
@@ -436,7 +434,7 @@ public void setIrtem(String irtem) {
 		_irtem = irtem.trim();
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_DIVERSION_RIGHTS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_DIVERSION_RIGHTS, true);
 		}
 	}
 }

@@ -41,6 +41,7 @@
 // 2004-10-28	SAM, RTi		Use the table model specific to account
 //					data.
 // 2005-01-21	JTS, RTi		Table model constructor changed.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
 
@@ -67,7 +68,6 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
@@ -80,13 +80,9 @@ import RTi.Util.GUI.JScrollWorksheet;
 import RTi.Util.GUI.JWorksheet;
 import RTi.Util.GUI.ResponseJDialog;
 
-import RTi.Util.Help.URLHelp;
-
 import RTi.Util.IO.PropList;
 
 import RTi.Util.Message.Message;
-
-import RTi.Util.String.StringUtil;
 
 /**
 This class displays reservoir owner account information and allows 
@@ -236,7 +232,6 @@ private int checkInput() {
 	String warning = "";
 	String id;
 	String name;
-	String ownerTie;
 	int fatalCount = 0;
 	int lastID = 0;
 	int currID = 0;
@@ -374,7 +369,7 @@ private boolean saveData() {
 	}
 
 	__currentRes.setAccounts(clone);
-	__dataset.setDirty(__dataset.COMP_RESERVOIR_STATIONS, true);
+	__dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_STATIONS, true);
 	return true;
 }
 
@@ -396,6 +391,7 @@ Helper method used when data is put into the table model.
 @param n2own the value of n2own
 @return a String to display in the gui for n2own.
 */
+/* TODO SAM 2007-03-01 Evaluate use
 private String fillN2owns(int n2own) {
 	if (n2own == 1) {
 		return "1 - To First Fill Right(s)";
@@ -404,6 +400,7 @@ private String fillN2owns(int n2own) {
 		return "2 - To Second Fill Right(s)";
 	}
 }
+*/
 
 /**
 Clean up before garbage collection.
@@ -481,8 +478,6 @@ private void setupGUI() {
 
 	addWindowListener(this);
 
-	GridBagConstraints gbc = new GridBagConstraints();
-
 	__addOwner = new JButton(__BUTTON_ADD_OWNER);
 	__deleteOwner = new JButton(__BUTTON_DEL_OWNER);
 	__deleteOwner.setEnabled(false);
@@ -527,8 +522,6 @@ private void setupGUI() {
 	p.add("JWorksheet.AllowCopy=true");
 	p.add("JWorksheet.SelectionMode=SingleRowSelection");
 
-	Vector accounts = __currentRes.getAccounts();
-
 	int widths[] = null;
 	JScrollWorksheet jsw = null;
 	try {	
@@ -572,9 +565,9 @@ private void setupGUI() {
 	main_panel.add(p1, "South");
 
 	JGUIUtil.addComponent(bigPanel, info_panel, 0, 0, 1, 1, 0, 0,
-		gbc.NONE, gbc.NORTHWEST);
+		GridBagConstraints.NONE, GridBagConstraints.NORTHWEST);
 	JGUIUtil.addComponent(bigPanel, main_panel, 0, 1, 10, 10, 1, 1,
-		gbc.BOTH, gbc.SOUTH);
+		GridBagConstraints.BOTH, GridBagConstraints.SOUTH);
 	__addOwner.addActionListener(this);
 	__deleteOwner.addActionListener(this);
 	__helpJButton.addActionListener(this);

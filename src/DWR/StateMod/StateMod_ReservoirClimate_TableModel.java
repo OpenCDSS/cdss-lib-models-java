@@ -49,6 +49,7 @@
 //					Add tool tips.
 // 2005-01-21	JTS, RTi		Added ability to display data for either
 //					one or many reservoirs.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 // EndHeader
 
@@ -57,8 +58,6 @@ package DWR.StateMod;
 import java.util.Vector;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
-
-import RTi.Util.String.StringUtil;
 
 /**
 This table model displays reservoir climate station assignment data.  The model 
@@ -97,7 +96,8 @@ stations and one for evaporation stations.
 REVISIT (JTS - 2005-01-25)
 is this even needed anymore by stuff that uses this table model??
 */
-private StateMod_ReservoirClimate_TableModel __partnerModel;
+// TODO SAM 2007-03-01 Evaluate use
+//private StateMod_ReservoirClimate_TableModel __partnerModel;
 
 /**
 Whether the table model should be set up for displaying the rights for only
@@ -337,7 +337,6 @@ public void setValueAt(Object value, int row, int col) {
 		row = _sortOrder[row];
 	}
 	double dval;
-	int ival;
 	StateMod_ReservoirClimate cl 
 		= (StateMod_ReservoirClimate)_data.elementAt(row);
 

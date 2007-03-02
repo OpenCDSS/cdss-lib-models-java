@@ -56,6 +56,7 @@
 //					  better.
 // 2005-03-31	JTS, RTi		Added createBackup().
 // 2005-04-18	JTS, RTi		Added writeListFile().
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
 
@@ -64,7 +65,6 @@ package DWR.StateMod;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.PrintWriter;
-import java.io.IOException;
 
 import java.lang.Double;
 
@@ -241,7 +241,7 @@ creating instances in the StateMod GUI.  If false, initialize to missing,
 suitable for use with StateDMI.
 */
 private void initialize ( boolean initialize_defaults )
-{	_smdata_type = _dataset.COMP_INSTREAM_RIGHTS;
+{	_smdata_type = StateMod_DataSet.COMP_INSTREAM_RIGHTS;
 	_irtem = "";
 	if ( initialize_defaults ) {
 		_dcrifr = 0;
@@ -340,7 +340,7 @@ public void setDcrifr(double dcrifr) {
 		_dcrifr = dcrifr;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_INSTREAM_RIGHTS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_INSTREAM_RIGHTS, true);
 		}
 	}
 }
@@ -373,7 +373,7 @@ public void setIrtem(String irtem) {
 		_irtem = irtem.trim();
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_INSTREAM_RIGHTS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_INSTREAM_RIGHTS, true);
 		}
 	}
 }

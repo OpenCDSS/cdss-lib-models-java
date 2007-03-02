@@ -135,6 +135,7 @@
 //					has one time series for a reservoir,
 //					then assign to the maximum target and
 //					leave the minimum as null.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
 
@@ -142,7 +143,6 @@ package DWR.StateMod;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.IOException;
 import java.io.PrintWriter;
 
 import java.lang.Double;
@@ -322,7 +322,7 @@ public void addAccount(StateMod_ReservoirAccount owner)
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(
-			_dataset.COMP_RESERVOIR_STATIONS, true);
+			StateMod_DataSet.COMP_RESERVOIR_STATIONS, true);
 		}
 	}
 }
@@ -337,7 +337,7 @@ public void addAreaCap(StateMod_ReservoirAreaCap areacap)
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(
-			_dataset.COMP_RESERVOIR_STATIONS,true);
+			StateMod_DataSet.COMP_RESERVOIR_STATIONS,true);
 		}
 	}
 }
@@ -352,7 +352,7 @@ public void addClimate(StateMod_ReservoirClimate climate) {
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(
-			_dataset.COMP_RESERVOIR_STATIONS, true);
+			StateMod_DataSet.COMP_RESERVOIR_STATIONS, true);
 		}
 	}
 }
@@ -703,7 +703,7 @@ public void deleteAreaCapAt(int index) {
 	_areacapvals.removeElementAt(index);
 	setDirty ( true );
 	if ( !_isClone && _dataset != null ) {
-		_dataset.setDirty(_dataset.COMP_RESERVOIR_STATIONS, true);
+		_dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_STATIONS, true);
 	}
 }
 
@@ -715,7 +715,7 @@ public void deleteClimateAt(int index) {
 	_climate_Vector.removeElementAt(index);
 	setDirty ( true );
 	if ( !_isClone && _dataset != null ) {
-		_dataset.setDirty(_dataset.COMP_RESERVOIR_STATIONS, true);
+		_dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_STATIONS, true);
 	}
 }
 
@@ -727,7 +727,7 @@ public void deleteAccountAt(int index) {
 	_owners.removeElementAt(index);
 	setDirty ( true );
 	if ( !_isClone && _dataset != null ) {
-		_dataset.setDirty(_dataset.COMP_RESERVOIR_STATIONS, true);
+		_dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_STATIONS, true);
 	}
 }
 
@@ -1208,7 +1208,7 @@ Initialize data members.
 If false, don't initialize data - this is suitable for filling in StateDMI.
 */
 private void initialize ( boolean initialize_defaults )
-{	_smdata_type = _dataset.COMP_RESERVOIR_STATIONS;
+{	_smdata_type = StateMod_DataSet.COMP_RESERVOIR_STATIONS;
 	_owners = new Vector();
 	_climate_Vector = new Vector();
 	_areacapvals = new Vector();
@@ -1259,7 +1259,7 @@ public void insertAreaCapAt(StateMod_ReservoirAreaCap areacap, int i) {
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(
-			_dataset.COMP_RESERVOIR_STATIONS, true);
+			StateMod_DataSet.COMP_RESERVOIR_STATIONS, true);
 		}
 	}
 }
@@ -1632,7 +1632,7 @@ public void setCresdy(String cresdy) {
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(
-			_dataset.COMP_RESERVOIR_STATIONS, true);
+			StateMod_DataSet.COMP_RESERVOIR_STATIONS, true);
 		}
 	}
 }
@@ -1646,7 +1646,7 @@ public void setDeadst(double deadst) {
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(
-			_dataset.COMP_RESERVOIR_STATIONS, true);
+			StateMod_DataSet.COMP_RESERVOIR_STATIONS, true);
 		}
 	}
 }
@@ -1676,7 +1676,7 @@ public void setFlomax(double flomax) {
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(
-			_dataset.COMP_RESERVOIR_STATIONS, true);
+			StateMod_DataSet.COMP_RESERVOIR_STATIONS, true);
 		}
 	}
 }
@@ -1752,7 +1752,7 @@ public void setRdate(double rdate) {
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(
-			_dataset.COMP_RESERVOIR_STATIONS, true);
+			StateMod_DataSet.COMP_RESERVOIR_STATIONS, true);
 		}
 	}
 }
@@ -1790,7 +1790,7 @@ public void setVolmax(double volmax) {
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(
-			_dataset.COMP_RESERVOIR_STATIONS, true);
+			StateMod_DataSet.COMP_RESERVOIR_STATIONS, true);
 		}
 	}
 }
@@ -1820,7 +1820,7 @@ public void setVolmin(double volmin) {
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(
-			_dataset.COMP_RESERVOIR_STATIONS, true);
+			StateMod_DataSet.COMP_RESERVOIR_STATIONS, true);
 		}
 	}
 }
@@ -1898,9 +1898,10 @@ throws Exception {
 	String format_1 =
 		"                        %#8.0f%#8.0f%#8.0f%#8.0f%8d%8d%8d%8d";
 	String format_2 = "            %-12.12s%#8.0f%#8.0f%8.0f%8d";
-	String format_3 = "            %-12.12s%#8.0f%#8.0f%8.0f%8d";
+	// TODO SAM 2007-03-01 Evaluate use
+	//String format_3 = "            %-12.12s%#8.0f%#8.0f%8.0f%8d";
 	String format_4 = "            %-12.12s%-12.12s%#8.0f";
-	String format_5 = "            %-12.12s%#8.0f%8.0f%8.0f";
+	//String format_5 = "            %-12.12s%#8.0f%8.0f%8.0f";
 	String desc = null;
 	StateMod_Reservoir res = null;
 	StateMod_ReservoirAreaCap ac = null;
@@ -1912,7 +1913,7 @@ throws Exception {
 	Vector climatev = null;
 	Vector areacapv = null;
 
-	int i,j=0,k;
+	int i,j=0;
 	
 	// print out header
 	out.println(cmnt);

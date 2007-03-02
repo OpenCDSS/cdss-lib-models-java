@@ -11,6 +11,7 @@
 // 2004-01-21	JTS, RTi		Removed the row count column and 
 //					changed all the other column numbers.
 // 2004-10-28	SAM, RTi		Change setValueAt() to support sort.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 // EndHeader
 
@@ -202,8 +203,6 @@ public void setValueAt(Object value, int row, int col)
 {	if (_sortOrder != null) {
 		row = _sortOrder[row];
 	}
-	double dval;
-	int ival;
 
 	switch (col) {
 		case COL_STRUCTURE_ID:	

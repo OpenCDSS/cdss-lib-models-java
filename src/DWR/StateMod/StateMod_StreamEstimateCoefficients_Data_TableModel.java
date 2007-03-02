@@ -7,6 +7,7 @@
 // History:
 //
 // 2005-04-05	J. Thomas Sapienza, RTi	Initial version.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 
 package DWR.StateMod;
@@ -194,7 +195,6 @@ public void setValueAt(Object value, int row, int col) {
 	if (_sortOrder != null) {
 		row = _sortOrder[row];
 	}
-	double dval;
 	switch (col) {
 		case COL_ID:
 		case COL_STREAM_NAME:
@@ -222,14 +222,11 @@ private void setupData(Vector data) {
 		__data[i] = new Vector();
 	}
 
-	double total = 0;
 	String id = null;
-	String name = null;
 	int rowCount = 0;
 	int M = 0;
 	int N = 0;
 	for (int i = 0; i < size; i++) {
-		total = 0;
 		coeff = (StateMod_StreamEstimate_Coefficients)data.elementAt(i);
 		id = coeff.getID();
 		M = coeff.getM();

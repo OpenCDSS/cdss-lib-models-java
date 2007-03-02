@@ -7,6 +7,7 @@
 // History:
 // 2006-08-22	Steven A. Malers, RTi	Initial version, based on the
 //					StateMod_Diversion_TableModel.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 
 package DWR.StateMod;
@@ -50,11 +51,6 @@ Whether the table data can be edited or not.
 private boolean __editable = true;
 
 /**
-Dataset that contains the data.
-*/
-private StateMod_DataSet __dataset;
-
-/**
 Constructor.  This builds the Model for displaying the plan station data.
 @param data the data that will be displayed in the table.
 @param editable whether the data can be edited or not
@@ -94,7 +90,6 @@ fields will be shown.
 public StateMod_Plan_TableModel(StateMod_DataSet dataset, 
 Vector data, boolean editable, boolean compactForm)
 throws Exception {
-	__dataset = dataset;
 	if (data == null) {
 		throw new Exception ("Invalid data Vector passed to " 
 			+ "StateMod_Plan_TableModel constructor.");
@@ -275,10 +270,8 @@ public void setValueAt(Object value, int row, int col)
 {	if (_sortOrder != null) {
 		row = _sortOrder[row];
 	}
-	double dval;
 	int ival;
 	int index;
-	String s;
 
 	StateMod_Plan smp = (StateMod_Plan)_data.elementAt(row);
 

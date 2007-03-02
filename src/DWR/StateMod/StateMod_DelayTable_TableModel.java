@@ -18,6 +18,7 @@
 //					a percent or a fraction.
 // 2004-10-28	SAM, RTi		Change setValueAt() to support sort.
 // 2005-03-28	JTS, RTi		Adjusted column sizes.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 // EndHeader
 
@@ -258,8 +259,6 @@ public void setValueAt(Object value, int row, int col) {
 	if (_sortOrder != null) {
 		row = _sortOrder[row];
 	}
-	double dval;
-	int ival;
 	// REVISIT (JTS - 2005-01-17)
 	// not fleshed out for ID, Name
 	switch (col) {

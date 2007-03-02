@@ -20,6 +20,7 @@
 // 2006-03-06	JTS, RTi		* The last row in the worksheet can now
 //					  be deleted with preDeleteRow().
 //					* Added javadocs for all the methods.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 // EndHeader
 
@@ -38,8 +39,6 @@ import RTi.Util.GUI.JWorksheet;
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 import RTi.Util.GUI.JWorksheet_CellAttributes;
 import RTi.Util.GUI.SimpleFileFilter;
-
-import RTi.Util.Message.Message;
 
 /**
 This table model display delta plot data.
@@ -410,15 +409,12 @@ public Vector formLoadData(Vector fileData) {
 
 	String pfile = "";
 	String ptype = "";
-	String pdtype = "";
 	String pyear = "";
-	String pid = "";
 
 	String file = null;
 	String type = null;
 	String dtype = null;
 	String year = null;
-	String id = null;
 
 	// gnw will be a node used for creating the _W_orksheet nodes
 	StateMod_GraphNode gnw = null;
@@ -478,7 +474,6 @@ public Vector formLoadData(Vector fileData) {
 
 		pfile = file;
 		ptype = type;
-		pdtype = dtype;
 		pyear = year;
 	}
 

@@ -9,6 +9,7 @@
 // 2006-02-28	Steven A. Malers, RTi	Create class to use the JFreeChart
 //					package.  Initial prototyping was
 //					created by JTS.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
 
@@ -18,7 +19,6 @@ import java.util.Vector;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -36,9 +36,6 @@ import org.jfree.chart.title.TextTitle;
 
 import org.jfree.data.xy.DefaultTableXYDataset;
 import org.jfree.data.xy.XYSeries;
-
-import org.jfree.ui.HorizontalAlignment;
-import org.jfree.ui.RectangleEdge;
 
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.Message.Message;
@@ -100,7 +97,7 @@ private DefaultTableXYDataset createDataset()
 		do_area = false;
 	}
 	double value_prev = -10000000.0, value = 0.0, value2 = 0.0;
-	double content = 0.0, content_prev = -10000000.0;
+	double content = 0.0;
 	int match_count = 0;
 	for ( int i = 0; i < size; i++ ) {
 		ac = (StateMod_ReservoirAreaCap)v.elementAt(i);
@@ -138,7 +135,6 @@ private DefaultTableXYDataset createDataset()
 			2, routine, "X="+value2+" y="+content);
 		series.add(value2,content);
 		value_prev = value;
-		content_prev = content;
 	}
 	dataset.addSeries(series);
 

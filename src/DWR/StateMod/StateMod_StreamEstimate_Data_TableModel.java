@@ -9,6 +9,7 @@
 // 2005-04-04	J. Thomas Sapienza, RTi	Initial version.
 // 2005-04-05	JTS, RTi		Added River node ID and Daily ID 
 //					columns.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 
 package DWR.StateMod;
@@ -195,8 +196,6 @@ public void setValueAt(Object value, int row, int col)
 {	if (_sortOrder != null) {
 		row = _sortOrder[row];
 	}
-	double dval;
-	int ival;
 	switch (col) {
 		default:	break;
 	}	

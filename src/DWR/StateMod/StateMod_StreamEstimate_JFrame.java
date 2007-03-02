@@ -63,11 +63,11 @@
 // 2006-01-19	JTS, RTi		* Now implements JWorksheet_SortListener
 //					* Reselects the record that was selected
 //					  when the worksheet is sorted.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 
 package DWR.StateMod;
 
-import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -94,19 +94,16 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
 import RTi.GRTS.TSProduct;
 import RTi.GRTS.TSViewJFrame;
 
-import RTi.TS.MonthTS;
 import RTi.TS.TS;
 
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.JScrollWorksheet;
 import RTi.Util.GUI.JWorksheet;
-import RTi.Util.GUI.JWorksheet_CellAttributes;
 import RTi.Util.GUI.JWorksheet_SortListener;
 import RTi.Util.GUI.ResponseJDialog;
 import RTi.Util.GUI.SimpleJButton;
@@ -344,8 +341,6 @@ Responds to action performed events.
 @param e the ActionEvent that happened.
 */
 public void actionPerformed(ActionEvent e) {
-	String routine="StateMod_StreamEstimate_JFrame.actionPerformed"; 
-
 	String action = e.getActionCommand();
 	Object o = e.getSource();
 
@@ -372,7 +367,7 @@ public void actionPerformed(ActionEvent e) {
 		}	
 		if (changed) {
 			__dataset.setDirty(
-				__dataset.COMP_STREAMESTIMATE_STATIONS,
+				StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS,
 				true);
 		}							
 		size = __coefficientsVector.size();
@@ -388,7 +383,7 @@ public void actionPerformed(ActionEvent e) {
 		}	
 		if (changed) {
 			__dataset.setDirty(
-				__dataset.COMP_STREAMESTIMATE_COEFFICIENTS,
+				StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS,
 				true);
 		}	
 	}
@@ -429,7 +424,7 @@ public void actionPerformed(ActionEvent e) {
 		}		
 		if (changed) {
 			__dataset.setDirty(
-				__dataset.COMP_STREAMESTIMATE_STATIONS,
+				StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS,
 				true);
 		}						
 		size = __coefficientsVector.size();
@@ -445,7 +440,7 @@ public void actionPerformed(ActionEvent e) {
 		}		
 		if (changed) {
 			__dataset.setDirty(
- 				__dataset.COMP_STREAMESTIMATE_COEFFICIENTS,
+ 				StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS,
 			     	true);
 		}		
 		if ( __dataset_wm != null ) {
@@ -497,7 +492,7 @@ private boolean checkInput() {
 	for (int i = 0; i < errorCount; i++) {
 		label += errors.elementAt(i) + "\n";
 	}
-	ResponseJDialog dialog = new ResponseJDialog(this, 
+	new ResponseJDialog(this, 
 		"Errors encountered", label, ResponseJDialog.OK);
 	return false;
 }
@@ -560,8 +555,6 @@ private void displayTSViewJFrame(Object o)
 	props.set("Product.TotalHeight", "400");
 
 	Vector tslist = new Vector();
-
-	String id = __idJTextField.getText().trim();
 
 	int sub = 0;
 	int its = 0;
@@ -1088,14 +1081,14 @@ private void setupGUI(int index) {
 		"Streamflow (Baseflow Monthly)");
 	__ts_streamflow_base_monthly_JCheckBox.addItemListener(this);
 	if (!__dataset.getComponentForComponentType(
-		__dataset.COMP_STREAMESTIMATE_BASEFLOW_TS_MONTHLY).hasData()) {
+		StateMod_DataSet.COMP_STREAMESTIMATE_BASEFLOW_TS_MONTHLY).hasData()) {
 		__ts_streamflow_base_monthly_JCheckBox.setEnabled(false);
 	}
 	__ts_streamflow_base_daily_JCheckBox = new JCheckBox(
 		"Streamflow (Baseflow Daily)");
 	__ts_streamflow_base_daily_JCheckBox.addItemListener(this);
 	if (!__dataset.getComponentForComponentType(	
-		__dataset.COMP_STREAMESTIMATE_BASEFLOW_TS_DAILY).hasData()) {
+		StateMod_DataSet.COMP_STREAMESTIMATE_BASEFLOW_TS_DAILY).hasData()) {
 		__ts_streamflow_base_daily_JCheckBox.setEnabled(false);
 	}
 	
@@ -1256,7 +1249,7 @@ public void windowClosing(WindowEvent e) {
 		s.acceptChanges();
 	}		
 	if (changed) {
-		__dataset.setDirty(__dataset.COMP_STREAMESTIMATE_STATIONS,
+		__dataset.setDirty(StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS,
 			true);
 	}					
 	size = __coefficientsVector.size();
@@ -1271,7 +1264,7 @@ public void windowClosing(WindowEvent e) {
 		c.acceptChanges();
 	}		
 	if (changed) {
-		__dataset.setDirty(__dataset.COMP_STREAMESTIMATE_COEFFICIENTS,
+		__dataset.setDirty(StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS,
 			true);
 	}	
 	if ( __dataset_wm != null ) {

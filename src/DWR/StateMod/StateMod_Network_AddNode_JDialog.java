@@ -10,6 +10,7 @@
 // 2004-07-07	JTS, RTi		* Confluence nodes can be added now.
 //					* Grouped related items on the panels.
 // 2004-07-12	JTS, RTi		Added support for XConfluence nodes.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 
 package DWR.StateMod;
@@ -26,7 +27,6 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;

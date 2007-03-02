@@ -115,12 +115,11 @@
 //					river network file.
 // 2006-08-20	SAM, RTi		Move code to check for edits before
 //					running to StateModGUI_JFrame.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
 
 package DWR.StateMod;
-
-import java.io.File;
 
 import java.util.Collections;
 import java.util.Vector;
@@ -128,8 +127,6 @@ import java.util.Vector;
 import javax.swing.JFrame;
 
 import DWR.StateMod.StateMod_DataSet;
-
-import DWR.StateModGUI.StateModGUI;
 
 import RTi.TS.DayTS;
 import RTi.TS.MonthTS;
@@ -590,8 +587,7 @@ public static Vector arrayToVector(String[] array) {
 public static double calculateTimeSeriesDifference(TS ts1, TS ts2,
 boolean percent) 
 throws Exception
-{	String routine = "StateMod_Util.calculateTimeSeriesDifference";
-	// Loop through the time series and convert to yearly...  Do it the
+{	// Loop through the time series and convert to yearly...  Do it the
 	// brute force way right now...
 
 	if (ts1 == null || ts2 == null) {
@@ -716,7 +712,7 @@ throws Exception
 	String full_path1 = IOUtil.getPathUsingWorkingDir ( path1 );
 	String full_path2 = IOUtil.getPathUsingWorkingDir ( path2 );
 	int n1, n2;				// Size of data vectors
-	int i, j, pos, size;
+	int i, pos, size;
 	StringBuffer b = new StringBuffer();
 	if ( comp_type == StateMod_DataSet.COMP_WELL_RIGHTS ) {
 		StateMod_WellRight wer1, wer2;
@@ -1374,7 +1370,8 @@ public static TS createWaterRightTS (	StateMod_Data smdata,
 				fill_date1 = date1;
 				fill_date2 = new DateTime();
 				fill_date2.setYear ( onoff );
-				decree = (decree);
+				// TODO SAM 2007-03-01 Evaluate logic
+				//decree = (decree);
 			}
 		}
 		if ( interval == TimeInterval.MONTH ) {
@@ -1393,7 +1390,6 @@ public static TS createWaterRightTS (	StateMod_Data smdata,
 			}
 		}
 		else if ( interval == TimeInterval.DAY ) {
-			int ndays_in_month;
 			for (	DateTime date = new DateTime (fill_date1);
 				date.lessThanOrEqualTo(fill_date2);
 				date.addInterval(TimeInterval.DAY,1) ) {
@@ -1956,7 +1952,7 @@ public static DayTS getDailyTimeSeries ( String ID, String dailyID,
 			return null;
 		}
 
-		int numValuesInMonth, numDaysInMonth;
+		int numValuesInMonth;
 		double sum, ratio, value;
 		DateTime ddate, enddate;
 		boolean isFlow = true;
@@ -2895,7 +2891,6 @@ the given identifier.  If none are found, an empty non-null Vector is returned.
 public static Vector getUpstreamNetworkNodes (	Vector node_Vector,
 						String downstream_id )
 {	String rtn = "StateMod_Util.getUpstreamNetworkNodes";
-	int dl = 1;
 	if ( Message.isDebugOn ) {
 		Message.printDebug ( 1, rtn,
 		"Trying to find upstream nodes for " + downstream_id );
@@ -3393,7 +3388,6 @@ public static void runStateMod (	String response_file_name,
 					int wait_after )
 throws Exception
 {	String routine = "StateMod_Util.runStateMod";
-	String path = "";
 	if ( response_file_name == null ) {
 		response_file_name = "";
 	}

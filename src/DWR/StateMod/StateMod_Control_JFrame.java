@@ -89,16 +89,15 @@
 //					* Increase size of text field for
 //					  "ccall".
 //					* Add support for "isig".
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
 
 package DWR.StateMod;
 
-import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.GridLayout;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -307,7 +306,7 @@ private boolean checkInput() {
 	for (int i = 0; i < errorCount; i++) {
 		label += errors.elementAt(i) + "\n";
 	}
-	ResponseJDialog dialog = new ResponseJDialog(this, 
+	new ResponseJDialog(this, 
 		"Errors encountered", label, ResponseJDialog.OK);
 	return false;
 }
@@ -430,7 +429,6 @@ throws Throwable {
 	__monevaSimpleJComboBox = null;
 	__soildSimpleJComboBox = null;
 	__isigSimpleJComboBox = null;
-	StateMod_DataSet __dataset = null;
 
 	super.finalize();
 }
@@ -1029,7 +1027,6 @@ private void setupGUI() {
 
 	addWindowListener(this);
 	
-	GridBagConstraints gbc = new GridBagConstraints();
 	GridBagLayout gb = new GridBagLayout();
 
 	__applyJButton = new JButton(__BUTTON_APPLY);
@@ -1631,10 +1628,6 @@ private void setupGUI() {
 		__gwmaxrcJTextField);
 
 	// Now add the components to the frame...
-	GridLayout glvertical = new GridLayout(0, 1);
-	GridLayout glhorizontal = new GridLayout(1, 0);
-
-	int y=0;
 
 	////////////////////////////////////////////////////////
 	// Run Dates
@@ -1660,117 +1653,117 @@ private void setupGUI() {
 	JGUIUtil.addComponent(generalPanel, new JLabel("Title (1): "),
 		0, 0, 1, 1, 0, 0, 
 		5, 5, 0, 0,
-		gbc.NONE, gbc.EAST);
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(generalPanel, __title1,
 		1, 0, 9, 1, 0, 0, 
 		5, 0, 0, 5,
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
 	JGUIUtil.addComponent(generalPanel, new JLabel("Title (2): "),
 		0, 1, 1, 1, 0, 0, 
 		5, 5, 0, 0,
-		gbc.NONE, gbc.EAST);
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(generalPanel, __title2, 
 		1, 1, 9, 1, 0, 0, 
 		5, 0, 0, 5,
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
 	JGUIUtil.addComponent(generalPanel,new JLabel("Data start:"),
 		0, 2, 1, 1, 0, 0, 
-		gbc.NONE, gbc.EAST);
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(generalPanel, __dataDate1,
 		1, 2, 1, 1, 0, 0, 
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	JGUIUtil.addComponent(generalPanel, new JLabel("Data end:"),
 		2, 2, 1, 1, 0, 0, 
 		0, 10, 0, 0,
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	JGUIUtil.addComponent(generalPanel, __dataDate2,
 		3, 2, 1, 1, 0, 0, 
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	JGUIUtil.addComponent(generalPanel, new JLabel("Run start:"),
 		0, 3, 1, 1, 0, 0, 
-		gbc.NONE, gbc.EAST);
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(generalPanel, __runDate1SimpleJComboBox,
 		1, 3, 1, 1, 0, 0, 
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	JGUIUtil.addComponent(generalPanel, new JLabel("Run end:"),
 		2, 3, 1, 1, 0, 0, 
 		0, 10, 0, 0,
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	JGUIUtil.addComponent(generalPanel, __runDate2SimpleJComboBox,
 		3, 3, 1, 1, 0, 0, 
-		gbc.NONE, gbc.WEST);		
+		GridBagConstraints.NONE, GridBagConstraints.WEST);		
 		
 	JGUIUtil.addComponent(generalPanel,
 		new JLabel("Output units:"),
 		0, 4, 1, 1, 0, 0, 
-		gbc.NONE, gbc.EAST);
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(generalPanel, __iresopSimpleJComboBox,
 		1, 4, 3, 1, 0, 0, 
-		gbc.NONE, gbc.WEST);	
+		GridBagConstraints.NONE, GridBagConstraints.WEST);	
 
 	JGUIUtil.addComponent(generalPanel, 
 		new JLabel("Year type:"),
 		0, 5, 1, 1, 0, 0, 
-		gbc.NONE, gbc.EAST);
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(generalPanel, __cyr1SimpleJComboBox,
 		1, 5, 8, 1, 0, 0, 
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
 	JGUIUtil.addComponent(generalPanel,
 		new JLabel("Data start and end are determined from "
 			+ "historical input time series."),
 		0, 6, 20, 1, 0, 0,
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	
 	////////////////////////////////////////////////////////
 	// options panel
 	JGUIUtil.addComponent(optionsPanel, 
 		new JLabel("Evaporation/precipitation data:"),
 		0, 0, 1, 1, 0, 0, 
-		gbc.NONE, gbc.EAST);
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(optionsPanel, __monevaSimpleJComboBox,
 		1, 0, 1, 1, 0, 0, 
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
 	JGUIUtil.addComponent(optionsPanel, 
 		new JLabel("Streamflow data:"),
 		0, 1, 1, 1, 0, 0, 
-		gbc.NONE, gbc.EAST);
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(optionsPanel, __iopfloSimpleJComboBox,
 		1, 1, 1, 1, 0, 0, 
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
 	JGUIUtil.addComponent(optionsPanel, 
 		new JLabel("Number of delay table entries:"),
 		0, 2, 1, 1, 0, 0, 
-		gbc.NONE, gbc.EAST);
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
 
 	JGUIUtil.addComponent(optionsPanel, __intervSimpleJComboBox,
 		1, 2, 1, 1, 0, 0, 
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 		
 	JGUIUtil.addComponent(optionsPanel, __interv,
 		2, 2, 1, 1, 0, 0, 
 		0, 10, 0, 0,
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
 	JGUIUtil.addComponent(optionsPanel, 
 		new JLabel("Demand data type:"),
 		0, 3, 1, 1, 0, 0, 
-		gbc.NONE, gbc.EAST);
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(optionsPanel, __icondemSimpleJComboBox,
 		1, 3, 2, 1, 0, 0, 
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
 	JGUIUtil.addComponent(optionsPanel, 
 		new JLabel("Instream flow approach:"),
 		0, 4, 1, 1, 0, 0, 
-		gbc.NONE, gbc.EAST);
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(optionsPanel, __ireachSimpleJComboBox,
 		1, 4, 8, 1, 0, 0, 
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
 	////////////////////////////////////////////////////////
 	// factors panel
@@ -1792,58 +1785,58 @@ private void setupGUI() {
 	JGUIUtil.addComponent(factorsPanel, 
 		new JLabel("Factor to convert from CFS to AF/D:"),
 		0, 0, 1, 1, 0, 0,
-		gbc.NONE, gbc.EAST);
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(factorsPanel, __factor,
 		1, 0, 1, 1, 0, 0,
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	
 	JGUIUtil.addComponent(factorsPanel,
 		new JLabel("Divisor for streamflow data units:"),
 		0, 1, 1, 1, 0, 0,
-		gbc.NONE, gbc.EAST);
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(factorsPanel, __rfacto,
 		1, 1, 1, 1, 0, 0,
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	
 	JGUIUtil.addComponent(factorsPanel,
 		new JLabel("Divisor for diversion data units:"),
 		0, 2, 1, 1, 0, 0,
-		gbc.NONE, gbc.EAST);
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(factorsPanel, __dfacto,
 		1, 2, 1, 1, 0, 0,
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	
 	JGUIUtil.addComponent(factorsPanel,
 		new JLabel("Divisor for instream flow data units:"),
 		0, 3, 1, 1, 0, 0,
-		gbc.NONE, gbc.EAST);
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(factorsPanel, __ffacto,
 		1, 3, 1, 1, 0, 0,
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	
 	JGUIUtil.addComponent(factorsPanel,
 		new JLabel("Factor to convert reservoir content data to AF:"),
 		0, 4, 1, 1, 0, 0,
-		gbc.NONE, gbc.EAST);
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(factorsPanel, __cfacto,
 		1, 4, 1, 1, 0, 0,
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	
 	JGUIUtil.addComponent(factorsPanel,
 		new JLabel("Factor to convert evaporation data to feet:"),
 		0, 5, 1, 1, 0, 0,
-		gbc.NONE, gbc.EAST);
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(factorsPanel, __efacto,
 		1, 5, 1, 1, 0, 0,
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
 	JGUIUtil.addComponent(factorsPanel, 
 		new JLabel("Factor to convert precipitation data to feet:"),
 		0, 6, 1, 1, 0, 0,
-		gbc.NONE, gbc.EAST);
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(factorsPanel, __pfacto,
 		1, 6, 1, 1, 0, 0,
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
 
 	////////////////////////////////////////////////////////
@@ -1852,28 +1845,28 @@ private void setupGUI() {
 	JGUIUtil.addComponent(checksPanel, 
 		new JLabel("Detailed output:"),
 		0, 0, 1, 1, 0, 0, 
-		gbc.NONE, gbc.EAST);
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(checksPanel, __ichkSimpleJComboBox,
 		1, 0, 2, 1, 0, 0, 
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
 	JGUIUtil.addComponent(checksPanel, 
 		new JLabel("Detailed call output:"),
 		0, 1, 1, 1, 0, 0, 
-		gbc.NONE, gbc.EAST);
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
 		
 	JGUIUtil.addComponent(checksPanel, __icallSimpleJComboBox,
 		1, 1, 1, 1, 0, 0, 
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
 	JGUIUtil.addComponent(checksPanel, 
 		new JLabel("Call water right of interest:"),
 		0, 2, 1, 1, 0, 0, 
-		gbc.NONE, gbc.EAST);
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
 		
 	JGUIUtil.addComponent(checksPanel, __ccall,
 		1, 2, 1, 1, 0, 0, 
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
 
 	////////////////////////////////////////////////////////
@@ -1882,90 +1875,90 @@ private void setupGUI() {
 	JGUIUtil.addComponent(advancedPanel, 
 		new JLabel("Daily analysis:"),
 		0, 0, 1, 1, 0, 0, 
-		gbc.NONE, gbc.EAST);
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(advancedPanel, __idaySimpleJComboBox,
 		1, 0, 8, 1, 0, 0, 
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
 	JGUIUtil.addComponent(advancedPanel, 
 		new JLabel("Well analysis:"),
 		0, 1, 1, 1, 0, 0, 
-		gbc.NONE, gbc.EAST);
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(advancedPanel, __iwellSimpleJComboBox,
 		1, 1, 1, 1, 0, 0, 
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
 	JGUIUtil.addComponent(advancedPanel, 
 		new JLabel("Max recharge (CFS):"),
 		0, 2, 1, 1, 0, 0, 
-		gbc.NONE, gbc.EAST);
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(advancedPanel, __gwmaxrcJTextField,
 		1, 2, 1, 1, 0, 0, 
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
 	JGUIUtil.addComponent(advancedPanel, 
 		new JLabel("San juan:"),
 		0, 3, 1, 1, 0, 0, 
-		gbc.NONE, gbc.EAST);
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(advancedPanel, __isjripSimpleJComboBox,
 		1, 3, 1, 1, 0, 0, 
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
 	JGUIUtil.addComponent(advancedPanel, 
 		new JLabel("Variable efficiency:"),
 		0, 4, 1, 1, 0, 0, 
-		gbc.NONE, gbc.EAST);
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(advancedPanel, __itsfileSimpleJComboBox,
 		1, 4, 1, 1, 0, 0, 
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
 	JGUIUtil.addComponent(advancedPanel, 
 		new JLabel("Sprinkler irrigation:"),
 		0, 5, 1, 1, 0, 0, 
-		gbc.NONE, gbc.EAST);
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(advancedPanel, __isprinkSimpleJComboBox,
 		1, 5, 1, 1, 0, 0, 
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
 	JGUIUtil.addComponent(advancedPanel, 
 		new JLabel("Irrigation water requirement:"),
 		0, 6, 1, 1, 0, 0, 
-		gbc.NONE, gbc.EAST);
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(advancedPanel, __ieffmaxSimpleJComboBox,
 		1, 6, 1, 1, 0, 0, 
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
 	JGUIUtil.addComponent(advancedPanel, 
 		new JLabel("Soil moisture:"),
 		0, 7, 1, 1, 0, 0, 
-		gbc.NONE, gbc.EAST);
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(advancedPanel, __soildSimpleJComboBox,
 		1, 7, 1, 1, 0, 0, 
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	JGUIUtil.addComponent(advancedPanel, __soildJTextField,
 		2, 7, 1, 1, 0, 0, 
 		0, 10, 0, 0,
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
 	JGUIUtil.addComponent(advancedPanel, 
 		new JLabel("Reoperate reservoirs:"),
 		0, 8, 1, 1, 0, 0, 
-		gbc.NONE, gbc.EAST);
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(advancedPanel, __ireopxSimpleJComboBox,
 		1, 8, 1, 1, 0, 0, 
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	JGUIUtil.addComponent(advancedPanel, __ireopx,
 		2, 8, 1, 1, 0, 0, 
 		0, 10, 0, 0,
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
 	JGUIUtil.addComponent(advancedPanel, 
 		new JLabel("Significant figures:"),
 		0, 9, 1, 1, 0, 0, 
-		gbc.NONE, gbc.EAST);
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(advancedPanel, __isigSimpleJComboBox,
 		1, 9, 1, 1, 0, 0, 
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
 	JTabbedPane tabs = new JTabbedPane();
 	tabs.add("General", generalPanel);
@@ -1978,7 +1971,6 @@ private void setupGUI() {
 
 	// add bottom buttons
 	FlowLayout fl = new FlowLayout(FlowLayout.CENTER);
-	JPanel bottomPanel = new JPanel();
 
 	JPanel buttonPanel = new JPanel();
 	buttonPanel.setLayout(fl);

@@ -70,6 +70,7 @@
 //					* Add and delete node popup menu items
 //					  now are disabled if running in
 //					  StateModGUI.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 
 package DWR.StateMod;
@@ -100,7 +101,6 @@ import java.util.Vector;
 
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
@@ -120,15 +120,12 @@ import RTi.Util.GUI.JComboBoxResponseJDialog;
 import RTi.Util.GUI.JFileChooserFactory;
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.ResponseJDialog;
-import RTi.Util.GUI.SaveImageGUI;
 import RTi.Util.GUI.SimpleFileFilter;
 import RTi.Util.GUI.TextResponseJDialog;
 
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.PrintUtil;
 import RTi.Util.IO.PropList;
-
-import RTi.Util.Math.MathUtil;
 
 import RTi.Util.Message.Message;
 
@@ -141,11 +138,6 @@ public class StateMod_Network_JComponent
 extends GRJComponentDevice
 implements ActionListener, KeyListener, MouseListener, MouseMotionListener, 
 Printable {
-
-/**
-Class name for routines.
-*/
-private final String __CLASS = "StateMod_Network_JComponent";
 
 /**
 Strings for menu items.
@@ -1173,8 +1165,8 @@ private void buildNodeArray() {
 				nodes.add(node);
 			}
 			holdNode = node;	
-			node = __network.getDownstreamNode(node, 
-				__network.POSITION_COMPUTATIONAL);		
+			node = HydroBase_NodeNetwork.getDownstreamNode(node, 
+				HydroBase_NodeNetwork.POSITION_COMPUTATIONAL);		
 		
 			if (node == holdNode) {
 				done = true;
@@ -1871,14 +1863,9 @@ private void drawLegend() {
 	// hold this point for calculating the exact divider Y point later
 	dividerY = height;
 
-	double scale = 0;
 	double id = 0;
 	double bd = 0;
 	if (__fitWidth) {
-		double pixels = __dpi * (int)(__pageFormat.getWidth() / 72);
-		double pct = (getBounds().width / pixels);
-		double Width = __totalDataWidth * pct;
-		scale = Width / __screenDataWidth;
 		id = convertX(__legendNodeDiameter);
 		int third = (int)(__legendNodeDiameter / 3);
 		if ((third % 2) == 1) {
@@ -1891,10 +1878,6 @@ private void drawLegend() {
 		}
 	}
 	else {
-		double pixels = __dpi * (int)(__pageFormat.getHeight() / 72);
-		double pct = (getBounds().height / pixels);
-		double Height = __totalDataHeight * pct;
-		scale = Height / __screenDataHeight;
 		id = convertY(HydroBase_Node.ICON_DIAM);
 		int third = (int)(__legendNodeDiameter / 3);
 		if ((third % 2) == 1) {
@@ -2259,8 +2242,8 @@ private void drawNetworkLines() {
 	}
 
 	for (node = nodeTop; node != null; 
-	    node = __network.getDownstreamNode(
-	    node, __network.POSITION_COMPUTATIONAL)) {
+	    node = HydroBase_NodeNetwork.getDownstreamNode(
+	    node, HydroBase_NodeNetwork.POSITION_COMPUTATIONAL)) {
 	    	// move ahead and skip and blank or unknown nodes (which won't
 		// be drawn, anyways -- check buildNodeArray()), so that 
 		// connections are only between visible nodes
@@ -2270,8 +2253,8 @@ private void drawNetworkLines() {
 		}
 		holdNode2 = node;
 		while (node.getType() == HydroBase_Node.NODE_TYPE_UNKNOWN) {
-			node = __network.getDownstreamNode(node, 
-				__network.POSITION_COMPUTATIONAL);
+			node = HydroBase_NodeNetwork.getDownstreamNode(node, 
+				HydroBase_NodeNetwork.POSITION_COMPUTATIONAL);
 			if (node == null || node == holdNode2) {
 				GRDrawingAreaUtil.setLineWidth(__drawingArea,1);
 				return;
@@ -2285,8 +2268,8 @@ private void drawNetworkLines() {
 			return;
 		}
 
-		dsRealNode = __network.getDownstreamNode(node, 
-			__network.POSITION_COMPUTATIONAL);
+		dsRealNode = HydroBase_NodeNetwork.getDownstreamNode(node, 
+			HydroBase_NodeNetwork.POSITION_COMPUTATIONAL);
 
 		dots = false;
 		if (dsRealNode != null 
@@ -3152,9 +3135,6 @@ public void mousePressed(MouseEvent event) {
 	__clickedNodeNum = findNodeAtXY(convertX(event.getX()) + __screenLeftX,
 		convertY(invertY(event.getY())) + __screenBottomY);
 
-	double xx = convertX(event.getX()) + __screenLeftX;
-	double yy = convertY(invertY(event.getY())) + __screenBottomY;
-
 	// if a node was clicked on ...
 	if (__clickedNodeNum > -1) {
 		__mouseDeviceX = event.getX();
@@ -3401,8 +3381,9 @@ public void mouseReleased(MouseEvent event) {
 		__eraseLegend = false;
 		
 		if (__snapToGrid) {
-			__mouseDataX = __mouseDataX;
-			__mouseDataY = __mouseDataY;
+			// TODO SAM Evaluate logic
+			//__mouseDataX = __mouseDataX;
+			//__mouseDataY = __mouseDataY;
 		} 
 		else {
 			__mouseDataX = convertX(event.getX()) + __screenLeftX
@@ -4097,7 +4078,6 @@ Prints a page.
 Printable.PAGE_EXISTS if a page should be printed.
 */
 public int print(Graphics g, PageFormat pageFormat, int pageIndex) {
-	String routine = __CLASS + ".print";
 	if (pageIndex > 0) {
 		return NO_SUCH_PAGE;
 	}
@@ -4146,9 +4126,6 @@ public int print(Graphics g, PageFormat pageFormat, int pageIndex) {
 		double w = pageFormat.getWidth();
 		double ih = pageFormat.getImageableHeight();
 		double h = pageFormat.getHeight();
-
-		double wScale = w / iw;
-		double hScale = h / ih;
 
 		double scale = 0;
 
@@ -4647,16 +4624,13 @@ protected void setOrientation(String orientation) {
 	try {
 		__pageFormat = PrintUtil.getPageFormat(
 			PrintUtil.pageFormatToString(__pageFormat));
-		int orient = 0;
 		if (orientation.trim().equalsIgnoreCase("Landscape")) {
 			PrintUtil.setPageFormatOrientation(__pageFormat, 
 				PrintUtil.LANDSCAPE);
-			orient = PrintUtil.LANDSCAPE;
 		}
 		else {
 			PrintUtil.setPageFormatOrientation(__pageFormat, 
 				PrintUtil.PORTRAIT);
-			orient = PrintUtil.PORTRAIT;
 		}
 		PrintUtil.setPageFormatMargins(__pageFormat,.75, .75, .75, .75);
 		int hPixels = (int)(__pageFormat.getWidth() / __printScale);
@@ -4730,9 +4704,11 @@ of .5 would result in 144 DPI and .25 in 288 DPI.  2 would result in 36 DPI.<P>
 for larger networks and smaller papers.
 @param scale the printing scale.
 */
+/* TODO SAM 2007-03-01 Evaluate whether needed
 private void setPrintingScale(double scale) {	
 	__printScale = scale;
 }
+*/
 
 /**
 Sets the size in pixels that fonts should be printed at when printed at 1:1.
@@ -4810,10 +4786,12 @@ protected void setTotalSize(int w, int h) {
 /**
 Sets up the double buffer.
 */
+/* TODO SAM 2007-03-01 Evaluate whether needed
 private void setupDoubleBuffering() {
 	setupDoubleBuffer(0, 0, getBounds().width, getBounds().height);
 	forceRepaint();
 }
+*/
 
 /**
 Sets the part of the network being viewed.  
@@ -4880,6 +4858,7 @@ Converts an X value in data units to an X value in drawing units.
 @return the x value, converted from being scaled for data limits to being 
 scaled for drawing units.
 */
+/* TODO SAM Evaluate use
 private double unconvertX(double x) {
 	GRLimits data = __drawingArea.getDataLimits();
 	GRLimits draw = __drawingArea.getDrawingLimits();
@@ -4896,6 +4875,7 @@ private double unconvertX(double x) {
 	double pct = x / width;
 	return draw.getWidth() * pct;
 }
+*/
 
 /**
 Converts an Y value in data units to an Y value in drawing units.
@@ -4903,6 +4883,7 @@ Converts an Y value in data units to an Y value in drawing units.
 @return the y value, converted from being scaled for data limits to being 
 scaled for drawing units.
 */
+/* TODO SAM 2007-03-01 Evaluate whether needed
 private double unconvertY(double y) {
 	GRLimits data = __drawingArea.getDataLimits();
 	GRLimits draw = __drawingArea.getDrawingLimits();
@@ -4921,6 +4902,7 @@ private double unconvertY(double y) {
 	double pct = y / height;
 	return draw.getHeight() * pct;
 }
+*/
 
 /**
 Undoes one change operation.
@@ -5449,6 +5431,7 @@ protected void zoomOut() {
 Zooms so that the height of the network fits exactly in the height of the 
 screen.
 */
+/* TODO SAM 2007-03-01 Evaluate whether needed
 private void zoomToHeight() {
 	//__screenLeftX = __dataLeftX;
 	//__screenBottomY = __dataBottomY;
@@ -5461,12 +5444,14 @@ private void zoomToHeight() {
 	scaleUnscalables();
 	forceRepaint();
 }
+*/
 
 /**
 Zooms so that the network fits in the screen and all dimension are visible.
 REVISIT (JTS - 2004-04-01)
 Doesn't work 100% right.
 */
+/* TODO SAM Evaluate whether needed
 private void zoomToScreen() {
 	int height = getBounds().height;
 	int width = getBounds().width;
@@ -5493,10 +5478,12 @@ private void zoomToScreen() {
 	scaleUnscalables();
 	forceRepaint();
 }
+*/
 
 /**
 Zooms so that the width of the network fits exactly in the width of the screen.
 */
+/* TODO SAM 2007-03-01 Evaluate whether needed
 private void zoomToWidth() {
 	__screenDataWidth = __totalDataWidth;
 	double pct = ((double)(getBounds().height))
@@ -5506,6 +5493,7 @@ private void zoomToWidth() {
 	scaleUnscalables();
 	forceRepaint();
 }
+*/
 
 }
 

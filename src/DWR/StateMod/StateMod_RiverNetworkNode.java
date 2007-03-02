@@ -114,6 +114,7 @@
 //					  when the component is marked as dirty.
 // 2005-04-18	JTS, RTi		Added writeListFile().
 // 2005-06-13	JTS, RTi		Made a new toString().
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
 
@@ -123,8 +124,6 @@ import java.io.FileReader;
 import java.io.BufferedReader;
 import java.io.PrintWriter;
 import java.util.Vector;
-import java.lang.Double;
-import java.lang.Integer;
 
 import RTi.Util.IO.IOUtil;
 import RTi.Util.Message.Message;
@@ -322,7 +321,7 @@ private void initialize ()
 {	_cstadn = "";
 	_comment = "";
 	_gwmaxr = -999;
-	_smdata_type = _dataset.COMP_RIVER_NETWORK;
+	_smdata_type = StateMod_DataSet.COMP_RIVER_NETWORK;
 }
 
 /**
@@ -337,7 +336,6 @@ throws Exception
 	Vector theRivs = new Vector();
 	String iline, s;
 	Vector v = new Vector ( 7 );
-	int i;
 	int [] format_0;
 	int [] format_0w;
 	format_0 = new int[7];

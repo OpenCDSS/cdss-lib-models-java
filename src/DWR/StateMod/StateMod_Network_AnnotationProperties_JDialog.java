@@ -7,6 +7,7 @@
 // History:
 // 2004-07-12	J. Thomas Sapienza, RTi	Initial version from
 //					HydroBase_GUI_WISDiagramNodeProperties.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 
 package DWR.StateMod;
@@ -21,8 +22,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-
-import java.util.Vector;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -39,8 +38,6 @@ import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleJComboBox;
 
 import RTi.Util.IO.PropList;
-
-import RTi.Util.Message.Message;
 
 import RTi.Util.String.StringUtil;
 
@@ -97,7 +94,6 @@ GUI text fields.
 */
 private JTextField 
 	__fontSizeTextField,
-	__nodeTypeTextField,
 	__textTextField,
 	__xTextField,
 	__yTextField;
@@ -135,7 +131,6 @@ Responds to button presses.
 */
 public void actionPerformed(ActionEvent event) {
 	String command = event.getActionCommand();
-	Object o = event.getSource();
 
 	if (command.equals(__BUTTON_APPLY)) {
 		applyChanges();
@@ -246,7 +241,7 @@ and closes the GUI.
 @param event that KeyEvent that happened.
 */
 public void keyPressed(KeyEvent event) {
-	if (event.getKeyCode() == event.VK_ENTER) {
+	if (event.getKeyCode() == KeyEvent.VK_ENTER) {
 		if (__editable) {
 			applyChanges();
 		}

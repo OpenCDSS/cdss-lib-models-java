@@ -57,6 +57,7 @@
 // 2006-01-23	SAM, RTi		* Fix bug where monthly average time
 //					  series were not being read in properly
 //					  for water year.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 // EndHeader
 
@@ -510,14 +511,12 @@ should be read.
 public static Vector readPatternTimeSeriesList (	String filename,
 							boolean read_data )
 {	int	dl = 1, i, m1, m2, y1, y2, num_years, year = 0, len,
-		currentTSindex, index, current_year=0, init_year, numts = 0;
+		currentTSindex, current_year=0, init_year, numts = 0;
 	String	chval, iline, message,
 		rtn="StateMod_TS.readPatternTimeSeriesList", value;
 	DateTime date = new DateTime (DateTime.PRECISION_MONTH);
 	DateTime date1 = new DateTime (DateTime.PRECISION_MONTH);
 	DateTime date2 = new DateTime (DateTime.PRECISION_MONTH);
-	boolean	requested_id_found = false;	// Indicates if we have found
-						// the requested TS in the file.
 
 	Vector v;
 	Vector tslist = new Vector ( 10, 5 );
@@ -864,8 +863,6 @@ public static TS readTimeSeries (	String tsident_string, String filename,
 throws Exception
 {	TS	ts = null;
 	String routine = "StateMod_TS.readTimeSeries";
-	boolean	is_file = true;	// Is tsident_string a file?
-				// Assume and check below
 
 	String input_name = filename;
 	String full_fname = IOUtil.getPathUsingWorkingDir ( filename );
@@ -895,6 +892,7 @@ throws Exception
 	}
 	ts.setIdentifier ( tsident_string );
 	// The specific time series is modified...
+	// TODO SAM 2007-03-01 Evaluate logic
 	Vector v = readTimeSeriesList (	ts, in, full_fname,
 			data_interval, date1, date2, units, read_data );
 	ts.getIdentifier().setInputType("StateMod");
@@ -1253,6 +1251,7 @@ throws Exception
 	currentTSindex = 0;
 	TS currentTS = null, ts = null;
 					// Used to fill data.
+	// TODO SAM 2007-03-01 Evaluate use
 	int req_ts_index;		// Position of requested TS in data.
 	String id = null;		// Identifier for a row.
 
@@ -2091,10 +2090,8 @@ throws Exception
 	DateTime cdate = new DateTime ( DateTime.PRECISION_MONTH );
 	date.setMonth ( req_date1.getMonth());
 	date.setYear ( req_date1.getYear());
-	int 	precision = PRECISION_DEFAULT;
 	Vector	iline_v = null;	// Vector for output lines.
-	int	ndays;		// Number of days in a month.
-	int	mon, day, j;	// counters
+	int	mon, j;	// counters
 
 	if ( req_interval_base == TimeInterval.MONTH ) {
 		iline_v = new Vector(15,1);
@@ -3035,7 +3032,6 @@ throws Exception
 {	String []	comment_str = { "#" }; 
 	String []	ignore_str = { "#>" };
 	String		rtn = "StateMod_TS.writeTimeSeriesList";
-	int		nlines, status;
 
 	Message.printStatus ( 1, rtn, 
 		"Writing new time series to file \"" + outfile + 

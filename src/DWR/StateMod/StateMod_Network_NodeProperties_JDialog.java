@@ -37,6 +37,7 @@
 //					* Added finalize().
 // 2006-04-18	JTS, RTi		__nodes is no longer finalized in this
 //					class.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 
 package DWR.StateMod;
@@ -57,17 +58,15 @@ import java.util.Vector;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import DWR.DMI.HydroBaseDMI.HydroBase_Node;
+import DWR.DMI.HydroBaseDMI.HydroBase_NodeNetwork;
 
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleJComboBox;
-
-import RTi.Util.Message.Message;
 
 import RTi.Util.String.StringUtil;
 
@@ -273,7 +272,7 @@ Adds the IDs of the downstream nodes to the main JPanel.
 @param y the y coordinate at which to start adding them.
 */
 private void addDownstreamNodeToPanel(JPanel panel, int y) {
-	HydroBase_Node node = __parent.getNetwork().findNextRealDownstreamNode(
+	HydroBase_Node node = HydroBase_NodeNetwork.findNextRealDownstreamNode(
 		__nodes[__nodeNum]);
 	JGUIUtil.addComponent(panel, new JLabel("Downstream node: "),
 		0, y, 1, 1, 0, 0,
@@ -339,6 +338,7 @@ private int addUpstreamNodesToPanel(JPanel panel, int y) {
 Called when Apply or OK is clicked.  Commits any changes to the node.
 */
 private void applyClicked() {
+	//TODO SAM 2007-03-01 Evaluate use
 	boolean dirty = false;
 	String id = __idTextField.getText();
 	String x = __xTextField.getText();
@@ -566,7 +566,6 @@ private void checkValidity() {
 	}
 	else {
 		try {
-			Double xx = new Double(xs);
 			__xTextField.setBackground(Color.white);
 		}
 		catch (Exception e) {
@@ -582,7 +581,6 @@ private void checkValidity() {
 	}
 	else {
 		try {
-			Double yy = new Double(ys);
 			__yTextField.setBackground(Color.white);
 		}
 		catch (Exception e) {
@@ -599,7 +597,6 @@ private void checkValidity() {
 		}
 		else {
 			try {
-				Double a = new Double(area);
 				__areaTextField.setBackground(Color.white);
 			}
 			catch (Exception e) {
@@ -617,7 +614,6 @@ private void checkValidity() {
 		}
 		else {
 			try {
-				Double p = new Double(precipitation);
 				__precipitationTextField.setBackground(
 					Color.white);
 			}

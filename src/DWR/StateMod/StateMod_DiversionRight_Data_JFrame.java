@@ -16,6 +16,7 @@
 //					* Editability of data in the worksheet
 //					  is now passed in via the constructor.
 // 2005-03-28	JTS, RTi		Adjusted GUI size.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 
 package DWR.StateMod;
@@ -23,8 +24,6 @@ package DWR.StateMod;
 import java.util.Vector;
 
 import RTi.Util.GUI.JScrollWorksheet;
-
-import RTi.Util.Message.Message;
 
 /**
 This class is a JFrame for displaying Diversion Right data in a worksheet.  

@@ -97,6 +97,7 @@
 // 2006-03-06	JTS, RTi		Removed the help key from the process
 //					manager dialog so that the help option
 //					no longer displays.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 
 package DWR.StateMod;
@@ -140,7 +141,6 @@ import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.Help.HelpJDialog;
 
 import RTi.Util.IO.DataSetComponent;
-import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.ProcessManager;
 import RTi.Util.IO.ProcessManagerJDialog;
 import RTi.Util.IO.PropList;
@@ -287,15 +287,15 @@ public StateMod_RunDeltaPlot_JFrame(StateMod_DataSet dataset) {
 	__dataset = dataset;
 	
 	__reservoirComp = __dataset.getComponentForComponentType(
-		__dataset.COMP_RESERVOIR_STATIONS);
+		StateMod_DataSet.COMP_RESERVOIR_STATIONS);
 	__diversionComp = __dataset.getComponentForComponentType(
-		__dataset.COMP_DIVERSION_STATIONS);
+		StateMod_DataSet.COMP_DIVERSION_STATIONS);
 	__instreamFlowComp = __dataset.getComponentForComponentType(
-		__dataset.COMP_INSTREAM_STATIONS);
+		StateMod_DataSet.COMP_INSTREAM_STATIONS);
 	__wellComp = __dataset.getComponentForComponentType(
-		__dataset.COMP_WELL_STATIONS);
+		StateMod_DataSet.COMP_WELL_STATIONS);
 	__streamGageComp = __dataset.getComponentForComponentType(
-		__dataset.COMP_STREAMGAGE_STATIONS );
+		StateMod_DataSet.COMP_STREAMGAGE_STATIONS );
 			
 	__defaultFilenameFilter = "in";
 	
@@ -845,7 +845,7 @@ public void runDelplt() {
 			}
 		}
 		else {	// Log file does not exist...
-			int x = new ResponseJDialog(this, 
+			new ResponseJDialog(this, 
 				"Delplt Unsuccessful",
 				"Delplt did not complete successfully.\n\n" +
 				"No Delplt log file is available.  Verify that"+
@@ -1146,7 +1146,6 @@ private void setupGUI() {
 	JPanel topPanel = new JPanel();
 	topPanel.setLayout(gl);
 
-	GridBagConstraints gbc = new GridBagConstraints();
 	GridLayout gl2 = new GridLayout(1, 0, 2, 0);
 	JPanel bottomPanel = new JPanel();
 	bottomPanel.setLayout(gl2);
@@ -1168,7 +1167,7 @@ private void setupGUI() {
 	JGUIUtil.addComponent(mainPanel, topPanel, 
 		0, y, 10, 3, 0, 0, 
 		10, 10, 10, 10, 
-		gbc.NONE, gbc.NORTH);
+		GridBagConstraints.NONE, GridBagConstraints.NORTH);
 	y+=3;
 	JPanel runTypeJPanel = new JPanel(new FlowLayout());
 	runTypeJPanel.add(new JLabel("Delplt run mode:"));
@@ -1176,33 +1175,33 @@ private void setupGUI() {
 	JGUIUtil.addComponent(mainPanel, runTypeJPanel,
 		0, y, 10, 1, 1, 0, 
 		0, 0, 0, 0,
-		gbc.HORIZONTAL, gbc.WEST);
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 	JGUIUtil.addComponent(mainPanel, new JLabel(
 		"(1) File:  For reservoirs specify the ASCII "
 		+ ".xre or binary .b44 file."),
 		0, ++y, 10, 1, 1, 0, 
 		0, 4, 0, 0,
-		gbc.HORIZONTAL, gbc.WEST);
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 	JGUIUtil.addComponent(mainPanel, new JLabel(
 		"         For other node types specify the "
 		+ "ASCII .xdd or binary .b43 file.  Or, specify"
 		+ " blank if continuing list of IDs."),
 		0, ++y, 10, 1, 1, 0, 
 		0, 4, 0, 0,
-		gbc.HORIZONTAL, gbc.WEST);
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 	JGUIUtil.addComponent(mainPanel, new JLabel(
 		"(2) Station type:  diversion, instream, "
 		+ "reservoir, stream, streamID (0* gages)"
 		+ ", well, or blank if continuing list of IDs."),
 		0, ++y, 10, 1, 1, 0, 
 		0, 4, 0, 0,
-		gbc.HORIZONTAL, gbc.WEST);
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 	JGUIUtil.addComponent(mainPanel, new JLabel(
 		"(3) Parameter:  parameters from StateMod "
 		+ "output, or blank if continuing list of IDs."),
 		0, ++y, 10, 1, 1, 0, 
 		0, 4, 0, 0,
-		gbc.HORIZONTAL, gbc.WEST);
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 	JGUIUtil.addComponent(mainPanel, new JLabel(
 		"(4) Year/Ave:  Enter Ave, 4-digit year "
 		+ "(e.g., 1989) or year and month (e.g., "
@@ -1210,17 +1209,17 @@ private void setupGUI() {
 		+ " IDs."),
 		0, ++y, 10, 1, 1, 0, 
 		0, 4, 0, 0,
-		gbc.HORIZONTAL, gbc.WEST);
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 	JGUIUtil.addComponent(mainPanel, new JLabel(
 		"(5) ID:  0 (zero) for all or enter a specific "
 		+ "identifier."),
 		0, ++y, 10, 1, 1, 0, 
 		0, 4, 0, 0,
-		gbc.HORIZONTAL, gbc.WEST);
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 	JGUIUtil.addComponent(mainPanel, __autoLineCopyJCheckBox,
 		0, ++y, 1, 1, 0, 0, 
 		0, 10, 0, 0,
-		gbc.NONE, gbc.WEST);
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
 	PropList p = 
 		new PropList("StateMod_RunDeltaPlot_JFrame.JWorksheet");
@@ -1266,8 +1265,6 @@ private void setupGUI() {
 		jsw = new JScrollWorksheet(crg, __tableModel, p);
 		__worksheet = jsw.getJWorksheet();
 
-		Vector v = StateMod_Util.arrayToVector(
-			StateMod_GraphNode.node_types);
 		__worksheet.setColumnJComboBoxValues(0, filenames, true);
 
 		Vector vn = StateMod_Util.arrayToVector(
@@ -1300,10 +1297,10 @@ private void setupGUI() {
 
 	JGUIUtil.addComponent(gridPanel, jsw,
 		0, 0, 1, 1, 1, 1, 
-		gbc.BOTH, gbc.CENTER);
+		GridBagConstraints.BOTH, GridBagConstraints.CENTER);
 	JGUIUtil.addComponent(mainPanel, gridPanel, 
 		0, ++y, 10, 12, 1, 1, 
-		gbc.BOTH, gbc.CENTER);
+		GridBagConstraints.BOTH, GridBagConstraints.CENTER);
 
 	y += 11;	// To account for grid height
 
@@ -1322,7 +1319,7 @@ private void setupGUI() {
 		//0, gbc.RELATIVE, 10, 1, 
 		0, ++y, 10, 1, 
 		0, 0, 
-		gbc.VERTICAL, gbc.SOUTH);
+		GridBagConstraints.VERTICAL, GridBagConstraints.SOUTH);
 
 	// Add the main panel as the resizable content...
 	getContentPane().add("Center", mainPanel);
@@ -1337,11 +1334,11 @@ private void setupGUI() {
 	JGUIUtil.addComponent(message_JPanel, __messageTextField, 
 		0, 0, 9, 1, 
 		1, 0, 
-		gbc.HORIZONTAL, gbc.WEST);
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 	JGUIUtil.addComponent(message_JPanel, __statusTextField, 
 		9, 0, 1, 1, 
 		0, 0, 
-		gbc.HORIZONTAL, gbc.SOUTH);
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.SOUTH);
 
 	getContentPane().add("South", message_JPanel);
 

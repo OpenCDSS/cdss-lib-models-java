@@ -73,6 +73,7 @@
 //					functionality.
 // 2006-01-19	JTS, RTi		Made the dialog wider so that the 
 //					Graph button is displayed.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
 
@@ -99,7 +100,6 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
 import DWR.StateMod.StateMod_DelayTable;
@@ -241,14 +241,14 @@ public StateMod_DelayTable_JFrame (	StateMod_DataSet dataset,
 		__window_type =
 		StateMod_DataSet_WindowManager.WINDOW_DELAY_TABLE_MONTHLY;
 		__delayComponent = __dataset.getComponentForComponentType(
-			__dataset.COMP_DELAY_TABLES_MONTHLY);
-		__componentType = __dataset.COMP_DELAY_TABLES_MONTHLY;
+			StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY);
+		__componentType = StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY;
 	}
 	else {	__window_type =
 		StateMod_DataSet_WindowManager.WINDOW_DELAY_TABLE_DAILY;
 		__delayComponent = __dataset.getComponentForComponentType(
-			__dataset.COMP_DELAY_TABLES_DAILY);
-		__componentType = __dataset.COMP_DELAY_TABLES_DAILY;
+			StateMod_DataSet.COMP_DELAY_TABLES_DAILY);
+		__componentType = StateMod_DataSet.COMP_DELAY_TABLES_DAILY;
 		interval = " (Daily)";
 	}
 	StateMod_GUIUtil.setTitle(this, dataset, "Delay Tables" + interval, 
@@ -291,14 +291,14 @@ public StateMod_DelayTable_JFrame (	StateMod_DataSet dataset,
 		__window_type =
 		StateMod_DataSet_WindowManager.WINDOW_DELAY_TABLE_MONTHLY;
 		__delayComponent = __dataset.getComponentForComponentType(
-			__dataset.COMP_DELAY_TABLES_MONTHLY);
-		__componentType = __dataset.COMP_DELAY_TABLES_MONTHLY;
+			StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY);
+		__componentType = StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY;
 	}
 	else {	__window_type =
 		StateMod_DataSet_WindowManager.WINDOW_DELAY_TABLE_DAILY;
 		__delayComponent = __dataset.getComponentForComponentType(
-			__dataset.COMP_DELAY_TABLES_DAILY);
-		__componentType = __dataset.COMP_DELAY_TABLES_DAILY;
+			StateMod_DataSet.COMP_DELAY_TABLES_DAILY);
+		__componentType = StateMod_DataSet.COMP_DELAY_TABLES_DAILY;
 		interval = " (Daily)";
 	}
 	StateMod_GUIUtil.setTitle(this, dataset, "Delay Tables" + interval, 
@@ -337,11 +337,11 @@ public StateMod_DelayTable_JFrame (	Vector delaysVector,
 	if ( __monthly_data ) {
 		__window_type =
 		StateMod_DataSet_WindowManager.WINDOW_DELAY_TABLE_MONTHLY;
-		__componentType = __dataset.COMP_DELAY_TABLES_MONTHLY;
+		__componentType = StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY;
 	}
 	else {	__window_type =
 		StateMod_DataSet_WindowManager.WINDOW_DELAY_TABLE_DAILY;
-		__componentType = __dataset.COMP_DELAY_TABLES_DAILY;
+		__componentType = StateMod_DataSet.COMP_DELAY_TABLES_DAILY;
 		interval = " (Daily)";
 	}
 	StateMod_GUIUtil.setTitle(this, null, "Delay Tables" + interval, 
@@ -379,11 +379,11 @@ public StateMod_DelayTable_JFrame (	Vector delaysVector,
 	if ( __monthly_data ) {
 		__window_type =
 		StateMod_DataSet_WindowManager.WINDOW_DELAY_TABLE_MONTHLY;
-		__componentType = __dataset.COMP_DELAY_TABLES_MONTHLY;
+		__componentType = StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY;
 	}
 	else {	__window_type =
 		StateMod_DataSet_WindowManager.WINDOW_DELAY_TABLE_DAILY;
-		__componentType = __dataset.COMP_DELAY_TABLES_DAILY;
+		__componentType = StateMod_DataSet.COMP_DELAY_TABLES_DAILY;
 		interval = " (Daily)";
 	}
 	StateMod_GUIUtil.setTitle(this, null, "Delay Tables" + interval, 
@@ -419,11 +419,11 @@ public StateMod_DelayTable_JFrame (	StateMod_DelayTable delay,
 	if ( __monthly_data ) {
 		__window_type =
 		StateMod_DataSet_WindowManager.WINDOW_DELAY_TABLE_MONTHLY;
-		__componentType = __dataset.COMP_DELAY_TABLES_MONTHLY;
+		__componentType = StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY;
 	}
 	else {	__window_type =
 		StateMod_DataSet_WindowManager.WINDOW_DELAY_TABLE_DAILY;
-		__componentType = __dataset.COMP_DELAY_TABLES_DAILY;
+		__componentType = StateMod_DataSet.COMP_DELAY_TABLES_DAILY;
 		interval = " (Daily)";
 	}
 	StateMod_GUIUtil.setTitle(this, null, "Delay Table" + interval, 
@@ -546,9 +546,9 @@ public void actionPerformed(ActionEvent e) {
 			if (x == ResponseJDialog.NO) {
 				return;
 			}
-			StateMod_DelayTable dt = (StateMod_DelayTable)
-				__worksheetL.getRowData(
-				__worksheetL.getSelectedRow());
+			//StateMod_DelayTable dt = (StateMod_DelayTable)
+				//__worksheetL.getRowData(
+				//__worksheetL.getSelectedRow());
 			__worksheetR.deleteRow(row);
 			__deleteReturn.setEnabled(false);
 		}
@@ -875,7 +875,6 @@ Checks to see if any data has changed in the delay table and if so, writes
 the delay table back into the StateMod_DelayTable object.
 */
 private void saveDelayTable() {
-	String routine = "StateMod_DelayTable_JFrame.saveDelayTable";
 	int index = __currentIndex;
 	if (index < 0) {
 		return;

@@ -44,6 +44,7 @@
 //					to diversion rights.
 // 2006-03-05	SAM, RTi		Increase the width slighthly to better
 //					accomodate all columns at startup.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
 
@@ -70,7 +71,6 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
@@ -82,8 +82,6 @@ import RTi.Util.GUI.JScrollWorksheet;
 import RTi.Util.GUI.JWorksheet;
 
 import RTi.Util.GUI.ResponseJDialog;
-
-import RTi.Util.Help.URLHelp;
 
 import RTi.Util.IO.PropList;
 
@@ -267,8 +265,7 @@ private boolean saveData() {
 	// at this point, remove the old diversion rights from the original
 	// component Vector
 	Vector diversionRights =(Vector)(__dataset.getComponentForComponentType(
-		__dataset.COMP_DIVERSION_RIGHTS)).getData();
-	int holdsize1 = diversionRights.size();
+		StateMod_DataSet.COMP_DIVERSION_RIGHTS)).getData();
 	int size = dv.size();
 	StateMod_DiversionRight dr;	
 	for (int i = 0; i < size; i++) {
@@ -292,11 +289,11 @@ private boolean saveData() {
 	// here we are sorting the full data array -- may be a performance
 	// issue
 	Vector sorted = StateMod_Util.sortStateMod_DataVector(diversionRights);
-	__dataset.getComponentForComponentType(__dataset.COMP_DIVERSION_RIGHTS)
+	__dataset.getComponentForComponentType(StateMod_DataSet.COMP_DIVERSION_RIGHTS)
 		.setData(sorted);
 	__currentDiv.disconnectRights();
 	__currentDiv.connectRights(sorted);
-	__dataset.setDirty(__dataset.COMP_DIVERSION_RIGHTS, true);
+	__dataset.setDirty(StateMod_DataSet.COMP_DIVERSION_RIGHTS, true);
 	return true;
 }
 
@@ -474,8 +471,6 @@ private void setupGUI() {
 	
 	addWindowListener(this);
 	
-	GridBagConstraints gbc = new GridBagConstraints();
-
 	__addRight = new JButton(__BUTTON_ADD_RIGHT);
 	__deleteRight = new JButton(__BUTTON_DEL_RIGHT);
 	__closeJButton = new JButton(__BUTTON_CLOSE);
@@ -487,8 +482,7 @@ private void setupGUI() {
 	GridBagLayout gbl = new GridBagLayout();
 	JPanel bigPanel = new JPanel();
 	bigPanel.setLayout(gbl);
-
-	FlowLayout fl = new FlowLayout(FlowLayout.CENTER);
+	
 	JPanel p1 = new JPanel();
 	p1.setLayout(new FlowLayout(FlowLayout.RIGHT));
 
@@ -562,9 +556,9 @@ private void setupGUI() {
 	main_panel.add(p1, "South");
 
 	JGUIUtil.addComponent(bigPanel, info_panel, 0, 0, 1, 1, 0, 0, 
-		gbc.NONE, gbc.NORTHWEST);
+		GridBagConstraints.NONE, GridBagConstraints.NORTHWEST);
 	JGUIUtil	.addComponent(bigPanel, main_panel, 0, 1, 10, 10, 1, 1, 
-		gbc.BOTH, gbc.SOUTH);
+		GridBagConstraints.BOTH, GridBagConstraints.SOUTH);
 		
 	getContentPane().add(bigPanel);
 		

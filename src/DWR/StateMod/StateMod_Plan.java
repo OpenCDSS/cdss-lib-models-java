@@ -8,6 +8,7 @@
 // 
 // 2006-08-22	Steven A. Malers, RTi	Copy diversion class and update for
 //					plans.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
 
@@ -15,13 +16,11 @@ package DWR.StateMod;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.IOException;
 import java.io.PrintWriter;
 
 import java.lang.Double;
 import java.lang.Integer;
 
-import java.util.StringTokenizer;
 import java.util.Vector;
 
 import RTi.GIS.GeoView.GeoRecord;
@@ -31,8 +30,6 @@ import RTi.Util.IO.IOUtil;
 import RTi.Util.Message.Message;
 
 import RTi.Util.String.StringUtil;
-
-import RTi.Util.Time.TimeUtil;
 
 /**
 Object used to store plan information.  All set routines set
@@ -164,7 +161,8 @@ public int compareTo(Object o) {
 		return res;
 	}
 
-	StateMod_Plan p = (StateMod_Plan)o;
+	// TODO SAM 2007-03-01 Need to enable
+	//StateMod_Plan p = (StateMod_Plan)o;
 
 /* REVISIT SAM 2006-08-22
 Need to review
@@ -457,7 +455,7 @@ Sets the smdata_type to _dataset.COMP_PLANS.
 If false, all data are set to missing.
 */
 private void initialize ( boolean initialize_defaults )
-{	_smdata_type = _dataset.COMP_PLANS;
+{	_smdata_type = StateMod_DataSet.COMP_PLANS;
 	if ( initialize_defaults ) {
 		_iPlnTyp = 1;
 		_Peff = 999;
@@ -502,9 +500,7 @@ throws Exception
 	String iline = null;
 	Vector v = new Vector(9);
 	Vector thePlans = new Vector();
-	int i;
 	int linecount = 0;
-	String s = null;
 	
 	StateMod_Plan aPlan = null;
 	BufferedReader in = null;
@@ -568,7 +564,6 @@ throws Exception
 	catch (Exception e) {
 		routine = null;
 		v = null;
-		s = null;
 		aPlan = null;
 		if (in != null) {
 			in.close();
@@ -583,7 +578,6 @@ throws Exception
 	routine = null;
 	iline = null;
 	v = null;
-	s = null;
 	aPlan = null;
 	if (in != null) {
 		in.close();
@@ -619,7 +613,7 @@ public void setIPfail(int iPfail) {
 		_iPfail = iPfail;
 		setDirty(true);
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty( _dataset.COMP_PLANS, true);
+			_dataset.setDirty( StateMod_DataSet.COMP_PLANS, true);
 		}
 	}
 }
@@ -652,7 +646,7 @@ public void setIPrf(int iPrf) {
 		_iPrf = iPrf;
 		setDirty(true);
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty( _dataset.COMP_PLANS, true);
+			_dataset.setDirty( StateMod_DataSet.COMP_PLANS, true);
 		}
 	}
 }
@@ -693,7 +687,7 @@ public void setIPlnTyp(int iPlnTyp) {
 		_iPlnTyp = iPlnTyp;
 		setDirty(true);
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty( _dataset.COMP_PLANS, true);
+			_dataset.setDirty( StateMod_DataSet.COMP_PLANS, true);
 		}
 	}
 }
@@ -735,7 +729,7 @@ public void setPeff(double Peff) {
 		Message.printStatus ( 2, "", "_isClone=" + _isClone +
 			" _dataset="+s );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty( _dataset.COMP_PLANS, true);
+			_dataset.setDirty( StateMod_DataSet.COMP_PLANS, true);
 			Message.printStatus ( 2, "", "Is data set dirt?"  +
 			_dataset.isDirty() );
 		}
@@ -773,7 +767,7 @@ public void setPsource(String Psource) {
 		_Psource = Psource;
 		setDirty(true);
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty( _dataset.COMP_PLANS, true);
+			_dataset.setDirty( StateMod_DataSet.COMP_PLANS, true);
 		}
 	}
 }
@@ -787,7 +781,7 @@ public void setPsto1(double Psto1) {
 		_Psto1 = Psto1;
 		setDirty(true);
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty( _dataset.COMP_PLANS, true);
+			_dataset.setDirty( StateMod_DataSet.COMP_PLANS, true);
 		}
 	}
 }
@@ -832,10 +826,8 @@ throws Exception {
 			new_comments, comment_str, ignore_comment_str, 0);
 
 		int i;
-		int j;
 		String iline;
 		String cmnt = "#>";
-		String routine = "StateMod_Plan.writeStateModFile";
 		String format =
 		"%-12.12s %-24.24s %-12.12s %8d %8d% #8.2F %8d %8d %8.2F %-12.12s";
 		StateMod_Plan plan = null;

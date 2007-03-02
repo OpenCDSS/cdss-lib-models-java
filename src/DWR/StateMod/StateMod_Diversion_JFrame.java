@@ -189,6 +189,7 @@
 //					* Corrected bug that was corrupting data
 //					  when rights or return flow sub-forms
 //					  were entered.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //-----------------------------------------------------------------------------
 // EndHeader
 
@@ -215,28 +216,19 @@ import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JRadioButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.JTextField;
 
-import javax.swing.text.JTextComponent;
-
-import DWR.StateCU.StateCU_IrrigationPracticeTS;
-
-import DWR.StateMod.StateMod_Data;
 import DWR.StateMod.StateMod_Diversion;
 
 import RTi.GRTS.TSProduct;
 import RTi.GRTS.TSViewJFrame;
 
 import RTi.TS.DayTS;
-import RTi.TS.MonthTS;
 import RTi.TS.TS;
 import RTi.TS.TSUtil;
 
@@ -247,8 +239,6 @@ import RTi.Util.GUI.JWorksheet_SortListener;
 import RTi.Util.GUI.ResponseJDialog;
 import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.GUI.SimpleJComboBox;
-
-import RTi.Util.Help.URLHelp;
 
 import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.PropList;
@@ -301,8 +291,7 @@ String labels for buttons.
 private static final String 
 	__BUTTON_APPLY = "Apply",
 	__BUTTON_CANCEL = "Cancel",
-	__BUTTON_CLOSE = "Close",
-	__BUTTON_HELP = "Help";
+	__BUTTON_CLOSE = "Close";
 
 /**
 Whether itemStateChanged() should ignore next state change that occurs.
@@ -559,7 +548,7 @@ public void actionPerformed(ActionEvent e) {
 			div.acceptChanges();
 		}		
 		if (changed) {
-			__dataset.setDirty(__dataset.COMP_DIVERSION_STATIONS,
+			__dataset.setDirty(StateMod_DataSet.COMP_DIVERSION_STATIONS,
 				true);
 		}
 		if ( __dataset_wm != null ) {
@@ -583,7 +572,7 @@ public void actionPerformed(ActionEvent e) {
 			div.createBackup();
 		}
 		if (changed) {			
-			__dataset.setDirty(__dataset.COMP_DIVERSION_STATIONS,
+			__dataset.setDirty(StateMod_DataSet.COMP_DIVERSION_STATIONS,
 				true);
 		}		
 	}
@@ -631,8 +620,7 @@ public void actionPerformed(ActionEvent e) {
 			(StateMod_Diversion)__diversionsVector
 			.elementAt(__currentDiversionIndex);
 	
-		StateMod_Diversion_Right_JFrame newFrame = 
-			new StateMod_Diversion_Right_JFrame(
+		new StateMod_Diversion_Right_JFrame(
 			__dataset, div, __editable);
 	}
 	else if (source == __returnFlow_JButton) {
@@ -648,8 +636,7 @@ public void actionPerformed(ActionEvent e) {
 			(StateMod_Diversion)__diversionsVector.elementAt(
 			__currentDiversionIndex);
 	
-		StateMod_Diversion_ReturnFlow_JFrame newFrame = 
-			new StateMod_Diversion_ReturnFlow_JFrame(
+		new StateMod_Diversion_ReturnFlow_JFrame(
 			__dataset, div, __editable);
 	}
 	}
@@ -1023,7 +1010,7 @@ public void displayTSViewJFrame(String type)
 				// the water right volume...
 				ts =	StateMod_Util.createWaterRightTS ( div,
 					TimeInterval.MONTH,
-					__dataset.lookupTimeSeriesDataUnits(
+					StateMod_DataSet.lookupTimeSeriesDataUnits(
 					StateMod_DataSet.
 					COMP_DIVERSION_TS_MONTHLY),
 					__dataset.getDataStart(),
@@ -1214,7 +1201,7 @@ public void displayTSViewJFrame(String type)
 				// the water right volume...
 				ts =	StateMod_Util.createWaterRightTS ( div,
 					TimeInterval.DAY,
-					__dataset.lookupTimeSeriesDataUnits(
+					StateMod_DataSet.lookupTimeSeriesDataUnits(
 					StateMod_DataSet.
 					COMP_DIVERSION_TS_DAILY),
 					__dataset.getDataStart(),
@@ -1370,15 +1357,14 @@ public void itemStateChanged(ItemEvent e)
 		return;
 	}
 
-	boolean selected = (e.getStateChange() == e.SELECTED);
-	
 	if (__currentDiversionIndex == -1) {
 		return;
 	}
 
 	// set placeholder to current diversion
-	StateMod_Diversion div = (StateMod_Diversion)
-		__diversionsVector.elementAt(__currentDiversionIndex);
+	// TODO SAM Evaluate logic
+	//StateMod_Diversion div = (StateMod_Diversion)
+	//	__diversionsVector.elementAt(__currentDiversionIndex);
 }
 
 /**
@@ -2909,7 +2895,7 @@ public void windowClosing(WindowEvent e) {
 		div.acceptChanges();
 	}			
 	if (changed) {
-		__dataset.setDirty(__dataset.COMP_DIVERSION_STATIONS, true);
+		__dataset.setDirty(StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
 	}	
 	if ( __dataset_wm != null ) {
 		__dataset_wm.closeWindow (

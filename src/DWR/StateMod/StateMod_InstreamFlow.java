@@ -78,6 +78,7 @@
 // 2006-03-06	SAM, RTi		Fix bug where all rights were being
 //					connected, not just the ones associated
 //					with this instream flow station/reach.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
 
@@ -85,10 +86,8 @@ package DWR.StateMod;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.IOException;
 import java.io.PrintWriter;
 
-import java.lang.Double;
 import java.lang.Integer;
 
 import java.util.Vector;
@@ -588,7 +587,7 @@ StateMod GUI.  If false, data values are initialized to missing - this is
 suitable for a new instance in StateDMI.
 */
 private void initialize ( boolean initialize_defaults )
-{	_smdata_type = _dataset.COMP_INSTREAM_STATIONS;
+{	_smdata_type = StateMod_DataSet.COMP_INSTREAM_STATIONS;
 	_ifrrdn = "";
 	if ( initialize_defaults ) {
 		_cifridy = "0";	// Estimate average daily data from monthly
@@ -634,7 +633,6 @@ throws Exception {
 				1,
 				12,
 				8 };
-	int i;
 
 	if (Message.isDebugOn) {
 		Message.printDebug(10, routine, 
@@ -730,7 +728,7 @@ public void setCifridy(String cifridy) {
 		_cifridy = cifridy;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_INSTREAM_STATIONS,true);
+			_dataset.setDirty(StateMod_DataSet.COMP_INSTREAM_STATIONS,true);
 		}
 	}
 }
@@ -773,7 +771,7 @@ public void setIifcom(int iifcom) {
 		_iifcom = iifcom;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_INSTREAM_STATIONS,true);
+			_dataset.setDirty(StateMod_DataSet.COMP_INSTREAM_STATIONS,true);
 		}
 	}
 }
@@ -793,7 +791,7 @@ public void setIfrrdn(String ifrrdn) {
 		_ifrrdn = ifrrdn;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_INSTREAM_STATIONS,true);
+			_dataset.setDirty(StateMod_DataSet.COMP_INSTREAM_STATIONS,true);
 		}
 	}
 }

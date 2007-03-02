@@ -27,6 +27,7 @@
 //					  number of lines to be printed in 
 //					  landscape and portrait modes.
 //					* Added print() method.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 
 package DWR.StateMod;
@@ -60,7 +61,6 @@ import RTi.Util.GUI.SimpleFileFilter;
 import RTi.Util.GUI.SimpleJButton;
 
 import RTi.Util.IO.IOUtil;
-import RTi.Util.IO.PrintJGUI;
 import RTi.Util.IO.PropList;
 import RTi.Util.IO.SecurityCheck;
 
@@ -406,8 +406,6 @@ boolean quotes) {
 
 	v.add(buff.toString());
 
-	Class c = null;
-	
 	int j = 0;
 	String s = null;
 	for (int i = 0; i < rows; i++) {
@@ -455,7 +453,6 @@ protected String[] getFilenameAndFormat() {
 	String dir = JGUIUtil.getLastFileDialogDirectory();
 	JFileChooser fc = JFileChooserFactory.createJFileChooser(dir);
 	fc.setDialogTitle("Select Export File");
-	String[] s = null;
 
 	SimpleFileFilter tabFF = new SimpleFileFilter("txt", "Tab-delimited");
 	SimpleFileFilter commaFF = new SimpleFileFilter("csv", 

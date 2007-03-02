@@ -44,6 +44,7 @@
 // 2004-08-26	JTS, RTi		* On/Off column now has a combo box from
 //					  which users can select values.
 // 2005-01-21	JTS, RTi		Table model constructor changed.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 
 package DWR.StateMod;
@@ -69,7 +70,6 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
@@ -78,13 +78,9 @@ import RTi.Util.GUI.JScrollWorksheet;
 import RTi.Util.GUI.JWorksheet;
 import RTi.Util.GUI.ResponseJDialog;
 
-import RTi.Util.Help.URLHelp;
-
 import RTi.Util.IO.PropList;
 
 import RTi.Util.Message.Message;
-
-import RTi.Util.GUI.JWorksheet_CellAttributes;
 
 import RTi.Util.String.StringUtil;
 
@@ -347,8 +343,7 @@ private boolean saveData() {
 	// at this point, remove the old diversion rights from the original
 	// component Vector
 	Vector wellRights = (Vector)(__dataset.getComponentForComponentType(
-		__dataset.COMP_WELL_RIGHTS)).getData();
-	int holdsize1 = wellRights.size();
+		StateMod_DataSet.COMP_WELL_RIGHTS)).getData();
 	int size = lv.size();
 	StateMod_WellRight wr;
 	for (int i = 0; i < size; i++) {
@@ -359,7 +354,6 @@ private boolean saveData() {
 	// now add the elements from the new Vector to the wellRights 
 	// Vector.
 	size = wv.size();
-	Vector clone = new Vector();
 	StateMod_WellRight cwr = null;
 	for (int i = 0; i < size; i++) {
 		wr = (StateMod_WellRight)wv.elementAt(i);
@@ -373,11 +367,11 @@ private boolean saveData() {
 	// here we are sorting the full data array -- may be a performance
 	// issue
 	Vector sorted = StateMod_Util.sortStateMod_DataVector(wellRights);
-	__dataset.getComponentForComponentType(__dataset.COMP_WELL_RIGHTS)
+	__dataset.getComponentForComponentType(StateMod_DataSet.COMP_WELL_RIGHTS)
 		.setData(sorted);
 	__currentWell.disconnectRights();
 	__currentWell.connectRights(sorted);
-	__dataset.setDirty(__dataset.COMP_WELL_RIGHTS, true);
+	__dataset.setDirty(StateMod_DataSet.COMP_WELL_RIGHTS, true);
 	return true;
 }
 
@@ -471,8 +465,6 @@ private void setupGUI() {
 
 	addWindowListener(this);
 
-	GridBagConstraints gbc = new GridBagConstraints();
-
 	__addRight = new JButton(__BUTTON_ADD_RIGHT);
 	__deleteRight = new JButton(__BUTTON_DEL_RIGHT);
 	__deleteRight.setEnabled(false);
@@ -558,11 +550,11 @@ private void setupGUI() {
 	// assemble window from parts
 	JGUIUtil.addComponent(mainJPanel, info_panel, 
 		0, 0, 1, 1, 0, 0, 
-		gbc.NONE, gbc.NORTHWEST);
+		GridBagConstraints.NONE, GridBagConstraints.NORTHWEST);
 
 	JGUIUtil.addComponent(mainJPanel, main_panel, 
 		0, 1, 10, 10, 1, 1, 
-		gbc.BOTH, gbc.SOUTH);
+		GridBagConstraints.BOTH, GridBagConstraints.SOUTH);
 	__addRight.addActionListener(this);
 	__deleteRight.addActionListener(this);
 	__closeJButton.addActionListener(this);

@@ -7,6 +7,7 @@
 // History:
 // 
 // 2005-04-04	J. Thomas Sapienza, RTi	Initial version.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 
 package DWR.StateMod;
@@ -24,8 +25,6 @@ import javax.swing.JPanel;
 
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.JScrollWorksheet;
-
-import RTi.Util.Message.Message;
 
 /**
 This class is a JFrame for displaying well delay table assignment data 
@@ -122,8 +121,6 @@ constructor.
 */
 protected JScrollWorksheet buildJScrollWorksheet() 
 throws Exception {
-	String routine = "StateMod_Well_DelayTableAssignment_Data_JFrame"
-		+ ".buildJScrollWorksheet()";
 	StateMod_Well_DelayTableAssignment_Data_TableModel tableModel 
 		= new StateMod_Well_DelayTableAssignment_Data_TableModel(
 		_data, _editable, __isDepletion);

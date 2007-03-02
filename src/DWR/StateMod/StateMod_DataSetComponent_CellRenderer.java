@@ -8,12 +8,12 @@
 //
 // 2003-08-10	Steven A. Malers, RTi	Initial version - copy and modify the
 //					similar StateCU class.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 
 package DWR.StateMod;
 
 import RTi.Util.GUI.JWorksheet_DefaultTableCellRenderer;
-import RTi.Util.String.StringUtil;
 
 /**
 This class is used to render cells for StateMod_DataSetComponent_TableModel

@@ -43,6 +43,7 @@
 // 2004-01-21	JTS, RTi		Removed the row count column and 
 //					changed all the other column numbers.
 // 2004-10-28	SAM, RTi		Change setValueAt() to support sort.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 // EndHeader
 
@@ -60,15 +61,11 @@ import RTi.Util.GUI.JFileChooserFactory;
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.JWorksheet;
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
-import RTi.Util.GUI.SimpleFileFilter;
 
 import RTi.Util.IO.IOUtil;
 
-import RTi.Util.Message.Message;
-
 import RTi.Util.String.StringUtil;
 
-import RTi.Util.Time.DateTime;
 import RTi.Util.Time.TimeInterval;
 
 /**
@@ -485,7 +482,7 @@ public void fillInputNameColumn (	int row, String station_type, String id,
 	}
 	else {	// Need to pick the correct input name from the type...
 		// This needs to be relative if at all possible!
-		String ext = __dataset.lookupTimeSeriesDataFileExtension (
+		String ext = StateMod_DataSet.lookupTimeSeriesDataFileExtension (
 			StringUtil.getToken(data_type," ",0,0), interval );
 		if ( !ext.equals("") ) {
 			input_names.addElement ( "*." + ext );
@@ -531,10 +528,6 @@ public void fillInputTypeColumn (	int row, String station_type, String id,
 					String interval_string,
 					String data_type )
 {	Vector input_types = new Vector();
-	int interval = TimeInterval.MONTH;
-	if ( interval_string.equalsIgnoreCase("Day") ) {
-		interval = TimeInterval.DAY;
-	}
 
 	if ( StringUtil.indexOfIgnoreCase(data_type, "Output", 0) > 0 ) {
 		// Have an output time series...

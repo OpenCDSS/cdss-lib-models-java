@@ -40,6 +40,7 @@
 // 2004-10-27	SAM, RTi		Use table model for return flows rather
 //					than combined diversion data table
 //					model.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
 
@@ -66,7 +67,6 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
@@ -257,7 +257,7 @@ private boolean saveData() {
 	}
 
 	__currentWell.setDepletions(clone);
-	__dataset.setDirty(__dataset.COMP_WELL_STATIONS, true);
+	__dataset.setDirty(StateMod_DataSet.COMP_WELL_STATIONS, true);
 
 	return true;
 }
@@ -410,8 +410,6 @@ public void setupGUI() {
 
 	addWindowListener(this);
 
-	GridBagConstraints gbc = new GridBagConstraints();
-
 	__addDepletion = new JButton(__BUTTON_ADD_DEPLETION);
 	__deleteDepletion = new JButton(__BUTTON_DELETE_DEPLETION);
 	__deleteDepletion.setEnabled(false);
@@ -461,7 +459,7 @@ public void setupGUI() {
 	JScrollWorksheet jsw = null;
 	try {	
 		Vector nodes = (Vector)(__dataset.getComponentForComponentType(
-			__dataset.COMP_RIVER_NETWORK).getData());	
+			StateMod_DataSet.COMP_RIVER_NETWORK).getData());	
 		Vector v = new Vector();
 		Vector v2 = __currentWell.getDepletions();
 		StateMod_ReturnFlow rf;
@@ -491,12 +489,12 @@ public void setupGUI() {
 		if (__dataset.getIday() == 1) {
 			delayIDs = (Vector)(__dataset
 				.getComponentForComponentType(
-				__dataset.COMP_DELAY_TABLES_DAILY).getData());
+				StateMod_DataSet.COMP_DELAY_TABLES_DAILY).getData());
 		}
 		else {
 			delayIDs = (Vector)(__dataset
 				.getComponentForComponentType(
-				__dataset.COMP_DELAY_TABLES_MONTHLY).getData());
+				StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY).getData());
 		}
 		v = StateMod_Util.createDataList(delayIDs, true);
 		__worksheet.setColumnJComboBoxValues(
@@ -518,10 +516,10 @@ public void setupGUI() {
 	main_panel.add(p1, "South");
 	JGUIUtil.addComponent(mainJPanel, info_panel,
 		0, 0, 1, 1, 0, 0,
-		gbc.NONE, gbc.NORTHWEST);
+		GridBagConstraints.NONE, GridBagConstraints.NORTHWEST);
 	JGUIUtil.addComponent(mainJPanel, main_panel,
 		0, 1, 10, 10, 1, 1,
-		gbc.BOTH, gbc.SOUTH);
+		GridBagConstraints.BOTH, GridBagConstraints.SOUTH);
 
 	getContentPane().add(mainJPanel);
 

@@ -26,19 +26,15 @@
 //					table is displaying several instream
 //					flows' worth of rights or only one
 //					instream flow's rights.
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 // EndHeader
 
 package DWR.StateMod;
 
-import java.util.Date;
 import java.util.Vector;
 
-import RTi.DMI.DMIUtil;
-
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
-
-import RTi.Util.Time.DateTime;
 
 /**
 This table model displays instream flow right data.

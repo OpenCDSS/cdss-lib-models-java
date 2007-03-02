@@ -9,19 +9,15 @@
 // 2005-03-31	J. Thomas Sapienza, RTi	Initial version.
 // 2006-04-11	JTS, RTi		Corrected the classes returned from
 //					getColumnClass().
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 // EndHeader
 
 package DWR.StateMod;
 
-import java.util.Date;
 import java.util.Vector;
 
-import RTi.DMI.DMIUtil;
-
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
-
-import RTi.Util.Time.DateTime;
 
 /**
 This table model displays instream flow right data.

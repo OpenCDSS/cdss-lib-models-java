@@ -9,6 +9,7 @@
 // 2005-04-04	J. Thomas Sapienza, RTi	Initial version.
 // 2006-04-11	JTS, RTi		Corrected the classes returned from
 //					getColumnClass().
+// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 
 package DWR.StateMod;
@@ -16,8 +17,6 @@ package DWR.StateMod;
 import java.util.Vector;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
-
-import RTi.Util.Message.Message;
 
 /**
 This table model displays well data.
@@ -415,8 +414,6 @@ public void setValueAt(Object value, int row, int col)
 {	if (_sortOrder != null) {
 		row = _sortOrder[row];
 	}
-	double dval;
-	int ival;
 
 	StateMod_Well smw = (StateMod_Well)_data.elementAt(row);
 
