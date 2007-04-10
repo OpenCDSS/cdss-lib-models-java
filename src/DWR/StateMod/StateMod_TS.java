@@ -58,6 +58,8 @@
 //					  series were not being read in properly
 //					  for water year.
 // 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
+// 2007-04-10	SAM, RTi		Change default prevision from 2 to -2 as per
+//						writeStateMod() command docs - this is a better default.
 // ----------------------------------------------------------------------------
 // EndHeader
 
@@ -120,7 +122,7 @@ public static final int PRECISION_SPECIAL_OFFSET = 1000;
 /**
 Default precision for output.
 */
-public static final int PRECISION_DEFAULT = 2;
+public static final int PRECISION_DEFAULT = -2;
 
 /**
 Comment character for permanent comments.
@@ -893,7 +895,7 @@ throws Exception
 	ts.setIdentifier ( tsident_string );
 	// The specific time series is modified...
 	// TODO SAM 2007-03-01 Evaluate logic
-	Vector v = readTimeSeriesList (	ts, in, full_fname,
+	readTimeSeriesList (	ts, in, full_fname,
 			data_interval, date1, date2, units, read_data );
 	ts.getIdentifier().setInputType("StateMod");
 	ts.setInputName ( full_fname );
@@ -1252,7 +1254,7 @@ throws Exception
 	TS currentTS = null, ts = null;
 					// Used to fill data.
 	// TODO SAM 2007-03-01 Evaluate use
-	int req_ts_index;		// Position of requested TS in data.
+	//int req_ts_index;		// Position of requested TS in data.
 	String id = null;		// Identifier for a row.
 
 	// Sometimes, the time series files have empty lines at the
@@ -1447,7 +1449,8 @@ throws Exception
 				numts = 1;
 				// Save this index as that used for the
 				// requested time series...
-				req_ts_index = currentTSindex;
+				// TODO SAM 2007-04-10 Evaluate use
+				//req_ts_index = currentTSindex;
 			}
 			// Else, we already caught this in a check above and
 			// would not get to here.
