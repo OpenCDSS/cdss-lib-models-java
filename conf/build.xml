@@ -17,18 +17,6 @@
 
 <project name="buildTemplate" basedir="../" default="compile">
 
-	<!-- === Set file separator depending on OS ===-->
-	<condition property="sep" value="/">
-		<and>
-       		<os family="unix" />
-		</and>
-	</condition>
-	<condition property="sep" value="\">
-		<and>
-       		<os family="windows" />
-		</and>
-	</condition>
-
 	<!-- set the javac location for OS type -->
 	<condition property="executable" value="/home/sharedLibs/j2sdk1.4.2_12/bin/javac">
 		<and>
@@ -74,38 +62,39 @@
 	<property name="build.dir"	     location="build" />
 	<property name="dist.dir"        location="dist" />
 	<property name="doc.dir"		 location="doc" />
-	<property name="buildwork.dir"   location="${build.dir}${sep}work" />
-	<property name="buildtest.dir"   location="build${sep}test" />
-	<property name="test.dir"	     location="test${sep}unit${sep}src" />
-	<property name="testOp.dir"      location="test${sep}operational" />
-	<property name="jdoc.dir"	     location="doc${sep}javadoc" />
+	<property name="buildwork.dir"   location="${build.dir}/work" />
+	<property name="buildtest.dir"   location="build/test" />
+	<property name="test.dir"	     location="test/unit/src" />
+	<property name="testOp.dir"      location="test/operational" />
+	<property name="jdoc.dir"	     location="doc/javadoc" />
 	<property name="ext.dir"         location="externals" />
 	<property name="graphics.dir"    location="graphics" />
-	<property name="package"     	 value="DWR${sep}StateMod" />
+	<property name="package"     	 value="DWR/StateMod" />
 	<property name="nsis.dir"		 location="NSIS" />
 	<property name="executable"  	 
-		location="S:${sep}develop${sep}jdk_142${sep}bin${sep}javac" />
+		location="S:/develop/jdk_142/bin/javac" />
 	<property name="classname"   	 value="" />
-	<property name="testSuite"  	 value="DWR.DMI.StateMod.testSuite" />
+	<property name="testSuite"  	 value="DWR.StateMod.StateMod_TestSuite" />
 	<property name="jarfname"    	 value="StateMod_142.jar" />
-	<property name="regTest.dir"	 location="test${sep}regression${sep}src" />
+	<property name="regTest.dir"	 location="test/regression/src" />
 	<property name="command_file"    value="Regression.StateMod" />
+	<property name="proj_name"		 value="StateMod" />
 	
 	<!--================ Dependencies ==================-->
 	<property name="RTi_jar"	  
-			value="${ext.dir}${sep}RTi_Common${sep}RTi_Common_142.jar" />
+			value="${ext.dir}/RTi_Common/RTi_Common_142.jar" />
 	<property name="xerces_jar"	  
-			value="${ext.dir}${sep}xerces.jar" />
+			value="${ext.dir}/xerces.jar" />
 	<property name="StateCU_jar"  
-			value="${ext.dir}${sep}StateCU${sep}StateCU_142.jar" />
+			value="${ext.dir}/StateCU/StateCU_142.jar" />
 	<property name="StateGUI_jar" 
-			value="${ext.dir}${sep}StateModGUI_142.jar" />
+			value="${ext.dir}/StateModGUI_142.jar" />
 	<property name="Hydro_jar"	  
-			value="${ext.dir}${sep}HydroBaseDMI${sep}HydroBaseDMI_142.jar" />
+			value="${ext.dir}/HydroBaseDMI/HydroBaseDMI_142.jar" />
 	<property name="jfree_jar"	  
-			value="${ext.dir}${sep}jfreechart.jar" />
+			value="${ext.dir}/jfreechart.jar" />
 	<property name="jcommon_jar"  
-			value="${ext.dir}${sep}jcommon.jar" />
+			value="${ext.dir}/jcommon.jar" />
 	
 	
 	<!-- =========== Compiler Properties ===============-->
@@ -133,7 +122,7 @@
 		<pathelement location="${StateGUI_jar}" />
 		<pathelement location="${jfree_jar}" />
 		<pathelement location="${jcommon_jar}" />
-		<pathelement location="${dist.dir}${sep}${jarfname}" />
+		<pathelement location="${dist.dir}/${jarfname}" />
 		<pathelement location="."/>
 	</path>
 	
@@ -189,10 +178,10 @@
 ==========================================================-->
 <target name="compileTest" depends="compile">
 
-	<mkdir dir="${build.dir}${sep}test" />
+	<mkdir dir="${build.dir}/test" />
 	
-	<javac srcdir 		= "${test.dir}${sep}${package}"
-	       destdir 	    = "${build.dir}${sep}test"
+	<javac srcdir 		= "${test.dir}/${package}"
+	       destdir 	    = "${build.dir}/test"
            classpathref = "classpath"
            debug 		= "on"
 	       fork 		= "yes"
@@ -215,7 +204,7 @@
 		<formatter type="xml"/>
 		<classpath refid="classpath" />
 		<test name="${testSuite}"
-		  outfile="test${sep}unit${sep}results${sep}${proj_name}" />
+		  outfile="test/unit/results/${proj_name}" />
 	</junit>
 
 </target>
@@ -228,7 +217,8 @@
 			  testing
 ====================================================-->
 <target name="runDev" depends="compile">
-		
+	
+	<!--
 	<java classname="${classname}" fork="true">
 		<jvmarg    value = "-mx256m" />
 		<jvmarg    value = "-Djava.compiler=NONE" />
@@ -236,6 +226,7 @@
 		<arg	   value = "${testOp.dir}" />
 		<classpath refid = "classpath" />   
 	</java>	
+	-->
 
 </target>
 
@@ -247,14 +238,16 @@
 ====================================================-->
 <target name="runOp" depends="jar">
 			
-		<java classname="${classname}" fork="true">
-			<jvmarg    value = "-mx256m" />
-			<jvmarg    value = "-Djava.compiler=NONE" />
-			<arg       value = "-home" />
-			<arg	   value = "${testOp.dir}" />
-			<classpath refid = "classpathOp" />   
-		</java>	
-
+	<!--
+	<java classname="${classname}" fork="true">
+		<jvmarg    value = "-mx256m" />
+		<jvmarg    value = "-Djava.compiler=NONE" />
+		<arg       value = "-home" />
+		<arg	   value = "${testOp.dir}" />
+		<classpath refid = "classpathOp" />   
+	</java>	
+	-->
+	
 </target>
 	
 	
@@ -272,7 +265,7 @@
 
 	<javadoc destdir="${jdoc.dir}" >
 		<classpath refid="classpath"/>
-		<fileset dir="${src.dir}${sep}${package}" >
+		<fileset dir="${src.dir}/${package}" >
     	  		<include name="*.java"/>
     		</fileset>
 	</javadoc>	
@@ -291,7 +284,7 @@
 	</copy>
 	
     <mkdir dir="${dist.dir}"/>
-    <jar jarfile="${dist.dir}${sep}${jarfname}" basedir="${buildwork.dir}" >
+    <jar jarfile="${dist.dir}/${jarfname}" basedir="${buildwork.dir}" >
 	<manifest >
     	<attribute name="Author"    value="Riverside Technology, inc. (RTi)"/>
       	<attribute name="Address1"  value="2290 E. Prospect Road, Suite 1"/>
@@ -320,7 +313,7 @@
 		<arg       value = "-home" />
 		<arg	   value = "${testOp.dir}" />
 		<arg	   value = "-commands" />
-		<arg	   value = "${regTest.dir}${sep}${command_file}" />
+		<arg	   value = "${regTest.dir}/${command_file}" />
 		<classpath refid = "classpathOp" />   
 	</java>	
 	-->
