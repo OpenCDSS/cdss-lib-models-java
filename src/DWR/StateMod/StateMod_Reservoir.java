@@ -135,6 +135,9 @@
 //					has one time series for a reservoir,
 //					then assign to the maximum target and
 //					leave the minimum as null.
+// 2007-04-12	Kurt Tometich, RTi		Added checkComponentData() and
+//									getDataHeader() methods for check
+//									file and data check support.
 // 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
@@ -158,6 +161,7 @@ import RTi.TS.TS;
 import RTi.TS.TSUtil;
 
 import RTi.Util.IO.IOUtil;
+import RTi.Util.IO.PropList;
 
 import RTi.Util.Message.Message;
 
@@ -169,7 +173,7 @@ file.  Secondary data classes are used in cases where lists of data are used.
 */
 public class StateMod_Reservoir 
 extends StateMod_Data
-implements Cloneable, Comparable {
+implements Cloneable, Comparable, StateMod_Component {
 
 /**
 date for one fill rule admin
@@ -379,6 +383,20 @@ public boolean changed() {
 		return false;
 	}
 	return true;
+}
+
+/**
+@param count Number of components checked.
+@param dataset StateMod dataset object.
+@param props Extra properties for specific data checks.
+@return List of data that failed specific checks.
+ */
+public String[] checkComponentData( int count, 
+StateMod_DataSet dataset, PropList props ) 
+{
+	// TODO KAT 2007-04-16
+	// add specific checks here
+	return null;
 }
 
 /**
@@ -899,6 +917,18 @@ Return cresdy
 */
 public String getCresdy() {
 	return _cresdy;
+}
+
+/**
+Returns the data column header for the specifically checked data.
+@return Data column header.
+ */
+public static String[] getDataHeader()
+{
+	// TODO KAT 2007-04-16 
+	// When specific checks are added to checkComponentData
+	// return the header for that data here
+	return new String[] {};
 }
 
 /**

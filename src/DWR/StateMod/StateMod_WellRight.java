@@ -55,6 +55,9 @@
 // 2005-03-28	JTS, RTi		Corrected wrong class name in 
 //					createBackup().
 // 2005-04-18	JTS, RTi		Added writeListFile().
+// 2007-04-12	Kurt Tometich, RTi		Added checkComponentData() and
+//									getDataHeader() methods for check
+//									file and data check support.
 // 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
@@ -69,7 +72,9 @@ import java.lang.Double;
 
 import java.util.Vector;
 
+import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.IOUtil;
+import RTi.Util.IO.PropList;
 
 import RTi.Util.Message.Message;
 
@@ -80,7 +85,7 @@ This class provides stores all the information associated with a well right.
 */
 
 public class StateMod_WellRight extends StateMod_Data
-implements Cloneable, Comparable {
+implements Cloneable, Comparable, StateMod_Component {
 
 private String 	_irtem;		// administration number
 private double	_dcrdivw;	// decreed amount
@@ -99,6 +104,55 @@ Clean up before garbage collection.
 protected void finalize()throws Throwable {
 	_irtem = null;
 	super.finalize();
+}
+
+/**
+Performs specific data checks for StateMod Well Rights.
+@param count position of the StateMod Well Right data Vector.
+@param dataset StateMod dataset.
+@param props List of additional properties for the data test.
+@return List of invalid data.
+ */
+public String[] checkComponentData( int count, StateMod_DataSet dataset,
+PropList props) 
+{
+	int pos = 0;			// Position in well station vector
+	//String wes_name = null;		// Well station name
+	//String wes_id = null;		// Well station ID
+	double decree = 0.0;
+	StateMod_WellRight wer_i = this;
+	//int index = count;
+	DataSetComponent wes_comp = dataset.getComponentForComponentType (
+			StateMod_DataSet.COMP_WELL_STATIONS );
+	Vector wes_Vector = ( Vector )wes_comp.getData();
+	// Format to two digits to match StateMod output...
+	decree = StringUtil.atod(
+		StringUtil.formatString( wer_i.getDcrdivw(),"%.2f" ) );
+	if ( decree <= 0.0 ) {
+		// Find associated well station for output to print ID
+		// and name...
+		++count;
+		pos = StateMod_Util.indexOf( wes_Vector,
+				wer_i.getCgoto() );
+		StateMod_Well wes_i = null;
+		if ( pos >= 0 ) {
+			wes_i = ( StateMod_Well )wes_Vector.elementAt( pos );
+		}
+//		wes_name = "";
+//		if ( wes_i != null ) {
+//			wes_id = wes_i.getID();
+//			wes_name = wes_i.getName();
+//		}
+		// new format for check file
+		String [] data_table = {
+			StringUtil.formatString( count, "%4d" ),
+			StringUtil.formatString( this.getID(), "%-12.12s"),
+			StringUtil.formatString( wer_i.getCgoto(), "%-12.12s" ) };
+			//StringUtil.formatString( wes_name, "%-12.12s" ) };
+		
+		return StateMod_Util.checkForMissingValues( data_table );
+	}
+	return null;
 }
 
 /**
@@ -211,6 +265,18 @@ public boolean equals(StateMod_WellRight right) {
 		return true;
 	}
 	return false;
+}
+
+/**
+Returns the table header for StateMod_WellRight data tables.
+@return String[] header - Array of header elements.
+ */
+public static String[] getDataHeader()
+{
+	return new String[] { "Num",
+			"Well Right ID",
+			"Well Station ID" };
+			//"Well Name" };
 }
 
 /**

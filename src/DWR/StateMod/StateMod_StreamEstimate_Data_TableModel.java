@@ -9,6 +9,8 @@
 // 2005-04-04	J. Thomas Sapienza, RTi	Initial version.
 // 2005-04-05	JTS, RTi		Added River node ID and Daily ID 
 //					columns.
+// 2007-04-27	Kurt Tometich, RTi		Added getValidators method for check
+//									file and data check implementation.
 // 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 
@@ -17,12 +19,13 @@ package DWR.StateMod;
 import java.util.Vector;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
+import RTi.Util.IO.Validator;
 
 /**
 This table model displays stream estimate station data.
 */
 public class StateMod_StreamEstimate_Data_TableModel 
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel implements StateMod_Data_TableModel {
 
 /**
 Number of columns in the table model.
@@ -107,6 +110,23 @@ public String getColumnName(int columnIndex) {
 }
 
 /**
+Returns an array containing the widths (in number of characters) that the 
+fields in the table should be sized to.
+@return an integer array containing the widths for each field.
+*/
+public int[] getColumnWidths() {
+	int[] widths = new int[__COLUMNS];
+	for (int i = 0; i < __COLUMNS; i++) {
+		widths[i] = 0;
+	}
+	widths[COL_ID] = 	9;
+	widths[COL_NAME] = 	23;
+	widths[COL_NODE_ID] = 	9;
+	widths[COL_DAILY_ID] = 	9;
+	return widths;
+}
+
+/**
 Returns the format that the specified column should be displayed in when
 the table is being displayed in the given table format. 
 @param column column for which to return the format.
@@ -132,6 +152,23 @@ public int getRowCount() {
 }
 
 /**
+Returns general validators based on column of data being checked.
+@param col Column of data to check.
+@return List of validators for a column of data.
+ */
+public Validator[] getValidators( int col ) {
+	Validator[] no_checks = new Validator[] {};
+	
+	switch (col) {
+	case COL_ID:		return ids;
+	case COL_NAME:		return blank;	
+	case COL_NODE_ID:	return ids;
+	case COL_DAILY_ID:	return ids;
+	default:			return no_checks;
+	}
+}
+
+/**
 Returns the data that should be placed in the JTable
 at the given row and column.
 @param row the row for which to return data.
@@ -153,23 +190,6 @@ public Object getValueAt(int row, int col) {
 		case COL_DAILY_ID:	return bfs.getCrunidy();
 		default:		return "";
 	}
-}
-
-/**
-Returns an array containing the widths (in number of characters) that the 
-fields in the table should be sized to.
-@return an integer array containing the widths for each field.
-*/
-public int[] getColumnWidths() {
-	int[] widths = new int[__COLUMNS];
-	for (int i = 0; i < __COLUMNS; i++) {
-		widths[i] = 0;
-	}
-	widths[COL_ID] = 	9;
-	widths[COL_NAME] = 	23;
-	widths[COL_NODE_ID] = 	9;
-	widths[COL_DAILY_ID] = 	9;
-	return widths;
 }
 
 /**

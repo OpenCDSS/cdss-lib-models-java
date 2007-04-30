@@ -192,6 +192,9 @@
 //					  to verify sum is the same as well
 //					  station capacity.
 // 2007-02-18	SAM, RTi		Clean up code based on Eclipse feedback.
+// 2007-04-10	Kurt Tometich, RTi		Added a runComponentChecks method
+//									for support of new check file 
+//									implemenation.
 //-----------------------------------------------------------------------------
 // EndHeader
 
@@ -217,6 +220,7 @@ import RTi.TS.TSIdent;
 
 import RTi.Util.Message.Message;
 
+import RTi.Util.IO.CheckFile;
 import RTi.Util.IO.DataSet;
 import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.IOUtil;
@@ -8225,6 +8229,46 @@ private void readInputAnnounce2 ( DataSetComponent comp, double seconds )
 }
 
 /**
+Remove a ProcessListener that was previously added with addProcessListener().
+@param p ProcessListener to remove.
+*/
+public void removeProcessListener(ProcessListener p) {
+	if (__processListeners == null) {
+		return;
+	}
+	__processListeners.removeElement(p);
+}
+
+/**
+Performs the check file setup and calls code to check component.  Also sets
+the check file to the list in the GUI.  If problems are encountered when
+running data checks are added to the check file.
+@param int type - StateModComponent type.
+*/
+public String runComponentChecks( int type, String fname, 
+String commands, String header )
+{
+	String check_file = "";
+	CheckFile chk = new CheckFile( fname, commands );
+	chk.addToHeader( header );
+	StateMod_ComponentDataCheck check = new StateMod_ComponentDataCheck(
+		type, chk, this);
+	// Run the data checks for the component and retrieve the
+	// finalized check file
+	CheckFile final_check = check.checkComponentType( null );
+	try {
+		final_check.finalizeCheckFile();
+		check_file = final_check.toString();
+	} catch (Exception e) {
+		Message.printWarning(2, "StateDMI_Processor.runComponentChecks",
+		"Check file: " +  final_check.toString() + " couldn't be finalized.");
+		Message.printWarning(3, "StateDMI_Processor.runComponentChecks",
+		e);
+	}
+	return check_file;
+}
+
+/**
 Write the data set to an XML file.  The filename is adjusted to the 
 working directory if necessary using IOUtil.getPathUsingWorkingDir().
 @param filename_prev the name of the previous version of the file(for
@@ -8327,17 +8371,6 @@ public void addProcessListener(ProcessListener p) {
 		__processListeners = new Vector();
 	}
 	__processListeners.add(p);
-}
-
-/**
-Remove a ProcessListener that was previously added with addProcessListener().
-@param p ProcessListener to remove.
-*/
-public void removeProcessListener(ProcessListener p) {
-	if (__processListeners == null) {
-		return;
-	}
-	__processListeners.removeElement(p);
 }
 
 /**

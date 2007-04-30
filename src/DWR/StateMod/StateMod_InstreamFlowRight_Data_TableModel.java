@@ -18,12 +18,13 @@ package DWR.StateMod;
 import java.util.Vector;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
+import RTi.Util.IO.Validator;
 
 /**
 This table model displays instream flow right data.
 */
 public class StateMod_InstreamFlowRight_Data_TableModel 
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel implements StateMod_Data_TableModel {
 
 /**
 Number of columns in the table model.
@@ -135,13 +136,32 @@ public int getRowCount() {
 }
 
 /**
+Returns general validators based on column of data being checked.
+@param col Column of data to check.
+@return List of validators for a column of data.
+ */
+public Validator[] getValidators( int col ) {
+	Validator[] no_checks = new Validator[] {};
+
+	switch (col) {
+		case COL_RIGHT_ID:		return ids;
+		case COL_RIGHT_NAME:	return blank;
+		case COL_STRUCT_ID:		return ids;
+		case COL_ADMIN_NUM:		return nums;
+		case COL_DCR_AMT:		return nums;
+		case COL_ON_OFF:		return nums;
+		default:				return no_checks;
+	}
+}
+
+/**
 Returns the data that should be placed in the JTable at the given row 
 and column.
 @param row the row for which to return data.
 @param col the column for which to return data.
 @return the data that should be placed in the JTable at the given row and col.
 */
-public Object getValueAt(int row, int col) {
+public Object getValueAt( int row, int col ) {
 	if (_sortOrder != null) {
 		row = _sortOrder[row];
 	}

@@ -64,6 +64,9 @@
 // 					* Added restoreOriginal().
 // 2005-03-13	SAM, RTi		* Clean up output header information for
 //					  switch.
+// 2007-04-12	Kurt Tometich, RTi		Added checkComponentData() and
+//									getDataHeader() methods for check
+//									file and data check support.
 // 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
@@ -79,13 +82,14 @@ import java.lang.Double;
 import java.util.Vector;
 
 import RTi.Util.IO.IOUtil;
+import RTi.Util.IO.PropList;
 
 import RTi.Util.Message.Message;
 
 import RTi.Util.String.StringUtil;
 
 public class StateMod_DiversionRight extends StateMod_Data 
-implements Cloneable, Comparable {
+implements Cloneable, Comparable, StateMod_Component {
 
 /**
 Administration number.
@@ -105,6 +109,11 @@ Constructor.
 public StateMod_DiversionRight() {
 	super();
 	initialize();
+}
+
+public String[] checkComponentData(int count, StateMod_DataSet dataset, PropList props) {
+	// TODO Add checks here ...
+	return null;
 }
 
 /**
@@ -228,6 +237,17 @@ protected void finalize()
 throws Throwable {
 	_irtem = null;
 	super.finalize();
+}
+
+/**
+Returns the column headers for the specific data checked.
+@return List of column headers.
+ */
+public static String[] getDataHeader()
+{
+	return new String[] { "Num",
+			"Right ID",
+			"Right Name" };
 }
 
 /**

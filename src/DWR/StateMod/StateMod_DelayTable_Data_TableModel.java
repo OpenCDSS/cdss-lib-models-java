@@ -8,6 +8,8 @@
 // 2005-03-29	J. Thomas Sapienza, RTi	Initial version.
 // 2005-03-31	JTS, RTi		Added the code to put TOTALS lines
 //					in the worksheet.
+// 2007-04-27	Kurt Tometich, RTi		Added getValidators method for check
+//									file and data check implementation.
 // 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 // EndHeader
@@ -20,12 +22,13 @@ import DWR.StateMod.StateMod_DelayTable;
 
 import RTi.Util.GUI.JWorksheet;
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
+import RTi.Util.IO.Validator;
 
 /**
 This class displays delay table related data.
 */
 public class StateMod_DelayTable_Data_TableModel 
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel implements StateMod_Data_TableModel {
 
 /**
 Number of columns in the table model.
@@ -144,6 +147,22 @@ public String getColumnName(int columnIndex) {
 
 
 /**
+Returns an array containing the widths (in number of characters) that the 
+fields in the table should be sized to.
+@return an integer array containing the widths for each field.
+*/
+public int[] getColumnWidths() {
+	int[] widths = new int[__COLUMNS];
+	for (int i = 0; i < __COLUMNS; i++) {
+		widths[i] = 0;
+	}
+	widths[COL_ID] = 		7;
+	widths[COL_DATE] = 		4;
+	widths[COL_RETURN_AMT] = 	8;
+	return widths;
+}
+
+/**
 Returns the format that the specified column should be displayed in when
 the table is being displayed in the given table format. 
 @param column column for which to return the format.
@@ -167,6 +186,20 @@ public int getRowCount() {
 }
 
 /**
+Returns general validators based on column of data being checked.
+@param col Column of data to check.
+@return List of validators for a column of data.
+ */
+public Validator[] getValidators( int col ) 
+{
+	// TODO KAT 2007-04-16
+	// Need to add general validators but don't know
+	// what data is going to be checked.
+	Validator[] no_checks = new Validator[] {};
+	return no_checks;
+}
+
+/**
 Returns the data that should be placed in the JTable at the given row 
 and column.
 @param row the row for which to return data.
@@ -182,22 +215,6 @@ public Object getValueAt(int row, int col) {
 		row = ((Integer)__rowMap.elementAt(row)).intValue();
 	}
 	return __data[col].elementAt(row);		
-}
-
-/**
-Returns an array containing the widths (in number of characters) that the 
-fields in the table should be sized to.
-@return an integer array containing the widths for each field.
-*/
-public int[] getColumnWidths() {
-	int[] widths = new int[__COLUMNS];
-	for (int i = 0; i < __COLUMNS; i++) {
-		widths[i] = 0;
-	}
-	widths[COL_ID] = 		7;
-	widths[COL_DATE] = 		4;
-	widths[COL_RETURN_AMT] = 	8;
-	return widths;
 }
 
 /**

@@ -84,6 +84,9 @@
 //					  vectors - this is used with the
 //					  StateDMI set command.
 // 2005-04-18	JTS, RTi		Added writeListFile().
+// 2007-04-12	Kurt Tometich, RTi		Added checkComponentData() and
+//									getDataHeader() methods for check
+//									file and data check support.
 //------------------------------------------------------------------------------
 // EndHeader
 
@@ -98,10 +101,11 @@ import java.util.Vector;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 import RTi.Util.IO.IOUtil;
+import RTi.Util.IO.PropList;
 
 public class StateMod_StreamEstimate_Coefficients 
 extends StateMod_Data 
-implements Cloneable {
+implements Cloneable, StateMod_Component {
 
 // REVISIT - why is this needed?
 public static final int MAX_BASEFLOWS = 15;
@@ -197,6 +201,20 @@ public boolean changed() {
 		return false;
 	}
 	return true;
+}
+
+/**
+@param count Number of components checked.
+@param dataset StateMod dataset object.
+@param props Extra properties for specific data checks.
+@return List of data that failed specific checks.
+ */
+public String[] checkComponentData( int count, 
+StateMod_DataSet dataset, PropList props ) 
+{
+	// TODO KAT 2007-04-16
+	// add specific checks here
+	return null;
 }
 
 /**
@@ -428,6 +446,18 @@ Return the coefn corresponding to a particular index.
 */
 public Vector getCoefn() {
 	return _coefn;
+}
+
+/**
+Returns the data column header for the specifically checked data.
+@return Data column header.
+ */
+public static String[] getDataHeader()
+{
+	// TODO KAT 2007-04-16 
+	// When specific checks are added to checkComponentData
+	// return the header for that data here
+	return new String[] {};
 }
 
 /**

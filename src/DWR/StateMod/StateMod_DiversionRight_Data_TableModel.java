@@ -7,6 +7,8 @@
 // History:
 //
 // 2005-03-30	J. Thomas Sapienza, RTi	Initial version.
+// 2007-04-27	Kurt Tometich, RTi		Added getValidators method for check
+//									file and data check implementation.
 // 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 
@@ -18,13 +20,16 @@ import DWR.StateMod.StateMod_DiversionRight;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 
+import RTi.Util.IO.Validator;
+import RTi.Util.IO.Validators;
+
 /**
 This table model displays diversion right data.  The model can display rights
 data for a single diversion or for 1+ diversion.  The difference is specified
 in the constructor and affects how many columns of data are shown.
 */
 public class StateMod_DiversionRight_Data_TableModel 
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel implements StateMod_Data_TableModel {
 
 /**
 Number of columns in the table model.  For table models that display rights
@@ -108,6 +113,36 @@ public int getColumnCount() {
 }
 
 /**
+Returns the text to be assigned to worksheet tooltips.
+@return a String array of tool tips.
+*/
+public String[] getColumnToolTips() {
+	String[] tips = new String[__COLUMNS];
+
+	tips[COL_RIGHT_ID] =
+		"<html>The diversion right ID is typically the diversion" +
+		" station ID<br> followed by .01, .02, etc.</html>";
+	tips[COL_RIGHT_NAME] = 
+		"Diversion right name";
+	tips[COL_STRUCT_ID] = 
+		"<HTML>The diversion ID is the link between diversion stations "
+		+ "and their right(s).</HTML>";
+	tips[COL_ADMIN_NUM] = 
+		"<HTML>Lower admininistration numbers indicate greater " +
+		"seniority.<BR>99999 is typical for a very junior" +
+		" right.</html>";
+	tips[COL_DCR_AMT] = 
+		"Decree amount (CFS)";
+	tips[COL_ON_OFF] = 
+		"<HTML>0 = OFF<BR>1 = ON<BR>" +
+		"YYYY indicates to turn on the right in year YYYY."+
+		"<BR>-YYYY indicates to turn off the right in year" +
+		" YYYY.</HTML>";
+
+	return tips;
+}
+
+/**
 Returns the name of the column at the given position.
 @param col the index of the column for which to return the name.  This
 is base 0.
@@ -151,6 +186,25 @@ Returns the number of rows of data in the table.
 */
 public int getRowCount() {
 	return _rows;
+}
+
+/**
+Returns general data validators for a given column.
+@param col Column to return validators from.
+@return List of general Validators.
+ */
+public Validator[] getValidators(int col) {
+	
+	Validator[] no_checks = new Validator[] {};
+	switch (col) {
+		case COL_RIGHT_ID:		return ids;
+		case COL_RIGHT_NAME:	return blank;
+		case COL_STRUCT_ID:		return ids;
+		case COL_ADMIN_NUM:		return nums;
+		case COL_DCR_AMT:		return nums;
+		case COL_ON_OFF:		return nums;
+		default:				return no_checks;
+	}
 }
 
 /**
@@ -262,36 +316,6 @@ public void setValueAt(Object value, int row, int col) {
 	}
 
 	super.setValueAt(value, row, col);	
-}	
-
-/**
-Returns the text to be assigned to worksheet tooltips.
-@return a String array of tool tips.
-*/
-public String[] getColumnToolTips() {
-	String[] tips = new String[__COLUMNS];
-
-	tips[COL_RIGHT_ID] =
-		"<html>The diversion right ID is typically the diversion" +
-		" station ID<br> followed by .01, .02, etc.</html>";
-	tips[COL_RIGHT_NAME] = 
-		"Diversion right name";
-	tips[COL_STRUCT_ID] = 
-		"<HTML>The diversion ID is the link between diversion stations "
-		+ "and their right(s).</HTML>";
-	tips[COL_ADMIN_NUM] = 
-		"<HTML>Lower admininistration numbers indicate greater " +
-		"seniority.<BR>99999 is typical for a very junior" +
-		" right.</html>";
-	tips[COL_DCR_AMT] = 
-		"Decree amount (CFS)";
-	tips[COL_ON_OFF] = 
-		"<HTML>0 = OFF<BR>1 = ON<BR>" +
-		"YYYY indicates to turn on the right in year YYYY."+
-		"<BR>-YYYY indicates to turn off the right in year" +
-		" YYYY.</HTML>";
-
-	return tips;
 }
 
 }

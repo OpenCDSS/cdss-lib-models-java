@@ -7,6 +7,8 @@
 // History:
 //
 // 2005-03-31	J. Thomas Sapienza, RTi	Initial version.
+// 2007-04-27	Kurt Tometich, RTi		Added getValidators method for check
+//									file and data check implementation.
 // 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 
@@ -15,12 +17,14 @@ package DWR.StateMod;
 import java.util.Vector;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
+import RTi.Util.IO.Validator;
+import RTi.Util.IO.Validators;
 
 /**
 This table model displays instream flow data.
 */
 public class StateMod_InstreamFlow_Data_TableModel 
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel implements StateMod_Data_TableModel {
 
 /**
 Number of columns in the table model.
@@ -178,6 +182,33 @@ public int getRowCount() {
 	return _rows;
 }
 
+/**
+Returns general validators based on column of data being checked.
+@param col Column of data to check.
+@return List of validators for a column of data.
+ */
+public Validator[] getValidators( int col ) {
+	Validator[] no_checks = new Validator[] {};
+	// Data type switch must be 0, 1 or 2.
+	Validator [] data_type = new Validator[] {
+		Validators.isEquals( new Integer( 0 ) ),
+		Validators.isEquals( new Integer( 1 ) ),
+		Validators.isEquals( new Integer( 2 ) ) };
+	Validator [] data_type_Validators = new Validator[] {
+			Validators.or( data_type ) };
+	
+	switch (col) {
+		case COL_ID: 			return ids;
+		case COL_NAME: 			return blank;
+		case COL_NODE_ID:		return ids;
+		case COL_SWITCH:		return on_off_switch;
+		case COL_DAILY_ID:		return ids;
+		case COL_DOWN_NODE:		return blank;
+		case COL_DEMAND_TYPE:	return data_type_Validators;
+		default:				return no_checks;
+	}
+}
+	
 /**
 Returns the data that should be placed in the JTable at the given row 
 and column.

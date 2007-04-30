@@ -115,6 +115,8 @@
 //					river network file.
 // 2006-08-20	SAM, RTi		Move code to check for edits before
 //					running to StateModGUI_JFrame.
+// 2007-04-15	Kurt Tometich, RTi		Added some helper methods that
+//								return validators for data checks.
 // 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
@@ -143,6 +145,8 @@ import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.ProcessManager;
 import RTi.Util.IO.ProcessManagerJDialog;
 import RTi.Util.IO.PropList;
+import RTi.Util.IO.Validators;
+import RTi.Util.IO.Validator;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 import RTi.Util.Time.DateTime;
@@ -693,6 +697,30 @@ throws Exception
 
 	return result;
 }
+
+/**
+Fills in missing values with a space.  This is needed for the HTML table
+to show a blank value and not an empty cell.
+@param String[] data - The array of data to check.
+@return String[] - Formatted data array.
+ */
+public static String[] checkForMissingValues( String[] data )
+{
+	if( data != null)
+	{
+		for( int i = 0; i < data.length; i++ ) {
+			String element = data[i].trim();
+			if( element == null || element.length() == 0 ) {
+				data[i] = " ";
+			}
+			else {
+				data[i] = element;
+			}
+		}
+	}
+	return data;
+}
+
 
 // REVISIT SAM 2005-03-03 This simple test needs to be evaluated to determine
 // if it should be supported in all the file types.  For example, this code
@@ -2053,6 +2081,39 @@ public static DayTS getDailyTimeSeries ( String ID, String dailyID,
 		return newDayTS;
 		
 	}
+}
+
+/**
+Helper method to return validators to check an ID.
+@return List of Validators.
+ */
+public static Validator[] getIDValidators()
+{
+	return new Validator[] { Validators.notBlankValidator(),
+		Validators.regexValidator( "^[0-9a-zA-Z\\._]+$" ) };
+}
+
+/**
+Helper method to return general validators for numbers.
+@return List of Validators.
+ */
+public static Validator[] getNumberValidators()
+{
+	return new Validator[] { Validators.notBlankValidator(),
+		Validators.rangeValidator( 0, 999999 )};
+}
+
+/**
+Helper method to return general validators for an on/off switch.
+@return List of Validators.
+ */
+public static Validator[] getOnOffSwitchValidator()
+{
+	Validator[] orValidator = new Validator[] {
+		Validators.isEquals( new Integer( 0 )),
+		Validators.isEquals( new Integer( 1 )) };		
+	return new Validator[] { Validators.notBlankValidator(),
+		Validators.or( orValidator ) };
 }
 
 /**

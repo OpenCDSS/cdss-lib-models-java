@@ -7,6 +7,8 @@
 // History:
 //
 // 2005-04-04	J. Thomas Sapienza, RTi	Initial version.
+// 2007-04-27	Kurt Tometich, RTi		Added getValidators method for check
+//									file and data check implementation.
 // 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 
@@ -15,12 +17,14 @@ package DWR.StateMod;
 import java.util.Vector;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
+import RTi.Util.IO.Validator;
+import RTi.Util.IO.Validators;
 
 /**
 This table model displays reservoir station data.
 */
 public class StateMod_Reservoir_Data_TableModel
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel implements StateMod_Data_TableModel {
 
 /**
 Number of columns in the table model.
@@ -221,6 +225,45 @@ Returns the number of rows of data in the table.
 */
 public int getRowCount() {
 	return _rows;
+}
+
+/**
+Returns general validators based on column of data being checked.
+@param col Column of data to check.
+@return List of validators for a column of data.
+ */
+public Validator[] getValidators( int col ) 
+{
+	Validator[] no_checks = new Validator[] {};
+	// Switch must be 0, 1, 2 or 3.
+	Validator [] data_type = new Validator[] {
+		Validators.isEquals( new Integer( 0 ) ),
+		Validators.isEquals( new Integer( 1 ) ),
+		Validators.isEquals( new Integer( 2 ) ),
+		Validators.isEquals( new Integer( 3 ) ) };
+	Validator [] switch_Validators = new Validator[] {
+			Validators.or( data_type ) };
+	Validator [] rdate = new Validator[] {
+		Validators.notBlankValidator(),
+		Validators.rangeValidator( -2, 13 )};
+	
+	switch ( col ) {
+	case COL_ID:				return ids;
+	case COL_NAME:				return blank;
+	case COL_NODE_ID:			return ids;
+	case COL_SWITCH:			return switch_Validators;
+	case COL_ONE_FILL_DATE:		return rdate;
+	case COL_MIN_CONTENT:		return nums;
+	case COL_MAX_CONTENT:		return nums;
+	case COL_MAX_RELEASE:		return nums;
+	case COL_DEAD_STORAGE:		return nums;
+	case COL_DAILY_ID:			return ids;
+	case COL_NUM_OWNERS:		return nums;
+	case COL_NUM_PRECIP_STA: 	return nums;
+	case COL_NUM_EVAP_STA:		return nums;
+	case COL_NUM_CURVE_ROWS:	return nums;
+	default:					return no_checks;
+	}
 }
 
 /**

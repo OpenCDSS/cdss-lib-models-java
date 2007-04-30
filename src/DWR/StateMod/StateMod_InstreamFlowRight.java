@@ -56,6 +56,9 @@
 //					  better.
 // 2005-03-31	JTS, RTi		Added createBackup().
 // 2005-04-18	JTS, RTi		Added writeListFile().
+// 2007-04-12	Kurt Tometich, RTi		Added checkComponentData() and
+//									getDataHeader() methods for check
+//									file and data check support.
 // 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
@@ -71,6 +74,7 @@ import java.lang.Double;
 import java.util.Vector;
 
 import RTi.Util.IO.IOUtil;
+import RTi.Util.IO.PropList;
 
 import RTi.Util.Message.Message;
 
@@ -81,7 +85,7 @@ This StateMod_InstreamFlowRight class holds information for StateMod instream
 flow station rights.
 */
 public class StateMod_InstreamFlowRight extends StateMod_Data 
-implements Cloneable, Comparable {
+implements Cloneable, Comparable, StateMod_Component {
 
 /**
 Administration number.  The value is stored as a string to allow exact
@@ -111,6 +115,20 @@ suitable for use with StateDMI.
 public StateMod_InstreamFlowRight ( boolean initialize_defaults )
 {	super();
 	initialize ( initialize_defaults );
+}
+
+/**
+@param count Number of components checked.
+@param dataset StateMod dataset object.
+@param props Extra properties for specific data checks.
+@return List of data that failed specific checks.
+ */
+public String[] checkComponentData( int count, 
+StateMod_DataSet dataset, PropList props ) 
+{
+	// TODO KAT 2007-04-16
+	// add specific checks here
+	return null;
 }
 
 /**
@@ -248,6 +266,18 @@ private void initialize ( boolean initialize_defaults )
 	}
 	else {	_dcrifr = StateMod_Util.MISSING_DOUBLE;
 	}
+}
+
+/**
+Returns the data column header for the specifically checked data.
+@return Data column header.
+ */
+public static String[] getDataHeader()
+{
+	// TODO KAT 2007-04-16 
+	// When specific checks are added to checkComponentData
+	// return the header for that data here
+	return new String[] {};
 }
 
 /**

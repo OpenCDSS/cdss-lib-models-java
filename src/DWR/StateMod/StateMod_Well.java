@@ -106,6 +106,9 @@
 // 2006-04-09	SAM, RTi		Add _parcels_Vector data member and
 //					associated methods, to help with
 //					StateDMI error handling.
+// 2007-04-12	Kurt Tometich, RTi		Added checkComponentData() and
+//									getDataHeader() methods for check
+//									file and data check support.
 // 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
@@ -126,7 +129,9 @@ import DWR.StateCU.StateCU_IrrigationPracticeTS;
 import RTi.GIS.GeoView.GeoRecord;
 import RTi.TS.DayTS;
 import RTi.TS.MonthTS;
+import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.IOUtil;
+import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 import RTi.Util.Time.TimeUtil;
@@ -137,7 +142,7 @@ This class stores all relevant data for a StateMod well.
 
 public class StateMod_Well 
 extends StateMod_Data
-implements Cloneable, Comparable {
+implements Cloneable, Comparable, StateMod_Component {
 protected String 	_cdividyw;	// Well id to use for daily data.
 private double		_divcapw;	// Well capacity(cfs)
 private String		_idvcow2;	// Diversion this well is tied to 
@@ -333,6 +338,155 @@ public boolean changed() {
 	}
 */
 	return true;
+}
+
+/**
+Performs data checks for this component.
+@return String[] - Array of data that has been checked. Returns null if
+there were no problems found.
+ */
+public String[] checkComponentData( int count, StateMod_DataSet dataset,
+PropList props )
+{	
+	StateMod_Parcel parcel = null;	// Parcel associated with a well station
+	String id_i = null;
+	int wes_parcel_count = 0;	// Parcel count for well station
+	double wes_parcel_area = 0.0;	// Area of parcels for well station
+	int wes_well_parcel_count = 0;	// Parcel (with wells) count for well
+					// station.
+	double wes_well_parcel_area = 0.0;
+					// Area of parcels with wells for well
+					// station.
+	Vector parcel_Vector;		// List of parcels for well station.
+								// potential problems.
+	// check proplist for valid values
+	boolean checkRights = false;
+	Vector wer_Vector = null;
+	if ( props != null ) {
+		// Check if well rights are being evaluated.
+		// Validating Well Station Rights by checking Station data
+		String propRights = props.getValue("checkRights");
+		if ( propRights != null && propRights.equalsIgnoreCase("true")) {
+			checkRights = true;
+			DataSetComponent wer_comp = 
+				dataset.getComponentForComponentType (
+				StateMod_DataSet.COMP_WELL_RIGHTS );
+			wer_Vector = (Vector)wer_comp.getData();
+		}
+	}
+	id_i = getID();
+	if ( getAreaw() <= 0.0 ) {
+		if ( checkRights ) {
+			Vector rights = 
+				StateMod_Util.getRightsForStation ( id_i, wer_Vector );
+			if ( rights != null  &&  rights.size() != 0 ) {
+				return null;
+			}
+		}
+		++count;
+		// Check for parcels...
+		wes_parcel_count = 0;
+		wes_parcel_area = 0.0;
+		wes_well_parcel_count = 0;
+		wes_well_parcel_area = 0.0;
+		parcel_Vector = getParcels();
+		if ( parcel_Vector != null ) {
+			wes_parcel_count = parcel_Vector.size();
+			for ( int j = 0; j < wes_parcel_count; j++ ) {
+				parcel = (StateMod_Parcel)
+					parcel_Vector.elementAt(j);
+				if ( parcel.getArea() > 0.0 ) {
+					wes_parcel_area +=
+						parcel.getArea();
+				}
+				if ( parcel.getWellCount() > 0 ) {
+					wes_well_parcel_count +=
+						parcel.getWellCount();
+					wes_well_parcel_area +=
+						parcel.getArea();
+				}
+			}
+		}
+		// new format for check file
+		String [] data_table = {
+			StringUtil.formatString(count,"%4d"),
+			StringUtil.formatString(id_i,"%-12.12s"),
+			getName(),
+			StringUtil.formatString(getCollectionType(),
+			"%-10.10s"),
+			StringUtil.formatString(wes_parcel_count,"%9d"),
+			StringUtil.formatString(wes_parcel_area,"%11.0f"),
+			StringUtil.formatString(wes_well_parcel_count,"%9d"),
+			StringUtil.formatString(wes_well_parcel_area,"%11.0f") };
+		
+		return StateMod_Util.checkForMissingValues( data_table );
+	}
+	return null;
+}
+
+/**
+Performs data checks for the capacity portion of this component.
+@param Vector wer_Vector - Vector of water rights.
+@return String[] - Array of data that has been checked. Returns null if
+there were no problems found.
+ */
+public String[] checkComponentData_Capacity( Vector wer_Vector, int count )
+{
+	double decree;
+	double decree_sum;
+	int onoff = 0;		// On/off switch for right
+	int size_rights = 0;
+	String id_i = null;
+	Vector rights = null;
+	id_i = getID();
+	StateMod_WellRight wer_i = null;
+	rights = StateMod_Util.getRightsForStation ( id_i, wer_Vector );
+	size_rights = 0;
+	if ( rights != null ) {
+		size_rights = rights.size();
+	}
+	if ( size_rights == 0 ) {
+		return null;
+	}
+	// Get the sum of the rights, assuming that all should be
+	// compared against the capacity (i.e., sum of rights at the
+	// end of the period will be compared with the current well
+	// capacity)...
+	decree_sum = 0.0;
+	for ( int iright = 0; iright < size_rights; iright++ ) {
+		wer_i = (StateMod_WellRight)rights.elementAt(iright);
+		decree = wer_i.getDcrdivw();
+		onoff = getSwitch();
+		if ( decree < 0.0 ) {
+			// Ignore - missing values will cause a bad
+			// sum.
+			continue;
+		}
+		if ( onoff <= 0 ) {
+			// Subtract the decree...
+			decree_sum -= decree;
+		}
+		else {	// Add the decree...
+			decree_sum += decree;
+		}
+	}
+	// Compare to a whole number, which is the greatest precision
+	// for documented files.
+	if ( !StringUtil.formatString(decree_sum,"%.2f").equals(
+		StringUtil.formatString(getDivcapw(),"%.2f")) ) {
+		// new format for check file
+		String [] data_table = {
+			StringUtil.formatString(++count,"%4d"),
+			StringUtil.formatString(id_i,"%-12.12s"),
+			getName(),
+			StringUtil.formatString(getCollectionType(),
+			"%-10.10s"),
+			StringUtil.formatString(getDivcapw(),"%9.2f"),
+			StringUtil.formatString(decree_sum,"%9.2f"),
+			StringUtil.formatString( size_rights,"%8d"), };
+		return StateMod_Util.checkForMissingValues( data_table );
+	}
+	return null;
 }
 
 /**
@@ -952,6 +1106,22 @@ public MonthTS getConsumptiveWaterRequirementMonthTS() {
 }
 
 /**
+Returns the table header for StateMod_Well data tables.
+@return String[] header - Array of header elements.
+ */
+public static String[] getDataHeader()
+{
+	return new String[] {"Num",
+			"Well Station ID",
+			"Well Station Name",
+			"Collection Type",
+			"# Parcels for Well Station",
+			"Total Parcel Area",
+			"# Parcels with Wells",
+			"Parcels with Well Area (ACRE)"};
+}
+
+/**
 @return daily demand time series
 */
 public DayTS getDemandDayTS() {
@@ -1046,6 +1216,21 @@ Get the geographical data associated with the well.
 */
 public GeoRecord getGeoRecord() {
 	return _georecord;
+}
+
+/**
+Returns the table header for capacity data tables.
+@return String[] header - Array of header elements.
+ */
+public static String[] getCapacityHeader()
+{
+	return new String[] {"Num",
+			"Well Station ID",
+			"Well Station Name",
+			"Collection Type",
+			"Well Capacity (CFS)",
+			"Sum of Rights (CFS)",
+			"Number of Rights (CFS)", };
 }
 
 /**

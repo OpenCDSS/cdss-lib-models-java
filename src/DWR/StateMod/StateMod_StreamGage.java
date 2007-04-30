@@ -131,6 +131,9 @@
 //					* Clone status is checked via _isClone
 //					  when the component is marked as dirty.
 // 2005-04-18	JTS, RTi		Added writeListFile().
+// 2007-04-12	Kurt Tometich, RTi		Added checkComponentData() and
+//									getDataHeader() methods for check
+//									file and data check support.
 // 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
@@ -146,12 +149,13 @@ import RTi.GIS.GeoView.GeoRecord;
 import RTi.TS.DayTS;
 import RTi.TS.MonthTS;
 import RTi.Util.IO.IOUtil;
+import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 
 public class StateMod_StreamGage 
 extends StateMod_Data
-implements Cloneable, Comparable
+implements Cloneable, Comparable, StateMod_Component
 {
 
 //protected String 	_cgoto;		// River node for stream station.
@@ -236,6 +240,20 @@ public boolean changed() {
 	}
 
 	return true;
+}
+
+/**
+@param count Number of components checked.
+@param dataset StateMod dataset object.
+@param props Extra properties for specific data checks.
+@return List of data that failed specific checks.
+ */
+public String[] checkComponentData( int count, 
+StateMod_DataSet dataset, PropList props ) 
+{
+	// TODO KAT 2007-04-16
+	// add specific checks here
+	return null;
 }
 
 /**
@@ -485,6 +503,18 @@ Get the daily stream station identifier used with the stream gage station file.
 */
 public String getCrunidy ( ) {
 	return _crunidy;
+}
+
+/**
+Returns the data column header for the specifically checked data.
+@return Data column header.
+ */
+public static String[] getDataHeader()
+{
+	// TODO KAT 2007-04-16 
+	// When specific checks are added to checkComponentData
+	// return the header for that data here
+	return new String[] {};
 }
 
 /**

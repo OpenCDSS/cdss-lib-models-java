@@ -148,6 +148,9 @@
 // 2006-04-09	SAM, RTi		Add _parcels_Vector data member and
 //					associated methods, to help with
 //					StateDMI error handling.
+// 2007-04-12	Kurt Tometich, RTi		Added checkComponentData() and
+//									getDataHeader() methods for check
+//									file and data check support.
 // 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
@@ -175,6 +178,7 @@ import RTi.TS.DayTS;
 import RTi.TS.MonthTS;
 
 import RTi.Util.IO.IOUtil;
+import RTi.Util.IO.PropList;
 
 import RTi.Util.Message.Message;
 
@@ -188,7 +192,7 @@ the COMP_DIVERSION_STATIONS flag dirty.  A new object will have empty non-null
 Vectors, null time series, and defaults for all other data.
 */
 public class StateMod_Diversion extends StateMod_Data
-implements Cloneable, Comparable
+implements Cloneable, Comparable, StateMod_Component
 {
 
 /**
@@ -502,6 +506,11 @@ public boolean changed() {
 		return false;
 	}
 	return true;
+}
+
+public String[] checkComponentData(int count, StateMod_DataSet dataset, PropList props) {
+	// TODO Add data checks here ...
+	return null;
 }
 
 /**
@@ -1209,6 +1218,17 @@ Get monthly consumptive water requirement time series.
 */
 public MonthTS getConsumptiveWaterRequirementMonthTS() {
 	return _cwr_MonthTS;
+}
+
+/**
+Returns the column headers for the specific data checked.
+@return List of column headers.
+ */
+public static String[] getDataHeader()
+{
+	return new String[] { "Num",
+			"Diversion ID",
+			"Diversion Name" };
 }
 
 /**

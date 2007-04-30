@@ -9,6 +9,12 @@
 // 2005-04-04	J. Thomas Sapienza, RTi	Initial version.
 // 2006-04-11	JTS, RTi		Corrected the classes returned from
 //					getColumnClass().
+// 2007-03-29	Kurt Tometich, RTi		Added a getValidators() method
+//									that returns a list of validators
+//									for a given column of data.  This was
+//									added to abstract and simplify obtaining
+//									the types of validation for a given data
+//									type.
 // 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 
@@ -17,12 +23,14 @@ package DWR.StateMod;
 import java.util.Vector;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
+import RTi.Util.IO.Validator;
+import RTi.Util.IO.Validators;
 
 /**
 This table model displays well data.
 */
 public class StateMod_Well_Data_TableModel 
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel implements StateMod_Data_TableModel {
 
 /**
 Whether the table data is editable or not.
@@ -313,13 +321,67 @@ public int getRowCount() {
 }
 
 /**
+Returns the validators for the specified row and column
+of the internal component data.
+@param col The column index.
+@return List of Validators for the specified column of data.
+ */
+public Validator[] getValidators( int col )
+{	
+	Validator[] no_checks = new Validator[] {};
+	// More specific validators ...
+	// Demand and Annual Efficieny must be less than 100 and
+	Validator [] generalAndLessThanHundred = new Validator [] { 
+			Validators.notBlankValidator(),
+			Validators.regexValidator( "^[0-9\\-]+$" ),
+			Validators.rangeValidator( 0, 9999999 ),
+			Validators.lessThan( 100 ) };
+	// Efficiencies must be between 0 and 100
+	Validator [] generaAndRangeZeroToHundred = new Validator [] { 
+			Validators.notBlankValidator(),
+			Validators.regexValidator( "^[0-9\\-]+$" ),
+			Validators.rangeValidator( 0, 9999999 ),
+			Validators.rangeValidator( -1, 101 ) };
+	
+	switch ( col ) {
+		case COL_ID:			return ids;
+		case COL_NAME:			return blank;
+		case COL_RIVER_NODE_ID:	return ids;
+		case COL_SWITCH:		return blank;
+		case COL_DAILY_ID:		return blank;
+		case COL_CAPACITY:		return nums;
+		case COL_DIVERSION_ID:	return ids;	
+		case COL_DEMAND_TYPE:	return generalAndLessThanHundred;
+		case COL_EFF_ANNUAL:	return generalAndLessThanHundred;
+		case COL_AREA:			return nums;
+		case COL_USE_TYPE:		return nums;
+		case COL_DEMAND_SOURCE:	return nums;
+		case COL_PRIMARY:		return generaAndRangeZeroToHundred;
+		case COL_EFF_01:		return generaAndRangeZeroToHundred;
+		case COL_EFF_02:		return generaAndRangeZeroToHundred;
+		case COL_EFF_03:		return generaAndRangeZeroToHundred;
+		case COL_EFF_04:		return generaAndRangeZeroToHundred;
+		case COL_EFF_05:		return generaAndRangeZeroToHundred;
+		case COL_EFF_06:		return generaAndRangeZeroToHundred;
+		case COL_EFF_07:		return generaAndRangeZeroToHundred;
+		case COL_EFF_08:		return generaAndRangeZeroToHundred;
+		case COL_EFF_09:		return generaAndRangeZeroToHundred;
+		case COL_EFF_10:		return generaAndRangeZeroToHundred;
+		case COL_EFF_11:		return generaAndRangeZeroToHundred;
+		case COL_EFF_12:		return generaAndRangeZeroToHundred;	
+		default:				return no_checks;
+	}
+}
+
+/**
 Returns the data that should be placed in the JTable
 at the given row and column.
 @param row the row for which to return data.
 @param col the column for which to return data.
 @return the data that should be placed in the JTable at the given row and col.
 */
-public Object getValueAt(int row, int col) {
+public Object getValueAt(int row, int col) 
+{
 	if (_sortOrder != null) {
 		row = _sortOrder[row];
 	}
@@ -397,7 +459,8 @@ Returns whether the cell is editable or not.  Currently no cells are editable.
 or not.
 @return whether the cell is editable or not.
 */
-public boolean isCellEditable(int rowIndex, int columnIndex) {
+public boolean isCellEditable(int rowIndex, int columnIndex) 
+{
 	if (!__editable) {
 		return false;
 	}
@@ -411,12 +474,12 @@ Inserts the specified value into the table at the given position.
 @param col the column of the cell in which to place the object.
 */
 public void setValueAt(Object value, int row, int col)
-{	if (_sortOrder != null) {
+{	
+	if (_sortOrder != null) {
 		row = _sortOrder[row];
 	}
 
 	StateMod_Well smw = (StateMod_Well)_data.elementAt(row);
-
 	switch (col) {
 		case COL_ID:
 			smw.setID((String)value);

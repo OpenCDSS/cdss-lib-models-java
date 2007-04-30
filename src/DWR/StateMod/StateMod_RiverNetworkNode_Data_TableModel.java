@@ -22,12 +22,13 @@ package DWR.StateMod;
 import java.util.Vector;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
+import RTi.Util.IO.Validator;
 
 /**
 This table model displays reservoir data.
 */
 public class StateMod_RiverNetworkNode_Data_TableModel 
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel implements StateMod_Data_TableModel {
 
 /**
 Number of columns in the table model.
@@ -98,6 +99,25 @@ public String getColumnName(int columnIndex) {
 
 
 /**
+Returns an array containing the widths (in number of characters) that the 
+fields in the table should be sized to.
+@return an integer array containing the widths for each field.
+*/
+public int[] getColumnWidths() {
+	int[] widths = new int[__COLUMNS];
+	for (int i = 0; i < __COLUMNS; i++) {
+		widths[i] = 0;
+	}
+	widths[COL_ID] = 11;
+	widths[COL_NAME] = 23;
+	widths[COL_CSTADN] = 11;
+	widths[COL_GWMAXR] = 11;
+	widths[COL_COMMENT] = 16;
+	
+	return widths;
+}
+
+/**
 Returns the format that the specified column should be displayed in when
 the table is being displayed in the given table format. 
 @param column column for which to return the format.
@@ -124,6 +144,24 @@ public int getRowCount() {
 }
 
 /**
+Returns general validators based on column of data being checked.
+@param col Column of data to check.
+@return List of validators for a column of data.
+ */
+public Validator[] getValidators( int col ) {
+	Validator[] no_checks = new Validator[] {};
+	
+	switch (col) {
+	case COL_ID:		return ids;
+	case COL_NAME:		return blank;
+	case COL_COMMENT: 	return no_checks;		// can be blank
+	case COL_CSTADN:	return no_checks;		// can be blank
+	case COL_GWMAXR:	return nums;
+	default:			return no_checks;
+	}
+}
+
+/**
 Returns the data that should be placed in the JTable
 at the given row and column.
 @param row the row for which to return data.
@@ -146,25 +184,6 @@ public Object getValueAt(int row, int col) {
 		case COL_GWMAXR:	return new Double(r.getGwmaxr());
 		default:	return "";
 	}
-}
-
-/**
-Returns an array containing the widths (in number of characters) that the 
-fields in the table should be sized to.
-@return an integer array containing the widths for each field.
-*/
-public int[] getColumnWidths() {
-	int[] widths = new int[__COLUMNS];
-	for (int i = 0; i < __COLUMNS; i++) {
-		widths[i] = 0;
-	}
-	widths[COL_ID] = 11;
-	widths[COL_NAME] = 23;
-	widths[COL_CSTADN] = 11;
-	widths[COL_GWMAXR] = 11;
-	widths[COL_COMMENT] = 16;
-	
-	return widths;
 }
 
 /**

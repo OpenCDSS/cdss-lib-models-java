@@ -7,6 +7,8 @@
 // History:
 //
 // 2005-04-04	J. Thomas Sapienza, RTi	Initial version.
+// 2007-04-27	Kurt Tometich, RTi		Added getValidators method for check
+//									file and data check implementation.
 // 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 
@@ -18,11 +20,14 @@ import DWR.StateMod.StateMod_Diversion;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 
+import RTi.Util.IO.Validator;
+import RTi.Util.IO.Validators;
+
 /**
 This table model display data in diversion tables.
 */
 public class StateMod_Diversion_Data_TableModel 
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel implements StateMod_Data_TableModel {
 
 /**
 Number of columns in the table model (this includes all data - other code
@@ -161,6 +166,46 @@ public String getColumnName(int columnIndex) {
 }
 
 /**
+Returns an array containing the widths (in number of characters) that the 
+fields in the table should be sized to.
+@return an integer array containing the widths for each field.
+*/
+public int[] getColumnWidths() {
+	int[] widths = new int[__COLUMNS];
+	for (int i = 0; i < __COLUMNS; i++) {
+		widths[i] = 0;
+	}
+	widths[COL_ID] = 		8;
+	widths[COL_NAME] = 		18;
+
+	widths[COL_RIVER_NODE_ID] =	8;
+	widths[COL_ON_OFF] =		5;
+	widths[COL_CAPACITY] =		7;
+	widths[COL_REPLACE_RES_OPTION]= 8;
+	widths[COL_DAILY_ID] =		8;
+	widths[COL_USER_NAME] =		18;
+	widths[COL_DEMAND_TYPE] =	5;
+	widths[COL_EFF_ANNUAL] =	8;
+	widths[COL_AREA] =		6;	// Wider than title for big
+						// ditches
+	widths[COL_USE_TYPE] =		7;
+	widths[COL_DEMAND_SOURCE] =	6;
+	widths[COL_EFF_01] = 8;
+	widths[COL_EFF_02] = 8;
+	widths[COL_EFF_03] = 8;
+	widths[COL_EFF_04] = 8;
+	widths[COL_EFF_05] = 8;
+	widths[COL_EFF_06] = 8;
+	widths[COL_EFF_07] = 8;
+	widths[COL_EFF_08] = 8;
+	widths[COL_EFF_09] = 8;
+	widths[COL_EFF_10] = 8;
+	widths[COL_EFF_11] = 8;
+	widths[COL_EFF_12] = 8;
+	return widths;
+}
+
+/**
 Returns the format that the specified column should be displayed in when
 the table is being displayed in the given table format. 
 @param column column for which to return the format.
@@ -212,6 +257,76 @@ public int getRowCount() {
 }
 
 /**
+Returns general data validators for the given column.
+@param col Column to get validator for.
+@return List of general Validators.
+ */
+public Validator[] getValidators(int col) 
+{
+	Validator[] no_checks = new Validator[] {};
+	// Daily ID must be an ID, zero, 3, or 4.
+	Validator [] dailyID = new Validator[] {
+		Validators.regexValidator( "^[0-9a-zA-Z\\.]+$" ),
+		Validators.isEquals( new Integer( 0 ) ),
+		Validators.isEquals( new Integer( 3 ) ),
+		Validators.isEquals( new Integer( 4 ) )};
+	Validator [] dailyIDValidators = new Validator[] {
+		Validators.notBlankValidator(),
+		Validators.or( dailyID ) };
+	// Demand type must be between 1 and 5
+	Validator[] demand_type = new Validator[] {
+		Validators.notBlankValidator(),
+		Validators.rangeValidator( 0, 6 ) };
+	// Use type must be less than 6 and greater than -1
+	Validator[] use_type = new Validator[] {
+		Validators.notBlankValidator(),
+		Validators.rangeValidator( -1, 6 ) };
+	// Demand source must be greater than 0, less than 9
+	// or equal to -999
+	Validator[] demands = new Validator[] {
+		Validators.rangeValidator( 0, 9 ),
+		Validators.isEquals( new Integer( -999 ) )};
+	Validator[] demand_source = new Validator[] {
+		Validators.notBlankValidator(),
+		Validators.or( demands ) };
+	// Efficiencies must be between 0 and 100
+	Validator [] generalAndRangeZeroToHundred = new Validator [] { 
+		Validators.notBlankValidator(),
+		Validators.regexValidator( "^[0-9\\-]+$" ),
+		Validators.rangeValidator( 0, 9999999 ),
+		Validators.rangeValidator( -1, 101 ) };
+	
+	switch (col) {
+	case COL_ID:					return ids;
+	case COL_NAME:					return blank;
+	case COL_RIVER_NODE_ID:			return ids;
+	case COL_ON_OFF:				return on_off_switch;
+	case COL_CAPACITY:				return nums;
+	case COL_REPLACE_RES_OPTION:	return nums;
+	case COL_DAILY_ID:				return dailyIDValidators;
+	case COL_USER_NAME:				return blank;
+	case COL_DEMAND_TYPE:			return demand_type;
+	case COL_AREA:					return nums;
+	case COL_USE_TYPE:				return use_type;
+	case COL_DEMAND_SOURCE:			return demand_source;
+	case COL_EFF_ANNUAL:			return generalAndRangeZeroToHundred;
+	case COL_EFF_01:				return generalAndRangeZeroToHundred;
+	case COL_EFF_02:				return generalAndRangeZeroToHundred;
+	case COL_EFF_03:				return generalAndRangeZeroToHundred;
+	case COL_EFF_04:				return generalAndRangeZeroToHundred;
+	case COL_EFF_05:				return generalAndRangeZeroToHundred;
+	case COL_EFF_06:				return generalAndRangeZeroToHundred;
+	case COL_EFF_07:				return generalAndRangeZeroToHundred;
+	case COL_EFF_08:				return generalAndRangeZeroToHundred;
+	case COL_EFF_09:				return generalAndRangeZeroToHundred;
+	case COL_EFF_10:				return generalAndRangeZeroToHundred;
+	case COL_EFF_11:				return generalAndRangeZeroToHundred;
+	case COL_EFF_12:				return generalAndRangeZeroToHundred;
+	default:						return no_checks;
+	}
+}
+
+/**
 Returns the data that should be placed in the JTable at the given row and 
 column.
 @param row the row for which to return data.
@@ -253,46 +368,6 @@ public Object getValueAt(int row, int col) {
 		case COL_EFF_12:	return new Double(smd.getDiveff(11));
 		default:	return "";
 	}
-}
-
-/**
-Returns an array containing the widths (in number of characters) that the 
-fields in the table should be sized to.
-@return an integer array containing the widths for each field.
-*/
-public int[] getColumnWidths() {
-	int[] widths = new int[__COLUMNS];
-	for (int i = 0; i < __COLUMNS; i++) {
-		widths[i] = 0;
-	}
-	widths[COL_ID] = 		8;
-	widths[COL_NAME] = 		18;
-
-	widths[COL_RIVER_NODE_ID] =	8;
-	widths[COL_ON_OFF] =		5;
-	widths[COL_CAPACITY] =		7;
-	widths[COL_REPLACE_RES_OPTION]= 8;
-	widths[COL_DAILY_ID] =		8;
-	widths[COL_USER_NAME] =		18;
-	widths[COL_DEMAND_TYPE] =	5;
-	widths[COL_EFF_ANNUAL] =	8;
-	widths[COL_AREA] =		6;	// Wider than title for big
-						// ditches
-	widths[COL_USE_TYPE] =		7;
-	widths[COL_DEMAND_SOURCE] =	6;
-	widths[COL_EFF_01] = 8;
-	widths[COL_EFF_02] = 8;
-	widths[COL_EFF_03] = 8;
-	widths[COL_EFF_04] = 8;
-	widths[COL_EFF_05] = 8;
-	widths[COL_EFF_06] = 8;
-	widths[COL_EFF_07] = 8;
-	widths[COL_EFF_08] = 8;
-	widths[COL_EFF_09] = 8;
-	widths[COL_EFF_10] = 8;
-	widths[COL_EFF_11] = 8;
-	widths[COL_EFF_12] = 8;
-	return widths;
 }
 
 /**

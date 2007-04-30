@@ -7,6 +7,8 @@
 // History:
 //
 // 2005-04-04	J. Thomas Sapienza, RTi	Initial version.
+// 2007-04-27	Kurt Tometich, RTi		Added getValidators method for check
+//									file and data check implementation.
 // ----------------------------------------------------------------------------
 
 package DWR.StateMod;
@@ -17,13 +19,16 @@ import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 
 import RTi.Util.Message.Message;
 
+import RTi.Util.IO.Validator;
+
 /**
 This table model displays well right data.  The model can display rights data
 for a single well or for 1+ wells.  The difference is specified in the
 constructor and affects how many columns of data are shown.
 */
 public class StateMod_WellRight_Data_TableModel 
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel implements StateMod_Data_TableModel
+{
 
 /**
 Number of columns in the table model.  For table models that display rights for
@@ -199,13 +204,33 @@ public int getRowCount() {
 }
 
 /**
+Returns the validators for the given column.
+@param col The column to return the validators for.
+@return List of validators.
+ */
+public Validator[] getValidators( int col ) 
+{
+	Validator[] no_checks = new Validator[] {};
+	switch (col) {
+		case COL_RIGHT_ID:		return ids;
+		case COL_RIGHT_NAME:	return blank;
+		case COL_STRUCT_ID:		return ids;
+		case COL_ADMIN_NUM:		return nums;
+		case COL_DCR_AMT:		return nums;
+		case COL_ON_OFF:		return on_off_switch;
+		default:				return no_checks;
+	}
+}	
+
+/**
 Returns the data that should be placed in the JTable
 at the given row and column.
 @param row the row for which to return data.
 @param col the column for which to return data.
 @return the data that should be placed in the JTable at the given row and col.
 */
-public Object getValueAt(int row, int col) {
+public Object getValueAt(int row, int col) 
+{
 	if (_sortOrder != null) {
 		row = _sortOrder[row];
 	}
@@ -298,6 +323,6 @@ public void setValueAt(Object value, int row, int col) {
 	}	
 
 	super.setValueAt(value, row, col);	
-}	
+}
 
 }

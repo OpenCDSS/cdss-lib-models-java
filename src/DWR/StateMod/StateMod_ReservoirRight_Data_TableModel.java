@@ -8,7 +8,9 @@
 //
 // 2005-04-04	J. Thomas Sapienza, RTi	Initial version.
 // 2006-04-11	JTS, RTi		Corrected the classes returned from
-//					getColumnClass().
+//							getColumnClass().
+// 2007-04-27	Kurt Tometich, RTi		Added getValidators method for check
+//									file and data check implementation.
 // 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 // ----------------------------------------------------------------------------
 
@@ -17,6 +19,8 @@ package DWR.StateMod;
 import java.util.Vector;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
+import RTi.Util.IO.Validator;
+import RTi.Util.IO.Validators;
 
 /**
 This table model displays reservoir right data.  The model can display rights
@@ -24,7 +28,7 @@ data for a single reservoir or for 1+ reservoirs.  The difference is specified
 in the constructor and affects how many columns of data are shown.
 */
 public class StateMod_ReservoirRight_Data_TableModel 
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel implements StateMod_Data_TableModel {
 
 /**
 Number of columns in the table model.  For table models that display rights 
@@ -210,6 +214,41 @@ Returns the number of rows of data in the table.
 */
 public int getRowCount() {
 	return _rows;
+}
+
+/**
+Returns general validators based on column of data being checked.
+@param col Column of data to check.
+@return List of validators for a column of data.
+ */
+public Validator[] getValidators( int col ) {
+	Validator[] no_checks = new Validator[] {};
+	// Reservior right type must be -1 or 1
+	Validator [] right_type = new Validator[] {
+		Validators.isEquals( new Integer( -1 ) ),
+		Validators.isEquals( new Integer( 1 ) ) };
+	Validator [] type_Validators = new Validator[] {
+		Validators.or( right_type ) };
+	// Reservoir fill type must be 1 or 2
+	Validator [] fill_type = new Validator[] {
+		Validators.isEquals( new Integer( 1 ) ),
+		Validators.isEquals( new Integer( 2 ) ) };
+	Validator [] fill_Validators = new Validator[] {
+		Validators.or( fill_type ) };
+		
+	switch (col) {
+	case COL_RIGHT_ID:		return ids;
+	case COL_RIGHT_NAME:	return blank;
+	case COL_STRUCT_ID:		return ids;
+	case COL_ADMIN_NUM:		return nums;
+	case COL_DCR_AMT:		return nums;
+	case COL_ON_OFF:		return nums;
+	case COL_ACCOUNT_DIST:	return nums;
+	case COL_RIGHT_TYPE:	return type_Validators;
+	case COL_FILL_TYPE:		return fill_Validators;
+	case COL_OOP_RIGHT:		return nums;
+	default:				return no_checks;
+	}
 }
 
 /**

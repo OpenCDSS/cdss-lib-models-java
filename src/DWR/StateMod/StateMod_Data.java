@@ -54,13 +54,13 @@
 //					* Added setDataSet().
 // 2005-04-13	JTS, RTi		Added writeToListFile(), which is used
 //					by subclasses.
+// 2007-04-27	Kurt Tometich, RTi		Fixed some warnings.
 // 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 
 package DWR.StateMod;
 
 import RTi.Util.String.StringUtil;
-
 import RTi.Util.Time.DateTime;
 
 /**
@@ -71,6 +71,7 @@ Possible values for this member come from the SMFileData class
 */
 public class StateMod_Data 
 implements Cloneable, Comparable {
+
 
 public static DateTime MISSING_DATE = 		null;
 public static double MISSING_DOUBLE = 		-999.0;
@@ -186,7 +187,7 @@ public Object clone() {
 	}
 
 	// dataset is not cloned -- the same reference is used.
-	data._dataset = _dataset;
+	StateMod_Data._dataset = _dataset;
 	data._isClone = true;
 
 	return data;
@@ -266,7 +267,7 @@ public boolean equals(StateMod_Data data) {
 		&& data._mapLabel.equals(_mapLabel)
 		&& data._mapLabelDisplayID == _mapLabelDisplayID
 		&& data._mapLabelDisplayName == _mapLabelDisplayName
-		&& data._dataset == _dataset) {
+		&& StateMod_Data._dataset == _dataset) {
 		return true;
 	}
 	return false;
