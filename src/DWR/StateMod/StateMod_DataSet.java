@@ -1653,7 +1653,7 @@ private Vector checkComponentData_WellRights ( PropList props )
 				wer_i.getCgoto() );
 			wes_i = null;
 			if ( pos >= 0 ) {
-				wes_i = (StateMod_Well)wes_Vector.elementAt(i);
+				wes_i = (StateMod_Well)wes_Vector.elementAt(pos);
 			}
 			wes_name = "";
 			if ( wes_i != null ) {
