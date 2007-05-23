@@ -68,6 +68,7 @@
 //									getDataHeader() methods for check
 //									file and data check support.
 // 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
+// 2007-05-16	SAM, RTi		Implement StateMod_Right interface.
 //------------------------------------------------------------------------------
 // EndHeader
 
@@ -89,7 +90,7 @@ import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 
 public class StateMod_DiversionRight extends StateMod_Data 
-implements Cloneable, Comparable, StateMod_Component {
+implements Cloneable, Comparable, StateMod_Component, StateMod_Right {
 
 /**
 Administration number.
@@ -240,6 +241,14 @@ throws Throwable {
 }
 
 /**
+Return the administration number, as per the generic interface.
+@return the administration number, as a String to protect from roundoff.
+*/
+public String getAdministrationNumber ()
+{	return getIrtem();
+}
+
+/**
 Returns the column headers for the specific data checked.
 @return List of column headers.
  */
@@ -251,10 +260,35 @@ public static String[] getDataHeader()
 }
 
 /**
+Return the decree, as per the generic interface.
+@return the decree, in the units of the data.
+*/
+public double getDecree()
+{	return getDcrdiv();
+}
+
+//TODO SAM 2007-05-16 Need to evaluate whether should be hard-coded.
+/**
+Return the decree units.
+@return the decree units.
+*/
+public String getDecreeUnits()
+{	return "CFS";
+}
+
+/**
 Return the decreed amount.
 */
 public double getDcrdiv() {
 	return _dcrdiv;
+}
+
+/**
+Return the right identifier, as per the generic interface.
+@return the right identifier.
+*/
+public String getIdentifier()
+{	return getID();
 }
 
 /**
@@ -302,12 +336,34 @@ public String getIrtem() {
 }
 
 /**
+Return the right location identifier, as per the generic interface.
+@return the right location identifier (location where right applies).
+*/
+public String getLocationIdentifier()
+{	return getCgoto();
+}
+
+/**
 Initializes data members.
 */
 private void initialize() {
 	_smdata_type = StateMod_DataSet.COMP_DIVERSION_RIGHTS;
 	_irtem = "99999";
 	_dcrdiv = 0;
+}
+
+
+/**
+Determine whether a file is a diversion right file.  Currently true is returned
+if the file extension is ".ddr".
+@param filename Name of the file being checked.
+@return true if the file is a StateMod diversion right file.
+*/
+public static boolean isDiversionRightFile ( String filename )
+{	if ( filename.toUpperCase().endsWith(".DDR")) {
+		return true;
+	}
+	return false;
 }
 
 /**

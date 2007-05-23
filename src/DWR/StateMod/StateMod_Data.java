@@ -56,6 +56,8 @@
 //					by subclasses.
 // 2007-04-27	Kurt Tometich, RTi		Fixed some warnings.
 // 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
+// 2007-05-17	SAM, RTi		Add comment as data member to help with modeling
+//					procedure development.
 //------------------------------------------------------------------------------
 
 package DWR.StateMod;
@@ -113,6 +115,11 @@ protected String _id;
 Station name.
 */
 protected String _name;
+
+/**
+Comment for data object.
+*/
+protected String _comment;
 
 /**
 For stations, the river node where station is located.  For water rights, the
@@ -195,7 +202,7 @@ public Object clone() {
 
 /**
 Compares this object to another StateMod_Data object based on _id, _name,
-_cgoto, _switch, _utm_x, _utm_y, in that order.
+_cgoto, _switch, _utm_x, _utm_y, in that order.  The comment is not compared.
 @param o the object to compare against.
 @return 0 if they are the same, 1 if this object is greater than the other
 object, or -1 if it is less.
@@ -253,6 +260,7 @@ public int compareTo(Object o) {
 Checks to see if two StateMod_Data objects are equal.  The objects are equal
 if all the boolean, double and int variables are the same, the Strings match
 with case-sensitivity, and they both have are in the same _dataset object.
+The comment is not compared.
 @return true if they are equal, false if not.
 */
 public boolean equals(StateMod_Data data) {
@@ -280,6 +288,7 @@ protected void finalize()
 throws Throwable {
 	_id = null;
 	_name = null;
+	_comment = null;
 	_cgoto = null;
 	_mapLabel = null;
 }
@@ -289,6 +298,14 @@ Return the Cgoto.
 */
 public String getCgoto() {
 	return _cgoto;
+}
+
+
+/**
+Return the comment.
+*/
+public String getComment() {
+	return _comment;
 }
 
 /**
@@ -350,6 +367,7 @@ Initialize data members.
 private void initialize() {
 	_id = "";
 	_name = "";
+	_comment = "";
 	_cgoto = "";
 	_mapLabel = "";
 	_mapLabelDisplayID = false;
@@ -389,6 +407,7 @@ public void restoreOriginal() {
 	_switch = d._switch;
 	_id = d._id;
 	_name = d._name;
+	_comment = d._comment;
 	_cgoto = d._cgoto;
 	_smdata_type = d._smdata_type;
 	_mapLabel = d._mapLabel;
@@ -409,6 +428,22 @@ public void setCgoto(String s) {
 			_dataset.setDirty(_smdata_type, true);
 		}
 		_cgoto = s;
+	}
+}
+
+/**
+Set the Comment.
+@param s the new comment.
+*/
+public void setComment (String s) {
+	if (s == null) {
+		return;
+	}
+	if (!s.equals(_comment)) {
+		if ( !_isClone && !_isClone && _dataset != null ) {
+			_dataset.setDirty(_smdata_type, true);
+		}
+		_comment = s;
 	}
 }
 
@@ -588,7 +623,7 @@ public void setUTM(String sx_orig, String sy_orig) {
 }
 
 /**
-Returns a String representation of this object.
+Returns a String representation of this object.  Omit comment.
 @return a String representation of this object.
 */
 public String toString() {
@@ -598,4 +633,4 @@ public String toString() {
 		+ _mapLabelDisplayID + ", " + _mapLabelDisplayName;
 }
 
-} // End StateMod_Data
+}

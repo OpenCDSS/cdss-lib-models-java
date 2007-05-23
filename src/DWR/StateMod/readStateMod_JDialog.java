@@ -47,11 +47,13 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import java.io.File;
+import java.util.Vector;
 
 import RTi.Util.GUI.JFileChooserFactory;
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleFileFilter;
 import RTi.Util.GUI.SimpleJButton;
+import RTi.Util.GUI.SimpleJComboBox;
 import RTi.Util.IO.Command;
 import RTi.Util.IO.CommandProcessor;
 import RTi.Util.IO.IOUtil;
@@ -75,6 +77,12 @@ private JTextField	__InputStart_JTextField = null;
 						// Start of period for input
 private JTextField	__InputEnd_JTextField = null;
 						// End of period for input
+private SimpleJComboBox	__Interval_JComboBox = null;
+						// Interval for water rights output.
+private SimpleJComboBox	__SpatialAggregation_JComboBox = null;
+						// aggregation for water rights output.
+private JTextField	__ParcelYear_JTextField = null;
+						// Parcel year for parcel total water rights
 private boolean		__error_wait = false;	// Is there an error that we
 						// are waiting to be cleared up
 						// or Cancel?
@@ -169,6 +177,15 @@ public void actionPerformed( ActionEvent event )
 		}
 		refresh ();
 	}
+	else if ( (__Interval_JComboBox != null) && (o == __Interval_JComboBox) ) {
+		refresh ();
+	}
+	else if ( (__SpatialAggregation_JComboBox != null) && (o == __SpatialAggregation_JComboBox) ) {
+		refresh ();
+	}
+	else {	// Other combo boxes, etc...
+		refresh();
+	}
 }
 
 /**
@@ -181,6 +198,9 @@ private void checkInput ()
 	String InputFile = __InputFile_JTextField.getText().trim();
 	String InputStart = __InputStart_JTextField.getText().trim();
 	String InputEnd = __InputEnd_JTextField.getText().trim();
+	String Interval = __Interval_JComboBox.getSelected();
+	String SpatialAggregation = __SpatialAggregation_JComboBox.getSelected();
+	String ParcelYear = __ParcelYear_JTextField.getText().trim();
 	__error_wait = false;
 	if ( InputFile.length() > 0 ) {
 		props.set ( "InputFile", InputFile );
@@ -190,6 +210,15 @@ private void checkInput ()
 	}
 	if ( InputEnd.length() > 0 ) {
 		props.set ( "InputEnd", InputEnd );
+	}
+	if ( Interval.length() > 0 ) {
+		props.set ( "Interval", Interval );
+	}
+	if ( Interval.length() > 0 ) {
+		props.set ( "SpatialAggregation", SpatialAggregation );
+	}
+	if ( ParcelYear.length() > 0 ) {
+		props.set ( "ParcelYear", ParcelYear );
 	}
 	try {	// This will warn the user...
 		__command.checkCommandParameters ( props, null, 1 );
@@ -208,9 +237,15 @@ private void commitEdits ()
 {	String InputFile = __InputFile_JTextField.getText().trim();
 	String InputStart = __InputStart_JTextField.getText().trim();
 	String InputEnd = __InputEnd_JTextField.getText().trim();
+	String Interval = __Interval_JComboBox.getSelected();
+	String SpatialAggregation = __SpatialAggregation_JComboBox.getSelected();
+	String ParcelYear = __ParcelYear_JTextField.getText().trim();
 	__command.setCommandParameter ( "InputFile", InputFile );
 	__command.setCommandParameter ( "InputStart", InputStart );
 	__command.setCommandParameter ( "InputEnd", InputEnd );
+	__command.setCommandParameter ( "Interval", Interval );
+	__command.setCommandParameter ( "SpatialAggregation", SpatialAggregation );
+	__command.setCommandParameter ( "ParcelYear", ParcelYear );
 }
 
 /**
@@ -224,6 +259,9 @@ throws Throwable
 	__InputFile_JTextField = null;
 	__InputStart_JTextField = null;
 	__InputEnd_JTextField = null;
+	__Interval_JComboBox = null;
+	__SpatialAggregation_JComboBox = null;
+	__ParcelYear_JTextField = null;
 	__command = null;
 	__ok_JButton = null;
 	__path_JButton = null;
@@ -267,13 +305,16 @@ private void initialize ( JFrame parent, Command command )
 	int y = 0;
 
         JGUIUtil.addComponent(main_JPanel, new JLabel (
-		"Read all the time series from a StateMod file, using " +
+		"Read all the time series from a StateMod time series or well rights file, using " +
 		"information in the file to assign the identifier."),
 		0, y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
         JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"The data source and data type will be blank in the resulting "+
 		"time series identifier (TSID)."),
 		0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+        JGUIUtil.addComponent(main_JPanel, new JLabel (
+        "Specify the interval and parcel year only for well rights, based on how data will be used."),
+        0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
         JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"Specify a full or relative path (relative to working " +
 		"directory)." ), 
@@ -314,7 +355,53 @@ private void initialize ( JFrame parent, Command command )
         JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"Overrides the global input end."),
 		3, y, 3, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
+        
+     JGUIUtil.addComponent(main_JPanel, new JLabel ("Interval:"),
+      	0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+       	Vector Interval_Vector = new Vector();
+       	Interval_Vector.addElement ( "" );
+       	Interval_Vector.addElement ( __command._Day );
+       	Interval_Vector.addElement ( __command._Month );
+       	Interval_Vector.addElement ( __command._Year );
+    	// TODO SAM 2007-05-16 Evaluate whether needed
+       	//Interval_Vector.addElement ( __command._Irregular );
+       	__Interval_JComboBox = new SimpleJComboBox(false);
+       	__Interval_JComboBox.setData ( Interval_Vector );
+       	__Interval_JComboBox.select ( 0 );
+       	__Interval_JComboBox.addActionListener (this);
+    JGUIUtil.addComponent(main_JPanel, __Interval_JComboBox,
+    	1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+        JGUIUtil.addComponent(main_JPanel, new JLabel (
+    	"Interval for resulting time series when reading rights."),
+    	3, y, 3, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
+        
+        JGUIUtil.addComponent(main_JPanel, new JLabel ("Spatial aggregation:"),
+              	0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+               	Vector SpatialAggregation_Vector = new Vector();
+               	SpatialAggregation_Vector.addElement ( "" );
+               	SpatialAggregation_Vector.addElement ( __command._Location );
+               	SpatialAggregation_Vector.addElement ( __command._Parcel );
+               	SpatialAggregation_Vector.addElement ( __command._None );
+               	__SpatialAggregation_JComboBox = new SimpleJComboBox(false);
+               	__SpatialAggregation_JComboBox.setData ( SpatialAggregation_Vector );
+               	__SpatialAggregation_JComboBox.select ( 0 );
+               	__SpatialAggregation_JComboBox.addActionListener (this);
+            JGUIUtil.addComponent(main_JPanel, __SpatialAggregation_JComboBox,
+            	1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+                JGUIUtil.addComponent(main_JPanel, new JLabel (
+            	"Spatial aggregation when reading rights (default=Location)."),
+            	3, y, 3, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
 
+       JGUIUtil.addComponent(main_JPanel, new JLabel ( "Parcel year:"), 
+       		0, ++y, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+       	__ParcelYear_JTextField = new JTextField (20);
+       	__ParcelYear_JTextField.addKeyListener (this);
+               JGUIUtil.addComponent(main_JPanel, __ParcelYear_JTextField,
+       		1, y, 6, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+               JGUIUtil.addComponent(main_JPanel, new JLabel (
+       		"Use to only read a single irrigated lands year from a well right file ."),
+       		3, y, 3, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
+       
         JGUIUtil.addComponent(main_JPanel, new JLabel ( "Command:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__command_JTextArea = new JTextArea ( 4, 55 );
@@ -387,9 +474,13 @@ public boolean ok ()
 Refresh the command from the other text field contents.
 */
 private void refresh ()
-{	String InputFile = "";
+{	String routine = "readStateMod_JDialog.refresh";
+	String InputFile = "";
 	String InputStart = "";
 	String InputEnd = "";
+	String Interval = "";
+	String SpatialAggregation = "";
+	String ParcelYear = "";
 	PropList props = null;
 	if ( __first_time ) {
 		__first_time = false;
@@ -398,6 +489,9 @@ private void refresh ()
 		InputFile = props.getValue ( "InputFile" );
 		InputStart = props.getValue ( "InputStart" );
 		InputEnd = props.getValue ( "InputEnd" );
+		Interval = props.getValue ( "Interval" );
+		SpatialAggregation = props.getValue ( "SpatialAggregation" );
+		ParcelYear = props.getValue ( "ParcelYear" );
 		if ( InputFile != null ) {
 			__InputFile_JTextField.setText ( InputFile );
 		}
@@ -407,15 +501,58 @@ private void refresh ()
 		if ( InputEnd != null ) {
 			__InputEnd_JTextField.setText ( InputEnd );
 		}
+		if ( Interval == null ) {
+			// Select the first item
+			__Interval_JComboBox.select ( 0 );
+		}
+		else {	if (	JGUIUtil.isSimpleJComboBoxItem(
+				__Interval_JComboBox,
+				Interval, JGUIUtil.NONE, null, null ) ) {
+				__Interval_JComboBox.select ( Interval );
+			}
+			else {	Message.printWarning ( 1, routine,
+					"Existing command " +
+					"references an invalid\nInterval value \"" +
+					Interval +
+				"\".  Select a different value or Cancel.");
+				__error_wait = true;
+			}
+		}
+		if ( SpatialAggregation == null ) {
+			// Select the first item
+			__SpatialAggregation_JComboBox.select ( 0 );
+		}
+		else {	if (	JGUIUtil.isSimpleJComboBoxItem(
+				__SpatialAggregation_JComboBox,
+				SpatialAggregation, JGUIUtil.NONE, null, null ) ) {
+				__SpatialAggregation_JComboBox.select ( SpatialAggregation );
+			}
+			else {	Message.printWarning ( 1, routine,
+					"Existing command " +
+					"references an invalid\nSpatialAggregation value \"" +
+					SpatialAggregation +
+				"\".  Select a different value or Cancel.");
+				__error_wait = true;
+			}
+		}
+		if ( ParcelYear != null ) {
+			__ParcelYear_JTextField.setText ( ParcelYear );
+		}
 	}
 	// Regardless, reset the command from the fields...
 	InputFile = __InputFile_JTextField.getText().trim();
 	InputStart = __InputStart_JTextField.getText().trim();
 	InputEnd = __InputEnd_JTextField.getText().trim();
+	Interval = __Interval_JComboBox.getSelected();
+	SpatialAggregation = __SpatialAggregation_JComboBox.getSelected();
+	ParcelYear = __ParcelYear_JTextField.getText().trim();
 	props = new PropList ( __command.getCommandName() );
 	props.add ( "InputFile=" + InputFile );
 	props.add ( "InputStart=" + InputStart );
 	props.add ( "InputEnd=" + InputEnd );
+	props.add ( "Interval=" + Interval );
+	props.add ( "SpatialAggregation=" + SpatialAggregation );
+	props.add ( "ParcelYear=" + ParcelYear );
 	__command_JTextArea.setText( __command.toString ( props ) );
 	// Check the path and determine what the label on the path button should
 	// be...

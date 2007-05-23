@@ -1311,7 +1311,9 @@ public static MonthTS createRepeatingAverageMonthTS (	TS ts, DateTime date1,
 
 /**
 Create a water right time series, in which each interval has a value of the
-total water rights in effect at the time.  Switches are considered.
+total water rights in effect at the time.  Switches are considered.  This method
+can be used when processing rights for a single structure (e.g., when plotting
+rights in the StateMod GUI).
 @param smdata A StateMod data object (e.g., StateMod_Diversion) that the time
 series is being created for.
 @param interval TimeInterval.MONTH or TimeInterval.DAY.
@@ -1428,6 +1430,355 @@ public static TS createWaterRightTS (	StateMod_Data smdata,
 		}
 	}
 	return ts;
+}
+
+/**
+Create a list of time series from a list of water rights.  A non-null list
+is guaranteed.
+@param smrights A Vector of StateMod_Right.
+@param interval_base Time series interval for returned time series, either
+TimeInterval.DAY, TimeInterval.MONTH, TimeInterval.YEAR, or TimeInterval.IRREGULAR
+(smaller interval is slower).
+@param spatial_aggregation If 0, create a time series for the location,
+which is the sum of the water rights at that location.  If 1, time series will
+be created by parcel (requires parcel information in right - only for well rights).
+If 2, individual
+time series will be created (essentially step functions with one step).
+@parcel_year If spatial_aggregation = 1, include the year to specify the years
+for parcel indentifiers.
+@param include_dataset_totals If true, create a time series including a total
+of all time series.
+@param start Start DateTime for the time series.  If not specified, the date
+corresponding to the first right for a location will be used.
+@param end End DateTime for the time series.  If not specified, the date
+corresponding to the last right for a location will be used.
+@param process_data If true, process the time series data.  If false, only
+create the time series header information.
+@return a list of time series created from a list of water rights.
+@exception Exception if there is an error
+*/
+public static Vector createWaterRightTimeSeriesList ( Vector smrights,
+		int interval_base, int spatial_aggregation, int parcel_year,
+		boolean include_dataset_totals,
+		DateTime start, DateTime end,
+		boolean process_data )
+throws Exception
+{	String routine = "StateMod_Util.createWaterRightTimeSeriesList";
+	int size = 0;
+	// Spatial aggregation values
+	int BYLOC = 0;	// Time series for location (default)
+	int BYPARCEL = 1;	// Time series for parcel
+	//int BYRIGHT = 2;	// Time series for right
+	Vector tslist = new Vector();
+	TS ts = null;	// Time series to add.
+	StateMod_Right smright;
+	StateMod_WellRight smwellright; // Only for parcel processing.
+	boolean need_to_create_ts;	// Indicate whether new TS needed
+	String tsid = null;	// Time series identifier
+	String id = null;	// ID part of tsid
+	int pos = 0;		// Position of time series in list
+	String adminnum_String = null;
+	StateMod_AdministrationNumber adminnum = null;
+						// Administration number corresponding to
+						// date for right.
+	DateTime decree_DateTime = null; // Right appropriation date, to day.
+	// Get the locations that have water rights.
+	Vector loc_Vector = null;
+	if ( spatial_aggregation == BYPARCEL ) {
+		loc_Vector = getWaterRightParcelList ( smrights, parcel_year );
+	}
+	else { // Process by location or individual rights...
+		loc_Vector = getWaterRightLocationList ( smrights, parcel_year );
+	}
+	int loc_size = 0;
+	if ( loc_Vector != null ) {
+		loc_size = loc_Vector.size();
+	}
+	int smrights_size = 0;
+	if ( smrights != null ) {
+		smrights_size = smrights.size();
+	}
+	Message.printStatus ( 2, routine, "Found " + loc_size + " locations from " +
+			smrights_size + " rights.");
+	String loc_id = null;	// Identifier for a location or parcel
+	Vector loc_rights = null; // Vector of StateMod_Right
+	DateTime min_DateTime = null;
+	DateTime max_DateTime = null;
+	double decree = 0;	// Decree for water right
+	String datatype = "WaterRight"; // Default data type, reset below
+	int status = 0;	// Used for error handling
+	// Process the list of locations.
+	for ( int iloc = 0; iloc < loc_size; iloc++ ) {
+		loc_id = (String)loc_Vector.elementAt(iloc);
+		Message.printStatus ( 2, routine, "Processing location \"" + loc_id + "\"");
+		if ( spatial_aggregation == BYPARCEL ) {
+			loc_rights = getWaterRightsForParcel ( smrights, loc_id, parcel_year );
+		}
+		else { // Process by location or individual rights...
+			loc_rights = getWaterRightsForLocation ( smrights, loc_id, parcel_year );
+		}
+		size = 0;
+		if ( loc_rights != null ) {
+			size = loc_rights.size();
+		}
+		// If processing for the location or parcel, set the period of the time
+		// series data to the bounding limits of the dates.
+		min_DateTime = null;	// Initialize
+		max_DateTime = null;
+		if ( (spatial_aggregation == BYLOC) ||
+				(spatial_aggregation == BYPARCEL) ) {
+			for ( int i = 0; i < size; i++ ) {
+				smright = (StateMod_Right)loc_rights.elementAt(i);
+				if ( smright == null ) {
+					continue;
+				}
+				adminnum_String = smright.getAdministrationNumber();
+				adminnum = new StateMod_AdministrationNumber ( StringUtil.atod(adminnum_String) );
+				decree_DateTime = new DateTime(adminnum.getAppropriationDate());
+				if ( (min_DateTime == null) ||
+						decree_DateTime.lessThan(min_DateTime) ) {
+					min_DateTime = decree_DateTime;
+				}
+				if ( (max_DateTime == null) ||
+						decree_DateTime.greaterThan(max_DateTime) ) {
+					max_DateTime = decree_DateTime;
+				}
+			}
+		}
+		// Now process each right for the location...
+		for ( int i = 0; i < size; i++ ) {
+			smright = (StateMod_Right)loc_rights.elementAt(i);
+			if ( smright == null ) {
+				continue;
+			}
+			decree = smright.getDecree();
+			// Get the appropriation date from the admin number.
+			adminnum_String = smright.getAdministrationNumber();
+			adminnum = new StateMod_AdministrationNumber ( StringUtil.atod(adminnum_String) );
+			decree_DateTime = new DateTime(adminnum.getAppropriationDate());
+			// TODO SAM 2007-05-16 Can optimize by saving instances above in memory
+			// so they don't need to be recreated.
+			need_to_create_ts = false;
+			if ( spatial_aggregation == BYLOC ) {
+				// Search for the location in the time series list.
+				// If found, add to the time series.  Otherwise, create
+				// a new time series.
+				pos = TSUtil.indexOf ( tslist, smright.getLocationIdentifier(),
+					"Location", 1 );
+				if ( pos >= 0 ) {
+					// Will add to the matched right
+					ts = (TS)tslist.elementAt(pos);
+				}
+				else {	// Need to create a new total right.
+					id = smright.getLocationIdentifier();
+					need_to_create_ts = true;
+				}
+			}
+			else if ( spatial_aggregation == BYPARCEL ) {
+				// Search for the location in the time series list.
+				// If found, add to the time series.  Otherwise, create
+				// a new time series.
+				smwellright = (StateMod_WellRight)smright;
+				pos = TSUtil.indexOf ( tslist, smwellright.getParcelID(),
+					"Location", 1 );
+				if ( pos >= 0 ) {
+					// Will add to the matched right
+					ts = (TS)tslist.elementAt(pos);
+				}
+				else {	// Need to create a new total right.
+					id = smwellright.getParcelID();
+					need_to_create_ts = true;
+				}
+			}
+			else {	// Create an individual time series for each right.
+				need_to_create_ts = true;
+				id = smright.getLocationIdentifier() + "-" +
+				smright.getIdentifier();
+			}
+			// Create the time series (either first right for a location or
+			// time series are being created for each right).
+			if ( need_to_create_ts ) {
+				if ( smright instanceof StateMod_DiversionRight ) {
+					datatype = "DiversionWaterRight";
+				}
+				else if ( smright instanceof StateMod_InstreamFlowRight ) {
+					datatype = "InstreamFlowWaterRight";
+				}
+				else if ( smright instanceof StateMod_ReservoirRight ) {
+					datatype = "ReservoirWaterRight";
+				}
+				else if ( smright instanceof StateMod_WellRight ) {
+					datatype = "WellWaterRight";
+				}
+				if ( spatial_aggregation == BYLOC ) {
+					// Append to the datatype
+					datatype += "sTotal";
+				}
+				else if ( spatial_aggregation == BYPARCEL ) {
+					// Append to the datatype
+					datatype += "sParcelTotal";
+				}
+				if ( interval_base == TimeInterval.DAY ) {
+					tsid = id + ".StateMod." + datatype + ".Day";
+				}
+				else if ( interval_base == TimeInterval.MONTH ) {
+					tsid = id + ".StateMod." + datatype + ".Month";
+				}
+				else if ( interval_base == TimeInterval.YEAR ) {
+					tsid = id + ".StateMod." + datatype + ".Year";
+				}
+				else if ( interval_base == TimeInterval.IRREGULAR ) {
+					tsid = id + ".StateMod." + datatype + ".Irregular";
+				}
+				ts = TSUtil.newTimeSeries ( tsid, true );
+				ts.setIdentifier ( tsid );
+				if ( spatial_aggregation == BYLOC ) {
+					ts.setDescription ( smright.getLocationIdentifier() + " Total Rights for Location" );
+				}
+				else if ( spatial_aggregation == BYPARCEL ) {
+					if ( smright instanceof StateMod_WellRight ) {
+						ts.setDescription ( ((StateMod_WellRight)smright).getParcelID() + " Total Rights for Parcel" );
+					}
+					else {
+						ts.setDescription ( smright.getLocationIdentifier() + " Total Rights for Parcel" );
+										}
+				}
+				else {
+					ts.setDescription ( smright.getName() );
+				}
+				ts.setDataUnits ( smright.getDecreeUnits() );
+				// Set the dates for the time series. If a single right
+				// is being used, use the specific date.  Otherwise,
+				// use the extent of the dates found for all rights.  If
+				// a period has been specified, use that.
+				// Set the original dates to that from the data...
+				if ( spatial_aggregation == BYLOC ) {
+					ts.setDate1Original ( min_DateTime );
+					ts.setDate2Original ( max_DateTime );
+				}
+				else { ts.setDate1Original( decree_DateTime );
+					ts.setDate2Original ( decree_DateTime );
+				}
+				// Set the active dates to that requested or found...
+				if ( (start != null) && (end != null) ) {
+					ts.setDate1 ( start );
+					ts.setDate2 ( end );
+				}
+				else {
+					if ( (spatial_aggregation == BYLOC) ||
+							(spatial_aggregation == BYPARCEL)) {
+						ts.setDate1 ( min_DateTime );
+						ts.setDate2 ( max_DateTime );
+					}
+					else {
+						ts.setDate1 ( decree_DateTime );
+						ts.setDate2 ( decree_DateTime );
+					}
+				}
+				// Initialize to zero...
+				if ( process_data ) {
+					if ( interval_base == TimeInterval.DAY ) {
+						status = ((DayTS)ts).allocateDataSpace ( 0.0 );
+					}
+					else if ( interval_base == TimeInterval.MONTH ) {
+						status = ((MonthTS)ts).allocateDataSpace ( 0.0 );
+					}
+					else if ( interval_base == TimeInterval.YEAR ) {
+						status = ((YearTS)ts).allocateDataSpace ( 0.0 );
+					}
+					if ( status != 0 ){
+						// Don't add the time series
+						continue;
+					}
+				}
+				// No need to allocate space for irregular.
+				// Add the time series to the list...
+				tslist.addElement ( ts );
+			}
+			// Now add to the right.  If daily, add to each time step.
+			if ( process_data ) {
+				// Set data in the time series.
+				if ( (interval_base == TimeInterval.DAY) ||
+						(interval_base == TimeInterval.MONTH) ||
+						(interval_base == TimeInterval.YEAR)) {
+					if ( (spatial_aggregation == BYLOC) ||
+							(spatial_aggregation == BYPARCEL)) {
+						if ( decree > 0.0 ) {
+							Message.printStatus(2,"", "Adding constant decree " + decree + " starting in " + decree_DateTime + " to " + ts.getDate2());
+							TSUtil.addConstant ( ts, decree_DateTime, ts.getDate2(), -1, decree,
+									TSUtil.IGNORE_MISSING );
+						}
+					}
+					else {
+						// Set the single value...
+						ts.setDataValue ( decree_DateTime, decree );
+					}
+				}
+				else { // Irregular...
+					ts.setDataValue ( decree_DateTime, decree );
+				}
+			}
+		}
+	}
+	size = tslist.size();
+	if ( include_dataset_totals && (size > 0) ) {
+		// Include one time series that is the sum of all other time series.
+		if ( interval_base == TimeInterval.DAY ) {
+			tsid = "DataSet.StateMod." + datatype + ".Day";
+		}
+		else if ( interval_base == TimeInterval.MONTH ) {
+			tsid = "DataSet.StateMod." + datatype + ".Month";
+		}
+		else if ( interval_base == TimeInterval.YEAR ) {
+			tsid = "DataSet.StateMod." + datatype + ".Year";
+		}
+		TS totalts = TSUtil.newTimeSeries ( tsid, true );
+		totalts.setIdentifier ( tsid );
+
+		TSLimits limits = TSUtil.getPeriodFromTS ( tslist, TSUtil.MAX_POR );
+		totalts.setDate1( limits.getDate1() );
+		totalts.setDate1Original( limits.getDate1() );
+		totalts.setDate2( limits.getDate2() );
+		totalts.setDate2Original( limits.getDate2() );
+		Message.printStatus ( 2, routine, "Date limits for total time series are " +
+				limits.getDate1() + " to " + limits.getDate2() );
+
+		totalts.allocateDataSpace();
+		boolean units_set = false;
+		DateTime date = null;
+		double value;
+		for ( int i = 0; i < size; i++ ) {
+			ts = (TS)tslist.elementAt(i);
+			if ( !units_set && (ts.getDataUnits().length() > 0) ) {
+				totalts.setDataUnits ( ts.getDataUnits() );
+				totalts.setDataUnitsOriginal ( ts.getDataUnits() );
+				units_set = true;
+			}
+			// The time series have different periods but want
+			// the last value to be continued to the end of the
+			// period.  Therefore, first add each time series, and then add
+			// the last value from one interval past the end date to the
+			// of the time series to the end of the total time series.
+			Message.printStatus ( 2, routine, "Add " + ts.getLocation() + " " +
+					ts.getDate1() + " to " + ts.getDate2() );
+			TSUtil.add ( totalts, ts );
+			date = new DateTime(ts.getDate2());
+			// Should be non-missing...
+			value = ts.getDataValue( date );
+			if ( !ts.isDataMissing(value)) {
+				// Add constant at the end of the time series.
+				date.addInterval ( ts.getDataIntervalBase(),
+						ts.getDataIntervalMult() );
+				TSUtil.addConstant ( totalts, date, totalts.getDate2(), -1, value,
+						TSUtil.IGNORE_MISSING);
+				Message.printStatus ( 2, routine, "Add constant " + value + " " +
+						ts.getLocation() + " " + date + " to " + totalts.getDate2() );
+			}
+		}
+		totalts.setDescription ( "Total of water right time series." );
+		tslist.addElement ( totalts );
+	}
+	return tslist;
 }
 
 /**
@@ -2973,6 +3324,158 @@ public static Vector getUpstreamNetworkNodes (	Vector node_Vector,
 		}
 	}
 	return v;
+}
+
+/**
+Get a list of water rights for a location.  The locations are the
+nodes at which the rights apply.
+@param smrights List of StateMod_Right to search.
+@param loc_id Location identifier to match (case-insensitive).
+@param req_parcel_year Parcel year for data or <0 to use all (only used with well rights).
+@return a list of locations for water rights, in the order found in the original list.
+*/
+public static Vector getWaterRightsForLocation ( Vector smrights, String loc_id, int req_parcel_year )
+{	Vector matchlist = new Vector();	// Returned data
+	int size = 0;
+	if ( smrights != null ) {
+		size = smrights.size();
+	}
+	StateMod_Right right = null;
+	int parcel_year;
+	for ( int i = 0; i < size; i++ ) {
+		right = (StateMod_Right)smrights.elementAt(i);
+		if ( (req_parcel_year >= 0) && right instanceof StateMod_WellRight ) {
+			// Allow the year to filter.
+			parcel_year = ((StateMod_WellRight)right).getParcelYear();
+			if ( parcel_year != req_parcel_year ) {
+				// No need to process right.
+				continue;
+			}
+		}
+		if ( loc_id.equalsIgnoreCase(right.getLocationIdentifier()) ) {
+			matchlist.addElement ( right );
+		}
+	}
+	return matchlist;
+}
+
+/**
+Get a list of water rights for a parcel.
+@param smrights List of StateMod_WellRight to search.
+@param parcel_id Parcel identifier to match (case-insensitive).
+@param req_parcel_year Parcel year for data or <0 to use all.
+@return a list of water rights for the parcel, in the order found in the original list.
+*/
+public static Vector getWaterRightsForParcel ( Vector smrights, String parcel_id, int req_parcel_year )
+{	Vector matchlist = new Vector();	// Returned data
+	int size = 0;
+	if ( smrights != null ) {
+		size = smrights.size();
+	}
+	StateMod_WellRight right = null;
+	for ( int i = 0; i < size; i++ ) {
+		right = (StateMod_WellRight)smrights.elementAt(i);
+		if ( (req_parcel_year >= 0) && (right.getParcelYear() != req_parcel_year) ) {
+			// No need to process right.
+			continue;
+		}
+		if ( parcel_id.equalsIgnoreCase(right.getParcelID()) ) {
+			matchlist.addElement ( right );
+		}
+	}
+	return matchlist;
+}
+
+
+/**
+Get a list of locations from a list of water rights.  The locations are the
+nodes at which the rights apply.
+@return a list of locations for water rights, in the order found in the original list.
+*/
+public static Vector getWaterRightLocationList ( Vector smrights, int req_parcel_year )
+{	Vector loclist = new Vector();	// Returned data
+	int size = 0;
+	if ( smrights != null ) {
+		size = smrights.size();
+	}
+	StateMod_Right right = null;
+	int size_loc = 0;	// size of location list
+	boolean found = false;	// Indicate whether the location has been found.
+	String right_loc_id = null; // ID for location
+	int parcel_year = 0;	// Parcel year to process.
+	int j = 0; // Loop index for found locations.
+	for ( int i = 0; i < size; i++ ) {
+		right = (StateMod_Right)smrights.elementAt(i);
+		if ( req_parcel_year >= 0 ) {
+			// Check the parcel year and skip if necessary.
+			if ( right instanceof StateMod_WellRight ) {
+				parcel_year = ((StateMod_WellRight)right).getParcelYear();
+				if ( parcel_year != req_parcel_year ) {
+					// No need to consider the right.
+					continue;
+				}
+			}
+		}
+		right_loc_id = right.getLocationIdentifier();
+		// Search the list to see if it is a new item...
+		found = false;
+		for ( j = 0; j < size_loc; j++ ) {
+			if ( right_loc_id.equalsIgnoreCase((String)loclist.elementAt(j)) ) {
+				found = true;
+				break;
+			}
+		}
+		if ( !found ) {
+			// Add to the list
+			loclist.addElement ( right_loc_id );
+			size_loc = loclist.size();
+		}
+	}
+	return loclist;
+}
+
+/**
+Get a list of parcels from a list of well water rights.  The parcels are the
+locations at which well rights have been matched.
+@param smrights a Vector of StateMod_WellRight to process.
+@param req_parcel_year a requested year to constrain the parcel list (or negative to return all).
+@return a list of parcels for water rights, in the order found in the original list.
+*/
+public static Vector getWaterRightParcelList ( Vector smrights, int req_parcel_year )
+{	Vector loclist = new Vector();	// Returned data
+	int size = 0;
+	if ( smrights != null ) {
+		size = smrights.size();
+	}
+	StateMod_WellRight right = null;
+	int size_loc = 0;	// size of location list
+	boolean found = false;	// Indicate whether the location has been found.
+	String parcel_id = null; // ID for location
+	int parcel_year = 0;	// Year for parcels.
+	int j = 0; // Loop index for found locations.
+	for ( int i = 0; i < size; i++ ) {
+		right = (StateMod_WellRight)smrights.elementAt(i);
+		parcel_id = right.getParcelID();
+		parcel_year = right.getParcelYear();
+		if ( (req_parcel_year >= 0) && (parcel_year != req_parcel_year) ) {
+			// No need to process right
+			continue;
+		}
+		// Search the list to see if it is a new item...
+		found = false;
+		for ( j = 0; j < size_loc; j++ ) {
+			if ( parcel_id.equalsIgnoreCase((String)loclist.elementAt(j)) ) {
+				found = true;
+				break;
+			}
+		}
+		if ( !found ) {
+			// Add to the list
+			loclist.addElement ( parcel_id );
+			size_loc = loclist.size();
+		}
+	}
+	return loclist;
 }
 
 /**

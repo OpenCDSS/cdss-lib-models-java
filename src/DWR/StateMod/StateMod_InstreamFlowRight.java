@@ -60,6 +60,7 @@
 //									getDataHeader() methods for check
 //									file and data check support.
 // 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
+// 2007-05-16	SAM, RTi		Implement StateMod_Right interface.
 //------------------------------------------------------------------------------
 // EndHeader
 
@@ -85,7 +86,7 @@ This StateMod_InstreamFlowRight class holds information for StateMod instream
 flow station rights.
 */
 public class StateMod_InstreamFlowRight extends StateMod_Data 
-implements Cloneable, Comparable, StateMod_Component {
+implements Cloneable, Comparable, StateMod_Component, StateMod_Right {
 
 /**
 Administration number.  The value is stored as a string to allow exact
@@ -253,19 +254,11 @@ throws Throwable {
 }
 
 /**
-Initialize data.
-@param initialize_defaults If true, initialize to default values, suitable for
-creating instances in the StateMod GUI.  If false, initialize to missing,
-suitable for use with StateDMI.
+Return the administration number, as per the generic interface.
+@return the administration number, as a String to protect from roundoff.
 */
-private void initialize ( boolean initialize_defaults )
-{	_smdata_type = StateMod_DataSet.COMP_INSTREAM_RIGHTS;
-	_irtem = "";
-	if ( initialize_defaults ) {
-		_dcrifr = 0;
-	}
-	else {	_dcrifr = StateMod_Util.MISSING_DOUBLE;
-	}
+public String getAdministrationNumber ()
+{	return getIrtem();
 }
 
 /**
@@ -288,10 +281,72 @@ public double getDcrifr() {
 }
 
 /**
+Return the decree, as per the generic interface.
+@return the decree, in the units of the data.
+*/
+public double getDecree()
+{	return getDcrifr();
+}
+
+// TODO SAM 2007-05-15 Need to evaluate whether should be hard-coded.
+/**
+Return the decree units.
+@return the decree units.
+*/
+public String getDecreeUnits()
+{	return "CFS";
+}
+
+/**
+Return the right identifier, as per the generic interface.
+@return the right identifier.
+*/
+public String getIdentifier()
+{	return getID();
+}
+
+/**
 Retrieve the administration number.
 */
 public String getIrtem() {
 	return _irtem;
+}
+
+/**
+Return the right location identifier, as per the generic interface.
+@return the right location identifier (location where right applies).
+*/
+public String getLocationIdentifier()
+{	return getCgoto();
+}
+
+/**
+Initialize data.
+@param initialize_defaults If true, initialize to default values, suitable for
+creating instances in the StateMod GUI.  If false, initialize to missing,
+suitable for use with StateDMI.
+*/
+private void initialize ( boolean initialize_defaults )
+{	_smdata_type = StateMod_DataSet.COMP_INSTREAM_RIGHTS;
+	_irtem = "";
+	if ( initialize_defaults ) {
+		_dcrifr = 0;
+	}
+	else {	_dcrifr = StateMod_Util.MISSING_DOUBLE;
+	}
+}
+
+/**
+Determine whether a file is an instream flow right file.  Currently true is returned
+if the file extension is ".ifr".
+@param filename Name of the file being checked.
+@return true if the file is a StateMod instream flow right file.
+*/
+public static boolean isInstreamFlowRightFile ( String filename )
+{	if ( filename.toUpperCase().endsWith(".IFR")) {
+		return true;
+	}
+	return false;
 }
 
 /**

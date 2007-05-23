@@ -77,6 +77,7 @@
 // 2007-04-12	Kurt Tometich, RTi		Added checkComponentData() and
 //									getDataHeader() methods for check
 //									file and data check support.
+// 2007-05-16	SAM, RTi		Implement StateMod_Right interface.
 //------------------------------------------------------------------------------
 // EndHeader
 
@@ -98,7 +99,7 @@ import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 
 public class StateMod_ReservoirRight extends StateMod_Data 
-implements Cloneable, Comparable, StateMod_Component {
+implements Cloneable, Comparable, StateMod_Component, StateMod_Right {
 /**
 Administration number
 */
@@ -292,6 +293,14 @@ throws Throwable {
 }
 
 /**
+Return the administration number, as per the generic interface.
+@return the administration number, as a String to protect from roundoff.
+*/
+public String getAdministrationNumber ()
+{	return getRtem();
+}
+
+/**
 Return the out-of-priority associated op right.
 */
 public String getCopid() {
@@ -315,6 +324,31 @@ Return the decreed amount.
 */
 public double getDcrres() {
 	return _dcrres;
+}
+
+/**
+Return the decree, as per the generic interface.
+@return the decree, in the units of the data.
+*/
+public double getDecree()
+{	return getDcrres();
+}
+
+// TODO SAM 2007-05-15 Need to evaluate whether should be hard-coded.
+/**
+Return the decree units.
+@return the decree units.
+*/
+public String getDecreeUnits()
+{	return "ACFT";
+}
+
+/**
+Return the right identifier, as per the generic interface.
+@return the right identifier.
+*/
+public String getIdentifier()
+{	return getID();
 }
 
 /**
@@ -431,6 +465,14 @@ public static String getItyrsrDefault ( boolean include_notes )
 }
 
 /**
+Return the right location identifier, as per the generic interface.
+@return the right location identifier (location where right applies).
+*/
+public String getLocationIdentifier()
+{	return getCgoto();
+}
+
+/**
 Retrieve the reservoir right type.
 */
 public int getN2fill() {
@@ -485,13 +527,27 @@ public String getRtem() {
 INitialize data members
 */
 private void initialize() {
-	_smdata_type = _dataset.COMP_RESERVOIR_RIGHTS;
+	_smdata_type = StateMod_DataSet.COMP_RESERVOIR_RIGHTS;
 	_rtem = "99999";	// Default as per old SMGUI.
 	_copid = "";
 	_dcrres	= 0;
 	_iresco	= 1;	// Server first account, as per old SMGUI default
 	_ityrstr= 1;
 	_n2fill	= 1;
+}
+
+
+/**
+Determine whether a file is a reservoir right file.  Currently true is returned
+if the file extension is ".rer".
+@param filename Name of the file being checked.
+@return true if the file is a StateMod reservoir right file.
+*/
+public static boolean isReservoirRightFile ( String filename )
+{	if ( filename.toUpperCase().endsWith(".RER")) {
+		return true;
+	}
+	return false;
 }
 
 /**
@@ -611,7 +667,7 @@ public void setCopid(String copid) {
 		_copid = copid;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_RESERVOIR_RIGHTS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_RIGHTS, true);
 		}
 	}
 }
@@ -624,7 +680,7 @@ public void setDcrres(double dcrres) {
 		_dcrres = dcrres;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_RESERVOIR_RIGHTS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_RIGHTS, true);
 		}
 	}
 }
@@ -653,7 +709,7 @@ public void setIresco(int iresco) {
 		_iresco = iresco;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_RESERVOIR_RIGHTS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_RIGHTS, true);
 		}
 	}
 }
@@ -682,7 +738,7 @@ public void setItyrstr(int ityrstr) {
 		_ityrstr = ityrstr;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_RESERVOIR_RIGHTS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_RIGHTS, true);
 		}
 	}
 }
@@ -711,7 +767,7 @@ public void setN2fill(int n2fill) {
 		_n2fill = n2fill;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_RESERVOIR_RIGHTS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_RIGHTS, true);
 		}
 	}
 }
@@ -740,7 +796,7 @@ public void setRtem(String rtem) {
 		_rtem = rtem;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_RESERVOIR_RIGHTS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_RIGHTS, true);
 		}
 	}
 }

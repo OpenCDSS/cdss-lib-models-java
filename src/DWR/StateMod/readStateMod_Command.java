@@ -8,6 +8,7 @@
 //
 // 2005-09-02	Steven A. Malers, RTi	Initial version.  Copy and modify
 //					writeStateMod().
+// 2007-05-16	SAM, RTi                Add ability to read well rights file.
 //------------------------------------------------------------------------------
 // EndHeader
 
@@ -44,10 +45,22 @@ TSResultsList, WorkingDir.
 */
 public class readStateMod_Command extends SkeletonCommand implements Command
 {
+// Flags used when setting the interval
+protected String _Day = "Day";
+protected String _Month = "Month";
+protected String _Year = "Year";
+//protected String _Irregular = "Irregular";
+
+// Flags used when setting the spatial aggregation
+protected String _Location = "Location";
+protected String _Parcel = "Parcel";
+protected String _None = "None";
 
 // Indicates whether the TS Alias version of the command is being used...
 
 protected boolean _use_alias = false;
+
+private String __working_dir = null;	// Application working directory
 
 /**
 Constructor.
@@ -72,16 +85,18 @@ throws InvalidCommandParameterException
 {	String InputFile = parameters.getValue ( "InputFile" );
 	String InputStart = parameters.getValue ( "InputStart" );
 	String InputEnd = parameters.getValue ( "InputEnd" );
+	String Interval = parameters.getValue ( "Interval" );
+	String SpatialAggregation = parameters.getValue ( "SpatialAggregation" );
+	String ParcelYear = parameters.getValue ( "ParcelYear" );
 	String warning = "";
 
 	if ( (InputFile == null) || (InputFile.length() == 0) ) {
 		warning += "\nThe input file must be specified.";
 	}
-	else {	String working_dir = null;
-			try { Object o = _processor.getPropContents ( "WorkingDir" );
+	else {	try { Object o = _processor.getPropContents ( "WorkingDir" );
 				// Working directory is available so use it...
 				if ( o != null ) {
-					working_dir = (String)o;
+					__working_dir = (String)o;
 				}
 			}
 			catch ( Exception e ) {
@@ -92,7 +107,7 @@ throws InvalidCommandParameterException
 			}
 	
 		try {	String adjusted_path = IOUtil.adjustPath (
-				working_dir, InputFile);
+				__working_dir, InputFile);
 			File f = new File ( adjusted_path );
 			File f2 = new File ( f.getParent() );
 			if ( !f2.exists() ) {
@@ -106,8 +121,8 @@ throws InvalidCommandParameterException
 		catch ( Exception e ) {
 			warning +=
 				"\nThe working directory:\n" +
-				"    \"" + working_dir +
-				"\"\ncannot be adjusted using:\n" +
+				"    \"" + __working_dir +
+				"\"\ncannot be used to adjust the file:\n" +
 				"    \"" + InputFile + "\".";
 		}
 	}
@@ -134,6 +149,29 @@ throws InvalidCommandParameterException
 				"\nThe input end date/time \"" + InputEnd +
 				"\" is not a valid date/time.\n"+
 				"Specify a date/time or InputEnd.";
+		}
+	}
+	if ( (Interval != null) && !Interval.equals("") &&
+		!Interval.equalsIgnoreCase(_Day) &&
+		!Interval.equalsIgnoreCase(_Month) &&
+		!Interval.equalsIgnoreCase(_Year) ) {
+			warning +=
+				"\nThe interval must be Day, Month, or Year.";
+		}
+	
+	if ( (SpatialAggregation != null)&&
+			!SpatialAggregation.equals("") &&
+			!SpatialAggregation.equalsIgnoreCase(_Location) &&
+			!SpatialAggregation.equalsIgnoreCase(_Parcel) &&
+			!SpatialAggregation.equalsIgnoreCase(_None) ) {
+				warning +=
+					"\nThe spatial aggregation must be Location, Parcel, or None.";
+			}
+	
+	if ( (ParcelYear != null) && (ParcelYear.length() > 0) ) {
+		if ( !StringUtil.isInteger(ParcelYear)) {
+			warning +=
+				"\nThe parcel year must be an integer.";
 		}
 	}
 
@@ -213,7 +251,7 @@ throws InvalidCommandSyntaxException, InvalidCommandParameterException
 /**
 Run the commands:
 <pre>
-readStateMod(InputFile="X",InputStart="X",InputEnd="X")
+readStateMod(InputFile="X",InputStart="X",InputEnd="X",Interval=X)
 </pre>
 @param processor The CommandProcessor that is executing the command, which will
 provide necessary data inputs and receive output(s).
@@ -238,6 +276,9 @@ CommandWarningException, CommandException
 	String InputStart = _parameters.getValue ( "InputStart" );
 	DateTime InputStart_DateTime = null;
 	String InputEnd = _parameters.getValue ( "InputEnd" );
+	String Interval = _parameters.getValue ( "Interval" );
+	String SpatialAggregation = _parameters.getValue ( "SpatialAggregation" );
+	String ParcelYear = _parameters.getValue ( "ParcelYear" );
 	DateTime InputEnd_DateTime = null;
 	
 	if ( InputStart != null ) {
@@ -341,6 +382,23 @@ CommandWarningException, CommandException
 				Message.printDebug(10, routine, message );
 			}
 	}
+	
+		
+	int SpatialAggregation_int = 0;  // Default
+	if ( SpatialAggregation == null ) {
+		SpatialAggregation = _Location;
+		SpatialAggregation_int = 0;
+	}
+	else if ( SpatialAggregation.equalsIgnoreCase(_Parcel) ) {
+		SpatialAggregation_int = 1;
+	}
+	else if ( SpatialAggregation.equalsIgnoreCase(_None) ) {
+		SpatialAggregation_int = 2;
+	}
+	int ParcelYear_int = -1;	// Default - consider all
+	if ( ParcelYear != null ) {
+		ParcelYear_int = StringUtil.atoi ( ParcelYear );
+	}
 
 	if ( warning_count > 0 ) {
 		message = "There were " + warning_count +
@@ -355,25 +413,102 @@ CommandWarningException, CommandException
 
 	try {	Message.printStatus ( 2, routine,
 		"Reading StateMod file \"" + InputFile + "\"" );
-
-		int interval = StateMod_TS.getFileDataInterval(InputFile);
+	
 		Vector tslist = null;
-		if (	(interval == TimeInterval.MONTH) ||
-			(interval == TimeInterval.DAY) ) {
-			Message.printStatus ( 1, routine,
-			"Reading StateMod file \"" + InputFile + "\"" );
-			tslist = StateMod_TS.readTimeSeriesList (
+		if ( StateMod_DiversionRight.isDiversionRightFile(InputFile)) {
+			if ( (Interval == null) || Interval.equals("") ) {
+				Interval = "Year";
+			}
+			TimeInterval Interval_TimeInterval = TimeInterval.parseInterval( Interval );
+			// Read the diversion rights file and convert to time series
+			// (default is to sum time series at a location).
+			Vector ddr_Vector = StateMod_WellRight.readStateModFile ( InputFile );
+			// Convert the rights to time series (one per location)...
+			tslist = StateMod_Util.createWaterRightTimeSeriesList (
+					ddr_Vector,        // raw water rights
+					Interval_TimeInterval.getBase(),  // time series interval
+					SpatialAggregation_int,          // Where to summarize time series
+					ParcelYear_int,			// Parcel year for filter
+					true,				// Create a data set total
+					null,              // time series start
+					null,              // time series end
+					true );            // do read data
+		}
+		else if ( StateMod_InstreamFlowRight.isInstreamFlowRightFile(InputFile)) {
+			if ( (Interval == null) || Interval.equals("") ) {
+				Interval = "Year";
+			}
+			TimeInterval Interval_TimeInterval = TimeInterval.parseInterval( Interval );
+			// Read the instream flow rights file and convert to time series
+			// (default is to sum time series at a location).
+			Vector ifr_Vector = StateMod_WellRight.readStateModFile ( InputFile );
+			// Convert the rights to time series (one per location)...
+			tslist = StateMod_Util.createWaterRightTimeSeriesList (
+					ifr_Vector,        // raw water rights
+					Interval_TimeInterval.getBase(),  // time series interval
+					SpatialAggregation_int,          // Where to summarize time series
+					ParcelYear_int,			// Parcel year for filter
+					true,				// Create a data set total
+					null,              // time series start
+					null,              // time series end
+					true );            // do read data
+		}
+		else if ( StateMod_ReservoirRight.isReservoirRightFile(InputFile)) {
+			if ( (Interval == null) || Interval.equals("") ) {
+				Interval = "Year";
+			}
+			TimeInterval Interval_TimeInterval = TimeInterval.parseInterval( Interval );
+			// Read the reservoir rights file and convert to time series
+			// (default is to sum time series at a location).
+			Vector rer_Vector = StateMod_WellRight.readStateModFile ( InputFile );
+			// Convert the rights to time series (one per location)...
+			tslist = StateMod_Util.createWaterRightTimeSeriesList (
+					rer_Vector,        // raw water rights
+					Interval_TimeInterval.getBase(),  // time series interval
+					SpatialAggregation_int,          // Where to summarize time series
+					ParcelYear_int,			// Parcel year for filter
+					true,				// Create a data set total
+					null,              // time series start
+					null,              // time series end
+					true );            // do read data
+		}
+		else if ( StateMod_WellRight.isWellRightFile(InputFile)) {
+			if ( (Interval == null) || Interval.equals("") ) {
+				Interval = "Year";
+			}
+			TimeInterval Interval_TimeInterval = TimeInterval.parseInterval( Interval );
+			// Read the well rights file and convert to time series
+			// (default is to sum time series at a location).
+			Vector wer_Vector = StateMod_WellRight.readStateModFile ( InputFile );
+			// Convert the rights to time series (one per location)...
+			tslist = StateMod_Util.createWaterRightTimeSeriesList (
+					wer_Vector,        // raw water rights
+					Interval_TimeInterval.getBase(),  // time series interval
+					SpatialAggregation_int,          // Where to summarize time series
+					ParcelYear_int,			// Parcel year for filter
+					true,				// Create a data set total
+					null,              // time series start
+					null,              // time series end
+					true );            // do read data
+		}
+		else {	// Read a traditional time series file
+			int interval = StateMod_TS.getFileDataInterval(InputFile);
+
+			if (	(interval == TimeInterval.MONTH) ||
+					(interval == TimeInterval.DAY) ) {
+				tslist = StateMod_TS.readTimeSeriesList (
 				InputFile, InputStart_DateTime,
 				InputEnd_DateTime,
 				null,	// Requested units
 				true );	// Read all data
-		}
-		else {	message = "StateMod file \"" + InputFile +
-			"\" is not a recognized interval (bad file format?).";
-			Message.printWarning ( warning_level, 
-			MessageUtil.formatMessageTag(command_tag,
-			++warning_count), routine, message );
-			throw new CommandException ( message );
+			}
+			else {	message = "StateMod file \"" + InputFile +
+				"\" is not a recognized interval (bad file format?).";
+				Message.printWarning ( warning_level, 
+						MessageUtil.formatMessageTag(command_tag,
+						++warning_count), routine, message );
+				throw new CommandException ( message );
+			}
 		}
 
 		// Now add the time series to the end of the normal list...
@@ -454,6 +589,9 @@ public String toString ( PropList props )
 	String InputFile = props.getValue("InputFile");
 	String InputStart = props.getValue("InputStart");
 	String InputEnd = props.getValue("InputEnd");
+	String Interval = props.getValue("Interval");
+	String SpatialAggregation = props.getValue("SpatialAggregation");
+	String ParcelYear = props.getValue("ParcelYear");
 	StringBuffer b = new StringBuffer ();
 	if ( (InputFile != null) && (InputFile.length() > 0) ) {
 		if ( b.length() > 0 ) {
@@ -472,6 +610,24 @@ public String toString ( PropList props )
 			b.append ( "," );
 		}
 		b.append ( "InputEnd=\"" + InputEnd + "\"" );
+	}
+	if ( (Interval != null) && (Interval.length() > 0) ) {
+		if ( b.length() > 0 ) {
+			b.append ( "," );
+		}
+		b.append ( "Interval=\"" + Interval + "\"" );
+	}
+	if ( (SpatialAggregation != null) && (SpatialAggregation.length() > 0) ) {
+		if ( b.length() > 0 ) {
+			b.append ( "," );
+		}
+		b.append ( "SpatialAggregation=" + SpatialAggregation );
+	}
+	if ( (ParcelYear != null) && (ParcelYear.length() > 0) ) {
+		if ( b.length() > 0 ) {
+			b.append ( "," );
+		}
+		b.append ( "ParcelYear=" + ParcelYear );
 	}
 	return getCommandName() + "(" + b.toString() + ")";
 }
