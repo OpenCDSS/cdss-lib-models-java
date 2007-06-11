@@ -142,6 +142,7 @@ import RTi.Util.IO.DataFormat;
 import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.DataUnits;
 import RTi.Util.IO.IOUtil;
+import RTi.Util.Math.MathUtil;
 import RTi.Util.IO.ProcessManager;
 import RTi.Util.IO.ProcessManagerJDialog;
 import RTi.Util.IO.PropList;
@@ -158,6 +159,12 @@ This class contains utility methods related to a StateMod data set.
 */
 public class StateMod_Util
 {
+
+/**
+Strings used when handling free water rights.
+*/
+public static String AlwaysOn = "AlwaysOn";
+public static String UseSeniorRightAppropriationDate = "UseSeniorRightAppropriationDate";
 
 public static String MISSING_STRING = "";
 public static int MISSING_INT = -999;
@@ -1452,6 +1459,17 @@ of all time series.
 corresponding to the first right for a location will be used.
 @param end End DateTime for the time series.  If not specified, the date
 corresponding to the last right for a location will be used.
+@param FreeWaterAdministrationNumber_double A value >= to this is considered a free
+water right and will be handled as per FreeWaterMethod.  Specify a number larger
+than 99999.99999 to avoid adjusting for free water rights.
+@param FreeWaterMethod If null, handle the right as any other right, generally
+meaning that the decree in the time series will take effect in the future.
+If UseSeniorRightApropriationDate, use the appropriation date of the
+senior right for the location.
+If AlwaysOn, use the earliest available date specified by
+"start" or that of data for the free water right appropriation date.
+@param FreeWaterAppropriationDate_DateTime A DateTime that is used for the appropriation
+date if free water and FreeWaterMethod=UseSpecifiedDate.
 @param process_data If true, process the time series data.  If false, only
 create the time series header information.
 @return a list of time series created from a list of water rights.
@@ -1461,6 +1479,9 @@ public static Vector createWaterRightTimeSeriesList ( Vector smrights,
 		int interval_base, int spatial_aggregation, int parcel_year,
 		boolean include_dataset_totals,
 		DateTime start, DateTime end,
+		double FreeWaterAdministrationNumber_double,
+		String FreeWaterMethod,
+		DateTime FreeWaterAppropriationDate_DateTime,
 		boolean process_data )
 throws Exception
 {	String routine = "StateMod_Util.createWaterRightTimeSeriesList";
@@ -1468,7 +1489,22 @@ throws Exception
 	// Spatial aggregation values
 	int BYLOC = 0;	// Time series for location (default)
 	int BYPARCEL = 1;	// Time series for parcel
-	//int BYRIGHT = 2;	// Time series for right
+	int BYRIGHT = 2;	// Time series for right (one point)
+	// Free water methods...
+	int AlwaysOn_int = 0;
+	int UseSeniorRightAppropriationDate_int = 1;
+	int AsSpecified_int = 1;
+	int FreeWaterMethod_int = AsSpecified_int;
+	if ( FreeWaterMethod == null ) {
+		FreeWaterMethod_int = AsSpecified_int;
+	}
+	else if ( FreeWaterMethod.equalsIgnoreCase(AlwaysOn)) {
+		FreeWaterMethod_int = AlwaysOn_int;
+	}
+	else if ( FreeWaterMethod.equalsIgnoreCase(UseSeniorRightAppropriationDate)) {
+		FreeWaterMethod_int = UseSeniorRightAppropriationDate_int;
+	}
+
 	Vector tslist = new Vector();
 	TS ts = null;	// Time series to add.
 	StateMod_Right smright;
@@ -1478,6 +1514,7 @@ throws Exception
 	String id = null;	// ID part of tsid
 	int pos = 0;		// Position of time series in list
 	String adminnum_String = null;
+	double adminnum_double;
 	StateMod_AdministrationNumber adminnum = null;
 						// Administration number corresponding to
 						// date for right.
@@ -1506,7 +1543,10 @@ throws Exception
 	DateTime max_DateTime = null;
 	double decree = 0;	// Decree for water right
 	String datatype = "WaterRight"; // Default data type, reset below
+	String nodetype = "";	// Node type, for description, etc.
 	int status = 0;	// Used for error handling
+	int onoff;	// On/off switch for the right
+	int free_right_count; // count of free water rights at location
 	// Process the list of locations.
 	for ( int iloc = 0; iloc < loc_size; iloc++ ) {
 		loc_id = (String)loc_Vector.elementAt(iloc);
@@ -1525,6 +1565,7 @@ throws Exception
 		// series data to the bounding limits of the dates.
 		min_DateTime = null;	// Initialize
 		max_DateTime = null;
+		free_right_count = 0;
 		if ( (spatial_aggregation == BYLOC) ||
 				(spatial_aggregation == BYPARCEL) ) {
 			for ( int i = 0; i < size; i++ ) {
@@ -1533,7 +1574,8 @@ throws Exception
 					continue;
 				}
 				adminnum_String = smright.getAdministrationNumber();
-				adminnum = new StateMod_AdministrationNumber ( StringUtil.atod(adminnum_String) );
+				adminnum_double = StringUtil.atod(adminnum_String);
+				adminnum = new StateMod_AdministrationNumber ( adminnum_double );
 				decree_DateTime = new DateTime(adminnum.getAppropriationDate());
 				if ( (min_DateTime == null) ||
 						decree_DateTime.lessThan(min_DateTime) ) {
@@ -1542,6 +1584,10 @@ throws Exception
 				if ( (max_DateTime == null) ||
 						decree_DateTime.greaterThan(max_DateTime) ) {
 					max_DateTime = decree_DateTime;
+				}
+				// Check whether a free water right...
+				if ( (adminnum_double >= FreeWaterAdministrationNumber_double)) {
+					++free_right_count;
 				}
 			}
 		}
@@ -1552,10 +1598,40 @@ throws Exception
 				continue;
 			}
 			decree = smright.getDecree();
+			onoff = smright.getSwitch();
 			// Get the appropriation date from the admin number.
 			adminnum_String = smright.getAdministrationNumber();
-			adminnum = new StateMod_AdministrationNumber ( StringUtil.atod(adminnum_String) );
-			decree_DateTime = new DateTime(adminnum.getAppropriationDate());
+			adminnum_double = StringUtil.atod(adminnum_String);
+			if ( (adminnum_double >= FreeWaterAdministrationNumber_double) &&
+					(FreeWaterMethod != null) ) {
+				// The right is a free water right.  Adjust if requested
+				if ( FreeWaterMethod_int == AlwaysOn_int ) {
+					// Set to earliest of starting date and most senior
+					if ( (spatial_aggregation == BYRIGHT) ||
+							(free_right_count == size) ) {
+						// Minimum date will not have been determined.
+						decree_DateTime = start;
+					}
+					else {	// have a valid minimum
+						decree_DateTime = min_DateTime;
+						if ( start.lessThan(decree_DateTime)) {
+							decree_DateTime = start;
+						}
+					}
+				}
+				else if ( FreeWaterMethod_int == UseSeniorRightAppropriationDate_int ) {
+					if (min_DateTime != null ) {
+						decree_DateTime = min_DateTime;
+					}
+					else { decree_DateTime =
+						FreeWaterAppropriationDate_DateTime;
+					}
+				}
+			}
+			else {	// Process the admin number to get the decree date...
+				adminnum = new StateMod_AdministrationNumber ( adminnum_double );
+				decree_DateTime = new DateTime(adminnum.getAppropriationDate());
+			}
 			// TODO SAM 2007-05-16 Can optimize by saving instances above in memory
 			// so they don't need to be recreated.
 			need_to_create_ts = false;
@@ -1600,15 +1676,19 @@ throws Exception
 			if ( need_to_create_ts ) {
 				if ( smright instanceof StateMod_DiversionRight ) {
 					datatype = "DiversionWaterRight";
+					nodetype = "Diversion";
 				}
 				else if ( smright instanceof StateMod_InstreamFlowRight ) {
 					datatype = "InstreamFlowWaterRight";
+					nodetype = "InstreamFlow";
 				}
 				else if ( smright instanceof StateMod_ReservoirRight ) {
 					datatype = "ReservoirWaterRight";
+					nodetype = "Reservoir";
 				}
 				else if ( smright instanceof StateMod_WellRight ) {
 					datatype = "WellWaterRight";
+					nodetype = "Well";
 				}
 				if ( spatial_aggregation == BYLOC ) {
 					// Append to the datatype
@@ -1633,17 +1713,18 @@ throws Exception
 				ts = TSUtil.newTimeSeries ( tsid, true );
 				ts.setIdentifier ( tsid );
 				if ( spatial_aggregation == BYLOC ) {
-					ts.setDescription ( smright.getLocationIdentifier() + " Total Rights for Location" );
+					ts.setDescription ( smright.getLocationIdentifier() + " Total " + nodetype + " Rights for Location" );
 				}
 				else if ( spatial_aggregation == BYPARCEL ) {
 					if ( smright instanceof StateMod_WellRight ) {
-						ts.setDescription ( ((StateMod_WellRight)smright).getParcelID() + " Total Rights for Parcel" );
+						ts.setDescription ( ((StateMod_WellRight)smright).getParcelID() + " Total " + nodetype + " Rights for Parcel" );
 					}
 					else {
-						ts.setDescription ( smright.getLocationIdentifier() + " Total Rights for Parcel" );
+						ts.setDescription ( smright.getLocationIdentifier() + " Total " + nodetype + " Rights for Parcel" );
 										}
 				}
 				else {
+					// Individual rights
 					ts.setDescription ( smright.getName() );
 				}
 				ts.setDataUnits ( smright.getDecreeUnits() );
@@ -1698,6 +1779,28 @@ throws Exception
 			// Now add to the right.  If daily, add to each time step.
 			if ( process_data ) {
 				// Set data in the time series.
+				if ( onoff == 0 ) {
+					// Do not process.
+					continue;
+				}
+				else if ( onoff > 1 ) {
+					// On/off is a year.
+					// Only turn on the right for the indicated
+					// year.  Reset the year of the right to the on/off but
+					// only if it is later than the year from the admin number.
+					if ( onoff > decree_DateTime.getYear() ) {
+						Message.printStatus(2,"", "Resetting decree year from " +
+								decree_DateTime.getYear() + " to on/off " + onoff );
+						decree_DateTime.setYear( onoff );
+					}
+				}
+				else if ( onoff < 0 ) {
+					// Not yet handled - not expected to occur with well rights.
+					// TODO SAM 2007-06-08 Evaluate how to handle negative switch - skip
+					Message.printStatus( 2, routine,
+							"Software not able to handle negative on/off well right switch.  Skipping right.");
+					continue;
+				}
 				if ( (interval_base == TimeInterval.DAY) ||
 						(interval_base == TimeInterval.MONTH) ||
 						(interval_base == TimeInterval.YEAR)) {
@@ -1710,7 +1813,7 @@ throws Exception
 						}
 					}
 					else {
-						// Set the single value...
+						// Set the single value since one point in time...
 						ts.setDataValue ( decree_DateTime, decree );
 					}
 				}
@@ -1775,7 +1878,7 @@ throws Exception
 						ts.getLocation() + " " + date + " to " + totalts.getDate2() );
 			}
 		}
-		totalts.setDescription ( "Total of water right time series." );
+		totalts.setDescription ( "Total " + nodetype + " water right time series." );
 		tslist.addElement ( totalts );
 	}
 	return tslist;
@@ -3327,11 +3430,65 @@ public static Vector getUpstreamNetworkNodes (	Vector node_Vector,
 }
 
 /**
+Get a list of water right identifiers for a location.  The locations are the
+nodes at which the rights apply.  One or more water right can exist with
+the same identifier.
+@param smrights List of StateMod_Right to search.
+@param loc_id Location identifier to match (case-insensitive).
+@param req_parcel_year Parcel year for data or -1 to use all (only used with well rights).
+@return a list of locations for water rights, in the order found in the original list.
+*/
+public static Vector getWaterRightIdentifiersForLocation ( Vector smrights, String loc_id, int req_parcel_year )
+{	Vector matchlist = new Vector();	// Returned data, identifiers (not full right)
+	int size = 0;
+	if ( smrights != null ) {
+		size = smrights.size();
+	}
+	StateMod_Right right = null;
+	int parcel_year;
+	String right_id;	// Right identifier
+	int matchlist_size = 0;
+	boolean found = false; // used to indicate matching ID found
+	for ( int i = 0; i < size; i++ ) {
+		right = (StateMod_Right)smrights.elementAt(i);
+		if ( (req_parcel_year != -1) && right instanceof StateMod_WellRight ) {
+			// Allow the year to filter.
+			parcel_year = ((StateMod_WellRight)right).getParcelYear();
+			if ( parcel_year != req_parcel_year ) {
+				// No need to process right.
+				continue;
+			}
+		}
+		if ( (loc_id != null) &&
+			!loc_id.equalsIgnoreCase(right.getLocationIdentifier()) ) {
+			// Not a matching location
+			continue;
+		}
+		// If here need to add the identifier if not already in the
+		// list...
+		right_id = right.getIdentifier();
+		found = false;
+		for ( int j = 0; j < matchlist_size; j++ ) {
+			if ( right_id.equalsIgnoreCase((String)matchlist.elementAt(j)) ) {
+				found = true;
+				break;
+			}
+		}
+		if ( !found ) {
+			// Add to the list
+			matchlist.addElement ( right_id );
+			matchlist_size = matchlist.size();
+		}
+	}
+	return matchlist;
+}
+
+/**
 Get a list of water rights for a location.  The locations are the
 nodes at which the rights apply.
 @param smrights List of StateMod_Right to search.
 @param loc_id Location identifier to match (case-insensitive).
-@param req_parcel_year Parcel year for data or <0 to use all (only used with well rights).
+@param req_parcel_year Parcel year for data or -1 to use all (only used with well rights).
 @return a list of locations for water rights, in the order found in the original list.
 */
 public static Vector getWaterRightsForLocation ( Vector smrights, String loc_id, int req_parcel_year )
@@ -3344,7 +3501,7 @@ public static Vector getWaterRightsForLocation ( Vector smrights, String loc_id,
 	int parcel_year;
 	for ( int i = 0; i < size; i++ ) {
 		right = (StateMod_Right)smrights.elementAt(i);
-		if ( (req_parcel_year >= 0) && right instanceof StateMod_WellRight ) {
+		if ( (req_parcel_year != -1) && right instanceof StateMod_WellRight ) {
 			// Allow the year to filter.
 			parcel_year = ((StateMod_WellRight)right).getParcelYear();
 			if ( parcel_year != req_parcel_year ) {
@@ -3360,10 +3517,50 @@ public static Vector getWaterRightsForLocation ( Vector smrights, String loc_id,
 }
 
 /**
+Get a list of water rights for a location matching a right identifier.  The locations are the
+nodes at which the rights apply.
+@param smrights List of StateMod_Right to search.
+@param loc_id Location identifier to match (case-insensitive).
+@param right_id Right identifier to match (case-insensitive).
+@param req_parcel_year Parcel year for data or -1 to use all (only used with well rights).
+@return a list of locations for water rights, in the order found in the original list.
+*/
+public static Vector getWaterRightsForLocationAndRightIdentifier (
+		Vector smrights, String loc_id, String right_id, int req_parcel_year )
+{	Vector matchlist = new Vector();	// Returned data
+	int size = 0;
+	if ( smrights != null ) {
+		size = smrights.size();
+	}
+	StateMod_Right right = null;
+	int parcel_year;
+	for ( int i = 0; i < size; i++ ) {
+		right = (StateMod_Right)smrights.elementAt(i);
+		if ( (req_parcel_year != -1) && right instanceof StateMod_WellRight ) {
+			// Allow the year to filter.
+			parcel_year = ((StateMod_WellRight)right).getParcelYear();
+			if ( parcel_year != req_parcel_year ) {
+				// No need to process right.
+				continue;
+			}
+		}
+		if ( (loc_id != null) && !loc_id.equalsIgnoreCase(right.getLocationIdentifier()) ) {
+			continue;
+		}
+		if ( (right_id != null) && !right_id.equalsIgnoreCase(right.getIdentifier()) ) {
+			continue;
+		}
+		// If here it is a match...
+		matchlist.addElement ( right );
+	}
+	return matchlist;
+}
+
+/**
 Get a list of water rights for a parcel.
 @param smrights List of StateMod_WellRight to search.
 @param parcel_id Parcel identifier to match (case-insensitive).
-@param req_parcel_year Parcel year for data or <0 to use all.
+@param req_parcel_year Parcel year for data or -1 to use all.
 @return a list of water rights for the parcel, in the order found in the original list.
 */
 public static Vector getWaterRightsForParcel ( Vector smrights, String parcel_id, int req_parcel_year )
@@ -3375,7 +3572,7 @@ public static Vector getWaterRightsForParcel ( Vector smrights, String parcel_id
 	StateMod_WellRight right = null;
 	for ( int i = 0; i < size; i++ ) {
 		right = (StateMod_WellRight)smrights.elementAt(i);
-		if ( (req_parcel_year >= 0) && (right.getParcelYear() != req_parcel_year) ) {
+		if ( (req_parcel_year != -1) && (right.getParcelYear() != req_parcel_year) ) {
 			// No need to process right.
 			continue;
 		}
@@ -3390,6 +3587,9 @@ public static Vector getWaterRightsForParcel ( Vector smrights, String parcel_id
 /**
 Get a list of locations from a list of water rights.  The locations are the
 nodes at which the rights apply.
+@param smrights Vector of StateMod_Right to search.
+@param req_parcel_year Specific parcel year to match, or -1 to match all, if input is a
+Vector of StateMod_WellRight.
 @return a list of locations for water rights, in the order found in the original list.
 */
 public static Vector getWaterRightLocationList ( Vector smrights, int req_parcel_year )
@@ -3406,7 +3606,7 @@ public static Vector getWaterRightLocationList ( Vector smrights, int req_parcel
 	int j = 0; // Loop index for found locations.
 	for ( int i = 0; i < size; i++ ) {
 		right = (StateMod_Right)smrights.elementAt(i);
-		if ( req_parcel_year >= 0 ) {
+		if ( req_parcel_year != -1 ) {
 			// Check the parcel year and skip if necessary.
 			if ( right instanceof StateMod_WellRight ) {
 				parcel_year = ((StateMod_WellRight)right).getParcelYear();
@@ -3438,7 +3638,7 @@ public static Vector getWaterRightLocationList ( Vector smrights, int req_parcel
 Get a list of parcels from a list of well water rights.  The parcels are the
 locations at which well rights have been matched.
 @param smrights a Vector of StateMod_WellRight to process.
-@param req_parcel_year a requested year to constrain the parcel list (or negative to return all).
+@param req_parcel_year a requested year to constrain the parcel list (or -1 to return all).
 @return a list of parcels for water rights, in the order found in the original list.
 */
 public static Vector getWaterRightParcelList ( Vector smrights, int req_parcel_year )
@@ -3457,7 +3657,7 @@ public static Vector getWaterRightParcelList ( Vector smrights, int req_parcel_y
 		right = (StateMod_WellRight)smrights.elementAt(i);
 		parcel_id = right.getParcelID();
 		parcel_year = right.getParcelYear();
-		if ( (req_parcel_year >= 0) && (parcel_year != req_parcel_year) ) {
+		if ( (req_parcel_year != -1) && (parcel_year != req_parcel_year) ) {
 			// No need to process right
 			continue;
 		}
@@ -3476,6 +3676,49 @@ public static Vector getWaterRightParcelList ( Vector smrights, int req_parcel_y
 		}
 	}
 	return loclist;
+}
+
+/**
+Get a list of parcel years from a list of well water rights.
+@param smrights a Vector of StateMod_WellRight to process.
+@return a list of parcel years for water rights, in ascending order.
+*/
+public static int [] getWaterRightParcelYearList ( Vector smrights )
+{	Vector yearlist = new Vector();	// Returned data
+	int size = 0;
+	if ( smrights != null ) {
+		size = smrights.size();
+	}
+	StateMod_WellRight right = null;
+	int size_years = 0;	// size of location list
+	boolean found = false;	// Indicate whether the year has been found.
+	int parcel_year = 0;	// Year for parcels.
+	int j = 0; // Loop index for found years.
+	for ( int i = 0; i < size; i++ ) {
+		right = (StateMod_WellRight)smrights.elementAt(i);
+		parcel_year = right.getParcelYear();
+		// Search the list to see if it is a new item...
+		found = false;
+		for ( j = 0; j < size_years; j++ ) {
+			if ( parcel_year == ((Integer)yearlist.elementAt(j)).intValue()) {
+				found = true;
+				break;
+			}
+		}
+		if ( !found ) {
+			// Add to the list
+			yearlist.addElement ( new Integer(parcel_year) );
+			size_years = yearlist.size();
+		}
+	}
+	int [] parcel_years = new int[yearlist.size()];
+	for ( int i = 0; i < size_years; i++ ) {
+		parcel_years[i] = ((Integer)yearlist.elementAt(i)).intValue();
+	}
+	// Sort the array...
+	MathUtil.sort ( parcel_years, MathUtil.SORT_QUICK, MathUtil.SORT_ASCENDING,
+			null, false );
+	return parcel_years;
 }
 
 /**
