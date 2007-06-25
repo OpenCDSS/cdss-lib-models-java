@@ -1458,6 +1458,32 @@ public boolean hasAssociatedDiversion ()
 }
 
 /**
+Indicate whether the well has groundwater only supply.  This will
+be the case if the location is a collection with part type of "Parcel".
+*/
+public boolean hasGroundwaterOnlySupply ()
+{
+	if ( isCollection() &&
+			getCollectionPartType().equalsIgnoreCase("Parcel")) {
+		// TODO SAM 2007-05-11 Rectify part types with StateCU
+		return true;
+	}
+	return false;
+}
+
+/**
+Indicate whether the well has surface water supply.  This will
+be the case if the location is NOT a groundwater only supply location.
+*/
+public boolean hasSurfaceWaterSupply ()
+{
+	if ( hasGroundwaterOnlySupply() ) {
+		return false;
+	}
+	return true;
+}
+
+/**
 Set default values for all arguments
 @param initialize_defaults If true, initialize data to reasonable values.  If
 false, initialize to missing values.

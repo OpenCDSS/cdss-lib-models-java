@@ -1478,13 +1478,15 @@ create the time series header information.
 public static Vector createWaterRightTimeSeriesList ( Vector smrights,
 		int interval_base, int spatial_aggregation, int parcel_year,
 		boolean include_dataset_totals,
-		DateTime start, DateTime end,
+		DateTime OutputStart_DateTime, DateTime OutputEnd_DateTime,
 		double FreeWaterAdministrationNumber_double,
 		String FreeWaterMethod,
 		DateTime FreeWaterAppropriationDate_DateTime,
 		boolean process_data )
 throws Exception
 {	String routine = "StateMod_Util.createWaterRightTimeSeriesList";
+	Message.printStatus ( 2, routine, "Creating time series of water rights for requested period " +
+			OutputStart_DateTime + " to " + OutputEnd_DateTime );	
 	int size = 0;
 	// Spatial aggregation values
 	int BYLOC = 0;	// Time series for location (default)
@@ -1535,8 +1537,17 @@ throws Exception
 	if ( smrights != null ) {
 		smrights_size = smrights.size();
 	}
-	Message.printStatus ( 2, routine, "Found " + loc_size + " locations from " +
+	if ( spatial_aggregation == BYLOC ) {
+		Message.printStatus ( 2, routine, "Found " + loc_size + " locations from " +
 			smrights_size + " rights.");
+	}
+	else if ( spatial_aggregation == BYPARCEL ) {
+		Message.printStatus ( 2, routine, "Found " + loc_size + " parcels from " +
+				smrights_size + " rights.");
+	}
+	else { Message.printStatus ( 2, routine, "Found " + loc_size + " rights from " +
+			smrights_size + " rights.");
+	}
 	String loc_id = null;	// Identifier for a location or parcel
 	Vector loc_rights = null; // Vector of StateMod_Right
 	DateTime min_DateTime = null;
@@ -1610,12 +1621,12 @@ throws Exception
 					if ( (spatial_aggregation == BYRIGHT) ||
 							(free_right_count == size) ) {
 						// Minimum date will not have been determined.
-						decree_DateTime = start;
+						decree_DateTime = OutputStart_DateTime;
 					}
 					else {	// have a valid minimum
 						decree_DateTime = min_DateTime;
-						if ( start.lessThan(decree_DateTime)) {
-							decree_DateTime = start;
+						if ( OutputStart_DateTime.lessThan(decree_DateTime)) {
+							decree_DateTime = OutputStart_DateTime;
 						}
 					}
 				}
@@ -1733,7 +1744,8 @@ throws Exception
 				// use the extent of the dates found for all rights.  If
 				// a period has been specified, use that.
 				// Set the original dates to that from the data...
-				if ( spatial_aggregation == BYLOC ) {
+				if ( (spatial_aggregation == BYLOC) ||
+					(spatial_aggregation == BYPARCEL)) {
 					ts.setDate1Original ( min_DateTime );
 					ts.setDate2Original ( max_DateTime );
 				}
@@ -1741,9 +1753,12 @@ throws Exception
 					ts.setDate2Original ( decree_DateTime );
 				}
 				// Set the active dates to that requested or found...
-				if ( (start != null) && (end != null) ) {
-					ts.setDate1 ( start );
-					ts.setDate2 ( end );
+				if ( (OutputStart_DateTime != null) && (OutputEnd_DateTime != null) ) {
+					ts.setDate1 ( OutputStart_DateTime );
+					ts.setDate2 ( OutputEnd_DateTime );
+					Message.printStatus ( 2, routine,
+							"Setting right time series period to requested " +
+							ts.getDate1() + " to " + ts.getDate2() );
 				}
 				else {
 					if ( (spatial_aggregation == BYLOC) ||
@@ -1755,6 +1770,9 @@ throws Exception
 						ts.setDate1 ( decree_DateTime );
 						ts.setDate2 ( decree_DateTime );
 					}
+					Message.printStatus ( 2, routine,
+							"Setting right time series period to data limit " +
+							ts.getDate1() + " to " + ts.getDate2() );
 				}
 				// Initialize to zero...
 				if ( process_data ) {

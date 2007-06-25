@@ -432,6 +432,9 @@ CommandWarningException, CommandException
 					true,				// Create a data set total
 					null,              // time series start
 					null,              // time series end
+					999999.00000,	// No special free water rights
+					null,			// ...
+					null,			// ...
 					true );            // do read data
 		}
 		else if ( StateMod_InstreamFlowRight.isInstreamFlowRightFile(InputFile)) {
@@ -451,6 +454,9 @@ CommandWarningException, CommandException
 					true,				// Create a data set total
 					null,              // time series start
 					null,              // time series end
+					999999.00000,	// No special free water rights
+					null,			// ...
+					null,			// ...
 					true );            // do read data
 		}
 		else if ( StateMod_ReservoirRight.isReservoirRightFile(InputFile)) {
@@ -470,6 +476,9 @@ CommandWarningException, CommandException
 					true,				// Create a data set total
 					null,              // time series start
 					null,              // time series end
+					999999.00000,	// No special free water rights
+					null,			// ...
+					null,			// ...
 					true );            // do read data
 		}
 		else if ( StateMod_WellRight.isWellRightFile(InputFile)) {
@@ -489,6 +498,9 @@ CommandWarningException, CommandException
 					true,				// Create a data set total
 					null,              // time series start
 					null,              // time series end
+					999999.00000,	// No special free water rights
+					null,			// ...
+					null,			// ...
 					true );            // do read data
 		}
 		else {	// Read a traditional time series file

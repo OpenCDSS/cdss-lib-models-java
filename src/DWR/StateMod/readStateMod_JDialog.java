@@ -214,7 +214,7 @@ private void checkInput ()
 	if ( Interval.length() > 0 ) {
 		props.set ( "Interval", Interval );
 	}
-	if ( Interval.length() > 0 ) {
+	if ( SpatialAggregation.length() > 0 ) {
 		props.set ( "SpatialAggregation", SpatialAggregation );
 	}
 	if ( ParcelYear.length() > 0 ) {

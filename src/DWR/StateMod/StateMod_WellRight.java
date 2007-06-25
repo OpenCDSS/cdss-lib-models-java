@@ -444,7 +444,7 @@ throws Exception {
 				//80,
 				// Parcel data
 				5,
-				3,
+				5,
 				7};
 	String iline = null;
 	Vector v = new Vector(10);
@@ -487,10 +487,10 @@ throws Exception {
 			}
 			*/
 			// Evaluate handling parcel data... 
-			theWellRights.addElement(aRight);
 			aRight.setParcelYear((Integer)v.elementAt(6));
 			aRight.setParcelMatchClass((Integer)v.elementAt(7));
 			aRight.setParcelID(((String)v.elementAt(8)).trim());
+			theWellRights.addElement(aRight);
 		}
 	} 
 	catch(Exception e) {
@@ -771,10 +771,14 @@ throws Exception {
 			iline = StringUtil.formatString(v, format_0);
 			if ( WriteDataComments_boolean ) {
 				comment = right.getComment();
-				if ( comment.length() > 0 ) {
+				// TODO SAM Evaluate how best to set parcel data
+				comment = StringUtil.formatString(right.getParcelYear(),"%4d")+ " "+
+					StringUtil.formatString(right.getParcelMatchClass(),"%4d") +" " +
+					StringUtil.formatString(right.getParcelID(),"%6.6s");
+				//if ( comment.length() > 0 ) {
 					// Append to the line
 					out.println ( iline + " " + comment );
-				}
+				//}
 			}
 			else { out.println(iline);
 			}
