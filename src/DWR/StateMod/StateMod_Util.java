@@ -1801,6 +1801,9 @@ throws Exception
 					// Do not process.
 					continue;
 				}
+				else if ( onoff == 1 ) {
+					// Right is always on.  Fall through to processing below.
+				}
 				else if ( onoff > 1 ) {
 					// On/off is a year.
 					// Only turn on the right for the indicated
