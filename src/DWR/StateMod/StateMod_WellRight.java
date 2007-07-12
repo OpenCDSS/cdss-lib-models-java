@@ -454,7 +454,6 @@ throws Exception {
 	Message.printStatus(1, routine, "Reading well rights file: "
 		+ filename);
 
-	String comment = null;	// Comment from end of data line.
 	try {	in = new BufferedReader(new FileReader(
 		IOUtil.getPathUsingWorkingDir(filename)));
 		while ((iline = in.readLine()) != null) {
@@ -715,8 +714,12 @@ throws Exception {
  			+"***************************************************");
 		out.println(cmnt + "  Well Right File");
 		out.println(cmnt);
+		String format_add = "";
+		if ( WriteDataComments_boolean ) {
+			format_add = ", 1x, i4, 1x, i4, ix, a6";
+		}
 		out.println(cmnt 
-			+ "  Format:  (a12, a24, a12, f16.5, f8.2, i8)");
+			+ "  Format:  (a12, a24, a12, f16.5, f8.2, i8" + format_add + ")");
 		out.println(cmnt);
 		out.println(cmnt 
 			+ "     ID        cidvi:  Well right ID ");
@@ -738,13 +741,27 @@ throws Exception {
 		out.println(cmnt 
 			+ "                       -YYYY = off for years > " +
 			"YYYY" );
+		String header1_add = "";
+		String header2_add = "";
+		if ( WriteDataComments_boolean ) {
+			header1_add = " PYr--Cls--PID   ";
+			header2_add = "xb--exb--exb----e";
+			out.println(cmnt 
+					+ " Parcel Year     Pyr:  Parcel year used for parcel/well matching");
+			out.println(cmnt 
+					+ "Well match class Cls:  Indicates how well matched to parcel");
+			out.println(cmnt 
+					+ "                       (see CDSS documentation).");
+			out.println(cmnt 
+					+ "Parcel ID        PID:  Parcel ID for year.");
+		}
 		out.println(cmnt);
 		out.println(cmnt 
 			+ "   ID               Name             Struct   " 
-			+ "       Admin #   Decree  On/Off");
+			+ "       Admin #   Decree  On/Off " + header1_add );
 		out.println(cmnt 
 			+ "---------eb----------------------eb----------e" 
-			+ "b--------------eb------eb------e");
+			+ "b--------------eb------eb------e" + header2_add );
 		out.println(cmnt);
 		out.println(cmnt + "EndHeader");
 		out.println(cmnt);
@@ -784,7 +801,6 @@ throws Exception {
 			}
 		}
 		
-		
 	out.flush();
 	out.close();
 	out = null;
@@ -800,7 +816,7 @@ throws Exception {
 		comment_str = null;
 		ignore_comment_str = null;
 		routine = null;
-		Message.printWarning(2, routine, e);
+		Message.printWarning(3, routine, e);
 		throw e;
 	}
 }
