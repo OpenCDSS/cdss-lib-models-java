@@ -62,35 +62,26 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-
 import java.util.Vector;
 
 import javax.swing.Icon;
 import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
-
 import javax.swing.tree.TreePath;
 
-import DWR.StateMod.StateMod_Data;
 import DWR.StateCU.StateCU_Data;
-
 import RTi.GRTS.TSViewJFrame;
-
 import RTi.TS.MonthTS;
 import RTi.TS.TS;
-
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.ReportJFrame;
 import RTi.Util.GUI.SimpleJMenuItem;
 import RTi.Util.GUI.SimpleJTree;
 import RTi.Util.GUI.SimpleJTree_Node;
-
 import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.PropList;
-
 import RTi.Util.Message.Message;
-
 import RTi.Util.String.StringUtil;
 
 /**

@@ -16,10 +16,8 @@ package DWR.StateMod;
 import java.util.Vector;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
-
-import RTi.Util.Message.Message;
-
 import RTi.Util.IO.Validator;
+import RTi.Util.Message.Message;
 
 /**
 This table model displays well right data.  The model can display rights data

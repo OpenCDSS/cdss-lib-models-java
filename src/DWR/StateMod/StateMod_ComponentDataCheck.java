@@ -16,13 +16,12 @@ package DWR.StateMod;
 import java.util.Vector;
 
 import RTi.Util.IO.CheckFile;
-
-import RTi.Util.IO.DataSetComponent;
-import RTi.Util.IO.PropList;
-import RTi.Util.IO.DataSet_ComponentDataCheck;
 import RTi.Util.IO.CheckFile_DataModel;
-import RTi.Util.IO.Validator;
+import RTi.Util.IO.DataSetComponent;
+import RTi.Util.IO.DataSet_ComponentDataCheck;
+import RTi.Util.IO.PropList;
 import RTi.Util.IO.Status;
+import RTi.Util.IO.Validator;
 
 public class StateMod_ComponentDataCheck extends DataSet_ComponentDataCheck
 {

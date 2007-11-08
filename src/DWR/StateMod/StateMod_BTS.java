@@ -115,7 +115,6 @@
 package DWR.StateMod;
 
 import java.io.IOException;
-import java.lang.String;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -124,7 +123,6 @@ import RTi.TS.DayTS;
 import RTi.TS.MonthTS;
 import RTi.TS.TS;
 import RTi.TS.TSIdent;
-
 import RTi.Util.IO.EndianRandomAccessFile;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.PropList;

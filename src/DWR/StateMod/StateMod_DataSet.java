@@ -205,36 +205,29 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-
 import java.util.StringTokenizer;
 import java.util.Vector;
 
 import javax.swing.JFrame;
 
 import DWR.DMI.HydroBaseDMI.HydroBase_NodeNetwork;
-
+import DWR.StateCU.StateCU_IrrigationPracticeTS;
 import RTi.TS.DayTS;
 import RTi.TS.MonthTS;
 import RTi.TS.TS;
 import RTi.TS.TSIdent;
-
-import RTi.Util.Message.Message;
-
 import RTi.Util.IO.CheckFile;
 import RTi.Util.IO.DataSet;
 import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.ProcessListener;
 import RTi.Util.IO.PropList;
-
+import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
-
 import RTi.Util.Time.DateTime;
 import RTi.Util.Time.StopWatch;
 import RTi.Util.Time.TimeInterval;
 import RTi.Util.Time.TimeUtil;
-
-import DWR.StateCU.StateCU_IrrigationPracticeTS;
 
 /**
 This StateMod_DataSet class manages data components in a StateMod data set, 

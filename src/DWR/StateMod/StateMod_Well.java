@@ -121,11 +121,9 @@ package DWR.StateMod;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.PrintWriter;
-import java.lang.Double;
 import java.util.Vector;
 
 import DWR.StateCU.StateCU_IrrigationPracticeTS;
-
 import RTi.GIS.GeoView.GeoRecord;
 import RTi.TS.DayTS;
 import RTi.TS.MonthTS;

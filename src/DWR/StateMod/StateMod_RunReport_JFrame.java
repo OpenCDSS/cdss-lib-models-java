@@ -67,16 +67,12 @@ package DWR.StateMod;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-
-import java.lang.StringBuffer;
-
 import java.util.Vector;
 
 import javax.swing.ButtonGroup;
@@ -89,9 +85,7 @@ import javax.swing.JTabbedPane;
 
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleJComboBox;
-
 import RTi.Util.Message.Message;
-
 import RTi.Util.String.StringUtil;
 
 /**

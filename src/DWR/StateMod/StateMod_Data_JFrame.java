@@ -35,16 +35,13 @@ package DWR.StateMod;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
-
 import java.util.Vector;
 
 import javax.swing.JFileChooser;
@@ -59,11 +56,9 @@ import RTi.Util.GUI.JWorksheet_DefaultTableCellRenderer;
 import RTi.Util.GUI.ReportPrinter;
 import RTi.Util.GUI.SimpleFileFilter;
 import RTi.Util.GUI.SimpleJButton;
-
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.PropList;
 import RTi.Util.IO.SecurityCheck;
-
 import RTi.Util.Message.Message;
 
 /**

@@ -61,15 +61,11 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-
 import java.util.Vector;
 
 import RTi.TS.TSIdent;
-
 import RTi.Util.IO.IOUtil;
-
 import RTi.Util.Message.Message;
-
 import RTi.Util.String.StringUtil;
 
 public class StateMod_GraphNode {

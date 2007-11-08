@@ -45,11 +45,8 @@ import java.util.Vector;
 import javax.swing.JFrame;
 
 import RTi.GRTS.TSViewJFrame;
-
 import RTi.Util.GUI.ReportJFrame;
-
 import RTi.Util.IO.PropList;
-
 import RTi.Util.Message.Message;
 
 /**

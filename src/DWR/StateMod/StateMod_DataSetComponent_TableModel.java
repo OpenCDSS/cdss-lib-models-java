@@ -19,9 +19,7 @@ package DWR.StateMod;
 import java.util.Vector;
 
 import DWR.StateCU.StateCU_Data;
-
 import RTi.TS.TS;
-
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 import RTi.Util.IO.DataSetComponent;
 import RTi.Util.Message.Message;

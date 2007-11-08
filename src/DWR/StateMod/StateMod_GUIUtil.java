@@ -43,14 +43,10 @@ import javax.swing.JFrame;
 import javax.swing.JTextField;
 
 import RTi.GRTS.TSViewJFrame;
-
 import RTi.TS.TS;
-
 import RTi.Util.GUI.JGUIUtil;
-
 import RTi.Util.IO.ProcessManager;
 import RTi.Util.IO.PropList;
-
 import RTi.Util.Message.Message;
 
 /**

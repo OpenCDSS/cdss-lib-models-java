@@ -72,18 +72,12 @@ package DWR.StateMod;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.PrintWriter;
-
-import java.lang.Double;
-import java.lang.Integer;
-
-import java.util.Vector;
 import java.util.StringTokenizer;
+import java.util.Vector;
 
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.PropList;
-
 import RTi.Util.Message.Message;
-
 import RTi.Util.String.StringUtil;
 
 public class StateMod_DelayTable 

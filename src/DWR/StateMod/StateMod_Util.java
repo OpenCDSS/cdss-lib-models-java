@@ -128,8 +128,6 @@ import java.util.Vector;
 
 import javax.swing.JFrame;
 
-import DWR.StateMod.StateMod_DataSet;
-
 import RTi.TS.DayTS;
 import RTi.TS.MonthTS;
 import RTi.TS.TS;
@@ -137,17 +135,16 @@ import RTi.TS.TSIdent;
 import RTi.TS.TSLimits;
 import RTi.TS.TSUtil;
 import RTi.TS.YearTS;
-
 import RTi.Util.IO.DataFormat;
 import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.DataUnits;
 import RTi.Util.IO.IOUtil;
-import RTi.Util.Math.MathUtil;
 import RTi.Util.IO.ProcessManager;
 import RTi.Util.IO.ProcessManagerJDialog;
 import RTi.Util.IO.PropList;
-import RTi.Util.IO.Validators;
 import RTi.Util.IO.Validator;
+import RTi.Util.IO.Validators;
+import RTi.Util.Math.MathUtil;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 import RTi.Util.Time.DateTime;

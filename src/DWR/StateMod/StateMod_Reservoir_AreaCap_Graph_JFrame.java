@@ -15,10 +15,9 @@
 
 package DWR.StateMod;
 
-import java.util.Vector;
-
 import java.awt.Color;
 import java.awt.Dimension;
+import java.util.Vector;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -26,14 +25,10 @@ import javax.swing.JPanel;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-
 import org.jfree.chart.axis.NumberAxis;
-
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
-
 import org.jfree.chart.title.TextTitle;
-
 import org.jfree.data.xy.DefaultTableXYDataset;
 import org.jfree.data.xy.XYSeries;
 

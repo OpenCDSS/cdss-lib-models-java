@@ -2,10 +2,11 @@ package DWR.StateMod;
 
 import java.io.File;
 import java.util.ArrayList;
-import RTi.Util.Test.TestCollector;
+
+import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import junit.framework.Test;
+import RTi.Util.Test.TestCollector;
 
 public class StateMod_TestSuite extends TestCase {
 

@@ -53,21 +53,17 @@ package DWR.StateMod;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Insets;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-
 import java.awt.print.PageFormat;
-
 import java.net.URL;
-
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -81,37 +77,31 @@ import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 
+import org.apache.xerces.parsers.DOMParser;
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import DWR.DMI.HydroBaseDMI.HydroBaseDMI;
 import DWR.DMI.HydroBaseDMI.HydroBase_Node;
 import DWR.DMI.HydroBaseDMI.HydroBase_NodeNetwork;
-
 import RTi.GR.GRAspect;
 import RTi.GR.GRJComponentDrawingArea;
 import RTi.GR.GRLimits;
 import RTi.GR.GRUnits;
-
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.ResponseJDialog;
 import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.GUI.SimpleJComboBox;
 import RTi.Util.GUI.SimpleJToggleButton;
 import RTi.Util.GUI.TextResponseJDialog;
-
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.PrintUtil;
 import RTi.Util.IO.PropList;
-
 import RTi.Util.Math.MathUtil;
-
-import RTi.Util.String.StringUtil;
-
 import RTi.Util.Message.Message;
-
-import org.apache.xerces.parsers.DOMParser;
-import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import RTi.Util.String.StringUtil;
 
 /**
 This class is a class for displaying the network editor.

@@ -50,22 +50,17 @@
 package DWR.StateMod;
 
 import java.io.File;
-
 import java.util.Vector;
 
 import javax.swing.JFileChooser;
 
 import RTi.TS.TSIdent;
-
 import RTi.Util.GUI.JFileChooserFactory;
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.JWorksheet;
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
-
 import RTi.Util.IO.IOUtil;
-
 import RTi.Util.String.StringUtil;
-
 import RTi.Util.Time.TimeInterval;
 
 /**

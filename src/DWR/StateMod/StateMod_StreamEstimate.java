@@ -67,15 +67,15 @@
 
 package DWR.StateMod;
 
-import java.io.FileReader;
 import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.PrintWriter;
 import java.util.Vector;
 
 import RTi.GIS.GeoView.GeoRecord;
-import RTi.TS.TS;
 import RTi.TS.DayTS;
 import RTi.TS.MonthTS;
+import RTi.TS.TS;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;

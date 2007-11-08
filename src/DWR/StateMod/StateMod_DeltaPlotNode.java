@@ -19,7 +19,6 @@
 
 package DWR.StateMod;
 
-import java.lang.Double;
 import java.util.Vector;
 
 import RTi.Util.String.StringUtil;

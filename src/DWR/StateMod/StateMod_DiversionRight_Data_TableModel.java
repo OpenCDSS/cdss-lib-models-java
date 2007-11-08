@@ -16,12 +16,8 @@ package DWR.StateMod;
 
 import java.util.Vector;
 
-import DWR.StateMod.StateMod_DiversionRight;
-
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
-
 import RTi.Util.IO.Validator;
-import RTi.Util.IO.Validators;
 
 /**
 This table model displays diversion right data.  The model can display rights

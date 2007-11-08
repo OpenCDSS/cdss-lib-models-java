@@ -18,7 +18,6 @@
 package DWR.StateMod;
 
 import java.awt.Graphics;
-
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -27,7 +26,6 @@ import javax.swing.JFrame;
 
 import DWR.DMI.HydroBaseDMI.HydroBase_Node;
 import DWR.DMI.HydroBaseDMI.HydroBase_NodeNetwork;
-
 import RTi.GR.GRColor;
 import RTi.GR.GRDrawingAreaUtil;
 import RTi.GR.GRJComponentDevice;

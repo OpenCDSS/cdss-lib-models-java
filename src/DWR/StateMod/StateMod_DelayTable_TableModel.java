@@ -26,8 +26,6 @@ package DWR.StateMod;
 
 import java.util.Vector;
 
-import DWR.StateMod.StateMod_DelayTable;
-
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 
 /**

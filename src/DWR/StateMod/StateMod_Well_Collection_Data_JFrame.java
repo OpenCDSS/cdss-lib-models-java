@@ -15,8 +15,6 @@ package DWR.StateMod;
 
 import java.util.Vector;
 
-import DWR.StateMod.StateMod_Data_JFrame;
-
 import RTi.Util.GUI.JScrollWorksheet;
 
 /**

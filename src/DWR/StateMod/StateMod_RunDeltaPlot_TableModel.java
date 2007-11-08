@@ -27,9 +27,7 @@
 package DWR.StateMod;
 
 import java.awt.Color;
-
 import java.io.File;
-
 import java.util.Vector;
 
 import javax.swing.JFileChooser;

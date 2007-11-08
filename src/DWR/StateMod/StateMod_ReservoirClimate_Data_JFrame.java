@@ -24,7 +24,6 @@ package DWR.StateMod;
 import java.util.Vector;
 
 import RTi.Util.GUI.JScrollWorksheet;
-
 import RTi.Util.Message.Message;
 
 /**

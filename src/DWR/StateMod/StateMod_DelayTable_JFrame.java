@@ -80,9 +80,8 @@
 package DWR.StateMod;
 
 import java.awt.FlowLayout;
-import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
-
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -91,7 +90,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-
 import java.util.Collections;
 import java.util.Vector;
 
@@ -102,24 +100,18 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import DWR.StateMod.StateMod_DelayTable;
-
+import RTi.GRTS.TSViewJFrame;
 import RTi.TS.DayTS;
 import RTi.TS.MonthTS;
-import RTi.TS.TSIdent;
 import RTi.TS.TS;
-import RTi.GRTS.TSViewJFrame;
-
+import RTi.TS.TSIdent;
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.JScrollWorksheet;
 import RTi.Util.GUI.JWorksheet;
 import RTi.Util.GUI.ResponseJDialog;
-
 import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.PropList;
-
 import RTi.Util.Message.Message;
-
 import RTi.Util.Time.DateTime;
 import RTi.Util.Time.TimeInterval;
 

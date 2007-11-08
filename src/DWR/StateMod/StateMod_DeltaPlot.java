@@ -37,19 +37,13 @@
 package DWR.StateMod;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
-
-import java.lang.Double;
-import java.lang.Integer;
-
 import java.io.PrintWriter;
-
 import java.util.Vector;
 
 import RTi.Util.Message.Message;
-
 import RTi.Util.String.StringUtil;
 
 public class StateMod_DeltaPlot extends StateMod_Data {

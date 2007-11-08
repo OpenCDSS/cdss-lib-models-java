@@ -16,10 +16,7 @@ package DWR.StateMod;
 
 import java.util.Vector;
 
-import DWR.StateMod.StateMod_Diversion;
-
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
-
 import RTi.Util.IO.Validator;
 import RTi.Util.IO.Validators;
 

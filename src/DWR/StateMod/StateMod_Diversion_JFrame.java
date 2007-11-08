@@ -198,7 +198,6 @@ package DWR.StateMod;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -209,7 +208,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -217,21 +215,17 @@ import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
-import javax.swing.JRadioButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JTextField;
-
-import DWR.StateMod.StateMod_Diversion;
 
 import RTi.GRTS.TSProduct;
 import RTi.GRTS.TSViewJFrame;
-
 import RTi.TS.DayTS;
 import RTi.TS.TS;
 import RTi.TS.TSUtil;
-
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.JScrollWorksheet;
 import RTi.Util.GUI.JWorksheet;
@@ -239,14 +233,10 @@ import RTi.Util.GUI.JWorksheet_SortListener;
 import RTi.Util.GUI.ResponseJDialog;
 import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.GUI.SimpleJComboBox;
-
 import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.PropList;
-
 import RTi.Util.Message.Message;
-
 import RTi.Util.String.StringUtil;
-
 import RTi.Util.Time.TimeInterval;
 
 // The layout for the GUI is as follows, for the most part using grid bag

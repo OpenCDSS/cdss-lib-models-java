@@ -55,15 +55,10 @@
 package DWR.StateMod;
 
 import java.io.PrintWriter;
-
-import java.lang.Double;
-
 import java.util.Vector;
 
 import RTi.Util.IO.IOUtil;
-
 import RTi.Util.Message.Message;
-
 import RTi.Util.String.StringUtil;
 
 /**

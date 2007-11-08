@@ -15,7 +15,6 @@ package DWR.StateMod;
 import java.util.Vector;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
-
 import RTi.Util.IO.DataSetComponent;
 
 /**
