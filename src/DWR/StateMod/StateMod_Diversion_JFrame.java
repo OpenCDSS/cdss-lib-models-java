@@ -883,6 +883,7 @@ public void displayTSViewJFrame(String type)
 			".SubTitleString=Irrigated Acres for Diversion "
 			+ div.getID() + " (" + div.getName() + ")" );
 		props.set ( "SubProduct " + sub + ".SubTitleFontSize=12" );
+        /* FIXME SAM 2007-11-12 Need to use irrigation parts, not total.
 		ts = div.getIrrigationPracticeYearTS().getSacreTS();
 		if ( ts != null ) {
 			props.set ( "Data " + sub + "." + (++its) +
@@ -895,6 +896,7 @@ public void displayTSViewJFrame(String type)
 				".TSID=" + ts.getIdentifierString() );
 			tslist.add ( ts );
 		}
+        */
 		ts = div.getIrrigationPracticeYearTS().getTacreTS();
 		if ( ts != null ) {
 			props.set ( "Data " + sub + "." + (++its) +

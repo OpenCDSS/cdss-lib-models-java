@@ -137,7 +137,7 @@ public static String NONPERMANENT_COMMENT = "#>";
 /**
 Determine whether a StateMod file is daily or monthly format.  This is done
 by reading through the file until the first line of data.  If that line has
-&gt; 150 characters, it is assumed to be a daily file; otherwise it is assumed 
+more than 150 characters, it is assumed to be a daily file; otherwise it is assumed 
 to be a monthly file.  Currently, this method does NOT verify that the file
 contents are actually for StateMod.
 The IOUtil.getPathUsingWorkingDir() method is applied to the filename.
@@ -154,7 +154,7 @@ public static int getFileDataInterval ( String filename )
 	catch ( Exception e ) {
 		message = "Unable to open file \"" + full_filename +
 			"\" to determine data interval.";
-		Message.printWarning ( 1, routine, message );
+		Message.printWarning ( 2, routine, message );
 		return -999;
 	}
 	try {	iline = ifp.readLine();
