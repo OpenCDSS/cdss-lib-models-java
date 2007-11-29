@@ -3702,7 +3702,8 @@ public Vector getSummary()
 			ityopr_max = opright.getItyopr();
 		}
 	}
-	int count2[] = new int[ityopr_max + 1];	// To allow for 0th "Unknown"
+	//int count2[] = new int[ityopr_max + 1];	// To allow for 0th "Unknown"
+	int count2[] = new int[StateMod_OperationalRight.NAMES.length];
 	// Now loop through all the rights and count the number by type...
 	for ( int i = 0; i < StateMod_OperationalRight.NAMES.length; i++ ) {
 		count2[i] = 0;
