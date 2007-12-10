@@ -664,7 +664,7 @@ file:
 </tr>
 </table>
 */
-public static Vector readStateCUFile (	String filename,
+public static Vector readStateCUFile ( String filename,
 					DateTime date1_req, DateTime date2_req,
 					PropList props )
 throws Exception
@@ -674,8 +674,7 @@ throws Exception
 	Vector cupat_Vector = new Vector ( 100 );	// Data to return.
 	
 	String full_filename = IOUtil.getPathUsingWorkingDir ( filename );
-	Message.printStatus(2,routine,"Reading StateCU CDS file: " +
-		full_filename );
+	Message.printStatus(2,routine, "Reading StateCU CDS file: " + full_filename );
 	
 	if ( props == null ) {
 		props = new PropList ( "CDS" );
@@ -1200,8 +1199,7 @@ throws Exception
 }
 
 /**
-Read one or more time series from a StateCU crop pattern time series format
-file.
+Read one or more time series from a StateCU crop pattern time series format file.
 @return a Vector of time series if successful, null if not.  The calling code
 is responsible for freeing the memory for the time series.
 @param req_tsident Identifier for requested item series.  If null,
@@ -1223,11 +1221,10 @@ private static Vector readTimeSeriesList (	String req_tsident,
 						String req_units,
 						boolean read_data )
 throws Exception
-{	// REVISIT - can optimize this later to only read one time series...
+{	// TODO - can optimize this later to only read one time series...
 	// First read the whole file...
 
-	Vector data_Vector = readStateCUFile (	full_filename,
-						req_date1, req_date2 );
+	Vector data_Vector = readStateCUFile ( full_filename, req_date1, req_date2 );
 	// If all the time series are required, return all...
 	int size = 0;
 	if ( data_Vector != null ) {
@@ -1248,8 +1245,7 @@ throws Exception
 		cds = (StateCU_CropPatternTS)data_Vector.elementAt(i);
 		if ( req_tsident != null ) {
 			// Check to see if the location match...
-			if (	!cds.getID().equalsIgnoreCase(
-				tsident.getLocation() ) ) {
+			if ( !cds.getID().equalsIgnoreCase(	tsident.getLocation() ) ) {
 				include_ts = false;
 			}
 		}
@@ -1258,14 +1254,11 @@ throws Exception
 		}
 		nts = cds.__tslist.size();
 		for ( j = 0; j < nts; j++ ) {
-			// REVISIT - optimize this by evaluating when reading
-			// the file...
+			// TODO - optimize this by evaluating when reading the file...
 			ts = (TS)cds.__tslist.elementAt(j);
 			if ( req_tsident != null ) {
-				// Check to see if the location and data type
-				// match...
-				if (	!tsident.getType().equalsIgnoreCase(
-					ts.getDataType() ) ) {
+				// Check to see if the location and data type match...
+				if ( !tsident.getType().equalsIgnoreCase( ts.getDataType() ) ) {
 					continue;
 				}
 			}
