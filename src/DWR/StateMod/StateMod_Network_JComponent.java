@@ -241,8 +241,9 @@ private boolean __initialized = false;
 
 /**
 Whether the last thing clicked on in the network was an annotation or not.
+If false, then a node was the last object selected.
 */
-private boolean __isAnnotation = false;
+private boolean __isLastSelectedAnAnnotation = false;
 
 /**
 Whether the legend is being dragged.
@@ -525,7 +526,9 @@ private GRLimits __legendLimits = new GRLimits(0, 0, 0, 0);
 
 /**
 Array of all the nodes in the node network.  Stored here for quick access,
-rather than iterating through the network.
+rather than iterating through the network.  This array does NOT contain
+annotations, even though some methods refer to nodes generically and process
+network nodes and annotations.
 */
 private HydroBase_Node[] __nodes;
 
@@ -679,8 +682,11 @@ private String
 	__holdPaperOrientation = null,
 	__holdPaperSize = null;
 
+// FIXME SAM 2008-01-25 Need to change so annotations are not same object type
+// normal nodes.
 /**
-Vector of all the annotations displayed on the network.
+Vector of all the annotations displayed on the network.  Note that internally
+annotations are managed as a list of HydroBase_Node.
 */
 private Vector __annotations = new Vector();
 
@@ -791,7 +797,7 @@ public void actionPerformed(ActionEvent event) {
 		if (__popupNodeNum == -1) {
 			return;
 		}
-		if (__isAnnotation) {
+		if (__isLastSelectedAnAnnotation) {
 			__annotations.removeElementAt(__clickedNodeNum);
 		}
 		else {
@@ -864,7 +870,7 @@ public void actionPerformed(ActionEvent event) {
 		printScreen();
 	}
 	else if (action.equals(__MENU_PROPERTIES)) {
-		if (__isAnnotation) {
+		if (__isLastSelectedAnAnnotation) {
 			HydroBase_Node node = (HydroBase_Node)
 				__annotations.elementAt(__popupNodeNum);
 
@@ -1053,13 +1059,21 @@ Adds a node change operation to the undo list.
 @param x the new node X position.
 @param y the new node Y position.
 */
-private void addNodeChangeOperation(int nodeNum, double x, double y) {
-	// create a new UndoData object to store the location of the node
-	// before and 
+private void addNodeChangeOperation(int nodeNum, double x, double y)
+{
+	// Create a new UndoData object to store the location of the node before and 
 	UndoData data = new UndoData();
 	data.nodeNum = nodeNum;
-	data.oldX = __nodes[nodeNum].getX();
-	data.oldY = __nodes[nodeNum].getY();
+	if ( __isLastSelectedAnAnnotation ) {
+		// TODO SAM 2008-01-25 Figure out if undo applies to annotations also
+		//data.oldX = getAnnotationNode(nodeNum).getX();
+		//data.oldY = getAnnotationNode(nodeNum).getY();
+		return;
+	}
+	else {
+		data.oldX = __nodes[nodeNum].getX();
+		data.oldY = __nodes[nodeNum].getY();
+	}
 	data.newX = x;
 	data.newY = y;
 
@@ -1166,8 +1180,7 @@ private void buildNodeArray() {
 
 	int size = nodes.size();
 
-	// Move the nodes from the Vector into an array for quicker 
-	// traversal.
+	// Move the nodes from the Vector into an array for quicker traversal.
 
 	__nodes = new HydroBase_Node[size];
 
@@ -1727,7 +1740,7 @@ private void drawAnnotations() {
 	PropList p = null;
 	String origFontSize = null;
 	for (int i = 0; i < size; i++) {
-		if (i == __clickedNodeNum && __isAnnotation) {
+		if (i == __clickedNodeNum && __isLastSelectedAnAnnotation) {
 			// skip it -- outline being drawn for
 			// drag
 			continue;
@@ -2635,15 +2648,16 @@ private void findNode() {
 /**
 Finds the number of the node at the specified click.
 @param x the x location of the click on the screen
-@param y the y location of the click on the screen, inverted for RTi Y 
-style.
-@return the number of the node at the specified click, or -1 if no node
-was clicked on.
+@param y the y location of the click on the screen, inverted for RTi Y style.
+@return the number of the node at the specified click, or -1 if no node was clicked on.
 */
-private int findNodeAtXY(double x, double y) {
+private int findNodeOrAnnotationAtXY(double x, double y)
+{	String routine = "Statemod_Network_JComponent.findNodeAtXY";
 	double newX = x;
 	double newY = y;
-//	Message.printStatus(1, "", "X: " + x + "   Y: " + y);
+	if ( Message.isDebugOn ) {
+		Message.printDebug(1, routine, "Trying to find node or annotation at X: " + x + "   Y: " + y);
+	}
 	for (int i = (__nodes.length - 1); i >= 0; i--) {
 //		Message.printStatus(1, "", "" + __nodes[i].getCommonID() + "  " 
 //			+ __nodes[i].getX() + ", " + __nodes[i].getY()
@@ -2651,7 +2665,10 @@ private int findNodeAtXY(double x, double y) {
 //			+ __nodes[i].getHeight() + "]  "
 //			+ __nodes[i].isVisible());
 		if (__nodes[i].contains(newX, newY) && __nodes[i].isVisible()) {
-			__isAnnotation = false;
+			__isLastSelectedAnAnnotation = false;
+			if ( Message.isDebugOn ) {
+				Message.printDebug(1, routine, "Found node [" + i + "] at X: " + x + "   Y: " + y);
+			}
 			return i;
 		}
 	}
@@ -2665,7 +2682,10 @@ private int findNodeAtXY(double x, double y) {
 			node.getX() + node.getWidth(),
 			node.getY() + node.getHeight());
 		if (limits.contains(x, y) && node.isVisible()) {
-			__isAnnotation = true;
+			__isLastSelectedAnAnnotation = true;
+			if ( Message.isDebugOn ) {
+				Message.printDebug(1, routine, "Found annotation [" + i + "] at X: " + x + "   Y: " + y);
+			}
 			return i;
 		}
 	}
@@ -2884,7 +2904,7 @@ public void keyPressed(KeyEvent event) {
 				__legendDrag = false;
 			}
 			else if (__nodeDrag) {
-				if (__isAnnotation) {
+				if (__isLastSelectedAnAnnotation) {
 					HydroBase_Node node = (HydroBase_Node)
 						__annotations.elementAt(
 						__clickedNodeNum);
@@ -3122,21 +3142,26 @@ public void mousePressed(MouseEvent event) {
 	}
 	
 	// determine first whether a node was clicked on
-	__clickedNodeNum = findNodeAtXY(convertX(event.getX()) + __screenLeftX,
+	__clickedNodeNum = findNodeOrAnnotationAtXY(convertX(event.getX()) + __screenLeftX,
 		convertY(invertY(event.getY())) + __screenBottomY);
 
 	// if a node was clicked on ...
 	if (__clickedNodeNum > -1) {
 		__mouseDeviceX = event.getX();
 		__mouseDeviceY = event.getY();
-		__parent.displayNode(__nodes[__clickedNodeNum]);
+		if (__isLastSelectedAnAnnotation) {
+			__parent.displayNode(getAnnotationNode(__clickedNodeNum));
+		}
+		else {
+			__parent.displayNode(__nodes[__clickedNodeNum]);
+		}
 		// ... then set everything up so that the node can be
 		// dragged around the screen.  
 		if (!__editable) {
 			return;
 		}		
 
-		if (__isAnnotation) {
+		if (__isLastSelectedAnAnnotation) {
 			HydroBase_Node node = (HydroBase_Node)
 				__annotations.elementAt(__clickedNodeNum);
 			__draggedNodeLimits = new GRLimits(node.getX(), 
@@ -3261,7 +3286,7 @@ legend in its new position, or by showing a popup menu.
 public void mouseReleased(MouseEvent event) {
 	if (event.isPopupTrigger()) {
 		// find the node on which the popup menu was triggered
-		int nodeNum = findNodeAtXY(convertX(event.getX()) 
+		int nodeNum = findNodeOrAnnotationAtXY(convertX(event.getX()) 
 			+ __screenLeftX,
 			convertY(invertY(event.getY())) + __screenBottomY);
 		__popupX = convertX(event.getX()) + __screenLeftX;
@@ -3273,7 +3298,7 @@ public void mouseReleased(MouseEvent event) {
 			// annotation node or not, and sets __isAnnotation
 			// appropriately
 			__popupNodeNum = nodeNum;
-			if (__isAnnotation) {
+			if (__isLastSelectedAnAnnotation) {
 				__annotationPopup.show(event.getComponent(), 
 					event.getX(), event.getY());
 			}
@@ -3325,7 +3350,7 @@ public void mouseReleased(MouseEvent event) {
 				+ __screenBottomY;
 		}
 			
-		if (__isAnnotation) {
+		if (__isLastSelectedAnAnnotation) {
 			// prevent nodes from being dragged off the drawing
 			// area completely.
 			__mouseDataX -= __xAdjust;
