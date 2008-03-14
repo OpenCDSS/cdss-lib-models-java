@@ -336,11 +336,12 @@ public void actionPerformed(ActionEvent event)
 				StateMod_DataSet.COMP_DIVERSION_STATIONS,
 				((StateMod_Diversion)data).getID() ), props );
 		}
-		else {	// Assume properties...
+		else {
+			// Assume properties...
+			__dataset_wm.displayWindow (StateMod_DataSet_WindowManager.WINDOW_DIVERSION,__editable);
 			((StateMod_Diversion_JFrame)__dataset_wm.getWindow (
 				StateMod_DataSet_WindowManager.
-				WINDOW_DIVERSION )).selectID (
-				((StateMod_Diversion)data).getID() );
+				WINDOW_DIVERSION )).selectID (((StateMod_Diversion)data).getID() );
 		}
 	}
 	else if ( data instanceof TS ) {

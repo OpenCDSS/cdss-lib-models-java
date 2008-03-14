@@ -8064,8 +8064,7 @@ throws Exception
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
 				HydroBase_NodeNetwork network 
-					= HydroBase_NodeNetwork
-					.readStateModNetworkFile(fn,null, true);
+					= HydroBase_NodeNetwork.readStateModNetworkFile( fn, null, true);
 				comp.setData(network);
 				comp.setVisible(true);
 				comp.setDirty ( false );
