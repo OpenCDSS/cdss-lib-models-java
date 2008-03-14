@@ -141,6 +141,7 @@ import RTi.Util.IO.DataUnits;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.ProcessManager;
 import RTi.Util.IO.ProcessManagerJDialog;
+import RTi.Util.IO.ProcessManagerOutputFilter;
 import RTi.Util.IO.PropList;
 import RTi.Util.IO.Validator;
 import RTi.Util.IO.Validators;
@@ -565,12 +566,11 @@ private static double __statemod_version = 0.0;
 The latest known version is returned by getStateModVersionLatest() as a
 default.  This is used by StateMod_BTS when requesting parameters.
 */
-private static double __statemod_version_latest = 10.34;
+private static double __statemod_version_latest = 11.50;
 
 /**
-The program to use when running StateMod.  In general, this should just be the
-program name and rely on the PATH to find.  However, a full path can be
-specified to override the PATH.
+The program to use when running StateMod.  If relying on the path, this should just be the
+program name.  However, a full path can be specified to override the PATH.
 */
 private static String __statemod_executable = "statemod";
 
@@ -4155,16 +4155,11 @@ Run the command "statemod <response_file_name> <option>".
 typcially be used for model run options but is normally false when running the
 StateMod report mode.
 @param parent Calling JFrame, used when withGUI is true.
-@exception Exception if there is an error running the command (non Stop 0 from
-StateMod).
+@exception Exception if there is an error running the command (non Stop 0 from StateMod).
 */
-public static void runStateMod (	StateMod_DataSet dataset,
-					String option, 
-					boolean withGUI,
-					JFrame parent )
+public static void runStateMod ( StateMod_DataSet dataset, String option, boolean withGUI, JFrame parent )
 throws Exception
-{	DataSetComponent comp = dataset.getComponentForComponentType(
-			StateMod_DataSet.COMP_RESPONSE );
+{	DataSetComponent comp = dataset.getComponentForComponentType(StateMod_DataSet.COMP_RESPONSE );
 	runStateMod (	dataset.getDataFilePathAbsolute(comp.getDataFileName()),
 			option, withGUI, parent, 0 );
 }
@@ -4193,7 +4188,9 @@ throws Exception {
 /**
 Run the command "statemod <response_file_name> <option>".
 The response file is typically the original response file that was used to open
-the data set.  It can be null if not needed for the option (e.g., -help).
+the data set.  It can be null if not needed for the option (e.g., -help).  If the -v
+option is run, then the internal statemod version information is set.  In other
+words, use -v to reset the StateMod version number that is known.
 @param response_file_name Response file name, with full path.
 @param option Option to run(parameters after the program name).
 @param withGUI If true, a ProcessManagerDialog will be used.  If false, the GUI
@@ -4217,9 +4214,7 @@ throws Exception
 		response_file_name = "";
 	}
 
-	String command = __statemod_executable +
-			" " + response_file_name +
-			" " + option;
+	String command = __statemod_executable + " " + response_file_name + " " + option;
 	String str;
 
 	Message.printStatus(1, routine, "Running \"" + command + "\"");
@@ -4228,14 +4223,12 @@ throws Exception
 		// Run using a process manager dialog...
 		PropList props = new PropList("StateMod_Util.runStateMod");
 		PropList pm_props = new PropList ("StateMod_Util.runStateMod");
-		if (	option.startsWith("-update") ||
-			option.startsWith("-help") ||
-			option.startsWith("-version") ) {
+		if ( option.startsWith("-update") || option.startsWith("-help") || option.startsWith("-version") ) {
 			// Display all the output...
 			props.set("BufferSize","0");
 		}
-		else {	// Display a reasonably large number of lines of
-			// output...
+		else {
+			// Display a reasonably large number of lines of output...
 			props.set("BufferSize","1000");
 		}
 		// Tell the process manager to check for "STOP" as an exit
@@ -4251,17 +4244,16 @@ throws Exception
 		//test[2] = "-0";
 		//new ProcessManagerJDialog(parent, "StateMod",
 			//new ProcessManager( test, pm_props), props);
+		ProcessManagerOutputFilter filter = new StateMod_OutputFilter();
 		new ProcessManagerJDialog(parent, "StateMod",
 			new ProcessManager(StringUtil.toArray(
 			StringUtil.breakStringList(command,
-			" ", StringUtil.DELIM_SKIP_BLANKS)), pm_props), props);
+			" ", StringUtil.DELIM_SKIP_BLANKS)), pm_props), filter, props);
 	}
-	else if (option.equalsIgnoreCase("-v") ||
-		option.equalsIgnoreCase("-version")) {
-		// Run StateMod -version and search the output for the version
-		// information...
+	else if (option.equalsIgnoreCase("-v") || option.equalsIgnoreCase("-version")) {
+		// Run StateMod -version and search the output for the version information...
 		String [] command_array = new String[2];
-		command_array[0] = __statemod_executable;
+		command_array[0] = getStateModExecutable();
 		command_array[1] = "-version";
 		ProcessManager sp = new ProcessManager(command_array);
 		sp.saveOutput(true);
@@ -4275,9 +4267,7 @@ throws Exception
 		for (int i = 0; i < size; i++){
 			str = (String)output.elementAt(i);
 			if (str.indexOf("Version:") >= 0) {
-				String version = StringUtil.getToken(
-					str.trim()," ",
-					StringUtil.DELIM_SKIP_BLANKS,1);
+				String version = StringUtil.getToken( str.trim()," ", StringUtil.DELIM_SKIP_BLANKS,1);
 				// For now treat as a floating point number...
 				__statemod_version = StringUtil.atof(version);
 				versionFound = true;
@@ -4286,14 +4276,14 @@ throws Exception
 		}
 		if (!versionFound) {
 			Message.printWarning(1, routine,
-			"Unable to determine StateMod version from version " +
-			"output.\n"
+			"Unable to determine StateMod version from version output.\n"
 			+"Model may not run and output may not be accessible.\n"
 			+"Is statemod.exe in the PATH?");
 			return;	// To skip sleep below.
 		}
 	}
-	else {	// No GUI and not getting the version.
+	else {
+		// No GUI and not getting the version.
 		ProcessManager sp = new ProcessManager(
 			StringUtil.toArray(
 			StringUtil.breakStringList(command, " \t",
