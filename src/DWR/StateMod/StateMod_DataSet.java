@@ -210,7 +210,6 @@ import java.util.Vector;
 
 import javax.swing.JFrame;
 
-import DWR.DMI.HydroBaseDMI.HydroBase_NodeNetwork;
 import DWR.StateCU.StateCU_IrrigationPracticeTS;
 import RTi.TS.DayTS;
 import RTi.TS.MonthTS;
@@ -8063,8 +8062,8 @@ throws Exception
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
-				HydroBase_NodeNetwork network 
-					= HydroBase_NodeNetwork.readStateModNetworkFile( fn, null, true);
+				StateMod_NodeNetwork network =
+					(StateMod_NodeNetwork)StateMod_NodeNetwork.readStateModNetworkFile( fn, true);
 				comp.setData(network);
 				comp.setVisible(true);
 				comp.setDirty ( false );
@@ -8073,8 +8072,7 @@ throws Exception
 			}
 		}
 	} catch (Exception e) {
-		Message.printWarning(1, routine,
-			"Error reading network file:\n\"" + fn+"\"");
+		Message.printWarning(1, routine, "Unexpected error reading network file:\n\"" + fn+"\"");
 		Message.printWarning(2, routine, e);
 	}
 

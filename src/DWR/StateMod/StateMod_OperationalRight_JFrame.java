@@ -186,20 +186,20 @@ private JRadioButton
 GUI text fields.
 */
 private JTextField 
-	__oprLocation,
-	__oprName,
-	__oprStationID;
+	__oprLocation_JTextField,
+	__oprName_JTextField,
+	__oprStationID_JTextField,
+	__opr20Sjmina_JTextField,
+	__opr20Sjrela_JTextField,
+	__qdebt_JTextField,
+	__qdebtx_JTextField;
 
 /**
 Status bar textfields 
 */
 private JTextField 
-	__opr20Sjmina,
-	__opr20Sjrela,
-	__qdebt,
-	__qdebtx,
-	__messageJTextField,
-	__statusJTextField;
+	__message_JTextField,
+	__status_JTextField;
 
 /**
 GUI textfields to enter the value on which to search the worksheet.
@@ -221,21 +221,21 @@ private JWorksheet __opRightWorksheet;
 Combobox for holding the rule type switch.
 */
 private SimpleJComboBox 
-	__opr8JComboBox,
-	__destination,
-	__destinationAccount,
-	__source1,
-	__source2,
-	__source3,
-	__source4,
-	__source5,
-	__sourceAccount1,
-	__sourceAccount2,
-	__sourceAccount3,
-	__sourceAccount4,
-	__sourceAccount5,
-	__ruleTypeSwitch,
-	__oprSwitch;
+	__opr8_JComboBox,
+	__destination_JComboBox,
+	__destinationAccount_JComboBox,
+	__source1_JComboBox,
+	__source2_JComboBox,
+	__source3_JComboBox,
+	__source4_JComboBox,
+	__source5_JComboBox,
+	__sourceAccount1_JComboBox,
+	__sourceAccount2_JComboBox,
+	__sourceAccount3_JComboBox,
+	__sourceAccount4_JComboBox,
+	__sourceAccount5_JComboBox,
+	__ruleTypeSwitch_JComboBox,
+	__oprSwitch_JComboBox;
 
 /**
 Combobox array for holding month switches.
@@ -441,24 +441,24 @@ public void actionPerformed(ActionEvent e) {
 		__searchID.setEditable(false);
 		__searchName.setEditable(true);
 	}
-	else if (source == __destination) {		
+	else if (source == __destination_JComboBox) {		
 		fillDestinationAccount(__currentItyopr,
-			__destination.getSelected());
+			__destination_JComboBox.getSelected());
 		if (__currentItyopr == 8) {
 			// special case, the source is tied to the destination
-			__source1.setSelectedItem(__destination.getSelected());
+			__source1_JComboBox.setSelectedItem(__destination_JComboBox.getSelected());
 		}
 	}
-	else if (source == __source1) {
+	else if (source == __source1_JComboBox) {
 		StateMod_OperationalRight opr = (StateMod_OperationalRight)
 			__operationalRights.elementAt(__currentOpRightsIndex);
-		opr.setCiopso1(trim(__source1.getSelected()));
+		opr.setCiopso1(trim(__source1_JComboBox.getSelected()));
 		fillSourceAccount1(__currentItyopr, opr);
 	}
-	else if (source == __ruleTypeSwitch) {
+	else if (source == __ruleTypeSwitch_JComboBox) {
 		StateMod_OperationalRight opr = (StateMod_OperationalRight)
 			__operationalRights.elementAt(__currentOpRightsIndex);
-		opr.setItyopr(trim(__ruleTypeSwitch.getSelected()));
+		opr.setItyopr(trim(__ruleTypeSwitch_JComboBox.getSelected()));
 		populateRightInformation(opr);
 		populateAdditionalData(opr);
 	}	
@@ -610,8 +610,7 @@ private void disableComboBox(SimpleJComboBox cb) {
 }
 
 /**
-Enables the monthly switch panel, or disables it, depending on the value
-passed in.
+Enables the monthly switch panel, or disables it, depending on the value passed in.
 @param enable whether to enable the monthly switches or disable them.
 */
 private void enableOpPanel(boolean enable) {
@@ -645,7 +644,7 @@ private void fillDestinationAccount(int ityopr, String value) {
 		case 3:
 		case 11:
 		case 14:
-			__destinationAccount.removeAllItems();
+			__destinationAccount_JComboBox.removeAllItems();
 			index = StateMod_Util.indexOf(__reservoirs, value);
 			if (index == -1) {
 				// not a reservoir, check to see if it's
@@ -655,18 +654,18 @@ private void fillDestinationAccount(int ityopr, String value) {
 				if (index == -1) {
 					return;
 				}
-				__destinationAccount.add("1");
-				__destinationAccount.setEditable(false);
+				__destinationAccount_JComboBox.add("1");
+				__destinationAccount_JComboBox.setEditable(false);
 				return;
 			}
 			r = (StateMod_Reservoir)__reservoirs.elementAt(index);
 			accounts = r.getAccounts();
-			__destinationAccount.setData(
+			__destinationAccount_JComboBox.setData(
 				StateMod_Util.createDataList(accounts, true));
-			__destinationAccount.setEditable(true);
+			__destinationAccount_JComboBox.setEditable(true);
 			break;
 		case 5:
-			__destinationAccount.removeAllItems();
+			__destinationAccount_JComboBox.removeAllItems();
 			index = StateMod_Util.indexOf(__reservoirRights,
 				value);
 			if (index > -1) {
@@ -681,7 +680,7 @@ private void fillDestinationAccount(int ityopr, String value) {
 					StateMod_Util.createDataList(accounts,
 					true));
 				*/
-				__destinationAccount.setEditable(true);
+				__destinationAccount_JComboBox.setEditable(true);
 				return;
 			}
 			
@@ -690,25 +689,25 @@ private void fillDestinationAccount(int ityopr, String value) {
 				r = (StateMod_Reservoir)
 					__reservoirs.elementAt(index);
 				accounts = r.getAccounts();
-				__destinationAccount.setData(
+				__destinationAccount_JComboBox.setData(
 					StateMod_Util.createDataList(accounts,
 					true));
-				__destinationAccount.setEditable(true);
+				__destinationAccount_JComboBox.setEditable(true);
 				return;
 			}
 			return;
 		case 8:
 		case 16:
-			__destinationAccount.removeAllItems();
+			__destinationAccount_JComboBox.removeAllItems();
 			index = StateMod_Util.indexOf(__reservoirs, value);
 			if (index > -1) {
 				r = (StateMod_Reservoir)
 					__reservoirs.elementAt(index);
 				accounts = r.getAccounts();
-				__destinationAccount.setData(
+				__destinationAccount_JComboBox.setData(
 					StateMod_Util.createDataList(accounts,
 					true));
-				__destinationAccount.setEditable(true);
+				__destinationAccount_JComboBox.setEditable(true);
 				return;
 			}
 			break;
@@ -744,7 +743,7 @@ private void fillSourceAccount1(int ityopr, StateMod_OperationalRight opr) {
 		case 9:
 		case 10:
 		case 20:
-			__sourceAccount1.removeAllItems();
+			__sourceAccount1_JComboBox.removeAllItems();
 			index = StateMod_Util.indexOf(__reservoirs, value);
 			if (index == -1) {
 				return;
@@ -752,13 +751,13 @@ private void fillSourceAccount1(int ityopr, StateMod_OperationalRight opr) {
 			StateMod_Reservoir r = (StateMod_Reservoir)
 				__reservoirs.elementAt(index);
 			Vector accounts = r.getAccounts();
-			__sourceAccount1.setData(StateMod_Util.createDataList(
+			__sourceAccount1_JComboBox.setData(StateMod_Util.createDataList(
 				accounts, true));
 			if (ityopr == 9 || ityopr == 20) {
 				// special case
-				__sourceAccount1.addAt("0 - Prorate", 0);
+				__sourceAccount1_JComboBox.addAt("0 - Prorate", 0);
 			}
-			__sourceAccount1.setEditable(true);
+			__sourceAccount1_JComboBox.setEditable(true);
 			break;
 		default:
 			return;
@@ -780,38 +779,38 @@ throws Throwable {
 	__gridPanel = null;
 	__searchIDJRadioButton = null;
 	__searchNameJRadioButton = null;
-	__destination = null;
-	__destinationAccount = null;
-	__source1 = null;
-	__source2 = null;
-	__source3 = null;
-	__source4 = null;
-	__source5 = null;
-	__sourceAccount1 = null;
-	__sourceAccount2 = null;
-	__sourceAccount3 = null;
-	__sourceAccount4 = null;
-	__sourceAccount5 = null;
-	__oprLocation = null;
-	__oprName = null;
-	__oprStationID = null;
-	__oprSwitch = null;
+	__destination_JComboBox = null;
+	__destinationAccount_JComboBox = null;
+	__source1_JComboBox = null;
+	__source2_JComboBox = null;
+	__source3_JComboBox = null;
+	__source4_JComboBox = null;
+	__source5_JComboBox = null;
+	__sourceAccount1_JComboBox = null;
+	__sourceAccount2_JComboBox = null;
+	__sourceAccount3_JComboBox = null;
+	__sourceAccount4_JComboBox = null;
+	__sourceAccount5_JComboBox = null;
+	__oprLocation_JTextField = null;
+	__oprName_JTextField = null;
+	__oprStationID_JTextField = null;
+	__oprSwitch_JComboBox = null;
 	__searchID = null;
 	__searchName = null;
 	__worksheet = null;
 	__opRightWorksheet = null;
-	__ruleTypeSwitch = null;
+	__ruleTypeSwitch_JComboBox = null;
 	__monthSwitch = null;
 	__dataset = null;
 	__operationalRightsComponent = null;
 	__operationalRights = null;
 	__opr8Panel = null;
-	__opr8JComboBox = null;
+	__opr8_JComboBox = null;
 	__opr20Panel = null;
-	__opr20Sjmina = null;
-	__opr20Sjrela = null;
-	__qdebt = null;
-	__qdebtx = null;
+	__opr20Sjmina_JTextField = null;
+	__opr20Sjrela_JTextField = null;
+	__qdebt_JTextField = null;
+	__qdebtx_JTextField = null;
 	__qdebtPanel = null;
 
 	super.finalize();
@@ -825,30 +824,30 @@ selectTableIndex().
 private void initializeDisables() {
 	__disables = new JComponent[36];
 	int i = 0;
-	__disables[i++] = __oprStationID;
-	__disables[i++] = __oprName;
+	__disables[i++] = __oprStationID_JTextField;
+	__disables[i++] = __oprName_JTextField;
 	__disables[i++] = __applyJButton;
 	__disables[i++] = __gridPanel;
-	__disables[i++] = __ruleTypeSwitch;
-	__disables[i++] = __oprSwitch;
-	__disables[i++] = __destination;
-	__disables[i++] = __destinationAccount;
-	__disables[i++] = __source1;
-	__disables[i++] = __source2;
-	__disables[i++] = __source3;
-	__disables[i++] = __source4;
-	__disables[i++] = __source5;
-	__disables[i++] = __sourceAccount1;
-	__disables[i++] = __sourceAccount2;
-	__disables[i++] = __sourceAccount3;
-	__disables[i++] = __sourceAccount4;
-	__disables[i++] = __sourceAccount5;
-	__disables[i++] = __oprLocation;
-	__disables[i++] = __opr8JComboBox;
-	__disables[i++] = __opr20Sjmina;
-	__disables[i++] = __opr20Sjrela;
-	__disables[i++] = __qdebt;
-	__disables[i++] = __qdebtx;
+	__disables[i++] = __ruleTypeSwitch_JComboBox;
+	__disables[i++] = __oprSwitch_JComboBox;
+	__disables[i++] = __destination_JComboBox;
+	__disables[i++] = __destinationAccount_JComboBox;
+	__disables[i++] = __source1_JComboBox;
+	__disables[i++] = __source2_JComboBox;
+	__disables[i++] = __source3_JComboBox;
+	__disables[i++] = __source4_JComboBox;
+	__disables[i++] = __source5_JComboBox;
+	__disables[i++] = __sourceAccount1_JComboBox;
+	__disables[i++] = __sourceAccount2_JComboBox;
+	__disables[i++] = __sourceAccount3_JComboBox;
+	__disables[i++] = __sourceAccount4_JComboBox;
+	__disables[i++] = __sourceAccount5_JComboBox;
+	__disables[i++] = __oprLocation_JTextField;
+	__disables[i++] = __opr8_JComboBox;
+	__disables[i++] = __opr20Sjmina_JTextField;
+	__disables[i++] = __opr20Sjrela_JTextField;
+	__disables[i++] = __qdebt_JTextField;
+	__disables[i++] = __qdebtx_JTextField;
 	for (int j = 0; j < 12; j++) {
 		__disables[i + j] = __monthSwitch[j];
 	}
@@ -910,8 +909,7 @@ public void mouseReleased(MouseEvent e) {
 }
 
 /**
-Fills in the additional data section of the form for the specified 
-operational right.
+Fills in the additional data section of the form for the specified operational right.
 @param opr the operational right to use to fill out the additional data.
 */
 private void populateAdditionalData(StateMod_OperationalRight opr) {
@@ -949,7 +947,7 @@ private void populateAdditionalData(StateMod_OperationalRight opr) {
 		case 8:
 			enableOpPanel(false);
 			__opr8Panel.setVisible(true);
-			__opr8JComboBox.removeAllItems();
+			__opr8_JComboBox.removeAllItems();
 			// REVISIT (JTS - 2003-09-22)
 			// what goes here?
 //			__opr8JComboBox.add("" + opr.getIntern());
@@ -995,8 +993,8 @@ private void populateAdditionalData(StateMod_OperationalRight opr) {
 			}
 			__gridPanel.setVisible(false);
 			__qdebtPanel.setVisible(true);
-			__qdebt.setText("" + opr.getQdebt());
-			__qdebtx.setText("" + opr.getQdebtx());
+			__qdebt_JTextField.setText("" + opr.getQdebt());
+			__qdebtx_JTextField.setText("" + opr.getQdebtx());
 			__additionalPanel.setVisible(true);
 			break;
 		case 19:
@@ -1006,8 +1004,8 @@ private void populateAdditionalData(StateMod_OperationalRight opr) {
 			break;
 		case 20:
 			__opr20Panel.setVisible(true);
-			__opr20Sjmina.setText("" + opr.getSjmina());
-			__opr20Sjrela.setText("" + opr.getSjrela());
+			__opr20Sjmina_JTextField.setText("" + opr.getSjmina());
+			__opr20Sjrela_JTextField.setText("" + opr.getSjrela());
 			__additionalPanel.setVisible(true);
 			if (dumx == 12) {
 				setupMonthlyChoices(opr);
@@ -1033,13 +1031,13 @@ private void populateAdditionalData(StateMod_OperationalRight opr) {
 }
 
 /**
-Fills in the right information for the specified operational right.
-@param opr the operational right to use to populate the fields for
-right information.
+Fills in the display information for the specified operational right.
+@param opr the operational right to use to populate the fields for right information.
 */
-private void populateRightInformation(StateMod_OperationalRight opr) {
-	__ruleTypeSwitch.setEditable(false);
-	__oprSwitch.setEditable(false);
+private void populateRightInformation(StateMod_OperationalRight opr)
+{
+	__ruleTypeSwitch_JComboBox.setEditable(false);
+	__oprSwitch_JComboBox.setEditable(false);
 	int ityopr = opr.getItyopr();
 	__currentItyopr = ityopr;
 
@@ -1060,73 +1058,77 @@ private void populateRightInformation(StateMod_OperationalRight opr) {
 	String src5 = null;
 	String srcAcct5 = null;
 	
-	// REVISIT (JTS - 2003-09-22)
+	// FIXME JTS 2003-09-22
 	// whenever the rules for rule type #19 are determined, removed
 	// the check for 19 from this if statement.
-	if (ityopr == 0 || ityopr == 19) {
-		__destination.removeAllItems();
-		__destination.setEnabled(false);
-		__destination.setEditable(false);
-		__destinationAccount.removeAllItems();
-		__destinationAccount.setEnabled(false);
-		__destinationAccount.setEditable(false);
-		__source1.removeAllItems();
-		__source1.setEnabled(false);
-		__source1.setEditable(false);
-		__sourceAccount1.removeAllItems();
-		__sourceAccount1.setEnabled(false);
-		__sourceAccount1.setEditable(false);
-		__source2.removeAllItems();
-		__source2.setEnabled(false);
-		__source2.setEditable(false);
-		__sourceAccount2.removeAllItems();
-		__sourceAccount2.setEnabled(false);
-		__sourceAccount2.setEditable(false);
-		__source3.removeAllItems();
-		__source3.setEnabled(false);
-		__source3.setEditable(false);
-		__sourceAccount3.removeAllItems();
-		__sourceAccount3.setEnabled(false);
-		__sourceAccount3.setEditable(false);
-		__source4.removeAllItems();
-		__source4.setEnabled(false);
-		__source4.setEditable(false);
-		__sourceAccount4.removeAllItems();
-		__sourceAccount4.setEnabled(false);
-		__sourceAccount4.setEditable(false);
-		__source5.removeAllItems();
-		__source5.setEnabled(false);
-		__source5.setEditable(false);
-		__sourceAccount5.removeAllItems();
-		__sourceAccount5.setEnabled(false);
-		__sourceAccount5.setEditable(false);		
+	// Also disable when a right is not fully handled.
+	if ( (ityopr == 0) || (ityopr == 19) || (ityopr > StateMod_OperationalRight.MAX_HANDLED_TYPE) ) {
+		// Make sure that even basic information is not editable...
+		//__irtem.setEditable (false);
+		// More specific information
+		__destination_JComboBox.removeAllItems();
+		__destination_JComboBox.setEnabled(false);
+		__destination_JComboBox.setEditable(false);
+		__destinationAccount_JComboBox.removeAllItems();
+		__destinationAccount_JComboBox.setEnabled(false);
+		__destinationAccount_JComboBox.setEditable(false);
+		__source1_JComboBox.removeAllItems();
+		__source1_JComboBox.setEnabled(false);
+		__source1_JComboBox.setEditable(false);
+		__sourceAccount1_JComboBox.removeAllItems();
+		__sourceAccount1_JComboBox.setEnabled(false);
+		__sourceAccount1_JComboBox.setEditable(false);
+		__source2_JComboBox.removeAllItems();
+		__source2_JComboBox.setEnabled(false);
+		__source2_JComboBox.setEditable(false);
+		__sourceAccount2_JComboBox.removeAllItems();
+		__sourceAccount2_JComboBox.setEnabled(false);
+		__sourceAccount2_JComboBox.setEditable(false);
+		__source3_JComboBox.removeAllItems();
+		__source3_JComboBox.setEnabled(false);
+		__source3_JComboBox.setEditable(false);
+		__sourceAccount3_JComboBox.removeAllItems();
+		__sourceAccount3_JComboBox.setEnabled(false);
+		__sourceAccount3_JComboBox.setEditable(false);
+		__source4_JComboBox.removeAllItems();
+		__source4_JComboBox.setEnabled(false);
+		__source4_JComboBox.setEditable(false);
+		__sourceAccount4_JComboBox.removeAllItems();
+		__sourceAccount4_JComboBox.setEnabled(false);
+		__sourceAccount4_JComboBox.setEditable(false);
+		__source5_JComboBox.removeAllItems();
+		__source5_JComboBox.setEnabled(false);
+		__source5_JComboBox.setEditable(false);
+		__sourceAccount5_JComboBox.removeAllItems();
+		__sourceAccount5_JComboBox.setEnabled(false);
+		__sourceAccount5_JComboBox.setEditable(false);		
 		return;
 	}
 	else {
-		__destination.setEnabled(true);
-		__destination.setEditable(true);
-		__destinationAccount.setEnabled(true);
-		__destinationAccount.setEditable(true);
-		__source1.setEnabled(true);
-		__source1.setEditable(true);
-		__sourceAccount1.setEnabled(true);
-		__sourceAccount1.setEditable(true);
-		__source2.setEnabled(true);
-		__source2.setEditable(true);
-		__sourceAccount2.setEnabled(true);
-		__sourceAccount2.setEditable(true);
-		__source3.setEnabled(true);
-		__source3.setEditable(true);
-		__sourceAccount3.setEnabled(true);
-		__sourceAccount3.setEditable(true);
-		__source4.setEnabled(true);
-		__source4.setEditable(true);
-		__sourceAccount4.setEnabled(true);
-		__sourceAccount4.setEditable(true);
-		__source5.setEnabled(true);
-		__source5.setEditable(true);
-		__sourceAccount5.setEnabled(true);
-		__sourceAccount5.setEditable(true);		
+		__destination_JComboBox.setEnabled(true);
+		__destination_JComboBox.setEditable(true);
+		__destinationAccount_JComboBox.setEnabled(true);
+		__destinationAccount_JComboBox.setEditable(true);
+		__source1_JComboBox.setEnabled(true);
+		__source1_JComboBox.setEditable(true);
+		__sourceAccount1_JComboBox.setEnabled(true);
+		__sourceAccount1_JComboBox.setEditable(true);
+		__source2_JComboBox.setEnabled(true);
+		__source2_JComboBox.setEditable(true);
+		__sourceAccount2_JComboBox.setEnabled(true);
+		__sourceAccount2_JComboBox.setEditable(true);
+		__source3_JComboBox.setEnabled(true);
+		__source3_JComboBox.setEditable(true);
+		__sourceAccount3_JComboBox.setEnabled(true);
+		__sourceAccount3_JComboBox.setEditable(true);
+		__source4_JComboBox.setEnabled(true);
+		__source4_JComboBox.setEditable(true);
+		__sourceAccount4_JComboBox.setEnabled(true);
+		__sourceAccount4_JComboBox.setEditable(true);
+		__source5_JComboBox.setEnabled(true);
+		__source5_JComboBox.setEditable(true);
+		__sourceAccount5_JComboBox.setEnabled(true);
+		__sourceAccount5_JComboBox.setEditable(true);		
 	}
 	
 //	System.out.println("populateRightInformation: " + ityopr);
@@ -1135,40 +1137,40 @@ private void populateRightInformation(StateMod_OperationalRight opr) {
 			if (__instreamFlowIDs == null) {
 				createInstreamFlowIDVector();
 			}
-			__destination.setData(__instreamFlowIDs);
-			__destination.setSelectedPrefixItem(dest);
-			__destination.setEditable(true);
+			__destination_JComboBox.setData(__instreamFlowIDs);
+			__destination_JComboBox.setSelectedPrefixItem(dest);
+			__destination_JComboBox.setEditable(true);
 
-			__destinationAccount.removeAllItems();
-			__destinationAccount.add("1");
-			__destinationAccount.setEditable(false);
+			__destinationAccount_JComboBox.removeAllItems();
+			__destinationAccount_JComboBox.add("1");
+			__destinationAccount_JComboBox.setEditable(false);
 
 			if (__reservoirIDs == null) {
 				createReservoirIDVector();
 			}
-			__source1.setData(__reservoirIDs);
-			__source1.setSelectedPrefixItem(src1);
-			__source1.setEnabled(true);
-			__source1.setEditable(true);
+			__source1_JComboBox.setData(__reservoirIDs);
+			__source1_JComboBox.setSelectedPrefixItem(src1);
+			__source1_JComboBox.setEnabled(true);
+			__source1_JComboBox.setEditable(true);
 
 			fillSourceAccount1(ityopr, opr);
-			__sourceAccount1.setSelectedPrefixItem(srcAcct1);
+			__sourceAccount1_JComboBox.setSelectedPrefixItem(srcAcct1);
 
-			__source2.removeAllItems();
-			__source2.add("0");
-			__source2.setEditable(false);
+			__source2_JComboBox.removeAllItems();
+			__source2_JComboBox.add("0");
+			__source2_JComboBox.setEditable(false);
 
-			__sourceAccount2.removeAllItems();
-			__sourceAccount2.add("0");
-			__sourceAccount2.setEditable(false);
+			__sourceAccount2_JComboBox.removeAllItems();
+			__sourceAccount2_JComboBox.add("0");
+			__sourceAccount2_JComboBox.setEditable(false);
 
-			disableComboBox(__source3);
-			disableComboBox(__source4);
-			disableComboBox(__source5);
+			disableComboBox(__source3_JComboBox);
+			disableComboBox(__source4_JComboBox);
+			disableComboBox(__source5_JComboBox);
 
-			disableComboBox(__sourceAccount3);
-			disableComboBox(__sourceAccount4);
-			disableComboBox(__sourceAccount5);
+			disableComboBox(__sourceAccount3_JComboBox);
+			disableComboBox(__sourceAccount4_JComboBox);
+			disableComboBox(__sourceAccount5_JComboBox);
 
 			// no additional data
 
@@ -1184,37 +1186,37 @@ private void populateRightInformation(StateMod_OperationalRight opr) {
 			if (__reservoirIDs == null) {
 				createReservoirIDVector();
 			}
-			__destination.setData(combineVectors(
+			__destination_JComboBox.setData(combineVectors(
 				__reservoirIDs, __diversionIDs));
-			__destination.setSelectedPrefixItem(dest);
-			__destination.setEditable(true);
+			__destination_JComboBox.setSelectedPrefixItem(dest);
+			__destination_JComboBox.setEditable(true);
 
 			fillDestinationAccount(ityopr, dest);
-			__destinationAccount.setSelectedPrefixItem(destAcct);
+			__destinationAccount_JComboBox.setSelectedPrefixItem(destAcct);
 
-			__source1.setData(__reservoirIDs);
-			__source1.setSelectedPrefixItem(src1);
-			__source1.setEnabled(true);
-			__source1.setEditable(true);
+			__source1_JComboBox.setData(__reservoirIDs);
+			__source1_JComboBox.setSelectedPrefixItem(src1);
+			__source1_JComboBox.setEnabled(true);
+			__source1_JComboBox.setEditable(true);
 
 			fillSourceAccount1(ityopr, opr);
-			__sourceAccount1.setSelectedPrefixItem(srcAcct1);
+			__sourceAccount1_JComboBox.setSelectedPrefixItem(srcAcct1);
 
-			__source2.removeAllItems();
-			__source2.add("0");
-			__source2.setEditable(false);
+			__source2_JComboBox.removeAllItems();
+			__source2_JComboBox.add("0");
+			__source2_JComboBox.setEditable(false);
 			
-			__sourceAccount2.removeAllItems();
-			__sourceAccount2.add("0");
-			__sourceAccount2.setEditable(false);
+			__sourceAccount2_JComboBox.removeAllItems();
+			__sourceAccount2_JComboBox.add("0");
+			__sourceAccount2_JComboBox.setEditable(false);
 
-			disableComboBox(__source3);
-			disableComboBox(__source4);
-			disableComboBox(__source5);
+			disableComboBox(__source3_JComboBox);
+			disableComboBox(__source4_JComboBox);
+			disableComboBox(__source5_JComboBox);
 
-			disableComboBox(__sourceAccount3);
-			disableComboBox(__sourceAccount4);
-			disableComboBox(__sourceAccount5);
+			disableComboBox(__sourceAccount3_JComboBox);
+			disableComboBox(__sourceAccount4_JComboBox);
+			disableComboBox(__sourceAccount5_JComboBox);
 	
 			break;
 			
@@ -1223,41 +1225,41 @@ private void populateRightInformation(StateMod_OperationalRight opr) {
 			if (__diversionIDs == null) {
 				createDiversionIDVector();
 			}
-			__destination.setData(__diversionIDs);
-			__destination.setSelectedPrefixItem(dest);
-			__destination.setEditable(true);
+			__destination_JComboBox.setData(__diversionIDs);
+			__destination_JComboBox.setSelectedPrefixItem(dest);
+			__destination_JComboBox.setEditable(true);
 
-			__destinationAccount.removeAllItems();
-			__destinationAccount.add("1");
-			__destinationAccount.setEditable(false);
+			__destinationAccount_JComboBox.removeAllItems();
+			__destinationAccount_JComboBox.add("1");
+			__destinationAccount_JComboBox.setEditable(false);
 
 			if (__reservoirIDs == null) {
 				createReservoirIDVector();
 			}
-			__source1.setData(__reservoirIDs);
-			__source1.setSelectedPrefixItem(src1);
-			__source1.setEnabled(true);
-			__source1.setEditable(true);
+			__source1_JComboBox.setData(__reservoirIDs);
+			__source1_JComboBox.setSelectedPrefixItem(src1);
+			__source1_JComboBox.setEnabled(true);
+			__source1_JComboBox.setEditable(true);
 
 			fillSourceAccount1(ityopr, opr);
-			__sourceAccount1.setSelectedPrefixItem(srcAcct1);
+			__sourceAccount1_JComboBox.setSelectedPrefixItem(srcAcct1);
 
-			__source2.removeAllItems();
-			__source2.add("0");
-			__source2.setEditable(false);
+			__source2_JComboBox.removeAllItems();
+			__source2_JComboBox.add("0");
+			__source2_JComboBox.setEditable(false);
 	
-			__sourceAccount2.removeAllItems();
-			__sourceAccount2.add("0");
-			__sourceAccount2.add("-1");
-			__sourceAccount2.setEditable(false);
+			__sourceAccount2_JComboBox.removeAllItems();
+			__sourceAccount2_JComboBox.add("0");
+			__sourceAccount2_JComboBox.add("-1");
+			__sourceAccount2_JComboBox.setEditable(false);
 
-			disableComboBox(__source3);
-			disableComboBox(__source4);
-			disableComboBox(__source5);
+			disableComboBox(__source3_JComboBox);
+			disableComboBox(__source4_JComboBox);
+			disableComboBox(__source5_JComboBox);
 
-			disableComboBox(__sourceAccount3);
-			disableComboBox(__sourceAccount4);
-			disableComboBox(__sourceAccount5);			
+			disableComboBox(__sourceAccount3_JComboBox);
+			disableComboBox(__sourceAccount4_JComboBox);
+			disableComboBox(__sourceAccount5_JComboBox);			
 			
 			// no additional data
 			
@@ -1267,36 +1269,36 @@ private void populateRightInformation(StateMod_OperationalRight opr) {
 			if (__reservoirIDs == null) {
 				createReservoirIDVector();
 			}
-			__destination.setData(__reservoirIDs);
-			__destination.setSelectedPrefixItem(dest);
-			__destination.setEditable(true);
+			__destination_JComboBox.setData(__reservoirIDs);
+			__destination_JComboBox.setSelectedPrefixItem(dest);
+			__destination_JComboBox.setEditable(true);
 
 			fillDestinationAccount(ityopr, dest);
-			__destinationAccount.setSelectedPrefixItem(destAcct);
+			__destinationAccount_JComboBox.setSelectedPrefixItem(destAcct);
 
-			__source1.setData(__reservoirIDs);
-			__source1.setSelectedPrefixItem(src1);
-			__source1.setEnabled(true);
-			__source1.setEditable(true);
+			__source1_JComboBox.setData(__reservoirIDs);
+			__source1_JComboBox.setSelectedPrefixItem(src1);
+			__source1_JComboBox.setEnabled(true);
+			__source1_JComboBox.setEditable(true);
 
 			fillSourceAccount1(ityopr, opr);
-			__sourceAccount1.setSelectedPrefixItem(srcAcct1);
+			__sourceAccount1_JComboBox.setSelectedPrefixItem(srcAcct1);
 
-			__source2.removeAllItems();
-			__source2.add("0");
-			__source2.setEditable(false);
+			__source2_JComboBox.removeAllItems();
+			__source2_JComboBox.add("0");
+			__source2_JComboBox.setEditable(false);
 	
-			__sourceAccount2.removeAllItems();
-			__sourceAccount2.add("0");
-			__sourceAccount2.setEditable(false);
+			__sourceAccount2_JComboBox.removeAllItems();
+			__sourceAccount2_JComboBox.add("0");
+			__sourceAccount2_JComboBox.setEditable(false);
 
-			disableComboBox(__source3);
-			disableComboBox(__source4);
-			disableComboBox(__source5);
+			disableComboBox(__source3_JComboBox);
+			disableComboBox(__source4_JComboBox);
+			disableComboBox(__source5_JComboBox);
 
-			disableComboBox(__sourceAccount3);
-			disableComboBox(__sourceAccount4);
-			disableComboBox(__sourceAccount5);
+			disableComboBox(__sourceAccount3_JComboBox);
+			disableComboBox(__sourceAccount4_JComboBox);
+			disableComboBox(__sourceAccount5_JComboBox);
 
 			// no additional data
 			
@@ -1306,43 +1308,43 @@ private void populateRightInformation(StateMod_OperationalRight opr) {
 			if (__reservoirIDs == null) {
 				createReservoirIDVector();
 			}
-			__destination.setData(__reservoirIDs);
-			__destination.setSelectedPrefixItem(dest);
-			__destination.setEditable(true);
+			__destination_JComboBox.setData(__reservoirIDs);
+			__destination_JComboBox.setSelectedPrefixItem(dest);
+			__destination_JComboBox.setEditable(true);
 
 			// REVISIT (JTS - 2003-09-18)
-			__destinationAccount.removeAllItems();
-			__destinationAccount.add("REVISIT");
+			__destinationAccount_JComboBox.removeAllItems();
+			__destinationAccount_JComboBox.add("REVISIT");
 			// waiting for RRB
 			// __destinationAccount.setSelectedPrefixItem(destAcct);
-			__destinationAccount.setEditable(true);
+			__destinationAccount_JComboBox.setEditable(true);
 			
-			__source1.setData(__reservoirIDs);
-			__source1.setSelectedPrefixItem(src1);
-			__source1.setEnabled(true);
-			__source1.setEditable(true);
+			__source1_JComboBox.setData(__reservoirIDs);
+			__source1_JComboBox.setSelectedPrefixItem(src1);
+			__source1_JComboBox.setEnabled(true);
+			__source1_JComboBox.setEditable(true);
 
 			fillSourceAccount1(ityopr, opr);
-			__sourceAccount1.setSelectedPrefixItem(srcAcct1);
+			__sourceAccount1_JComboBox.setSelectedPrefixItem(srcAcct1);
 
-			__source2.removeAllItems();
-			__source2.setData(StateMod_Util.createDataList(
+			__source2_JComboBox.removeAllItems();
+			__source2_JComboBox.setData(StateMod_Util.createDataList(
 				__operationalRights, true));			
-			__source2.addAt("0", 0);
-			__source2.setSelectedPrefixItem(srcAcct2);
-			__source2.setEditable(true);
+			__source2_JComboBox.addAt("0", 0);
+			__source2_JComboBox.setSelectedPrefixItem(srcAcct2);
+			__source2_JComboBox.setEditable(true);
 	
-			__sourceAccount2.removeAllItems();
-			__sourceAccount2.add("0");
-			__sourceAccount2.setEditable(false);
+			__sourceAccount2_JComboBox.removeAllItems();
+			__sourceAccount2_JComboBox.add("0");
+			__sourceAccount2_JComboBox.setEditable(false);
 
-			disableComboBox(__source3);
-			disableComboBox(__source4);
-			disableComboBox(__source5);
+			disableComboBox(__source3_JComboBox);
+			disableComboBox(__source4_JComboBox);
+			disableComboBox(__source5_JComboBox);
 
-			disableComboBox(__sourceAccount3);
-			disableComboBox(__sourceAccount4);
-			disableComboBox(__sourceAccount5);
+			disableComboBox(__sourceAccount3_JComboBox);
+			disableComboBox(__sourceAccount4_JComboBox);
+			disableComboBox(__sourceAccount5_JComboBox);
 
 			break;
 			
@@ -1350,40 +1352,40 @@ private void populateRightInformation(StateMod_OperationalRight opr) {
 			if (__operationalRightIDs == null) {
 				createOperationalRightIDVector();
 			}
-			__destination.setData(__operationalRightIDs);
-			__destination.setSelectedPrefixItem(dest);
-			__destination.setEditable(true);
+			__destination_JComboBox.setData(__operationalRightIDs);
+			__destination_JComboBox.setSelectedPrefixItem(dest);
+			__destination_JComboBox.setEditable(true);
 
-			__destinationAccount.removeAllItems();
-			__destinationAccount.add("1");
-			__destinationAccount.setEditable(false);
+			__destinationAccount_JComboBox.removeAllItems();
+			__destinationAccount_JComboBox.add("1");
+			__destinationAccount_JComboBox.setEditable(false);
 
 			if (__reservoirIDs == null) {
 				createReservoirIDVector();
 			}
-			__source1.setData(__reservoirIDs);
-			__source1.setSelectedPrefixItem(src1);
-			__source1.setEnabled(true);
-			__source1.setEditable(true);
+			__source1_JComboBox.setData(__reservoirIDs);
+			__source1_JComboBox.setSelectedPrefixItem(src1);
+			__source1_JComboBox.setEnabled(true);
+			__source1_JComboBox.setEditable(true);
 
 			fillSourceAccount1(ityopr, opr);
-			__sourceAccount1.setSelectedPrefixItem(srcAcct1);
+			__sourceAccount1_JComboBox.setSelectedPrefixItem(srcAcct1);
 
-			__source2.removeAllItems();
-			__source2.add("0");
-			__source2.setEditable(false);
+			__source2_JComboBox.removeAllItems();
+			__source2_JComboBox.add("0");
+			__source2_JComboBox.setEditable(false);
 	
-			__sourceAccount2.removeAllItems();
-			__sourceAccount2.add("0");
-			__sourceAccount2.setEditable(false);
+			__sourceAccount2_JComboBox.removeAllItems();
+			__sourceAccount2_JComboBox.add("0");
+			__sourceAccount2_JComboBox.setEditable(false);
 
-			disableComboBox(__source3);
-			disableComboBox(__source4);
-			disableComboBox(__source5);
+			disableComboBox(__source3_JComboBox);
+			disableComboBox(__source4_JComboBox);
+			disableComboBox(__source5_JComboBox);
 
-			disableComboBox(__sourceAccount3);
-			disableComboBox(__sourceAccount4);
-			disableComboBox(__sourceAccount5);
+			disableComboBox(__sourceAccount3_JComboBox);
+			disableComboBox(__sourceAccount4_JComboBox);
+			disableComboBox(__sourceAccount5_JComboBox);
 
 			// no additional data
 
@@ -1393,77 +1395,77 @@ private void populateRightInformation(StateMod_OperationalRight opr) {
 			if (__reservoirIDs == null) {
 				createReservoirIDVector();
 			}
-			__destination.setData(__reservoirIDs);
-			__destination.setSelectedPrefixItem(dest);
-			__destination.setEditable(true);
+			__destination_JComboBox.setData(__reservoirIDs);
+			__destination_JComboBox.setSelectedPrefixItem(dest);
+			__destination_JComboBox.setEditable(true);
 
 			fillDestinationAccount(ityopr, dest);
-			__destinationAccount.setSelectedPrefixItem(destAcct);
+			__destinationAccount_JComboBox.setSelectedPrefixItem(destAcct);
 
-			__source1.setData(__reservoirIDs);
-			__source1.setSelectedPrefixItem(dest);
-			__source1.setEnabled(false);
-			__source1.setEditable(true);
+			__source1_JComboBox.setData(__reservoirIDs);
+			__source1_JComboBox.setSelectedPrefixItem(dest);
+			__source1_JComboBox.setEnabled(false);
+			__source1_JComboBox.setEditable(true);
 
 			fillSourceAccount1(ityopr, opr);
-			__sourceAccount1.setSelectedPrefixItem(srcAcct1);
+			__sourceAccount1_JComboBox.setSelectedPrefixItem(srcAcct1);
 
 			if (__diversionRightIDs == null) {
 				createDiversionRightIDVector();
 			}
-			__source2.setData(__diversionRightIDs);
-			__source2.setSelectedPrefixItem(src2);
-			__source2.setEditable(false);
+			__source2_JComboBox.setData(__diversionRightIDs);
+			__source2_JComboBox.setSelectedPrefixItem(src2);
+			__source2_JComboBox.setEditable(false);
 			
-			__sourceAccount2.removeAllItems();
-			__sourceAccount2.add("0");
-			__sourceAccount2.setEditable(false);
+			__sourceAccount2_JComboBox.removeAllItems();
+			__sourceAccount2_JComboBox.add("0");
+			__sourceAccount2_JComboBox.setEditable(false);
 
-			disableComboBox(__source3);
-			disableComboBox(__source4);
-			disableComboBox(__source5);
+			disableComboBox(__source3_JComboBox);
+			disableComboBox(__source4_JComboBox);
+			disableComboBox(__source5_JComboBox);
 
-			disableComboBox(__sourceAccount3);
-			disableComboBox(__sourceAccount4);
-			disableComboBox(__sourceAccount5);
+			disableComboBox(__sourceAccount3_JComboBox);
+			disableComboBox(__sourceAccount4_JComboBox);
+			disableComboBox(__sourceAccount5_JComboBox);
 
 			break;
 
 		case 9:		// reservoir target
-			__destination.removeAllItems();
-			__destination.add("0");
-			__destination.setEditable(false);
+			__destination_JComboBox.removeAllItems();
+			__destination_JComboBox.add("0");
+			__destination_JComboBox.setEditable(false);
 
-			__destinationAccount.removeAllItems();
-			__destinationAccount.add("0");
-			__destinationAccount.setEditable(false);
+			__destinationAccount_JComboBox.removeAllItems();
+			__destinationAccount_JComboBox.add("0");
+			__destinationAccount_JComboBox.setEditable(false);
 
 			if (__reservoirIDs == null) {
 				createReservoirIDVector();
 			}
-			__source1.setData(__reservoirIDs);
-			__source1.setSelectedPrefixItem(srcAcct1);
-			__source1.setEnabled(true);
-			__source1.setEditable(true);
+			__source1_JComboBox.setData(__reservoirIDs);
+			__source1_JComboBox.setSelectedPrefixItem(srcAcct1);
+			__source1_JComboBox.setEnabled(true);
+			__source1_JComboBox.setEditable(true);
 
 			fillSourceAccount1(ityopr, opr);
-			__sourceAccount1.setSelectedPrefixItem(srcAcct1);
+			__sourceAccount1_JComboBox.setSelectedPrefixItem(srcAcct1);
 
-			__source2.removeAllItems();
-			__source2.add("0");
-			__source2.setEditable(false);
+			__source2_JComboBox.removeAllItems();
+			__source2_JComboBox.add("0");
+			__source2_JComboBox.setEditable(false);
 
-			__sourceAccount2.removeAllItems();
-			__sourceAccount2.add("0");
-			__sourceAccount2.setEditable(false);
+			__sourceAccount2_JComboBox.removeAllItems();
+			__sourceAccount2_JComboBox.add("0");
+			__sourceAccount2_JComboBox.setEditable(false);
 
-			disableComboBox(__source3);
-			disableComboBox(__source4);
-			disableComboBox(__source5);
+			disableComboBox(__source3_JComboBox);
+			disableComboBox(__source4_JComboBox);
+			disableComboBox(__source5_JComboBox);
 
-			disableComboBox(__sourceAccount3);
-			disableComboBox(__sourceAccount4);
-			disableComboBox(__sourceAccount5);
+			disableComboBox(__sourceAccount3_JComboBox);
+			disableComboBox(__sourceAccount4_JComboBox);
+			disableComboBox(__sourceAccount5_JComboBox);
 
 			// no additional data
 
@@ -1471,40 +1473,40 @@ private void populateRightInformation(StateMod_OperationalRight opr) {
 
 		case 10:	// general replacement reservoir to a 
 				// diversion by a direct release or exchange
-			__destination.removeAllItems();
-			__destination.add("0");
-			__destination.setEditable(false);
+			__destination_JComboBox.removeAllItems();
+			__destination_JComboBox.add("0");
+			__destination_JComboBox.setEditable(false);
 
-			__destinationAccount.removeAllItems();
-			__destinationAccount.add("0");
-			__destinationAccount.setEditable(false);
+			__destinationAccount_JComboBox.removeAllItems();
+			__destinationAccount_JComboBox.add("0");
+			__destinationAccount_JComboBox.setEditable(false);
 
 			if (__reservoirIDs == null) {
 				createReservoirIDVector();
 			}
-			__source1.setData(__reservoirIDs);
-			__source1.setSelectedPrefixItem(srcAcct1);
-			__source1.setEnabled(true);
-			__source1.setEditable(true);
+			__source1_JComboBox.setData(__reservoirIDs);
+			__source1_JComboBox.setSelectedPrefixItem(srcAcct1);
+			__source1_JComboBox.setEnabled(true);
+			__source1_JComboBox.setEditable(true);
 
 			fillSourceAccount1(ityopr, opr);
-			__sourceAccount1.setSelectedPrefixItem(srcAcct1);
+			__sourceAccount1_JComboBox.setSelectedPrefixItem(srcAcct1);
 
-			__source2.removeAllItems();
-			__source2.add("0");
-			__source2.setEditable(false);
+			__source2_JComboBox.removeAllItems();
+			__source2_JComboBox.add("0");
+			__source2_JComboBox.setEditable(false);
 
-			__sourceAccount2.removeAllItems();
-			__sourceAccount2.add("0");
-			__sourceAccount2.setEditable(false);
+			__sourceAccount2_JComboBox.removeAllItems();
+			__sourceAccount2_JComboBox.add("0");
+			__sourceAccount2_JComboBox.setEditable(false);
 
-			disableComboBox(__source3);
-			disableComboBox(__source4);
-			disableComboBox(__source5);
+			disableComboBox(__source3_JComboBox);
+			disableComboBox(__source4_JComboBox);
+			disableComboBox(__source5_JComboBox);
 
-			disableComboBox(__sourceAccount3);
-			disableComboBox(__sourceAccount4);
-			disableComboBox(__sourceAccount5);
+			disableComboBox(__sourceAccount3_JComboBox);
+			disableComboBox(__sourceAccount4_JComboBox);
+			disableComboBox(__sourceAccount5_JComboBox);
 
 			// no additional data
 
@@ -1519,77 +1521,77 @@ private void populateRightInformation(StateMod_OperationalRight opr) {
 			if (__reservoirIDs == null) {
 				createReservoirIDVector();
 			}
-			__destination.setData(combineVectors(
+			__destination_JComboBox.setData(combineVectors(
 				__reservoirIDs, __diversionIDs));
-			__destination.setSelectedPrefixItem(dest);
-			__destination.setEditable(true);
+			__destination_JComboBox.setSelectedPrefixItem(dest);
+			__destination_JComboBox.setEditable(true);
 
 			fillDestinationAccount(ityopr, dest);
-			__destinationAccount.setSelectedPrefixItem(destAcct);
+			__destinationAccount_JComboBox.setSelectedPrefixItem(destAcct);
 
 			if (__diversionRightIDs == null) {
 				createDiversionRightIDVector();
 			}
-			__source1.setData(__diversionRightIDs);
-			__source1.setSelectedPrefixItem(src1);
-			__source1.setEnabled(true);
-			__source1.setEditable(true);
+			__source1_JComboBox.setData(__diversionRightIDs);
+			__source1_JComboBox.setSelectedPrefixItem(src1);
+			__source1_JComboBox.setEnabled(true);
+			__source1_JComboBox.setEditable(true);
 
-			__sourceAccount1.removeAllItems();
-			__sourceAccount1.add("0");
-			__sourceAccount1.setEditable(false);
+			__sourceAccount1_JComboBox.removeAllItems();
+			__sourceAccount1_JComboBox.add("0");
+			__sourceAccount1_JComboBox.setEditable(false);
 
-			__source2.removeAllItems();
-			__source2.add("0");
-			__source2.setEditable(false);
+			__source2_JComboBox.removeAllItems();
+			__source2_JComboBox.add("0");
+			__source2_JComboBox.setEditable(false);
 
-			__sourceAccount2.removeAllItems();
-			__sourceAccount2.add("0");
-			__sourceAccount2.setEditable(false);
+			__sourceAccount2_JComboBox.removeAllItems();
+			__sourceAccount2_JComboBox.add("0");
+			__sourceAccount2_JComboBox.setEditable(false);
 
-			disableComboBox(__source3);
-			disableComboBox(__source4);
-			disableComboBox(__source5);
+			disableComboBox(__source3_JComboBox);
+			disableComboBox(__source4_JComboBox);
+			disableComboBox(__source5_JComboBox);
 
-			disableComboBox(__sourceAccount3);
-			disableComboBox(__sourceAccount4);
-			disableComboBox(__sourceAccount5);
+			disableComboBox(__sourceAccount3_JComboBox);
+			disableComboBox(__sourceAccount4_JComboBox);
+			disableComboBox(__sourceAccount5_JComboBox);
 
 			break;
 				
 		case 12:	// reoperation
-			__destination.removeAllItems();
-			__destination.add("0");
-			__destination.setEditable(false);
+			__destination_JComboBox.removeAllItems();
+			__destination_JComboBox.add("0");
+			__destination_JComboBox.setEditable(false);
 
-			__destinationAccount.removeAllItems();
-			__destinationAccount.add("0");
-			__destinationAccount.setEditable(false);
+			__destinationAccount_JComboBox.removeAllItems();
+			__destinationAccount_JComboBox.add("0");
+			__destinationAccount_JComboBox.setEditable(false);
 
-			__source1.removeAllItems();
-			__source1.add("0");
-			__source1.setEditable(false);
-			__source1.setEnabled(true);
+			__source1_JComboBox.removeAllItems();
+			__source1_JComboBox.add("0");
+			__source1_JComboBox.setEditable(false);
+			__source1_JComboBox.setEnabled(true);
 
-			__sourceAccount1.removeAllItems();
-			__sourceAccount1.add("0");
-			__sourceAccount1.setEditable(false);
+			__sourceAccount1_JComboBox.removeAllItems();
+			__sourceAccount1_JComboBox.add("0");
+			__sourceAccount1_JComboBox.setEditable(false);
 			
-			__source2.removeAllItems();
-			__source2.add("0");
-			__source2.setEditable(false);
+			__source2_JComboBox.removeAllItems();
+			__source2_JComboBox.add("0");
+			__source2_JComboBox.setEditable(false);
 
-			__sourceAccount2.removeAllItems();
-			__sourceAccount2.add("0");
-			__sourceAccount2.setEditable(false);
+			__sourceAccount2_JComboBox.removeAllItems();
+			__sourceAccount2_JComboBox.add("0");
+			__sourceAccount2_JComboBox.setEditable(false);
 
-			disableComboBox(__source3);
-			disableComboBox(__source4);
-			disableComboBox(__source5);
+			disableComboBox(__source3_JComboBox);
+			disableComboBox(__source4_JComboBox);
+			disableComboBox(__source5_JComboBox);
 
-			disableComboBox(__sourceAccount3);
-			disableComboBox(__sourceAccount4);
-			disableComboBox(__sourceAccount5);	
+			disableComboBox(__sourceAccount3_JComboBox);
+			disableComboBox(__sourceAccount4_JComboBox);
+			disableComboBox(__sourceAccount5_JComboBox);	
 
 			// no additional data
 
@@ -1599,41 +1601,40 @@ private void populateRightInformation(StateMod_OperationalRight opr) {
 			if (__instreamFlowIDs == null) {
 				createInstreamFlowIDVector();
 			}
-			__destination.setData(__instreamFlowIDs);
-			__destination.setSelectedPrefixItem(dest);
-			__destination.setEditable(true);
+			__destination_JComboBox.setData(__instreamFlowIDs);
+			__destination_JComboBox.setSelectedPrefixItem(dest);
+			__destination_JComboBox.setEditable(true);
 
-			__destinationAccount.removeAllItems();
-			__destinationAccount.add("1");
-			__destinationAccount.setEditable(false);
+			__destinationAccount_JComboBox.removeAllItems();
+			__destinationAccount_JComboBox.add("1");
+			__destinationAccount_JComboBox.setEditable(false);
 			
-			Vector cgotoIDs = StateMod_Util.createCgotoDataList(
-				__instreamFlows, true);
-			__source1.setData(cgotoIDs);
-			__source1.setSelectedPrefixItem(src1);
-			__source1.setEditable(true);
-			__source1.setEnabled(true);
+			Vector cgotoIDs = StateMod_Util.createCgotoDataList(__instreamFlows, true);
+			__source1_JComboBox.setData(cgotoIDs);
+			__source1_JComboBox.setSelectedPrefixItem(src1);
+			__source1_JComboBox.setEditable(true);
+			__source1_JComboBox.setEnabled(true);
 			
-			__sourceAccount1.removeAllItems();
-			__sourceAccount1.add("0");
-			__sourceAccount1.add("" + srcAcct1);
-			__sourceAccount1.setEditable(true);
+			__sourceAccount1_JComboBox.removeAllItems();
+			__sourceAccount1_JComboBox.add("0");
+			__sourceAccount1_JComboBox.add("" + srcAcct1);
+			__sourceAccount1_JComboBox.setEditable(true);
 
-			__source2.removeAllItems();
-			__source2.add("0");
-			__source2.setEditable(false);
+			__source2_JComboBox.removeAllItems();
+			__source2_JComboBox.add("0");
+			__source2_JComboBox.setEditable(false);
 
-			__sourceAccount2.removeAllItems();
-			__sourceAccount2.add("0");
-			__sourceAccount2.setEditable(false);
+			__sourceAccount2_JComboBox.removeAllItems();
+			__sourceAccount2_JComboBox.add("0");
+			__sourceAccount2_JComboBox.setEditable(false);
 			
-			disableComboBox(__source3);
-			disableComboBox(__source4);
-			disableComboBox(__source5);
+			disableComboBox(__source3_JComboBox);
+			disableComboBox(__source4_JComboBox);
+			disableComboBox(__source5_JComboBox);
 
-			disableComboBox(__sourceAccount3);
-			disableComboBox(__sourceAccount4);
-			disableComboBox(__sourceAccount5);
+			disableComboBox(__sourceAccount3_JComboBox);
+			disableComboBox(__sourceAccount4_JComboBox);
+			disableComboBox(__sourceAccount5_JComboBox);
 	
 			break;
 		case 14:	// direct flow diversion to a demand or
@@ -1646,43 +1647,43 @@ private void populateRightInformation(StateMod_OperationalRight opr) {
 			if (__reservoirIDs == null) {
 				createReservoirIDVector();
 			}
-			__destination.setData(combineVectors(
+			__destination_JComboBox.setData(combineVectors(
 				__reservoirIDs, __diversionIDs));
-			__destination.setSelectedPrefixItem(dest);
-			__destination.setEditable(true);
+			__destination_JComboBox.setSelectedPrefixItem(dest);
+			__destination_JComboBox.setEditable(true);
 				
 			fillDestinationAccount(ityopr, dest);
-			__destinationAccount.setSelectedPrefixItem(destAcct);
+			__destinationAccount_JComboBox.setSelectedPrefixItem(destAcct);
 
 			if (__diversionRightIDs == null) {
 				createDiversionRightIDVector();
 			}
-			__source1.setData(__diversionRightIDs);
-			__source1.setSelectedPrefixItem(src1);
-			__source1.setEnabled(true);
-			__source1.setEditable(true);
+			__source1_JComboBox.setData(__diversionRightIDs);
+			__source1_JComboBox.setSelectedPrefixItem(src1);
+			__source1_JComboBox.setEnabled(true);
+			__source1_JComboBox.setEditable(true);
 		
-			__sourceAccount1.removeAllItems();
-			__sourceAccount1.add("0");
-			__sourceAccount1.add("0");
-			__sourceAccount1.add(
+			__sourceAccount1_JComboBox.removeAllItems();
+			__sourceAccount1_JComboBox.add("0");
+			__sourceAccount1_JComboBox.add("0");
+			__sourceAccount1_JComboBox.add(
 				"(enter a positive integer value)");
 
-			__source2.removeAllItems();
-			__source2.add("0");
-			__source2.setEditable(false);
+			__source2_JComboBox.removeAllItems();
+			__source2_JComboBox.add("0");
+			__source2_JComboBox.setEditable(false);
 
-			__sourceAccount2.removeAllItems();
-			__sourceAccount2.add("0");
-			__sourceAccount2.setEditable(false);
+			__sourceAccount2_JComboBox.removeAllItems();
+			__sourceAccount2_JComboBox.add("0");
+			__sourceAccount2_JComboBox.setEditable(false);
 		
-			disableComboBox(__source3);
-			disableComboBox(__source4);
-			disableComboBox(__source5);
+			disableComboBox(__source3_JComboBox);
+			disableComboBox(__source4_JComboBox);
+			disableComboBox(__source5_JComboBox);
 
-			disableComboBox(__sourceAccount3);
-			disableComboBox(__sourceAccount4);
-			disableComboBox(__sourceAccount5);
+			disableComboBox(__sourceAccount3_JComboBox);
+			disableComboBox(__sourceAccount4_JComboBox);
+			disableComboBox(__sourceAccount5_JComboBox);
 	
 			break;
 			
@@ -1690,47 +1691,47 @@ private void populateRightInformation(StateMod_OperationalRight opr) {
 			if (__instreamFlowIDs == null) {
 				createInstreamFlowIDVector();
 			}
-			__destination.setData(__instreamFlowIDs);
-			__destination.setSelectedPrefixItem(dest);
-			__destination.setEditable(true);
+			__destination_JComboBox.setData(__instreamFlowIDs);
+			__destination_JComboBox.setSelectedPrefixItem(dest);
+			__destination_JComboBox.setEditable(true);
 
-			__destinationAccount.removeAllItems();
-			__destinationAccount.add("1");
-			__destinationAccount.setEditable(false);
+			__destinationAccount_JComboBox.removeAllItems();
+			__destinationAccount_JComboBox.add("1");
+			__destinationAccount_JComboBox.setEditable(false);
 		
-			__source1.removeAllItems();
-			__source1.add("REVISIT");
-			__source1.setEditable(true);
+			__source1_JComboBox.removeAllItems();
+			__source1_JComboBox.add("REVISIT");
+			__source1_JComboBox.setEditable(true);
 		
 			// REVISIT (JTS - 2003-09-22)
 			// checking with RRB re: ciopso1
 
-			__sourceAccount1.removeAllItems();
-			__sourceAccount1.add("0");
-			__sourceAccount1.add("" + srcAcct1);
-			__sourceAccount1.setEditable(true);
+			__sourceAccount1_JComboBox.removeAllItems();
+			__sourceAccount1_JComboBox.add("0");
+			__sourceAccount1_JComboBox.add("" + srcAcct1);
+			__sourceAccount1_JComboBox.setEditable(true);
 
 			if (__diversionIDs == null) {
 				createDiversionIDVector();
 			}
-			__source2.setData(__diversionIDs);
-			__source2.setSelectedPrefixItem(src2);
-			__source2.setEditable(true);
+			__source2_JComboBox.setData(__diversionIDs);
+			__source2_JComboBox.setSelectedPrefixItem(src2);
+			__source2_JComboBox.setEditable(true);
 
-			__sourceAccount2.removeAllItems();
-			__sourceAccount2.add("0 - Allow 100% to be Diverted");
-			__sourceAccount2.add("-1 - Allow the Depletion to be "
+			__sourceAccount2_JComboBox.removeAllItems();
+			__sourceAccount2_JComboBox.add("0 - Allow 100% to be Diverted");
+			__sourceAccount2_JComboBox.add("-1 - Allow the Depletion to be "
 				+ "Diverted");
-			__sourceAccount2.setSelectedPrefixItem("" + srcAcct2);
-			__sourceAccount2.setEditable(false);
+			__sourceAccount2_JComboBox.setSelectedPrefixItem("" + srcAcct2);
+			__sourceAccount2_JComboBox.setEditable(false);
 
-			disableComboBox(__source3);
-			disableComboBox(__source4);
-			disableComboBox(__source5);
+			disableComboBox(__source3_JComboBox);
+			disableComboBox(__source4_JComboBox);
+			disableComboBox(__source5_JComboBox);
 
-			disableComboBox(__sourceAccount3);
-			disableComboBox(__sourceAccount4);
-			disableComboBox(__sourceAccount5);
+			disableComboBox(__sourceAccount3_JComboBox);
+			disableComboBox(__sourceAccount4_JComboBox);
+			disableComboBox(__sourceAccount5_JComboBox);
 	
 			// no additional data
 
@@ -1740,40 +1741,40 @@ private void populateRightInformation(StateMod_OperationalRight opr) {
 			if (__reservoirIDs == null) {
 				createReservoirIDVector();
 			}
-			__destination.setData(__reservoirIDs);
-			__destination.setSelectedPrefixItem(dest);
+			__destination_JComboBox.setData(__reservoirIDs);
+			__destination_JComboBox.setSelectedPrefixItem(dest);
 
 			fillDestinationAccount(ityopr, dest);
-			__destinationAccount.setSelectedPrefixItem(destAcct);
+			__destinationAccount_JComboBox.setSelectedPrefixItem(destAcct);
 
 			if (__diversionRightIDs == null) {			
 				createDiversionRightIDVector();
 			}
-			__source1.setData(__diversionRightIDs);
-			__source1.setSelectedPrefixItem(src1);
-			__source1.setEditable(true);
-			__source1.setEnabled(true);
+			__source1_JComboBox.setData(__diversionRightIDs);
+			__source1_JComboBox.setSelectedPrefixItem(src1);
+			__source1_JComboBox.setEditable(true);
+			__source1_JComboBox.setEnabled(true);
 
-			__sourceAccount1.removeAllItems();
-			__sourceAccount1.add("0");
-			__sourceAccount1.add("1");
-			__sourceAccount1.setEditable(false);
+			__sourceAccount1_JComboBox.removeAllItems();
+			__sourceAccount1_JComboBox.add("0");
+			__sourceAccount1_JComboBox.add("1");
+			__sourceAccount1_JComboBox.setEditable(false);
 
-			__source2.removeAllItems();
-			__source2.add("0");
-			__source2.setEditable(false);
+			__source2_JComboBox.removeAllItems();
+			__source2_JComboBox.add("0");
+			__source2_JComboBox.setEditable(false);
 
-			__sourceAccount2.removeAllItems();
-			__sourceAccount2.add("" + srcAcct2);
-			__sourceAccount2.setEditable(true);
+			__sourceAccount2_JComboBox.removeAllItems();
+			__sourceAccount2_JComboBox.add("" + srcAcct2);
+			__sourceAccount2_JComboBox.setEditable(true);
 			
-			disableComboBox(__source3);
-			disableComboBox(__source4);
-			disableComboBox(__source5);
+			disableComboBox(__source3_JComboBox);
+			disableComboBox(__source4_JComboBox);
+			disableComboBox(__source5_JComboBox);
 
-			disableComboBox(__sourceAccount3);
-			disableComboBox(__sourceAccount4);
-			disableComboBox(__sourceAccount5);
+			disableComboBox(__sourceAccount3_JComboBox);
+			disableComboBox(__sourceAccount4_JComboBox);
+			disableComboBox(__sourceAccount5_JComboBox);
 
 			break;
 
@@ -1781,34 +1782,34 @@ private void populateRightInformation(StateMod_OperationalRight opr) {
 			if (__instreamFlowIDs == null) {
 				createInstreamFlowIDVector();
 			}
-			__destination.setData(__instreamFlowIDs);
-			__destination.setSelectedPrefixItem(dest);
-			__destination.setEditable(true);
+			__destination_JComboBox.setData(__instreamFlowIDs);
+			__destination_JComboBox.setSelectedPrefixItem(dest);
+			__destination_JComboBox.setEditable(true);
 
-			__destinationAccount.removeAllItems();
-			__destinationAccount.add("1");
-			__destinationAccount.setEditable(false);
+			__destinationAccount_JComboBox.removeAllItems();
+			__destinationAccount_JComboBox.add("1");
+			__destinationAccount_JComboBox.setEditable(false);
 
 			if (__streamGageIDs == null) {
 				createStreamGageIDVector();
 			}
-			__source1.setData(__streamGageIDs);
-			__source1.setSelectedPrefixItem(src1);
-			__source1.setEditable(true);
-			__source1.setEnabled(true);
+			__source1_JComboBox.setData(__streamGageIDs);
+			__source1_JComboBox.setSelectedPrefixItem(src1);
+			__source1_JComboBox.setEditable(true);
+			__source1_JComboBox.setEnabled(true);
 
-			__sourceAccount1.removeAllItems();
-			__sourceAccount1.add("0");
-			__sourceAccount1.add("1");
-			__sourceAccount1.setEditable(false);
+			__sourceAccount1_JComboBox.removeAllItems();
+			__sourceAccount1_JComboBox.add("0");
+			__sourceAccount1_JComboBox.add("1");
+			__sourceAccount1_JComboBox.setEditable(false);
 
-			__source2.setData(__streamGageIDs);
-			__source2.setSelectedPrefixItem(src2);
-			__source2.setEditable(true);
+			__source2_JComboBox.setData(__streamGageIDs);
+			__source2_JComboBox.setSelectedPrefixItem(src2);
+			__source2_JComboBox.setEditable(true);
 
-			__sourceAccount2.removeAllItems();
-			__sourceAccount2.add("-1");
-			__sourceAccount2.setEditable(false);
+			__sourceAccount2_JComboBox.removeAllItems();
+			__sourceAccount2_JComboBox.add("-1");
+			__sourceAccount2_JComboBox.setEditable(false);
 		
 			src3 = opr.getCiopso3();
 			srcAcct3 = opr.getIopsou3();
@@ -1817,35 +1818,35 @@ private void populateRightInformation(StateMod_OperationalRight opr) {
 			src5 = opr.getCiopso5();
 			srcAcct5 = opr.getIopsou5();
 
-			__source3.setData(__streamGageIDs);
-			__source3.setSelectedPrefixItem(src3);
-			__source3.setEnabled(true);
-			__source3.setEditable(true);
+			__source3_JComboBox.setData(__streamGageIDs);
+			__source3_JComboBox.setSelectedPrefixItem(src3);
+			__source3_JComboBox.setEnabled(true);
+			__source3_JComboBox.setEditable(true);
 
-			__sourceAccount3.removeAllItems();
-			__sourceAccount3.addItem("" + srcAcct3);
-			__sourceAccount3.setEditable(true);
-			__sourceAccount3.setEnabled(true);
+			__sourceAccount3_JComboBox.removeAllItems();
+			__sourceAccount3_JComboBox.addItem("" + srcAcct3);
+			__sourceAccount3_JComboBox.setEditable(true);
+			__sourceAccount3_JComboBox.setEnabled(true);
 		
-			__source4.setData(__streamGageIDs);
-			__source4.setSelectedPrefixItem(src4);
-			__source4.setEnabled(true);
-			__source4.setEditable(true);
+			__source4_JComboBox.setData(__streamGageIDs);
+			__source4_JComboBox.setSelectedPrefixItem(src4);
+			__source4_JComboBox.setEnabled(true);
+			__source4_JComboBox.setEditable(true);
 
-			__sourceAccount4.removeAllItems();
-			__sourceAccount4.addItem("" + srcAcct4);
-			__sourceAccount4.setEditable(true);
-			__sourceAccount4.setEnabled(true);
+			__sourceAccount4_JComboBox.removeAllItems();
+			__sourceAccount4_JComboBox.addItem("" + srcAcct4);
+			__sourceAccount4_JComboBox.setEditable(true);
+			__sourceAccount4_JComboBox.setEnabled(true);
 
-			__source5.setData(__streamGageIDs);
-			__source5.setSelectedPrefixItem(src5);
-			__source5.setEnabled(true);
-			__source5.setEditable(true);
+			__source5_JComboBox.setData(__streamGageIDs);
+			__source5_JComboBox.setSelectedPrefixItem(src5);
+			__source5_JComboBox.setEnabled(true);
+			__source5_JComboBox.setEditable(true);
 
-			__sourceAccount5.removeAllItems();
-			__sourceAccount5.addItem("" + srcAcct5);
-			__sourceAccount5.setEditable(true);
-			__sourceAccount5.setEnabled(true);
+			__sourceAccount5_JComboBox.removeAllItems();
+			__sourceAccount5_JComboBox.addItem("" + srcAcct5);
+			__sourceAccount5_JComboBox.setEditable(true);
+			__sourceAccount5_JComboBox.setEnabled(true);
 
 			break;
 
@@ -1853,34 +1854,34 @@ private void populateRightInformation(StateMod_OperationalRight opr) {
 			if (__instreamFlowIDs == null) {
 				createInstreamFlowIDVector();
 			}
-			__destination.setData(__instreamFlowIDs);
-			__destination.setSelectedPrefixItem(dest);
-			__destination.setEditable(true);
+			__destination_JComboBox.setData(__instreamFlowIDs);
+			__destination_JComboBox.setSelectedPrefixItem(dest);
+			__destination_JComboBox.setEditable(true);
 
-			__destinationAccount.removeAllItems();
-			__destinationAccount.add("1");
-			__destinationAccount.setEditable(false);
+			__destinationAccount_JComboBox.removeAllItems();
+			__destinationAccount_JComboBox.add("1");
+			__destinationAccount_JComboBox.setEditable(false);
 
 			if (__streamGageIDs == null) {
 				createStreamGageIDVector();
 			}
-			__source1.setData(__streamGageIDs);
-			__source1.setSelectedPrefixItem(src1);
-			__source1.setEditable(true);
-			__source1.setEnabled(true);
+			__source1_JComboBox.setData(__streamGageIDs);
+			__source1_JComboBox.setSelectedPrefixItem(src1);
+			__source1_JComboBox.setEditable(true);
+			__source1_JComboBox.setEnabled(true);
 
-			__sourceAccount1.removeAllItems();
-			__sourceAccount1.add("0");
-			__sourceAccount1.add("1");
-			__sourceAccount1.setEditable(false);
+			__sourceAccount1_JComboBox.removeAllItems();
+			__sourceAccount1_JComboBox.add("0");
+			__sourceAccount1_JComboBox.add("1");
+			__sourceAccount1_JComboBox.setEditable(false);
 
-			__source2.setData(__streamGageIDs);
-			__source2.setSelectedPrefixItem(src2);
-			__source2.setEditable(true);
+			__source2_JComboBox.setData(__streamGageIDs);
+			__source2_JComboBox.setSelectedPrefixItem(src2);
+			__source2_JComboBox.setEditable(true);
 
-			__sourceAccount2.removeAllItems();
-			__sourceAccount2.add("-1");
-			__sourceAccount2.setEditable(false);
+			__sourceAccount2_JComboBox.removeAllItems();
+			__sourceAccount2_JComboBox.add("-1");
+			__sourceAccount2_JComboBox.setEditable(false);
 
 			src3 = opr.getCiopso3();
 			srcAcct3 = opr.getIopsou3();
@@ -1889,113 +1890,113 @@ private void populateRightInformation(StateMod_OperationalRight opr) {
 			src5 = opr.getCiopso5();
 			srcAcct5 = opr.getIopsou5();
 
-			__source3.setData(__streamGageIDs);
-			__source3.setSelectedPrefixItem(src3);
-			__source3.setEnabled(true);
-			__source3.setEditable(true);
+			__source3_JComboBox.setData(__streamGageIDs);
+			__source3_JComboBox.setSelectedPrefixItem(src3);
+			__source3_JComboBox.setEnabled(true);
+			__source3_JComboBox.setEditable(true);
 
-			__sourceAccount3.removeAllItems();
-			__sourceAccount3.addItem("" + srcAcct3);
-			__sourceAccount3.setEditable(true);
-			__sourceAccount3.setEnabled(true);
+			__sourceAccount3_JComboBox.removeAllItems();
+			__sourceAccount3_JComboBox.addItem("" + srcAcct3);
+			__sourceAccount3_JComboBox.setEditable(true);
+			__sourceAccount3_JComboBox.setEnabled(true);
 		
-			__source4.setData(__streamGageIDs);
-			__source4.setSelectedPrefixItem(src4);
-			__source4.setEnabled(true);
-			__source4.setEditable(true);
+			__source4_JComboBox.setData(__streamGageIDs);
+			__source4_JComboBox.setSelectedPrefixItem(src4);
+			__source4_JComboBox.setEnabled(true);
+			__source4_JComboBox.setEditable(true);
 
-			__sourceAccount4.removeAllItems();
-			__sourceAccount4.addItem("" + srcAcct4);
-			__sourceAccount4.setEditable(true);
-			__sourceAccount4.setEnabled(true);
+			__sourceAccount4_JComboBox.removeAllItems();
+			__sourceAccount4_JComboBox.addItem("" + srcAcct4);
+			__sourceAccount4_JComboBox.setEditable(true);
+			__sourceAccount4_JComboBox.setEnabled(true);
 
-			__source5.setData(__streamGageIDs);
-			__source5.setSelectedPrefixItem(src5);
-			__source5.setEnabled(true);
-			__source5.setEditable(true);
+			__source5_JComboBox.setData(__streamGageIDs);
+			__source5_JComboBox.setSelectedPrefixItem(src5);
+			__source5_JComboBox.setEnabled(true);
+			__source5_JComboBox.setEditable(true);
 
-			__sourceAccount5.removeAllItems();
-			__sourceAccount5.addItem("" + srcAcct5);
-			__sourceAccount5.setEditable(true);
-			__sourceAccount5.setEnabled(true);
+			__sourceAccount5_JComboBox.removeAllItems();
+			__sourceAccount5_JComboBox.addItem("" + srcAcct5);
+			__sourceAccount5_JComboBox.setEditable(true);
+			__sourceAccount5_JComboBox.setEnabled(true);
 		
 			break;
 			
 		case 19:	// split channel operation -- under development 
 			return;
 		case 20:	// san juan rip reservoir operation
-			__destination.removeAllItems();
-			__destination.add("0");
-			__destination.setEditable(false);
+			__destination_JComboBox.removeAllItems();
+			__destination_JComboBox.add("0");
+			__destination_JComboBox.setEditable(false);
 
-			__destinationAccount.removeAllItems();
-			__destinationAccount.add("0");
-			__destinationAccount.setEditable(false);
+			__destinationAccount_JComboBox.removeAllItems();
+			__destinationAccount_JComboBox.add("0");
+			__destinationAccount_JComboBox.setEditable(false);
 
 			if (__reservoirIDs == null) {
 				createReservoirIDVector();
 			}
-			__source1.setData(__reservoirIDs);
-			__source1.setSelectedPrefixItem(src1);
-			__source1.setEditable(true);
-			__source1.setEnabled(true);
+			__source1_JComboBox.setData(__reservoirIDs);
+			__source1_JComboBox.setSelectedPrefixItem(src1);
+			__source1_JComboBox.setEditable(true);
+			__source1_JComboBox.setEnabled(true);
 
 			fillSourceAccount1(ityopr, opr);
-			__sourceAccount1.setSelectedPrefixItem(srcAcct1);
+			__sourceAccount1_JComboBox.setSelectedPrefixItem(srcAcct1);
 
-			__source2.removeAllItems();
-			__source2.add("0");
-			__source2.setEditable(false);
+			__source2_JComboBox.removeAllItems();
+			__source2_JComboBox.add("0");
+			__source2_JComboBox.setEditable(false);
 
-			__sourceAccount2.removeAllItems();
-			__sourceAccount2.add("0");
-			__sourceAccount2.setEditable(false);
+			__sourceAccount2_JComboBox.removeAllItems();
+			__sourceAccount2_JComboBox.add("0");
+			__sourceAccount2_JComboBox.setEditable(false);
 
-			disableComboBox(__source3);
-			disableComboBox(__source4);
-			disableComboBox(__source5);
+			disableComboBox(__source3_JComboBox);
+			disableComboBox(__source4_JComboBox);
+			disableComboBox(__source5_JComboBox);
 
-			disableComboBox(__sourceAccount3);
-			disableComboBox(__sourceAccount4);
-			disableComboBox(__sourceAccount5);			
+			disableComboBox(__sourceAccount3_JComboBox);
+			disableComboBox(__sourceAccount4_JComboBox);
+			disableComboBox(__sourceAccount5_JComboBox);			
 
 			break;
 
 		case 21:	// sprinkler use
 		case 22:	// soil moisture flow
-			__destination.removeAllItems();
-			__destination.add("0");
-			__destination.setEditable(false);
+			__destination_JComboBox.removeAllItems();
+			__destination_JComboBox.add("0");
+			__destination_JComboBox.setEditable(false);
 
-			__destinationAccount.removeAllItems();
-			__destinationAccount.add("0");
-			__destinationAccount.setEditable(false);
+			__destinationAccount_JComboBox.removeAllItems();
+			__destinationAccount_JComboBox.add("0");
+			__destinationAccount_JComboBox.setEditable(false);
 			
-			__source1.removeAllItems();
-			__source1.add("0");
-			__source1.setEditable(false);
-			__source1.setEnabled(true);
+			__source1_JComboBox.removeAllItems();
+			__source1_JComboBox.add("0");
+			__source1_JComboBox.setEditable(false);
+			__source1_JComboBox.setEnabled(true);
 
-			__sourceAccount1.removeAllItems();
-			__sourceAccount1.add("0");
-			__sourceAccount1.add("1");
-			__sourceAccount1.setEditable(false);
+			__sourceAccount1_JComboBox.removeAllItems();
+			__sourceAccount1_JComboBox.add("0");
+			__sourceAccount1_JComboBox.add("1");
+			__sourceAccount1_JComboBox.setEditable(false);
 
-			__source2.removeAllItems();
-			__source2.add("0");
-			__source2.setEditable(false);
+			__source2_JComboBox.removeAllItems();
+			__source2_JComboBox.add("0");
+			__source2_JComboBox.setEditable(false);
 
-			__sourceAccount2.removeAllItems();
-			__sourceAccount2.add("0");
-			__sourceAccount2.setEditable(false);
+			__sourceAccount2_JComboBox.removeAllItems();
+			__sourceAccount2_JComboBox.add("0");
+			__sourceAccount2_JComboBox.setEditable(false);
 
-			disableComboBox(__source3);
-			disableComboBox(__source4);
-			disableComboBox(__source5);
+			disableComboBox(__source3_JComboBox);
+			disableComboBox(__source4_JComboBox);
+			disableComboBox(__source5_JComboBox);
 
-			disableComboBox(__sourceAccount3);
-			disableComboBox(__sourceAccount4);
-			disableComboBox(__sourceAccount5);			
+			disableComboBox(__sourceAccount3_JComboBox);
+			disableComboBox(__sourceAccount4_JComboBox);
+			disableComboBox(__sourceAccount5_JComboBox);			
 
 			// no additional data
 
@@ -2004,41 +2005,41 @@ private void populateRightInformation(StateMod_OperationalRight opr) {
 			if (__diversionIDs == null) {
 				createDiversionIDVector();
 			}
-			__destination.setData(__diversionIDs);
-			__destination.setSelectedPrefixItem(dest);
-			__destination.setEditable(true);
+			__destination_JComboBox.setData(__diversionIDs);
+			__destination_JComboBox.setSelectedPrefixItem(dest);
+			__destination_JComboBox.setEditable(true);
 
-			__destinationAccount.removeAllItems();
-			__destinationAccount.add("1");
-			__destinationAccount.setEditable(false);
+			__destinationAccount_JComboBox.removeAllItems();
+			__destinationAccount_JComboBox.add("1");
+			__destinationAccount_JComboBox.setEditable(false);
 
 			if (__diversionRightIDs == null) {
 				createDiversionRightIDVector();
 			}
-			__source1.setData(__diversionIDs);
-			__source1.setEditable(true);
-			__source1.setEnabled(true);
+			__source1_JComboBox.setData(__diversionIDs);
+			__source1_JComboBox.setEditable(true);
+			__source1_JComboBox.setEnabled(true);
 
-			__sourceAccount1.removeAllItems();
-			__sourceAccount1.add("0");
-			__sourceAccount1.add("1");
-			__sourceAccount1.setEditable(false);
+			__sourceAccount1_JComboBox.removeAllItems();
+			__sourceAccount1_JComboBox.add("0");
+			__sourceAccount1_JComboBox.add("1");
+			__sourceAccount1_JComboBox.setEditable(false);
 
-			__source2.removeAllItems();
-			__source2.add("1");
-			__source2.setEditable(false);
+			__source2_JComboBox.removeAllItems();
+			__source2_JComboBox.add("1");
+			__source2_JComboBox.setEditable(false);
 
-			__sourceAccount2.removeAllItems();
-			__sourceAccount2.add("0");
-			__sourceAccount2.setEditable(false);
+			__sourceAccount2_JComboBox.removeAllItems();
+			__sourceAccount2_JComboBox.add("0");
+			__sourceAccount2_JComboBox.setEditable(false);
 
-			disableComboBox(__source3);
-			disableComboBox(__source4);
-			disableComboBox(__source5);
+			disableComboBox(__source3_JComboBox);
+			disableComboBox(__source4_JComboBox);
+			disableComboBox(__source5_JComboBox);
 
-			disableComboBox(__sourceAccount3);
-			disableComboBox(__sourceAccount4);
-			disableComboBox(__sourceAccount5);			
+			disableComboBox(__sourceAccount3_JComboBox);
+			disableComboBox(__sourceAccount4_JComboBox);
+			disableComboBox(__sourceAccount5_JComboBox);			
 
 			break;
 
@@ -2067,33 +2068,41 @@ private void processTableSelection(int index) {
 		return;
 	}
 
-	JGUIUtil.enableComponents(__disables, __textUneditables,
-		__editable);
+	JGUIUtil.enableComponents(__disables, __textUneditables, __editable);
 
-	StateMod_OperationalRight opr = (StateMod_OperationalRight)
-		__operationalRights.elementAt(__currentOpRightsIndex);
-	__oprStationID.setText(opr.getID());
-	__oprName.setText(opr.getName());
-	__oprLocation.setText(opr.getRtem());
+	StateMod_OperationalRight opr = (StateMod_OperationalRight)__operationalRights.elementAt(__currentOpRightsIndex);
+	__oprStationID_JTextField.setText(opr.getID());
+	__oprName_JTextField.setText(opr.getName());
+	__oprLocation_JTextField.setText(opr.getRtem());
 	if (opr.getCgoto().equals("")) {	
 		setOriginalCgoto(opr, opr.getRtem());
 	}
 
 	// switch
 	if (opr.getSwitch() == 1) {
-		__oprSwitch.select("1 - On");
+		__oprSwitch_JComboBox.select("1 - On");
 	}
 	else {
-		__oprSwitch.select("0 - Off");
+		__oprSwitch_JComboBox.select("0 - Off");
 	}	
 
 	// rule type
 	int ityopr = opr.getItyopr();
-	if (ityopr >= 0 && ityopr < 24) {
-		__ruleTypeSwitch.select(ityopr);
+	if ( ityopr > 0 && ityopr <= StateMod_OperationalRight.MAX_KNOWN_TYPE ) {
+		__ruleTypeSwitch_JComboBox.select(ityopr);
+		if ( ityopr > StateMod_OperationalRight.MAX_HANDLED_TYPE) {
+			setMessageText ( "Rule type " + ityopr +
+			" is known but is not fully handled by the software (some information may not display)." );
+		}	
+		else {
+			// Clear out message.
+			setMessageText ( "" );
+		}
 	}
 	else {
-		__ruleTypeSwitch.select(0);
+		__ruleTypeSwitch_JComboBox.select(0); // UNKNOWN
+		setMessageText ( "Rule type " + ityopr +
+				" is unknown and was read as text only (some information may not display)." );
 	}
 	
 	populateRightInformation(opr);
@@ -2135,18 +2144,18 @@ private void saveInformation(int record) {
 
 	StateMod_OperationalRight opr = (StateMod_OperationalRight)
 		__operationalRights.elementAt(record);
-	opr.setName(__oprName.getText());
-	opr.setSwitch(__oprSwitch.getSelectedIndex());
-	opr.setCgoto(__oprLocation.getText());
+	opr.setName(__oprName_JTextField.getText());
+	opr.setSwitch(__oprSwitch_JComboBox.getSelectedIndex());
+	opr.setCgoto(__oprLocation_JTextField.getText());
 
-	opr.setCiopde(trim(__destination.getSelected()));
-	opr.setIopdes(trim(__destinationAccount.getSelected()));
-	opr.setCiopso1(trim(__source1.getSelected()));
-	opr.setIopsou1(trim(__sourceAccount1.getSelected()));
-	opr.setCiopso2(trim(__source2.getSelected()));
-	opr.setIopsou2(trim(__sourceAccount2.getSelected()));
+	opr.setCiopde(trim(__destination_JComboBox.getSelected()));
+	opr.setIopdes(trim(__destinationAccount_JComboBox.getSelected()));
+	opr.setCiopso1(trim(__source1_JComboBox.getSelected()));
+	opr.setIopsou1(trim(__sourceAccount1_JComboBox.getSelected()));
+	opr.setCiopso2(trim(__source2_JComboBox.getSelected()));
+	opr.setIopsou2(trim(__sourceAccount2_JComboBox.getSelected()));
 
-	int ityopr = __ruleTypeSwitch.getSelectedIndex();
+	int ityopr = __ruleTypeSwitch_JComboBox.getSelectedIndex();
 	opr.setItyopr(ityopr);
 
 	if (__monthSwitch[0].isEnabled()) {
@@ -2164,21 +2173,21 @@ private void saveInformation(int record) {
 //		opr.set??(__opr8JComboBox.getSelected().trim());
 	}
 	else if (__opr20Panel.isVisible()) {
-		opr.setSjmina(__opr20Sjmina.getText().trim());
-		opr.setSjrela(__opr20Sjrela.getText().trim());
+		opr.setSjmina(__opr20Sjmina_JTextField.getText().trim());
+		opr.setSjrela(__opr20Sjrela_JTextField.getText().trim());
 	}
 	else if (__qdebtPanel.isVisible()) {
-		opr.setQdebt(__qdebt.getText().trim());
-		opr.setQdebtx(__qdebtx.getText().trim());
+		opr.setQdebt(__qdebt_JTextField.getText().trim());
+		opr.setQdebtx(__qdebtx_JTextField.getText().trim());
 	}
 
-	if (__source3.isEnabled()) {
-		opr.setCiopso3(trim(__source3.getSelected()));
-		opr.setIopsou3(trim(__sourceAccount3.getSelected()));
-		opr.setCiopso4(trim(__source4.getSelected()));
-		opr.setIopsou4(trim(__sourceAccount4.getSelected()));
-		opr.setCiopso5(trim(__source5.getSelected()));
-		opr.setIopsou5(trim(__sourceAccount5.getSelected()));
+	if (__source3_JComboBox.isEnabled()) {
+		opr.setCiopso3(trim(__source3_JComboBox.getSelected()));
+		opr.setIopsou3(trim(__sourceAccount3_JComboBox.getSelected()));
+		opr.setCiopso4(trim(__source4_JComboBox.getSelected()));
+		opr.setIopsou4(trim(__sourceAccount4_JComboBox.getSelected()));
+		opr.setCiopso5(trim(__source5_JComboBox.getSelected()));
+		opr.setIopsou5(trim(__sourceAccount5_JComboBox.getSelected()));
 	}
 }
 
@@ -2253,6 +2262,19 @@ public void selectTableIndex(int index) {
 }
 
 /**
+ * Set the message text field at the bottom of the window.  Currently this is used mainly
+ * to indicate whether an operational right is handled not.
+ */
+private void setMessageText ( String text )
+{
+	__message_JTextField.setText ( text );
+}
+
+private void setOriginalCgoto(StateMod_OperationalRight o, String cgoto) {
+	((StateMod_OperationalRight)o._original)._cgoto = cgoto;
+}
+
+/**
 Sets up the GUI.
 @param index the index of operational right to be initially selected
 */
@@ -2267,66 +2289,66 @@ private void setupGUI(int index) {
 	__gridPanel = new JPanel();
 	JPanel psearch = new JPanel();	// search area
 
-	__oprStationID = new JTextField(12);
-	__oprName = new JTextField(24);
-	__oprName.setEditable(false);
-	__oprLocation = new JTextField(12);
-	__oprSwitch = new SimpleJComboBox();
-	__oprSwitch.add("0 - Off");
-	__oprSwitch.add("1 - On");	
-	__oprSwitch.setEditable(false);
+	__oprStationID_JTextField = new JTextField(12);
+	__oprName_JTextField = new JTextField(24);
+	__oprName_JTextField.setEditable(false);
+	__oprLocation_JTextField = new JTextField(12);
+	__oprSwitch_JComboBox = new SimpleJComboBox();
+	__oprSwitch_JComboBox.add("0 - Off");
+	__oprSwitch_JComboBox.add("1 - On");	
+	__oprSwitch_JComboBox.setEditable(false);
 
-	__destination = new SimpleJComboBox();
-	__destination.setPrototypeDisplayValue("                    "
+	__destination_JComboBox = new SimpleJComboBox();
+	__destination_JComboBox.setPrototypeDisplayValue("                    "
 		+ "                                                  ");
-	__destinationAccount = new SimpleJComboBox();
-	__destinationAccount.setPrototypeDisplayValue("          "
+	__destinationAccount_JComboBox = new SimpleJComboBox();
+	__destinationAccount_JComboBox.setPrototypeDisplayValue("          "
 		+ "                                                  ");
-	__source1 = new SimpleJComboBox();
-	__source1.setPrototypeDisplayValue("                    "
+	__source1_JComboBox = new SimpleJComboBox();
+	__source1_JComboBox.setPrototypeDisplayValue("                    "
 		+ "                                                  ");
-	__sourceAccount1 = new SimpleJComboBox();
-	__sourceAccount1.setPrototypeDisplayValue("          "
+	__sourceAccount1_JComboBox = new SimpleJComboBox();
+	__sourceAccount1_JComboBox.setPrototypeDisplayValue("          "
 		+ "                                                  ");
-	__source2 = new SimpleJComboBox();
-	__source2.setPrototypeDisplayValue("                    "
+	__source2_JComboBox = new SimpleJComboBox();
+	__source2_JComboBox.setPrototypeDisplayValue("                    "
 		+ "                                                  ");
-	__sourceAccount2 = new SimpleJComboBox();
-	__sourceAccount2.setPrototypeDisplayValue("          "
+	__sourceAccount2_JComboBox = new SimpleJComboBox();
+	__sourceAccount2_JComboBox.setPrototypeDisplayValue("          "
 		+ "                                                  ");
-	__source3 = new SimpleJComboBox();
-	__source3.setPrototypeDisplayValue("                    "
+	__source3_JComboBox = new SimpleJComboBox();
+	__source3_JComboBox.setPrototypeDisplayValue("                    "
 		+ "                                                  ");
-	__sourceAccount3 = new SimpleJComboBox();
-	__sourceAccount3.setPrototypeDisplayValue("          "
+	__sourceAccount3_JComboBox = new SimpleJComboBox();
+	__sourceAccount3_JComboBox.setPrototypeDisplayValue("          "
 		+ "                                                  ");
-	__source4 = new SimpleJComboBox();
-	__source4.setPrototypeDisplayValue("                    "
+	__source4_JComboBox = new SimpleJComboBox();
+	__source4_JComboBox.setPrototypeDisplayValue("                    "
 		+ "                                                  ");
-	__sourceAccount4 = new SimpleJComboBox();
-	__sourceAccount4.setPrototypeDisplayValue("          "
+	__sourceAccount4_JComboBox = new SimpleJComboBox();
+	__sourceAccount4_JComboBox.setPrototypeDisplayValue("          "
 		+ "                                                  ");
-	__source5 = new SimpleJComboBox();
-	__source5.setPrototypeDisplayValue("                    "
+	__source5_JComboBox = new SimpleJComboBox();
+	__source5_JComboBox.setPrototypeDisplayValue("                    "
 		+ "                                                  ");
-	__sourceAccount5 = new SimpleJComboBox();
-	__sourceAccount5.setPrototypeDisplayValue("          "
+	__sourceAccount5_JComboBox = new SimpleJComboBox();
+	__sourceAccount5_JComboBox.setPrototypeDisplayValue("          "
 		+ "                                                  ");
 
-	__destination.setSelectionFailureFallback("~ - Unknown", 0);
-	__destinationAccount.setSelectionFailureFallback("~ - Unknown", 0);
+	__destination_JComboBox.setSelectionFailureFallback("~ - Unknown", 0);
+	__destinationAccount_JComboBox.setSelectionFailureFallback("~ - Unknown", 0);
 
-	__source1.setSelectionFailureFallback("~ - Unknown", 0);
-	__source2.setSelectionFailureFallback("~ - Unknown", 0);
-	__source3.setSelectionFailureFallback("~ - Unknown", 0);
-	__source4.setSelectionFailureFallback("~ - Unknown", 0);
-	__source5.setSelectionFailureFallback("~ - Unknown", 0);
+	__source1_JComboBox.setSelectionFailureFallback("~ - Unknown", 0);
+	__source2_JComboBox.setSelectionFailureFallback("~ - Unknown", 0);
+	__source3_JComboBox.setSelectionFailureFallback("~ - Unknown", 0);
+	__source4_JComboBox.setSelectionFailureFallback("~ - Unknown", 0);
+	__source5_JComboBox.setSelectionFailureFallback("~ - Unknown", 0);
 
-	__sourceAccount1.setSelectionFailureFallback("~ - Unknown", 0);
-	__sourceAccount2.setSelectionFailureFallback("~ - Unknown", 0);
-	__sourceAccount3.setSelectionFailureFallback("~ - Unknown", 0);
-	__sourceAccount4.setSelectionFailureFallback("~ - Unknown", 0);
-	__sourceAccount5.setSelectionFailureFallback("~ - Unknown", 0);
+	__sourceAccount1_JComboBox.setSelectionFailureFallback("~ - Unknown", 0);
+	__sourceAccount2_JComboBox.setSelectionFailureFallback("~ - Unknown", 0);
+	__sourceAccount3_JComboBox.setSelectionFailureFallback("~ - Unknown", 0);
+	__sourceAccount4_JComboBox.setSelectionFailureFallback("~ - Unknown", 0);
+	__sourceAccount5_JComboBox.setSelectionFailureFallback("~ - Unknown", 0);
 
 	__monthSwitch = new SimpleJComboBox[12];
 	for (int i = 0; i < 12; i++) {
@@ -2335,15 +2357,15 @@ private void setupGUI(int index) {
 			"                           ");
 	}
 	
-	__ruleTypeSwitch = new SimpleJComboBox();
+	__ruleTypeSwitch_JComboBox = new SimpleJComboBox();
 	String[] options = StateMod_OperationalRight.NAMES;
 	int num = options.length;
 	for (int i = 0; i < num; i++) {		
-		__ruleTypeSwitch.add("" + i + " - " + options[i]);
+		__ruleTypeSwitch_JComboBox.add("" + i + " - " + options[i]);
 	}
 
-	__ruleTypeSwitch.setEnabled(false);
-	__ruleTypeSwitch.setEditable(false);
+	__ruleTypeSwitch_JComboBox.setEnabled(false);
+	__ruleTypeSwitch_JComboBox.setEditable(false);
 
 	__searchID = new JTextField(10);
 	__searchName = new JTextField(10);
@@ -2383,10 +2405,8 @@ private void setupGUI(int index) {
 	JScrollWorksheet jsw = null;
 	try {
 		StateMod_OperationalRight_TableModel tmo = new
-			StateMod_OperationalRight_TableModel(
-			__operationalRights, __editable);
-		StateMod_OperationalRight_CellRenderer cro = new
-			StateMod_OperationalRight_CellRenderer(tmo);
+			StateMod_OperationalRight_TableModel( __operationalRights, __editable);
+		StateMod_OperationalRight_CellRenderer cro = new StateMod_OperationalRight_CellRenderer(tmo);
 	
 		jsw = new JScrollWorksheet(cro, tmo, p);
 		__worksheet = jsw.getJWorksheet();
@@ -2418,7 +2438,7 @@ private void setupGUI(int index) {
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(
-		p1, __oprName,
+		p1, __oprName_JTextField,
 		1, y, 1, 1, 1, 0,
 		1, 0, 0, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -2430,12 +2450,12 @@ private void setupGUI(int index) {
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(
-		p1, __oprStationID,
+		p1, __oprStationID_JTextField,
 		1, y, 1, 1, 1, 0,
 		1, 0, 0, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 //	__oprStationID.addActionListener(this);
-	__oprStationID.setEditable(false);
+	__oprStationID_JTextField.setEditable(false);
 	y++;
 	JGUIUtil.addComponent(
 		p1, new JLabel("Administration Number:"),
@@ -2443,7 +2463,7 @@ private void setupGUI(int index) {
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(
-		p1, __oprLocation,
+		p1, __oprLocation_JTextField,
 		1, y, 1, 1, 1, 0,
 		1, 0, 0, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -2455,7 +2475,7 @@ private void setupGUI(int index) {
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(
-		p1, __oprSwitch,
+		p1, __oprSwitch_JComboBox,
 		1, y, 1, 1, 1, 0,
 		1, 0, 0, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -2466,7 +2486,7 @@ private void setupGUI(int index) {
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(
-		p1, __ruleTypeSwitch,
+		p1, __ruleTypeSwitch_JComboBox,
 		1, y, 1, 1, 1, 0,
 		1, 0, 0, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -2486,7 +2506,7 @@ private void setupGUI(int index) {
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(
-		dest, __destination,
+		dest, __destination_JComboBox,
 		1, y, 1, 1, 0, 0,
 		1, 0, 0, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -2496,7 +2516,7 @@ private void setupGUI(int index) {
 		0, 4, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(
-		dest, __destinationAccount,
+		dest, __destinationAccount_JComboBox,
 		3, y, 1, 1, 0, 0,
 		1, 0, 0, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -2518,7 +2538,7 @@ private void setupGUI(int index) {
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(
-		source, __source1,
+		source, __source1_JComboBox,
 		1, y, 1, 1, 0, 0,
 		1, 0, 0, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -2528,7 +2548,7 @@ private void setupGUI(int index) {
 		0, 4, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(
-		source, __sourceAccount1,
+		source, __sourceAccount1_JComboBox,
 		3, y, 1, 1, 0, 0,
 		1, 0, 0, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -2540,7 +2560,7 @@ private void setupGUI(int index) {
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(
-		source, __source2,
+		source, __source2_JComboBox,
 		1, y, 1, 1, 0, 0,
 		1, 0, 0, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -2550,7 +2570,7 @@ private void setupGUI(int index) {
 		0, 4, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(
-		source, __sourceAccount2,
+		source, __sourceAccount2_JComboBox,
 		3, y, 1, 1, 0, 0,
 		1, 0, 0, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -2562,7 +2582,7 @@ private void setupGUI(int index) {
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(
-		source, __source3,
+		source, __source3_JComboBox,
 		1, y, 1, 1, 0, 0,
 		1, 0, 0, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -2572,7 +2592,7 @@ private void setupGUI(int index) {
 		0, 4, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(
-		source, __sourceAccount3,
+		source, __sourceAccount3_JComboBox,
 		3, y, 1, 1, 0, 0,
 		1, 0, 0, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -2584,7 +2604,7 @@ private void setupGUI(int index) {
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(
-		source, __source4,
+		source, __source4_JComboBox,
 		1, y, 1, 1, 0, 0,
 		1, 0, 0, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -2594,7 +2614,7 @@ private void setupGUI(int index) {
 		0, 4, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(
-		source, __sourceAccount4,
+		source, __sourceAccount4_JComboBox,
 		3, y, 1, 1, 0, 0,
 		1, 0, 0, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -2606,7 +2626,7 @@ private void setupGUI(int index) {
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(
-		source, __source5,
+		source, __source5_JComboBox,
 		1, y, 1, 1, 0, 0,
 		1, 0, 0, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -2616,7 +2636,7 @@ private void setupGUI(int index) {
 		0, 4, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(
-		source, __sourceAccount5,
+		source, __sourceAccount5_JComboBox,
 		3, y, 1, 1, 0, 0,
 		1, 0, 0, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -2657,8 +2677,7 @@ private void setupGUI(int index) {
 	JScrollWorksheet opRightJSW = null;
 	try {
 		StateMod_OperationalRight_TableModel tmo = new
-			StateMod_OperationalRight_TableModel(
-			new Vector(), __editable);
+			StateMod_OperationalRight_TableModel( new Vector(), __editable);
 		StateMod_OperationalRight_CellRenderer cro = new
 			StateMod_OperationalRight_CellRenderer(tmo);
 	
@@ -2724,14 +2743,14 @@ private void setupGUI(int index) {
 		GridBagConstraints.BOTH, GridBagConstraints.NORTHWEST);		
 
 	__opr8Panel = new JPanel();
-	__opr8JComboBox = new SimpleJComboBox();
-	__opr8JComboBox.setPrototypeDisplayValue("                   ");
+	__opr8_JComboBox = new SimpleJComboBox();
+	__opr8_JComboBox.setPrototypeDisplayValue("                   ");
 	__opr20Panel = new JPanel();
-	__opr20Sjmina = new JTextField(20);
-	__opr20Sjrela = new JTextField(20);
+	__opr20Sjmina_JTextField = new JTextField(20);
+	__opr20Sjrela_JTextField = new JTextField(20);
 	__qdebtPanel = new JPanel();
-	__qdebt = new JTextField(20);
-	__qdebtx = new JTextField(20);
+	__qdebt_JTextField = new JTextField(20);
+	__qdebtx_JTextField = new JTextField(20);
 
 	__opr8Panel.setLayout(gb);
 	JGUIUtil.addComponent(__opr8Panel, 
@@ -2739,7 +2758,7 @@ private void setupGUI(int index) {
 		0, 0, 1, 1, 1, 1, 
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.NORTHWEST);	
-	JGUIUtil.addComponent(__opr8Panel, __opr8JComboBox,
+	JGUIUtil.addComponent(__opr8Panel, __opr8_JComboBox,
 		1, 0, 1, 1, 0, 0, 
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.NORTHWEST);
@@ -2750,7 +2769,7 @@ private void setupGUI(int index) {
 		0, 0, 1, 1, 1, 1,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.NORTHWEST);	
-	JGUIUtil.addComponent(__opr20Panel, __opr20Sjmina,
+	JGUIUtil.addComponent(__opr20Panel, __opr20Sjmina_JTextField,
 		1, 0, 1, 1, 0, 0,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.NORTHWEST);
@@ -2759,7 +2778,7 @@ private void setupGUI(int index) {
 		0, 1, 1, 1, 1, 1,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.NORTHWEST);
-	JGUIUtil.addComponent(__opr20Panel, __opr20Sjrela,
+	JGUIUtil.addComponent(__opr20Panel, __opr20Sjrela_JTextField,
 		1, 1, 1, 1, 0, 0,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.NORTHWEST);
@@ -2770,7 +2789,7 @@ private void setupGUI(int index) {
 		0, 0, 1, 1, 1, 1,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.NORTHWEST);
-	JGUIUtil.addComponent(__qdebtPanel, __qdebt,
+	JGUIUtil.addComponent(__qdebtPanel, __qdebt_JTextField,
 		1, 0, 1, 1, 0, 0,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.NORTHWEST);		
@@ -2779,7 +2798,7 @@ private void setupGUI(int index) {
 		0, 1, 1, 1, 1, 1,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.NORTHWEST);
-	JGUIUtil.addComponent(__qdebtPanel, __qdebtx,
+	JGUIUtil.addComponent(__qdebtPanel, __qdebtx_JTextField,
 		1, 1, 1, 1, 0, 0,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.NORTHWEST);
@@ -2904,17 +2923,17 @@ private void setupGUI(int index) {
 	
 	JPanel bottomJPanel = new JPanel();
 	bottomJPanel.setLayout (gb);
-	__messageJTextField = new JTextField();
-	__messageJTextField.setEditable(false);
+	__message_JTextField = new JTextField();
+	__message_JTextField.setEditable(false);
 	JGUIUtil.addComponent(bottomJPanel, pfinal,
 		0, 0, 8, 1, 1, 1,
 		GridBagConstraints.HORIZONTAL, GridBagConstraints.EAST);	
-	JGUIUtil.addComponent(bottomJPanel, __messageJTextField,
+	JGUIUtil.addComponent(bottomJPanel, __message_JTextField,
 		0, 1, 7, 1, 1.0, 0.0, 
 		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
-	__statusJTextField = new JTextField(5);
-	__statusJTextField.setEditable(false);
-	JGUIUtil.addComponent(bottomJPanel, __statusJTextField,
+	__status_JTextField = new JTextField(5);
+	__status_JTextField.setEditable(false);
+	JGUIUtil.addComponent(bottomJPanel, __status_JTextField,
 		7, 1, 1, 1, 0.0, 0.0, 
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	getContentPane().add ("South", bottomJPanel);	
@@ -2942,9 +2961,9 @@ private void setupGUI(int index) {
 
 	// put these here so any changes while the GUI is initializing 
 	// don't cause itemStateChanged events.
-	__destination.addActionListener(this);
-	__source1.addActionListener(this);
-	__ruleTypeSwitch.addActionListener(this);
+	__destination_JComboBox.addActionListener(this);
+	__source1_JComboBox.addActionListener(this);
+	__ruleTypeSwitch_JComboBox.addActionListener(this);
 
 	__worksheet.addSortListener(this);
 }
@@ -3089,10 +3108,6 @@ Responds to Window opening events; does nothing.
 @param e the WindowEvent that happened.
 */
 public void windowOpening(WindowEvent e) {}
-
-private void setOriginalCgoto(StateMod_OperationalRight o, String cgoto) {
-	((StateMod_OperationalRight)o._original)._cgoto = cgoto;
-}
 
 /**
 Called just before the worksheet is sorted.  Stores the index of the record

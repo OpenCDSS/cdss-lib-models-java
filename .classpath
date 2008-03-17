@@ -7,7 +7,7 @@
 	<classpathentry kind="lib" path="externals/jfreechart.jar"/>
 	<classpathentry kind="lib" path="externals/jcommon.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3.8.1"/>
-	<classpathentry kind="lib" path="/HydroBaseDMI/externals/HydroBaseDMI_2007_11_08.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/RTi_Common"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/cdss.domain"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

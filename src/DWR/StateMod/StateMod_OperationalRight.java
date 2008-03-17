@@ -93,7 +93,9 @@ package DWR.StateMod;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.IO.IOUtil;
@@ -108,8 +110,7 @@ implements Cloneable, Comparable {
 Operational right types using reasonably short phrases,
 */
 public static final String[] NAMES = {
-	"Unknown",	// 0, Use when the right number is outside the supported
-			// range
+	"Unknown",	// 0, Use when the right number is outside the supported range
 	"Reservoir Release to an Instream Flow",		// 1
 	"Reservoir Release to a Diversion by the River",	// 2
 	"Reservoir Release to a Diversion or Reservoir by a Carrier",	// 3
@@ -141,13 +142,36 @@ public static final String[] NAMES = {
 	"ReUse Plan Spill",					// 29
 	"Reservoir Re Diversion",				// 30
 	"Carrier to a ditch or res. w/ Reusable return flows",	// 31
-	"Res. and Plan to a Dir. Flow or res. or car. Dir. w/ or w/out dest. "+
-		"reuse",					// 32
-	"Res. and Plan to a Dir. Flow or res. or car. by Exch. w/ or w/out " +
-		"dest. reuse",					// 33
+	"Res. and Plan to a Dir. Flow or res. or car. Dir. w/ or w/out dest. reuse", // 32
+	"Res. and Plan to a Dir. Flow or res. or car. by Exch. w/ or w/out dest. reuse", // 33
 	"Paper Exchange",					// 34
-	"Import to a Div., Res., or Carrier w/ or w/out Reuse."	// 35
+	"Import to a Div., Res., or Carrier w/ or w/out Reuse.",	// 35
+	"Seasonal (Daily) Water Right", // 36
+	"Augmentation Well", // 37
+	"Out of Priority Diversion with Plan", // 38
+	"Alternate Point", // 39
+	"South Platte Compact", // 40
+	"Reservoir Storage with Special Limits", // 41
+	"Plan Demand Reset", // 42
+	"In Priority Supply", // 43
+	"Recharge Well", // 44
+	"Carrier with Loss", // 45
+	"Multiple Plan Ownership", // 46
+	"Administrative Plan Limit", // 47
+	"Plan or Reservoir Reuse to a T&C or Augmentation Plan Direct", // 48
+	"Plan or Reservoir Reuse to a T&C or Augmentation Plan Exchange" // 49
 };
+
+/**
+ * Maximum handled operational right type (those that the software has been
+ * coded to handle).
+ */
+public static int MAX_HANDLED_TYPE = 23;
+/**
+ * Maximum known operational right type (those that are know from documentation but
+ * whose syntax is not specifically handled.
+ */
+public static int MAX_KNOWN_TYPE = 49;
 
 protected String	_rtem;		// Administration number.
 protected int		_dumx;		// Typically the number of intervening
@@ -171,14 +195,39 @@ protected String 	_intern[];	// Intervening structure IDs (up to 10
 					// in StateMod doc but no limit here) -
 					// used by some rights.
 protected int		_imonsw[];	// Monthly switch, for some rights
-protected Vector	_comments;	// Comments provided by user -
-					// # comments before each right
+protected Vector	_comments;	// Comments provided by user - # comments before each right
 
 protected double	_qdebt;		// used with operational right 17, 18
 protected double	_qdebtx;	// used with operational right 17, 18
 
 protected double	_sjmina;	// used with operational right 20
 protected double	_sjrela;	// used with operational right 20
+/**
+ * Plan ID.
+ */
+private String __creuse;
+/**
+ * Diversion type.
+ */
+private String __cdivtyp;
+/**
+ * Convenyance loss.
+ */
+private double __oprLoss;
+/**
+ * Miscellaneous limits.
+ */
+private double __oprLimit;
+/**
+ * Beginning year of operation.
+ */
+private int __ioBeg;
+/**
+ * Ending year of operation.
+ */
+private int __ioEnd;
+
+private Vector __rightStringsVector = null;
 
 // cidvri = ID is in base class identifier
 // nameo = Name is in base class name
@@ -415,6 +464,44 @@ public int compareTo(Object o) {
 	else if (_sjrela > op._sjrela) {
 		return 1;
 	}
+	
+	res = __creuse.compareTo(op.__creuse);
+	if (res != 0) {
+		return res;
+	}
+	
+	res = __cdivtyp.compareTo(op.__cdivtyp);
+	if (res != 0) {
+		return res;
+	}
+	
+	if (__oprLoss < op.__oprLoss) {
+		return -1;
+	}
+	else if (__oprLoss > op.__oprLoss) {
+		return 1;
+	}
+	
+	if (__oprLimit < op.__oprLimit) {
+		return -1;
+	}
+	else if (__oprLimit > op.__oprLimit) {
+		return 1;
+	}
+	
+	if (__ioBeg < op.__ioBeg) {
+		return -1;
+	}
+	else if (__ioBeg > op.__ioBeg) {
+		return 1;
+	}
+	
+	if (__ioEnd < op.__ioEnd) {
+		return -1;
+	}
+	else if (__ioEnd > op.__ioEnd) {
+		return 1;
+	}
 
 	return 0;
 }
@@ -449,6 +536,8 @@ throws Throwable {
 	_imonsw = null;
 	_intern = null;
 	_comments = null;
+	__creuse = null;
+	__cdivtyp = null;
 	super.finalize();
 }
 
@@ -600,6 +689,15 @@ public double getQdebtx() {
 	return _qdebtx;
 }
 
+/**
+ * @return the list of strings that containing the operating rule data when the
+ * right is not understood.
+ */
+public List getRightStrings()
+{
+	return __rightStringsVector;
+}
+
 public double getSjrela() {
 	return _sjrela;
 }
@@ -635,6 +733,13 @@ private void initialize() {
 	_qdebtx = 0.0;
 	_sjmina = 0.0;
 	_sjrela = 0.0;
+	// Newer data
+	__creuse = "";
+	__cdivtyp = "";
+	__oprLoss = 0.0;
+	__oprLimit = 0.0;
+	__ioBeg = 0;
+	__ioEnd = 0;
 }
 
 public boolean hasImonsw() {
@@ -662,11 +767,14 @@ throws Exception {
 	String iline = null;
 	Vector v = null;
 	Vector theOprits = new Vector();
-	Vector comment_vector = new Vector(1);
+	Vector comment_vector = new Vector(1);	// Will be used prior to finding an operational right
 	// Formats use strings for many variables because files may have extra
 	// whitespace or be used for numeric and character data...
 	// Consistent among all operational rights...
-	String format_0 = "s12s24x16s12s8i8x1s12s8x1s12s8x1s12s8s8";
+	// Before adding creuse, etc... (12 values)
+	//String format_0 = "s12s24x16s12s8i8x1s12s8x1s12s8x1s12s8s8";
+	// After adding creuse, etc.... (18 values)
+	String format_0 = "s12s24x16s12s8i8x1s12s8x1s12s8x1s12s8s8x1a12x1s12x1s8s8s8s8";
 	// Format for intervening structures...
 	// TODO SAM 2007-03-01 Evaluate use
 	//String format_interv = "x36s12s12s12s12s12s12s12s12s12s12";
@@ -677,58 +785,71 @@ throws Exception {
 	StateMod_OperationalRight anOprit = null;
 	int linecount = 0;
 
-	int i;
-	int dumx, ninterv, nmonsw, ntokens;
+	int dumx, ninterv, nmonsw;
 	int type = 0;
-	boolean readingTmpComments = false;
-	Vector tokens = null;
 
-	Message.printStatus(1, routine, "Reading operational rights file: " 
-		+ filename);
-	try {	in = new BufferedReader(new FileReader(filename));
+	Message.printStatus(2, routine, "Reading operational rights file : " + filename);
+	try {
+		boolean reading_unknown_right = false;
+		Vector right_strings_Vector = null;	// Operating rule as a list of strings
+		in = new BufferedReader(new FileReader(filename));
 		while ((iline = in.readLine()) != null) {
 			++linecount;
+			Message.printStatus ( 2, routine, "Processing operating rule line " + linecount + ": " + iline );
+			// If was reading an unknown rule, turn off flag if done reading.
+			if ( reading_unknown_right ) {
+				if ( (iline.length() > 0) && (iline.charAt(0) != ' ') ) {
+					// Done reading the unknown right.  Next are either comments before or data for
+					// the next right.
+					reading_unknown_right = false;
+					// Add to the end of the list
+					Message.printStatus ( 2, routine, "Adding unrecognized operational right \"" +
+							anOprit.getID() + "\" as text");
+					theOprits.addElement(anOprit);
+					// Don't continue because the line that was just read needs to be handled.
+				}
+				else {
+					// Blank at front of line so assume still reading the unknown right.
+					// Add a string to the unknown right
+					right_strings_Vector.addElement ( iline );
+					continue;
+				}
+			}
 			// check for comments
 			// if a temporary comment line
 			if ( iline.startsWith("#>") ) {
-				readingTmpComments = true;
 				continue;
 			}
-			else if ((iline.startsWith("#") && !readingTmpComments)
-				|| iline.trim().length()==0) {
-				// A general comment line not associated with an
-				// operational right...
+			/* TODO SAM 2008-03-10 Evaluate whether needed
+			else if ((iline.startsWith("#") && !readingTmpComments)	|| iline.trim().length()==0) {
+				// A general comment line not associated with an operational right...
 				continue;
 			}
+			*/
 			else if (iline.startsWith("#")) { 
-				// A comment line specific to an individual
-				// operational right...
+				// A comment line specific to an individual operational right...
 				if (Message.isDebugOn) {
-					Message.printDebug(10, routine, 
-						"Opright comments: " + iline);
+					Message.printDebug(10, routine, "Opright comments: " + iline);
 				}
-				comment_vector.addElement(
-					iline.substring(1).trim());
+				comment_vector.addElement(iline.substring(1).trim());
 				continue;
 			}
 
 			// Allocate new operational rights object
 			anOprit = new StateMod_OperationalRight();
 			if (Message.isDebugOn) {
-				Message.printDebug(10, routine,
-					"Number of Opright comments: " +
-					comment_vector.size());
+				Message.printDebug(10, routine,	"Number of Opright comments: " + comment_vector.size());
 			}
 			if (comment_vector.size()> 0) {
+				// Set comments that have been read previous to this line.
 				anOprit.setComments(comment_vector);
-				// Clear out for next object...
-				comment_vector = new Vector(1);
 			}
+			// Always clear out for next object...
+			comment_vector = new Vector(1);
 
 			// line 1
 			if (Message.isDebugOn) {
-				Message.printDebug(50, routine, 
-					"line 1: " + iline);
+				Message.printDebug(50, routine, "line 1: " + iline);
 			}
 			v = StringUtil.fixedRead(iline, format_0);
 			if ( Message.isDebugOn ) {
@@ -750,8 +871,40 @@ throws Exception {
 			anOprit.setCiopso2(((String)v.elementAt(9)).trim());
 			anOprit.setIopsou2(((String)v.elementAt(10)).trim());
 			// Type is used to make additional decisions below...
-			type =StringUtil.atoi(((String)v.elementAt(11)).trim());
+			type = StringUtil.atoi(((String)v.elementAt(11)).trim());
 			anOprit.setItyopr(type);
+			// Plan ID
+			anOprit.setCreuse(((String)v.elementAt(12)).trim());
+			// Diversion type
+			anOprit.setCdivtyp(((String)v.elementAt(13)).trim());
+			// Conveyance loss...
+			double oprLoss = StringUtil.atod(((String)v.elementAt(14)).trim());
+			anOprit.setOprLoss ( oprLoss );
+			// Miscellaneous limits...
+			double oprLimit = StringUtil.atod(((String)v.elementAt(15)).trim());
+			anOprit.setOprLimit ( oprLimit );
+			// Beginning year...
+			int ioBeg = StringUtil.atoi(((String)v.elementAt(16)).trim());
+			anOprit.setIoBeg ( ioBeg );
+			// Ending year...
+			int ioEnd = StringUtil.atoi(((String)v.elementAt(17)).trim());
+			anOprit.setIoEnd ( ioEnd );
+			Message.printStatus( 2, routine, "Reading operating rule type " + type +
+					" starting at line " + linecount );
+			
+			if ( type > MAX_HANDLED_TYPE ) {
+				// The type is not known so read in as strings and set the type to negative.
+				// Most of the reading will occur at the top of the loop.
+				reading_unknown_right = true;
+				right_strings_Vector = new Vector();
+				right_strings_Vector.addElement ( iline );
+				// Add Vector and continue to add if more lines are read.  Since using a reference
+				// this will ensure that all lines are set for the right.
+				anOprit.setRightStrings ( right_strings_Vector );
+				Message.printWarning ( 2, routine, "Unknown right type " + type + " at line " + linecount +
+						".  Reading as text to continue reading file." );
+				continue;
+			}
 
 			// Now read the additional lines of data.  Just do the
 			// logic brute force since the order of data is not
@@ -759,425 +912,104 @@ throws Exception {
 
 			nmonsw = 0;
 			ninterv = 0;
-			if ( type == 2 ) {
-				// May have monthly switch and intervening
-				// structures...
-				if ( dumx >= 0 ) {
-					// Only have intervening structures...
-					ninterv = dumx;
-				}
-				else {	// Have monthly switches and intervening
-					// structures...
+			
+			// May have monthly switch and intervening structures.  For now check the value.
+			// FIXME SAM 2008-03-17 Will read in a file that indicates what is allowed so it is
+			// easier to dynamically check.
+			
+			if ( dumx == 12 ) {
+				// Only have monthly switches
+				nmonsw = 12;
+			}
+			else if ( dumx >= 0 ) {
+				// Only have intervening structures...
+				ninterv = dumx;
+			}
+			else if ( dumx < 0 ){
+				// Have monthly switches and intervening structures.
+				// -12 of the total count toward the monthly switch and the remainder is
+				// the number of intervening structures
+				// Check the value because some rules like 17 - Rio Grande Compact use -8
+				if ( dumx < -12 ) {
 					ninterv = -1*(dumx + 12);
 					nmonsw = 12;
 				}
-				if ( nmonsw > 0 ) {
-					iline = in.readLine().trim();
-					++linecount;
-					tokens = StringUtil.breakStringList(
-						iline, " \t",
-						StringUtil.DELIM_SKIP_BLANKS );
-					ntokens = 0;
-					if ( tokens != null ) {
-						ntokens = tokens.size();
-					}
-					if ( nmonsw > 0 ) {
-						anOprit._imonsw =
-							new int[nmonsw];
-					}
-					for (i=0; i<ntokens; i++) {
-						anOprit.setImonsw(i, ((String)
-						tokens.elementAt(i)).trim());
-					}
-				}
-				if ( ninterv > 0 ) {
-					iline = in.readLine().trim();
-					++linecount;
-					tokens = StringUtil.breakStringList(
-						iline, " \t",
-						StringUtil.DELIM_SKIP_BLANKS );
-					ntokens = 0;
-					if ( tokens != null ) {
-						ntokens = tokens.size();
-					}
-					if ( ntokens > 0 ) {
-						anOprit._intern =
-							new String[ninterv];
-					}
-					for (i=0; i<ntokens; i++) {
-						anOprit.setIntern(i, ((String)
-						tokens.elementAt(i)).trim());
-					}
+				else {
+					ninterv = -1*dumx;
 				}
 			}
-			else if ( type == 3 ) {
-				// Expect dumx to indicate the number of
-				// intervening structures...
-				ninterv = dumx;
-				if ( ninterv > 0 ) {
-					iline = in.readLine().trim();
-					++linecount;
-					tokens = StringUtil.breakStringList(
-						iline, " \t",
-						StringUtil.DELIM_SKIP_BLANKS );
-					ntokens = 0;
-					if ( tokens != null ) {
-						ntokens = tokens.size();
-					}
-					if ( ntokens > 0 ) {
-						anOprit._intern =
-							new String[ninterv];
-					}
-					for (i=0; i<ntokens; i++) {
-						anOprit.setIntern(i, ((String)
-						tokens.elementAt(i)).trim());
-					}
-				}
-			}
-			else if ( type == 6 ) {
-				// May have monthly switch...
-				nmonsw = dumx;
-				if ( nmonsw != 0 ) {
-					nmonsw = 12;
-					iline = in.readLine().trim();
-					++linecount;
-					tokens = StringUtil.breakStringList(
-						iline, " \t",
-						StringUtil.DELIM_SKIP_BLANKS );
-					ntokens = 0;
-					if ( tokens != null ) {
-						ntokens = tokens.size();
-					}
-					if ( nmonsw > 0 ) {
-						anOprit._imonsw =
-							new int[nmonsw];
-					}
-					for (i=0; i<ntokens; i++) {
-						anOprit.setImonsw(i, ((String)
-						tokens.elementAt(i)).trim());
-					}
-				}
-			}
-			else if ( type == 8 ) {
-				// Expect dumx to indicate the number of
-				// intervening structures (= 1)...
-				ninterv = dumx;
-				if ( ninterv > 0 ) {
-					iline = in.readLine().trim();
-					++linecount;
-					tokens = StringUtil.breakStringList(
-						iline, " \t",
-						StringUtil.DELIM_SKIP_BLANKS );
-					ntokens = 0;
-					if ( tokens != null ) {
-						ntokens = tokens.size();
-					}
-					if ( ntokens > 0 ) {
-						anOprit._intern =
-							new String[ninterv];
-					}
-					for (i=0; i<ntokens; i++) {
-						anOprit.setIntern(i, ((String)
-						tokens.elementAt(i)).trim());
-					}
-				}
-			}
-			else if ( type == 11 ) {
-				// Expect dumx to indicate the number of
-				// intervening structures...
-				ninterv = dumx;
-				if ( ninterv > 0 ) {
-					iline = in.readLine().trim();
-					++linecount;
-					tokens = StringUtil.breakStringList(
-						iline, " \t",
-						StringUtil.DELIM_SKIP_BLANKS );
-					ntokens = 0;
-					if ( tokens != null ) {
-						ntokens = tokens.size();
-					}
-					if ( ntokens > 0 ) {
-						anOprit._intern =
-							new String[ninterv];
-					}
-					for (i=0; i<ntokens; i++) {
-						anOprit.setIntern(i, ((String)
-						tokens.elementAt(i)).trim());
-					}
-				}
-			}
-			else if ( type == 13 ) {
-				// May have monthly switch...
-				nmonsw = dumx;
-				if ( nmonsw != 0 ) {
-					nmonsw = 12;
-					iline = in.readLine().trim();
-					++linecount;
-					tokens = StringUtil.breakStringList(
-						iline, " \t",
-						StringUtil.DELIM_SKIP_BLANKS );
-					ntokens = 0;
-					if ( tokens != null ) {
-						ntokens = tokens.size();
-					}
-					if ( nmonsw > 0 ) {
-						anOprit._imonsw =
-							new int[nmonsw];
-					}
-					for (i=0; i<ntokens; i++) {
-						anOprit.setImonsw(i, ((String)
-						tokens.elementAt(i)).trim());
-					}
-				}
-			}
-			else if ( type == 14 ) {
-				// Expect dumx to indicate the number of
-				// intervening structures (= 1)...
-				ninterv = dumx;
-				if ( ninterv > 0 ) {
-					iline = in.readLine().trim();
-					++linecount;
-					tokens = StringUtil.breakStringList(
-						iline, " \t",
-						StringUtil.DELIM_SKIP_BLANKS );
-					ntokens = 0;
-					if ( tokens != null ) {
-						ntokens = tokens.size();
-					}
-					if ( ntokens > 0 ) {
-						anOprit._intern =
-							new String[ninterv];
-					}
-					for (i=0; i<ntokens; i++) {
-						anOprit.setIntern(i, ((String)
-						tokens.elementAt(i)).trim());
-					}
-				}
-			}
-			else if ( type == 15 ) {
-				// May have monthly switch...
-				nmonsw = dumx;
-				if ( nmonsw != 0 ) {
-					nmonsw = 12;
-					iline = in.readLine().trim();
-					++linecount;
-					tokens = StringUtil.breakStringList(
-						iline, " \t",
-						StringUtil.DELIM_SKIP_BLANKS );
-					ntokens = 0;
-					if ( tokens != null ) {
-						ntokens = tokens.size();
-					}
-					if ( nmonsw > 0 ) {
-						anOprit._imonsw =
-							new int[nmonsw];
-					}
-					for (i=0; i<ntokens; i++) {
-						anOprit.setImonsw(i, ((String)
-						tokens.elementAt(i)).trim());
-					}
-				}
-			}
-			else if ( type == 16 ) {
-				// May have monthly switch and intervening
-				// structures...
-				if ( dumx >= 0 ) {
-					// Only have intervening structures...
-					ninterv = dumx;
-				}
-				else {	// Have monthly switches and intervening
-					// structures...
-					ninterv = -1*(dumx + 12);
-					nmonsw = 12;
-				}
-				if ( nmonsw > 0 ) {
-					iline = in.readLine().trim();
-					++linecount;
-					tokens = StringUtil.breakStringList(
-						iline, " \t",
-						StringUtil.DELIM_SKIP_BLANKS );
-					ntokens = 0;
-					if ( tokens != null ) {
-						ntokens = tokens.size();
-					}
-					if ( nmonsw > 0 ) {
-						anOprit._imonsw =
-							new int[nmonsw];
-					}
-					for (i=0; i<ntokens; i++) {
-						anOprit.setImonsw(i, ((String)
-						tokens.elementAt(i)).trim());
-					}
-				}
-				if ( ninterv > 0 ) {
-					iline = in.readLine().trim();
-					++linecount;
-					tokens = StringUtil.breakStringList(
-						iline, " \t",
-						StringUtil.DELIM_SKIP_BLANKS );
-					ntokens = 0;
-					if ( tokens != null ) {
-						ntokens = tokens.size();
-					}
-					if ( ntokens > 0 ) {
-						anOprit._intern =
-							new String[ninterv];
-					}
-					for (i=0; i<ntokens; i++) {
-						anOprit.setIntern(i, ((String)
-						tokens.elementAt(i)).trim());
-					}
-				}
-			}
-			else if ( type == 17 ) {
+			// FIXME SAM 2008-03-17 Need some more checks for things like invalid -11 and + 13
+			
+			// Start reading additional information before monthly and intervening data)...
+
+			if ( type == 17 ) {
 				// Rio Grande compact data...
 				iline = in.readLine().trim();
 				++linecount;
+				Message.printStatus ( 2, routine, "Processing operating rule line " + linecount + ": " + iline );
 				v = StringUtil.fixedRead(iline, format_rg);
-				anOprit.setQdebt(
-					((String)v.elementAt(0)).trim() );
-				anOprit.setQdebtx(
-					((String)v.elementAt(1)).trim() );
-				anOprit.setCiopso3(
-					((String)v.elementAt(2)).trim());
-				anOprit.setIopsou3(
-					((String)v.elementAt(3)).trim());
-				anOprit.setCiopso4(
-					((String)v.elementAt(4)).trim());
-				anOprit.setIopsou4(
-					((String)v.elementAt(5)).trim());
-				anOprit.setCiopso5(
-					((String)v.elementAt(6)).trim());
-				anOprit.setIopsou5(
-					((String)v.elementAt(7)).trim());
-				// May have monthly switch...
-				if ( dumx == -20 ) {
-					nmonsw = 12;
-				}
-				if ( nmonsw == 12 ) {
-					iline = in.readLine().trim();
-					++linecount;
-					tokens = StringUtil.breakStringList(
-						iline, " \t",
-						StringUtil.DELIM_SKIP_BLANKS );
-					ntokens = 0;
-					if ( tokens != null ) {
-						ntokens = tokens.size();
-					}
-					if ( nmonsw > 0 ) {
-						anOprit._imonsw =
-							new int[nmonsw];
-					}
-					for (i=0; i<ntokens; i++) {
-						anOprit.setImonsw(i, ((String)
-						tokens.elementAt(i)).trim() );
-					}
-				}
+				anOprit.setQdebt( ((String)v.elementAt(0)).trim() );
+				anOprit.setQdebtx( ((String)v.elementAt(1)).trim() );
+				anOprit.setCiopso3(	((String)v.elementAt(2)).trim());
+				anOprit.setIopsou3(	((String)v.elementAt(3)).trim());
+				anOprit.setCiopso4(	((String)v.elementAt(4)).trim());
+				anOprit.setIopsou4(	((String)v.elementAt(5)).trim());
+				anOprit.setCiopso5(	((String)v.elementAt(6)).trim());
+				anOprit.setIopsou5(	((String)v.elementAt(7)).trim());
 			}
 			else if ( type == 18 ) {
 				// Rio Grande Compact - Conejos River
 				iline = in.readLine().trim();
 				++linecount;
+				Message.printStatus ( 2, routine, "Processing operating rule line " + linecount + ": " + iline );
 				v = StringUtil.fixedRead(iline, format_rg);
-				anOprit.setQdebt(
-					((String)v.elementAt(0)).trim() );
-				anOprit.setQdebtx(
-					((String)v.elementAt(1)).trim() );
-				anOprit.setCiopso3(
-					((String)v.elementAt(2)).trim());
-				anOprit.setIopsou3(
-					((String)v.elementAt(3)).trim());
-				anOprit.setCiopso4(
-					((String)v.elementAt(4)).trim());
-				anOprit.setIopsou4(
-					((String)v.elementAt(5)).trim());
-				anOprit.setCiopso5(
-					((String)v.elementAt(6)).trim());
-				anOprit.setIopsou5(
-					((String)v.elementAt(7)).trim());
-				// May have monthly switch...
-				if ( dumx == -20 ) {
-					nmonsw = 12;
-				}
-				if ( nmonsw == 12 ) {
-					iline = in.readLine().trim();
-					++linecount;
-					tokens = StringUtil.breakStringList(
-						iline, " \t",
-						StringUtil.DELIM_SKIP_BLANKS );
-					ntokens = 0;
-					if ( tokens != null ) {
-						ntokens = tokens.size();
-					}
-					if ( nmonsw > 0 ) {
-						anOprit._imonsw =
-							new int[nmonsw];
-					}
-					for (i=0; i<ntokens; i++) {
-						anOprit.setImonsw(i, ((String)
-						tokens.elementAt(i)).trim());
-					}
-				}
+				anOprit.setQdebt( ((String)v.elementAt(0)).trim() );
+				anOprit.setQdebtx( ((String)v.elementAt(1)).trim() );
+				anOprit.setCiopso3(	((String)v.elementAt(2)).trim());
+				anOprit.setIopsou3(	((String)v.elementAt(3)).trim());
+				anOprit.setCiopso4(	((String)v.elementAt(4)).trim());
+				anOprit.setIopsou4(	((String)v.elementAt(5)).trim());
+				anOprit.setCiopso5(	((String)v.elementAt(6)).trim());
+				anOprit.setIopsou5(	((String)v.elementAt(7)).trim());
 			}
 			else if ( type == 20 ) {
 				// San Juan RIP...
 				v = StringUtil.fixedRead(iline, format_sj);
-				anOprit.setSjmina(
-					((String)v.elementAt(0)).trim());
-				anOprit.setSjrela(
-					((String)v.elementAt(1)).trim());
-				// May have monthly switch...
-				if ( dumx != 0 ) {
-					nmonsw = 12;
-				}
-				if ( nmonsw == 12 ) {
-					iline = in.readLine().trim();
-					++linecount;
-					tokens = StringUtil.breakStringList(
-						iline, " \t",
-						StringUtil.DELIM_SKIP_BLANKS );
-					ntokens = 0;
-					if ( tokens != null ) {
-						ntokens = tokens.size();
-					}
-					if ( nmonsw > 0 ) {
-						anOprit._imonsw =
-							new int[nmonsw];
-					}
-					for (i=0; i<ntokens; i++) {
-						anOprit.setImonsw(i, ((String)
-						tokens.elementAt(i)).trim());
-					}
-				}
+				anOprit.setSjmina( ((String)v.elementAt(0)).trim());
+				anOprit.setSjrela( ((String)v.elementAt(1)).trim());
 			}
-			else if ( type == 23 ) {
-				// May have monthly switch...
-				nmonsw = dumx;
-				if ( nmonsw != 0 ) {
-					nmonsw = 12;
-				}
-				if ( nmonsw == 12 ) {
-					iline = in.readLine().trim();
-					++linecount;
-					tokens = StringUtil.breakStringList(
-						iline, " \t",
-						StringUtil.DELIM_SKIP_BLANKS );
-					ntokens = 0;
-					if ( tokens != null ) {
-						ntokens = tokens.size();
-					}
-					if ( nmonsw > 0 ) {
-						anOprit._imonsw =
-							new int[nmonsw];
-					}
-					for (i=0; i<ntokens; i++) {
-						anOprit.setImonsw(i, ((String)
-						tokens.elementAt(i)).trim());
-					}
-				}
+			
+			// ...end reading additional data before monthly and intervening structure data
+			
+			// Start reading the monthly and intervening structure data...
+			
+			Message.printStatus ( 2, routine, "Number of intervening structures = " + ninterv +
+					" month switch = " + nmonsw );
+			if ( nmonsw > 0 ) {
+				linecount += readStateModFile_MonthlySwitches ( nmonsw, routine, linecount, in, anOprit );
 			}
+			// Don't read for the Rio Grande types
+			if ( (ninterv > 0) && (type != 17) && (type != 18) ) {
+				linecount += readStateModFile_InterveningStructures (
+						ninterv, routine, linecount, in, anOprit );
+			}
+			
+			// ...end reading monthly and intervening structure data.
+			
+			// Start reading additional data after monthly and intervening structure data...
+			
+			// ...end reading additional data after monthly and intervening structure data
 
 			// add the operational right to the vector of oprits
+			Message.printStatus ( 2, routine, "Adding recognized operational right \"" +
+					anOprit.getID() + "\" from full read.");
+			theOprits.addElement(anOprit);
+		}
+		// All lines have been read.
+		if ( reading_unknown_right ) {
+			// Last line was part of the unknown right so need to add what there was.
+			Message.printStatus ( 2, routine, "Adding unrecognized operational right \"" +
+					anOprit.getID() + "\" as text.");
 			theOprits.addElement(anOprit);
 		}
 	}
@@ -1191,8 +1023,7 @@ throws Exception {
 		}
 		in = null;
 		anOprit = null;
-		Message.printWarning(2, routine,
-		"Error reading near line " + linecount + ": " + iline);
+		Message.printWarning(2, routine, "Error reading near line " + linecount + ": " + iline);
 		iline = null;
 		Message.printWarning(2, routine, e);
 		throw e;
@@ -1211,6 +1042,65 @@ throws Exception {
 	return theOprits;
 }
 
+/**
+ * Read the StateMod operational rights file intervening structures.
+ * @param ninterv Intervening structures switch.
+ * @param routine to use for logging.
+ * @param linecount Line count (1+) before reading in this method.
+ * @param in BufferedReader to read.
+ * @param anOprit Operational right for which to read data.
+ * @return the number of lines read (add to line count in calling code).
+ * @exception IOException if there is an error reading the file
+ */
+private static int readStateModFile_InterveningStructures ( int ninterv, String routine, int linecount,
+		BufferedReader in, StateMod_OperationalRight anOprit )
+throws IOException
+{
+	String iline = in.readLine().trim();
+	Message.printStatus ( 2, routine, "Processing operating rule line " + (linecount + 1) + ": " + iline );
+	Vector tokens = StringUtil.breakStringList( iline, " \t", StringUtil.DELIM_SKIP_BLANKS );
+	int ntokens = 0;
+	if ( tokens != null ) {
+		ntokens = tokens.size();
+	}
+	if ( ntokens > 0 ) {
+		anOprit._intern = new String[ninterv];
+	}
+	for ( int i=0; i<ntokens; i++) {
+		anOprit.setIntern(i, ((String)tokens.elementAt(i)).trim());
+	}
+	return 1;
+}
+
+/**
+ * Read the statemod operational rights file monthly switches.
+ * @param nmonsw Monthly switch
+ * @param routine to use for logging.
+ * @param linecount Line count (1+) before reading in this method.
+ * @param in BufferedReader to read.
+ * @param anOprit Operational right for which to read data.
+ * @return the number of lines read (add to line count in calling code).
+ * @exception IOException if there is an error reading the file
+ */
+private static int readStateModFile_MonthlySwitches ( int nmonsw, String routine, int linecount,
+		BufferedReader in, StateMod_OperationalRight anOprit )
+throws IOException
+{
+	String iline = in.readLine().trim();
+	Message.printStatus ( 2, routine, "Processing operating rule line " + (linecount + 1) + ": " + iline );
+	Vector tokens = StringUtil.breakStringList( iline, " \t", StringUtil.DELIM_SKIP_BLANKS );
+	int ntokens = 0;
+	if ( tokens != null ) {
+		ntokens = tokens.size();
+	}
+	if ( nmonsw > 0 ) {
+		anOprit._imonsw = new int[nmonsw];
+	}
+	for ( int i=0; i<ntokens; i++) {
+		anOprit.setImonsw(i, ((String)tokens.elementAt(i)).trim());
+	}
+	return 1;
+}
 
 /**
 Cancels any changes made to this object within a GUI since createBackup()
@@ -1240,8 +1130,28 @@ public void restoreOriginal() {
 	_sjrela = op._sjrela;
 	_imonsw = op._imonsw;
 	_intern = op._intern;
+	// Newer data..
+	__creuse = op.__creuse;
+	__cdivtyp = op.__cdivtyp;
+	__oprLoss = op.__oprLoss;
+	__oprLimit = op.__oprLimit;
+	__ioBeg = op.__ioBeg;
+	__ioEnd = op.__ioEnd;
 	_isClone = false;
 	_original = null;
+}
+
+/**
+Set the cdivtyp.
+*/
+public void setCdivtyp(String cdivtyp) {
+	if ( (cdivtyp != null) && !cdivtyp.equals(__cdivtyp) ) {
+		__cdivtyp = cdivtyp;
+		setDirty ( true );
+		if ( !_isClone && _dataset != null ) {
+			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS,true);
+		}
+	}
 }
 
 /**
@@ -1322,12 +1232,25 @@ public void setCiopso5(String ciopso5) {
 	}
 }
 
-// REVISIT - need to check for dirty
+// TODO SAM 2008-03-16 - need to check for dirty
 /**
 Set the comments
 */
 public void setComments(Vector comments) {
 	_comments = comments;
+}
+
+/**
+Set the creuse.
+*/
+public void setCreuse(String creuse) {
+	if ( (creuse != null) && !creuse.equals(__creuse) ) {
+		__creuse = creuse;
+		setDirty ( true );
+		if ( !_isClone && _dataset != null ) {
+			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS,true);
+		}
+	}
 }
 
 /**
@@ -1357,6 +1280,64 @@ convert to a double and then case as an integer.
 public void setDumx(String dumx)
 {	if (dumx != null) {
 		setDumx((int)(StringUtil.atod(dumx.trim())));
+	}
+}
+
+/**
+Set ioBeg
+*/
+public void setIoBeg(int ioBeg) {
+	if (ioBeg != __ioBeg) {
+		__ioBeg = ioBeg;
+		setDirty ( true );
+		if ( !_isClone && _dataset != null ) {
+			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
+		}
+	}
+}
+
+/**
+Set ioBeg
+*/
+public void setIoBeg(Integer ioBeg) {
+	setDumx(ioBeg.intValue());
+}
+
+/**
+Set ioBeg.
+*/
+public void setIoBeg(String ioBeg)
+{	if (ioBeg != null) {
+		setIoBeg((int)(StringUtil.atod(ioBeg.trim())));
+	}
+}
+
+/**
+Set ioEnd
+*/
+public void setIoEnd(int ioEnd) {
+	if (ioEnd != __ioEnd) {
+		__ioEnd = ioEnd;
+		setDirty ( true );
+		if ( !_isClone && _dataset != null ) {
+			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
+		}
+	}
+}
+
+/**
+Set ioEnd
+*/
+public void setIoEnd(Integer ioEnd) {
+	setDumx(ioEnd.intValue());
+}
+
+/**
+Set ioEnd.
+*/
+public void setIoEnd(String ioEnd)
+{	if (ioEnd != null) {
+		setIoEnd((int)(StringUtil.atod(ioEnd.trim())));
 	}
 }
 
@@ -1535,6 +1516,32 @@ public void setItyopr(String ityopr) {
 }
 
 /**
+Set oprLimit
+*/
+public void setOprLimit(double oprLimit) {
+	if (oprLimit != __oprLimit) {
+		__oprLimit = oprLimit;
+		setDirty ( true );
+		if ( !_isClone && _dataset != null ) {
+			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
+		}
+	}
+}
+
+/**
+Set oprLoss
+*/
+public void setOprLoss(double oprLoss) {
+	if (oprLoss != __oprLoss) {
+		__oprLoss = oprLoss;
+		setDirty ( true );
+		if ( !_isClone && _dataset != null ) {
+			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
+		}
+	}
+}
+
+/**
 Set qdebt
 */
 public void setQdebt(double qdebt) {
@@ -1590,6 +1597,14 @@ public void setQdebtx(String qdebtx) {
 	if (qdebtx != null) {
 		setQdebtx(StringUtil.atod(qdebtx.trim()));
 	}
+}
+
+/**
+Set the operating rule strings, when read as text because an unknown right type.
+*/
+private void setRightStrings ( Vector right_strings_Vector )
+{
+	__rightStringsVector = right_strings_Vector;
 }
 
 /**
@@ -1672,8 +1687,7 @@ is also maintained by calling this routine.
 @param newComments addition comments which should be included in history
 @exception Exception if an error occurs.
 */
-public static void writeStateModFile(String infile, String outfile,
-			Vector theOpr, String[] newComments)
+public static void writeStateModFile(String infile, String outfile, Vector theOpr, String[] newComments)
 throws Exception {
 	PrintWriter	out = null;
 	String [] comment_str = { "#" };
@@ -1807,9 +1821,19 @@ throws Exception {
 
 			comments_vector = opr.getComments();
 			num_comments = comments_vector.size();
-			for (int j = 0; j < num_comments; j++)
-				out.println("# "
-					+ (String)comments_vector.elementAt(j));
+			// Print the comments in front of the operational right
+			for (int j = 0; j < num_comments; j++) {
+				out.println("# " + (String)comments_vector.elementAt(j));
+			}
+			// If the operational right was not understood at read, print the original contents
+			// and go to the next right.
+			List rightStringsList = opr.getRightStrings();
+			if ( rightStringsList != null ) {
+				for ( int j = 0; j < rightStringsList.size(); j++ ) {
+					out.println ( rightStringsList.get(j) );
+				}
+				continue;
+			}
 
 			v.removeAllElements();
 			v.addElement(opr.getID());
@@ -1829,34 +1853,27 @@ throws Exception {
 			dumx = opr.getDumx();
 
 			if ((dumx == 12) || (dumx < -12)) {
-				if (Message.isDebugOn)
+				if (Message.isDebugOn) {
 					Message.printDebug(50, routine, 
-						"in area 1:" +
-						"getDumx = " + opr.getDumx()+
-						"getItyopr = " 
-						+ opr.getItyopr());
+						"in area 1: getDumx = " + opr.getDumx()+ "getItyopr = " + opr.getItyopr());
+				}
 				vS.removeAllElements();
-				for (int j = 0; j < 12; j++)
-					vS.addElement(new Integer(
-						opr.getImonsw(j)));
+				for (int j = 0; j < 12; j++) {
+					vS.addElement(new Integer( opr.getImonsw(j)));
+				}
 				iline = StringUtil.formatString(vS, formatS);
 				out.println(iline);
 			}
 
 			if (Message.isDebugOn) {
 				Message.printDebug(50, routine, 
-					"in area 3 ("
-					+ opr.getID()
-					+ "): getDumx = " + opr.getDumx()
+					"in area 3 (" + opr.getID() + "): getDumx = " + opr.getDumx()
 					+ ", getItyopr = " + opr.getItyopr());
 			}
 			if ((dumx > 0 && dumx <= 10)|| dumx < -12) {
 				if (Message.isDebugOn) {
 					Message.printDebug(50, routine,
-						"in area 2:"
-						+ "getDumx = " + opr.getDumx()
-						+ "getItyopr = " 
-						+ opr.getItyopr());
+						"in area 2: getDumx = " + opr.getDumx() + "getItyopr = " + opr.getItyopr());
 				}
 				vsp.removeAllElements();
 				vsp.addElement(" ");
@@ -1869,19 +1886,15 @@ throws Exception {
 				}
 				for (int j = 0; j < num_intern; j++) {
 					if (Message.isDebugOn) {
-						Message.printDebug(50, routine, 
-							"in area 3: " 
-							+ num_intern);
+						Message.printDebug(50, routine, "in area 3: " + num_intern);
 					}
 					vI.removeAllElements();
 					vI.addElement(opr.getIntern(j));
-					iline = StringUtil.formatString(
-						vI, formatI);
+					iline = StringUtil.formatString( vI, formatI);
 					out.print(iline);
 				}
 				out.println();
 			}
-
 		}
 
 	out.flush();
