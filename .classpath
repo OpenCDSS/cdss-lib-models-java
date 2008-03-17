@@ -3,11 +3,11 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="test/unit/src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="externals/xerces.jar"/>
-	<classpathentry kind="lib" path="externals/jfreechart.jar"/>
-	<classpathentry kind="lib" path="externals/jcommon.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3.8.1"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/RTi_Common"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/cdss.domain"/>
+	<classpathentry kind="lib" path="lib/JCommon/jcommon.jar"/>
+	<classpathentry kind="lib" path="lib/JFreeChart/jfreechart.jar"/>
+	<classpathentry kind="lib" path="lib/Xerces/xerces.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
