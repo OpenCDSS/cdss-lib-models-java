@@ -24,9 +24,6 @@ import java.awt.event.MouseMotionListener;
 
 import javax.swing.JFrame;
 
-//import DWR.DMI.HydroBaseDMI.HydrologyNode;
-//import DWR.DMI.HydroBaseDMI.HydrologyNodeNetwork;
-
 import cdss.domain.hydrology.network.HydrologyNode;
 
 import RTi.GR.GRColor;

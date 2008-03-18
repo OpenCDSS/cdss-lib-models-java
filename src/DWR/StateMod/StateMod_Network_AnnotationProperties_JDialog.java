@@ -28,7 +28,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-//import DWR.DMI.HydroBaseDMI.HydroBase_Node;
 import cdss.domain.hydrology.network.HydrologyNode;
 import RTi.GR.GRLimits;
 import RTi.GR.GRText;
@@ -104,14 +103,13 @@ private SimpleJComboBox
 
 /**
 Constructor.
-@param dmi the dmi to use for getting data from the database.
 @param parent the parent GUI that instantiated this GUI.
 @param node the node for which to edit properties.
 @param nodeNum the number of the node in the parent GUI.
 */
 public StateMod_Network_AnnotationProperties_JDialog(
-StateMod_Network_JComponent parent, boolean editable, 
-HydrologyNode node, int nodeNum) {
+StateMod_Network_JComponent parent, boolean editable, HydrologyNode node, int nodeNum)
+{
 	__parent = parent;
 	__editable = editable;
 	__node = node;

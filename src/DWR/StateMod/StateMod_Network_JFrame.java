@@ -83,9 +83,6 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-//import DWR.DMI.HydroBaseDMI.HydroBaseDMI;
-//import DWR.DMI.HydroBaseDMI.HydrologyNode;
-//import DWR.DMI.HydroBaseDMI.HydrologyNodeNetwork;
 import cdss.domain.hydrology.network.HydrologyNode;
 
 import RTi.GR.GRAspect;
@@ -186,10 +183,9 @@ private double
 	__ty = 0;
 
 /**
-DMI for reading data to fill the nodes with.
+Data provider to fill the nodes with.
 */
-//private HydroBaseDMI __dmi;
-// FIXME SAM Should not need this now since network and HydroBase are de-coupled
+private StateMod_NodeDataProvider __nodeDataProvider = null;
 
 /**
 The font size stored in an XML file.
@@ -344,37 +340,28 @@ throws Exception {
 
 /**
 Constructor.
-@dmi the DMI to use for setting up the network.  Must be open and non-null.
+@param nodeDataProvider the data provider to use for setting up the network.
 @param filename the file from which to read the network.
 */
-public StateMod_Network_JFrame(
-		// FIXME SAM 2008-03-16 Need to handle DMI with StateDMI... HydroBaseDMI dmi,
-		String filename )
+public StateMod_Network_JFrame( StateMod_NodeDataProvider nodeDataProvider, String filename )
 throws Exception {
 	super();
-	initializeExistingNetwork(//dmi,
-			filename);
+	initializeExistingNetwork ( nodeDataProvider, filename );
 }
 
 /**
 Constructor.
-@dmi the DMI to use for setting up the network.  Must be open and non-null.
+@param nodeDataProvider the data provider to use for setting up the network.
 @param filename the file from which to read the network.
 */
-public StateMod_Network_JFrame(
-		// FIXME SAM 2008-03-16 Need to handle DMI for StateDMI...  HydroBaseDMI dmi,
-		String filename, boolean newNetwork)
+public StateMod_Network_JFrame( StateMod_NodeDataProvider nodeDataProvider,	String filename, boolean newNetwork)
 throws Exception {
 	super();
 	if (newNetwork) {
-		initializeNewNetwork(
-				//dmi,
-				filename);
+		initializeNewNetwork ( nodeDataProvider, filename );
 	}
 	else {
-		initializeExistingNetwork(
-				//dmi,
-				filename);
+		initializeExistingNetwork ( nodeDataProvider, filename );
 	}
 }
 
@@ -1063,8 +1050,7 @@ Cleans up member variables.
 */
 public void finalize()
 throws Throwable {
-	// FIXME SAM 2008-03-16 Need to handle DMI with StateDMI
-	//__dmi = null;
+	__nodeDataProvider = null;
 	__deleteButton = null;
 	__defaultLayoutCheckBox = null;
 	__nodeDescriptionTextField = null;
@@ -1140,15 +1126,13 @@ public StateMod_NodeNetwork getNetwork() {
 
 /**
 Initializes class settings for a network in a net file.  
-@param dmi the dmi to use for communicating with the database.
+@param nodeDataProvider the data provider to use for communicating with the database.
 @param filename the file from which the network will be read.
 @throws Exception if an error occurs when initializing.
 */
-private void initializeExistingNetwork(
-		// FIXME SAM 2008-03-16 Need to handle DMI with StateDMI...  HydroBaseDMI dmi,
-		String filename )
+private void initializeExistingNetwork( StateMod_NodeDataProvider nodeDataProvider, String filename )
 throws Exception {
-	//__dmi = dmi;
+	__nodeDataProvider = nodeDataProvider;
 	__newNetwork = false;
 	__filename = filename;
 	__device = new StateMod_Network_JComponent(this, .5);
@@ -1157,10 +1141,7 @@ throws Exception {
 	boolean isXML = StateMod_NodeNetwork.isXML(filename);
 
 	if (!isXML) {
-		__device.readMakenetFile(
-				// FIXME SAM 2008-03-16 Need to handle DMI with StateDMI
-				//__dmi,
-				filename);
+		__device.readMakenetFile ( nodeDataProvider, filename );
 	}
 	else {
 		__isXML = true;
@@ -1211,17 +1192,14 @@ throws Exception {
 
 /**
 Initializes class settings for a network to be built by the user.
-@param dmi the dmi to use for communicating with the database.
+@param nodeDataProvider the data provider to use for communicating with the database.
 @param filename the file to which the network will be saved when the user
 saves.
 @throws Exception if an error occurs when initializing.
 */
-private void initializeNewNetwork(
-		// FIXME SAM 2008-03-16
-		//HydroBaseDMI dmi,
-		String filename)
+private void initializeNewNetwork ( StateMod_NodeDataProvider nodeDataProvider, String filename )
 throws Exception {
-	//__dmi = dmi;
+	__nodeDataProvider = nodeDataProvider;
 	__isXML = true;
 	__newNetwork = true;
 	__filename = filename;

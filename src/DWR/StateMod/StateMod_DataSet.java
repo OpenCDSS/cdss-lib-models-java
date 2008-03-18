@@ -8063,7 +8063,7 @@ throws Exception
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
 				StateMod_NodeNetwork network =
-					(StateMod_NodeNetwork)StateMod_NodeNetwork.readStateModNetworkFile( fn, true);
+					(StateMod_NodeNetwork)StateMod_NodeNetwork.readStateModNetworkFile( fn, null, true);
 				comp.setData(network);
 				comp.setVisible(true);
 				comp.setDirty ( false );

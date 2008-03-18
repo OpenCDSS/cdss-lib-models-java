@@ -99,9 +99,6 @@ import javax.swing.JFileChooser;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
-//import DWR.DMI.HydroBaseDMI.HydroBaseDMI;
-//import DWR.DMI.HydroBaseDMI.HydrologyNode;
-//import DWR.DMI.HydroBaseDMI.HydrologyNodeNetwork;
 import cdss.domain.hydrology.network.HydrologyNode;
 
 import RTi.GR.GRColor;
@@ -4340,17 +4337,12 @@ private void processAnnotations() {
 
 /**
 Reads a network from a makenet file.
-@param dmi the dmi to use for helping to read the file.
+@param nodeDataProvider the data provider to use for helping to read the file.
 @param filename the name of the makenet file to read.
 */
-protected void readMakenetFile(
-		// FIXME SAM 2008-03-15 Need to handle DMI when not in StateDMI
-		//HydroBaseDMI dmi,
-		String filename) {
+protected void readMakenetFile(	StateMod_NodeDataProvider nodeDataProvider, String filename ) {
 	__network = new StateMod_NodeNetwork();
-	__network.readMakenetNetworkFile(
-			//dmi,
-			filename, true);
+	__network.readMakenetNetworkFile( nodeDataProvider,	filename, true );
 	__annotations = __network.getAnnotations();
 	__processAnnotations = true;
 	if (__annotations == null) {
@@ -5166,8 +5158,7 @@ private void writeListFiles()
 	fc.setDialogTitle("Select Base Filename for List Files");
 	SimpleFileFilter tff = new SimpleFileFilter("txt", "Text Files");
 	fc.addChoosableFileFilter(tff);
-	SimpleFileFilter csv_ff = new SimpleFileFilter("csv",
-		"Comma-separated Values");
+	SimpleFileFilter csv_ff = new SimpleFileFilter("csv", "Comma-separated Values");
 	fc.addChoosableFileFilter(csv_ff);
 	fc.setFileFilter(csv_ff);
 	fc.setDialogType(JFileChooser.SAVE_DIALOG);	

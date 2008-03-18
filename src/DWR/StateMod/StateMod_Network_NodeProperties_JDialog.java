@@ -60,8 +60,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-//import DWR.DMI.HydroBaseDMI.HydrologyNode;
-//import DWR.DMI.HydroBaseDMI.HydrologyNodeNetwork;
 import cdss.domain.hydrology.network.HydrologyNode;
 
 import RTi.Util.GUI.JGUIUtil;

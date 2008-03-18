@@ -11,6 +11,8 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import RTi.DMI.DMIUtil;
+import RTi.GR.GRLimits;
 import RTi.GR.GRText;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
@@ -20,13 +22,6 @@ import RTi.Util.Time.StopWatch;
 import cdss.domain.hydrology.network.HydrologyNode;
 import cdss.domain.hydrology.network.HydrologyNodeNetwork;
 import cdss.domain.hydrology.network.RiverLine;
-
-//TODO SAM 2007-02-18 Need to remove circular dependency with StateMod
-/*
-import DWR.StateMod.StateMod_DataSet;
-import DWR.StateMod.StateMod_PrfGageData;
-import DWR.StateMod.StateMod_RiverNetworkNode;
-*/
 
 public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 {
@@ -123,12 +118,10 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 	private boolean	__isDatabaseUp;
 	
 	/**
-	DMI instance for connecting to the database.
+	StateMod_NodeDataProvider instance for filling in node information (for CDSS
+	typically query HydroBase).
 	*/
-	/*
-	private HydroBaseDMI __dmi;
-	*/
-	// FIXME SAM 2008-03-15 Use the DMI with StateMod utilities to fill out data.
+	private StateMod_NodeDataProvider __nodeDataProvider;
 	
 	/**
 	 * Construct a StateMod_NodeNetwork.
@@ -438,12 +431,134 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 	}
 	
 	/**
+	Fills the locations of the nodes in the network, interpolating if necessary, 
+	and looking up from the database if possible.
+	@param nodeDataProvider the dmi to use for talking to the database.  Should be open and
+	non-null.
+	@param interpolate whether node locations should be interpolated, or just
+	looked up from the database.
+	@param limits if interpolating, the limits to use as the far bounds of the
+	network.
+	*/
+	public void fillLocations(StateMod_NodeDataProvider nodeDataProvider, boolean interpolate, 
+	GRLimits limits) {
+		double lx, rx, by, ty;
+		if (limits == null) {
+			limits = getExtents();
+		}
+
+		lx = limits.getLeftX();
+		by = limits.getBottomY();
+		rx = limits.getRightX();
+		ty = limits.getTopY();
+
+		// REVISIT -- eliminate the need for hold nodes -- they signify an
+		// error in the network.
+		HydrologyNode holdNode = null;
+		HydrologyNode node = getMostUpstreamNode();	
+		boolean done = false;
+		double[] loc = null;
+		while (!done) {
+			loc = __nodeDataProvider.lookupNodeLocation(node.getCommonID());
+			if (DMIUtil.isMissing(node.getX())) {
+				node.setX(loc[0]);
+				node.setDBX(loc[0]);
+			}
+			
+			if (DMIUtil.isMissing(node.getY())) {
+				node.setY(loc[1]);
+				node.setDBY(loc[1]);
+			}	
+		
+			if (node.getType() == HydrologyNode.NODE_TYPE_END) {
+				done = true;
+			}		
+			else if (node == holdNode) {
+				done = true;
+			}
+
+			holdNode = node;	
+			node = getDownstreamNode(node, POSITION_COMPUTATIONAL);		
+		}
+
+		if (!interpolate) {
+			return;
+		}
+
+		setLx ( lx );
+		setBy ( by );
+
+		if ((rx - lx) > (ty - by)) {
+			setNodeSpacing ( (ty - by) * 0.06 );
+		}
+		else {
+			setNodeSpacing ( (rx - lx) * 0.06 );
+		}
+
+		// Fills in any missing locations for all the nodes on the main stream stem.
+		fillMainStemLocations();
+
+		// Fills in missing locations for any node upstream of the main stem.
+		fillUpstreamLocations();
+
+		finalCheck(lx, by, rx, ty);
+	}
+	
+	/**
 	Finalize before garbage collection.
 	*/
 	protected void finalize()
 	throws Throwable
 	{
 		super.finalize();
+	}
+	
+	/**
+	Finds the two most-downstream consecutive nodes on the main stem that have
+	valid locations.
+	@return the two most-downstream consecutive nodes with valid locations.  The
+	array is a two-element array.  The first element is the most-downstream node
+	with a valid location and the second element is the node immediately upstream
+	from that node, but still on the main stem.  If the second element is null
+	then there is only one node in the main stem with a valid location.
+	*/
+	private HydrologyNode[] findLastMainStemValidNodes() {
+		HydrologyNode node = getMostUpstreamNode();
+		HydrologyNode prehold = null;
+		HydrologyNode holdValid = null;
+		HydrologyNode holdNode = null;
+
+		boolean done = false;
+		while (!done) {
+			if (node.getReachLevel() != 1) {
+				// ignore node
+			}
+			else {
+				if (node.getX() >= 0 && node.getY() >= 0) {
+					// prehold holds the value of the node
+					// with a valid location immediately upstream
+					// of the last node found.
+					prehold = holdValid;
+
+					// holdValid holds the last node found with
+					// a valid location
+					holdValid = node;
+				}
+			}
+			node = getDownstreamNode(node, POSITION_RELATIVE);
+
+		// REVISIT -- eliminate the need for hold nodes -- they signify an
+		// error in the network.
+			if (holdNode == node) {
+				done = true;
+			}
+			holdNode = node;			
+		}
+
+		HydrologyNode[] nodes = new HydrologyNode[2];
+		nodes[0] = holdValid;
+		nodes[1] = prehold;
+		return nodes;
 	}
 	
 	/**
@@ -455,8 +570,7 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 		__createOutputFiles = 		true;
 		__createFancyDescription = 	false;
 		//In base... __fontSize = 			10.0;
-		// FIXME 2008-03-15 Need to move to StateDMI
-		//__dmi = 			null;
+		__nodeDataProvider = null;
 		//In base... __labelType = 			LABEL_NODES_NETID;
 		//__legendDX = 			1.0;
 		//__legendDY = 			1.0;
@@ -1637,30 +1751,24 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 
 	/**
 	Read an entire Makenet network file and save in memory.
-	@param dmi HydroBase DMI.
+	@param nodeDataProvider Object that fills in node data (e.g., from HydroBase).
 	@param filename Makenet .net file to read and process.
 	@return true if the network was read successfully, false if not.
 	*/
-	// FIXME SAM 2008-03-15 Need to move to StateDMI
-	public boolean readMakenetNetworkFile(
-			//HydroBaseDMI dmi,
-			String filename) {
-		return readMakenetNetworkFile(
-				//dmi,
-				filename, false);
+	public boolean readMakenetNetworkFile( StateMod_NodeDataProvider nodeDataProvider, String filename) {
+		return readMakenetNetworkFile( nodeDataProvider, filename, false);
 	}
 
 	/**
 	Read an entire Makenet network file and save in memory.
-	@param dmi HydroBase DMI.
+	@param nodeDataProvider Object that fills in node data (e.g., from HydroBase).
 	@param filename Makenet .net file to read and process.
 	@param skipBlankNodes whether to skip blank nodes when reading nodes in.
 	@return true if the network was read successfully, false if not.
 	*/
-	public boolean readMakenetNetworkFile(
-			//HydroBaseDMI dmi,
-			String filename,
-	boolean skipBlankNodes) {
+	public boolean readMakenetNetworkFile( StateMod_NodeDataProvider nodeDataProvider,
+			String filename, boolean skipBlankNodes)
+	{
 		String routine = "HydroBase_NodeNetwork.readMakenetNetworkFile";
 		BufferedReader in;
 		try {	
@@ -1672,36 +1780,32 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 			printCheck(routine, 'W', message);
 			return false;
 		}
-		return readMakenetNetworkFile(
-				//dmi,
-				in, filename, skipBlankNodes);
+		return readMakenetNetworkFile( nodeDataProvider, in, filename, skipBlankNodes);
 	}
 
 	/**
 	Read an entire Makenet network file and save in memory.
-	@param dmi HydroBase DMI.
+	@param nodeDataProvider Object that fills in node data (e.g., from HydroBase).
 	@param in the BufferedReader to use for reading from the file.
 	@param filename Makenet .net file to read and process.
 	@return true if the network was read successfully, false if not.
 	*/
 	public boolean readMakenetNetworkFile(
-			//HydroBaseDMI dmi,
+			StateMod_NodeDataProvider nodeDataProvider,
 			BufferedReader in, String filename) {
-		return readMakenetNetworkFile(
-				//dmi,
-				in, filename, false);
+		return readMakenetNetworkFile( nodeDataProvider, in, filename, false);
 	}
 
 	/**
 	Read an entire makenet network file and save in memory.
-	@param dmi HydroBaseDMI.
+	@param nodeDataProvider Object that fills in node data (e.g., from HydroBase).
 	@param in the BufferedReader opened on the file to use for reading it.
 	@param filename the name of the file to be read.
 	@param skipBlankNodes whether to skip blank nodes when reading in from a file.
 	@return true if the network was read successfully, false if not.
 	*/
 	public boolean readMakenetNetworkFile(
-			//HydroBaseDMI dmi,
+			StateMod_NodeDataProvider nodeDataProvider,
 			BufferedReader in, String filename, boolean skipBlankNodes) {
 		String routine = "HydroBase_NodeNetwork.readMakenetNetworkFile";
 		double 	dx = 1.0, 
@@ -1716,14 +1820,6 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 			reachLevel = 0;		
 		String token0;
 		Vector tokens;
-
-		// Set the database information...
-		/* FIXME SAM 2008-03-16 Need to handle HydroBase in StateDMI
-		if (dmi != null && dmi.isOpen()) {
-			__dmi = dmi;
-			__isDatabaseUp = true;
-		}
-		*/
 
 		// Create a blank node used for disappearing streams.  The identifiers
 		// will be empty strings...
@@ -1872,17 +1968,15 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 	Reads a StateMod network file in either Makenet or XML format and returns
 	the network that was generated.
 	@param filename the name of the file from which to read.
-	@param dmi an open and connected dmi object.  Can be null if reading from an
-	XML file.
+	@param nodeDataProvider Object that fills in node data (e.g., from HydroBase).
+	Can be null if reading from an XML file.
 	@param skipBlankNodes whether blank nodes should be read from the Makenet file
 	or not.  Does not matter if reading from an XML file.
 	@return the network read from the file.
 	@throws Exception if an error occurs.
 	*/
-	// FIXME SAM 2008-03-15 Need to enable reading old makenet file
 	public static StateMod_NodeNetwork readStateModNetworkFile(String filename, 
-	//HydroBaseDMI dmi,
-	boolean skipBlankNodes ) 
+			StateMod_NodeDataProvider nodeDataProvider, boolean skipBlankNodes ) 
 	throws Exception {
 		StateMod_NodeNetwork network = null;
 		if (isXML(filename)) {
@@ -1890,9 +1984,7 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 		}
 		else {
 			network = new StateMod_NodeNetwork();
-			// FIXME SAM 3008-03-15 Need to enable reading old makenet network
-			//network.readMakenetNetworkFile(
-					//dmi, filename, skipBlankNodes);
+			network.readMakenetNetworkFile(	nodeDataProvider, filename, skipBlankNodes);
 		}
 		return network;
 	}
@@ -1991,7 +2083,6 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 		__createFancyDescription = fancydesc;
 	}
 	
-	// FIXME SAM 2008-03-15 Move to StateDMI if still needed
 	// FIXME SAM 2004-10-11 This code is probably unneeded because StateDMI fills
 	// from HydroBase in a specific step, not as the old .net file is read.
 	// However, it probably is needed to facilitate the conversion of old .net files
@@ -2005,755 +2096,10 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 	*/
 	public void setNodeDescriptions()
 	throws Exception
-	{	String	routine = "HydroBase_NodeNetwork.setNodeDescriptions";
-	/*
-		double[] coords = null;
-		HydroBase_Station station;
-		HydroBase_StationView view;
-		HydroBase_Structure structure;
-		HydroBase_StructureWDWater wdwater;
-		HydroBase_WellApplicationView well_applicationView;		
-		int	dl = 15, 
-			geoloc_num = 0,
-			i = 0, 
-			id = 0, 
-			type = 0, 
-			wd = 0;	
-		String 	message,
-			nodeType,
-			stationName,
-			streamName,
-			userDesc,
-			wdid;
-		Vector	idList = null,
-			permitList = new Vector(),
-			statList = null,
-			structList = null,
-			waterList = null,
-			wellApplications = null;
-
-		Message.printStatus(2, routine, "Setting node names from HydroBase...");
-
-		// Get the list of HydroBase_Stations and HydroBase_Structures 
-		// present in the Network as obtained from the database.  First 
-		// get stations (do this regardless of whether fancy descriptions 
-		// are used since the query is generally fast and output can be 
-		// easily formatted)...
-
-		int [] nodeTypes = null;
-		try {	
-			// Get list of stations as strings...
-			nodeTypes = new int[1];
-			nodeTypes[0] = Node.NODE_TYPE_FLOW;
-			idList = getNodeIdentifiersByType(nodeTypes);
-			// Now query to get the HydroBase_Station list...
-			Message.printStatus(2, routine,
-				"Getting station information from the database...");
-			StopWatch timer = new StopWatch();
-			timer.start();
-			if (__isDatabaseUp) {
-				statList = 
-					__dmi.readStationListForStation_idList(idList);
-			}
-			if (statList != null) {
-				Message.printStatus(2, routine,
-					"Query for " + statList.size()
-					+ " stations took " + (int)timer.getSeconds() 
-					+ " seconds.");
-			}
-			else {
-				statList = new Vector();
-			}
+	{
+		if ( __nodeDataProvider != null ) {
+			__nodeDataProvider.setNodeDescriptions( this, __createFancyDescription, __createOutputFiles );
 		}
-		catch (Exception e) {
-			message = "Errors finding stations in node network.  " 
-				+ "Can't set station descriptions.";
-			Message.printWarning(2, routine, message);
-			Message.printWarning(2, routine, e);
-			throw new Exception(message);
-		}
-
-		// Now get structures so we can fill in descriptions (do this regardless
-		// of whether fancy descriptions are used).  Structure types ...
-
-		try {	
-			// Get list of structures as strings...
-			nodeTypes = new int[5];
-			nodeTypes[0] = Node.NODE_TYPE_DIV;
-			nodeTypes[1] = Node.NODE_TYPE_RES;
-			nodeTypes[2] = Node.NODE_TYPE_ISF;
-			nodeTypes[3] = Node.NODE_TYPE_IMPORT;
-			nodeTypes[4] = Node.NODE_TYPE_DIV_AND_WELL;
-			// Ground water wells only (NODE_TYPE_WELL) are treated
-			// separately below...
-			idList = getNodeIdentifiersByType(nodeTypes);
-			// Now query to get the HydroBase_Structure list...
-			Message.printStatus(2, routine,
-				"Getting structure information from the database...");
-			StopWatch timer = new StopWatch();
-			timer.start();
-			if (__isDatabaseUp) {
-				structList = __dmi.readStructureListForWDIDs(idList);
-			}
-			timer.stop();
-			if (structList != null) {
-				Message.printStatus(2, routine,
-					"Query for " + structList.size() 
-					+ " structures took " + (int)timer.getSeconds() 
-					+ " seconds.");
-			}
-			else {
-				structList = new Vector();
-			}
-		}
-		catch (Exception e) {
-			message = "Errors finding structures in node network.  " 
-				+ "Can't set structure descriptions.";
-			Message.printWarning(2, routine, message);
-			Message.printWarning(2, routine, e);
-			throw new Exception(message);
-		}
-
-
-		// Now get stream information from the database for fancy descriptions
-		// so that they can be used for ditches and other structures...
-		if (__createFancyDescription) {
-			Message.printStatus(2, routine,
-				"Getting stream information from the database...");
-			// Need to get streams...
-			try {	
-				StopWatch timer = new StopWatch();
-				timer.start();
-				if (__isDatabaseUp) {
-					waterList = 
-						__dmi
-						.readStructureWDWaterListForStructureIDs
-						(idList);
-				}
-				timer.stop();
-				if (waterList != null) {
-					Message.printStatus(2, routine,
-						"Query for " + waterList.size() 
-						+ " wdwaters took " 
-						+ (int)timer.getSeconds() 
-						+ " seconds.");
-				}
-				else {
-					waterList = new Vector();
-				}
-			}
-			catch (Exception e) {
-				message = "Errors finding HydroBase_WDWater objects "
-					+ "for node network.";
-				Message.printWarning(2, routine, message);
-				Message.printWarning(2, routine, e);
-				throw new Exception(message);
-			}
-		
-			if (waterList == null) {
-				message = "Could not find HydroBase_WDWater objects "
-					+ "for node network.";
-				Message.printWarning(2, routine, message);
-				throw new Exception(message);
-			}
-			if (waterList.size() == 0) {
-				message = "Could not find HydroBase_WDWater objects "
-					+ "in node network.";
-				Message.printWarning(2, routine, message);
-				throw new Exception(message);
-			}
-			if (Message.isDebugOn) {
-				Message.printDebug(dl, routine,
-					"Setting fancy descriptions.");
-			}
-		}
-
-		// Now get the ground water well only...
-		/ *
-		REVISIT (JTS - 2004-03-15)
-		wellList is not used by the rest of the method, so this was 
-		commented out
-		try {	// Get list of stations as strings...
-			nodeTypes = new int[1];
-			nodeTypes[0] = HydroBase_Node.NODE_TYPE_WELL;
-			idList = getNodeIdentifiersByType(nodeTypes);
-			// Now query to get the HydroBase_Wells list...
-			Message.printStatus(2, routine,
-			"Getting well information from the database...");
-			StopWatch timer = new StopWatch();
-			timer.start();
-			wellList = HydroBaseDMIUtil.getStructureToWellFromIDs(
-				__dmi, idList, HydroBaseDMIUtil.STRUCT_TO_WELL_WELL,
-				true);
-			if (wellList != null) {
-				Message.printStatus(2, routine,
-					"Query for " + wellList.size()
-					+ " wells took " + (int)timer.getSeconds() 
-					+ " seconds.");
-			}
-		}
-		catch (Exception e) {
-			message = "Errors finding wells in node network.  " +
-			"Can't set well descriptions.";
-		}
-		* /
-
-		// Process all the nodes in the network, setting the descriptions as
-		// appropriate...
-
-		Message.printStatus(2, routine, "Setting node descriptions...");
-
-		boolean wdid_structure;
-		Node nodePt = null;
-		int[]	wdidArray;
-		int 	idot = 0,
-			i_structList = -1,
-			i_waterList = -1,
-			i_stationList = -1,
-			nstationList = 0,
-			nstructList = 0,
-			nwaterList = 0;
-		String desc = "";
-
-		nodePt = getMostUpstreamNode();
-		boolean done = false;
-
-		// REVISIT - reworked from a for loop while doing some debugging
-		// should probably set it back as this might be confusing.
-		nodePt = getMostUpstreamNode();
-		boolean cont = false;
-		while (!done) {
-			if (cont) {
-				cont = false;
-				nodePt = getDownstreamNode(nodePt, 
-					POSITION_COMPUTATIONAL);
-			}
-
-			if (nodePt == null) {
-				done = true;
-				type = -1;
-				userDesc = "";
-				nodeType = "";
-				streamName = "";
-			}
-			else {
-				type = nodePt.getType();	
-				userDesc = nodePt.getUserDescription();
-				nodeType = Node.getTypeString(type, 1); 
-				streamName = "";
-			}
-
-			if (nodePt == null) {}
-			else if (type == Node.NODE_TYPE_BLANK) {
-				nodePt.setDescription("BLANK NODE - PLOT ONLY");
-			}
-			else if (type == Node.NODE_TYPE_CONFLUENCE) {
-				nodePt.setDescription("CONFLUENCE - PLOT ONLY");
-			}
-			else if (type == Node.NODE_TYPE_END) {
-				if (userDesc.length() > 0) {
-					// User-defined...
-					nodePt.setDescription(userDesc);
-				}
-				else {	// Default...
-					nodePt.setDescription("END");
-				}
-				// The end of the network, so done...
-				done = true;
-			}
-			else if ((type == Node.NODE_TYPE_RES) 
-			    || (type == Node.NODE_TYPE_DIV) 
-			    || (type == Node.NODE_TYPE_DIV_AND_WELL) 
-			    || ((type == Node.NODE_TYPE_WELL) 
-			    && nodePt.getCommonID().charAt(0) != 'P' 
-			    && StringUtil.isInteger(nodePt.getCommonID())) 
-			    || (type == Node.NODE_TYPE_ISF) 
-			    || (type == Node.NODE_TYPE_IMPORT)) {
-				// First see if the id can be parsed out.  If not a
-				// true structure, then just leave the description as
-				// is(assume it was set by the user).  WELL nodes are
-				// included if the ID is not a permit but is a number
-				// only (in which case it is assumed to NOT be an
-				// aggregation, etc.)...
-				wdid_structure = true;
-				idot = nodePt.getCommonID().indexOf('.');
-				if (idot >= 0) {
-					// ID has a period (like old-style ISF)
-					wdidArray = HydroBase_WaterDistrict.parseWDID(
-						nodePt.getCommonID().substring(0,idot));
-				}
-				else {	
-					try {
-						wdidArray = HydroBase_WaterDistrict
-							.parseWDID(
-							nodePt.getCommonID());
-					}
-					catch (Exception e) {
-						// REVISIT (JTS - 2004-03-24)
-						// this is to handle aggregate 
-						// diversion nodes (43_ADW3030, etc)
-						// that break the routine
-						Message.printStatus (2, routine,
-						"Node ID \"" + nodePt.getCommonID() +
-						"\" is not a WDID.  Skipping " +
-						"HydroBase query." );
-						//Message.printWarning(2, routine, e);
-						wdidArray = null;
-					}
-						
-				}
-				
-				if (wdidArray == null) {
-					wdid_structure = false;
-				}
-				
-				if (wdid_structure) {
-					wd = wdidArray[0];
-					id = wdidArray[1];
-				}
-				else {	
-					wd = 0;
-					id = 0;
-				}
-				
-				// Use the description information from the database...
-				if (__createFancyDescription) {
-					// Get the stream associated with the
-					// structure.  The structure and wdwater list
-					// should be in the same order.  As an item
-					// is found, remove from the lists so that
-					// subsequent searches are faster...
-					// First find the structure...
-					nstructList = structList.size();
-					// Initialize to the current description (which
-					// will be the user description if specified)...
-					desc = nodePt.getDescription();
-					i_structList = -1;
-					geoloc_num = -1;
-					for (i = 0; i < nstructList; i++) {
-						structure = (HydroBase_StructureView)
-						structList.elementAt(i);
-						if ((structure.getWD() == wd) 
-						    && (structure.getID() == id)) {
-							// Found the structure...
-							i_structList = i;
-							desc = structure.getStr_name();
-							geoloc_num = structure
-								.getGeoloc_num();
-							// No need to keep searching...
-							break;
-						}
-					}
-
-					// Now find the HydroBase_StructureWDWater...
-					streamName = "";
-					i_waterList = -1;
-					nwaterList = waterList.size();
-					for (i = 0; i < nwaterList; i++) {
-						wdwater = (HydroBase_StructureWDWater)
-						waterList.elementAt(i);
-						if ((wdwater.getWD() == wd) 
-						    && (wdwater.getID() == id)) {
-							// Found the stream...
-							i_waterList = i;
-							streamName =
-								wdwater.getStr_name();
-							if (Message.isDebugOn) {
-								Message.printDebug(1,
-									routine,
-									"wdwater for " 
-									+ nodePt
-									.getCommonID() 
-									+ " is " 
-									+ streamName);
-							}
-							break;
-						}
-					}
-					if (i_waterList < 0) {
-						if (Message.isDebugOn) {
-							Message.printDebug(1,
-								routine,
-								"Did not find wdwater "
-								+ "for " 
-								+ nodePt.getCommonID());
-						}
-					}
-					// Regardless of what we found, format the
-					// output to be "fancy"...
-					// Structures need to be identified in
-					// terms of their "WDID"
-					wdid = formatWDID(wd, id, type);
-					if (Message.isDebugOn) {
-						Message.printDebug(dl, 
-							routine, "Structure WDID: " 
-							+ StringUtil.atoi(wdid) 
-							+ "  Node ID: " 
-							+ nodePt.getCommonID());
-					}
-					// Set the node description using either the
-					// existing user description or a stream name
-					// from the db...
-					if (userDesc.length() != 0) {
-						// Use the user's description,
-						// not that from the database and
-						// ignore the stream...
-						nodePt.setDescription(
-							StringUtil.formatString(
-							userDesc, "%-20.20s") + "_" 
-							+ StringUtil.formatString(
-							nodeType, "%-3.3s"));
-					}
-					else if (type == Node.NODE_TYPE_ISF) {
-						nodePt.setDescription(
-							StringUtil.formatString(
-							desc, "%-20.20s") 
-							+ "_" + StringUtil.formatString(
-							nodeType, "%-3.3s"));
-					}
-					else {	
-						// Use the stream from the database as
-						// the first 4 characters...
-						nodePt.setDescription(
-							StringUtil.formatString(
-							streamName, "%-4.4s") 
-							+ "_" +	StringUtil.formatString(
-							desc, "%-15.15s") 
-							+ "_" +	StringUtil.formatString(
-							nodeType, "%-3.3s"));
-					}
-					coords = findGeolocCoordinates(geoloc_num);
-					nodePt.setDBX(coords[0]);
-					nodePt.setDBY(coords[1]);
-					// Can now remove from the list
-					// to speed searches for later structures but
-					// only do so if not an ISF (because these are
-					// reused when old-style WDID.xx notation is
-					// used)...
-					if ((i_structList >= 0) 
-					    && (type != Node.NODE_TYPE_ISF)) {
-						structList.removeElementAt(
-							i_structList);
-					}
-					if ((i_waterList >= 0) 
-					    && (type != Node.NODE_TYPE_ISF)) {
-						waterList.removeElementAt(
-							i_waterList);
-					}
-				}
-				else if (__isDatabaseUp && __createOutputFiles) {
-					// No fancy description.  Just use the
-					// structure name for the description...
-					// First find the structure...
-					nstructList = structList.size();
-					// Initialize to the current description (which
-					// will be the user description if specified)...
-					desc = nodePt.getDescription();
-					i_structList = -1;
-					geoloc_num = -1;
-					for (i = 0; i < nstructList; i++) {
-						structure = (HydroBase_StructureView)
-						structList.elementAt(i);
-						if ((structure.getWD() == wd) 
-						    && (structure.getID() == id)) {
-							// Found the structure...
-							i_structList = i;
-							desc = structure.getStr_name();
-							geoloc_num = structure
-								.getGeoloc_num();
-							break;
-						}
-					}
-
-					// Regardless of what we found, format the
-					// output...
-					wdid = formatWDID(wd, id, type);
-
-					coords = findGeolocCoordinates(geoloc_num);
-					nodePt.setDBX(coords[0]);
-					nodePt.setDBY(coords[1]);
-
-					if (Message.isDebugOn) {
-						Message.printDebug(dl, routine,
-							"StructureNetID: " 
-							+ StringUtil.atoi(wdid));
-					}
-
-					if (userDesc.length() > 0) {
-						// User-defined...
-						nodePt.setDescription(userDesc);
-						cont = true;
-						continue;
-					}
-					else {	
-						// Use the description from above...
-						nodePt.setDescription(desc);
-					}
-					// Can now remove from the list
-					// to speed searches for later structures but
-					// only do so if not an ISF (because these are
-					// reused when old-style WDID.xx notation is
-					// used)...
-					if ((i_structList >= 0) 
-					    && (type != Node.NODE_TYPE_ISF)) {
-						structList.removeElementAt(
-							i_structList);
-					}
-				}
-			}
-			else if (type == Node.NODE_TYPE_WELL) {
-				// Already checked for a possible well as a structure
-				// with a WDID above so this is either a well permit
-				// with information in struct_to_well, in which case
-				// the description is taken from the first matching
-				// entry, or an aggregation, in which the description
-				// will not be found.
-				// First see if the id can be parsed out.  Identifiers
-				// that start with P are assumed to be well permits.
-				// Otherwise, then just leave the description as is
-				// (assume it was set by the user)...
-				// Use the description information from the database...
-
-				// Get the description from the well_application
-				// table (or other?).  Since there will not
-				// typically be many WEL nodes, this should not
-				// be that much of a hit...
-				try {
-				permitList.removeAllElements();
-				permitList.add(nodePt.getCommonID());
-				if (__isDatabaseUp) {
-					wellApplications = 
-						__dmi
-						.readWellApplicationListForPermitData(
-						permitList);
-				}
-				if ((wellApplications == null) 
-				    || (wellApplications.size() == 0)) {
-					Message.printStatus(2, routine,
-						"No well data for " 
-						+ nodePt.getCommonID());
-					desc = "";
-					geoloc_num = -1;				
-				}
-				else {	
-					// What came back has to be the permit...
-					well_applicationView 
-						= (HydroBase_WellApplicationView)
-						wellApplications.elementAt(0);
-					desc = well_applicationView.getWell_name();
-					geoloc_num 
-						= well_applicationView.getGeoloc_num();
-				}
-				}
-				catch (Exception e) {
-					desc = "";
-					geoloc_num = -1;
-				}
-
-				coords = findGeolocCoordinates(geoloc_num);
-				nodePt.setDBX(coords[0]);
-				nodePt.setDBY(coords[1]);
-					
-				if (__createFancyDescription 
-				    || (__isDatabaseUp && __createOutputFiles)) {
-					if (userDesc.length() != 0) {
-						// Use the user's description,
-						// not that from the database and
-						// ignore the stream...
-						nodePt.setDescription(
-							StringUtil.formatString(
-							userDesc, "%-20.20s") + "_" 
-							+ StringUtil.formatString(
-							nodeType, "%-3.3s"));
-					}
-					else {	
-						// Use the name from the database as
-						// the first 4 characters...
-						nodePt.setDescription(
-							StringUtil.formatString(
-							desc, "%-20.20s") 
-							+ "_" +	StringUtil.formatString(
-							nodeType, "%-3.3s"));
-					}
-				}
-			}
-			else if ((type == Node.NODE_TYPE_FLOW) 
-			    || (type == Node.NODE_TYPE_BASEFLOW) 
-			    || (type == Node.NODE_TYPE_OTHER)) {
-				stationName = "";
-				if (userDesc.length() > 0) {
-					// User-defined...
-					nodePt.setDescription(userDesc);
-					stationName = userDesc;
-				}
-				else {	
-					// Default...
-					if (type == Node.NODE_TYPE_BASEFLOW) {
-						nodePt.setDescription("Baseflow Node");
-					}
-				}
-				if (__createFancyDescription) {
-					// Set the new description using the gage 
-					// description and the node type...
-					// FLOW From user code...
-					// Find the Station...
-					i_stationList = -1;
-					nstationList = statList.size();
-					// Search even if a user description has been
-					// supplied to clean up list for other
-					// searches...
-					geoloc_num = -1;
-					for (i = 0; i < nstationList; i++) {
-						view = (HydroBase_StationView)
-						statList.elementAt(i);
-						if (view.getStation_id()
-						    .equalsIgnoreCase(nodePt
-						    .getCommonID())) {
-							// Found the view...
-							i_stationList = i;
-							if (userDesc.length() <= 0) {
-								// No user
-								// description...
-								stationName =
-								    view
-								    .getStation_name();
-								geoloc_num = 
-								    view
-								    .getGeoloc_num();
-							}
-							if (Message.isDebugOn) {
-								Message.printDebug(1,
-									routine,
-									"station for " 
-									+ nodePt
-									.getCommonID() 
-									+ " is " 
-									+ stationName);
-							}
-							// No need to search more...
-							break;
-						}
-					}
-
-					if (i_stationList < 0) {
-						stationName = nodePt.getDescription();
-					}
-
-					coords = findGeolocCoordinates(geoloc_num);
-					nodePt.setDBX(coords[0]);
-					nodePt.setDBY(coords[1]);
-
-					nodePt.setDescription(StringUtil.formatString(
-						stationName, "%-20.20s") + "_" 
-						+ StringUtil.formatString(
-						nodeType, "%-3.3s"));
-					// Now remove from the station list so searches
-					// are faster...
-					if (i_stationList >= 0) {
-						statList.removeElementAt(i_stationList);
-					}
-				}
-				else if (__isDatabaseUp && __createOutputFiles) {
-					// Just use the station name...
-					if (userDesc.length() > 0) {
-						// User-defined...
-						nodePt.setDescription(userDesc);
-						cont = true;
-						continue;
-					}
-					i_stationList = -1;
-					nstationList = statList.size();
-					if (__dmi.useStoredProcedures()) {
-					for (i = 0; i < nstationList; i++) {
-						view = (HydroBase_StationView)
-						statList.elementAt(i);
-						if (view.getStation_id()
-						    .equalsIgnoreCase(
-						    nodePt.getCommonID())) {
-							// Found the view...
-							i_stationList = i;
-							if (userDesc.length() <= 0) {
-								// No user
-								// description...
-								nodePt.setDescription(
-								    view
-								    .getStation_name());
-								geoloc_num = 
-								    view
-								    .getGeoloc_num();
-							}
-							if (Message.isDebugOn) {
-								Message.printDebug(1,
-									routine,
-									"station for " 
-									+ nodePt
-									.getCommonID() 
-									+ " is " 
-									+ stationName);
-							}
-							// No need to search more...
-							break;
-						}
-					}
-					}
-					else {
-					for (i = 0; i < nstationList; i++) {
-						station = (HydroBase_Station)
-						statList.elementAt(i);
-						if (station.getStation_id()
-						    .equalsIgnoreCase(
-						    nodePt.getCommonID())) {
-							// Found the station...
-							i_stationList = i;
-							if (userDesc.length() <= 0) {
-								// No user
-								// description...
-								nodePt.setDescription(
-								    station
-								    .getStation_name());
-								geoloc_num = 
-								    station
-								    .getGeoloc_num();
-							}
-							if (Message.isDebugOn) {
-								Message.printDebug(1,
-									routine,
-									"station for " 
-									+ nodePt
-									.getCommonID() 
-									+ " is " 
-									+ stationName);
-							}
-							// No need to search more...
-							break;
-						}
-					}
-					}
-					coords = findGeolocCoordinates(geoloc_num);
-					nodePt.setDBX(coords[0]);
-					nodePt.setDBY(coords[1]);
-					// Can now remove from the list...
-					if (i_stationList >= 0) {
-						statList.removeElementAt(
-							i_stationList);
-					}
-				}
-			}
-			else if (type == Node.NODE_TYPE_XCONFLUENCE) {
-				if (userDesc.length() > 0) {
-					// User-defined...
-					nodePt.setDescription(userDesc);
-				}
-				else {	// Default...
-					nodePt.setDescription(
-						"XCONFLUENCE - PLOT ONLY");
-				}
-			}
-			nodePt = getDownstreamNode(nodePt, POSITION_COMPUTATIONAL);
-		}
-		Message.printStatus(2, routine,
-			"...done setting node names from HydroBase...");
-			*/
 	}
 	
 }

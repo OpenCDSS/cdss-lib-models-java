@@ -25,7 +25,6 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-//import DWR.DMI.HydroBaseDMI.HydroBase_Node;
 import cdss.domain.hydrology.network.HydrologyNode;
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleJComboBox;
