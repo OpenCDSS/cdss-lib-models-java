@@ -424,6 +424,17 @@ public void addID ( String s )
 	}
 }
 
+//FIXME SAM 2008-03-24 Why is this here?  Does anything use it outside of this class?
+public static Vector arrayToVector(String[] array) {
+	int size = array.length;
+	Vector v = new Vector();
+	for (int i = 0; i < size; i++) {
+		v.add(array[i]);
+	}
+
+	return v;
+}
+
 /**
 Clean up before garbage collection.
 */
@@ -447,8 +458,7 @@ with a StateMod version of -1.0 is used.
 @param s_type Station/structure type (e.g., "diversion").
 @param dtype Data type for the s_type.
 */
-public static int getDataOutputColumn ( String s_type, String dtype,
-	String filename )
+public static int getDataOutputColumn ( String s_type, String dtype, String filename )
 throws Exception
 {	return getDataOutputColumn ( s_type, dtype, filename, -1.0 );
 }
@@ -463,31 +473,26 @@ made (i.e. were well included in this version or not).
 @param statemod_version StateMod version as floating point number, used to
 determine order of columns.
 */
-public static int getDataOutputColumn ( String s_type, String dtype,
-					String filename,
-					double statemod_version )
+public static int getDataOutputColumn ( String s_type, String dtype, String filename, double statemod_version )
 throws Exception
 {	String rtn = "StateMod_GraphNode.getDataOutputColumn";
 	int type = getTypeFromString ( s_type );
 	int index = getDataOutputIndex ( type, dtype, statemod_version );
 	if ( index == -999 ) {
-		Message.printWarning ( 1, rtn, 
-			"Unable to get index for " + s_type + ", " + dtype );
+		Message.printWarning ( 1, rtn, "Unable to get index for " + s_type + ", " + dtype );
 		return -999;
 	}
 
 	if ( Message.isDebugOn ) {
-		Message.printDebug ( 30, rtn, "Finding column for " + s_type +
-		" (" + type + "), " + dtype );
+		Message.printDebug ( 30, rtn, "Finding column for " + s_type + " (" + type + "), " + dtype );
 	}
 	if ( type == RESERVOIR_TYPE ) {
-		// Does not depend on the version.  Make all columns
-		// available...
+		// Does not depend on the version.  Make all columns available...
 		return (index + 5);
 	}
 	else if ( type == STREAM_TYPE ) {
 		if ( statemod_version > 9.69 ) {
-			if (	(index == 0) || (index == 1) || (index == 2) ) {
+			if ( (index == 0) || (index == 1) || (index == 2) ) {
 				return index + 22;
 			}
 			else if ( index >= 3 ) {
@@ -495,7 +500,7 @@ throws Exception
 			}
 		}
 		else if ( statemod_version > 9.01 ) {
-			if (	(index == 0) || (index == 1) || (index == 2) ) {
+			if ( (index == 0) || (index == 1) || (index == 2) ) {
 				return index + 17;
 			}
 			else if ( (index == 3) || (index == 4) ) {
@@ -505,7 +510,8 @@ throws Exception
 				return index + 20;
 			}
 		}
-		else {	// Older...
+		else {
+			// Older...
 			return index + 16;
 		}
 	}
@@ -594,10 +600,8 @@ Locate the index of the string matching dtype.
 @param statemod_version Statemod version as a double.
 @return the index in the data types for the structure type (starting at zero).
 */
-public static int getDataOutputIndex(int type, String dtype,
-double statemod_version) {
-	// first, set Options to correct string list of options
-	// depending on the type
+public static int getDataOutputIndex(int type, String dtype, double statemod_version) {
+	// first, set Options to correct string list of options depending on the type
 
 	Vector Options = getGraphDataType ( type, statemod_version, true );
 	if ( Options == null ) {
@@ -630,14 +634,21 @@ public String getFileName() {
 }
 
 /**
-Get data type associated with type.  It is assumed that StateMod is the newest
-version.
-@param type Structure/station data type.
+Get data type associated with type.  It is assumed that StateMod is the newest version.
+Input (historical) and output data types are returned.
+@param type Structure/station data type (see StateMod_GraphNode.*_TYPE).
 */
 public static Vector getGraphDataType ( int type )
 {	return getGraphDataType ( type, 1000.0, true );
 }
 
+/**
+Get data type associated with type.
+It is assumed that StateMod is the newest version.
+@param type Structure/station data type (see StateMod_GraphNode.*_TYPE).
+@param include_all If true, input (historical) and output data types are returned.
+If false, only output data types are returned.
+*/
 public static Vector getGraphDataType (int type, boolean include_all) {
 	return getGraphDataType(type, 1000.0, include_all);
 }
@@ -651,8 +662,7 @@ It is assumed that the structure/station is NOT a baseflow node.
 list (suitable for StateMod GUI graphing tool).  If false, only model output
 parameters are returned (suitable for delplt usage with the big picture plot).
 */
-public static Vector getGraphDataType ( int type, double statemod_version,
-					boolean include_all )
+public static Vector getGraphDataType ( int type, double statemod_version, boolean include_all )
 {	return getGraphDataType ( type, statemod_version, include_all, false );
 }
 
@@ -668,9 +678,8 @@ a data type of "StreamflowBase" will be appended to the list.
 @return a new-line delimited list of appropriate graph parameter types or null
 if the requested station type or version does not match a known combination.
 */
-public static Vector getGraphDataType ( int type, double statemod_version,
-					boolean include_all,
-					boolean is_baseflow ) {
+public static Vector getGraphDataType ( int type, double statemod_version, boolean include_all, boolean is_baseflow )
+{
 	Vector options = null;
 	if ( statemod_version >= 9.69 ) {
 		if ( type == STREAM_TYPE ) {
@@ -736,7 +745,8 @@ public static Vector getGraphDataType ( int type, double statemod_version,
 			}
 		}
 	}
-	else  { // Assume old...
+	else {
+		// Assume old...
 		if ( type == STREAM_TYPE ) {
 			options = arrayToVector(streamOptions_0100);
 			if ( !include_all ) {
@@ -825,7 +835,8 @@ public static int getGraphDataTypeSize ( int type, double statemod_version )
 		}
 		return 0;
 	}
-	else {	// Assume old...
+	else {
+		// Assume old...
 		if ( type == STREAM_TYPE ) {
 			return streamOptionsSize_0100;
 		}
@@ -1037,8 +1048,7 @@ public void setType ( String s ) {
 		if (temp.equals("diversion")) {
 			temp = "Diversion";
 		}
-		else if (temp.equalsIgnoreCase("instream") 
-			|| temp.equalsIgnoreCase("InstreamFlow")) {
+		else if (temp.equalsIgnoreCase("instream") || temp.equalsIgnoreCase("InstreamFlow")) {
 			temp = "Instream Flow";
 		}
 		else if (temp.equals("reservoir")) {
@@ -1064,8 +1074,7 @@ public void setYrAve ( String s )
 	}
 }
 
-public static int SMDumpDelpltFile ( Vector theTemplate, String filename,
-	PrintWriter out )
+public static int SMDumpDelpltFile ( Vector theTemplate, String filename, PrintWriter out )
 throws IOException
 {	String rtn = "StateMod_GraphNode.SMDumpDelpltFile";
 	String temp_cmnt = "#>";
@@ -1077,8 +1086,8 @@ throws IOException
 	if ( theTemplate != null ) {
 		num = theTemplate.size();
 	}
-	try {	out.println ( temp_cmnt + " " + filename +
-			" - Delplt input file" );
+	try {
+		out.println ( temp_cmnt + " " + filename + " - SmDelta input file" );
 		out.println ( temp_cmnt );
 		out.println ( temp_cmnt );
 
@@ -1086,9 +1095,7 @@ throws IOException
 			node = (StateMod_GraphNode)theTemplate.elementAt(i);
 			if ( i==0 ) {
 				out.println ( cmnt );
-				out.println ( cmnt + 
-				" Run type (Single, Multiple, Difference, " +
-				"Diffx, Merge):" );
+				out.println ( cmnt + " Run type (Single, Multiple, Difference, " + "Diffx, Merge):" );
 				out.println ( cmnt );
 				int run_type = node.getSwitch();
 				if ( run_type == RUNTYPE_SINGLE ) {
@@ -1111,31 +1118,25 @@ throws IOException
 			out.println ( cmnt+cmnt+cmnt+cmnt+cmnt );
 			out.println ( cmnt );
 			out.println ( cmnt + "     File:" );
-			out.println ( cmnt + "          For reservoirs use " +
-				".xre or .b44" );
-			out.println ( cmnt + "          For others use " +
-				".xde or .b43" );
+			out.println ( cmnt + "          For reservoirs use .xre or .b44" );
+			out.println ( cmnt + "          For others use .xde or .b43" );
 			out.println ( node.getFileName());
 			out.println ( cmnt );
-			out.println ( cmnt + "     Data type (Diversion, " +
-				"Instream, StreamGage, StreamID, Reservoir," +
-				" Well):" );
+			out.println ( cmnt + "     Data type (Diversion, Instream, StreamGage, StreamID, Reservoir, Well):" );
 			out.println ( node.getType());
 			out.println ( cmnt );
-			out.println ( cmnt + "     Parameter (same as SMGUI) " +
-				"or type statemod -h" );
+			out.println ( cmnt + "     Parameter (same as StateModGUI) or type statemod -h" );
 			out.println ( node.getDtype());
 			out.println ( cmnt );
-			out.println ( cmnt + "     ID (0=all, n=ID, " +
-				"end with a -999)" );
+			out.println ( cmnt + "     ID (0=all, n=ID, end with a -999)" );
 			v = node.getIDVec();
 			int numIDs = v.size();
-			for ( int j=0; j<numIDs; j++ )
+			for ( int j=0; j<numIDs; j++ ) {
 				out.println ((String)v.elementAt(j));
+			}
 			out.println ( "-999" );
 			out.println ( cmnt );
-			out.println ( cmnt + "     Time (year [e.g., 1989]," +
-				" year and month [e.g. 1989 NOV], or Ave)" );
+			out.println ( cmnt + "     Time (year [e.g., 1989], year and month [e.g. 1989 NOV], or Ave)" );
 			out.println ( node.getYrAve());
 			out.println ( cmnt );
 		}
@@ -1175,16 +1176,11 @@ throws IOException
 	if ( theGraphOpts != null ) {
 		num = theGraphOpts.size();
 	}
-	try {	for ( i=0; i<num; i++ ) {
+	try {
+		for ( i=0; i<num; i++ ) {
 			node = (StateMod_GraphNode)theGraphOpts.elementAt(i);
 			// Identifier is ID..StructType_DataType.MONTH.Scenario
-			ident = node.getID() +
-				".." +
-				node.getType() +
-				"_" +
-				node.getDtype() +
-				".MONTH." +
-				node.getScenario();
+			ident = node.getID() + ".." + node.getType() + "_" + node.getDtype() + ".MONTH." + node.getScenario();
 			out.println ( ident );
 		}
 	} catch (Exception e) {
@@ -1213,27 +1209,21 @@ throws IOException
 	if ( theOC != null ) {
 		num = theOC.size();
 	}
-	try {	out.println ( cmnt + 
-		"*.xou; Output request file for StateMod" );
+	try {
+		out.println ( cmnt + "*.xou; Output request file for StateMod" );
 		out.println ( cmnt );
-		out.println ( cmnt + 
-		"Type ( e.g.  Diversion, StreamGage or Reservoir, or All)" );
-		out.println ( cmnt );
-		out.println ( "All" );	// hardcoded - may need to change
-		out.println ( cmnt );
-		out.println ( cmnt +
-		"Parameter (e.g. TotalSupply, SimEOM, RiverOutflow, or All)");
+		out.println ( cmnt + "Type ( e.g.  Diversion, StreamGage or Reservoir, or All)" );
 		out.println ( cmnt );
 		out.println ( "All" );	// hardcoded - may need to change
 		out.println ( cmnt );
-		out.println ( cmnt +
-		"ID Name Type and Print Code (0=no, 1=yes)" );
-		out.println ( cmnt +
-		"Note: id = All prints all" );
-		out.println ( cmnt +
-		"      id = -999 = stop" );
-		out.println ( cmnt +
-		"      default is to turn on all stream gages (FLO)" );
+		out.println ( cmnt + "Parameter (e.g. TotalSupply, SimEOM, RiverOutflow, or All)");
+		out.println ( cmnt );
+		out.println ( "All" );	// hardcoded - may need to change
+		out.println ( cmnt );
+		out.println ( cmnt + "ID Name Type and Print Code (0=no, 1=yes)" );
+		out.println ( cmnt + "Note: id = All prints all" );
+		out.println ( cmnt + "      id = -999 = stop" );
+		out.println ( cmnt + "      default is to turn on all stream gages (FLO)" );
 		out.println ( cmnt );
 
 		int istart=0;
@@ -1289,7 +1279,7 @@ throws IOException
 }
 
 /**
-Parse a delplt input file.  Each StateMod_GraphNode contains a
+Parse a SmDelta input file.  Each StateMod_GraphNode contains a
 station type/file/parameter combination.  The identifiers associated with the
 graph node are stored in a Vector with each node (e.g., can be a single zero
 string in the Vector or a Vector of identifiers).  The run mode is stored with
@@ -1307,7 +1297,7 @@ throws IOException
 
 	int step=0, run_type=0;
 
-	Message.printStatus ( 1, rtn, "Reading delplt template: " + filename );
+	Message.printStatus ( 1, rtn, "Reading SmDelta template: " + filename );
 	try {	in = new BufferedReader ( new FileReader (filename));
 		while ( (iline = in.readLine()) != null ) {
 			// check for comments
@@ -1317,8 +1307,7 @@ throws IOException
 			}
 
 			if ( Message.isDebugOn ) {
-				Message.printDebug ( 50, rtn, 
-				"line: \"" + iline + "\", step=" + step );
+				Message.printDebug ( 50, rtn, "line: \"" + iline + "\", step=" + step );
 			}
 
 			if ( step == 0 ) {
@@ -1343,12 +1332,11 @@ throws IOException
 			else if ( step == 1 ) {
 				if ( iline.equals("-999")) {
 					// end of file indicator
-					Message.printDebug (40, rtn,
-					"End of file indicator found" );
+					Message.printDebug (40, rtn, "End of file indicator found" );
 					break;
 				}
-				else {	// Allocate new graph node and set
-					// top-level data like the run mode...
+				else {
+					// Allocate new graph node and set top-level data like the run mode...
 					aNode = new StateMod_GraphNode();
 
 					// File
@@ -1359,7 +1347,7 @@ throws IOException
 				}
 			}
 			else if ( step == 2 ) {
-				// data type
+				// Node type
 				aNode.setType ( iline.trim() );
 				step++;
 			}
@@ -1374,12 +1362,12 @@ throws IOException
 				// increment the step counter.  Otherwise, 
 				// add the id to the list, but don't increment
 				// the step counter because the next line will
-				// be either the end of list indicator or
-				// another ID.
+				// be either the end of list indicator or another ID.
 				if ( iline.equals("-999")) {
 					step++;
 				}
-				else {	aNode.addID( iline.trim() );
+				else {
+					aNode.addID( iline.trim() );
 				}
 			}
 			else if ( step == 5 ) {
@@ -1427,8 +1415,7 @@ throws IOException
 	Vector list = null;
 	int dtype_pos = 0;
 
-	Message.printStatus ( 1, rtn, "Reading graph template: " 
-		+ filename );
+	Message.printStatus ( 1, rtn, "Reading graph template: " + filename );
 	try {	in = new BufferedReader ( new FileReader (filename));
 		while ( (iline = in.readLine()) != null ) {
 			// check for comments
@@ -1440,8 +1427,7 @@ throws IOException
 			aNode = new StateMod_GraphNode();
 
 			if ( Message.isDebugOn ) {
-				Message.printDebug ( 50, rtn, 
-				"line 1: " + iline );
+				Message.printDebug ( 50, rtn, "line 1: " + iline );
 			}
 			ident = TSIdent.parseIdentifier ( iline );
 
@@ -1450,8 +1436,7 @@ throws IOException
 
 			// break up type into type (e.g., "diversion") and
 			// dtype (e.g., "Total_Demand")...
-			list = StringUtil.breakStringList (
-				ident.getType(), "_", 0 );
+			list = StringUtil.breakStringList (	ident.getType(), "_", 0 );
 			if ( Message.isDebugOn ) {
 				Message.printDebug ( 50, rtn, ident.getType());
 			}
@@ -1459,10 +1444,8 @@ throws IOException
 				continue;
 			}
 			aNode.setType ( (String)list.elementAt(0));
-			if ( aNode.getType().equalsIgnoreCase(
-				"instream flow") ) {
-				// New convention is shorter as of
-				// 2002-08-06
+			if ( aNode.getType().equalsIgnoreCase( "instream flow") ) {
+				// New convention is shorter as of 2002-08-06
 				aNode.setType("instream");
 			}
 			if ( Message.isDebugOn ) {
@@ -1473,8 +1456,7 @@ throws IOException
 			//aNode.setDtype ( (String)list.elementAt(1));
 			dtype_pos = ident.getType().indexOf("_");
 			if ( dtype_pos < ident.getType().length() ) { 
-				aNode.setDtype (
-				ident.getType().substring(dtype_pos + 1) );
+				aNode.setDtype ( ident.getType().substring(dtype_pos + 1) );
 			}
 			if ( Message.isDebugOn ) {
 				Message.printDebug ( 50, rtn, aNode.getDtype());
@@ -1523,14 +1505,15 @@ throws IOException
 	int skipAll=0;// there are 2 "All" statements we need to skip over
 			// if a 3rd exists, we need to pass that info back
 
-	Message.printStatus ( 1, rtn, "Reading output control template: " 
-		+ filename );
-	try {	in = new BufferedReader ( new FileReader (filename));
+	Message.printStatus ( 1, rtn, "Reading output control template: " + filename );
+	try {
+		in = new BufferedReader ( new FileReader (filename));
 		while ( (iline = in.readLine()) != null )
 		{
 			// check for comments
-			if (iline.startsWith("#") || iline.trim().length()==0)
+			if (iline.startsWith("#") || iline.trim().length()==0) {
 				continue;
+			}
 
 			if ( iline.equalsIgnoreCase ( "All" ) && skipAll < 2 )
 			{
@@ -1538,15 +1521,16 @@ throws IOException
 				continue;
 			}
 
-			if ( iline.startsWith ( "-999" ))
+			if ( iline.startsWith ( "-999" )) {
 				return 0;
+			}
 
 			// allocate new diversion node
 			aNode = new StateMod_GraphNode();
 
-			if ( Message.isDebugOn )
-				Message.printDebug ( 50, rtn, 
-				"line 1: " + iline );
+			if ( Message.isDebugOn ) {
+				Message.printDebug ( 50, rtn, "line 1: " + iline );
+			}
 			v = StringUtil.fixedRead ( iline, format );
 			if ( v.size() < 4 )
 			{
@@ -1558,8 +1542,7 @@ throws IOException
 				}
 				else
 				{
-					Message.printWarning ( 2, rtn,
-					"Unable to process \"" + iline + "\"" );
+					Message.printWarning ( 2, rtn, "Unable to process \"" + iline + "\"" );
 					continue;
 				}
 			}
@@ -1596,6 +1579,16 @@ throws IOException
 	return 0;
 }
 
+private static Vector removeLastNElements(Vector v, int count) {
+	Vector r = (Vector)(v.clone());
+	for (int i = 0; i < count; i++) {
+		int size = r.size();
+		r.remove((size - 1));
+	}
+	
+	return r;
+}
+
 public static void writeStateModDelPltFile ( String instrfile, 
 	String outstrfile, Vector theTemplate, String[] new_comments )
 throws IOException
@@ -1604,12 +1597,10 @@ throws IOException
 	String [] ignore_comment_str = { "#>" };
 	PrintWriter out = null;
 	if ( Message.isDebugOn ) {
-		Message.printDebug ( 1, rtn, 
-		"in writeStateModDelPltFile printing file: " 
-		+ outstrfile );
+		Message.printDebug ( 1, rtn, "in writeStateModDelPltFile printing file: " + outstrfile );
 	}
-	try {	out = IOUtil.processFileHeaders ( instrfile, outstrfile, 
-			new_comments, comment_str, ignore_comment_str, 0 );
+	try {
+		out = IOUtil.processFileHeaders ( instrfile, outstrfile, new_comments, comment_str, ignore_comment_str, 0 );
 		SMDumpDelpltFile ( theTemplate, outstrfile, out );
 		out.flush();
 		out.close();
@@ -1639,12 +1630,11 @@ throws IOException
 	String [] ignore_comment_str = { "#>" };
 	PrintWriter out = null;
 
-	if ( Message.isDebugOn )
-		Message.printDebug ( 2, rtn, 
-		"in writeStateModGraphFile printing file: " 
-		+ outstrfile );
-	try {	out = IOUtil.processFileHeaders ( instrfile, outstrfile, 
-			new_comments, comment_str, ignore_comment_str, 0 );
+	if ( Message.isDebugOn ) {
+		Message.printDebug ( 2, rtn, "in writeStateModGraphFile printing file: " + outstrfile );
+	}
+	try {
+		out = IOUtil.processFileHeaders ( instrfile, outstrfile, new_comments, comment_str, ignore_comment_str, 0 );
 		SMDumpGraphFile ( theGraphOpts, out );
 		out.flush();
 		out.close();
@@ -1665,17 +1655,17 @@ throws IOException
 	}
 }
 
-public static void writeStateModOutputControlFile ( String instrfile, 
-	String outstrfile, Vector theOC, String[] new_comments )
+public static void writeStateModOutputControlFile ( String instrfile, String outstrfile, Vector theOC, String[] new_comments )
 throws IOException
 {	String rtn = "StateMod_GraphNode.writeStateModOutputControlFile";
 	String [] comment_str = { "#" };
 	String [] ignore_comment_str = { "#>" };
 	PrintWriter out = null;
-	if ( Message.isDebugOn )
+	if ( Message.isDebugOn ) {
 		Message.printDebug ( 1, rtn, "Printing file: " + outstrfile );
-	try {	out = IOUtil.processFileHeaders ( instrfile, outstrfile, 
-			new_comments, comment_str, ignore_comment_str, 0 );
+	}
+	try {
+		out = IOUtil.processFileHeaders ( instrfile, outstrfile, new_comments, comment_str, ignore_comment_str, 0 );
 		SMDumpOutputControlFile ( theOC, out );
 		out.flush();
 		out.close();
@@ -1695,7 +1685,6 @@ throws IOException
 		Message.printWarning ( 2, rtn, e );
 		throw new IOException ( e.getMessage());
 	}
-
 }
 
 /**
@@ -1712,26 +1701,6 @@ public String toString()
 		+ ", IDVec: " + _IDVec
 		+ ", YrAve: " + _YrAve
 		+ ", Filename: " + _fileName;
-}
-
-private static Vector removeLastNElements(Vector v, int count) {
-	Vector r = (Vector)(v.clone());
-	for (int i = 0; i < count; i++) {
-		int size = r.size();
-		r.remove((size - 1));
-	}
-	
-	return r;
-}
-
-public static Vector arrayToVector(String[] array) {
-	int size = array.length;
-	Vector v = new Vector();
-	for (int i = 0; i < size; i++) {
-		v.add(array[i]);
-	}
-
-	return v;
 }
 
 } // end StateMod_GraphNode

@@ -319,7 +319,7 @@ The StateMod data set type is unknown.
 public static final int TYPE_UNKNOWN = 0;
 public static final String NAME_UNKNOWN = "Unknown";
 
-// REVISIT - Start SAM new definitions (indent to illustrate groups).
+// TODO - Start SAM new definitions (indent to illustrate groups).
 
 public final static int COMP_UNKNOWN = -1;	// Use for initialization, if
 						// needed
@@ -528,26 +528,16 @@ private static String[] __component_names = {
 // cases for labels and displays but the data are managed with a component
 // listed above.  Make private to force handling through lookup methods.
 private final static String
-	__COMPNAME_DIVERSION_STATION_DELAY_TABLES =
-		"Diversion Station Delay Table Assignment",
-	__COMPNAME_DIVERSION_STATION_COLLECTIONS =
-		"Diversion Station Collection Definitions",
-	__COMPNAME_RESERVOIR_STATION_ACCOUNTS =
-		"Reservoir Station Accounts",
-	__COMPNAME_RESERVOIR_STATION_PRECIP_STATIONS =
-		"Reservoir Station Precipitation Stations",
-	__COMPNAME_RESERVOIR_STATION_EVAP_STATIONS =
-		"Reservoir Station Evaporation Stations",
-	__COMPNAME_RESERVOIR_STATION_CURVE =
-		"Reservoir Station Content/Area/Seepage",
-	__COMPNAME_RESERVOIR_STATION_COLLECTIONS =
-		"Reservoir Station Collection Definitions",
-	__COMPNAME_WELL_STATION_DELAY_TABLES =
-		"Well Station Delay Table Assignment",
-	__COMPNAME_WELL_STATION_DEPLETION_TABLES =
-		"Well Station Depletion Table Assignment",
-	__COMPNAME_WELL_STATION_COLLECTIONS =
-		"Well Station Collection Definitions";
+	__COMPNAME_DIVERSION_STATION_DELAY_TABLES =	"Diversion Station Delay Table Assignment",
+	__COMPNAME_DIVERSION_STATION_COLLECTIONS = "Diversion Station Collection Definitions",
+	__COMPNAME_RESERVOIR_STATION_ACCOUNTS =	"Reservoir Station Accounts",
+	__COMPNAME_RESERVOIR_STATION_PRECIP_STATIONS = "Reservoir Station Precipitation Stations",
+	__COMPNAME_RESERVOIR_STATION_EVAP_STATIONS = "Reservoir Station Evaporation Stations",
+	__COMPNAME_RESERVOIR_STATION_CURVE = "Reservoir Station Content/Area/Seepage",
+	__COMPNAME_RESERVOIR_STATION_COLLECTIONS = "Reservoir Station Collection Definitions",
+	__COMPNAME_WELL_STATION_DELAY_TABLES = "Well Station Delay Table Assignment",
+	__COMPNAME_WELL_STATION_DEPLETION_TABLES = "Well Station Depletion Table Assignment",
+	__COMPNAME_WELL_STATION_COLLECTIONS = "Well Station Collection Definitions";
 
 private static int[] __component_types = {
 	COMP_CONTROL_GROUP,
@@ -5723,8 +5713,7 @@ throws Exception
 	in = null;
 }
 
-// REVISIT - StateCU has this return a DataSet object, not populate an existing
-// one
+// TODO - StateCU has this return a DataSet object, not populate an existing one
 /**
 Read the StateMod response file and fill the current StateMod_DataSet object.
 The file and settings that are read are those set when the object was created.
@@ -5736,8 +5725,7 @@ be set to the directory of the response file.
 @param parent The parent JFrame used to position warning dialogs if useGUI
 is true.
 */
-public void readStateModFile (	String filename, boolean tsAreRead,
-				boolean useGUI, JFrame parent )
+public void readStateModFile (	String filename, boolean tsAreRead, boolean useGUI, JFrame parent )
 throws Exception
 {	String routine = "StateMod_DataSet.readStateModFile";
 	__tsAreRead = tsAreRead;
@@ -5764,8 +5752,7 @@ throws Exception
 	// Set basic information about the response file component - only save
 	// the file name - the data itself are stored in this data set object.
 
-	getComponentForComponentType( COMP_RESPONSE).setDataFileName(
-			f.getName() );
+	getComponentForComponentType( COMP_RESPONSE).setDataFileName( f.getName() );
 
 	// Open the response file so that it can be read...
 
@@ -5787,11 +5774,9 @@ throws Exception
 	StopWatch readTime = new StopWatch();
 
 	Message.printStatus(1, routine, 
-		"Reading all information from input directory: \"" 
-		+ getDataSetDirectory());
+		"Reading all information from input directory: \"" + getDataSetDirectory());
 
-	Message.printStatus(1, routine, "Reading response file \"" +
-		filename + "\"" );
+	Message.printStatus(1, routine, "Reading response file \"" + filename + "\"" );
 	
 	totalReadTime.start();
 
@@ -5803,7 +5788,8 @@ throws Exception
 		response_props.readPersistent();
 	}
 
-	try {	// Try for all reads.
+	try {
+		// Try for all reads.
 
 	// Read the lines of the response file.  Of major importance is reading
 	// the control file, which indicates data set properties that allow
@@ -5832,7 +5818,8 @@ throws Exception
 		if ( __is_free_format ) {
 			fn = response_props.getValue ( "Control" );
 		}
-		else {	if ( (fn = readFileLine ( in )) == null ) {
+		else {
+			if ( (fn = readFileLine ( in )) == null ) {
 				continue_reading = false;
 			}
 		}
@@ -5850,16 +5837,14 @@ throws Exception
 			readInputAnnounce1(comp);
 			readStateModControlFile(fn);
 			comp.setDirty ( false );
-			// Control does not have its own data file now so use
-			// the data set.
+			// Control does not have its own data file now so use the data set.
 			comp.setData ( this );
 			readTime.stop();
 			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 		
 	} catch (Exception e) {
-		Message.printWarning(1, routine, "Error reading control file:\n"
-			+"\"" + fn + "\"");
+		Message.printWarning(1, routine, "Error reading control file:\n" + "\"" + fn + "\"");
 		Message.printWarning(2, routine, e);
 	}
 
@@ -5869,8 +5854,8 @@ throws Exception
 		if ( __is_free_format ) {
 			fn = response_props.getValue ( "River_Network" );
 		}
-		else {	if (	continue_reading &&
-				((fn = readFileLine ( in )) == null) ) {
+		else {
+			if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 				continue_reading = false;
 			}
 		}
@@ -5880,21 +5865,18 @@ throws Exception
 			comp.setDataFileName ( fn );
 		}
 		// Read the data...
-		if (	continue_reading && (fn != null) &&
-			!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+		if ( continue_reading && (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 			readTime.clear();
 			readTime.start();
 			fn = getDataFilePathAbsolute ( fn );
 			readInputAnnounce1(comp);
-			comp.setData( StateMod_RiverNetworkNode.
-				readStateModFile(fn) );
+			comp.setData( StateMod_RiverNetworkNode.readStateModFile(fn) );
 			comp.setDirty ( false );
 			readTime.stop();
 			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	} catch (Exception e) {
-		Message.printWarning(1, routine, "Error reading river "
-			+ "network file:\n\"" + fn + "\"");
+		Message.printWarning(1, routine, "Error reading river network file:\n\"" + fn + "\"");
 		Message.printWarning(2, routine, e);
 	}
 
@@ -5904,8 +5886,8 @@ throws Exception
 		if ( __is_free_format ) {
 			fn = response_props.getValue ( "Reservoir_Station" );
 		}
-		else {	if (	continue_reading &&
-				((fn = readFileLine ( in )) == null) ) {
+		else {
+			if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 				continue_reading = false;
 			}
 		}
@@ -5927,8 +5909,7 @@ throws Exception
 			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	} catch (Exception e) {
-		Message.printWarning(1, routine,
-			"Error reading reservoir station file:\n\"" + fn +"\"");
+		Message.printWarning(1, routine, "Error reading reservoir station file:\n\"" + fn +"\"");
 		Message.printWarning(2, routine, e);
 	}
 
@@ -5938,8 +5919,8 @@ throws Exception
 		if ( __is_free_format ) {
 			fn = response_props.getValue ( "Diversion_Station" );
 		}
-		else {	if (	continue_reading &&
-				((fn = readFileLine ( in )) == null) ) {
+		else {
+			if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 				continue_reading = false;
 			}
 		}
@@ -5949,8 +5930,7 @@ throws Exception
 			comp.setDataFileName ( fn );
 		}
 		// Read the data...
-		if (	continue_reading && (fn != null) &&
-			!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+		if ( continue_reading && (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 			readTime.clear();
 			readTime.start();
 			fn = getDataFilePathAbsolute ( fn );
@@ -5961,19 +5941,19 @@ throws Exception
 			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	} catch (Exception e) {
-		Message.printWarning(1, routine,
-			"Error reading diversion station file:\n\"" + fn +"\"");
+		Message.printWarning(1, routine, "Error reading diversion station file:\n\"" + fn +"\"");
 		Message.printWarning(2, routine, e);
 	}
 
 	// Stream gage stations file (.ris)...
 
-	try {	fn = null;
+	try {
+		fn = null;
 		if ( __is_free_format ) {
 			fn = response_props.getValue ( "StreamGage_Station" );
 		}
-		else {	if (	continue_reading &&
-				((fn = readFileLine ( in )) == null) ) {
+		else {
+			if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 				continue_reading = false;
 			}
 		}
@@ -5983,8 +5963,7 @@ throws Exception
 			comp.setDataFileName ( fn );
 		}
 		// Read the data...
-		if (	continue_reading && (fn != null) &&
-			!fileIsEmpty(getDataFilePathAbsolute(fn) ) ) {
+		if ( continue_reading && (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn) ) ) {
 			readTime.clear();
 			readTime.start();
 			fn = getDataFilePathAbsolute ( fn );
@@ -5995,8 +5974,7 @@ throws Exception
 			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	} catch (Exception e) {
-		Message.printWarning(1, routine,
-			"Error reading stream gage stations file:\n\""+fn+"\"");
+		Message.printWarning(1, routine, "Error reading stream gage stations file:\n\""+fn+"\"");
 		Message.printWarning(2, routine, e);
 	}
 
@@ -6004,16 +5982,22 @@ throws Exception
 	// file because some stations will be stream estimate stations.  If free
 	// format, get the file name...
 
-	try {	if ( __is_free_format ) {
+	try {
+		fn = null;
+		if ( __is_free_format ) {
 			fn = response_props.getValue ("StreamEstimate_Station");
 		}
-		else {	// Get from the stream gage component...
-			comp = getComponentForComponentType (
-				COMP_STREAMGAGE_STATIONS );
+		if ( fn == null ) {
+			// Get from the stream gage component because Ray has not adopted a separate stream
+			// estimate file...
+			Message.printStatus(2, routine,
+					"Using StreamGage_Station for StreamEstimage_Station (no separate 2nd file)." );
+			comp = getComponentForComponentType ( COMP_STREAMGAGE_STATIONS );
 			if ( comp == null ) {
 				fn = null;
 			}
-			else {	fn = comp.getDataFileName();
+			else {
+				fn = comp.getDataFileName();
 			}
 		}
 		// Always set the file name...
@@ -6021,35 +6005,32 @@ throws Exception
 		if ( (comp != null) && (fn != null) ) {
 			comp.setDataFileName ( fn );
 		}
-		// Read the data...
-		if (	continue_reading && (fn != null) &&
-			!fileIsEmpty(getDataFilePathAbsolute(fn) ) ) {
+		// (Re)read the data...
+		if ( continue_reading && (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn) ) ) {
 			readTime.clear();
 			readTime.start();
 			// Use the relative path...
 			fn = getDataFilePathAbsolute ( fn );
 			readInputAnnounce1(comp);
-			comp.setData(
-				StateMod_StreamEstimate.readStateModFile(fn) );
+			comp.setData( StateMod_StreamEstimate.readStateModFile(fn) );
 			comp.setDirty ( false );
 			readTime.stop();
 			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	} catch (Exception e) {
-		Message.printWarning(1, routine,
-			"Error reading stream estimate stations file:\n\"" +
-			fn + "\"");
+		Message.printWarning(1, routine, "Error reading stream estimate stations file:\n\"" + fn + "\"");
 		Message.printWarning(2, routine, e);
 	}
 
 	// Instream flow stations file (.ifs)...
 
-	try {	fn = null;
+	try {
+		fn = null;
 		if ( __is_free_format ) {
 			fn = response_props.getValue ( "Instreamflow_Station" );
 		}
-		else {	if (	continue_reading &&
-				((fn = readFileLine ( in )) == null) ) {
+		else {
+			if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 				continue_reading = false;
 			}
 		}
@@ -6059,33 +6040,31 @@ throws Exception
 			comp.setDataFileName ( fn );
 		}
 		// Read the data...
-		if (	continue_reading && (fn != null) &&
-			!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+		if ( continue_reading && (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 			readTime.clear();
 			readTime.start();
 			fn = getDataFilePathAbsolute ( fn );
 			readInputAnnounce1(comp);
-			comp.setData (
-				StateMod_InstreamFlow.readStateModFile(fn) );
+			comp.setData ( StateMod_InstreamFlow.readStateModFile(fn) );
 			comp.setDirty ( false );
 			readTime.stop();
 			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	} catch (Exception e) {
-		Message.printWarning(1, routine,
-		"Error reading instream flow station file:\n\""+fn+"\"");
+		Message.printWarning(1, routine, "Error reading instream flow station file:\n\""+fn+"\"");
 		Message.printWarning(2, routine, e);
 	}
 
 	// Well stations...
 
 	if ( __is_free_format || (!__is_free_format && hasWellData(false)) ) {
-		try {	fn = null;
+		try {
+			fn = null;
 			if ( __is_free_format ) {
 				fn = response_props.getValue ( "Well_Station");
 			}
-			else {	if (	continue_reading &&
-					((fn = readFileLine ( in )) == null) ) {
+			else {
+				if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 					continue_reading = false;
 				}
 			}
@@ -6095,22 +6074,18 @@ throws Exception
 				comp.setDataFileName ( fn );
 			}
 			// Read the data...
-			if (	continue_reading && hasWellData(false) &&
-				(fn != null) &&
-				!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+			if ( continue_reading && hasWellData(false) && (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 				readTime.clear();
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
-				comp.setData(
-					StateMod_Well.readStateModFile(fn) );
+				comp.setData( StateMod_Well.readStateModFile(fn) );
 				comp.setDirty ( false );
 				readTime.stop();
 				readInputAnnounce2(comp, readTime.getSeconds());
 			}
 		} catch (Exception e) {
-			Message.printWarning(1, routine,
-			"Error reading well station file:\n\"" + fn + "\"");
+			Message.printWarning(1, routine, "Error reading well station file:\n\"" + fn + "\"");
 			Message.printWarning(2, routine, e);
 		}
 	}
@@ -6118,33 +6093,29 @@ throws Exception
 	// Plans...
 
 	if ( __is_free_format ) {
-		try {	fn = response_props.getValue ( "Plan_Data");
+		try {
+			fn = response_props.getValue ( "Plan_Data");
 			// Always set the file name...
 			comp = getComponentForComponentType(COMP_PLANS);
 			if ( comp == null ) {
-				Message.printWarning ( 2, routine,
-				"Unable to look up plans component " +
-				COMP_PLANS );
+				Message.printWarning ( 2, routine, "Unable to look up plans component " + COMP_PLANS );
 			}
 			if ( (comp != null) && (fn != null) ) {
 				comp.setDataFileName ( fn );
 			}
 			// Read the data...
-			if (	continue_reading && (fn != null) &&
-				!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+			if ( continue_reading && (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 				readTime.clear();
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
-				comp.setData(
-					StateMod_Plan.readStateModFile(fn) );
+				comp.setData( StateMod_Plan.readStateModFile(fn) );
 				comp.setDirty ( false );
 				readTime.stop();
 				readInputAnnounce2(comp, readTime.getSeconds());
 			}
 		} catch (Exception e) {
-			Message.printWarning(1, routine,
-			"Error reading plan file:\n\"" + fn + "\"");
+			Message.printWarning(1, routine, "Error reading plan file:\n\"" + fn + "\"");
 			Message.printWarning(2, routine, e);
 		}
 	}
@@ -6155,8 +6126,8 @@ throws Exception
 		if ( __is_free_format ) {
 			fn = response_props.getValue ( "Instreamflow_Right" );
 		}
-		else {	if (	continue_reading &&
-				((fn = readFileLine ( in )) == null) ) {
+		else {
+			if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 				continue_reading = false;
 			}
 		}
@@ -6166,27 +6137,21 @@ throws Exception
 			comp.setDataFileName ( fn );
 		}
 		// Read the data...
-		if (	continue_reading && (fn != null) &&
-			!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+		if ( continue_reading && (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 			readTime.clear();
 			readTime.start();
 			fn = getDataFilePathAbsolute ( fn );
 			readInputAnnounce1(comp);
-			comp.setData( StateMod_InstreamFlowRight.
-				readStateModFile(fn) );
+			comp.setData( StateMod_InstreamFlowRight.readStateModFile(fn) );
 			comp.setDirty ( false );
-			Message.printStatus ( 1, routine,
-				"Connecting instream flow rights to stations.");
+			Message.printStatus ( 1, routine, "Connecting instream flow rights to stations.");
 			StateMod_InstreamFlow.connectAllRights(
-				(Vector)getComponentForComponentType (
-				COMP_INSTREAM_STATIONS ).getData(),
-				(Vector)comp.getData() );
+				(Vector)getComponentForComponentType ( COMP_INSTREAM_STATIONS ).getData(), (Vector)comp.getData() );
 			readTime.stop();
 			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	} catch (Exception e) {
-		Message.printWarning(1, routine,
-		"Error reading instream flow rights file:\n\"" + fn+"\"");
+		Message.printWarning(1, routine, "Error reading instream flow rights file:\n\"" + fn+"\"");
 		Message.printWarning(2, routine, e);
 	}
 
@@ -6196,8 +6161,8 @@ throws Exception
 		if ( __is_free_format ) {
 			fn = response_props.getValue ( "Reservoir_Right" );
 		}
-		else {	if (	continue_reading &&
-				((fn = readFileLine ( in )) == null) ) {
+		else {
+			if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 				continue_reading = false;
 			}
 		}
@@ -6207,27 +6172,21 @@ throws Exception
 			comp.setDataFileName ( fn );
 		}
 		// Read the data...
-		if (	continue_reading && (fn != null) &&
-			!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+		if ( continue_reading && (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 			readTime.clear();
 			readTime.start();
 			fn = getDataFilePathAbsolute ( fn );
 			readInputAnnounce1(comp);
-			comp.setData( StateMod_ReservoirRight.
-				readStateModFile(fn) );
+			comp.setData( StateMod_ReservoirRight.readStateModFile(fn) );
 			comp.setDirty ( false );
 			readTime.stop();
 			readInputAnnounce2(comp, readTime.getSeconds() );
-			Message.printStatus ( 1, routine,
-			"Connecting reservoir rights with reservoir stations.");
+			Message.printStatus ( 1, routine, "Connecting reservoir rights with reservoir stations.");
 			StateMod_Reservoir.connectAllRights(
-				(Vector)getComponentForComponentType(
-				COMP_RESERVOIR_STATIONS).getData(),
-				(Vector)comp.getData());
+				(Vector)getComponentForComponentType( COMP_RESERVOIR_STATIONS).getData(), (Vector)comp.getData());
 		}
 	} catch (Exception e) {
-		Message.printWarning(1, routine,
-			"Error reading reservoir rights file:\n\"" + fn + "\"");
+		Message.printWarning(1, routine, "Error reading reservoir rights file:\n\"" + fn + "\"");
 		Message.printWarning(2, routine, e);
 	}
 	
@@ -6237,8 +6196,8 @@ throws Exception
 		if ( __is_free_format ) {
 			fn = response_props.getValue ( "Diversion_Right" );
 		}
-		else {	if (	continue_reading &&
-				((fn = readFileLine ( in )) == null) ) {
+		else {
+			if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 				continue_reading = false;
 			}
 		}
@@ -6248,27 +6207,21 @@ throws Exception
 			comp.setDataFileName ( fn );
 		}
 		// Read the data...
-		if (	continue_reading && (fn != null) &&
-			!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+		if ( continue_reading && (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 			readTime.clear();
 			readTime.start();
 			fn = getDataFilePathAbsolute ( fn );
 			readInputAnnounce1(comp);
-			comp.setData( StateMod_DiversionRight.
-				readStateModFile(fn) );
+			comp.setData( StateMod_DiversionRight.readStateModFile(fn) );
 			comp.setDirty ( false );
 			readTime.stop();
 			readInputAnnounce2(comp, readTime.getSeconds() );
-			Message.printStatus ( 1, routine,
-			"Connecting diversion rights to diversion stations" );
+			Message.printStatus ( 1, routine, "Connecting diversion rights to diversion stations" );
 			StateMod_Diversion.connectAllRights(
-				(Vector)getComponentForComponentType (
-				COMP_DIVERSION_STATIONS).getData(),
-				(Vector)comp.getData());
+				(Vector)getComponentForComponentType ( COMP_DIVERSION_STATIONS).getData(), (Vector)comp.getData());
 		}
 	} catch (Exception e) {
-		Message.printWarning(1, routine,
-			"Error reading diversion rights file:\n\"" + fn + "\"");
+		Message.printWarning(1, routine, "Error reading diversion rights file:\n\"" + fn + "\"");
 		Message.printWarning(2, routine, e);
 	}
 
@@ -6278,8 +6231,8 @@ throws Exception
 		if ( __is_free_format ) {
 			fn = response_props.getValue ( "Operational_Right" );
 		}
-		else {	if (	continue_reading &&
-				((fn = readFileLine ( in )) == null) ) {
+		else {
+			if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 				continue_reading = false;
 			}
 		}
@@ -6289,105 +6242,92 @@ throws Exception
 			comp.setDataFileName ( fn );
 		}
 		// Read the data...
-		if (	continue_reading && (fn != null) &&
-			!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+		if ( continue_reading && (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 			readTime.clear();
 			readTime.start();
 			fn = getDataFilePathAbsolute ( fn );
 			readInputAnnounce1(comp);
-			comp.setData(
-				StateMod_OperationalRight.readStateModFile(fn));
+			comp.setData( StateMod_OperationalRight.readStateModFile(fn));
 			comp.setDirty ( false );
 			readTime.stop();
 			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	} catch (Exception e) {
-		Message.printWarning(1, routine,
-			"Error reading operational rights file:\n\"" + fn+"\"");
+		Message.printWarning(1, routine, "Error reading operational rights file:\n\"" + fn+"\"");
 		Message.printWarning(2, routine, e);
 	}
 
 	// Well rights file (.wer)...
 
 	if ( __is_free_format || (!__is_free_format && hasWellData(false)) ) {
-		try {	fn = null;
+		try {
+			fn = null;
 			if ( __is_free_format ) {
 				fn = response_props.getValue ( "Well_Right" );
 			}
-			else {	if (	continue_reading &&
-					((fn = readFileLine ( in )) == null) ) {
+			else {
+				if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 					continue_reading = false;
 				}
 			}
 			// Always set the file name...
-			comp = getComponentForComponentType(
-				COMP_WELL_RIGHTS );
+			comp = getComponentForComponentType( COMP_WELL_RIGHTS );
 			if ( (comp != null) && (fn != null) ) {
 				comp.setDataFileName ( fn );
 			}
 			// Read data...
-			if (	continue_reading && (fn != null) &&
-				!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+			if ( continue_reading && (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 				readTime.clear();
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
-				comp.setData( StateMod_WellRight.
-					readStateModFile(fn) );
+				comp.setData( StateMod_WellRight.readStateModFile(fn) );
 				comp.setDirty ( false );
 				readTime.stop();
 				readInputAnnounce2(comp, readTime.getSeconds());
-				Message.printStatus ( 1, routine, "Connecting "+
-					"well rights to well stations.");
+				Message.printStatus ( 1, routine, "Connecting well rights to well stations.");
 				StateMod_Well.connectAllRights(
-					(Vector)getComponentForComponentType(
-					COMP_WELL_STATIONS).getData(),
-					(Vector)comp.getData() );
+					(Vector)getComponentForComponentType( COMP_WELL_STATIONS).getData(), (Vector)comp.getData() );
 			}
 		} catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading well "
-				+ "rights file:\n\"" + fn + "\"");
+			Message.printWarning(1, routine, "Error reading well rights file:\n\"" + fn + "\"");
 			Message.printWarning(2, routine, e);
 		}
 	}
 
 	// Precipitation TS monthly file (.pre) - always read...
 
-	try {	fn = null;
+	try {
+		fn = null;
 		if ( __is_free_format ) {
 			fn = response_props.getValue ( "Precipitation_Monthly");
 		}
-		else {	if (	continue_reading &&
-				((fn = readFileLine ( in )) == null) ) {
+		else {
+			if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 				continue_reading = false;
 			}
 		}
 		// Always set the file name in the component...
-		comp = getComponentForComponentType(
-				COMP_PRECIPITATION_TS_MONTHLY );
+		comp = getComponentForComponentType( COMP_PRECIPITATION_TS_MONTHLY );
 		if ( (comp != null) && (fn != null) ) {
 			comp.setDataFileName ( fn );
 		}
 		// Now read the file...
-		if (	continue_reading && (fn != null) &&
-			!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+		if ( continue_reading && (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 			readTime.clear();
 			readTime.start();
 			fn = getDataFilePathAbsolute ( fn );
 			readInputAnnounce1(comp);
-			Vector v = StateMod_TS.readTimeSeriesList(fn, null,
-				null, null, true);
+			Vector v = StateMod_TS.readTimeSeriesList(fn, null,	null, null, true);
 			if (v == null) {
 				v = new Vector();
 			}
 			size = v.size();
-			// REVISIT
-			// Old-style data that may be removed in new StateMod...
+			// TODO Old-style data that may be removed in new StateMod...
 			setNumpre ( size );
 			for (i = 0; i < size; i++) {
 				((MonthTS)v.elementAt(i)).setDataType(
-				lookupTimeSeriesDataType(
-				COMP_PRECIPITATION_TS_MONTHLY ) );
+				lookupTimeSeriesDataType( COMP_PRECIPITATION_TS_MONTHLY ) );
 			}
 			comp.setData(v);
 			comp.setDirty ( false );
@@ -6395,8 +6335,7 @@ throws Exception
 			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	} catch (Exception e) {
-		Message.printWarning(1, routine,
-		"Error reading precipitation time series file:\n\"" + fn +"\"");
+		Message.printWarning(1, routine, "Error reading precipitation time series file:\n\"" + fn +"\"");
 		Message.printWarning(2, routine, e);
 	}
 
@@ -6406,8 +6345,8 @@ throws Exception
 		if ( __is_free_format ) {
 			fn = response_props.getValue ( "Evaporation_Monthly" );
 		}
-		else {	if (	continue_reading &&
-				((fn = readFileLine ( in )) == null) ) {
+		else {
+			if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 				continue_reading = false;
 			}
 		}
@@ -6417,25 +6356,20 @@ throws Exception
 			comp.setDataFileName ( fn );
 		}
 		// Read the data...
-		if (	continue_reading && (fn != null) &&
-			!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+		if ( continue_reading && (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 			readTime.clear();
 			readTime.start();
 			fn = getDataFilePathAbsolute ( fn );
 			readInputAnnounce1(comp);
-			Vector v = StateMod_TS.readTimeSeriesList(fn, null,
-				null, null, true);
+			Vector v = StateMod_TS.readTimeSeriesList(fn, null,	null, null, true);
 			if (v == null) {
 				v = new Vector();
 			}
 			size = v.size();
-			// REVISIT
-			// Old-style data that may be removed in new StateMod...
+			// TODO Old-style data that may be removed in new StateMod...
 			setNumeva ( size );
 			for (i = 0; i < size; i++) {
-				((MonthTS)v.elementAt(i)).setDataType(
-				lookupTimeSeriesDataType(
-				COMP_EVAPORATION_TS_MONTHLY ) );
+				((MonthTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType( COMP_EVAPORATION_TS_MONTHLY ) );
 			}
 			comp.setData(v);
 			comp.setDirty ( false );
@@ -6443,46 +6377,40 @@ throws Exception
 			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	} catch (Exception e) {
-		Message.printWarning(1, routine,
-		"Error reading evaporation time series file:\n\"" + fn + "\"");
+		Message.printWarning(1, routine, "Error reading evaporation time series file:\n\"" + fn + "\"");
 		Message.printWarning(2, routine, e);
 	}
 
 	// Stream gage base flow time series (.rim or .xbm) - always read...
 
-	try {	fn = null;
+	try {
+		fn = null;
 		if ( __is_free_format ) {
-			fn = response_props.getValue (
-				"Stream_Base_Monthly" );
+			fn = response_props.getValue ( "Stream_Base_Monthly" );
 		}
-		else {	if (	continue_reading &&
-				((fn = readFileLine ( in )) == null) ) {
+		else {
+			if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 				continue_reading = false;
 			}
 		}
 		// Always set the file name...
-		comp = getComponentForComponentType(
-			COMP_STREAMGAGE_BASEFLOW_TS_MONTHLY );
+		comp = getComponentForComponentType( COMP_STREAMGAGE_BASEFLOW_TS_MONTHLY );
 		if ( (comp != null) && (fn != null) ) {
 			comp.setDataFileName ( fn );
 		}
 		// Read the data...
-		if (	continue_reading && (fn != null) &&
-			!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+		if ( continue_reading && (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 			readTime.clear();
 			readTime.start();
 			fn = getDataFilePathAbsolute ( fn );
 			readInputAnnounce1(comp);
-			Vector v = StateMod_TS.readTimeSeriesList(fn, null,
-				null, null, true);
+			Vector v = StateMod_TS.readTimeSeriesList(fn, null,	null, null, true);
 			if (v == null) {
 				v = new Vector();
 			}
 			size = v.size();
 			for (i = 0; i < size; i++) {
-				((MonthTS)v.elementAt(i)).setDataType(
-				lookupTimeSeriesDataType(
-				COMP_STREAMGAGE_BASEFLOW_TS_MONTHLY ) );
+				((MonthTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType( COMP_STREAMGAGE_BASEFLOW_TS_MONTHLY ) );
 			}
 			comp.setData(v);
 			comp.setDirty ( false );
@@ -6490,9 +6418,7 @@ throws Exception
 			// The StreamGage and StreamEstimate groups
 			// share the same baseflow time series files...
 
-			DataSetComponent comp2 =
-			getComponentForComponentType(
-			COMP_STREAMESTIMATE_BASEFLOW_TS_MONTHLY );
+			DataSetComponent comp2 = getComponentForComponentType( COMP_STREAMESTIMATE_BASEFLOW_TS_MONTHLY );
 			comp2.setDataFileName ( comp.getDataFileName());
 			comp2.setData(v);
 			comp2.setDirty ( false );
@@ -6501,46 +6427,40 @@ throws Exception
 			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	} catch (Exception e) {
-		Message.printWarning(1, routine,
-		"Error reading baseflow time series (monthly) file:\n\""+
-		fn+"\"");
+		Message.printWarning(1, routine, "Error reading baseflow time series (monthly) file:\n\""+ fn+"\"");
 		Message.printWarning(2, routine, e);
 	}
 
-	// Direct flow demand time series (monthly) file (.ddm)...
+	// Diversion direct flow demand time series (monthly) file (.ddm)...
 
-	try {	fn = null;
+	try {
+		fn = null;
 		if ( __is_free_format ) {
 			fn =response_props.getValue("Diversion_Demand_Monthly");
 		}
-		else {	if (	continue_reading &&
-				((fn = readFileLine ( in )) == null) ) {
+		else {
+			if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 				continue_reading = false;
 			}
 		}
 		// Always set the file name in the component...
-		comp = getComponentForComponentType(
-			COMP_DEMAND_TS_MONTHLY );
+		comp = getComponentForComponentType( COMP_DEMAND_TS_MONTHLY );
 		if ( (comp != null) && (fn != null) ) {
 			comp.setDataFileName ( fn );
 		}
 		// Now read the data...
-		if (	continue_reading && __tsAreRead && (fn != null) &&
-			!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+		if ( continue_reading && __tsAreRead && (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 			readTime.clear();
 			readTime.start();
 			readInputAnnounce1(comp);
 			fn = getDataFilePathAbsolute ( fn );
-			Vector v = StateMod_TS.readTimeSeriesList(fn, 
-				null, null, null, true);
+			Vector v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 			if (v == null) {
 				v = new Vector();
 			}
 			size = v.size();
 			for (i = 0; i < size; i++) {
-				((MonthTS)v.elementAt(i)).setDataType(
-				lookupTimeSeriesDataType(
-				COMP_DEMAND_TS_MONTHLY ) );
+				((MonthTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType( COMP_DEMAND_TS_MONTHLY ) );
 			}
 			comp.setData(v);
 			comp.setDirty ( false );
@@ -6549,46 +6469,40 @@ throws Exception
 
 		}
 	} catch (Exception e) {
-		Message.printWarning(1, routine, "Error reading demand"+
-			" time series (monthly) file:\n\""+fn+"\"");
+		Message.printWarning(1, routine, "Error reading demand time series (monthly) file:\n\""+fn+"\"");
 		Message.printWarning(2, routine, e);
 	}
 	
 	// Direct flow demand time series override (monthly) file (.ddo)...
 
-	try {	fn = null;
+	try {
+		fn = null;
 		if ( __is_free_format ) {
-			fn = response_props.getValue (
-				"Diversion_DemandOverride_Monthly" );
+			fn = response_props.getValue ( "Diversion_DemandOverride_Monthly" );
 		}
-		else {	if (	continue_reading &&
-				((fn = readFileLine ( in )) == null) ) {
+		else {
+			if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 				continue_reading = false;
 			}
 		}
 		// Set the file name in the component...
-		comp = getComponentForComponentType(
-			COMP_DEMAND_TS_OVERRIDE_MONTHLY );
+		comp = getComponentForComponentType( COMP_DEMAND_TS_OVERRIDE_MONTHLY );
 		if ( (comp != null) && (fn != null) ) {
 			comp.setDataFileName ( fn );
 		}
 		// Now read the file...
-		if (	continue_reading && __tsAreRead && (fn != null) &&
-			!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+		if ( continue_reading && __tsAreRead && (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 			readTime.clear();
 			readTime.start();
 			readInputAnnounce1(comp);
 			fn = getDataFilePathAbsolute ( fn );
-			Vector v = StateMod_TS.readTimeSeriesList(fn, 
-				null, null, null, true);
+			Vector v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 			if (v == null) {
 				v = new Vector();
 			}
 			size = v.size();
 			for (i = 0; i < size; i++) {
-				((MonthTS)v.elementAt(i)).setDataType(
-				lookupTimeSeriesDataType(
-				COMP_DEMAND_TS_OVERRIDE_MONTHLY ) );
+				((MonthTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType(COMP_DEMAND_TS_OVERRIDE_MONTHLY ) );
 			}
 			comp.setData(v);
 			comp.setDirty ( false );
@@ -6597,95 +6511,82 @@ throws Exception
 
 		}
 	} catch (Exception e) {
-		Message.printWarning(1, routine, "Error reading demand"+
-			" time series override (monthly) file:\n\""+fn+"\"");
+		Message.printWarning(1, routine, "Error reading demand time series override (monthly) file:\n\""+fn+"\"");
 		Message.printWarning(2, routine, e);
 	}
 	
 	// Direct flow demand time series average (monthly) file (.dda)...
 
-	try {	fn = null;
+	try {
+		fn = null;
 		if ( __is_free_format ) {
-			fn = response_props.getValue (
-				"Diversion_Demand_AverageMonthly" );
+			fn = response_props.getValue ( "Diversion_Demand_AverageMonthly" );
 		}
-		else {	if (	continue_reading &&
-				((fn = readFileLine ( in )) == null) ) {
+		else {
+			if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 				continue_reading = false;
 			}
 		}
 		// Set the file name in the component...
-		comp = getComponentForComponentType(
-			COMP_DEMAND_TS_AVERAGE_MONTHLY );
+		comp = getComponentForComponentType( COMP_DEMAND_TS_AVERAGE_MONTHLY );
 		if ( (comp != null) && (fn != null) ) {
 			comp.setDataFileName ( fn );
 		}
 		// Now read the data file...
-		if (	continue_reading && __tsAreRead && (fn != null) &&
-			!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+		if ( continue_reading && __tsAreRead && (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 			readTime.clear();
 			readTime.start();
 			readInputAnnounce1(comp);
 			fn = getDataFilePathAbsolute ( fn );
-			Vector v = StateMod_TS.readTimeSeriesList(fn, 
-				null, null, null, true);
+			Vector v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 			if (v == null) {
 				v = new Vector();
 			}
 			size = v.size();
 			for (i = 0; i < size; i++) {
-				((MonthTS)v.elementAt(i)).setDataType(
-				lookupTimeSeriesDataType(
-				COMP_DEMAND_TS_AVERAGE_MONTHLY ) );
+				((MonthTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType( COMP_DEMAND_TS_AVERAGE_MONTHLY ) );
 			}
 			comp.setData(v);
 			comp.setDirty ( false );
 			readTime.stop();
 			readInputAnnounce2(comp, readTime.getSeconds() );
-
 		}
 	} catch (Exception e) {
-		Message.printWarning(1, routine, "Error reading demand"+
-			" time series (average monthly) file:\n\""+fn+"\"");
+		Message.printWarning(1, routine, "Error reading demand time series (average monthly) file:\n\""+fn+"\"");
 		Message.printWarning(2, routine, e);
 	}
 	
 	// Monthly instream flow demand...
 
 	if ( __is_free_format || (!__is_free_format && hasMonthlyISFData()) ) {
-		try {	fn = null;
+		try {
+			fn = null;
 			if ( __is_free_format ) {
-				fn = response_props.getValue (
-					"Instreamflow_Demand_Monthly" );
+				fn = response_props.getValue ( "Instreamflow_Demand_Monthly" );
 			}
-			else {	if (	continue_reading &&
-					((fn = readFileLine ( in )) == null) ) {
+			else {
+				if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 					continue_reading = false;
 				}
 			}
 			// Set the file name in the component...
-			comp = getComponentForComponentType(
-				COMP_INSTREAM_DEMAND_TS_MONTHLY );
+			comp = getComponentForComponentType( COMP_INSTREAM_DEMAND_TS_MONTHLY );
 			if ( (comp != null) && (fn != null) ) {
 				comp.setDataFileName ( fn );
 			}
 			// Read the data file...
-			if (	continue_reading && (fn != null) &&
-				!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+			if ( continue_reading && (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 				readTime.clear();
 				readTime.start();
 				readInputAnnounce1(comp);
 				fn = getDataFilePathAbsolute ( fn );
-				Vector v = StateMod_TS.readTimeSeriesList(fn,
-					null, null, null, true);
+				Vector v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 				if (v == null) {
 					v = new Vector();
 				}
 				size = v.size();
 				for (i = 0; i<size; i++) {
-					((MonthTS)v.elementAt(i)).setDataType(
-					lookupTimeSeriesDataType(
-					COMP_INSTREAM_DEMAND_TS_MONTHLY ) );
+					((MonthTS)v.elementAt(i)).setDataType(lookupTimeSeriesDataType(COMP_INSTREAM_DEMAND_TS_MONTHLY ) );
 				}
 				comp.setData(v);
 				comp.setDirty ( false );
@@ -6694,47 +6595,42 @@ throws Exception
 			}
 		} catch (Exception e) {
 			Message.printWarning(1, routine, 
-			"Error reading monthly instream flow demand time "
-			+ "series file:\n\"" + fn + "\"");
+			"Error reading monthly instream flow demand time series file:\n\"" + fn + "\"");
 			Message.printWarning(2, routine, e);
 		}
 	}
 
 	// Instream demand time series (average monthly) file (.ifa)...
 
-	try {	fn = null;
+	try {
+		fn = null;
 		if ( __is_free_format ) {
-			fn = response_props.getValue (
-				"Instreamflow_Demand_AverageMonthly" );
+			fn = response_props.getValue ( "Instreamflow_Demand_AverageMonthly" );
 		}
-		else {	if (	continue_reading &&
-				((fn = readFileLine ( in )) == null) ) {
+		else {
+			if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 				continue_reading = false;
 			}
 		}
 		// Set the file name in the component...
-		comp = getComponentForComponentType(
-			COMP_INSTREAM_DEMAND_TS_AVERAGE_MONTHLY );
+		comp = getComponentForComponentType( COMP_INSTREAM_DEMAND_TS_AVERAGE_MONTHLY );
 		if ( (comp != null) && (fn != null) ) {
 			comp.setDataFileName ( fn );
 		}
 		// Now read the data file...
-		if (	continue_reading && __tsAreRead && (fn != null) &&
-			!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+		if ( continue_reading && __tsAreRead && (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 			readTime.clear();
 			readTime.start();
 			fn = getDataFilePathAbsolute ( fn );
 			readInputAnnounce1(comp);
-			Vector v = StateMod_TS.readTimeSeriesList(fn, null,
-				null, null, true);
+			Vector v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 			if (v == null) {
 				v = new Vector();
 			}
 			size = v.size();
 			for (i = 0; i< size; i++) {
 				((MonthTS)v.elementAt(i)).setDataType(
-				lookupTimeSeriesDataType(
-				COMP_INSTREAM_DEMAND_TS_AVERAGE_MONTHLY ) );
+						lookupTimeSeriesDataType( COMP_INSTREAM_DEMAND_TS_AVERAGE_MONTHLY ) );
 			}
 			comp.setData(v);
 			comp.setDirty ( false );
@@ -6742,48 +6638,41 @@ throws Exception
 			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	} catch (Exception e) {
-		Message.printWarning(1, routine, 
-			"Error reading instream flow demand time "
-			+ "series file:\n\"" + fn + "\"");
+		Message.printWarning(1, routine, "Error reading instream flow demand time series file:\n\"" + fn + "\"");
 		Message.printWarning(2, routine, e);
 	}
 
 	// Well demand time series (monthly) file (.wem)...
 
 	if ( __is_free_format || (!__is_free_format && hasWellData(false)) ) {
-		try {	fn = null;
+		try {
+			fn = null;
 			if ( __is_free_format ) {
-				fn = response_props.getValue (
-					"Well_Demand_Monthly" );
+				fn = response_props.getValue ( "Well_Demand_Monthly" );
 			}
-			else {	if (	continue_reading &&
-					((fn = readFileLine ( in )) == null) ) {
+			else {
+				if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 					continue_reading = false;
 				}
 			}
 			// Set the file name in the component...
-			comp = getComponentForComponentType(
-				COMP_WELL_DEMAND_TS_MONTHLY );
+			comp = getComponentForComponentType( COMP_WELL_DEMAND_TS_MONTHLY );
 			if ( (comp != null) && (fn != null) ) {
 				comp.setDataFileName ( fn );
 			}
 			// Now read the data file...
-			if (	continue_reading && __tsAreRead && (fn != null)
-				&&!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+			if ( continue_reading && __tsAreRead && (fn != null) &&!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 				readTime.clear();
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
-				Vector v = StateMod_TS.readTimeSeriesList(fn,
-					null, null, null, true);
+				Vector v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 				if (v == null) {
 					v = new Vector();
 				}
 				size = v.size();				
 				for (i = 0; i < size; i++) {
-					((MonthTS)v.elementAt(i)).setDataType(
-					lookupTimeSeriesDataType(
-					COMP_WELL_DEMAND_TS_MONTHLY ) );
+					((MonthTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType( COMP_WELL_DEMAND_TS_MONTHLY ) );
 				}
 				comp.setData(v);
 				comp.setDirty ( false );
@@ -6791,21 +6680,20 @@ throws Exception
 				readInputAnnounce2(comp, readTime.getSeconds());
 			}
 		} catch (Exception e) {
-			Message.printWarning(1, routine,
-				"Error reading well demand time "
-				+ "series (monthly) file:\n" + fn + "\"");
+			Message.printWarning(1, routine, "Error reading well demand time series (monthly) file:\n" + fn + "\"");
 			Message.printWarning(2, routine, e);
 		}
 	}
 
 	// Delay file (monthly) file (.dly)...
 
-	try {	fn = null;
+	try {
+		fn = null;
 		if ( __is_free_format ) {
 			fn = response_props.getValue ( "DelayTable_Monthly" );
 		}
-		else {	if (	continue_reading &&
-				((fn = readFileLine ( in )) == null) ) {
+		else {
+			if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 				continue_reading = false;
 			}
 		}
@@ -6815,66 +6703,57 @@ throws Exception
 			comp.setDataFileName ( fn );
 		}
 		// Read the data...
-		if (	continue_reading && (fn != null) &&
-			!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+		if ( continue_reading && (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 			readTime.clear();
 			readTime.start();
 			fn = getDataFilePathAbsolute ( fn );
 			readInputAnnounce1(comp);
-			comp.setData( StateMod_DelayTable.readStateModFile(
-				fn,true,getInterv()) );
+			comp.setData( StateMod_DelayTable.readStateModFile(	fn,true,getInterv()) );
 			comp.setDirty ( false );
 			readTime.stop();
 			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	} catch (Exception e) {
-		Message.printWarning(1, routine, "Error reading delay table "
-			+ " (monthly) file:\n\"" + fn + "\"");
+		Message.printWarning(1, routine, "Error reading delay table (monthly) file:\n\"" + fn + "\"");
 		Message.printWarning(2, routine, e);
 	}
 
 	// Reservoir target time series (monthly) file (.tar)...
 
-	try {	fn = null;
+	try {
+		fn = null;
 		if ( __is_free_format ) {
-			fn = response_props.getValue (
-				"Reservoir_Target_Monthly" );
+			fn = response_props.getValue ( "Reservoir_Target_Monthly" );
 		}
-		else {	if (	continue_reading &&
-				((fn = readFileLine ( in )) == null) ) {
+		else {
+			if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 				continue_reading = false;
 			}
 		}
 		// Set the file name in the component...
-		comp = getComponentForComponentType(
-			COMP_RESERVOIR_TARGET_TS_MONTHLY );
+		comp = getComponentForComponentType( COMP_RESERVOIR_TARGET_TS_MONTHLY );
 		if ( (comp != null) && (fn != null) ) {
 			comp.setDataFileName ( fn );
 		}
 		// Now read the data file...
-		if (	continue_reading && __tsAreRead && (fn != null) &&
-			!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+		if ( continue_reading && __tsAreRead && (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 			readTime.clear();
 			readTime.start();
 			fn = getDataFilePathAbsolute ( fn );
 			readInputAnnounce1(comp);
-			Vector v = StateMod_TS.readTimeSeriesList(fn, null,
-				null, null, true);
+			Vector v = StateMod_TS.readTimeSeriesList(fn, null,	null, null, true);
 			if (v == null) {
 				v = new Vector();
 			}
 			size = v.size();
 			for (i = 0; i < size; i++) {
 				if ( (i%2) == 0 ) {
-					((MonthTS)v.elementAt(i)).setDataType(
-					lookupTimeSeriesDataType(
-					COMP_RESERVOIR_TARGET_TS_MONTHLY) +
-					"Min" );
+					((MonthTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType(
+					COMP_RESERVOIR_TARGET_TS_MONTHLY) +	"Min" );
 				}
-				else {	((MonthTS)v.elementAt(i)).setDataType(
-					lookupTimeSeriesDataType(
-					COMP_RESERVOIR_TARGET_TS_MONTHLY) +
-					"Max" );
+				else {
+					((MonthTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType(
+					COMP_RESERVOIR_TARGET_TS_MONTHLY) +	"Max" );
 				}
 			}
 			comp.setData(v);
@@ -6883,22 +6762,20 @@ throws Exception
 			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	} catch (Exception e) {
-		Message.printWarning(1, routine, "Error reading " +
-		"reservoir target time series (monthly) file:\n\"" + fn +
-		"\"");
+		Message.printWarning(1, routine, "Error reading reservoir target time series (monthly) file:\n\"" + fn + "\"");
 		Message.printWarning(2, routine, e);
 	}
 
-	// REVISIT - San Juan Sediment Recovery
+	// TODO - San Juan Sediment Recovery
 
 	if ( __is_free_format || (!__is_free_format && hasSanJuanData(false))) {
-		try {	fn = null;
+		try {
+			fn = null;
 			if ( __is_free_format ) {
-				fn = response_props.getValue (
-					"SanJuanRecovery" );
+				fn = response_props.getValue ( "SanJuanRecovery" );
 			}
-			else {	if (	continue_reading &&
-					((fn = readFileLine ( in )) == null) ) {
+			else {
+				if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 					continue_reading = false;
 				}
 			}
@@ -6908,98 +6785,82 @@ throws Exception
 				comp.setDataFileName ( fn );
 			}
 			// Read the data...
-			if (	continue_reading && (fn != null) &&
-				hasSanJuanData(false) &&
-				!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
-				Message.printWarning ( 1, routine,
-				"Do not know how to read the San Juan " +
-				"Recover File." );
+			if ( continue_reading && (fn != null) && hasSanJuanData(false) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+				Message.printWarning ( 1, routine, "Do not know how to read the San Juan Recovery File." );
 			}
 		} catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading San"+
-			" Juan Recovery file:\n\""+fn+"\"");
+			Message.printWarning(1, routine, "Error reading San Juan Recovery file:\n\""+fn+"\"");
 			Message.printWarning(2, routine, e);
 		}
 	}
 
 	// Irrigation practice time series (tsp/ipy)...
 
-	if (	__is_free_format ||
-		(!__is_free_format && hasIrrigationPracticeData(false)) ) {
-		try {	fn = null;
+	if ( __is_free_format || (!__is_free_format && hasIrrigationPracticeData(false)) ) {
+		try {
+			fn = null;
 			if ( __is_free_format ) {
-				fn = response_props.getValue (
-					"IrrigationPractice_Yearly" );
+				fn = response_props.getValue ( "IrrigationPractice_Yearly" );
 			}
-			else {	if (	continue_reading &&
-					((fn = readFileLine ( in )) == null) ) {
+			else {
+				if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 					continue_reading = false;
 				}
 			}
 			// Set the file name in the component...
-			comp = getComponentForComponentType(
-				COMP_IRRIGATION_PRACTICE_TS_YEARLY );
+			comp = getComponentForComponentType( COMP_IRRIGATION_PRACTICE_TS_YEARLY );
 			if ( (comp != null) && (fn != null) ) {
 				comp.setDataFileName ( fn );
 			}
 			// Now read the data...
-			if (	continue_reading && __tsAreRead && (fn != null)
-				&&!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+			if ( continue_reading && __tsAreRead && (fn != null) &&!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 				readTime.clear();
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
-				comp.setData(
-				StateCU_IrrigationPracticeTS.readStateCUFile(
-				fn, null, null ) );
+				comp.setData( StateCU_IrrigationPracticeTS.readStateCUFile( fn, null, null ) );
 				comp.setDirty ( false );
 				readTime.stop();
 				readInputAnnounce2(comp, readTime.getSeconds());
 			}
 		} catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading "
-				+ "irrigation practice file:\n\"" + fn + "\"");
+			Message.printWarning(1, routine, "Error reading irrigation practice file:\n\"" + fn + "\"");
 			Message.printWarning(2, routine, e);
 		}
 	}
 
 	// Irrigation water requirement (iwr) - monthly...
 
-	if (	__is_free_format ||
-		(!__is_free_format&& hasIrrigationWaterRequirementData(false))){
-		try {	fn = null;
+	if ( __is_free_format || (!__is_free_format&& hasIrrigationWaterRequirementData(false))){
+		try {
+			fn = null;
 			if ( __is_free_format ) {
-				fn = response_props.getValue (
-					"ConsumptiveWaterRequirement_Monthly" );
+				fn = response_props.getValue ( "ConsumptiveWaterRequirement_Monthly" );
 			}
-			else {	if (	continue_reading &&
-					((fn = readFileLine ( in )) == null) ) {
+			else {
+				if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 					continue_reading = false;
 				}
 			}
 			// Set the file name in the component...
-			comp = getComponentForComponentType(
-				COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_MONTHLY );
+			comp = getComponentForComponentType( COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_MONTHLY );
 			if ( (comp != null) && (fn != null) ) {
 				comp.setDataFileName ( fn );
 			}
 			// Now read the data...
-			if (	continue_reading && __tsAreRead && (fn != null)
-				&&!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+			if ( continue_reading && __tsAreRead && (fn != null) &&!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 				readTime.clear();
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
-				Vector v = StateMod_TS.readTimeSeriesList(fn,
-					null, null, null, true);
+				Vector v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 				if (v == null) {
 					v = new Vector();
 				}
 				size = v.size();				
 				for (i = 0; i < size; i++) {
-					((MonthTS)v.elementAt(i)).setDataType(
-					lookupTimeSeriesDataType (
-				COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_MONTHLY));
+					((MonthTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType (
+							COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_MONTHLY));
 				}
 				comp.setData(v);
 				comp.setDirty ( false );
@@ -7007,26 +6868,22 @@ throws Exception
 				readInputAnnounce2(comp, readTime.getSeconds());
 			}
 		} catch (Exception e) {
-			Message.printWarning(1,routine,"Error reading "+
-			"irrigation water requirement (monthly) time series " +
-			"file:\n\"" +
-			fn + "\"");
+			Message.printWarning(1,routine,"Error reading irrigation water requirement (monthly) time series " +
+			"file:\n\"" + fn + "\"");
 			Message.printWarning(2, routine, e);
 		}
 	}
 
-	// REVISIT - Soil moisture (StateCU STR?) - StateMod used to read PAR
-	// but the AWC is now in the STR file.
+	// TODO - Soil moisture (StateCU STR?) - StateMod used to read PAR but the AWC is now in the STR file.
 
-	if (	__is_free_format ||
-		(!__is_free_format && hasSoilMoistureData(false)) ) {
-		try {	fn = null;
+	if ( __is_free_format || (!__is_free_format && hasSoilMoistureData(false)) ) {
+		try {
+			fn = null;
 			if ( __is_free_format ) {
-				fn = response_props.getValue (
-					"SoilMoisture" );
+				fn = response_props.getValue ( "SoilMoisture" );
 			}
-			else {	if (	continue_reading &&
-					((fn = readFileLine ( in )) == null) ) {
+			else {
+				if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 					continue_reading = false;
 				}
 			}
@@ -7036,56 +6893,46 @@ throws Exception
 				comp.setDataFileName ( fn );
 			}
 			// Read the data...
-			if (	continue_reading && (fn != null) &&
-				!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
-				Message.printWarning ( 2, routine,
-				"StateCU Soil moisture File - " +
-				"not yet supported.");
+			if ( continue_reading && (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+				Message.printWarning ( 2, routine, "StateCU Soil moisture File - not yet supported.");
 			}
 		} catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading soil "+
-			" moisture file:\n\""+fn+"\"");
+			Message.printWarning(1, routine, "Error reading soil moisture file:\n\""+fn+"\"");
 			Message.printWarning(2, routine, e);
 		}
 	}
 
 	// Reservoir content time series (monthly) file (.eom)...
 
-	try {	fn = null;
+	try {
+		fn = null;
 		if ( __is_free_format ) {
-			fn = response_props.getValue (
-				"Reservoir_Historic_Monthly" );
+			fn = response_props.getValue ( "Reservoir_Historic_Monthly" );
 		}
-		else {	if (	continue_reading &&
-				((fn = readFileLine ( in )) == null) ) {
+		else {
+			if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 				continue_reading = false;
 			}
 		}
 		// Set the file name in the component...
-		comp = getComponentForComponentType(
-			COMP_RESERVOIR_CONTENT_TS_MONTHLY );
+		comp = getComponentForComponentType( COMP_RESERVOIR_CONTENT_TS_MONTHLY );
 		if ( (comp != null) && (fn != null) ) {
 			comp.setDataFileName ( fn );
 		}
 		// Now read the data file...
-		if (	continue_reading && __tsAreRead && (fn != null) &&
-			!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+		if ( continue_reading && __tsAreRead && (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 			readTime.clear();
 			readTime.start();
 			fn = getDataFilePathAbsolute ( fn );
 			readInputAnnounce1(comp);
-			Vector v = StateMod_TS.readTimeSeriesList(fn,
-				null, null, null, true);
+			Vector v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 			if (v == null) {
 				v = new Vector();
 			}
-			// Set the data type because it is not in the StateMod
-			// file...
+			// Set the data type because it is not in the StateMod file...
 			size = v.size();
 			for (i = 0; i < size; i++) {
-				((MonthTS)v.elementAt(i)).setDataType(
-					lookupTimeSeriesDataType (
-					COMP_RESERVOIR_CONTENT_TS_MONTHLY ));
+				((MonthTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType ( COMP_RESERVOIR_CONTENT_TS_MONTHLY ));
 			}
 			comp.setData(v);
 			comp.setDirty ( false );
@@ -7093,86 +6940,74 @@ throws Exception
 			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	} catch (Exception e) {
-		Message.printWarning(1, routine,
-		"Error reading reservoir end of month time series " +
-		"file:\n\"" + fn + "\"");
+		Message.printWarning(1, routine, "Error reading reservoir end of month time series file:\n\"" + fn + "\"");
 		Message.printWarning(2, routine, e);
 	}
 
 	// Baseflow coefficients file (.rib)...
 
-	try {	fn = null;
+	try {
+		fn = null;
 		if ( __is_free_format ) {
-			fn = response_props.getValue (
-				"StreamEstimate_Coefficients" );
+			fn = response_props.getValue ( "StreamEstimate_Coefficients" );
 		}
-		else {	if (	continue_reading &&
-				((fn = readFileLine ( in )) == null) ) {
+		else {
+			if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 				continue_reading = false;
 			}
 		}
 		// Always set the file name...
-		comp = getComponentForComponentType(
-			COMP_STREAMESTIMATE_COEFFICIENTS);
+		comp = getComponentForComponentType( COMP_STREAMESTIMATE_COEFFICIENTS);
 		if ( (comp != null) && (fn != null) ) {
 			comp.setDataFileName ( fn );
 		}
 		// Read the data...
-		if (	continue_reading && (fn != null) &&
-			!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+		if ( continue_reading && (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 			readTime.clear();
 			readTime.start();
 			fn = getDataFilePathAbsolute ( fn );
 			readInputAnnounce1(comp);
-			comp.setData( StateMod_StreamEstimate_Coefficients.
-				readStateModFile(fn) );
+			comp.setData( StateMod_StreamEstimate_Coefficients.readStateModFile(fn) );
 			comp.setDirty ( false );
 			readTime.stop();
 			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	} catch (Exception e) {
-		Message.printWarning(1, routine, "Error reading baseflow "
-			+ "coefficient file:\n\"" + fn + "\"");
+		Message.printWarning(1, routine, "Error reading baseflow coefficient file:\n\"" + fn + "\"");
 		Message.printWarning(2, routine, e);
 	}
 
 	// Historical streamflow (monthly) file (.rih)...
 
-	try {	fn = null;
+	try {
+		fn = null;
 		if ( __is_free_format ) {
-			fn = response_props.getValue (
-				"StreamGage_Historic_Monthly" );
+			fn = response_props.getValue ( "StreamGage_Historic_Monthly" );
 		}
-		else {	if (	continue_reading &&
-				((fn = readFileLine ( in )) == null) ) {
+		else {
+			if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 				continue_reading = false;
 			}
 		}
 		// Always set the file name...
-		comp = getComponentForComponentType(
-			COMP_STREAMGAGE_HISTORICAL_TS_MONTHLY );
+		comp = getComponentForComponentType( COMP_STREAMGAGE_HISTORICAL_TS_MONTHLY );
 		if ( (comp != null) && (fn != null) ) {
 			comp.setDataFileName ( fn );
 		}
 		// Read the data...
-		if (	continue_reading && (fn != null) &&
-			!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+		if ( continue_reading && (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 			readTime.clear();
 			readTime.start();
 			fn = getDataFilePathAbsolute ( fn );
 			readInputAnnounce1(comp);
-			Vector v = StateMod_TS.readTimeSeriesList(fn, null,
-				null, null, true);
+			Vector v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 			if (v == null) {
 				v = new Vector();
 			}
 			size = v.size();
 			for (i = 0; i<size; i++) {
-				// Set this information because it is not in the
-				// StateMod time series file...
-				((MonthTS)v.elementAt(i)).setDataType(
-				lookupTimeSeriesDataType (
-				COMP_STREAMGAGE_HISTORICAL_TS_MONTHLY ));
+				// Set this information because it is not in the StateMod time series file...
+				((MonthTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType (COMP_STREAMGAGE_HISTORICAL_TS_MONTHLY ));
 			}
 			comp.setData(v);
 			comp.setDirty ( false );
@@ -7180,21 +7015,19 @@ throws Exception
 			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	} catch (Exception e) {
-		Message.printWarning(1, routine,
-		"Error reading historical streamflow time series file:\n"
-		+ "\n\"" + fn + "\"");
+		Message.printWarning(1, routine, "Error reading historical streamflow time series file:\n\n\"" + fn + "\"");
 		Message.printWarning(2, routine, e);
 	}
 
 	// Diversion time series (historical monthly) file (.ddh)...
 
-	try {	fn = null;
+	try {
+		fn = null;
 		if ( __is_free_format ) {
-			fn = response_props.getValue (
-				"Diversion_Historic_Monthly" );
+			fn = response_props.getValue ( "Diversion_Historic_Monthly" );
 		}
-		else {	if (	continue_reading &&
-				((fn = readFileLine ( in )) == null) ) {
+		else {
+			if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 				continue_reading = false;
 			}
 		}
@@ -7204,22 +7037,18 @@ throws Exception
 			comp.setDataFileName ( fn );
 		}
 		// Now read the file if requested...
-		if (	continue_reading && __tsAreRead && (fn != null) &&
-			!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+		if ( continue_reading && __tsAreRead && (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 			readTime.clear();
 			readTime.start();
 			readInputAnnounce1(comp);
 			fn = getDataFilePathAbsolute ( fn );
-			Vector v = StateMod_TS.readTimeSeriesList(fn, 
-				null, null, null, true);
+			Vector v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 			if (v == null) {
 				v = new Vector();
 			}
 			size = v.size();
 			for (i = 0; i < size; i++) {
-				((MonthTS)v.elementAt(i)).setDataType(
-				lookupTimeSeriesDataType (
-				COMP_DIVERSION_TS_MONTHLY ));
+				((MonthTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType (COMP_DIVERSION_TS_MONTHLY ));
 			}
 			comp.setData ( v );
 			comp.setDirty ( false );
@@ -7227,48 +7056,41 @@ throws Exception
 			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	} catch (Exception e) {
-		Message.printWarning(1, routine,
-			"Error reading historical diversion time "
-			+ "series (monthly) file:\n\"" + fn + "\"");
+		Message.printWarning(1, routine, "Error reading historical diversion time series (monthly) file:\n\"" + fn + "\"");
 		Message.printWarning(2, routine, e);
 	}
 
 	// Well historical pumping time series (monthly) file (.weh)..
 
 	if ( __is_free_format || (!__is_free_format && hasWellData(false)) ) {
-		try {	fn = null;
+		try {
+			fn = null;
 			if ( __is_free_format ) {
-				fn = response_props.getValue (
-					"Well_Historic_Monthly" );
+				fn = response_props.getValue ( "Well_Historic_Monthly" );
 			}
-			else {	if (	continue_reading &&
-					((fn = readFileLine ( in )) == null) ) {
+			else {
+				if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 					continue_reading = false;
 				}
 			}
 			// Set the file name in the component...
-			comp = getComponentForComponentType(
-				COMP_WELL_PUMPING_TS_MONTHLY );
+			comp = getComponentForComponentType( COMP_WELL_PUMPING_TS_MONTHLY );
 			if ( (comp != null) && (fn != null) ) {
 				comp.setDataFileName ( fn );
 			}
 			// Now read the data file...
-			if (	continue_reading && __tsAreRead && (fn != null)
-				&&!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+			if ( continue_reading && __tsAreRead && (fn != null) &&!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 				readTime.clear();
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
-				Vector v = StateMod_TS.readTimeSeriesList(fn,
-					null, null, null, true);
+				Vector v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 				if (v == null) {
 					v = new Vector();
 				}
 				size = v.size();
 				for (i = 0; i < size; i++) {
-					((MonthTS)v.elementAt(i)).setDataType(
-					lookupTimeSeriesDataType (
-					COMP_WELL_PUMPING_TS_MONTHLY ));
+					((MonthTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType ( COMP_WELL_PUMPING_TS_MONTHLY ));
 				}
 				comp.setData(v);
 				comp.setDirty ( false );
@@ -7276,21 +7098,20 @@ throws Exception
 				readInputAnnounce2(comp, readTime.getSeconds());
 			}
 		} catch (Exception e) {
-			Message.printWarning(1, routine,
-				"Error reading well pumping time "
-				+ "series (monthly) file:\n\"" + fn + "\"");
+			Message.printWarning(1, routine, "Error reading well pumping time series (monthly) file:\n\"" + fn + "\"");
 			Message.printWarning(2, routine, e);
 		}
 	}
 
 	// GeoView project file...
 
-	try {	fn = null;
+	try {
+		fn = null;
 		if ( __is_free_format ) {
 			fn = response_props.getValue ( "GeographicInformation");
 		}
-		else {	if (	continue_reading &&
-				((fn = readFileLine ( in )) == null) ) {
+		else {
+			if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 				continue_reading = false;
 			}
 		}
@@ -7314,20 +7135,20 @@ throws Exception
 	catch (Exception e) {
 		// Print this at level 2 because the main GUI will warn if it
 		// cannot read the file.  We don't want 2 warnings.
-		Message.printWarning(2, routine, "Unable to read/process "
-			+ " GeoView project file \"" + fn + "\"" );
+		Message.printWarning(2, routine, "Unable to read/process GeoView project file \"" + fn + "\"" );
 		Message.printWarning(2, routine, e);
 	}
 
-	// REVISIT - output control - this is usually read separately when
+	// RTODO - output control - this is usually read separately when
 	// running reports, etc.  Just read the line but do not read the file...
 
-	try {	fn = null;
+	try {
+		fn = null;
 		if ( __is_free_format ) {
 			fn = response_props.getValue ( "OutputRequest" );
 		}
-		else {	if (	continue_reading &&
-				((fn = readFileLine ( in )) == null) ) {
+		else {
+			if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 				continue_reading = false;
 			}
 		}
@@ -7346,39 +7167,34 @@ throws Exception
 	// Always read if a daily data set.
 
 	if ( __is_free_format || (!__is_free_format && hasDailyData(false)) ) {
-		try {	fn = null;
+		try {
+			fn = null;
 			if ( __is_free_format ) {
-				fn = response_props.getValue (
-					"Stream_Base_Daily" );
+				fn = response_props.getValue ( "Stream_Base_Daily" );
 			}
-			else {	if (	continue_reading &&
-					((fn = readFileLine ( in )) == null) ) {
+			else {
+				if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 					continue_reading = false;
 				}
 			}
 			// Always set the file name...
-			comp = getComponentForComponentType(
-				COMP_STREAMGAGE_BASEFLOW_TS_DAILY );
+			comp = getComponentForComponentType( COMP_STREAMGAGE_BASEFLOW_TS_DAILY );
 			if ( (comp != null) && (fn != null) ) {
 				comp.setDataFileName ( fn );
 			}
 			// Read the data...
-			if (	continue_reading && (fn != null) &&
-				!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+			if ( continue_reading && (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 				readTime.clear();
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
-				Vector v = StateMod_TS.readTimeSeriesList(
-					fn, null, null, null, true);
+				Vector v = StateMod_TS.readTimeSeriesList( fn, null, null, null, true);
 				if (v == null) {
 					v = new Vector();
 				}
 				size = v.size();
 				for (i = 0; i < size; i++) {
-					((DayTS)v.elementAt(i)).setDataType(
-					lookupTimeSeriesDataType (
-					COMP_STREAMGAGE_BASEFLOW_TS_DAILY ));
+					((DayTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType ( COMP_STREAMGAGE_BASEFLOW_TS_DAILY ));
 				}
 				comp.setData(v);
 				comp.setDirty ( false );
@@ -7386,9 +7202,7 @@ throws Exception
 				// The StreamGage and StreamEstimate groups
 				// share the same baseflow time series files...
 
-				DataSetComponent comp2 =
-				getComponentForComponentType(
-				COMP_STREAMESTIMATE_BASEFLOW_TS_DAILY );
+				DataSetComponent comp2 = getComponentForComponentType( COMP_STREAMESTIMATE_BASEFLOW_TS_DAILY );
 				comp2.setDataFileName ( comp.getDataFileName());
 				comp2.setData(v);
 				comp2.setDirty ( false );
@@ -7397,9 +7211,7 @@ throws Exception
 				readInputAnnounce2(comp, readTime.getSeconds());
 			}
 		} catch (Exception e) {
-			Message.printWarning(1, routine,
-			"Error reading daily baseflow time series file:\n\"" +
-				fn + "\"");
+			Message.printWarning(1, routine, "Error reading daily baseflow time series file:\n\"" + fn + "\"");
 			Message.printWarning(2, routine, e);
 		}
 	}
@@ -7407,13 +7219,13 @@ throws Exception
 	// Direct diversion demand time series (daily) file (.ddd)...
 
 	if ( __is_free_format || (!__is_free_format && hasDailyData(false) ) ) {
-		try {	fn = null;
+		try {
+			fn = null;
 			if ( __is_free_format ) {
-				fn = response_props.getValue (
-					"Diversion_Demand_Daily" );
+				fn = response_props.getValue ( "Diversion_Demand_Daily" );
 			}
-			else {	if (	continue_reading &&
-					((fn = readFileLine ( in )) == null) ) {
+			else {
+				if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 					continue_reading = false;
 				}
 			}
@@ -7423,22 +7235,18 @@ throws Exception
 				comp.setDataFileName ( fn );
 			}
 			// Now read the data file...
-			if (	continue_reading && __tsAreRead && (fn != null)
-				&&!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+			if ( continue_reading && __tsAreRead && (fn != null) &&!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 				readTime.clear();
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
-				Vector v = StateMod_TS.readTimeSeriesList(fn, 
-					null, null, null, true);
+				Vector v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 				if (v == null) {
 					v = new Vector();
 				}
 				size = v.size();
 				for (i = 0; i < size; i++) {
-					((DayTS)v.elementAt(i)).setDataType(
-					lookupTimeSeriesDataType (
-					COMP_DEMAND_TS_DAILY ));
+					((DayTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType (	COMP_DEMAND_TS_DAILY ));
 				}
 				comp.setData(v);
 				comp.setDirty ( false );
@@ -7446,9 +7254,7 @@ throws Exception
 				readInputAnnounce2(comp, readTime.getSeconds());
 			}
 		} catch (Exception e) {
-			Message.printWarning(1, routine,
-			"Error reading daily demand time series file:\n"+
-			"\"" + fn + "\"");
+			Message.printWarning(1, routine, "Error reading daily demand time series file:\n\"" + fn + "\"");
 			Message.printWarning(2, routine, e);
 		}
 	}
@@ -7456,39 +7262,35 @@ throws Exception
 	// Instream flow demand time series (daily) file (.ifd)...
 
 	if ( __is_free_format || (!__is_free_format && hasDailyData(false) ) ) {
-		try {	fn = null;
+		try {
+			fn = null;
 			if ( __is_free_format ) {
-				fn = response_props.getValue (
-					"Instreamflow_Demand_Daily" );
+				fn = response_props.getValue ( "Instreamflow_Demand_Daily" );
 			}
-			else {	if (	continue_reading &&
-					((fn = readFileLine ( in )) == null) ) {
+			else {
+				if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 					continue_reading = false;
 				}
 			}
 			// Set the file name in the component...
-			comp = getComponentForComponentType(
-				COMP_INSTREAM_DEMAND_TS_DAILY);
+			comp = getComponentForComponentType( COMP_INSTREAM_DEMAND_TS_DAILY);
 			if ( (comp != null) && (fn != null) ) {
 				comp.setDataFileName ( fn );
 			}
 			// Now read the data file...
-			if (	continue_reading && __tsAreRead && (fn != null)
+			if ( continue_reading && __tsAreRead && (fn != null)
 				&&!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 				readTime.clear();
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
-				Vector v = StateMod_TS.readTimeSeriesList(fn,
-					null, null, null, true);
+				Vector v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 				if (v == null) {
 					v = new Vector();
 				}
 				size = v.size();
 				for (i = 0; i< size; i++) {
-					((DayTS)v.elementAt(i)).setDataType(
-					lookupTimeSeriesDataType (
-					COMP_INSTREAM_DEMAND_TS_DAILY ));
+					((DayTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType ( COMP_INSTREAM_DEMAND_TS_DAILY ));
 				}
 				comp.setData(v);
 				comp.setDirty ( false );
@@ -7496,8 +7298,7 @@ throws Exception
 				readInputAnnounce2(comp, readTime.getSeconds());
 			}
 		} catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading"
-			+ " daily instream flow demand time series"
+			Message.printWarning(1, routine, "Error reading daily instream flow demand time series"
 			+ " file:\n\"" + fn + "\"");
 			Message.printWarning(2, routine, e);
 		}
@@ -7505,41 +7306,35 @@ throws Exception
 
 	// Well demand time series (daily) file (.wed)...
 
-	if (	__is_free_format ||
-		(!__is_free_format&&hasDailyData(false) && hasWellData(false))){
-		try {	fn = null;
+	if ( __is_free_format || (!__is_free_format&&hasDailyData(false) && hasWellData(false))){
+		try {
+			fn = null;
 			if ( __is_free_format ) {
-				fn = response_props.getValue (
-					"Well_Demand_Daily" );
+				fn = response_props.getValue ( "Well_Demand_Daily" );
 			}
-			else {	if (	continue_reading &&
-					((fn = readFileLine ( in )) == null) ) {
+			else {
+				if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 					continue_reading = false;
 				}
 			}
 			// Set the file name in the component...
-			comp = getComponentForComponentType(
-				COMP_WELL_DEMAND_TS_DAILY );
+			comp = getComponentForComponentType( COMP_WELL_DEMAND_TS_DAILY );
 			if ( (comp != null) && (fn != null) ) {
 				comp.setDataFileName ( fn );
 			}
 			// Now read the data file...
-			if (	continue_reading && __tsAreRead && (fn != null)
-				&&!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+			if ( continue_reading && __tsAreRead && (fn != null) &&!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 				readTime.clear();
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
-				Vector v = StateMod_TS.readTimeSeriesList(fn,
-					null, null, null, true);
+				Vector v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 				if (v == null) {
 					v = new Vector();
 				}
 				size = v.size();				
 				for (i = 0; i < size; i++) {
-					((DayTS)v.elementAt(i)).setDataType(
-					lookupTimeSeriesDataType (
-					COMP_WELL_DEMAND_TS_DAILY ));
+					((DayTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType ( COMP_WELL_DEMAND_TS_DAILY ));
 				}
 				comp.setData(v);
 				comp.setDirty ( false );
@@ -7547,8 +7342,7 @@ throws Exception
 				readInputAnnounce2(comp, readTime.getSeconds());
 			}
 		} catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading daily "+
-				"well demand time series file:\n\"" +fn + "\"");
+			Message.printWarning(1, routine, "Error reading daily well demand time series file:\n\"" +fn + "\"");
 			Message.printWarning(2, routine, e);
 		}
 	}
@@ -7556,48 +7350,40 @@ throws Exception
 	// Reservoir target time series (daily) file (.tad)...
 
 	if ( __is_free_format || (!__is_free_format && hasDailyData(false) ) ) {
-		try {	fn = null;
+		try {
+			fn = null;
 			if ( __is_free_format ) {
-				fn = response_props.getValue (
-					"Reservoir_Target_Daily" );
+				fn = response_props.getValue ( "Reservoir_Target_Daily" );
 			}
-			else {	if (	continue_reading &&
-					((fn = readFileLine ( in )) == null) ) {
+			else {
+				if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 					continue_reading = false;
 				}
 			}
 			// Set the file name in the component...
-			comp = getComponentForComponentType(
-				COMP_RESERVOIR_TARGET_TS_DAILY );
+			comp = getComponentForComponentType( COMP_RESERVOIR_TARGET_TS_DAILY );
 			if ( (comp != null) && (fn != null) ) {
 				comp.setDataFileName ( fn );
 			}
 			// Now read the data file...
-			if (	continue_reading && __tsAreRead && (fn != null) 
-				&&!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+			if ( continue_reading && __tsAreRead && (fn != null) &&!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 				readTime.clear();
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
-				Vector v = StateMod_TS.readTimeSeriesList(fn,
-					null, null, null, true);
+				Vector v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 				if (v == null) {
 					v = new Vector();
 				}
 				size = v.size();
 				for (i = 0; i < size; i++) {
 					if ( (i%2) == 0 ) {
-						((DayTS)v.elementAt(i)).
-						setDataType(
-						lookupTimeSeriesDataType (
-						COMP_RESERVOIR_TARGET_TS_DAILY)+
-						"Min");
+						((DayTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType (
+								COMP_RESERVOIR_TARGET_TS_DAILY)+ "Min");
 					}
-					else {	((DayTS)v.elementAt(i)).
-						setDataType(
-						lookupTimeSeriesDataType (
-						COMP_RESERVOIR_TARGET_TS_DAILY)+
-						"Max");
+					else {
+						((DayTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType (
+								COMP_RESERVOIR_TARGET_TS_DAILY)+ "Max");
 					}
 				}
 				comp.setData(v);
@@ -7606,8 +7392,7 @@ throws Exception
 				readInputAnnounce2(comp, readTime.getSeconds());
 			}
 		} catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading"
-			+ "daily reservoir target time series file:\n\""
+			Message.printWarning(1, routine, "Error reading daily reservoir target time series file:\n\""
 			+ fn + "\"");
 			Message.printWarning(2, routine, e);
 		}
@@ -7616,81 +7401,70 @@ throws Exception
 	// Delay table (daily)...
 
 	if ( __is_free_format || (!__is_free_format && hasDailyData(false) ) ) {
-		try {	fn = null;
+		try {
+			fn = null;
 			if ( __is_free_format ) {
-				fn = response_props.getValue (
-					"DelayTable_Daily" );
+				fn = response_props.getValue ( "DelayTable_Daily" );
 			}
-			else {	if (	continue_reading &&
-					((fn = readFileLine ( in )) == null) ) {
+			else {
+				if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 					continue_reading = false;
 				}
 			}
 			// Always set the file name...
-			comp = getComponentForComponentType(
-				COMP_DELAY_TABLES_DAILY );
+			comp = getComponentForComponentType( COMP_DELAY_TABLES_DAILY );
 			if ( (comp != null) && (fn != null) ) {
 				comp.setDataFileName ( fn );
 			}
 			// Read the data...
-			if (	continue_reading && (fn != null) &&
-				!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+			if ( continue_reading && (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 				readTime.clear();
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
-				comp.setData( StateMod_DelayTable.
-					readStateModFile(
-					fn,false,getInterv()) );
+				comp.setData( StateMod_DelayTable.readStateModFile(fn,false,getInterv()) );
 				comp.setDirty ( false );
 				readTime.stop();
 				readInputAnnounce2(comp, readTime.getSeconds());
 			}
 		} catch (Exception e) {
-			Message.printWarning(1, routine,
-				"Error reading delay table "
-				+ " (daily) file:\n\"" + fn + "\"");
+			Message.printWarning(1, routine, "Error reading delay table (daily) file:\n\"" + fn + "\"");
 			Message.printWarning(2, routine, e);
 		}
 	}
 
 	// Irrigation water requirement (iwr) - daily...
 
-	if (	__is_free_format || (!__is_free_format && hasDailyData(false) &&
-		hasIrrigationWaterRequirementData(false) ) ) {
-		try {	fn = null;
+	if ( __is_free_format || (!__is_free_format && hasDailyData(false) && hasIrrigationWaterRequirementData(false) ) ) {
+		try {
+			fn = null;
 			if ( __is_free_format ) {
-				fn = response_props.getValue (
-					"ConsumptiveWaterRequirement_Daily" );
+				fn = response_props.getValue ( "ConsumptiveWaterRequirement_Daily" );
 			}
-			else {	if (	continue_reading &&
-					((fn = readFileLine ( in )) == null) ) {
+			else {
+				if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 					continue_reading = false;
 				}
 			}
 			// Set the file name in the component...
-			comp = getComponentForComponentType(
-				COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_DAILY );
+			comp = getComponentForComponentType( COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_DAILY );
 			if ( (comp != null) && (fn != null) ) {
 				comp.setDataFileName ( fn );
 			}
 			// Now read the data file...
-			if (	continue_reading && __tsAreRead && (fn != null)
-				&&!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+			if ( continue_reading && __tsAreRead && (fn != null) &&!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 				readTime.clear();
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
-				Vector v = StateMod_TS.readTimeSeriesList(fn,
-					null, null, null, true);
+				Vector v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 				if (v == null) {
 					v = new Vector();
 				}
 				size = v.size();				
 				for (i = 0; i < size; i++) {
-					((DayTS)v.elementAt(i)).setDataType(
-						lookupTimeSeriesDataType (
-				COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_DAILY) );
+					((DayTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType (
+							COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_DAILY) );
 				}
 				comp.setData(v);
 				comp.setDirty ( false );
@@ -7698,8 +7472,7 @@ throws Exception
 				readInputAnnounce2(comp, readTime.getSeconds());
 			}
 		} catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading "+
-			"irrigation water requirement (daily) time series " +
+			Message.printWarning(1, routine, "Error reading irrigation water requirement (daily) time series " +
 			"file:\n\"" + fn + "\"");
 			Message.printWarning(2, routine, e);
 		}
@@ -7709,42 +7482,36 @@ throws Exception
 	// read...
 
 	if ( __is_free_format || (!__is_free_format && hasDailyData(false) ) ) {
-		try {	fn = null;
+		try {
+			fn = null;
 			if ( __is_free_format ) {
-				fn = response_props.getValue (
-					"StreamGage_Historic_Daily" );
+				fn = response_props.getValue ( "StreamGage_Historic_Daily" );
 			}
-			else {	if (	continue_reading &&
-					((fn = readFileLine ( in )) == null) ) {
+			else {
+				if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 					continue_reading = false;
 				}
 			}
 			// Always set the file name...
-			comp = getComponentForComponentType(
-				COMP_STREAMGAGE_HISTORICAL_TS_DAILY );
+			comp = getComponentForComponentType( COMP_STREAMGAGE_HISTORICAL_TS_DAILY );
 			if ( (comp != null) && (fn != null) ) {
 				comp.setDataFileName ( fn );
 			}
 			// Read the data...
-			if (	continue_reading && __tsAreRead && (fn != null)
-				&&!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+			if ( continue_reading && __tsAreRead && (fn != null) &&!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 				readTime.clear();
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
-				Vector v = StateMod_TS.readTimeSeriesList(fn,
-					null,null, null, true);
+				Vector v = StateMod_TS.readTimeSeriesList(fn, null,null, null, true);
 				if (v == null) {
 					v = new Vector();
 				}
 				size = v.size();
 				for (i = 0; i<size; i++) {
-					// Set this information because it is
-					// not in the StateMod time series
-					// file...
+					// Set this information because it is not in the StateMod time series file...
 					((DayTS)v.elementAt(i)).setDataType(
-					lookupTimeSeriesDataType (
-					COMP_STREAMGAGE_HISTORICAL_TS_DAILY) );
+					lookupTimeSeriesDataType ( COMP_STREAMGAGE_HISTORICAL_TS_DAILY) );
 				}
 				comp.setData(v);
 				comp.setDirty ( false );
@@ -7753,8 +7520,7 @@ throws Exception
 			}
 		}
 		catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading "+
-			"daily historical streamflow time series file:\n\"" +
+			Message.printWarning(1, routine, "Error reading daily historical streamflow time series file:\n\"" +
 			fn+ "\"");
 			Message.printWarning(2, routine, e);
 		}
@@ -7763,31 +7529,28 @@ throws Exception
 	// Diversion (daily) time series (.ddd)...
 
 	if ( __is_free_format || (!__is_free_format && hasDailyData(false) ) ) {
-		try {	fn = null;
+		try {
+			fn = null;
 			if ( __is_free_format ) {
-				fn = response_props.getValue (
-				"Diversion_Historic_Daily" );
+				fn = response_props.getValue ( "Diversion_Historic_Daily" );
 			}
-			else {	if (	continue_reading &&
-					((fn = readFileLine ( in )) == null) ) {
+			else {
+				if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 					continue_reading = false;
 				}
 			}
 			// Set the file name in the component...
-			comp = getComponentForComponentType(
-				COMP_DIVERSION_TS_DAILY );
+			comp = getComponentForComponentType( COMP_DIVERSION_TS_DAILY );
 			if ( (comp != null) && (fn != null) ) {
 				comp.setDataFileName ( fn );
 			}
 			// Now read the data file...
-			if (	continue_reading && __tsAreRead && (fn != null)
-				&&!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+			if ( continue_reading && __tsAreRead && (fn != null) &&!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 				readTime.clear();
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
-				Vector v = StateMod_TS.readTimeSeriesList(fn,
-					null, null, null, true);
+				Vector v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 				if (v == null) {
 					v = new Vector();
 				}
@@ -7795,9 +7558,7 @@ throws Exception
 				// StateMod file...
 				size = v.size();
 				for (i = 0; i < size; i++) {
-					((DayTS)v.elementAt(i)).setDataType(
-					lookupTimeSeriesDataType (
-					COMP_DIVERSION_TS_DAILY) );
+					((DayTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType (	COMP_DIVERSION_TS_DAILY) );
 				}
 				comp.setData(v);
 				comp.setDirty ( false );
@@ -7805,52 +7566,43 @@ throws Exception
 				readInputAnnounce2(comp, readTime.getSeconds());
 			}
 		} catch (Exception e) {
-			Message.printWarning(1, routine,
-			"Error reading diversion (daily) time series " +
-			"file:\n\"" + fn + "\"");
+			Message.printWarning(1, routine, "Error reading diversion (daily) time series file:\n\"" + fn + "\"");
 			Message.printWarning(2, routine, e);
 		}
 	}
 
 	// Well pumping (daily) time series...
 
-	if (	__is_free_format ||
-		(!__is_free_format&&hasDailyData(false) && hasWellData(false))){
-		try {	fn = null;
+	if ( __is_free_format || (!__is_free_format&&hasDailyData(false) && hasWellData(false))){
+		try {
+			fn = null;
 			if ( __is_free_format ) {
-				fn = response_props.getValue (
-					"Well_Historic_Daily" );
+				fn = response_props.getValue ( "Well_Historic_Daily" );
 			}
-			else {	if (	continue_reading &&
-					((fn = readFileLine ( in )) == null) ) {
+			else {
+				if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 					continue_reading = false;
 				}
 			}
 			// Set the file name in the component...
-			comp = getComponentForComponentType(
-				COMP_WELL_PUMPING_TS_DAILY );
+			comp = getComponentForComponentType( COMP_WELL_PUMPING_TS_DAILY );
 			if ( (comp != null) && (fn != null) ) {
 				comp.setDataFileName ( fn );
 			}
 			// Now read the data file...
-			if (	continue_reading && __tsAreRead && (fn != null)
-				&&!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+			if ( continue_reading && __tsAreRead && (fn != null) &&!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 				readTime.clear();
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
-				Vector v = StateMod_TS.readTimeSeriesList(fn,
-					null, null, null, true);
+				Vector v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 				if (v == null) {
 					v = new Vector();
 				}
-				// Set the data type because it is not in the
-				// StateMod file...
+				// Set the data type because it is not in the StateMod file...
 				size = v.size();
 				for (i = 0; i < size; i++) {
-					((MonthTS)v.elementAt(i)).setDataType(
-					lookupTimeSeriesDataType (
-					COMP_WELL_PUMPING_TS_DAILY) );
+					((MonthTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType ( COMP_WELL_PUMPING_TS_DAILY) );
 				}
 				comp.setData(v);
 				comp.setDirty ( false );
@@ -7858,9 +7610,7 @@ throws Exception
 				readInputAnnounce2(comp, readTime.getSeconds());
 			}
 		} catch (Exception e) {
-			Message.printWarning(1, routine,
-			"Error reading well pumping (daily) time series " +
-			"file:\n\"" + fn + "\"");
+			Message.printWarning(1, routine, "Error reading well pumping (daily) time series file:\n\"" + fn + "\"");
 			Message.printWarning(2, routine, e);
 		}
 	}
@@ -7868,41 +7618,35 @@ throws Exception
 	// Daily reservoir content "eoy"...
 
 	if ( __is_free_format || (!__is_free_format && hasDailyData(false)) ) {
-		try {	fn = null;
+		try {
+			fn = null;
 			if ( __is_free_format ) {
-				fn = response_props.getValue (
-					"Reservoir_Historic_Daily" );
+				fn = response_props.getValue ( "Reservoir_Historic_Daily" );
 			}
-			else {	if (	continue_reading &&
-					((fn = readFileLine ( in )) == null) ) {
+			else {
+				if ( continue_reading && ((fn = readFileLine ( in )) == null) ) {
 					continue_reading = false;
 				}
 			}
 			// Set the file name in the component...
-			comp = getComponentForComponentType(
-				COMP_RESERVOIR_CONTENT_TS_DAILY );
+			comp = getComponentForComponentType( COMP_RESERVOIR_CONTENT_TS_DAILY );
 			if ( (comp != null) && (fn != null) ) {
 				comp.setDataFileName ( fn );
 			}
 			// Read the data file...
-			if (	continue_reading && __tsAreRead && (fn != null)
-				&& !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+			if ( continue_reading && __tsAreRead && (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 				readTime.clear();
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
-				Vector v = StateMod_TS.readTimeSeriesList(fn,
-					null, null, null, true);
+				Vector v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 				if (v == null) {
 					v = new Vector();
 				}
-				// Set the data type because it is not in the
-				// StateMod file...
+				// Set the data type because it is not in the StateMod file...
 				size = v.size();
 				for (i = 0; i < size; i++) {
-					((MonthTS)v.elementAt(i)).setDataType(
-					lookupTimeSeriesDataType (
-					COMP_RESERVOIR_CONTENT_TS_DAILY) );
+					((MonthTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType ( COMP_RESERVOIR_CONTENT_TS_DAILY) );
 				}
 				comp.setData(v);
 				comp.setDirty ( false );
@@ -7910,9 +7654,7 @@ throws Exception
 				readInputAnnounce2(comp, readTime.getSeconds());
 			}
 		} catch (Exception e) {
-			Message.printWarning(1, routine,
-			"Error reading reservoir end of day time series " +
-			"file:\n\"" + fn + "\"");
+			Message.printWarning(1, routine, "Error reading reservoir end of day time series file:\n\"" + fn + "\"");
 			Message.printWarning(2, routine, e);
 		}
 	}
@@ -7921,132 +7663,87 @@ throws Exception
 
 	Message.printStatus (1,routine,"Connect all instream flow time series");
 	StateMod_InstreamFlow.connectAllTS (
-		(Vector)getComponentForComponentType(
-			COMP_INSTREAM_STATIONS).getData(),
-		(Vector)getComponentForComponentType(
-			COMP_INSTREAM_DEMAND_TS_MONTHLY).getData(),
-		(Vector)getComponentForComponentType(
-			COMP_INSTREAM_DEMAND_TS_AVERAGE_MONTHLY).getData(),
-		(Vector)getComponentForComponentType(
-			COMP_INSTREAM_DEMAND_TS_DAILY).getData() );
+		(Vector)getComponentForComponentType( COMP_INSTREAM_STATIONS).getData(),
+		(Vector)getComponentForComponentType( COMP_INSTREAM_DEMAND_TS_MONTHLY).getData(),
+		(Vector)getComponentForComponentType( COMP_INSTREAM_DEMAND_TS_AVERAGE_MONTHLY).getData(),
+		(Vector)getComponentForComponentType( COMP_INSTREAM_DEMAND_TS_DAILY).getData() );
 
 	// Connect all the reservoir time series to the stations...
 
 	StateMod_Reservoir.connectAllTS (
-		(Vector)getComponentForComponentType(
-			COMP_RESERVOIR_STATIONS).getData(),
-		(Vector)getComponentForComponentType(
-			COMP_RESERVOIR_CONTENT_TS_MONTHLY).getData(),
-		(Vector)getComponentForComponentType(
-			COMP_RESERVOIR_CONTENT_TS_DAILY).getData(),
-		(Vector)getComponentForComponentType(
-			COMP_RESERVOIR_TARGET_TS_MONTHLY).getData(),
-		(Vector)getComponentForComponentType(
-			COMP_RESERVOIR_TARGET_TS_DAILY).getData());
+		(Vector)getComponentForComponentType( COMP_RESERVOIR_STATIONS).getData(),
+		(Vector)getComponentForComponentType( COMP_RESERVOIR_CONTENT_TS_MONTHLY).getData(),
+		(Vector)getComponentForComponentType( COMP_RESERVOIR_CONTENT_TS_DAILY).getData(),
+		(Vector)getComponentForComponentType( COMP_RESERVOIR_TARGET_TS_MONTHLY).getData(),
+		(Vector)getComponentForComponentType( COMP_RESERVOIR_TARGET_TS_DAILY).getData());
 
 	// Connect all the diversion time series to the stations...
 
 	Message.printStatus ( 1, routine, "Connect all diversion time series");
 	StateMod_Diversion.connectAllTS(
-		(Vector)getComponentForComponentType(
-			COMP_DIVERSION_STATIONS).getData(),
-		(Vector)getComponentForComponentType(
-			COMP_DIVERSION_TS_MONTHLY).getData(),
-		(Vector)getComponentForComponentType(
-			COMP_DIVERSION_TS_DAILY).getData(),
-		(Vector)getComponentForComponentType(
-			COMP_DEMAND_TS_MONTHLY).getData(),
-		(Vector)getComponentForComponentType(
-			COMP_DEMAND_TS_OVERRIDE_MONTHLY).getData(),
-		(Vector)getComponentForComponentType(
-			COMP_DEMAND_TS_AVERAGE_MONTHLY).getData(),
-		(Vector)getComponentForComponentType(
-			COMP_DEMAND_TS_DAILY).getData(),
-		(Vector)getComponentForComponentType(
-			COMP_IRRIGATION_PRACTICE_TS_YEARLY).getData(),
-		(Vector)getComponentForComponentType(
-			COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_MONTHLY).
-			getData(),
-		(Vector)getComponentForComponentType(
-			COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_DAILY).getData());
+		(Vector)getComponentForComponentType( COMP_DIVERSION_STATIONS).getData(),
+		(Vector)getComponentForComponentType( COMP_DIVERSION_TS_MONTHLY).getData(),
+		(Vector)getComponentForComponentType( COMP_DIVERSION_TS_DAILY).getData(),
+		(Vector)getComponentForComponentType( COMP_DEMAND_TS_MONTHLY).getData(),
+		(Vector)getComponentForComponentType( COMP_DEMAND_TS_OVERRIDE_MONTHLY).getData(),
+		(Vector)getComponentForComponentType( COMP_DEMAND_TS_AVERAGE_MONTHLY).getData(),
+		(Vector)getComponentForComponentType( COMP_DEMAND_TS_DAILY).getData(),
+		(Vector)getComponentForComponentType( COMP_IRRIGATION_PRACTICE_TS_YEARLY).getData(),
+		(Vector)getComponentForComponentType( COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_MONTHLY).getData(),
+		(Vector)getComponentForComponentType( COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_DAILY).getData());
 
 	// Connect all the well time series to the stations...
 
 	Message.printStatus ( 1, routine, "Connect all well time series");
 	StateMod_Well.connectAllTS(
-		(Vector)getComponentForComponentType(
-			COMP_WELL_STATIONS).getData(),
-		(Vector)getComponentForComponentType(
-			COMP_WELL_PUMPING_TS_MONTHLY).getData(), 
-		(Vector)getComponentForComponentType(
-			COMP_WELL_PUMPING_TS_DAILY).getData(), 
-		(Vector)getComponentForComponentType(
-			COMP_WELL_DEMAND_TS_MONTHLY).getData(),
-		(Vector)getComponentForComponentType(
-			COMP_WELL_DEMAND_TS_DAILY).getData(),
-		(Vector)getComponentForComponentType(
-			COMP_IRRIGATION_PRACTICE_TS_YEARLY).getData(),
-		(Vector)getComponentForComponentType(
-			COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_MONTHLY).
-			getData(),
-		(Vector)getComponentForComponentType(
-			COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_DAILY).getData());
+		(Vector)getComponentForComponentType( COMP_WELL_STATIONS).getData(),
+		(Vector)getComponentForComponentType( COMP_WELL_PUMPING_TS_MONTHLY).getData(), 
+		(Vector)getComponentForComponentType( COMP_WELL_PUMPING_TS_DAILY).getData(), 
+		(Vector)getComponentForComponentType( COMP_WELL_DEMAND_TS_MONTHLY).getData(),
+		(Vector)getComponentForComponentType( COMP_WELL_DEMAND_TS_DAILY).getData(),
+		(Vector)getComponentForComponentType( COMP_IRRIGATION_PRACTICE_TS_YEARLY).getData(),
+		(Vector)getComponentForComponentType( COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_MONTHLY).getData(),
+		(Vector)getComponentForComponentType( COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_DAILY).getData());
 
 	// Process the old-style ris, rim, rid files for the new convention...
 
 	if ( !__is_free_format ) {
 		StateMod_StreamEstimate.processStreamData ( 
-		(Vector)getComponentForComponentType(
-			COMP_STREAMGAGE_STATIONS).getData(),
-		(Vector)getComponentForComponentType(
-			COMP_STREAMGAGE_HISTORICAL_TS_MONTHLY).getData(),
-		(Vector)getComponentForComponentType(
-			COMP_STREAMESTIMATE_STATIONS).getData(),
-		(Vector)getComponentForComponentType(
-			COMP_STREAMESTIMATE_COEFFICIENTS).getData() );
-	}	// Else the StreamGage and StreamEstimate stations are already
-		// split into separate files.
+		(Vector)getComponentForComponentType( COMP_STREAMGAGE_STATIONS).getData(),
+		(Vector)getComponentForComponentType( COMP_STREAMGAGE_HISTORICAL_TS_MONTHLY).getData(),
+		(Vector)getComponentForComponentType( COMP_STREAMESTIMATE_STATIONS).getData(),
+		(Vector)getComponentForComponentType( COMP_STREAMESTIMATE_COEFFICIENTS).getData() );
+	}	// Else the StreamGage and StreamEstimate stations are already split into separate files.
 
 	// Connect all the stream gage station time series to the stations...
 
 	Message.printStatus (1,routine,"Connect all river station time series");
 	StateMod_StreamGage.connectAllTS(
-		(Vector)getComponentForComponentType(
-			COMP_STREAMGAGE_STATIONS).getData(),
-		(Vector)getComponentForComponentType(
-			COMP_STREAMGAGE_HISTORICAL_TS_MONTHLY).getData(),
-		(Vector)getComponentForComponentType(
-			COMP_STREAMGAGE_HISTORICAL_TS_DAILY).getData(),
-		(Vector)getComponentForComponentType(
-			COMP_STREAMGAGE_BASEFLOW_TS_MONTHLY).getData(),
-		(Vector)getComponentForComponentType(
-			COMP_STREAMGAGE_BASEFLOW_TS_DAILY).getData());
+		(Vector)getComponentForComponentType( COMP_STREAMGAGE_STATIONS).getData(),
+		(Vector)getComponentForComponentType( COMP_STREAMGAGE_HISTORICAL_TS_MONTHLY).getData(),
+		(Vector)getComponentForComponentType( COMP_STREAMGAGE_HISTORICAL_TS_DAILY).getData(),
+		(Vector)getComponentForComponentType( COMP_STREAMGAGE_BASEFLOW_TS_MONTHLY).getData(),
+		(Vector)getComponentForComponentType( COMP_STREAMGAGE_BASEFLOW_TS_DAILY).getData());
 
-	// Connect all the stream estimate station time series to the
-	// stations...
+	// Connect all the stream estimate station time series to the stations...
 
-	Message.printStatus (1,routine,
-		"Connect all stream estimate station time series");
+	Message.printStatus (1,routine, "Connect all stream estimate station time series");
 	StateMod_StreamEstimate.connectAllTS(
-		(Vector)getComponentForComponentType(
-			COMP_STREAMESTIMATE_STATIONS).getData(),
-		(Vector)getComponentForComponentType(
-			COMP_STREAMESTIMATE_BASEFLOW_TS_MONTHLY).getData(),
-		(Vector)getComponentForComponentType(
-			COMP_STREAMESTIMATE_BASEFLOW_TS_DAILY).getData());
+		(Vector)getComponentForComponentType( COMP_STREAMESTIMATE_STATIONS).getData(),
+		(Vector)getComponentForComponentType( COMP_STREAMESTIMATE_BASEFLOW_TS_MONTHLY).getData(),
+		(Vector)getComponentForComponentType( COMP_STREAMESTIMATE_BASEFLOW_TS_DAILY).getData());
 
 	totalReadTime.stop();
 	Message.printStatus(1, routine, "Total time to read StateMod files is "
-		+ StringUtil.formatString(totalReadTime.getSeconds(),"%.3f")
-		+ " seconds");
+		+ StringUtil.formatString(totalReadTime.getSeconds(),"%.3f") + " seconds");
 	totalReadTime.start();
 
 	// Convert the StateMod network to the more general network object...
 
-	Message.printStatus ( 1, routine,
-	"Creating linked network from data set files." );
+	Message.printStatus ( 1, routine, "Creating linked network from data set files." );
 
-	try {	fn = null;
+	try {
+		fn = null;
 		if ( __is_free_format ) {
 			// only read in if from a free-format file
 			fn = response_props.getValue ( "Network" );
@@ -8056,14 +7753,12 @@ throws Exception
 				comp.setDataFileName ( fn );
 			}
 			// Read the data...
-			if (	continue_reading && (fn != null) &&
-				!fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+			if ( continue_reading && (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 				readTime.clear();
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
-				StateMod_NodeNetwork network =
-					(StateMod_NodeNetwork)StateMod_NodeNetwork.readStateModNetworkFile( fn, null, true);
+				StateMod_NodeNetwork network = (StateMod_NodeNetwork)StateMod_NodeNetwork.readStateModNetworkFile( fn, null, true);
 				comp.setData(network);
 				comp.setVisible(true);
 				comp.setDirty ( false );
@@ -8076,28 +7771,25 @@ throws Exception
 		Message.printWarning(2, routine, e);
 	}
 
-	
 //	Network network = createNetworkFromStateModRiverNetwork();
 //	getComponentForComponentType( COMP_NETWORK).setData(network);
-	Message.printStatus ( 1, routine,
-		"Finished creating linked network from data set files.");
+	Message.printStatus ( 1, routine, "Finished creating linked network from data set files.");
 
 	} catch (Exception e) {
 		// Main catch for all reads.
 		Message.printStatus ( 1, routine, "Error during read.");
 		Message.printWarning(1, routine, e);
-		// REVISIT...
-		// Just rethrow for now
+		// TODO Just rethrow for now
 		throw ( e );
 	}
 
 	// Check the filenames for 8.3.  This limitation may be removed at
 	// some point...
-	// REVISIT - may move this to the front again, but only if the response
+	// TODO - may move this to the front again, but only if the response
 	// file is read up front for the check and then reading continues as per
 	// the above logic.
 
-/* REVISIT 
+/* TODO 
 	if (	!checkComponentFilenames(files_from_response, 1) &&
 		useGUI && (parent != null) ) {
 		Message.printWarning ( 1, routine, "StateMod may not run." );
@@ -8110,15 +7802,14 @@ throws Exception
 
 	totalReadTime.stop();
 	String msg = "Total time to read all files is "
-		+ StringUtil.formatString(totalReadTime.getSeconds(),"%.3f")
-		+ " seconds";
+		+ StringUtil.formatString(totalReadTime.getSeconds(),"%.3f") + " seconds";
 	Message.printStatus(1, routine, msg );
 	sendProcessListenerMessage(StateMod_GUIUtil.STATUS_READ_COMPLETE, msg );
 	setDirty(COMP_CONTROL, false);
 
 	readTime = null;
 	totalReadTime = null;
-	// REVISIT - uncomment for debugging
+	// TODO - uncomment for debugging
 	//Message.printStatus ( 1, routine,
 	//		"SAMX - After reading all files, control dirty =" +
 	//		getComponentForComponentType(

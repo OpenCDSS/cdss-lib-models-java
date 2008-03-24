@@ -190,8 +190,7 @@ may be used independent of a data set.
 public static final String STATION_TYPE_DIVERSION = "Diversion";
 public static final String STATION_TYPE_INSTREAM_FLOW = "Instream Flow";
 public static final String STATION_TYPE_RESERVOIR = "Reservoir";
-public static final String STATION_TYPE_STREAMESTIMATE =
-						"Stream Estimate Station";
+public static final String STATION_TYPE_STREAMESTIMATE = "Stream Estimate Station";
 public static final String STATION_TYPE_STREAMGAGE = "Stream Gage Station";
 public static final String STATION_TYPE_WELL = "Well";
 
@@ -261,8 +260,7 @@ private static final String[] __output_ts_data_types_stream_0969 = {
 	"Water Supply - From_River_By_Priority",
 	"Water Supply - From_River_By_Storage",
 	"Water Supply - From_River_By_Exchange",
-	"Water Supply - From_River_By_Well",		// Prior to 2003-11-03
-							// was From_Well
+	"Water Supply - From_River_By_Well",		// Prior to 2003-11-03 was From_Well
 	"Water Supply - From_Carrier_By_Priority",
 	"Water Supply - From_Carrier_By_Storage",
 	"Water Supply - Carried_Water",
@@ -403,8 +401,7 @@ private static final String[] __output_ts_data_types_instream_0969 = {
 	"Water Supply - From_River_By_Priority",
 	"Water Supply - From_River_By_Storage",
 	"Water Supply - From_River_By_Exchange",
-	"Water Supply - From_River_By_Well",		// Prior to 2003-11-03
-							// was From_Well
+	"Water Supply - From_River_By_Well",		// Prior to 2003-11-03 was From_Well
 	"Water Supply - From_Carrier_By_Priority",
 	"Water Supply - From_Carrier_By_Storage",
 	"Water Supply - Carried_Water",
@@ -433,7 +430,6 @@ the *.xdg file by StateMod's -report module.  The raw data are in the *.B43
 (monthly) binary output file.
 As per Ray Bennett 2003-11-05 email, all parameters are valid for output.
 */
-
 private static final String[] __output_ts_data_types_diversion_0100 = {
 	"Demand - ConsDemand",
 	"Water Supply - FromRiverByPriority",
@@ -483,8 +479,7 @@ private static final String[] __output_ts_data_types_diversion_0969 = {
 	"Water Supply - From_River_By_Priority",
 	"Water Supply - From_River_By_Storage",
 	"Water Supply - From_River_By_Exchange",
-	"Water Supply - From_River_By_Well",		// Prior to 2003-11-03
-							// was From_Well
+	"Water Supply - From_River_By_Well",		// Prior to 2003-11-03 was From_Well
 	"Water Supply - From_Carrier_By_Priority",
 	"Water Supply - From_Carrier_By_Storage",
 	"Water Supply - Carried_Water",
@@ -556,23 +551,39 @@ public static final String[] __output_ts_data_types_well_0969 =	{
 	"Water Source - Total_Source" };
 
 /**
-The version of statemod that is being run.  This is normally set at the
+The version of StateMod that is being run as a number (e.g., 11.5).  This is normally set at the
 beginning of a StateMod GUI session by calling runStateMod ( ... "-version" ).
 Then its value can be checked with getStateModVersion();
 */
-private static double __statemod_version = 0.0;
+private static double __statemodVersion = 0.0;
+
+/**
+The StateMod revision date.  This is normally set at the
+beginning of a StateMod GUI session by calling runStateMod ( ... "-version" ).
+Then its value can be checked with getStateModVersion();
+*/
+private static String __statemodRevisionDate = "Unknown";
 
 /**
 The latest known version is returned by getStateModVersionLatest() as a
 default.  This is used by StateMod_BTS when requesting parameters.
 */
-private static double __statemod_version_latest = 11.50;
+private static double __statemodVersionLatest = 12.20;
 
 /**
 The program to use when running StateMod.  If relying on the path, this should just be the
 program name.  However, a full path can be specified to override the PATH.
+See the system/StateModGUI.cfg file for configuration properties.
 */
-private static String __statemod_executable = "statemod";
+private static String __statemodExecutable = "StateMod";
+
+/**
+The program to use when running the SmDelta utility program.
+If relying on the path, this should just be the
+program name.  However, a full path can be specified to override the PATH.
+See the system/StateModGUI.cfg file for configuration properties.
+*/
+private static String __smdeltaExecutable = "SmDelta";
 
 /**
 Turns an array of Strings into a Vector of Strings.
@@ -2638,7 +2649,125 @@ public static Vector getRightsForStation (	String station_id,
 	return matches;
 }
 
-// REVISIT - may need to add parameters to modify the list based on what is
+/**
+Return the SmDelta executable.  This can be a full path or if not, the PATH
+environment variable is relied on to find the executable.
+By default this is expanded if any ${property} tokens are used (e.g., ${Home} for
+the software installation home).
+@return the StateMod executable name.
+*/
+public static String getSmDeltaExecutable ()
+{	return getSmDeltaExecutable ( true );
+}
+
+/**
+Return the SmDelta executable.  This can be a full path or if not, the PATH
+environment variable is relied on to find the executable.
+By default this is expanded if any ${property} tokens are used (e.g., ${Home} for
+the software installation home).
+@return the SmDelta executable name.
+@param expanded If false, ${properties} will not be expanded (e.g., use to show in
+configuration dialogs).  If true, properties will be expanced.  Currently ${Home}
+(case-insensitive) is expanced using a call to RTi.Util.IO.IOUtil.getApplicationHomeDir(), if
+not empty.
+*/
+public static String getSmDeltaExecutable ( boolean expanded )
+{	
+	if ( __smdeltaExecutable == null ) {
+		return null;
+	}
+	else if ( !expanded ) {
+		return __smdeltaExecutable;
+	}
+	// Expand properties if found.
+	String home = IOUtil.getApplicationHomeDir();
+	if ( (home != null) && (home.length() > 0) ) {
+		// Replace ${Home} with supplied value.  Since there is currently no elegant
+		// way to deal with case (and not enforcing on the input end yet), check
+		// several variants.
+		String s = StringUtil.replaceString(__smdeltaExecutable, "${Home}", home );
+		s = StringUtil.replaceString(s, "${HOME}", home );
+		s = StringUtil.replaceString(s, "${home}", home );
+		return s;
+	}
+	else {
+		return __smdeltaExecutable;
+	}
+}
+
+/**
+Return the StateMod executable.  This can be a full path or if not, the PATH
+environment variable is relied on to find the executable.
+By default this is expanded if any ${property} tokens are used (e.g., ${Home} for
+the software installation home).
+@return the StateMod executable name.
+*/
+public static String getStateModExecutable ()
+{	return getStateModExecutable ( true );
+}
+
+/**
+Return the StateMod executable.  This can be a full path or if not, the PATH
+environment variable is relied on to find the executable.
+By default this is expanded if any ${property} tokens are used (e.g., ${Home} for
+the software installation home).
+@return the StateMod executable name.
+@param expanded If false, ${properties} will not be expanded (e.g., use to show in
+configuration dialogs).  If true, properties will be expanced.  Currently ${Home}
+(case-insensitive) is expanced using a call to RTi.Util.IO.IOUtil.getApplicationHomeDir(), if
+not empty.
+*/
+public static String getStateModExecutable ( boolean expanded )
+{	
+	if ( __statemodExecutable == null ) {
+		return null;
+	}
+	else if ( !expanded ) {
+		return __statemodExecutable;
+	}
+	// Expand properties if found.
+	String home = IOUtil.getApplicationHomeDir();
+	if ( (home != null) && (home.length() > 0) ) {
+		// Replace ${Home} with supplied value.  Since there is currently no elegant
+		// way to deal with case (and not enforcing on the input end yet), check
+		// several variants.
+		String s = StringUtil.replaceString(__statemodExecutable, "${Home}", home );
+		s = StringUtil.replaceString(s, "${HOME}", home );
+		s = StringUtil.replaceString(s, "${home}", home );
+		return s;
+	}
+	else {
+		return __statemodExecutable;
+	}
+}
+
+/**
+Return the StateMod model version, which was determined in the last call to
+runStateMod ( ... "-version" ).
+*/
+public static double getStateModVersion()
+{	return __statemodVersion;
+}
+
+/**
+Get the StateMod model revision date, which was determined in the last call to
+runStateMod ( ... "-version" ).
+*/
+public static String getStateModRevisionDate()
+{	return __statemodRevisionDate;
+}
+
+/**
+Return the latest known StateMod model version.  This can be used as a default
+if getStateModVersion() returns zero, meaning the version has not been
+determined.  In this case, the latest version is a good guess, especially for
+determining binary file parameters, which don't change much between versions.
+*/
+public static double getStateModVersionLatest()
+{	return __statemodVersionLatest;
+}
+
+// TODO- may need to add parameters to modify the list based on what is
 // available in a data set (e.g., leave out wells).
 /**
 Return a list of station types for use in the GUI.
@@ -3817,31 +3946,6 @@ public static boolean isVersionAtLeast ( double version, double known_version )
 }
 
 /**
-Return the StateMod executable, which is used to run the program.
-*/
-public static String getStateModExecutable ()
-{	return __statemod_executable;
-}
-
-/**
-Return the StateMod model version, which was determined in the last call to
-runStateMod ( ... "-version" ).
-*/
-public static double getStateModVersion()
-{	return __statemod_version;
-}
-
-/**
-Return the latest known StateMod model version.  This can be used as a default
-if getStateModVersion() returns zero, meaning the version has not been
-determined.  In this case, the latest version is a good guess, especially for
-determining binary file parameters, which don't change much between versions.
-*/
-public static double getStateModVersionLatest()
-{	return __statemod_version_latest;
-}
-
-/**
 Find the position of a StateMod_Data object in the data Vector, using the
 identifier.  The position for the first match is returned.
 @return the position, or -1 if not found.
@@ -4047,365 +4151,6 @@ public static int locateIndexFromID(String ID, Vector theData) {
 }
 
 /**
-Get the matching time series for an identifier.  This is used, for example, 
-to find the time series associated with a StateMod data object, when the time
-series is not a reference data member within the data object (e.g., climate
-time series for reservoirs.
-@param id Identifier associated with a StateMod data object, which will be
-compared with the location part of the time series identifier.
-@param tslist Vector of time series to search, typically read from one of the
-time series data files.
-@param match_count Indicates which match to return.  In most cases this will be
-1 but for some time series (e.g., reservoir targets) the second match may be
-requested.
-@return matching time series or null if no match is found.
-*/
-public static TS lookupTimeSeries (	String id, Vector tslist,
-					int match_count )
-{	if ( (id == null) || id.equals("") ) {
-		return null;
-	}
-	int size = 0;
-	if ( tslist != null ) {
-		size = tslist.size();
-	}
-	TS ts = null;
-	Object o = null;
-	int match_count2 = 0;
-	for ( int i = 0; i < size; i++ ) {
-		o = tslist.elementAt(i);
-		if ( o == null ) {
-			continue;
-		}
-		ts = (TS)o;
-		if ( id.equalsIgnoreCase(ts.getLocation()) ) {
-			++match_count2;
-			if ( match_count2 == match_count ) {
-				// Match is found so return.
-				return ts;
-			}
-		}
-	}
-	return null;
-}
-
-/**
-Look up a title to use for a time series graph, given the data set component.
-Currently this simply returns the component name, replacing " TS " with
-" Time Series ".
-@param comp_type StateMod component type.
-*/
-public static String lookupTimeSeriesGraphTitle ( int comp_type )
-{	StateMod_DataSet dataset = new StateMod_DataSet();
-	return dataset.lookupComponentName (
-		comp_type ).replaceAll(" TS ", " Time Series " );
-}
-
-/**
-Sorts a Vector of StateMod_Data objects, depending on the compareTo() method
-for the specific object.
-@param data a Vector of StateMod_Data objects.  Can be null.
-@return a new sorted Vector with references to the same data objects in the
-passed-in Vector.  If a null Vector is passed in, an empty Vector will be
-returned.
-*/
-public static Vector sortStateMod_DataVector ( Vector data )
-{	return sortStateMod_DataVector ( data, true );
-}
-
-/**
-Sorts a Vector of StateMod_Data objects, depending on the compareTo() method
-for the specific object.
-@param data a Vector of StateMod_Data objects.  Can be null.
-@param return_new If true, return a new Vector with references to the data.
-If false, return the original Vector, with sorted contents.
-@return a sorted Vector with references to the same data objects in the
-passed-in Vector.  If a null Vector is passed in, an empty Vector will be
-returned.
-*/
-public static Vector sortStateMod_DataVector ( Vector data, boolean return_new )
-{	if (data == null) {
-		return new Vector();
-	}
-	Vector v = data;
-	int size = data.size();
-	if ( return_new ) {
-		if (size == 0) {
-			return new Vector();
-		}
-		v = new Vector(size);
-		for (int i = 0; i < size; i++) {
-			v.add(data.elementAt(i));
-		}
-	}
-
-	if (size == 1) {
-		return v;
-	}
-
-	Collections.sort(v);
-	return v;
-}
-
-/**
-Run the command "statemod <response_file_name> <option>".
-@param dataset Data set to get the response file from.
-@param option Option to run (e.g., "-simx" for a fast simulate).
-@param withGUI If true, the process manager gui will be displayed.  True should
-typcially be used for model run options but is normally false when running the
-StateMod report mode.
-@param parent Calling JFrame, used when withGUI is true.
-@exception Exception if there is an error running the command (non Stop 0 from StateMod).
-*/
-public static void runStateMod ( StateMod_DataSet dataset, String option, boolean withGUI, JFrame parent )
-throws Exception
-{	DataSetComponent comp = dataset.getComponentForComponentType(StateMod_DataSet.COMP_RESPONSE );
-	runStateMod (	dataset.getDataFilePathAbsolute(comp.getDataFileName()),
-			option, withGUI, parent, 0 );
-}
-
-/**
-Run the command "statemod <response_file_name> <option>".
-The response file is typically the original response file that was used to open
-the data set.
-@param response_file_name Response file name, with full path.
-@param option Option to run (e.g., "-simx" for a fast simulate).
-@param withGUI If true, the process manager gui will be displayed.  True should
-typcially be used for model run options but is normally false when running the
-StateMod report mode.
-@param parent Calling JFrame, used when withGUI is true.
-@exception Exception if there is an error running the command (non Stop 0 from
-StateMod).
-*/
-public static void runStateMod (	String response_file_name,
-					String option, 
-					boolean withGUI,
-					JFrame parent )
-throws Exception {
-	runStateMod ( response_file_name, option, withGUI, parent, 0 );
-}
-
-/**
-Run the command "statemod <response_file_name> <option>".
-The response file is typically the original response file that was used to open
-the data set.  It can be null if not needed for the option (e.g., -help).  If the -v
-option is run, then the internal statemod version information is set.  In other
-words, use -v to reset the StateMod version number that is known.
-@param response_file_name Response file name, with full path.
-@param option Option to run(parameters after the program name).
-@param withGUI If true, a ProcessManagerDialog will be used.  If false, the GUI
-will not be shown (although a DOS window may pop up).
-@param parent Calling JFrame, used when withGUI is true.
-@param wait_after Number of milliseconds to wait after running.  This is
-sometimes needed to allow the output file (e.g., .x*g) file to be recognized
-by the operating system.  This will not be needed if time series are read from
-binary model output files but may be needed if reports are viewed immediately
-after running.
-@exception Exception if there is an error running the command (non Stop 0 from
-StateMod).
-*/
-public static void runStateMod (	String response_file_name,
-					String option, 
-					boolean withGUI, JFrame parent,
-					int wait_after )
-throws Exception
-{	String routine = "StateMod_Util.runStateMod";
-	if ( response_file_name == null ) {
-		response_file_name = "";
-	}
-
-	String command = __statemod_executable + " " + response_file_name + " " + option;
-	String str;
-
-	Message.printStatus(1, routine, "Running \"" + command + "\"");
-
-	if ( withGUI ) {
-		// Run using a process manager dialog...
-		PropList props = new PropList("StateMod_Util.runStateMod");
-		PropList pm_props = new PropList ("StateMod_Util.runStateMod");
-		if ( option.startsWith("-update") || option.startsWith("-help") || option.startsWith("-version") ) {
-			// Display all the output...
-			props.set("BufferSize","0");
-		}
-		else {
-			// Display a reasonably large number of lines of output...
-			props.set("BufferSize","1000");
-		}
-		// Tell the process manager to check for "STOP" as an exit
-		// code - this seems to work better than a process exit code.
-		// Comment out for now.  The exit() calls built into the
-		// statemod.exe seem to be working
-		//pm_props.set("ExitStatusTokens","STOP");
-		// Use the following to test the Statemod.exe with exit() codes
-		// Use the array of command arguments - seems to work better...
-		//String [] test = new String[3];
-		//test[0] = "statemod";
-		//test[1] = "-test";
-		//test[2] = "-0";
-		//new ProcessManagerJDialog(parent, "StateMod",
-			//new ProcessManager( test, pm_props), props);
-		ProcessManagerOutputFilter filter = new StateMod_OutputFilter();
-		new ProcessManagerJDialog(parent, "StateMod",
-			new ProcessManager(StringUtil.toArray(
-			StringUtil.breakStringList(command,
-			" ", StringUtil.DELIM_SKIP_BLANKS)), pm_props), filter, props);
-	}
-	else if (option.equalsIgnoreCase("-v") || option.equalsIgnoreCase("-version")) {
-		// Run StateMod -version and search the output for the version information...
-		String [] command_array = new String[2];
-		command_array[0] = getStateModExecutable();
-		command_array[1] = "-version";
-		ProcessManager sp = new ProcessManager(command_array);
-		sp.saveOutput(true);
-		sp.run();
-		Vector output = sp.getOutputVector();
-		int size = 0;
-		if (output != null){
-			size = output.size();	
-		}
-		boolean	versionFound = false;
-		for (int i = 0; i < size; i++){
-			str = (String)output.elementAt(i);
-			if (str.indexOf("Version:") >= 0) {
-				String version = StringUtil.getToken( str.trim()," ", StringUtil.DELIM_SKIP_BLANKS,1);
-				// For now treat as a floating point number...
-				__statemod_version = StringUtil.atof(version);
-				versionFound = true;
-				break;
-			}
-		}
-		if (!versionFound) {
-			Message.printWarning(1, routine,
-			"Unable to determine StateMod version from version output.\n"
-			+"Model may not run and output may not be accessible.\n"
-			+"Is statemod.exe in the PATH?");
-			return;	// To skip sleep below.
-		}
-	}
-	else {
-		// No GUI and not getting the version.
-		ProcessManager sp = new ProcessManager(
-			StringUtil.toArray(
-			StringUtil.breakStringList(command, " \t",
-				StringUtil.DELIM_SKIP_BLANKS)));
-		sp.saveOutput(true);
-		sp.run();
-		if (sp.getExitStatus()!= 0){
-			// There was an error running StateMod.
-			Message.printWarning(2, routine,
-			"Error running \"" + command + "\"");
-			throw new Exception("Error running \"" + command +
-			"\"");
-		}
-		Vector output = sp.getOutputVector();
-		int size = 0;
-		if (output != null) {
-			size = output.size();	
-		}
-		for (int i = 0; i < size; i++) {
-			// Print the output as status messages since no GUI is
-			// being shown but we may want to see what is going on
-			// in the log and console...
-			str = (String)output.elementAt(i);
-			if (str != null) {
-				// This prints to the Diagnostics GUI and to
-				// the console window...
-				Message.printStatus(1, routine, str);
-			}
-		}
-		// Appears that in some cases the model is not completing saving
-		// its output so sleep .1 second...
-		if (wait_after > 0) {
-			Message.printStatus(1,"", "Waiting " + wait_after
-				+ " milliseconds to let output finish.");
-			TimeUtil.sleep(wait_after);
-			Message.printStatus(1,"", "Done waiting.");
-		}
-	}
-}
-
-/**
-Sets description field in each time series using supplied StateMod_Data object
-identifiers.  The StateMod time series files include only the start/end period
-of record, units, year type, ID and values only, no descriptions are included.
-This method correlates the descriptions in the stations files with the
-TimeSeries.
-@param theData StateMod_Data objects from which we will use the name is used 
-to fill in the description field in the time series
-@param theTS vector of time series
-@param mult the number of TS in a row which will use the description.  For
-example, the reservoir min/max vector has two time series for each node in
-theData (min and max) whereas most have a one-to-one correlation.
-*/
-public static void setTSDescriptions (Vector theData, Vector theTS, int mult) {
-	if ((theData == null) || (theTS == null)) {
-		return;
-	}
-	if (theData.size() == 0 || theTS.size() == 0) {
-		return;
-	}
-
-	int size = theData.size();
-
-	StateMod_Data smdata = null;
-	TS ts = null;
-	for (int i=0; i<size; i++) {
-		smdata = (StateMod_Data)theData.elementAt(i);
-		for (int j=0; j<mult; j++) {
-			try {	ts = (TS)theTS.elementAt(i*mult + j);
-
-				if (smdata.getID().equalsIgnoreCase
-					(ts.getIdentifier().getLocation())) {
-					ts.setDescription(smdata.getName());
-				}
-			} catch (Exception e) {
-				Message.printWarning (2,
-					"StateMod_GUIUtil.setTSDescriptions", 
-					"Unable to set description for ts");
-			}
-		}
-				
-	}
-	smdata = null;
-	ts = null;
-}
-
-/**
-Removes all the objects that match the specified object (with a compareTo() 
-call) from the Vector.
-@param v the Vector from which to remove the element.
-@param data the object to match and remove.
-*/
-public static void removeFromVector(Vector v, StateMod_Data data) {
-	if (v == null || v.size() == 0) {
-		return;
-	}
-	int size = v.size();
-	StateMod_Data element = null;
-	for (int i = size - 1; i >= 0; i--) {
-		element = (StateMod_Data)v.elementAt(i);
-		if (element.compareTo(data) == 0) {
-			v.remove(i);
-		}
-	}
-}
-
-/**
-Set the program to use when running StateMod.  In general, this should just be
-the program name and rely on the PATH to find.  However, a full path can be
-specified to override the PATH.
-*/
-public static void setStateModExecutable ( String statemod_executable )
-{	if ( statemod_executable != null ) {
-		__statemod_executable = statemod_executable;
-	}
-}
-
-/*
-	COMP_RESERVOIR_AREA_CAP = -102,
-*/
-
-/**
 Returns the property value for a component.  
 @param componentType the kind of component to look up for.
 @param propType the property to look up.  One of "FieldName", 
@@ -4427,8 +4172,7 @@ String field) {
 	else if (componentType == StateMod_DataSet.COMP_DIVERSION_STATIONS) {
 		return lookupDiversionPropValue(propType, field);
 	}
-	else if (componentType 
-	    == StateMod_DataSet.COMP_DIVERSION_STATION_COLLECTIONS) {
+	else if (componentType == StateMod_DataSet.COMP_DIVERSION_STATION_COLLECTIONS) {
 	    	return lookupDiversionCollectionPropValue(propType, field);
 	}
 	else if (componentType
@@ -6425,6 +6169,60 @@ String field) {
 }
 
 /**
+Get the matching time series for an identifier.  This is used, for example, 
+to find the time series associated with a StateMod data object, when the time
+series is not a reference data member within the data object (e.g., climate
+time series for reservoirs.
+@param id Identifier associated with a StateMod data object, which will be
+compared with the location part of the time series identifier.
+@param tslist Vector of time series to search, typically read from one of the
+time series data files.
+@param match_count Indicates which match to return.  In most cases this will be
+1 but for some time series (e.g., reservoir targets) the second match may be
+requested.
+@return matching time series or null if no match is found.
+*/
+public static TS lookupTimeSeries (	String id, Vector tslist,
+					int match_count )
+{	if ( (id == null) || id.equals("") ) {
+		return null;
+	}
+	int size = 0;
+	if ( tslist != null ) {
+		size = tslist.size();
+	}
+	TS ts = null;
+	Object o = null;
+	int match_count2 = 0;
+	for ( int i = 0; i < size; i++ ) {
+		o = tslist.elementAt(i);
+		if ( o == null ) {
+			continue;
+		}
+		ts = (TS)o;
+		if ( id.equalsIgnoreCase(ts.getLocation()) ) {
+			++match_count2;
+			if ( match_count2 == match_count ) {
+				// Match is found so return.
+				return ts;
+			}
+		}
+	}
+	return null;
+}
+
+/**
+Look up a title to use for a time series graph, given the data set component.
+Currently this simply returns the component name, replacing " TS " with " Time Series ".
+@param comp_type StateMod component type.
+*/
+public static String lookupTimeSeriesGraphTitle ( int comp_type )
+{	StateMod_DataSet dataset = new StateMod_DataSet();
+	return dataset.lookupComponentName (
+		comp_type ).replaceAll(" TS ", " Time Series " );
+}
+
+/**
 Returns property values for wells.
 @param propType the property to look up.  One of "FieldName", 
 "FieldNameHeader", "ToolTip", or "Format".  
@@ -7067,6 +6865,319 @@ String field) {
 	}
 
 	return null;
+}
+
+/**
+Removes all the objects that match the specified object (with a compareTo() call) from the Vector.
+@param v the Vector from which to remove the element.
+@param data the object to match and remove.
+*/
+public static void removeFromVector(Vector v, StateMod_Data data) {
+	if (v == null || v.size() == 0) {
+		return;
+	}
+	int size = v.size();
+	StateMod_Data element = null;
+	for (int i = size - 1; i >= 0; i--) {
+		element = (StateMod_Data)v.elementAt(i);
+		if (element.compareTo(data) == 0) {
+			v.remove(i);
+		}
+	}
+}
+
+/**
+Run the command "statemod <response_file_name> <option>".
+@param dataset Data set to get the response file from.
+@param option Option to run (e.g., "-simx" for a fast simulate).
+@param withGUI If true, the process manager gui will be displayed.  True should
+typcially be used for model run options but is normally false when running the
+StateMod report mode.
+@param parent Calling JFrame, used when withGUI is true.
+@exception Exception if there is an error running the command (non Stop 0 from StateMod).
+*/
+public static void runStateMod ( StateMod_DataSet dataset, String option, boolean withGUI, JFrame parent )
+throws Exception
+{	DataSetComponent comp = dataset.getComponentForComponentType(StateMod_DataSet.COMP_RESPONSE );
+	runStateMod ( dataset.getDataFilePathAbsolute(comp.getDataFileName()), option, withGUI, parent, 0 );
+}
+
+/**
+Run the command "statemod <response_file_name> <option>".
+The response file is typically the original response file that was used to open
+the data set.
+@param response_file_name Response file name, with full path.
+@param option Option to run (e.g., "-simx" for a fast simulate).
+@param withGUI If true, the process manager gui will be displayed.  True should
+typcially be used for model run options but is normally false when running the
+StateMod report mode.
+@param parent Calling JFrame, used when withGUI is true.
+@exception Exception if there is an error running the command (non Stop 0 from StateMod).
+*/
+public static void runStateMod ( String response_file_name, String option, boolean withGUI, JFrame parent )
+throws Exception {
+	runStateMod ( response_file_name, option, withGUI, parent, 0 );
+}
+
+/**
+Run the command "statemod <response_file_name> <option>".
+The response file is typically the original response file that was used to open
+the data set.  It can be null if not needed for the option (e.g., -help).  If the -v
+option is run, then the internal statemod version information is set.  In other
+words, use -v to reset the StateMod version number that is known.
+@param response_file_name Response file name, with full path.
+@param option Option to run(parameters after the program name).
+@param withGUI If true, a ProcessManagerDialog will be used.  If false, the GUI
+will not be shown (although a DOS window may pop up).
+@param parent Calling JFrame, used when withGUI is true.
+@param wait_after Number of milliseconds to wait after running.  This is
+sometimes needed to allow the output file (e.g., .x*g) file to be recognized
+by the operating system.  This will not be needed if time series are read from
+binary model output files but may be needed if reports are viewed immediately
+after running.
+@exception Exception if there is an error running the command (non Stop 0 from StateMod).
+*/
+public static void runStateMod ( String response_file_name, String option, boolean withGUI, JFrame parent, int wait_after )
+throws Exception
+{	String routine = "StateMod_Util.runStateMod";
+	if ( response_file_name == null ) {
+		response_file_name = "";
+	}
+
+	String command = getStateModExecutable() + " " + response_file_name + " " + option;
+	String str;
+
+	Message.printStatus(1, routine, "Running \"" + command + "\"");
+
+	if ( withGUI ) {
+		// Run using a process manager dialog...
+		PropList props = new PropList("StateMod_Util.runStateMod");
+		PropList pm_props = new PropList ("StateMod_Util.runStateMod");
+		if ( option.startsWith("-update") || option.startsWith("-help") || option.startsWith("-version") ) {
+			// Display all the output...
+			props.set("BufferSize","0");
+		}
+		else {
+			// Display a reasonably large number of lines of output...
+			props.set("BufferSize","1000");
+		}
+		// Tell the process manager to check for "STOP" as an exit
+		// code - this seems to work better than a process exit code.
+		// Comment out for now.  The exit() calls built into the
+		// statemod.exe seem to be working
+		//pm_props.set("ExitStatusTokens","STOP");
+		// Use the following to test the Statemod.exe with exit() codes
+		// Use the array of command arguments - seems to work better...
+		//String [] test = new String[3];
+		//test[0] = "statemod";
+		//test[1] = "-test";
+		//test[2] = "-0";
+		//new ProcessManagerJDialog(parent, "StateMod", new ProcessManager( test, pm_props), props);
+		ProcessManagerOutputFilter filter = new StateMod_OutputFilter();
+		new ProcessManagerJDialog(parent, "StateMod", new ProcessManager(StringUtil.toArray(
+			StringUtil.breakStringList(command, " ", StringUtil.DELIM_SKIP_BLANKS)), pm_props), filter, props);
+	}
+	else if (option.equalsIgnoreCase("-v") || option.equalsIgnoreCase("-version")) {
+		// Run StateMod -version and search the output for the version information...
+		String [] command_array = new String[2];
+		command_array[0] = getStateModExecutable();
+		command_array[1] = "-version";
+		ProcessManager sp = new ProcessManager(command_array);
+		sp.saveOutput(true);
+		sp.run();
+		Vector output = sp.getOutputVector();
+		int size = 0;
+		if (output != null){
+			size = output.size();	
+		}
+		boolean	versionFound = false;
+		for (int i = 0; i < size; i++){
+			str = (String)output.elementAt(i);
+			if (str.indexOf("Version:") >= 0) {
+				String version = StringUtil.getToken( str.trim(),":", StringUtil.DELIM_SKIP_BLANKS,1).trim();
+				// For now treat as a floating point number...
+				setStateModVersion ( StringUtil.atof(version) );
+				versionFound = true;
+			}
+			if (str.indexOf("revision date:") >= 0) {
+				String revisionDate = StringUtil.getToken( str.trim(),":", StringUtil.DELIM_SKIP_BLANKS,1).trim();
+				setStateModRevisionDate ( revisionDate );
+			}
+		}
+		if (!versionFound) {
+			Message.printWarning(1, routine,
+			"Unable to determine StateMod version from version output using:\n" +
+			"   " + getStateModExecutable() + "\n" +
+			"StateMod may not run and output may not be accessible.\n"
+			+"Is statemod.exe in the PATH or specified as a full path (see Tools ... Options)?");
+			return;	// To skip sleep below.
+		}
+	}
+	else {
+		// No GUI and not getting the version.
+		ProcessManager sp = new ProcessManager(
+			StringUtil.toArray(	StringUtil.breakStringList(command, " \t", StringUtil.DELIM_SKIP_BLANKS)));
+		sp.saveOutput(true);
+		sp.run();
+		if (sp.getExitStatus()!= 0){
+			// There was an error running StateMod.
+			Message.printWarning(2, routine, "Error running \"" + command + "\"");
+			throw new Exception("Error running \"" + command + "\"");
+		}
+		Vector output = sp.getOutputVector();
+		int size = 0;
+		if (output != null) {
+			size = output.size();	
+		}
+		for (int i = 0; i < size; i++) {
+			// Print the output as status messages since no GUI is
+			// being shown but we may want to see what is going on in the log and console...
+			str = (String)output.elementAt(i);
+			if (str != null) {
+				Message.printStatus(1, routine, str);
+			}
+		}
+		// Appears that in some cases the model is not completing saving its output so sleep .1 second...
+		if (wait_after > 0) {
+			Message.printStatus(1,"", "Waiting " + wait_after + " milliseconds to let output finish.");
+			TimeUtil.sleep(wait_after);
+			Message.printStatus(1,"", "Done waiting.");
+		}
+	}
+}
+
+/**
+Set the program to use when running SmDelta.  In general, this should just be
+the program name and rely on the PATH to find.  However, a full path can be
+specified to override the PATH.
+@param smdeltaExecutable name of StateMod executable to run.
+*/
+public static void setSmDeltaExecutable ( String smdeltaExecutable )
+{	if ( smdeltaExecutable != null ) {
+		__smdeltaExecutable = smdeltaExecutable;
+	}
+}
+
+/**
+Set the program to use when running StateMod.  In general, this should just be
+the program name and rely on the PATH to find.  However, a full path can be
+specified to override the PATH.
+@param statemodExecutable name of StateMod executable to run.
+*/
+public static void setStateModExecutable ( String statemodExecutable )
+{	if ( statemodExecutable != null ) {
+		__statemodExecutable = statemodExecutable;
+	}
+}
+
+/**
+Set the StateMod revision date.
+@param statemodRevisionDate Revision date string from running statemod -v
+*/
+public static void setStateModRevisionDate ( String statemodRevisionDate )
+{	if ( statemodRevisionDate != null ) {
+		__statemodRevisionDate = statemodRevisionDate;
+	}
+}
+
+/**
+ * Set the StateMod version, for internal use.  This information is useful
+ * for checking version "greater than" for software features and file formats, etc.
+ * @param statemodVersion StateMod version as a double.
+ */
+private static void setStateModVersion ( double statemodVersion )
+{
+	__statemodVersion = statemodVersion;
+}
+
+/**
+Sorts a Vector of StateMod_Data objects, depending on the compareTo() method
+for the specific object.
+@param data a Vector of StateMod_Data objects.  Can be null.
+@return a new sorted Vector with references to the same data objects in the
+passed-in Vector.  If a null Vector is passed in, an empty Vector will be
+returned.
+*/
+public static Vector sortStateMod_DataVector ( Vector data )
+{	return sortStateMod_DataVector ( data, true );
+}
+
+/**
+Sorts a Vector of StateMod_Data objects, depending on the compareTo() method
+for the specific object.
+@param data a Vector of StateMod_Data objects.  Can be null.
+@param return_new If true, return a new Vector with references to the data.
+If false, return the original Vector, with sorted contents.
+@return a sorted Vector with references to the same data objects in the
+passed-in Vector.  If a null Vector is passed in, an empty Vector will be
+returned.
+*/
+public static Vector sortStateMod_DataVector ( Vector data, boolean return_new )
+{	if (data == null) {
+		return new Vector();
+	}
+	Vector v = data;
+	int size = data.size();
+	if ( return_new ) {
+		if (size == 0) {
+			return new Vector();
+		}
+		v = new Vector(size);
+		for (int i = 0; i < size; i++) {
+			v.add(data.elementAt(i));
+		}
+	}
+
+	if (size == 1) {
+		return v;
+	}
+
+	Collections.sort(v);
+	return v;
+}
+
+/**
+Sets description field in each time series using supplied StateMod_Data object
+identifiers.  The StateMod time series files include only the start/end period
+of record, units, year type, ID and values only, no descriptions are included.
+This method correlates the descriptions in the stations files with the
+TimeSeries.
+@param theData StateMod_Data objects from which we will use the name is used 
+to fill in the description field in the time series
+@param theTS vector of time series
+@param mult the number of TS in a row which will use the description.  For
+example, the reservoir min/max vector has two time series for each node in
+theData (min and max) whereas most have a one-to-one correlation.
+*/
+public static void setTSDescriptions (Vector theData, Vector theTS, int mult) {
+	if ((theData == null) || (theTS == null)) {
+		return;
+	}
+	if (theData.size() == 0 || theTS.size() == 0) {
+		return;
+	}
+
+	int size = theData.size();
+
+	StateMod_Data smdata = null;
+	TS ts = null;
+	for (int i=0; i<size; i++) {
+		smdata = (StateMod_Data)theData.elementAt(i);
+		for (int j=0; j<mult; j++) {
+			try {
+				ts = (TS)theTS.elementAt(i*mult + j);
+
+				if (smdata.getID().equalsIgnoreCase	(ts.getIdentifier().getLocation())) {
+					ts.setDescription(smdata.getName());
+				}
+			} catch (Exception e) {
+				Message.printWarning (2,"StateMod_GUIUtil.setTSDescriptions", "Unable to set description for ts");
+			}
+		}
+				
+	}
+	smdata = null;
+	ts = null;
 }
 
 }

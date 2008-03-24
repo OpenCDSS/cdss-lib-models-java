@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------
-// StateMod_RunDeltaPlot_TableModel - Table model for displaying data for 
+// StateMod_RunSmDelta_TableModel - Table model for displaying data for 
 //	delta plot-related tables
 // ----------------------------------------------------------------------------
 // Copyright:   See the COPYRIGHT file
@@ -41,7 +41,7 @@ import RTi.Util.GUI.SimpleFileFilter;
 /**
 This table model display delta plot data.
 */
-public class StateMod_RunDeltaPlot_TableModel 
+public class StateMod_RunSmDelta_TableModel 
 extends JWorksheet_AbstractRowTableModel {
 
 /**
@@ -52,7 +52,7 @@ private final static int __COLUMNS = 5;
 /**
 The parent frame on which the JWorksheet for this model is displayed.
 */
-private StateMod_RunDeltaPlot_JFrame __parent = null;
+private StateMod_RunSmDelta_JFrame __parent = null;
 
 /**
 The worksheet in which this table model is working.
@@ -102,7 +102,7 @@ Constructor.
 @param wells Vector of StateMod_Well objects
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_RunDeltaPlot_TableModel(StateMod_RunDeltaPlot_JFrame parent,
+public StateMod_RunSmDelta_TableModel(StateMod_RunSmDelta_JFrame parent,
 Vector data, Vector reservoirs, Vector diversions, Vector instreamFlows,
 Vector streamGages, Vector wells)
 throws Exception {
@@ -118,8 +118,7 @@ throws Exception {
 	__needsFilled.borderColor = Color.red;
 
 	if (data == null) {
-		throw new Exception ("Invalid data Vector passed to " 
-			+ "StateMod_RunDeltaPlot_TableModel constructor.");
+		throw new Exception ("Invalid data Vector passed to StateMod_RunSmDelta_TableModel constructor.");
 	}
 	_rows = data.size();
 	_data = data;
@@ -283,51 +282,46 @@ public void emptyParmIDComboBoxes(int row) {
 }
 
 /**
-Fills the parameter column in the given row based on the station type selected
-on that row.
-@param row the row to fill the parameter column of.
+Fills the parameter column in the given row based on the station type selected for that row.
+@param row the row for which to fill the parameter column.
 @param type the type of the station in the given row.
 */
 public void fillParameterColumn(int row, String type) {
 	Vector datatypes = new Vector();
 
+	// Get the model output data types (no input since SmDelta deals with output).
 	if (type.equalsIgnoreCase("Diversion")) {
-		datatypes = StateMod_GraphNode.getGraphDataType(
-			StateMod_GraphNode.DIVERSION_TYPE, false);
+		datatypes = StateMod_GraphNode.getGraphDataType(StateMod_GraphNode.DIVERSION_TYPE, false);
 	}
 	else if (type.equalsIgnoreCase("Instream flow")) {
-		datatypes = StateMod_GraphNode.getGraphDataType(
-			StateMod_GraphNode.INSTREAM_TYPE, false);
+		datatypes = StateMod_GraphNode.getGraphDataType(StateMod_GraphNode.INSTREAM_TYPE, false);
 	}
 	else if (type.equalsIgnoreCase("Reservoir")) {
-		datatypes = StateMod_GraphNode.getGraphDataType(
-			StateMod_GraphNode.RESERVOIR_TYPE, false);
+		datatypes = StateMod_GraphNode.getGraphDataType(StateMod_GraphNode.RESERVOIR_TYPE, false);
 	}
 	else if (type.equalsIgnoreCase("Streamflow")) {
-		datatypes = StateMod_GraphNode.getGraphDataType(
-			StateMod_GraphNode.STREAM_TYPE, false);
+		datatypes = StateMod_GraphNode.getGraphDataType(StateMod_GraphNode.STREAM_TYPE, false);
 	}
 	else if (type.equalsIgnoreCase("Well")) {
-		datatypes = StateMod_GraphNode.getGraphDataType(
-			StateMod_GraphNode.WELL_TYPE, false);
+		datatypes = StateMod_GraphNode.getGraphDataType(StateMod_GraphNode.WELL_TYPE, false);
 	}
 	else if (type.equalsIgnoreCase("Stream ID (0* Gages)")) {
-		datatypes = StateMod_GraphNode.getGraphDataType(
-			StateMod_GraphNode.STREAM_TYPE, false);
+		datatypes = StateMod_GraphNode.getGraphDataType(StateMod_GraphNode.STREAM_TYPE, false);
 	}
 
 	Vector finalTypes = new Vector();
 	finalTypes.add("");
 
 	for (int i = 0; i < datatypes.size(); i++) {
-		finalTypes.add(((String)datatypes.elementAt(i))
-			.replace('_', ' '));
+		// FIXME SAM 2008-03-20 No need to remove underscores for newer versions of StateMod, right?.
+		// Use data types from binary file.
+		//finalTypes.add(((String)datatypes.elementAt(i)).replace('_', ' '));
+		finalTypes.add(datatypes.elementAt(i));
 	}
 
 	if (__worksheet != null) {
 		//System.out.println("Setting cell-specific stuff");
-		__worksheet.setCellSpecificJComboBoxValues(row, COL_PARM, 
-			finalTypes);
+		__worksheet.setCellSpecificJComboBoxValues(row, COL_PARM, finalTypes);
 	}
 }
 
@@ -346,8 +340,7 @@ public void fillIDColumn(int row, String type) {
 	}
 	else if (type.equalsIgnoreCase("Instream flow")) {
 		if (__instreamFlowIDs == null) {
-			__instreamFlowIDs = createAvailableIDsList(
-				__instreamFlows);
+			__instreamFlowIDs = createAvailableIDsList(	__instreamFlows);
 		}
 		ids = __instreamFlowIDs;
 	}
@@ -689,8 +682,10 @@ public Object getValueAt(int row, int col) {
 		case COL_FILE:	return gn.getFileName();
 		case COL_TYPE:	return gn.getType();
 		case COL_PARM:	
-			String s = new String(gn.getDtype());
-			s = (s.replace('_', ' ')).trim();
+			String s = gn.getDtype();
+			// FIXME SAM 2008-03-24 No need to do this with newer StateMod
+			// since binary file uses underscores for data types.
+			//s = (s.replace('_', ' ')).trim();
 			return s;
 		case COL_YEAR:	return gn.getYrAve();
 		case COL_ID:	return gn.getID();
@@ -874,14 +869,14 @@ public void setValueAt(Object value, int row, int col) {
 //	"Set value at: " + row + ", " + col + " '" + value + "'");
 	switch (col) {
 		case COL_FILE:	
-			String filename = new String((String)value);
+			String filename = (String)value;
 			String oldFilename = (String)(getValueAt(row, col));
 			if (filename.equals(oldFilename)) {
 				return;
 			}
 
 			if (filename.equalsIgnoreCase(
-				StateMod_RunDeltaPlot_JFrame.OPTION_BROWSE)) {
+				StateMod_RunSmDelta_JFrame.OPTION_BROWSE)) {
 				String newfile = browseForFile();
 				gn.setFileName(newfile);
 				if (row == 0) {
@@ -910,7 +905,7 @@ public void setValueAt(Object value, int row, int col) {
 			}
 			break;
 		case COL_TYPE:
-			String type = new String((String)value);
+			String type = (String)value;
 			String oldType = (String)(getValueAt(row, col));
 
 			if (type.equals(oldType)) {
@@ -952,8 +947,10 @@ public void setValueAt(Object value, int row, int col) {
 
 			break;
 		case COL_PARM:	
-			String dtype = new String((String)value).trim();
-			dtype = dtype.replace(' ', '_');
+			String dtype = ((String)value).trim();
+			// FIXME SAM 2008-03-24 No need to do this with newer StateMod
+			// since binary file uses underscores for data types.
+			//dtype = dtype.replace(' ', '_');
 			String oldDtype = (String)(getValueAt(row, col));
 			if (dtype.equals(oldDtype)) {
 				return;
@@ -972,7 +969,7 @@ public void setValueAt(Object value, int row, int col) {
 			}
 			break;
 		case COL_YEAR:	
-			String year = new String((String)value).trim();
+			String year = ((String)value).trim();
 			String oldYear = (String)(getValueAt(row, col));
 			if (year.equals(oldYear)) {
 				return;
@@ -988,7 +985,7 @@ public void setValueAt(Object value, int row, int col) {
 			}
 			break;
 		case COL_ID:	
-			String id = new String((String)value);
+			String id = (String)value;
 			String oldID = (String)(getValueAt(row, col));
 			if (id.equals(oldID)) {
 				return;

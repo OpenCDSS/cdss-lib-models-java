@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------
-// StateMod_RunDeltaPlot_CellRenderer - Class for rendering cells for 
+// StateMod_RunSmDelta_CellRenderer - Class for rendering cells for 
 //	delta plot-related tables
 // ----------------------------------------------------------------------------
 // Copyright:   See the COPYRIGHT file
@@ -15,17 +15,17 @@ import RTi.Util.GUI.JWorksheet_AbstractExcelCellRenderer;
 /**
 This class renders cells for the delta plot table.
 */
-public class StateMod_RunDeltaPlot_CellRenderer
+public class StateMod_RunSmDelta_CellRenderer
 extends JWorksheet_AbstractExcelCellRenderer {
 
-private StateMod_RunDeltaPlot_TableModel __tableModel;
+private StateMod_RunSmDelta_TableModel __tableModel;
 
 /**
 Constructor.  
 @param tableModel the table model for which to render cells
 */
-public StateMod_RunDeltaPlot_CellRenderer(
-StateMod_RunDeltaPlot_TableModel tableModel) {
+public StateMod_RunSmDelta_CellRenderer(
+StateMod_RunSmDelta_TableModel tableModel) {
 	__tableModel = tableModel;
 }
 

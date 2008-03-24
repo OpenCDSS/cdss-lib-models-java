@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-// StateMod_RunDeltaPlot_JFrame - dialog to create templates for graphing
+// StateMod_RunSmDelta_JFrame - dialog to create templates for graphing
 //------------------------------------------------------------------------------
 // Copyright:	See the COPYRIGHT file.
 //------------------------------------------------------------------------------
@@ -136,6 +136,7 @@ import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.GUI.SimpleJComboBox;
 import RTi.Util.Help.HelpJDialog;
 import RTi.Util.IO.DataSetComponent;
+import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.ProcessManager;
 import RTi.Util.IO.ProcessManagerJDialog;
 import RTi.Util.IO.PropList;
@@ -144,15 +145,14 @@ import RTi.Util.Message.Message;
 /**
 This GUI is a class for controlling the run of delta plots.
 */
-public class StateMod_RunDeltaPlot_JFrame extends JFrame
+public class StateMod_RunSmDelta_JFrame extends JFrame
 implements ActionListener, ItemListener, KeyListener, MouseListener, 
 WindowListener {
 
 /**
 Reference the window manager's number for this window.
 */
-public final static int WINDOW_NUM = 
-	StateMod_DataSet_WindowManager.WINDOW_RUN_DELPLT;
+public final static int WINDOW_NUM = StateMod_DataSet_WindowManager.WINDOW_RUN_DELPLT;
 
 /**
 Filename option for the file browser.
@@ -160,21 +160,19 @@ Filename option for the file browser.
 public final static String OPTION_BROWSE = "Browse ...";
 
 /**
+ * Name of the program as known to users.
+ */
+private final String __SmDelta = "SmDelta";
+
+/**
 Run mode types.
 */
 private final String 
-	__DELPLT_RUN_MODE_SINGLE = 
-		"Single - One parameter (first given), 1+ stations",
-	__DELPLT_RUN_MODE_MULTIPLE = 
-		"Multiple - 1+ parameter(s), 1+ station(s)",
-	__DELPLT_RUN_MODE_DIFFERENCE = 
-		"Diff - 1 parameter difference between runs (assign zero if "
-		+ "not found in both runs)",
-	__DELPLT_RUN_MODE_DIFFX =
-		"Diffx - 1 parameter difference between runs (ignore if "
-		+ "not found in both runs)",
-	__DELPLT_RUN_MODE_MERGE =
-		"Merge - merge output from delplt runs";
+	__DELPLT_RUN_MODE_SINGLE = "Single - One parameter (first given), 1+ stations",
+	__DELPLT_RUN_MODE_MULTIPLE = "Multiple - 1+ parameter(s), 1+ station(s)",
+	__DELPLT_RUN_MODE_DIFFERENCE = "Diff - 1 parameter difference between runs (assign zero if not found in both runs)",
+	__DELPLT_RUN_MODE_DIFFX = "Diffx - 1 parameter difference between runs (ignore if not found in both runs)",
+	__DELPLT_RUN_MODE_MERGE = "Merge - merge output from " + __SmDelta + " runs";
 
 /**
 Button labels.
@@ -183,11 +181,11 @@ private final String
 	__BUTTON_ADD_ROW = "Add a Row (Append)",
 	__BUTTON_DELETE_ROWS = "Delete Selected Row(s)",
 	__BUTTON_REMOVE_ALL_ROWS = "Remove All Rows",
-	__BUTTON_LOAD = "Load Delplt Input",
-	__BUTTON_RUN = "Run Delplt",
+	__BUTTON_LOAD = "Load " + __SmDelta + " Input",
+	__BUTTON_RUN = "Run " + __SmDelta,
 	__BUTTON_CLOSE = "Close",
 	__BUTTON_HELP = "Help",
-	__BUTTON_SAVE = "Save Delplt Input";
+	__BUTTON_SAVE = "Save " + __SmDelta + " Input";
 
 /**
 Whether the table is dirty or not.
@@ -232,12 +230,12 @@ private SimpleJButton
 	__saveTemplateButton,
 	__helpButton,
 	__closeButton,
-	__runDelpltButton;
+	__runSmDeltaButton;
 
 /**
 GUI combo box for choosing the run mode.
 */
-private SimpleJComboBox __delpltRunModeSimpleJComboBox;
+private SimpleJComboBox __smdeltaRunModeSimpleJComboBox;
 
 /**
 The dataset containing the StateMod data.
@@ -247,54 +245,43 @@ private StateMod_DataSet __dataset;
 /**
 The worksheet table model.
 */
-private StateMod_RunDeltaPlot_TableModel __tableModel;
+private StateMod_RunSmDelta_TableModel __tableModel;
 
 /**
 The default filename filter.
 */
-private String __defaultFilenameFilter;
+private String __defaultFilenameFilter = __SmDelta;
 
 /**
-The name of the response file without the extension.
+The SmDelta response file (no leading path).
 */
-private String __basename = "";
+private String __smdeltaFilename;
 
 /**
-The default filename.
+The SmDelta response file folder.
 */
-private String __defaultFilename;
-
-/**
-The template location.
-*/
-private String __templateLocation;
+private String __smdeltaFolder;
 
 /** 
 Constructor.
 @param dataset the dataset for which to construct a delta plot run file.
 */
-public StateMod_RunDeltaPlot_JFrame(StateMod_DataSet dataset) {
-	StateMod_GUIUtil.setTitle(this, dataset, "Run Delta Plot", null);
+public StateMod_RunSmDelta_JFrame(StateMod_DataSet dataset) {
+	StateMod_GUIUtil.setTitle(this, dataset, "Run " + __SmDelta, null);
 	JGUIUtil.setIcon(this, JGUIUtil.getIconImage());
-	__basename = dataset.getBaseName();
+	// Get the StateMod data set basename
+	String basename = dataset.getBaseName();
 
 	__dataset = dataset;
 	
-	__reservoirComp = __dataset.getComponentForComponentType(
-		StateMod_DataSet.COMP_RESERVOIR_STATIONS);
-	__diversionComp = __dataset.getComponentForComponentType(
-		StateMod_DataSet.COMP_DIVERSION_STATIONS);
-	__instreamFlowComp = __dataset.getComponentForComponentType(
-		StateMod_DataSet.COMP_INSTREAM_STATIONS);
-	__wellComp = __dataset.getComponentForComponentType(
-		StateMod_DataSet.COMP_WELL_STATIONS);
-	__streamGageComp = __dataset.getComponentForComponentType(
-		StateMod_DataSet.COMP_STREAMGAGE_STATIONS );
-			
-	__defaultFilenameFilter = "in";
+	__reservoirComp = __dataset.getComponentForComponentType( StateMod_DataSet.COMP_RESERVOIR_STATIONS);
+	__diversionComp = __dataset.getComponentForComponentType( StateMod_DataSet.COMP_DIVERSION_STATIONS);
+	__instreamFlowComp = __dataset.getComponentForComponentType( StateMod_DataSet.COMP_INSTREAM_STATIONS);
+	__wellComp = __dataset.getComponentForComponentType( StateMod_DataSet.COMP_WELL_STATIONS);
+	__streamGageComp = __dataset.getComponentForComponentType( StateMod_DataSet.COMP_STREAMGAGE_STATIONS );
 	
-	if (!__basename.equals("")) {
-		setTitle(getTitle()+ " - " + __basename);
+	if (!basename.equals("")) {
+		setTitle(getTitle()+ " - " + basename);
 	}
 
 	setupGUI();
@@ -310,8 +297,7 @@ public void actionPerformed(ActionEvent event) {
 
 	if (action.equals(__BUTTON_ADD_ROW)) {
 		if (!__tableModel.canAddRow()) {
-			setMessages("At least the first row must have all "
-				+ "values filled out.", "Error");
+			setMessages("At least the first row must have all values filled out.", "Error");
 			return;
 		}
 		int rows = __worksheet.getRowCount();
@@ -329,16 +315,13 @@ public void actionPerformed(ActionEvent event) {
 			return;
 		}
 		
-		StateMod_GraphNode gnp = (StateMod_GraphNode)
-			__worksheet.getRowData(rows - 1);
+		StateMod_GraphNode gnp = (StateMod_GraphNode)__worksheet.getRowData(rows - 1);
 		String id = gnp.getID().trim();			
 		
 		if (autoLineCopy() && id.equals("0 (All)")) {
-		// duplicate the values from the above row and copy them
-		// into the new row
+		// duplicate the values from the above row and copy them into the new row
 			__worksheet.addRow(new StateMod_GraphNode());
-			__worksheet.setValueAt(gnp.getFileName(), 
-				rows, 0);
+			__worksheet.setValueAt(gnp.getFileName(), rows, 0);
 			__worksheet.setValueAt(gnp.getType(), rows, 1);
 			__tableModel.setParmIDComboBoxes(rows, gnp.getType());
 			__worksheet.setValueAt(gnp.getDtype(), rows, 2);
@@ -375,7 +358,7 @@ public void actionPerformed(ActionEvent event) {
 		}
 		checkButtonStates();
 		__dirty = true;
-		setMessages("Delplt input has changed.", "Ready");
+		setMessages(__SmDelta + " input has changed.", "Ready");
 	}
 	else if (action.equals(__BUTTON_HELP)) {
 		Vector helpVector = fillBPPrelimHelpGUIVector();
@@ -384,15 +367,14 @@ public void actionPerformed(ActionEvent event) {
 		new HelpJDialog(this, helpVector, proplist);
 	}	
 	else if (action.equals(__BUTTON_RUN)) {
-		runDelplt();
+		runSmDelta();
 	}
 	else if (action.equals(__BUTTON_SAVE)) {
-		saveDelpltFile();
+		saveSmDeltaFile();
 	}
 	else if (action.equals(__BUTTON_LOAD)) {
 		JGUIUtil.setWaitCursor(this, true);
-		String directory = 
-			JGUIUtil.getLastFileDialogDirectory();
+		String directory = JGUIUtil.getLastFileDialogDirectory();
 	
 		JFileChooser fc = null;
 		if (directory != null) {
@@ -402,9 +384,8 @@ public void actionPerformed(ActionEvent event) {
 			fc = new JFileChooser();
 		}
 
-		fc.setDialogTitle("Select Delplt Input File");
-		SimpleFileFilter tpl = new SimpleFileFilter(
-			__defaultFilenameFilter, "Delplt Input Files");
+		fc.setDialogTitle("Select " + __SmDelta + " Input File");
+		SimpleFileFilter tpl = new SimpleFileFilter( __defaultFilenameFilter, __SmDelta + " Input Files");
 		fc.addChoosableFileFilter(tpl);
 		fc.setAcceptAllFileFilterUsed(true);
 		fc.setFileFilter(tpl);
@@ -418,21 +399,20 @@ public void actionPerformed(ActionEvent event) {
 	
 		String currDir = (fc.getCurrentDirectory()).toString();
 	
-		__templateLocation = currDir;
+		__smdeltaFolder = currDir;
 	
 		if (!currDir.equalsIgnoreCase(directory)) {
 			JGUIUtil.setLastFileDialogDirectory(currDir);
 		}
 		String filename = fc.getSelectedFile().getName();
 
-		__defaultFilename = filename;
+		__smdeltaFilename = filename;
 
 		JGUIUtil.setWaitCursor(this, true);
 
 		Vector theGraphNodes = new Vector();
 		try {
-			StateMod_GraphNode.readStateModDelPltFile(theGraphNodes,
-				currDir + File.separator + filename);
+			StateMod_GraphNode.readStateModDelPltFile(theGraphNodes, currDir + File.separator + filename);
 			Vector nodes = __tableModel.formLoadData(theGraphNodes);
 			StateMod_GraphNode gn = null;
 			__worksheet.clear();
@@ -441,8 +421,7 @@ public void actionPerformed(ActionEvent event) {
 				__worksheet.addRow(new StateMod_GraphNode());
 				__worksheet.setValueAt(gn.getFileName(), i, 0);
 				__worksheet.setValueAt(gn.getType(), i, 1);
-				__tableModel.setParmIDComboBoxes(i, 
-					gn.getType());
+				__tableModel.setParmIDComboBoxes(i, gn.getType());
 				__worksheet.setValueAt(gn.getDtype(), i, 2);
 				__worksheet.setValueAt(gn.getYrAve(), i, 3);
 				__worksheet.setValueAt(gn.getID(), i, 4);
@@ -452,15 +431,12 @@ public void actionPerformed(ActionEvent event) {
 		}
 		catch (Exception e) {
 			Message.printWarning(1, routine,
-				"Error loading output control file\n"
-				+ "\"" + currDir + File.separator + filename
-				+ "\"", this);
+				"Error loading output control file\n\"" + currDir + File.separator + filename + "\"", this);
 			Message.printWarning(2, routine, e);
 		}
 
 		if (theGraphNodes.size() > 0) {
-			StateMod_GraphNode gn = (StateMod_GraphNode)
-				theGraphNodes.elementAt(0);
+			StateMod_GraphNode gn = (StateMod_GraphNode)theGraphNodes.elementAt(0);
 			setRunType(gn.getSwitch());
 		}
 	
@@ -500,12 +476,12 @@ private void checkButtonStates() {
 	int rows = __worksheet.getRowCount();
 	if (rows == 0) {
 		__clearWorksheetButton.setEnabled(false);
-		__runDelpltButton.setEnabled(false);
+		__runSmDeltaButton.setEnabled(false);
 		__saveTemplateButton.setEnabled(false);
 	}
 	else {
 		__clearWorksheetButton.setEnabled(true);
-		__runDelpltButton.setEnabled(true);
+		__runSmDeltaButton.setEnabled(true);
 		__saveTemplateButton.setEnabled(true);
 	}
 }
@@ -516,13 +492,12 @@ Closes the window, prompting to save if the user has not already.
 protected void closeWindow() {
 	if (__dirty) {
 		int x = new ResponseJDialog(this, 
-			"Save Delplt Input",
-			"You have not saved the Delplt input file.\n\n"
+			"Save " + __SmDelta + " Input",
+			"You have not saved the " + __SmDelta + " input file.\n\n"
 			+ "Continue without saving?",
 			ResponseJDialog.YES | ResponseJDialog.NO).response();
 		if (x == ResponseJDialog.NO) {
-			setDefaultCloseOperation (
-				WindowConstants.DO_NOTHING_ON_CLOSE);		
+			setDefaultCloseOperation ( WindowConstants.DO_NOTHING_ON_CLOSE);		
 			return;
 		}
 	}
@@ -537,77 +512,46 @@ Create help information for the help dialog.
 */
 private Vector fillBPPrelimHelpGUIVector() {
 	Vector helpVector = new Vector(2);
-	helpVector.addElement(
-	"This tool is intended to help you create an input file for the ");
-	helpVector.addElement(
-	"delplt, which allows comparisons of different scenarios, years, ");
-	helpVector.addElement(
-	"data types, etc.  Each section in the input file (file, data type, ");
-	helpVector.addElement(
-	"parameters, ID list and year) is constructed in this tool.  Each ");
-	helpVector.addElement(
-	"time you specify a new file name, the entire row must be filled.");
-	helpVector.addElement(
-	"This is a new section in the input file.  If you wish to ");
-	helpVector.addElement(
-	"perform the analysis on every station, set the identifier to \"0\".");
-	helpVector.addElement(
-	"If you wish to specify a list of identifiers, fill in every column ");
-	helpVector.addElement(
-	"on the first row and only the identifier on subsequent rows.");
+	helpVector.addElement( "This tool helps you create an input file for the " + __SmDelta);
+	helpVector.addElement( "program, which allows comparisons of different scenarios, years, ");
+	helpVector.addElement( "data types, etc.  Each section in the input file (file, data type, ");
+	helpVector.addElement( "parameters, ID list and year) is constructed in this tool.  Each ");
+	helpVector.addElement( "time you specify a new file name, the entire row must be filled.");
+	helpVector.addElement( "This is a new section in the input file.  If you wish to ");
+	helpVector.addElement( "perform the analysis on every station, set the identifier to \"0\".");
+	helpVector.addElement( "If you wish to specify a list of identifiers, fill in every column ");
+	helpVector.addElement( "on the first row and only the identifier on subsequent rows.");
 	helpVector.addElement("");
 
-	helpVector.addElement(
-	"The file name should either be one of the binary files (.b43 or .b44");
-	helpVector.addElement(
-	"for example)or the .xdd file for diversions or .xre for ");
-	helpVector.addElement(
-	"reservoirs if full reports have been created.");
+	helpVector.addElement( "The file name should either be one of the binary files (.b43 or .b44");
+	helpVector.addElement( "for example)or the .xdd file for diversions or .xre for ");
+	helpVector.addElement( "reservoirs if full reports have been created.");
 
-	helpVector.addElement(
-	"StateMod determines which stations to include in the reports based");
-	helpVector.addElement(
-	"on the output control contents.  Therefore, if your results don't");
-	helpVector.addElement(
-	"include stations you wish to compare, look at your output control");
-	helpVector.addElement(
-	"file.  Remember that changes to that file will not be reflected in ");
-	helpVector.addElement(
-	"the BigPicture plot until another StateMod simulation has been run.");
+	helpVector.addElement( "StateMod determines which stations to include in the reports based");
+	helpVector.addElement( "on the output control contents.  Therefore, if your results don't");
+	helpVector.addElement( "include stations you wish to compare, look at your output control");
+	helpVector.addElement( "file.  Remember that changes to that file will not be reflected in ");
+	helpVector.addElement( "the BigPicture plot until another StateMod simulation has been run.");
 	helpVector.addElement("");
 
-	helpVector.addElement(
-	"For example, to perform difference comparisons between average");
-	helpVector.addElement(
-	"River_Outflow and River_Outflow in 1995 of 4 different stations, ");
-	helpVector.addElement(
-	"the table would look like the following:");
-	helpVector.addElement("");
-	helpVector.addElement(
-	"Stream       River_Outflow   09152500      Ave     whiteH.xdd");
-	helpVector.addElement(
-	"                             09144250");
-	helpVector.addElement(
-	"                             09128000");
-	helpVector.addElement(
-	"                             09149500");
-	helpVector.addElement(
-	"Stream       River_Outflow   09152500      1995    whiteH.xdd");
-	helpVector.addElement(
-	"                             09144250");
-	helpVector.addElement(
-	"                             09128000");
-	helpVector.addElement(
-	"                             09149500");
-	helpVector.addElement("");
-	helpVector.addElement(
-	"The result is a single value (the difference) for each station");
+	helpVector.addElement( "For example, to perform difference comparisons between average");
+	helpVector.addElement( "River_Outflow and River_Outflow in 1995 of 4 different stations, ");
+	helpVector.addElement( "the table would look like the following:");
+	helpVector.addElement( "");
+	helpVector.addElement( "Stream       River_Outflow   09152500      Ave     whiteH.xdd");
+	helpVector.addElement( "                             09144250");
+	helpVector.addElement( "                             09128000");
+	helpVector.addElement( "                             09149500");
+	helpVector.addElement( "Stream       River_Outflow   09152500      1995    whiteH.xdd");
+	helpVector.addElement( "                             09144250");
+	helpVector.addElement( "                             09128000");
+	helpVector.addElement( "                             09149500");
+	helpVector.addElement( "");
+	helpVector.addElement( "The result is a single value (the difference) for each station");
 
-	helpVector.addElement("");
-	helpVector.addElement(
-	"See additional help through the \"More help\" button below.");
-	helpVector.addElement(
-	"Note that the additional help may take some time to display.");
+	helpVector.addElement( "");
+	helpVector.addElement( "See additional help through the \"More help\" button below.");
+	helpVector.addElement( "Note that the additional help may take some time to display.");
 	return helpVector;
 }
 
@@ -624,10 +568,10 @@ throws Throwable {
 This method is called by the SMbigPictureGrid getData()method.
 REVISIT (JTS - 2003-08-25) 
 this should be used instead by whatever method saves the data to a file
-@return StateMod_GraphNode.RUNTYPE_*, indicating Delplt run mode.
+@return StateMod_GraphNode.RUNTYPE_*, indicating SmDelta run mode.
 */
 public int getRunType() {
-	String selected = __delpltRunModeSimpleJComboBox.getSelected();
+	String selected = __smdeltaRunModeSimpleJComboBox.getSelected();
 	if (selected.equals(__DELPLT_RUN_MODE_SINGLE)) {
 		return StateMod_GraphNode.RUNTYPE_SINGLE;
 	}
@@ -701,30 +645,27 @@ public void mouseReleased(MouseEvent event) {
 }
 
 /**
-Run delplt.  It is run as follows:
+Run SmDelta as follows:
 <ol>
-<li>	Run delplt.</li>
-<li>	Convert delplt .xgr output file to a more general .txt file format.</li>
-<li>	Display the .txt file contents as a layer on the map(if
-	requested).</li>
+<li>	Run SmDelta.</li>
+<li>	Convert SmDelta .xgr output file to a more general .csv file format.</li>
+<li>	Display the .csv file contents as a layer on the map (if requested).</li>
 </ol>
 */
-public void runDelplt() {
-	String routine = "StateMod_RunDeltaPlot_JFrame.runDelplt";
+public void runSmDelta() {
+	String routine = "StateMod_RunSmDelta_JFrame.runSmDelta";
 
 	if (__worksheet.getRowCount() == 0) {
-		Message.printWarning(1, routine,
-			"Input for Delplt has not been defined.");
+		Message.printWarning(1, routine, "Input for " + __SmDelta + " has not been defined.");
 		return;
 	}
 	
-	new ResponseJDialog(this, "Run Delplt",
-		"The Delplt utility program will now be run to\n"
+	new ResponseJDialog(this, "Run " + __SmDelta,
+		"The " + __SmDelta + " utility program will now be run to\n"
 		+ "prepare summary data that can be displayed on the map.",
 		ResponseJDialog.OK).response();
 
-	// Check to see if anything in the template has changed
-	// since a template was last read in(if any).
+	// Check to see if anything in the template has changed since a template was last read in(if any).
 	// If so, rewrite template file.
 
 	if (__dirty) {
@@ -739,111 +680,97 @@ public void runDelplt() {
 			ResponseJDialog.OK).response();
 		}
 		else {*/	// Use *.in for file name...
-		new ResponseJDialog(this, "Save Delplt Input",
+		new ResponseJDialog(this, "Save SmDelta Input",
 			"Changes have been made to the input "
-			+ "file used by \"delplt\".\nYou will be asked "
-			+ "to select an input file name (convention is *.in).",
+			+ "file used by \"SmDelta\".\nYou will be asked "
+			+ "to select an input file name (convention is *.SmDelta).",
 			ResponseJDialog.OK).response();
 		//}
 
-		if (!saveDelpltFile()) {
+		// If false is returned, the save was cancelled and no need to continue.
+		if (!saveSmDeltaFile()) {
 			return;
 		}
 	}
 
-	// Construct the(*.xgr)output file name created by delplt...
+	// Construct the(*.xgr)output file name created by SmDelta...
 
-	int index = __defaultFilename.indexOf(".");
+	int index = __smdeltaFilename.indexOf(".");
 	if (index == -1) {
 		Message.printWarning(1, routine, 
-			"Don't know how to handle filename output.  "
-			+ "You must include a \".\" in your filename.", this);
+			"Don't know how to handle filename from output.  "
+			+ "You must include a \".\" in the filename.", this);
 		return;
 	}
-	String xgrOutputFilename = 
-		__defaultFilename.substring(0, index).toUpperCase() + ".XGR";
+	String xgrOutputFilename = __smdeltaFilename.substring(0, index).toUpperCase() + ".XGR";
 
-	File xgrFile = new File(__templateLocation + File.separator 
-		+ xgrOutputFilename);
+	File xgrFile = new File(__smdeltaFolder + File.separator + xgrOutputFilename);
 
 	// Delete the file if it exists so we don't get bogus output...
 
 	if (xgrFile.exists()) {
-		Message.printStatus(1, routine, "Deleting existing delplt "
-			+ "output file \"" + __templateLocation + File.separator
+		Message.printStatus(1, routine, "Deleting existing " + __SmDelta
+			+ " output file \"" + __smdeltaFolder + File.separator
 			+ xgrOutputFilename + "\"");
 		xgrFile.delete();
 		xgrFile = null;
 	}
 
-	// Also delete the delplt log file so if there is an error we can
-	// display the correct one...
+	// Also delete the SmDelta log file so if there is an error we can display the correct one...
 
-	// Start with the input file...
-	String logfileString = __defaultFilename.substring(0, index)+ ".log";
-
-	// Strip off the extension and replace with "log".
+	// Start with the input file, and strip off the extension and replace with "log".
+	String logfileString = __smdeltaFilename.substring(0, index)+ ".log";
 
 	File logfile = new File(logfileString);
 	if (logfile.exists()) {
-		Message.printStatus(1, routine, "Deleting existing delplt "
-			+ "log file \"" + logfileString + "\"");
+		Message.printStatus(1, routine, "Deleting existing SmDelta log file \"" + logfileString + "\"");
 		logfile.delete();
 		logfile = null;
 	}
 
 	// Run command using GUI...
 
-	PropList props = new PropList("Delplt");
+	PropList props = new PropList("SmDelta");
 	// This is modal...
 	String [] command_array = new String[2];
-	command_array[0] = "delplt";
-	command_array[1] = __templateLocation + File.separator 
-		+ __defaultFilename;
+	command_array[0] = StateMod_Util.getSmDeltaExecutable();
+	command_array[1] = __smdeltaFolder + File.separator + __smdeltaFilename;
 	ProcessManager pm = new ProcessManager(command_array);
-	ProcessManagerJDialog pmgui = new ProcessManagerJDialog(
-		this,"StateMod Delplt", pm, props);
+	ProcessManagerJDialog pmgui = new ProcessManagerJDialog( this,"StateMod SmDelta", pm, props);
 
 	int exitStatus = pmgui.getExitStatus();
 	Message.printStatus(1, routine, "exitStatus is " + exitStatus);
 
 	if (exitStatus != 0) {
-		// Try checking for the log file.  If it does not exist, then
-		// delplt is probably not in the path...
+		// Try checking for the log file.  If it does not exist, then SmDelta is probably not in the path...
 		logfile = new File(logfileString);
 		if (logfile.exists()) {
 			int x = new ResponseJDialog(this, 
-				"Delplt Unsuccessful",
-				"Delplt did not complete successfully.\n\n"
-				+ "View Delplt log file?",
-				ResponseJDialog.YES | ResponseJDialog.NO)
-				.response();
+				"SmDelta Unsuccessful",
+				"SmDelta did not complete successfully.\n\n"
+				+ "View SmDelta log file?",
+				ResponseJDialog.YES | ResponseJDialog.NO).response();
 			if (x == ResponseJDialog.YES) {
 				try {	
 					String[] command_array2 = new String[2];
-					command_array2[0] = 
-					    StateMod_GUIUtil._editorPreference;
+					command_array2[0] = StateMod_GUIUtil._editorPreference;
 					command_array2[1] = logfileString;
-					ProcessManager p = new ProcessManager(
-						command_array2);
-					// This will run as a thread until the
-					// process is shut down...
+					ProcessManager p = new ProcessManager( command_array2);
+					// This will run as a thread until the process is shut down...
 					Thread t = new Thread(p);
 					t.start();
 				}
 				catch (Exception e2) {
-					Message.printWarning(1, routine,
-						"Unable to view/edit file \""
-						+ logfileString + "\"");
+					Message.printWarning(1, routine, "Unable to view/edit file \"" + logfileString + "\"");
 				}
 			}
 		}
-		else {	// Log file does not exist...
+		else {
+			// Log file does not exist...
 			new ResponseJDialog(this, 
-				"Delplt Unsuccessful",
-				"Delplt did not complete successfully.\n\n" +
-				"No Delplt log file is available.  Verify that"+
-				" Delplt is in the PATH.",
+				"SmDelta Unsuccessful",
+				"SmDelta did not complete successfully.\n\n" +
+				"No SmDelta log file is available.  Verify that SmDelta is in the PATH.",
 				ResponseJDialog.OK).response();
 		}
 		return;
@@ -857,24 +784,22 @@ public void runDelplt() {
 	}
 
 	// Now - if command was successful, there should be a <filename>.xgr
-	// file in the directory corresponding to the delplt .rsp file
-	// directory.  If so, ask user for a .txt filename to save converted
+	// file in the directory corresponding to the SmDelta .rsp file
+	// directory.  If so, ask user for a .csv filename to save converted
 	// information to.  Note that this is different from the StateMod report
 	// which puts the output in the directory of the response file for each
-	// individual run.  For Delplt, the output is always in the directory
-	// where the Delplt input file is.
+	// individual run.  For SmDelta, the output is always in the directory
+	// where the SmDelta input file is.
 	if (Message.isDebugOn) {
 		Message.printDebug(10, routine, "Looking for xgr file: "
-			+ __templateLocation + File.separator 
-			+ xgrOutputFilename);	
+			+ __smdeltaFolder + File.separator + xgrOutputFilename);	
 	}
 	//File xgrOutput = new File(__templateLocation + xgrOutputFilename);
 	// Reopen this file to see if output was created...
-	xgrFile = new File(__templateLocation + File.separator 
-		+ xgrOutputFilename);
+	xgrFile = new File(__smdeltaFolder + File.separator + xgrOutputFilename);
 
 	// Sometimes need to wait for the file to be created...
-	/* SAMX take this out - the new ProcessManager seems to be better
+	/* TODO take this out - the new ProcessManager seems to be better
 		behaved so see if we can do without.
 	if (TimeUtil.waitForFile(__templateLocation +
 		xgrOutputFilename, 500, 120)) {}
@@ -882,17 +807,16 @@ public void runDelplt() {
 	
 	if (xgrFile.exists()) {
 		// Describe to users what is going to happen.  This is done with
-		// a dialog because the JFileChooser does not have a way to add
-		// more instructions...
+		// a dialog because the JFileChooser does not have a way to add more instructions...
 		int response = new ResponseJDialog(this,
-			"Save Delplt Output as Text File",
-			"Delplt was successful.\n\nThe output will now "
+			"Save SmDelta Output as Text File",
+			"SmDelta was successful.\n\nThe output will now "
 			+ "be converted from " + xgrOutputFilename
 			+ " format to a comma delimited format\n"
 			+ "that can be used directly by the StateMod GUI, GIS"
 			+ " applications and other software.\n"
 			+ "You will be asked to select an output filename "
-			+ "(convention is *.txt).\n\n"
+			+ "(convention is *.csv).\n\n"
 			+ "Select Cancel if no further action is desired.",
 			ResponseJDialog.OK | ResponseJDialog.CANCEL).response();
 		if (response == ResponseJDialog.CANCEL) {
@@ -911,8 +835,8 @@ public void runDelplt() {
 			fc = new JFileChooser();
 		}
 	
-		fc.setDialogTitle("Select Filename for Delplt Text Output");
-		SimpleFileFilter tpl = new SimpleFileFilter("txt","Text Files");
+		fc.setDialogTitle("Select Filename for SmDelta Text Output");
+		SimpleFileFilter tpl = new SimpleFileFilter("csv","Comma Separated Value (CSV) Files");
 		fc.addChoosableFileFilter(tpl);
 		fc.setAcceptAllFileFilterUsed(true);
 		fc.setFileFilter(tpl);
@@ -926,39 +850,34 @@ public void runDelplt() {
 	
 		String currDir = (fc.getCurrentDirectory()).toString();
 
-		__templateLocation = currDir;
+		__smdeltaFolder = currDir;
 	
 		if (!currDir.equalsIgnoreCase(directory)) {
 			JGUIUtil.setLastFileDialogDirectory(currDir);
 		}
 		String filename = fc.getSelectedFile().getName();
+		filename = IOUtil.enforceFileExtension(filename, "csv");
 
-		StateMod_DeltaPlot delpltOutput = new StateMod_DeltaPlot();
+		StateMod_DeltaPlot smdeltaOutput = new StateMod_DeltaPlot();
 		try {
-			delpltOutput.readStateModDeltaOutputFile(
-				__templateLocation + File.separator 
-				+ xgrOutputFilename);
-			delpltOutput.writeArcViewFile(
-				null, currDir + File.separator + filename, 
-				null);
+			smdeltaOutput.readStateModDeltaOutputFile( __smdeltaFolder + File.separator + xgrOutputFilename);
+			smdeltaOutput.writeArcViewFile(	null, currDir + File.separator + filename, null);
 
 			// Prompt the user if they want to add to the map.
-			// Sometimes all they are trying to do is to run Delplt
+			// Sometimes all they are trying to do is to run SmDelta
 			// so they can look at the text output.
 
 			response = new ResponseJDialog(this,
-				"Display Delplt Output on Map",
-				"Do you want to display the Delplt output as "
-				+ "a map layer?\nYou can add to the map later "
-				+ "if you answer No.",
-				ResponseJDialog.YES|ResponseJDialog.NO)
-				.response();
+				"Display " + __SmDelta + " Output on Map",
+				"Do you want to display the " + __SmDelta + " output as "
+				+ "a map layer?\nYou can add to the map later if you answer No.",
+				ResponseJDialog.YES|ResponseJDialog.NO).response();
 			if (response == ResponseJDialog.NO) {
 				pmgui.toFront();
 				return;
 			}
 	/*
-	REVISIT (JTS - 2003-08-25)
+	TODO (JTS - 2003-08-25)
 	no 'addSummaryMapLayer' method in the main jframe
 			// Create a layer and add it to the geoview...
 			((StateModGUI_JFrame)StateMod_GUIUtil.getWindow(
@@ -971,25 +890,22 @@ public void runDelplt() {
 			ex.printStackTrace();
 		}
 	}
-	else {	Message.printWarning(1, routine, 
-		__templateLocation + xgrOutputFilename + 
-		" file never created.", this);
+	else {
+		Message.printWarning(1, routine, __smdeltaFolder + xgrOutputFilename + " file never created.", this);
 	}
 }
 
 /**
-Saves the delta plot file.
+Saves the SmDelta plot file.
 */
-private boolean saveDelpltFile() {
-	// REVISIT (JTS - 2003-08-27)
-	// check for formatted cells and disallow saving if there are
-	// errors
+private boolean saveSmDeltaFile() {
+	// TODO (JTS - 2003-08-27)
+	// check for formatted cells and disallow saving if there are errors
 
-	String routine = "StateMod_RunDeltaPlot_JFrame.saveDelpltFile";
+	String routine = "StateMod_RunDeltaPlot_JFrame.saveSmDeltaFile";
 
 	JGUIUtil.setWaitCursor(this, true);
-	String directory = 
-		JGUIUtil.getLastFileDialogDirectory();
+	String directory = JGUIUtil.getLastFileDialogDirectory();
 
 	JFileChooser fc = null;
 	if (directory != null) {
@@ -999,9 +915,8 @@ private boolean saveDelpltFile() {
 		fc = new JFileChooser();
 	}
 
-	fc.setDialogTitle("Select Delplt Input File to Save");
-	SimpleFileFilter tpl = new SimpleFileFilter(
-		__defaultFilenameFilter, "Delplt Input Files");
+	fc.setDialogTitle("Select " + __SmDelta + " Input File to Save");
+	SimpleFileFilter tpl = new SimpleFileFilter(__defaultFilenameFilter, __SmDelta + " Input Files");
 	fc.addChoosableFileFilter(tpl);
 	fc.setAcceptAllFileFilterUsed(true);
 	fc.setFileFilter(tpl);
@@ -1015,19 +930,19 @@ private boolean saveDelpltFile() {
 
 	String currDir = (fc.getCurrentDirectory()).toString();
 
-	__templateLocation = currDir;
+	__smdeltaFolder = currDir;
 
 	if (!currDir.equalsIgnoreCase(directory)) {
 		JGUIUtil.setLastFileDialogDirectory(currDir);
 	}
 	String filename = fc.getSelectedFile().getName();
+	filename = IOUtil.enforceFileExtension(filename, __SmDelta);
 
-	__defaultFilename = filename;
+	__smdeltaFilename = filename;
 
 	JGUIUtil.setWaitCursor(this, true);
 
-	Vector theGraphNodes = __tableModel.formSaveData(
-		__worksheet.getAllData());
+	Vector theGraphNodes = __tableModel.formSaveData(__worksheet.getAllData());
 
 	StateMod_GraphNode gn = null;
 	int runtype = getRunType();
@@ -1036,17 +951,12 @@ private boolean saveDelpltFile() {
 		gn.setSwitch(runtype);
 	}
 	try {	
-		StateMod_GraphNode.writeStateModDelPltFile(null, 
-			currDir + File.separator + filename,
-			theGraphNodes, null);
+		StateMod_GraphNode.writeStateModDelPltFile(null, currDir + File.separator + filename, theGraphNodes, null);
 			__dirty = false;
 		} 
 	catch (Exception e) {
 		Message.printWarning(1, routine,
-			"Error saving output control file\n"
-			+ "\"" + currDir + File.separator 
-			+ filename + "\"",
-			this);
+			"Error saving output control file\n" + "\"" + currDir + File.separator + filename + "\"", this);
 		Message.printWarning(2, routine, e);
 		JGUIUtil.setWaitCursor(this, false);		
 		return false;
@@ -1058,27 +968,24 @@ private boolean saveDelpltFile() {
 
 /**
 This method is called by the SMbigPictureGrid displayData()method.
-REVISIT (JTS - 2003-08-25)
-this should actually be called when the values are read in from a file.
+TODO (JTS - 2003-08-25) This should actually be called when the values are read in from a file.
 @param runType StateMod_GraphNode.RUNTYPE_* values.
 */
 public void setRunType(int runType) {
 	if (runType == StateMod_GraphNode.RUNTYPE_SINGLE) {
-		__delpltRunModeSimpleJComboBox.select(__DELPLT_RUN_MODE_SINGLE);
+		__smdeltaRunModeSimpleJComboBox.select(__DELPLT_RUN_MODE_SINGLE);
 	}
 	else if (runType == StateMod_GraphNode.RUNTYPE_MULTIPLE) {
-		__delpltRunModeSimpleJComboBox.select(
-			__DELPLT_RUN_MODE_MULTIPLE);
+		__smdeltaRunModeSimpleJComboBox.select( __DELPLT_RUN_MODE_MULTIPLE);
 	}
 	else if (runType == StateMod_GraphNode.RUNTYPE_DIFFERENCE) {
-		__delpltRunModeSimpleJComboBox.select(
-			__DELPLT_RUN_MODE_DIFFERENCE);
+		__smdeltaRunModeSimpleJComboBox.select( __DELPLT_RUN_MODE_DIFFERENCE);
 	}
 	else if (runType == StateMod_GraphNode.RUNTYPE_DIFFX) {
-		__delpltRunModeSimpleJComboBox.select(__DELPLT_RUN_MODE_DIFFX);
+		__smdeltaRunModeSimpleJComboBox.select(__DELPLT_RUN_MODE_DIFFX);
 	}
 	else if (runType == StateMod_GraphNode.RUNTYPE_MERGE) {
-		__delpltRunModeSimpleJComboBox.select(__DELPLT_RUN_MODE_MERGE);
+		__smdeltaRunModeSimpleJComboBox.select(__DELPLT_RUN_MODE_MERGE);
 	}
 }
 
@@ -1104,32 +1011,29 @@ private void setupGUI() {
 
 	addWindowListener(this);	
 
-	__defaultFilename = "";
+	__smdeltaFilename = "";
 
 	__addRowButton = new SimpleJButton(__BUTTON_ADD_ROW, this);
 	__deleteRowButton = new SimpleJButton(__BUTTON_DELETE_ROWS, this);
 	__saveTemplateButton = new SimpleJButton(__BUTTON_SAVE, this);
-	__clearWorksheetButton = new SimpleJButton(__BUTTON_REMOVE_ALL_ROWS,
-		this);
+	__clearWorksheetButton = new SimpleJButton(__BUTTON_REMOVE_ALL_ROWS, this);
 	__selectTemplateButton = new SimpleJButton(__BUTTON_LOAD, this);
 
 	__helpButton = new SimpleJButton(__BUTTON_HELP, this);
 	__closeButton = new SimpleJButton(__BUTTON_CLOSE, this);
-	__runDelpltButton = new SimpleJButton(__BUTTON_RUN, this);
+	__runSmDeltaButton = new SimpleJButton(__BUTTON_RUN, this);
 
-	__delpltRunModeSimpleJComboBox = new SimpleJComboBox();
-	__delpltRunModeSimpleJComboBox.add(__DELPLT_RUN_MODE_SINGLE);
-	__delpltRunModeSimpleJComboBox.add(__DELPLT_RUN_MODE_MULTIPLE);
-	__delpltRunModeSimpleJComboBox.add(__DELPLT_RUN_MODE_DIFFERENCE);
-	__delpltRunModeSimpleJComboBox.add(__DELPLT_RUN_MODE_DIFFX);
-	__delpltRunModeSimpleJComboBox.add(__DELPLT_RUN_MODE_MERGE);
-	__delpltRunModeSimpleJComboBox.addItemListener(this);
+	__smdeltaRunModeSimpleJComboBox = new SimpleJComboBox();
+	__smdeltaRunModeSimpleJComboBox.add(__DELPLT_RUN_MODE_SINGLE);
+	__smdeltaRunModeSimpleJComboBox.add(__DELPLT_RUN_MODE_MULTIPLE);
+	__smdeltaRunModeSimpleJComboBox.add(__DELPLT_RUN_MODE_DIFFERENCE);
+	__smdeltaRunModeSimpleJComboBox.add(__DELPLT_RUN_MODE_DIFFX);
+	__smdeltaRunModeSimpleJComboBox.add(__DELPLT_RUN_MODE_MERGE);
+	__smdeltaRunModeSimpleJComboBox.addItemListener(this);
 	// Default is to select multiple mode...
-	__delpltRunModeSimpleJComboBox.select(1);
+	__smdeltaRunModeSimpleJComboBox.select(1);
 
-	__autoLineCopyJCheckBox = new JCheckBox(
-		"Automatically fill initial line content on \"Add a Row\".", 
-		true);
+	__autoLineCopyJCheckBox = new JCheckBox( "Automatically fill initial line content on \"Add a Row\".", true);
 
 	// Make a main panel to be the resizable body of the frame...
 	JPanel mainPanel = new JPanel();
@@ -1164,8 +1068,8 @@ private void setupGUI() {
 		GridBagConstraints.NONE, GridBagConstraints.NORTH);
 	y+=3;
 	JPanel runTypeJPanel = new JPanel(new FlowLayout());
-	runTypeJPanel.add(new JLabel("Delplt run mode:"));
-	runTypeJPanel.add(__delpltRunModeSimpleJComboBox);
+	runTypeJPanel.add(new JLabel(__SmDelta + " run mode:"));
+	runTypeJPanel.add(__smdeltaRunModeSimpleJComboBox);
 	JGUIUtil.addComponent(mainPanel, runTypeJPanel,
 		0, y, 10, 1, 1, 0, 
 		0, 0, 0, 0,
@@ -1223,7 +1127,7 @@ private void setupGUI() {
 	p.add("JWorksheet.ShowPopupMenu=true");
 
 	File file = new File(__dataset.getDataSetDirectory());
-	__templateLocation = __dataset.getDataSetDirectory();
+	__smdeltaFolder = __dataset.getDataSetDirectory();
 	JGUIUtil.setLastFileDialogDirectory(__dataset.getDataSetDirectory());
 	Vector filters = new Vector();
 	filters.add("xre");
@@ -1238,31 +1142,28 @@ private void setupGUI() {
 	filenames.add(OPTION_BROWSE);
 	for (int i = 0; i < files.length; i++) {
 		filenames.add(files[i].getName());
-		Message.printStatus(1, "", "File " + i + ": '" 
-			+ files[i].getName() + "'");
+		Message.printStatus(1, "", "File " + i + ": '" + files[i].getName() + "'");
 	}
 	
 	int[] widths = null;
 	JScrollWorksheet jsw = null;
 	try {
 		__tableModel = new
-			StateMod_RunDeltaPlot_TableModel(this, new Vector(),
+			StateMod_RunSmDelta_TableModel(this, new Vector(),
 			(Vector)__reservoirComp.getData(), 
 			(Vector)__diversionComp.getData(),
 			(Vector)__instreamFlowComp.getData(),
 			(Vector)__wellComp.getData(),
 			(Vector)__streamGageComp.getData());
 			
-		StateMod_RunDeltaPlot_CellRenderer crg = new
-			StateMod_RunDeltaPlot_CellRenderer(__tableModel);
+		StateMod_RunSmDelta_CellRenderer crg = new StateMod_RunSmDelta_CellRenderer(__tableModel);
 	
 		jsw = new JScrollWorksheet(crg, __tableModel, p);
 		__worksheet = jsw.getJWorksheet();
 
 		__worksheet.setColumnJComboBoxValues(0, filenames, true);
 
-		Vector vn = StateMod_Util.arrayToVector(
-			StateMod_GraphNode.node_types);
+		Vector vn = StateMod_Util.arrayToVector( StateMod_GraphNode.node_types);
 		
 		int index = vn.indexOf("Streamflow");
 		vn.add(index + 1, "Stream ID (0* Gages)");
@@ -1301,7 +1202,7 @@ private void setupGUI() {
 	// Add bottom buttons - these are alphabetical so be
 	// careful if more are added
 
-	finalButtonPanel.add(__runDelpltButton);
+	finalButtonPanel.add(__runSmDeltaButton);
 	finalButtonPanel.add(__closeButton);
 	finalButtonPanel.add(__helpButton);
 	finalButtonPanel.add(__saveTemplateButton);

@@ -172,8 +172,7 @@ private JCheckBox
 	__ts_streamflow_base_daily_JCheckBox;
 
 /**
-Array of JComponents that should be disabled when nothing is selected 
-from the list.
+Array of JComponents that should be disabled when nothing is selected from the list.
 */
 private JComponent[] __disables;
 
@@ -250,13 +249,11 @@ public StateMod_StreamEstimate_JFrame (	StateMod_DataSet dataset,
 					dataset_wm, boolean editable )
 {	
 	JGUIUtil.setIcon(this, JGUIUtil.getIconImage());
-	StateMod_GUIUtil.setTitle(this, dataset, "Stream Estimate Stations", 
-		null);
+	StateMod_GUIUtil.setTitle(this, dataset, "Stream Estimate Stations", null);
 
 	__dataset = dataset;
 	__dataset_wm = dataset_wm;
-	__stationsComp = __dataset.getComponentForComponentType(
-		StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS);
+	__stationsComp = __dataset.getComponentForComponentType( StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS);
 	__stationsVector = (Vector)__stationsComp.getData();
 	int size = __stationsVector.size();
 	StateMod_StreamEstimate s = null;
@@ -271,8 +268,7 @@ public StateMod_StreamEstimate_JFrame (	StateMod_DataSet dataset,
 	size = __coefficientsVector.size();
 	StateMod_StreamEstimate_Coefficients c = null;
 	for (int i = 0; i < size; i++) {
-		c = (StateMod_StreamEstimate_Coefficients)
-			__coefficientsVector.elementAt(i);
+		c = (StateMod_StreamEstimate_Coefficients)__coefficientsVector.elementAt(i);
 		c.createBackup();
 	}
 		
@@ -296,8 +292,7 @@ public StateMod_StreamEstimate_JFrame (	StateMod_DataSet dataset,
 					boolean editable )
 {	
 	JGUIUtil.setIcon(this, JGUIUtil.getIconImage());
-	StateMod_GUIUtil.setTitle(this, dataset, "Stream Estimate Stations", 
-		null);
+	StateMod_GUIUtil.setTitle(this, dataset, "Stream Estimate Stations", null);
 
 	__dataset = dataset;
 	__dataset_wm = dataset_wm;
@@ -317,8 +312,7 @@ public StateMod_StreamEstimate_JFrame (	StateMod_DataSet dataset,
 	size = __coefficientsVector.size();
 	StateMod_StreamEstimate_Coefficients c = null;
 	for (int i = 0; i < size; i++) {
-		c = (StateMod_StreamEstimate_Coefficients)
-			__coefficientsVector.elementAt(i);
+		c = (StateMod_StreamEstimate_Coefficients)__coefficientsVector.elementAt(i);
 		c.createBackup();
 	}
 
@@ -352,55 +346,47 @@ public void actionPerformed(ActionEvent e) {
 		StateMod_StreamEstimate s = null;
 		boolean changed = false;
 		for (int i = 0; i < size; i++) {
-			s = (StateMod_StreamEstimate)
-				__stationsVector.elementAt(i);
+			s = (StateMod_StreamEstimate)__stationsVector.elementAt(i);
 			if (!changed && s.changed()) {
 				changed = true;
 			}
 			s.createBackup();
 		}	
 		if (changed) {
-			__dataset.setDirty(
-				StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS,
-				true);
+			__dataset.setDirty(	StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS,true);
 		}							
 		size = __coefficientsVector.size();
 		StateMod_StreamEstimate_Coefficients c = null;
 		changed = false;
 		for (int i = 0; i < size; i++) {
-			c = (StateMod_StreamEstimate_Coefficients)
-				__coefficientsVector.elementAt(i);
+			c = (StateMod_StreamEstimate_Coefficients)__coefficientsVector.elementAt(i);
 			if (!changed && c.changed()) {
 				changed = true;
 			}
 			c.createBackup();
 		}	
 		if (changed) {
-			__dataset.setDirty(
-				StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS,
-				true);
+			__dataset.setDirty(StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS,true);
 		}	
 	}
 	else if (action.equals(__BUTTON_CANCEL)) {
 		int size = __stationsVector.size();
 		StateMod_StreamEstimate s = null;
 		for (int i = 0; i < size; i++) {
-			s = (StateMod_StreamEstimate)
-				__stationsVector.elementAt(i);
+			s = (StateMod_StreamEstimate)__stationsVector.elementAt(i);
 			s.restoreOriginal();
 		}		
 		size = __coefficientsVector.size();
 		StateMod_StreamEstimate_Coefficients c = null;
 		for (int i = 0; i < size; i++) {
-			c = (StateMod_StreamEstimate_Coefficients)
-				__coefficientsVector.elementAt(i);
+			c = (StateMod_StreamEstimate_Coefficients)__coefficientsVector.elementAt(i);
 			c.restoreOriginal();
 		}		
 		if ( __dataset_wm != null ) {
-			__dataset_wm.closeWindow (
-			StateMod_DataSet_WindowManager.WINDOW_STREAMESTIMATE );
+			__dataset_wm.closeWindow ( StateMod_DataSet_WindowManager.WINDOW_STREAMESTIMATE );
 		}
-		else {	JGUIUtil.close ( this );
+		else {
+			JGUIUtil.close ( this );
 		}
 	}
 	else if (action.equals(__BUTTON_CLOSE)) {
@@ -409,43 +395,37 @@ public void actionPerformed(ActionEvent e) {
 		StateMod_StreamEstimate s = null;
 		boolean changed = false;
 		for (int i = 0; i < size; i++) {
-			s = (StateMod_StreamEstimate)
-				__stationsVector.elementAt(i);
+			s = (StateMod_StreamEstimate)__stationsVector.elementAt(i);
 			if (!changed && s.changed()) {
 				changed = true;
 			}
 			s.acceptChanges();
 		}		
 		if (changed) {
-			__dataset.setDirty(
-				StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS,
-				true);
+			__dataset.setDirty(	StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS,true);
 		}						
 		size = __coefficientsVector.size();
 		StateMod_StreamEstimate_Coefficients c = null;
 		changed = false;
 		for (int i = 0; i < size; i++) {
-			c = (StateMod_StreamEstimate_Coefficients)
-				__coefficientsVector.elementAt(i);
+			c = (StateMod_StreamEstimate_Coefficients)__coefficientsVector.elementAt(i);
 			if (!changed && c.changed()) {
 				changed = true;
 			}
 			c.acceptChanges();
 		}		
 		if (changed) {
-			__dataset.setDirty(
- 				StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS,
-			     	true);
+			__dataset.setDirty(StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS,true);
 		}		
 		if ( __dataset_wm != null ) {
-			__dataset_wm.closeWindow (
-			StateMod_DataSet_WindowManager.WINDOW_STREAMESTIMATE );
+			__dataset_wm.closeWindow ( StateMod_DataSet_WindowManager.WINDOW_STREAMESTIMATE );
 		}
-		else {	JGUIUtil.close ( this );
+		else {
+			JGUIUtil.close ( this );
 		}
 	}
 	else if (action.equals(__BUTTON_HELP)) {
-		// REVISIT HELP (JTS - 2003-08-20)
+		// TODO Enable HELP (JTS - 2003-08-20)
 	}	
 	else if (action.equals(__BUTTON_FIND_NEXT)) {
 		searchLWorksheet(__worksheetL.getSelectedRow() + 1);
@@ -481,13 +461,11 @@ private boolean checkInput() {
 	if (errorCount > 1) {
 		plural = "s were ";
 	}
-	String label = "The following error" + plural + "encountered "
-		+ "trying to save the record:\n";
+	String label = "The following error" + plural + "encountered trying to save the record:\n";
 	for (int i = 0; i < errorCount; i++) {
 		label += errors.elementAt(i) + "\n";
 	}
-	new ResponseJDialog(this, 
-		"Errors encountered", label, ResponseJDialog.OK);
+	new ResponseJDialog(this, "Errors encountered", label, ResponseJDialog.OK);
 	return false;
 }
 
@@ -532,12 +510,10 @@ private void displayTSViewJFrame(Object o)
 		display_props.set("InitialView", "Summary");
 	}
 
-	StateMod_StreamEstimate sta = (StateMod_StreamEstimate)
-			__stationsVector.elementAt(__currentStationIndex);
+	StateMod_StreamEstimate sta = (StateMod_StreamEstimate)__stationsVector.elementAt(__currentStationIndex);
 
 	// display_props.set("HelpKey", "TSTool.ExportMenu");
-	display_props.set("TSViewTitleString",
-		StateMod_Util.createDataLabel(sta,true) + " Time Series");
+	display_props.set("TSViewTitleString", StateMod_Util.createDataLabel(sta,true) + " Time Series");
 	display_props.set("DisplayFont", "Courier");
 	display_props.set("DisplaySize", "11");
 	display_props.set("PrintFont", "Courier");
@@ -554,8 +530,7 @@ private void displayTSViewJFrame(Object o)
 	int its = 0;
 	TS ts = null;
 
-	if (	(__ts_streamflow_base_monthly_JCheckBox.isSelected() &&
-		(sta.getBaseflowMonthTS() != null) ) ) {
+	if ( (__ts_streamflow_base_monthly_JCheckBox.isSelected() && (sta.getBaseflowMonthTS() != null) ) ) {
 		// Do the monthly graph...
 		++sub;
 		props.set ( "SubProduct " + sub + ".GraphType=Line" );
@@ -565,30 +540,27 @@ private void displayTSViewJFrame(Object o)
 		props.set ( "SubProduct " + sub + ".SubTitleFontSize=12" );
 		ts = sta.getBaseflowMonthTS();
 		if ( ts != null ) {
-			props.set ( "Data " + sub + "." + (++its) +
-				".TSID=" + ts.getIdentifierString() );
+			props.set ( "Data " + sub + "." + (++its) +	".TSID=" + ts.getIdentifierString() );
 			tslist.add ( ts );
 		}
 	}
 
-	if (	(__ts_streamflow_base_daily_JCheckBox.isSelected() &&
-		(sta.getBaseflowDayTS() != null) ) ) {
+	if ( (__ts_streamflow_base_daily_JCheckBox.isSelected() && (sta.getBaseflowDayTS() != null) ) ) {
 		// Do the daily graph...
 		++sub;
 		its = 0;
 		props.set ( "SubProduct " + sub + ".GraphType=Line" );
 		props.set ( "SubProduct " + sub +
-		".SubTitleString=Daily Data for Stream Estimate Station "
-			+ sta.getID() + " (" + sta.getName() + ")" );
+		".SubTitleString=Daily Data for Stream Estimate Station " + sta.getID() + " (" + sta.getName() + ")" );
 		props.set ( "SubProduct " + sub + ".SubTitleFontSize=12" );
 		ts = sta.getBaseflowDayTS();
 		if ( ts != null ) {
-			props.set ( "Data " + sub + "." + (++its) +
-				".TSID=" + ts.getIdentifierString() );
+			props.set ( "Data " + sub + "." + (++its) + ".TSID=" + ts.getIdentifierString() );
 			tslist.add ( ts );
 		}
 	}
-	try {	TSProduct tsproduct = new TSProduct ( props, display_props );
+	try {
+		TSProduct tsproduct = new TSProduct ( props, display_props );
 		tsproduct.setTSList ( tslist );
 		new TSViewJFrame ( tsproduct );
 	}
@@ -638,8 +610,7 @@ private StateMod_StreamEstimate_Coefficients findCoefficients(String id) {
 	StateMod_StreamEstimate_Coefficients coef = null;
 	int pos = StateMod_Util.indexOf ( __coefficientsVector, id );
 	if ( pos >= 0 ) {;
-		coef = (StateMod_StreamEstimate_Coefficients)
-			__coefficientsVector.elementAt(pos);
+		coef = (StateMod_StreamEstimate_Coefficients)__coefficientsVector.elementAt(pos);
 	}
 	return coef;
 }
@@ -748,8 +719,7 @@ private void processLTableSelection(int index) {
 	StateMod_StreamEstimate sta = (StateMod_StreamEstimate)
 		__stationsVector.elementAt(__currentStationIndex);
 
-	JGUIUtil.enableComponents(__disables, __textUneditables,
-		__editable);
+	JGUIUtil.enableComponents(__disables, __textUneditables, __editable);
 	checkTimeSeriesButtonsStates();
 		
 	__idJTextField.setText(sta.getID());
@@ -758,12 +728,12 @@ private void processLTableSelection(int index) {
 	StateMod_StreamEstimate_Coefficients coef=findCoefficients(sta.getID());
 
 	if (coef != null) {	
-		StateMod_GUIUtil.checkAndSet(coef.getProratnf(), 
-			__prorationFactorJTextField);
+		StateMod_GUIUtil.checkAndSet(coef.getProratnf(), __prorationFactorJTextField);
 		__tableModelR.setStreamEstimateCoefficients(coef);
 		__worksheetR.refresh();
 	}
-	else {	__prorationFactorJTextField.setText("");
+	else {
+		__prorationFactorJTextField.setText("");
 		__tableModelR.setStreamEstimateCoefficients(null);
 		__worksheetR.refresh();
 	}
@@ -777,13 +747,15 @@ private void processLTableSelection(int index) {
 	if ( sta.getBaseflowMonthTS() != null ) {
 		__ts_streamflow_base_monthly_JCheckBox.setEnabled(true);
 	}
-	else {	__ts_streamflow_base_monthly_JCheckBox.setEnabled(false);
+	else {
+		__ts_streamflow_base_monthly_JCheckBox.setEnabled(false);
 	}
 
 	if ( sta.getBaseflowDayTS() != null ) {
 		__ts_streamflow_base_daily_JCheckBox.setEnabled(true);
 	}
-	else {	__ts_streamflow_base_daily_JCheckBox.setEnabled(false);
+	else {
+		__ts_streamflow_base_daily_JCheckBox.setEnabled(false);
 	}
 }
 
@@ -818,8 +790,7 @@ private void saveInformation(int record) {
 		return;
 	}
 
-	StateMod_StreamEstimate sta = (StateMod_StreamEstimate)
-		__stationsVector.elementAt(record);
+	StateMod_StreamEstimate sta = (StateMod_StreamEstimate)__stationsVector.elementAt(record);
 
 	sta.setName(__nameJTextField.getText());	
 	sta.setID(__idJTextField.getText());	
@@ -957,10 +928,8 @@ private void setupGUI(int index) {
 	int[] widthsL = null;
 	JScrollWorksheet jswL = null;
 	try {
-		StateMod_StreamEstimate_TableModel tmr = new
-			StateMod_StreamEstimate_TableModel(__stationsVector);
-		StateMod_StreamEstimate_CellRenderer crr = new
-			StateMod_StreamEstimate_CellRenderer(tmr);
+		StateMod_StreamEstimate_TableModel tmr = new StateMod_StreamEstimate_TableModel(__stationsVector);
+		StateMod_StreamEstimate_CellRenderer crr = new StateMod_StreamEstimate_CellRenderer(tmr);
 	
 		jswL = new JScrollWorksheet(crr, tmr, p);
 		__worksheetL = jswL.getJWorksheet();
@@ -1032,8 +1001,7 @@ private void setupGUI(int index) {
 		__tableModelR = new
 			StateMod_StreamEstimate_Coefficients_TableModel(v);
 		StateMod_StreamEstimate_Coefficients_CellRenderer crr = new
-			StateMod_StreamEstimate_Coefficients_CellRenderer(
-			__tableModelR);
+			StateMod_StreamEstimate_Coefficients_CellRenderer( __tableModelR);
 	
 		jswR = new JScrollWorksheet(crr, __tableModelR, p);
 		__worksheetR = jswR.getJWorksheet();
@@ -1059,8 +1027,7 @@ private void setupGUI(int index) {
 		0, 0, 0, 0,
 		GridBagConstraints.BOTH, GridBagConstraints.SOUTHEAST);
 
-	worksheetRPanel.setBorder(BorderFactory.createTitledBorder(
-		"Stream Estimate Coefficients"));
+	worksheetRPanel.setBorder(BorderFactory.createTitledBorder("Stream Estimate Coefficients"));
 	
 	JGUIUtil.addComponent(
 		pmain, worksheetRPanel,
@@ -1071,15 +1038,13 @@ private void setupGUI(int index) {
 	JPanel tsPanel = new JPanel();
 	tsPanel.setLayout(gb);
 
-	__ts_streamflow_base_monthly_JCheckBox = new JCheckBox(
-		"Streamflow (Baseflow Monthly)");
+	__ts_streamflow_base_monthly_JCheckBox = new JCheckBox( "Streamflow (Baseflow Monthly)");
 	__ts_streamflow_base_monthly_JCheckBox.addItemListener(this);
 	if (!__dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_STREAMESTIMATE_BASEFLOW_TS_MONTHLY).hasData()) {
 		__ts_streamflow_base_monthly_JCheckBox.setEnabled(false);
 	}
-	__ts_streamflow_base_daily_JCheckBox = new JCheckBox(
-		"Streamflow (Baseflow Daily)");
+	__ts_streamflow_base_daily_JCheckBox = new JCheckBox( "Streamflow (Baseflow Daily)");
 	__ts_streamflow_base_daily_JCheckBox.addItemListener(this);
 	if (!__dataset.getComponentForComponentType(	
 		StateMod_DataSet.COMP_STREAMESTIMATE_BASEFLOW_TS_DAILY).hasData()) {
@@ -1111,8 +1076,7 @@ private void setupGUI(int index) {
 		1, 0, 0, 1,
 		GridBagConstraints.NONE, GridBagConstraints.CENTER);
 
-	tsPanel.setBorder(BorderFactory.createTitledBorder(
-		"Time Series"));
+	tsPanel.setBorder(BorderFactory.createTitledBorder("Time Series"));
 
 	JGUIUtil.addComponent(
 		pmain, tsPanel,
@@ -1143,8 +1107,7 @@ private void setupGUI(int index) {
 	// add search areas
 	//
 	y=0;	
-	p2.setBorder(BorderFactory.createTitledBorder(
-		"Search above list for:     "));
+	p2.setBorder(BorderFactory.createTitledBorder("Search above list for:     "));
 	y++;
 	JGUIUtil.addComponent(
 		p2, __searchIDJRadioButton,
@@ -1250,20 +1213,17 @@ public void windowClosing(WindowEvent e) {
 	StateMod_StreamEstimate_Coefficients c = null;
 	changed = false;
 	for (int i = 0; i < size; i++) {
-		c = (StateMod_StreamEstimate_Coefficients)
-			__coefficientsVector.elementAt(i);
+		c = (StateMod_StreamEstimate_Coefficients)__coefficientsVector.elementAt(i);
 		if (!changed && c.changed()) {	
 			changed = true;
 		}
 		c.acceptChanges();
 	}		
 	if (changed) {
-		__dataset.setDirty(StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS,
-			true);
+		__dataset.setDirty(StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS,true);
 	}	
 	if ( __dataset_wm != null ) {
-		__dataset_wm.closeWindow (
-		StateMod_DataSet_WindowManager.WINDOW_STREAMESTIMATE );
+		__dataset_wm.closeWindow (StateMod_DataSet_WindowManager.WINDOW_STREAMESTIMATE );
 	}
 }
 
@@ -1305,8 +1265,7 @@ that is selected.
 @param sort the type of sort being performed.
 */
 public void worksheetSortAboutToChange(JWorksheet worksheet, int sort) {
-	__sortSelectedRow = __worksheetL.getOriginalRowNumber(
-		__worksheetL.getSelectedRow());
+	__sortSelectedRow = __worksheetL.getOriginalRowNumber( __worksheetL.getSelectedRow());
 }
 
 /**
@@ -1317,8 +1276,7 @@ prior to the sort.
 */
 public void worksheetSortChanged(JWorksheet worksheet, int sort) {
 	__worksheetL.deselectAll();
-	__worksheetL.selectRow(__worksheetL.getSortedRowNumber(
-		__sortSelectedRow));
+	__worksheetL.selectRow(__worksheetL.getSortedRowNumber( __sortSelectedRow));
 }
 
 }
