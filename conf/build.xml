@@ -1,4 +1,4 @@
-<project name="StateMod" default="compile-java" basedir="../">
+<project name="StateMod" default="compile" basedir="../">
     
     <import file="../../rtibuild/common-build.xml"/>
     
