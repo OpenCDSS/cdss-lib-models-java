@@ -409,7 +409,7 @@ private void setupGUI() {
 	pack();
 	setSize(getWidth() + 100, getHeight());
 	JGUIUtil.center(this);
-	show();
+	setVisible(true);
 }
 
 /**
