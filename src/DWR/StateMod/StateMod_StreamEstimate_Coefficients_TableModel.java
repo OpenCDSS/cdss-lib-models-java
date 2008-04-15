@@ -264,11 +264,10 @@ public void setValueAt(Object value, int row, int col)
 	super.setValueAt(value, row, col);
 }
 
-public void setStreamEstimateCoefficients (
-				StateMod_StreamEstimate_Coefficients coeff ) {
+public void setStreamEstimateCoefficients ( StateMod_StreamEstimate_Coefficients coeff ) {
 	__coeff = coeff;
 	if (__coeff != null) {
-		_rows = __coeff.MAX_BASEFLOWS;
+		_rows = StateMod_StreamEstimate_Coefficients.MAX_BASEFLOWS;
 	}
 	else {
 		_rows = 0;

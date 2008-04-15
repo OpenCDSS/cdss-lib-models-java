@@ -146,9 +146,7 @@ public void addCoefm(Double d) {
 	}
 	if (!_isClone) {
 		if ( _dataset != null ) {
-			_dataset.setDirty(
-			_dataset.COMP_STREAMESTIMATE_COEFFICIENTS, 
-			true);
+			_dataset.setDirty( StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS, true);
 		}
 	}
 }
@@ -165,8 +163,7 @@ public void addCoefn(Double d) {
 	}
 	if (!_isClone) {
 		if ( _dataset != null) {
-			_dataset.setDirty(
-			_dataset.COMP_STREAMESTIMATE_COEFFICIENTS, true);
+			_dataset.setDirty( StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS, true);
 		}
 	}
 }
@@ -180,9 +177,7 @@ public void addUpper(String s) {
 		}
 		if (!_isClone) {
 			if ( _dataset != null ) {
-				_dataset.setDirty(
-				_dataset.COMP_STREAMESTIMATE_COEFFICIENTS,
-				true);
+				_dataset.setDirty( StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS,true);
 			}
 		}
 	}
@@ -519,7 +514,7 @@ public Vector getUpper() {
 Initialize member variables.
 */
 private void initialize() {
-	_smdata_type = _dataset.COMP_STREAMESTIMATE_COEFFICIENTS;
+	_smdata_type = StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS;
 	_flowX = "";
 	_N = 0;
 	_M = 0;
@@ -566,9 +561,7 @@ public void setCoefm(int index, double str) {
 		_coefm.setElementAt(new Double(str), index);
 		if (!_isClone) {
 			if ( _dataset != null ) {
-				_dataset.setDirty(
-				_dataset.COMP_STREAMESTIMATE_COEFFICIENTS,
-				true);
+				_dataset.setDirty( StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS,true);
 			}
 		}
 	}
@@ -594,9 +587,7 @@ public void setCoefn(int index, double str) {
 		_coefn.setElementAt(new Double(str), index);
 		if (!_isClone) {
 			if ( _dataset != null ) {
-				_dataset.setDirty(
-				_dataset.COMP_STREAMESTIMATE_COEFFICIENTS,
-				true);
+				_dataset.setDirty( StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS,true);
 			}
 		}
 	}
@@ -610,9 +601,7 @@ public void setFlowX(String s) {
 		if (!s.equals(_flowX)) {
 			if (!_isClone) {
 				if ( _dataset != null ) {
-					_dataset.setDirty(
-				      _dataset.COMP_STREAMESTIMATE_COEFFICIENTS,
-				      true);
+					_dataset.setDirty( StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS,true);
 				}
 			}
 			_flowX = s;
@@ -633,9 +622,7 @@ public void setFlowm(int index, String str) {
 			_flowm.setElementAt(str.trim(), index);
 			if (!_isClone) {
 				if ( _dataset != null ) {
-					_dataset.setDirty( _dataset.
-					COMP_STREAMESTIMATE_COEFFICIENTS,
-				      	true);
+					_dataset.setDirty( StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS,true);
 				}
 			}
 		}
@@ -654,9 +641,7 @@ public void addFlowm(String s) {
 		}
 		if (!_isClone) {
 			if ( _dataset != null ) {
-				_dataset.setDirty(
-				_dataset.COMP_STREAMESTIMATE_COEFFICIENTS, 
-				true);
+				_dataset.setDirty( StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS, true);
 			}
 		}
 	}
@@ -669,9 +654,7 @@ public void setM(int i) {
 	if (i != _M) {
 		if (!_isClone) {
 			if ( _dataset != null ) {
-				_dataset.setDirty(
-				_dataset.COMP_STREAMESTIMATE_COEFFICIENTS,
-				true);
+				_dataset.setDirty(StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS, true);
 			}
 		}
 		_M = i;
@@ -706,8 +689,7 @@ public void setN(int i) {
 	if (i != _N) {
 		if (!_isClone) {
 			if ( _dataset != null ) {
-				_dataset.setDirty(
-				_dataset.COMP_STREAMESTIMATE_COEFFICIENTS,
+				_dataset.setDirty( StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS,
 				true);
 			}
 		}
@@ -743,9 +725,7 @@ public void setProratnf(double d) {
 	if (d != _proratnf) {
 		if (!_isClone) {
 			if ( _dataset != null ) {
-				_dataset.setDirty(
-				_dataset.COMP_STREAMESTIMATE_COEFFICIENTS,
-				true);
+				_dataset.setDirty( StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS,true);
 			}
 		}
 		_proratnf = d;
@@ -780,8 +760,7 @@ public void setUpper(int index, String str) {
 			_upper.setElementAt(str.trim(), index);
 			if (!_isClone) {
 				if ( _dataset != null ) {
-					_dataset.setDirty( _dataset.
-					COMP_STREAMESTIMATE_COEFFICIENTS, true);
+					_dataset.setDirty( StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS, true);
 				}
 			}
 		}

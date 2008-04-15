@@ -351,8 +351,7 @@ Set the initial storage of owner.
 public void setCurown(double d) {
 	if (d != _curown) {
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_RESERVOIR_STATIONS,
-			true);
+			_dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_STATIONS,true);
 		}
 		_curown = d;
 	}
@@ -381,8 +380,7 @@ Set the ownership tied to n fill right.
 public void setN2own(int i) {
 	if (i != _n2own) {
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_RESERVOIR_STATIONS,
-			true);
+			_dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_STATIONS,true);
 		}
 		_n2own = i;
 	}
@@ -411,7 +409,7 @@ Set the maximum storage of owner.
 public void setOwnmax(double d) {
 	if (d != _ownmax) {
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_RESERVOIR_STATIONS,
+			_dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_STATIONS,
 			true);
 		}
 		_ownmax = d;
@@ -441,8 +439,7 @@ Set the prorate res evap btwn accnt owners.
 public void setPcteva(double d) {
 	if (d != _pcteva) {
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_RESERVOIR_STATIONS,
-			true);
+			_dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_STATIONS,	true);
 		}
 		_pcteva = d;
 	}

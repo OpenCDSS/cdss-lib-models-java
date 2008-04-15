@@ -1752,8 +1752,8 @@ throws Exception
 	double acswspr = 0.0;
 	double acgwfl = 0.0;
 	double acgwspr = 0.0;
-	TS gacrets = null;		// Time series for groundwater and sprinkler acres
-	TS sacrets = null;
+	//TS gacrets = null;		// Time series for groundwater and sprinkler acres
+	//TS sacrets = null;
 	try {
 	while ( (iline = in.readLine()) != null ) {
 		++linecount;
@@ -3049,7 +3049,7 @@ precision for area formatting.
 */
 private static void writeVector ( Vector data_Vector, PrintWriter out, 
 DateTime start, DateTime end, PropList props ) throws IOException 
-{	String routine = "StateCU_IrrigationPracticeTS.writeVector";
+{
 	int i;
 	String iline;
 	String cmnt = "#>";
@@ -3066,7 +3066,7 @@ DateTime start, DateTime end, PropList props ) throws IOException
 	}
 	// Indicate whether version 10 groundwater and sprinkler acreage should
 	// be computed from the more detailed Version 12+ acreage columns.
-	String RecomputeVersion10Acreage = props.getValue ( "RecomputeVersion10Acreage" );
+	//String RecomputeVersion10Acreage = props.getValue ( "RecomputeVersion10Acreage" );
 	boolean RecomputeVersion10Acreage_boolean = true;
 	/* FIXME SAM 2007-10-18 Remove later when tested out
 	 * Always recompute now
@@ -3263,11 +3263,12 @@ DateTime start, DateTime end, PropList props ) throws IOException
 	DateTime temp_DateTime = new DateTime ();	// Use for data access.
 	int year = 0;
 	double val, acgw_val, acgwfl_val, acgwspr_val, acsw_val, acswfl_val, acswspr_val;
-	int check_tolerance = 1;	// Tolerance when checking integer acreage terms
-	long parts_total = 0;	// Total of acreage parts
-	long tacre;			// total acres
+	//int check_tolerance = 1;	// Tolerance when checking integer acreage terms
+	//long parts_total = 0;	// Total of acreage parts
+	//long tacre;			// total acres
 	double area_big = 1000000.0;	// Needs to use lower precision output
-	YearTS	ceff_yts, feff_yts, seff_yts, gacre_yts, sacre_yts, mprate_yts,
+	YearTS	ceff_yts, feff_yts, seff_yts, //gacre_yts, sacre_yts,
+	    mprate_yts,
 		gmode_yts, tacre_yts, acgw_yts, acgwfl_yts, acgwspr_yts, acsw_yts, acswfl_yts, acswspr_yts;
 	// This is not real efficient but is relatively fast...
 	// Outer loop is for the time series period...
@@ -3400,11 +3401,14 @@ DateTime start, DateTime end, PropList props ) throws IOException
 				else {
 					v.add(StringUtil.formatString(acgwspr_val,area_format));
 				}
+				/*
 				if ( (acswfl_val >= 0.0) && (acswspr_val >= 0.0) && (acgwfl_val >= 0.0) && (acgwspr_val >= 0.0) ) {
 					parts_total = Math.round(acswfl_val + acswspr_val + acgwfl_val + acgwspr_val);
 				}
-				else { parts_total = -999;
+				else {
+				    parts_total = -999;
 				}
+				*/
 			}
 			mprate_yts = tsp.getMprateTS();
 			val = mprate_yts.getDataValue ( temp_DateTime );
@@ -3429,7 +3433,7 @@ DateTime start, DateTime end, PropList props ) throws IOException
 			else {
 				v.add(StringUtil.formatString(val,area_format));
 			}
-			tacre = Math.round(val);
+			//tacre = Math.round(val);
 			if ( !version10 ) {
 				// Add the new supply type acreage
 				acsw_yts = tsp.getAcswTS();

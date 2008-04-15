@@ -7,23 +7,23 @@ import junit.framework.TestCase;
 
 public class StateMod_ComponentDataCheckTest extends TestCase 
 {
-	private RTi.Util.IO.CheckFile __check_file;
-	private StateMod_DataSet __data_set;
+	//private RTi.Util.IO.CheckFile __check_file;
+	//private StateMod_DataSet __data_set;
 	
 public void setup() 
 {
-	__check_file = new RTi.Util.IO.CheckFile("myCheckFile", "commands");
-	__data_set = new StateMod_DataSet();
+	//__check_file = new RTi.Util.IO.CheckFile("myCheckFile", "commands");
+	//__data_set = new StateMod_DataSet();
 }
 	
 public void testCheckForMissingData() 
 {
 	// setup test object
-	StateMod_ComponentDataCheck testObj = new StateMod_ComponentDataCheck(
-		StateMod_DataSet.COMP_WELL_STATIONS, __check_file, __data_set );
+	//StateMod_ComponentDataCheck testObj = new StateMod_ComponentDataCheck(
+	//	StateMod_DataSet.COMP_WELL_STATIONS, __check_file, __data_set );
 	
 	Vector orig = new Vector();
-	int numMissing = 3;
+	//int numMissing = 3;
 	orig.add( getStringList(  true ) );
 	orig.add( getStringList(  true ) );
 	orig.add( getStringList(  true ) );
@@ -33,16 +33,15 @@ public void testCheckForMissingData()
 	//assertEquals( numMissing, missing.size() );
 	
 	orig.clear();
-	numMissing = 0;
+	//numMissing = 0;
 	orig.add( getStringList(  false ) );
 	//missing = testObj.checkForMissingData( orig );
 	//assertEquals( 0, missing.size() );
 	
 	orig.clear();
-	numMissing = 0;
+	//numMissing = 0;
 	//missing = testObj.checkForMissingData( null );
 	//assertEquals( null, missing );
-	
 }
 
 

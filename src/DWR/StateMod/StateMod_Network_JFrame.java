@@ -95,7 +95,6 @@ import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.GUI.SimpleJComboBox;
 import RTi.Util.GUI.SimpleJToggleButton;
 import RTi.Util.GUI.TextResponseJDialog;
-import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.PrintUtil;
 import RTi.Util.IO.PropList;
 import RTi.Util.Math.MathUtil;
@@ -185,7 +184,7 @@ private double
 /**
 Data provider to fill the nodes with.
 */
-private StateMod_NodeDataProvider __nodeDataProvider = null;
+//private StateMod_NodeDataProvider __nodeDataProvider = null;
 
 /**
 The font size stored in an XML file.
@@ -514,26 +513,6 @@ public void buildToolBar() {
 		Message.printDebug(10, routine,
 			"Print Network icon loaded from Jar file.");
 	}
-	else if (!IOUtil.release()) {
-		try {
-			ImageIcon i = JGUIUtil.loadIconImage(
-				"i:\\develop\\GIS\\libGeoViewJava\\"
-				+ "graphics\\RTi\\graphics\\GIS\\GeoView\\"
-				+ "icon_print.gif");
-			__printJButton = new SimpleJButton(i, "Print Network", 
-				"Print Network", none, false, this);	
-			Message.printDebug(10, routine,
-				"Print Network icon loaded from I drive.");
-		}
-		catch (Exception e) {
-			__printJButton = new SimpleJButton("Print", 
-				"Print Network", "Print Network", none, false, 
-				this);	
-			Message.printDebug(10, routine,
-				"Print Network icon defaulted to text "
-				+ "(non-release).");
-		}
-	}
 	else {
 		__printJButton = new SimpleJButton("Print", "Print Network", 
 			"Print Network", none, false, this);		
@@ -550,28 +529,6 @@ public void buildToolBar() {
 		Message.printDebug(10, routine,
 			"Print Screen icon loaded from Jar file.");
 	}
-	else if (!IOUtil.release()) {
-		try {
-			ImageIcon i = JGUIUtil.loadIconImage(
-				"j:\\cdss\\develop\\libStateModJava\\graphics"
-				+ "\\RTi\\graphics\\"
-				+ "DWR\\StateMod\\icon_printScreen.gif");
-
-			__printScreenJButton = new SimpleJButton(i,
-				"Print Screen", "Print Screen", none, false, 
-				this);	
-			Message.printDebug(10, routine,
-				"Print Screen icon loaded from I drive.");
-		}
-		catch (Exception e) {
-			__printScreenJButton = new SimpleJButton("Print",
-				"Print Screen", "Print Screen", none, false, 
-				this);	
-			Message.printDebug(10, routine,
-				"Print Screen icon defaulted to text "
-				+ "(non-release).");
-		}
-	}
 	else {
 		__printScreenJButton = new SimpleJButton( "Print",
 			"Print Screen", "Print Screen", none, false, this);	
@@ -580,35 +537,13 @@ public void buildToolBar() {
 	}	
 	__toolBar.add(__printScreenJButton);
 
-	url = this.getClass().getResource(
-		"/RTi/graphics/GIS/GeoView/icon_saveAsJpeg.gif");
+	url = this.getClass().getResource( "/RTi/graphics/GIS/GeoView/icon_saveAsJpeg.gif");
 	if (url != null) {
 		__saveAsImageJButton = new SimpleJButton(new ImageIcon(url),
 			"Save Image", "Save as Image", none, false, this);	
 		Message.printDebug(10, routine,
 			"Save Image icon loaded from Jar file.");
 	}
-	else if (!IOUtil.release()) {
-		try {
-			ImageIcon i = JGUIUtil.loadIconImage(
-				"i:\\develop\\GIS\\libGeoViewJava\\graphics\\"
-				+ "RTi\\graphics\\GIS\\GeoView\\"
-				+ "icon_saveAsJpeg.gif");
-			__saveAsImageJButton = new SimpleJButton(i,
-				"Save Image", "Save as Image", none, false, 
-				this);	
-			Message.printDebug(10, routine,
-				"Save Image icon loaded from I drive.");
-		}
-		catch (Exception e) {
-			__saveAsImageJButton = new SimpleJButton("Save",
-				"Save Image", "Save as Image", none, 
-				false, this);	
-			Message.printDebug(10, routine,
-				"Save Image icon defaulted to text "
-				+ "(non-release).");
-		}
-	}	
 	else {
 		__saveAsImageJButton = new SimpleJButton("Save",
 			"Save Image", "Save as Image", none, false, this);	
@@ -626,28 +561,6 @@ public void buildToolBar() {
 		Message.printDebug(10, routine,
 			"Save Screen icon loaded from Jar file.");
 	}
-	else if (!IOUtil.release()) {
-		try {
-			ImageIcon i = JGUIUtil.loadIconImage(
-				"j:\\cdss\\develop\\libStateModJava\\"
-				+ "graphics\\RTi\\graphics\\"
-				+ "DWR\\StateMod\\icon_saveScreen.gif");
-	
-			__saveScreenAsImageJButton = new SimpleJButton(i,
-				"Save Screen", "Save Screen as Image", 
-				none, false, this);	
-			Message.printDebug(10, routine,
-				"Save Screen icon loaded from I drive.");
-		}
-		catch (Exception e) {
-			__saveScreenAsImageJButton = new SimpleJButton("Save",
-				"Save Screen", "Save Screen as Image", none, 
-				false, this);	
-			Message.printDebug(10, routine,
-				"Save Screen icon defaulted to text "
-				+ "(non-release).");
-		}
-	}	
 	else {
 		__saveScreenAsImageJButton = new SimpleJButton("Save",
 			"Save Screen", "Save Screen as Image", none, 
@@ -667,27 +580,6 @@ public void buildToolBar() {
 		Message.printDebug(10, routine,
 			"Save XML icon loaded from Jar file.");
 	}
-	else if (!IOUtil.release()) {
-		try {
-			ImageIcon i = JGUIUtil.loadIconImage(
-				"j:\\cdss\\develop\\libStateModJava\\"
-				+ "graphics\\RTi\\graphics\\"
-				+ "DWR\\StateMod\\icon_saveXML.gif");
-			__saveXMLJButton = new SimpleJButton(i,
-				"Save XML", "Save XML Network File", 
-				none, false, this);	
-			Message.printDebug(10, routine,
-				"Save XML icon loaded from I drive.");
-		}
-		catch (Exception e) {
-			__saveXMLJButton = new SimpleJButton("Save",
-				"Save XML", "Save XML Network File", none, 
-				false, this);	
-			Message.printDebug(10, routine,
-				"Save XML icon defaulted to text "
-				+ "(non-release).");
-		}
-	}	
 	else {
 		__saveXMLJButton = new SimpleJButton("Save", "Save XML", 
 			"Save XML Network File", none, false, this);	
@@ -706,25 +598,6 @@ public void buildToolBar() {
 		Message.printDebug(10, routine,
 			"Refresh icon loaded from Jar file.");
 	}
-	else if (!IOUtil.release()) {
-		try {
-			ImageIcon i = JGUIUtil.loadIconImage(
-		"i:\\develop\\GIS\\libGeoViewJava\\graphics\\RTi\\graphics\\"
-			+ "GIS\\GeoView\\icon_refresh.gif");
-	
-			__refreshJButton = new SimpleJButton(i, "Refresh", 
-				"Refresh", none, false, this);
-			Message.printDebug(10, routine,
-				"Refresh icon loaded from I drive.");
-		}
-		catch (Exception e) {
-			__refreshJButton = new SimpleJButton("Refresh",
-				"Refresh", "Refresh", none, false, this);
-			Message.printDebug(10, routine,
-				"Refresh icon defaulted to text "
-				+ "(non-release).");
-		}
-	}		
 	else {
 		__refreshJButton = new SimpleJButton("Refresh",
 			"Refresh", "Refresh", none, false, this);
@@ -741,26 +614,6 @@ public void buildToolBar() {
 			"Zoom Out", "Zoom Out", none, false, this);
 		Message.printDebug(10, routine,
 			"Zoom Out icon loaded from Jar file.");
-	}
-	else if (!IOUtil.release()) {
-		try {
-			ImageIcon i = JGUIUtil.loadIconImage(
-				"i:\\develop\\GIS\\libGeoViewJava\\graphics\\"
-				+ "RTi\\graphics\\GIS\\GeoView\\"
-				+ "icon_zoomOut.gif");
-		
-			__zoomOutJButton = new SimpleJButton(i, "Zoom Out", 
-				"Zoom Out", none, false, this);
-			Message.printDebug(10, routine,
-				"Zoom Out icon loaded from I drive.");
-		}
-		catch (Exception e) {
-			__zoomOutJButton = new SimpleJButton("Zoom Out",
-				"Zoom Out", "Zoom Out", none, false, this);
-			Message.printDebug(10, routine,
-				"Zoom Out icon defaulted to text "
-				+ "(non-release).");
-		}
 	}
 	else {
 		__zoomOutJButton = new SimpleJButton("Zoom Out",
@@ -783,25 +636,6 @@ public void buildToolBar() {
 		Message.printDebug(10, routine,
 			"Zoom In icon loaded from Jar file.");
 	}
-	else if (!IOUtil.release()) {
-		try {
-			ImageIcon i = JGUIUtil.loadIconImage(
-		"i:\\develop\\GIS\\libGeoViewJava\\graphics\\RTi\\graphics\\"
-				+ "GIS\\GeoView\\icon_zoomMode.gif");
-		
-			__zoomInJButton = new SimpleJButton(i, "Zoom In", 
-				"Zoom In", none, false, this);
-			Message.printDebug(10, routine,
-				"Zoom In icon loaded from I drive.");
-		}
-		catch (Exception e) {
-			__zoomInJButton = new SimpleJButton("Zoom In",
-				"Zoom In", "Zoom In", none, false, this);
-			Message.printDebug(10, routine,
-				"Zoom In icon defaulted to text "
-				+ "(non-release).");
-		}
-	}	
 	else {
 		__zoomInJButton = new SimpleJButton("Zoom In",
 			"Zoom In", "Zoom In", none, false, this);
@@ -834,28 +668,6 @@ public void buildToolBar() {
 		Message.printDebug(10, routine,
 			"Enter Pan Mode icon loaded from Jar file.");
 	}
-	else if (!IOUtil.release()) {
-		try {
-			ImageIcon i = JGUIUtil.loadIconImage(
-				"j:\\cdss\\develop\\libStateModJava\\"
-				+ "graphics\\RTi\\graphics\\"
-				+ "DWR\\StateMod\\icon_hand.gif");
-		
-			__panJButton = new SimpleJToggleButton(i,
-				MODE_PAN, "Enter Pan Mode", none, false, 
-				this, true);
-			Message.printDebug(10, routine,
-				"Enter Pan Mode icon loaded from I drive.");
-		}
-		catch (Exception e) {
-			__panJButton = new SimpleJToggleButton("Pan Mode",
-				MODE_PAN, "Enter Pan Mode", none, false, 
-				this, true);
-			Message.printDebug(10, routine,
-				"Enter Pan Mode icon defaulted to text "
-				+ "(non-release).");
-		}
-	}	
 	else {
 		__panJButton = new SimpleJToggleButton("Pan Mode",
 			MODE_PAN, "Enter Pan Mode", none, false, this, true);
@@ -873,27 +685,6 @@ public void buildToolBar() {
 		Message.printDebug(10, routine,
 			"Enter Info Mode icon loaded from Jar file.");
 	}
-	else if (!IOUtil.release()) {
-		try {
-			ImageIcon i = JGUIUtil.loadIconImage(
-				"i:\\develop\\GIS\\libGeoViewJava\\graphics\\"
-				+ "RTi\\graphics\\GIS\\GeoView\\"
-				+ "icon_infoMode.gif");
-			__infoJButton = new SimpleJToggleButton(i,
-				MODE_INFO, "Enter Info Mode", none, false, 
-				this, false);
-			Message.printDebug(10, routine,
-				"Enter Info Mode icon loaded from I drive.");
-		}
-		catch (Exception e) {
-			__infoJButton = new SimpleJToggleButton("Info Mode",
-				MODE_INFO, "Enter Info Mode", none, false, 
-				this, false);
-			Message.printDebug(10, routine,
-				"Enter Info Mode icon defaulted to text "
-				+ "(non-release).");
-		}
-	}	
 	else {
 		__infoJButton = new SimpleJToggleButton("Info Mode",
 			MODE_INFO, "Enter Info Mode", none, false, this, false);
@@ -913,27 +704,6 @@ public void buildToolBar() {
 		Message.printDebug(10, routine,
 			"Enter Select Mode icon loaded from Jar file.");
 	}
-	else if (!IOUtil.release()) {
-		try {
-			ImageIcon i = JGUIUtil.loadIconImage(
-				"i:\\develop\\GIS\\libGeoViewJava\\graphics\\"
-				+ "RTi\\graphics\\GIS\\GeoView\\"
-				+ "icon_selectMode.gif");
-			__selectJButton = new SimpleJToggleButton(i,
-				MODE_SELECT, "Enter Select Mode", none, 
-				false, this, false);
-			Message.printDebug(10, routine,
-				"Enter Select Mode icon loaded from I drive.");
-		}
-		catch (Exception e) {
-			__selectJButton = new SimpleJToggleButton("Select Mode",
-				MODE_SELECT, "Enter Select Mode", none, 
-				false, this, false);
-			Message.printDebug(10, routine,
-				"Enter Select Mode icon defaulted to text "
-				+ "(non-release).");
-		}
-	}	
 	else {
 		__selectJButton = new SimpleJToggleButton("Select Mode",
 			MODE_SELECT, "Enter Select Mode", none, false, this, 
@@ -1050,7 +820,6 @@ Cleans up member variables.
 */
 public void finalize()
 throws Throwable {
-	__nodeDataProvider = null;
 	__deleteButton = null;
 	__defaultLayoutCheckBox = null;
 	__nodeDescriptionTextField = null;
@@ -1132,7 +901,7 @@ Initializes class settings for a network in a net file.
 */
 private void initializeExistingNetwork( StateMod_NodeDataProvider nodeDataProvider, String filename )
 throws Exception {
-	__nodeDataProvider = nodeDataProvider;
+	//__nodeDataProvider = nodeDataProvider;
 	__newNetwork = false;
 	__filename = filename;
 	__device = new StateMod_Network_JComponent(this, .5);
@@ -1199,7 +968,7 @@ saves.
 */
 private void initializeNewNetwork ( StateMod_NodeDataProvider nodeDataProvider, String filename )
 throws Exception {
-	__nodeDataProvider = nodeDataProvider;
+	//__nodeDataProvider = nodeDataProvider;
 	__isXML = true;
 	__newNetwork = true;
 	__filename = filename;

@@ -258,8 +258,7 @@ Set the content in area capacity table.
 public void setConten(double d) {
 	if (d != _conten) {
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_RESERVOIR_STATIONS,
-			true);
+			_dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_STATIONS,true);
 		}
 		_conten = d;
 	}
@@ -291,8 +290,7 @@ Set the seepage associated with the content.
 public void setSeepage(double d) {
 	if (d != _seepage) {
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_RESERVOIR_STATIONS,
-			true);
+			_dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_STATIONS,true);
 		}
 		_seepage = d;
 	}
@@ -324,8 +322,7 @@ Set the area associated with the content.
 public void setSurarea(double d) {
 	if (d != _surarea) {
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(_dataset.COMP_RESERVOIR_STATIONS,
-			true);
+			_dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_STATIONS,true);
 		}
 		_surarea = d;
 	}
