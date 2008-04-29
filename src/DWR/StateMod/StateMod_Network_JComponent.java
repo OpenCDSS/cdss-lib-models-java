@@ -3599,11 +3599,9 @@ public void paint(Graphics g) {
 	// if doing double-buffered drawing, single-buffered if not)
 	if (__printingNetwork) {
 		Font f = __drawingArea.getFont();
-		__bufferGraphics.setFont(new Font(f.getName(), 
-			f.getStyle(), __printFontPointSize));
+		__bufferGraphics.setFont(new Font(f.getName(), f.getStyle(), __printFontPointSize));
 		forceGraphics(__bufferGraphics);
-		__bufferGraphics.setFont(new Font(f.getName(), 
-			f.getStyle(), __printFontPointSize));
+		__bufferGraphics.setFont(new Font(f.getName(), f.getStyle(), __printFontPointSize));
 	}
 	else if (__printingScreen || __savingNetwork || __savingScreen) {
 		// force the graphics to use the double-buffer graphics
@@ -3627,17 +3625,14 @@ public void paint(Graphics g) {
 		__drawingArea.setFont(f.getName(), f.getStyle(), 10);
 		
 		setupDoubleBuffer(0, 0, getBounds().width, getBounds().height);
-		GRLimits limits = new GRLimits(0, 0, getBounds().width,
-			getBounds().height);
-		__drawingArea.setDrawingLimits(limits, GRUnits.DEVICE,
-			GRLimits.DEVICE);
+		GRLimits limits = new GRLimits(0, 0, getBounds().width, getBounds().height);
+		__drawingArea.setDrawingLimits(limits, GRUnits.DEVICE, GRLimits.DEVICE);
 
 		GRLimits data = null;
 		
 		// determine the datalimits to be drawn in the current screen
 		if (__fitWidth) {
-			double pct = ((double)(getBounds().height))
-				/ ((double)(getBounds().width));
+			double pct = ((double)(getBounds().height))	/ ((double)(getBounds().width));
 			double height = pct * __totalDataWidth;
 			data = new GRLimits(
 				__dataLeftX, 
@@ -3646,8 +3641,7 @@ public void paint(Graphics g) {
 				__dataBottomY + height);			
 		}
 		else {
-			double pct = ((double)(getBounds().width))
-				/ ((double)(getBounds().height));
+			double pct = ((double)(getBounds().width)) / ((double)(getBounds().height));
 			double width = pct * __totalDataHeight;
 			data = new GRLimits(
 				__dataLeftX, 
@@ -3662,8 +3656,7 @@ public void paint(Graphics g) {
 		__screenDataHeight = data.getHeight();
 		__drawingArea.setDataLimits(data);
 
-		// REVISIT (JTS - 2004-04-05)
-		// On the subject of node sizes:
+		// TODO (JTS - 2004-04-05) On the subject of node sizes:
 		// Nodes are drawn in data units, so that whatever is specified
 		// as the print node size is the number of pixels across the
 		// node will appear on screen.  However, because of the magic
@@ -3705,17 +3698,13 @@ public void paint(Graphics g) {
 		// check to see if the bounds of the device have changed --
 		// if they have then the GUI window has been resized and
 		// the double buffer size needs changed accordingly.
-		if (__drawingAreaHeight != getBounds().height 
-		    || __drawingAreaWidth != getBounds().width) {
-		    	adjustForResize();
+		if (__drawingAreaHeight != getBounds().height || __drawingAreaWidth != getBounds().width) {
+		    adjustForResize();
 			__drawingAreaHeight = getBounds().height;
 			__drawingAreaWidth = getBounds().width;	
-			GRLimits limits = new GRLimits(0, 0, getBounds().width,
-				getBounds().height);
-			__drawingArea.setDrawingLimits(limits, GRUnits.DEVICE,
-				GRLimits.DEVICE);
-			setupDoubleBuffer(0, 0, getBounds().width, 
-				getBounds().height);
+			GRLimits limits = new GRLimits(0, 0, getBounds().width, getBounds().height);
+			__drawingArea.setDrawingLimits(limits, GRUnits.DEVICE, GRLimits.DEVICE);
+			setupDoubleBuffer(0, 0, getBounds().width, getBounds().height);
 			__forceRefresh = true;
 		}
 	}		  
@@ -3754,8 +3743,7 @@ public void paint(Graphics g) {
 		// portion is drawn in the screen and set up the drawing limits.
 		if (!__printingNetwork && !__printingScreen && !__savingNetwork
 		    && !__savingScreen) {
-			__drawingArea.setFont(f.getName(), f.getStyle(),
-				__fontPointSize);
+			__drawingArea.setFont(f.getName(), f.getStyle(), __fontPointSize);
 			setLimits(getLimits(true));			
 			__drawingArea.setDataLimits(new GRLimits(
 				__screenLeftX,
@@ -3766,8 +3754,7 @@ public void paint(Graphics g) {
 		}
 		// if printing the entire network, do a translation so that the
 		// entire network is drawn in the BufferedImage.  No X change 
-		// is needed, but the bottom of the network needs aligned 
-		// properly.
+		// is needed, but the bottom of the network needs aligned properly.
 		else if (__printingNetwork) {
 			__holdLimits = __drawingArea.getDataLimits();
 			GRLimits data = new GRLimits(
@@ -3781,8 +3768,7 @@ public void paint(Graphics g) {
 			translate(0, __totalBufferHeight - getBounds().height);
 			scaleUnscalables();
 			clear();
-			__bufferGraphics.setFont(new Font(f.getName(), 
-				f.getStyle(), __printFontPointSize));
+			__bufferGraphics.setFont(new Font(f.getName(), f.getStyle(), __printFontPointSize));
 		}
 		else if (__savingNetwork) {
 			__holdLimits = __drawingArea.getDataLimits();
@@ -3799,15 +3785,13 @@ public void paint(Graphics g) {
 				* (72.0 / (double)__dpi))  
 				- getBounds().height);
 			clear();
-			__drawingArea.setFont(f.getName(), f.getStyle(),
-				__fontPointSize);			
+			__drawingArea.setFont(f.getName(), f.getStyle(), __fontPointSize);			
 		}		
 		// if just the current screen is drawn, the same translation 
 		// can be done that was done for normal drawing.
 		else if (__printingScreen || __savingScreen) {
 			clear();
-			__drawingArea.setFont(f.getName(), f.getStyle(),
-				__fontPointSize);			
+			__drawingArea.setFont(f.getName(), f.getStyle(), __fontPointSize);			
 		}
 		setAntiAlias(__antiAlias);
 		drawNetworkLines();
@@ -3839,8 +3823,7 @@ public void paint(Graphics g) {
 			int tempMaxY = (int)(convertAbsY(maxY) + __dataBottomY);
 			for (int i = 0; i < maxX; i+= ((72/__printScale)/2)) {
 				j = (int)(convertAbsX(i) + __dataLeftX);
-				GRDrawingAreaUtil.drawLine(__drawingArea, j, 
-					minY, j, tempMaxY);
+				GRDrawingAreaUtil.drawLine(__drawingArea, j, minY, j, tempMaxY);
 				GRDrawingAreaUtil.drawText(__drawingArea, 
 					"" + ((double)i/(72/__printScale)),j, 
 					minY, 0, 
@@ -3865,29 +3848,21 @@ public void paint(Graphics g) {
 		if (__drawPixelGrid) {
 			for (int i = (int)__dataBottomY; 
 				i < __totalDataHeight; i+= 20) {
-				GRDrawingAreaUtil.setColor(__drawingArea,
-					GRColor.green);
-				GRDrawingAreaUtil.drawLine(__drawingArea,
-					__dataLeftX, i, __totalDataWidth, i);
+				GRDrawingAreaUtil.setColor(__drawingArea, GRColor.green);
+				GRDrawingAreaUtil.drawLine(__drawingArea, __dataLeftX, i, __totalDataWidth, i);
 				for (int j = i + 5; j < (i + 20); j += 5) {
-				GRDrawingAreaUtil.setColor(__drawingArea,
-					GRColor.yellow);
-				GRDrawingAreaUtil.drawLine(__drawingArea,
-					__dataLeftX, j, __totalDataWidth, j);
+				GRDrawingAreaUtil.setColor(__drawingArea, GRColor.yellow);
+				GRDrawingAreaUtil.drawLine(__drawingArea, __dataLeftX, j, __totalDataWidth, j);
 				}
 			}
 		}
 		setAntiAlias(__antiAlias);
 		if (__drawMargin) {
 			__drawingArea.setFloatLineDash(__dashes, 0);		
-			GRDrawingAreaUtil.setColor(__drawingArea, 
-				GRColor.cyan);			
+			GRDrawingAreaUtil.setColor(__drawingArea, GRColor.cyan);			
 
-			double leftX = __pageFormat.getImageableX() 
-				/ __printScale;
-			double topY = (__pageFormat.getHeight() 
-				- __pageFormat.getImageableY()) 
-				/ __printScale;
+			double leftX = __pageFormat.getImageableX() / __printScale;
+			double topY = (__pageFormat.getHeight() - __pageFormat.getImageableY()) / __printScale;
 			double rightX = (leftX 
 				+ __pageFormat.getImageableWidth()
 				/ __printScale) - 1;
@@ -3900,53 +3875,39 @@ public void paint(Graphics g) {
 			rightX = convertAbsX(rightX) + __dataLeftX;
 			bottomY = convertAbsY(bottomY) + __dataBottomY;
 
-			GRDrawingAreaUtil.drawLine(__drawingArea,
-				leftX, topY, leftX, bottomY);
-			GRDrawingAreaUtil.drawLine(__drawingArea,
-				rightX, topY, rightX, bottomY);
-			GRDrawingAreaUtil.drawLine(__drawingArea,
-				leftX, topY, rightX, topY);
-			GRDrawingAreaUtil.drawLine(__drawingArea,
-				leftX, bottomY, rightX, bottomY);
+			GRDrawingAreaUtil.drawLine(__drawingArea, leftX, topY, leftX, bottomY);
+			GRDrawingAreaUtil.drawLine(__drawingArea, rightX, topY, rightX, bottomY);
+			GRDrawingAreaUtil.drawLine(__drawingArea, leftX, topY, rightX, topY);
+			GRDrawingAreaUtil.drawLine(__drawingArea, leftX, bottomY, rightX, bottomY);
 
 			__drawingArea.setFloatLineDash(null, 0);
 		}
 		setAntiAlias(__antiAlias);
 		if (true && !__savingNetwork) {
-			GRDrawingAreaUtil.setColor(__drawingArea, 
-				GRColor.yellow);			
+			GRDrawingAreaUtil.setColor(__drawingArea, GRColor.yellow);			
 
 			double leftX = 0;
-			double topY = (__pageFormat.getHeight() 
-				/ __printScale);
-			double rightX = (__pageFormat.getWidth()
-				/ __printScale);
+			double topY = (__pageFormat.getHeight() / __printScale);
+			double rightX = (__pageFormat.getWidth() / __printScale);
 			double bottomY = 0;
 			leftX = convertAbsX(leftX) + __dataLeftX;
 			topY = convertAbsY(topY) + __dataBottomY - 1;
 			rightX = convertAbsX(rightX) + __dataLeftX - 1;
 			bottomY = convertAbsY(bottomY) + __dataBottomY;
 
-			GRDrawingAreaUtil.drawLine(__drawingArea,
-				leftX, topY, leftX, bottomY);
-			GRDrawingAreaUtil.drawLine(__drawingArea,
-				rightX, topY, rightX, bottomY);
-			GRDrawingAreaUtil.drawLine(__drawingArea,
-				leftX, topY, rightX, topY);
-			GRDrawingAreaUtil.drawLine(__drawingArea,
-				leftX, bottomY, rightX, bottomY);
+			GRDrawingAreaUtil.drawLine(__drawingArea, leftX, topY, leftX, bottomY);
+			GRDrawingAreaUtil.drawLine(__drawingArea, rightX, topY, rightX, bottomY);
+			GRDrawingAreaUtil.drawLine(__drawingArea, leftX, topY, rightX, topY);
+			GRDrawingAreaUtil.drawLine(__drawingArea, leftX, bottomY, rightX, bottomY);
 		}
 
-		// make sure the reference window represents the current
-		// status of this window
+		// make sure the reference window represents the current status of this window
 		__referenceJComponent.forceRepaint();
 		__forceRefresh = false;
 	}
 
-	if (!__printingNetwork && !__savingNetwork && !__printingScreen
-	    && !__savingScreen) {
-		// draw the border lines that separate the drawing area from
-		// the rest of the GUI.
+	if (!__printingNetwork && !__savingNetwork && !__printingScreen && !__savingScreen) {
+		// draw the border lines that separate the drawing area from the rest of the GUI.
 
 		GRDrawingAreaUtil.setColor(__drawingArea, GRColor.black);
 		GRDrawingAreaUtil.drawLine(__drawingArea,
@@ -3980,8 +3941,7 @@ public void paint(Graphics g) {
 	
 	setAntiAlias(__antiAlias);	
 	// only show the double buffered image to screen if not printing
-	if (!__printingNetwork && !__printingScreen && !__savingNetwork
-	    && !__savingScreen) {
+	if (!__printingNetwork && !__printingScreen && !__savingNetwork && !__savingScreen) {
 		showDoubleBuffer(g);
 	}
 	else if (__printingScreen || __savingScreen) {
@@ -4004,8 +3964,7 @@ public void paint(Graphics g) {
 		drawNodesOutlines(g);
 	}	
 	else if (__legendDrag) {
-		// force the graphics context to be the on-screen one, not
-		// the double-buffered one
+		// force the graphics context to be the on-screen one, not the double-buffered one
 		forceGraphics(g);		
 		GRDrawingAreaUtil.setColor(__drawingArea, GRColor.black);
 		GRDrawingAreaUtil.drawLine(__drawingArea, 
@@ -4162,20 +4121,20 @@ public int print(Graphics g, PageFormat pageFormat, int pageIndex) {
 /**
 Prints the entire network.
 */
-protected void printNetwork() {
+protected void printNetwork()
+{	String routine = "StateMod_Network_JComponent.printNetwork";
+	Message.printStatus( 2, routine, "Printing entire network" );
 	boolean drawMargin = __drawMargin;
 	__drawMargin = false;
 //	__antiAlias = false;
 	__antiAlias = true;
 
 	__printCount = 0;
-	__tempBuffer = new BufferedImage(__totalBufferWidth, 
-		__totalBufferHeight, BufferedImage.TYPE_4BYTE_ABGR);
+	__tempBuffer = new BufferedImage(__totalBufferWidth, __totalBufferHeight, BufferedImage.TYPE_4BYTE_ABGR);
 	__bufferGraphics = (Graphics2D)(__tempBuffer.createGraphics());
 	__printingNetwork = true;
 
-	// make sure that none of the nodes are selected so they don't
-	// print blue.  
+	// make sure that none of the nodes are selected so they don't print blue.  
 	for (int i = 0; i < __nodes.length; i++) {
 		__nodes[i].setSelected(false);
 	}
@@ -4214,32 +4173,25 @@ protected void printNetwork() {
 }
 
 /**
-Prints information about the nodes in the network to status level 2.  Used
-for debugging.
+Prints information about the nodes in the network to status level 2.  Used for debugging.
 */
 private void printNetworkInfo() {
 	if (__network == null) {
 		return;
 	}
 	Vector v = __network.getNodeCountsVector();
-	Message.printStatus(2, 
-		"StateMod_Network_JComponent.printNetworkInfo",
-		"--- Network Node Summary ---");
+	Message.printStatus(2, "StateMod_Network_JComponent.printNetworkInfo", "--- Network Node Summary ---");
 	for (int i = 0; i < v.size(); i++) {	
-		Message.printStatus(2, 
-			"StateMod_Network_JComponent.printNetworkInfo",
-			"" + v.elementAt(i));
+		Message.printStatus(2, "StateMod_Network_JComponent.printNetworkInfo", "" + v.elementAt(i));
 	}
 }
 
 /**
-Prints whatever is visible on the screen, scaled to fit the default piece
-of paper.
+Prints whatever is visible on the screen, scaled to fit the default piece of paper.
 */
 protected void printScreen() {
 	__printCount = 0;
-	double leftX = __pageFormat.getImageableX() 
-		/ __printScale;
+	double leftX = __pageFormat.getImageableX() / __printScale;
 	double topY = (__pageFormat.getHeight() 
 		- __pageFormat.getImageableY()) 
 		/ __printScale;

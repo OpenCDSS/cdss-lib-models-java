@@ -379,10 +379,8 @@ public void actionPerformed(ActionEvent event) {
 		String id = "Page Layout #" + (__layouts.size() + 1);
 		p.set("ID=\"" + id + "\"");
 		p.set("PaperSize=\"" + __DEFAULT_PAPER_SIZE + "\"");
-		p.set("PageOrientation=\"" + __DEFAULT_PAGE_ORIENTATION 
-			+ "\"");
-		p.set("NodeLabelFontSize=\"" + __DEFAULT_FONT_SIZE 
-			+ "\"");
+		p.set("PageOrientation=\"" + __DEFAULT_PAGE_ORIENTATION + "\"");
+		p.set("NodeLabelFontSize=\"" + __DEFAULT_FONT_SIZE + "\"");
 		p.set("NodeSize=\"" + __DEFAULT_NODE_SIZE + "\"");
 		p.set("IsDefault=\"false\"");
 		__layouts.add(p);
