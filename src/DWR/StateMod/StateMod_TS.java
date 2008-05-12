@@ -909,35 +909,31 @@ throws Exception
 /**
 Read all the time series from a StateMod format file.
 The IOUtil.getPathUsingWorkingDir() method is applied to the filename.
-@return a pointer to a newly-allocated Vector of time series if successful,
-a NULL pointer if not.
+@return a pointer to a newly-allocated Vector of time series if successful, a NULL pointer if not.
 @param fname Name of file to read.
-@param date1 Starting date to initialize period (NULL to read the entire time
-series).
-@param date2 Ending date to initialize period (NULL to read the entire time
-series).
+@param date1 Starting date to initialize period (NULL to read the entire time series).
+@param date2 Ending date to initialize period (NULL to read the entire time series).
 @param units Units to convert to.
 @param read_data Indicates whether data should be read.
 */
-public static Vector readTimeSeriesList (	String fname,
-						DateTime date1, DateTime date2,
-						String units, boolean read_data)
+public static Vector readTimeSeriesList ( String fname,	DateTime date1, DateTime date2, String units, boolean read_data)
 throws Exception
 {	Vector	tslist = null;
+    String routine = "StateMod_TS.readTimeSeriesList";
 
 	String input_name = fname;
 	String full_fname = IOUtil.getPathUsingWorkingDir ( fname );
 	BufferedReader in = null;
 	int data_interval = 0;
-	try {	data_interval = getFileDataInterval ( full_fname );
-		in = new BufferedReader ( new InputStreamReader(
-				IOUtil.getInputStream ( full_fname )) );
-	}
-	catch ( Exception e ) {
-		Message.printWarning( 2,
-		"StateMod_TS.readTimeSeriesList",
-		"Unable to open file \"" + full_fname + "\"" );
-	}
+    if ( !IOUtil.fileExists(full_fname) ) {
+        Message.printWarning( 2, routine, "File does not exist: \"" + full_fname + "\"" );
+    }
+    if ( !IOUtil.fileReadable(full_fname) ) {
+        Message.printWarning( 2, routine, "File is not readable: \"" + full_fname + "\"" );
+    }
+    data_interval = getFileDataInterval ( full_fname );
+    // Let the following thrown FileNotFoundException, etc.
+	in = new BufferedReader ( new InputStreamReader( IOUtil.getInputStream ( full_fname )) );
 	tslist = readTimeSeriesList (	null, in, full_fname, data_interval,
 					date1, date2, units, read_data );
 	TS ts;
@@ -949,7 +945,7 @@ throws Exception
 		ts = (TS)tslist.elementAt(i);
 		if ( ts != null ) {
 			ts.setInputName ( full_fname );
-			// Revisit - is this needed?
+			// TODO SAM 2008-05-11 is this needed?
 			//ts.getIdentifier().setInputType ( "StateMod" );
 			ts.getIdentifier().setInputName ( input_name );
 		}
@@ -967,12 +963,9 @@ return all new time series in the vector.  All data are reset, except for the
 identifier, which is assumed to have been set in the calling code.
 @param in Reference to open input stream.
 @parm full_filename Full path to filename, used for messages.
-@param req_date1 Requested starting date to initialize period (or NULL to read
-the entire time series).
-@param file_interval Indicates the file type (TimeInterval.DAY or
-TimeInterval.MONTH).
-@param req_date2 Requested ending date to initialize period (or NULL to read
-the entire time series).
+@param req_date1 Requested starting date to initialize period (or NULL to read the entire time series).
+@param file_interval Indicates the file type (TimeInterval.DAY or TimeInterval.MONTH).
+@param req_date2 Requested ending date to initialize period (or NULL to read the entire time series).
 @param units Units to convert to (currently ignored).
 @param read_data Indicates whether data should be read.
 @exception Exception if there is an error reading the time series.
@@ -994,18 +987,15 @@ throws Exception
 	DateTime date = null;
 	if ( file_interval == TimeInterval.DAY ) {
 		date = new DateTime ( DateTime.PRECISION_DAY );
-		doffset = 3;	// Used when setting data to skip the leading
-				// fields on the data line
+		doffset = 3; // Used when setting data to skip the leading fields on the data line
 	}
-	else {	date = new DateTime ( DateTime.PRECISION_MONTH );
+	else {
+	    date = new DateTime ( DateTime.PRECISION_MONTH );
 	}
-	boolean	req_id_found = false;		// Indicates if we have found
-						// the requested TS in the file.
-	boolean standard_ts = true;		// Non-standard indicates 12
-						// monthly averages in file.
+	boolean	req_id_found = false; // Indicates if we have found the requested TS in the file.
+	boolean standard_ts = true; // Non-standard indicates 12 monthly averages in file.
 
-	Vector tslist = null;			// List of time series to
-						// return.
+	Vector tslist = null; // List of time series to return.
 	String req_id = null;
 	if ( req_ts != null ) {
 		req_id = req_ts.getLocation();
@@ -1503,13 +1493,13 @@ throws Exception
 			// etc.
 			TSIdent ident = new TSIdent ();
 			ident.setLocation ( id );
-			// REVISIT - should not need now that input type is
-			// default
+			// TODO SAM 2008-05-11 - should not need now that input type is default
 			//ident.setSource ( "StateMod" );
 			if ( file_interval == TimeInterval.DAY ) {
 				ident.setInterval ( "DAY" );
 			}
-			else {	ident.setInterval ( "MONTH" );
+			else {
+			    ident.setInterval ( "MONTH" );
 			}
 			ident.setInputType ( "StateMod" );
 			ident.setInputName ( full_filename );
@@ -1736,7 +1726,7 @@ throws Exception
 		MissingDV = prop_value;
 	}
 
-	boolean print_genesis = false;	// REVISIT SAM 2005-05-06 enable later?
+	boolean print_genesis = false;	// TODO SAM 2005-05-06 enable later?
 
 	int nseries = tslist.size();
 	int req_interval_base = TimeInterval.MONTH;
@@ -1752,7 +1742,7 @@ throws Exception
 		if ( tslist.elementAt(i) == null ) {
 			continue;
 		}
-		/* REVISIT SAM 2005-05-06 Support daily or yearly later?
+		/* TODO SAM 2005-05-06 Support daily or yearly later?
 		if ( tslist.elementAt(i) instanceof DayTS ) {
 			req_interval_base = TimeInterval.DAY;
 		}
@@ -1793,12 +1783,10 @@ throws Exception
 				"detected for " + tsptr.getIdentifier() +
 				" - skipping in output.");
 			}
-			/* REVISIT SAM 2005-05-06 Might enable daily later...
+			/* TODO SAM 2005-05-06 Might enable daily later...
 			else if ( req_interval_base == TimeInterval.DAY ) {
 				Message.printWarning ( 2, rtn,
-				"A TS interval other than daily " +
-				"detected for " + tsptr.getIdentifier() +
-				" - skipping in output.");
+				"A TS interval other than daily detected for " + tsptr.getIdentifier() + " - skipping in output.");
 			}
 			*/
 		}
@@ -1956,7 +1944,7 @@ throws Exception
 		"b------eb------eb------eb------eb------eb------e" +
 		"b------eb------e" );
 	}
-	/* REVISIT SAM 2005-05-06 maybe enable daily later...
+	/* TODO SAM 2005-05-06 maybe enable daily later...
 	else {	// Daily output...
 		out.println( cmnt + 
 		"Yr  Mo ID            d(x,1)  d(x,2)  d(x,3)  " +
@@ -2064,8 +2052,9 @@ throws Exception
 		if ( req_interval_base == TimeInterval.MONTH ) {
 			initial_format = "%4d %-12.12s";
 		}
-		/* REVISIT SAM 2005-05-06 maybe enable daily later
-		else {	// daily...
+		/* TODO SAM 2005-05-06 maybe enable daily later
+		else {
+		    // daily...
 			initial_format = "%4d%4d %-12.12s";
 		}
 		*/
@@ -2099,8 +2088,9 @@ throws Exception
 	if ( req_interval_base == TimeInterval.MONTH ) {
 		iline_v = new Vector(15,1);
 	}
-	/* REVISIT SAM 2005-05-06 maybe enable daily later
-	else {	// Daily...
+	/* TODO SAM 2005-05-06 maybe enable daily later
+	else {
+	    // Daily...
 		iline_v = new Vector(36,1);
 	}
 	*/
@@ -2176,7 +2166,7 @@ throws Exception
 			}
 		}
 	}
-	/* REVISIT SAM 2005-05-06 maybe enable daily later.
+	/* TODO SAM 2005-05-06 maybe enable daily later.
 	else {	// Daily format files.  Because the output is always in calendar
 		// date and because counts are slightly different, include
 		// separate code, rather than trying to merge with monthly
