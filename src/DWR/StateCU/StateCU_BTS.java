@@ -58,14 +58,14 @@ private final float CFS_TO_ACFT = (float)1.9835;// Conversion factor from CFS
 						// to ACFT - also need to
 						// multiply by days in month.
 
-private String __version = null;		// File format version as a
+//private String __version = null;		// File format version as a
 						// String (e.g., "9.62").
 						// Before version 11.0 there was
 						// no version in the binary file
 						// so the code just reflects the
 						// documented format for the
 						// 9.62 version, especially
-						// since no documentaion exists
+						// since no documentation exists
 						// for earlier versions of the
 						// binary files.
 private double __version_double = -999.0;	// File format version as a
@@ -73,8 +73,8 @@ private double __version_double = -999.0;	// File format version as a
 						// __version. used by some
 						// methods where the string is
 						// not.
-private String __header_program = "";		// Program that created the file.
-private String __header_date = "";		// Date for the software version.
+//private String __header_program = "";		// Program that created the file.
+//private String __header_date = "";		// Date for the software version.
 
 // Data members...
 
@@ -122,11 +122,7 @@ private int __numparm = 0;			// Number of parameters for each
 						// This will be set equal to one
 						// of __ndivO, __nresO, __nwelO.
 private int __maxparm = 0;			// Maximum length of parameter list, for all files.
-private int __ndivO = 0;			// Number of parameters specific to the diversion file.
-private int __nresO = 0;			// Number of parameters specific to the reservoir file.
-private int __nwelO = 0;			// Number of parameters specific to the well file.
 private String  [] __parameter = null;		// List of the official parameter names.
-private String  [] __unit = null;		// Units for each parameter.
 
 private int __comp_type = StateCU_DataSet.COMP_UNKNOWN;
 						// Component type for the binary
@@ -136,6 +132,36 @@ private int __comp_type = StateCU_DataSet.COMP_UNKNOWN;
 // Binary header information, according to the StateCU documentation.
 // Currently, only the B1 header information is listed.
 
+private int __varTypeLength = 1;   // Length of variable (parameter) types
+private int __varNameLength = 24;  // Length of parameter name (spaces on end)
+private int __varReportHeaderLength = 60; // Length of report header (spaces on end)
+
+private int __tsVarTypeLength = 1;   // Length of variable (parameter) types
+private int __tsVarNameLength = 24;  // Length of parameter name (spaces on end)
+private int __tsVarUnitsLength = 10; // Length of report header (spaces on end) 
+
+private int __numStructures = 0;
+private int __numStructureVar = 0;
+private int __numTimeSteps = 0;
+private int __numTimeSeriesVar = 0;
+private int __numAnnualTimeSeriesSteps = 0;
+
+private String [] __structureVarTypes = null;
+private int [] __structureVarLength = null;
+private String [] __structureVarNames = null;
+private int [] __structureVarInReport = null;
+private String [] __structureVarReportHeaders = null;
+private Object [][] __structureVarValues = null;
+
+private String [] __tsVarTypes = null;
+private int [] __tsVarLength = null;
+private String [] __tsVarNames = null;
+private int [] __tsVarInReport = null;
+private String [] __tsUnits = null;
+
+// Old StateMod information...
+
+
 private int	__iystr0 = 0;	// Beginning year of simulation
 private int	__iyend0 = 0;	// Ending year of simulation
 
@@ -143,20 +169,12 @@ private int	__numsta = 0;	// Number of river nodes.
 private int	__numdiv = 0;	// Number of diversions.
 private int	__numifr = 0;	// Number of instream flows.
 private int	__numres = 0;	// Number of reservoirs.
-private int	__numown = 0;	// Number of reservoir owners.
-private int	__nrsact = 0;	// Number of active reservoirs
 private int	__numrun = 0;	// Number of baseflow (stream gage + stream estimate)
 private int	__numdivw= 0;	// Number of wells.
-private int	__numdxw = 0;	// Number of ?
 
 private String []	__xmonam = null;	// List of month names, used to
 						// determine whether the data
 						// are water or calendar year.
-private int []		__mthday = null;	// Number of days per month,
-						// corresponding to __xmonam.
-						// This is used to convert CFS
-						// to ACFT.  Note February
-						// always has 28 days.
 private int []		__mthday2 = null;	// __mthday, always in calendar order.
 
 private String[]	__cstaid = null;	// List of river node IDs.  The
@@ -173,37 +191,12 @@ private int[]		__ifrsta = null;	// River node position for instream flow (1+).
 
 private String[]	__cresid = null;	// List of reservoir IDs.
 private String[]	__resnam = null;	// Reservoir names.
-private int[]		__irssta = null;	// River node position for reservoir (1+).
-private int[]		__iressw = null;	// Indicates whether reservoir
-						// is on or off.  Reservoirs that are off do not have output records.
-private int[]		__nowner = null;	// Number of owners (accounts)
-						// for each reservoir,
-						// cumulative, and does not
-						// include, totals, which are
-						// stored as account 0 for each
-						// reservoir.
 private int[]		__nowner2 = null;	// Number of owners (accounts)
 						// for each reservoir (not
 						// cumulative like __nowner).
 						// This DOES include the
 						// total account, which is
 						// account 0.
-private int[]		__nowner2_cum = null;	// Number of owners (accounts)
-						// for each reservoir,
-						// cumulative, including
-						// the current reservoir.  This
-						// includes the total and is
-						// only for active reservoirs.
-						// This is used when figuring
-						// out how many records to skip
-						// for previous stations.
-private int[]		__nowner2_cum2 = null;	// Number of owners (accounts)
-						// for each reservoir,
-						// cumulative, taking into
-						// account that inactive
-						// reservoirs are at the end
-						// of the list of time series
-						// and can be ignored.
 
 private String[]	__crunid = null;	// List of stream gage and
 						// stream estimate IDs (nodes that have baseflows).
@@ -800,29 +793,6 @@ throws IOException
 		header_rec = 1;
 	}
 	*/
-	
-	int __varTypeLength = 1;   // Length of variable (parameter) types
-	int __varNameLength = 24;  // Length of parameter name (spaces on end)
-	int __varReportHeaderLength = 60; // Length of report header (spaces on end)
-	
-    int __tsVarTypeLength = 1;   // Length of variable (parameter) types
-    int __tsVarNameLength = 24;  // Length of parameter name (spaces on end)
-    int __tsVarUnitsLength = 10; // Length of report header (spaces on end) 
-	
-	int __numStructures = 0;
-	int __numStructureVar = 0;
-	int __numTimeSteps = 0;
-	int __numTimeSeriesVar = 0;
-	int __numAnnualTimeSeriesSteps = 0;
-	
-	String [] __structureVarTypes = null;
-	String [] __structureVarNames = null;
-	String [] __structureVarReportHeaders = null;
-	Object [] __structureVarValues = null;
-	
-	String [] __tsVarTypes = null;
-	String [] __tsVarNames = null;
-	String [] __tsUnits = null;
 
 	__fp.seek ( 0 );
 	__numStructures = __fp.readLittleEndianInt();
@@ -835,18 +805,23 @@ throws IOException
     }
     __numStructureVar = __fp.readLittleEndianInt();
     __structureVarTypes = new String[__numStructureVar];
+    __structureVarLength = new int[__numStructureVar];
     __structureVarNames = new String[__numStructureVar];
+    __structureVarInReport = new int[__numStructureVar];
     __structureVarReportHeaders = new String[__numStructureVar];
+    __structureVarValues = new Object[__numStructures][__numStructureVar];
     if ( Message.isDebugOn ) {
         Message.printDebug ( dl, routine, "numStructureVar=" + __numStructureVar );
     }
     __numTimeSeriesVar = __fp.readLittleEndianInt();
     if ( Message.isDebugOn ) {
-        Message.printDebug ( dl, routine, "numTimeSeriesParameters=" + __numTimeSeriesVar );
+        Message.printDebug ( dl, routine, "numTimeSeriesVar=" + __numTimeSeriesVar );
     }
     __tsVarTypes = new String[__numTimeSeriesVar];
+    __tsVarLength = new int[__numTimeSeriesVar];
     __tsVarNames = new String[__numTimeSeriesVar];
-    __tsUnits = new String[__numStructureVar];
+    __tsVarInReport = new int[__numTimeSeriesVar];
+    __tsUnits = new String[__numTimeSeriesVar];
     __numAnnualTimeSeriesSteps = __fp.readLittleEndianInt();
     if ( Message.isDebugOn ) {
         Message.printDebug ( dl, routine, "numAnnualTimeSeriesSteps=" + __numAnnualTimeSeriesSteps );
@@ -858,27 +833,27 @@ throws IOException
         __structureVarTypes[iStructureVar] = __fp.readLittleEndianString1(__varTypeLength).trim();
         if ( Message.isDebugOn ) {
             Message.printDebug ( dl, routine, "structure[" + iStructureVar + "] variable type = \"" +
-                    __structureVarTypes[iStructureVar] + "\"");
+                __structureVarTypes[iStructureVar] + "\"");
         }
-        int ijunk = __fp.readLittleEndianInt();
+        __structureVarLength[iStructureVar] = __fp.readLittleEndianInt();
         if ( Message.isDebugOn ) {
-            Message.printDebug ( dl, routine, "structure[" + iStructureVar + "] junk = \"" +
-                    ijunk + "\"");
+            Message.printDebug ( dl, routine, "structure[" + iStructureVar + "] variable length = \"" +
+                __structureVarLength[iStructureVar] + "\"");
         }
         __structureVarNames[iStructureVar] = __fp.readLittleEndianString1(__varNameLength).trim();
         if ( Message.isDebugOn ) {
             Message.printDebug ( dl, routine, "structure[" + iStructureVar + "] variable name = \"" +
-                    __structureVarNames[iStructureVar] + "\"" );
+                __structureVarNames[iStructureVar] + "\"" );
         }
-        int ijunk2 = __fp.readLittleEndianInt();
+        __structureVarInReport[iStructureVar] = __fp.readLittleEndianInt();
         if ( Message.isDebugOn ) {
-            Message.printDebug ( dl, routine, "structure[" + iStructureVar + "] junk2 = \"" +
-                    ijunk2 + "\"");
+            Message.printDebug ( dl, routine, "structure[" + iStructureVar + "] variable in report = \"" +
+                __structureVarInReport[iStructureVar] + "\"");
         }
         __structureVarReportHeaders[iStructureVar] = __fp.readLittleEndianString1(__varReportHeaderLength).trim();
         if ( Message.isDebugOn ) {
             Message.printDebug ( dl, routine, "structure[" + iStructureVar + "] variable report Header = \"" +
-                    __structureVarReportHeaders[iStructureVar] + "\"");
+                __structureVarReportHeaders[iStructureVar] + "\"");
         }
     }
     
@@ -888,27 +863,27 @@ throws IOException
         __tsVarTypes[iTimeSeriesVar] = __fp.readLittleEndianString1(__tsVarTypeLength).trim();
         if ( Message.isDebugOn ) {
             Message.printDebug ( dl, routine, "ts[" + iTimeSeriesVar + "] variable type = \"" +
-                    __tsVarTypes[iTimeSeriesVar] + "\"");
+                __tsVarTypes[iTimeSeriesVar] + "\"");
         }
-        int ijunk = __fp.readLittleEndianInt();
+        __tsVarLength[iTimeSeriesVar] = __fp.readLittleEndianInt();
         if ( Message.isDebugOn ) {
-            Message.printDebug ( dl, routine, "ts[" + iTimeSeriesVar + "] junk = \"" +
-                    ijunk + "\"");
+            Message.printDebug ( dl, routine, "ts[" + iTimeSeriesVar + "] variable length = \"" +
+                __tsVarLength[iTimeSeriesVar] + "\"");
         }
         __tsVarNames[iTimeSeriesVar] = __fp.readLittleEndianString1(__tsVarNameLength).trim();
         if ( Message.isDebugOn ) {
             Message.printDebug ( dl, routine, "ts[" + iTimeSeriesVar + "] variable name = \"" +
-                    __tsVarNames[iTimeSeriesVar] + "\"" );
+                __tsVarNames[iTimeSeriesVar] + "\"" );
         }
-        int ijunk2 = __fp.readLittleEndianInt();
+        __tsVarInReport[iTimeSeriesVar] = __fp.readLittleEndianInt();
         if ( Message.isDebugOn ) {
-            Message.printDebug ( dl, routine, "ts[" + iTimeSeriesVar + "] junk2 = \"" +
-                    ijunk2 + "\"");
+            Message.printDebug ( dl, routine, "ts[" + iTimeSeriesVar + "] variable in report = \"" +
+                __tsVarInReport[iTimeSeriesVar] + "\"");
         }
         __tsUnits[iTimeSeriesVar] = __fp.readLittleEndianString1(__tsVarUnitsLength).trim();
         if ( Message.isDebugOn ) {
             Message.printDebug ( dl, routine, "ts[" + iTimeSeriesVar + "] units = \"" +
-                    __tsUnits[iTimeSeriesVar] + "\"");
+                __tsUnits[iTimeSeriesVar] + "\"");
         }
     }
     
@@ -916,500 +891,53 @@ throws IOException
     
     for ( int iStructure = 0; iStructure < __numStructures; ++iStructure ) {
         for ( int iStructureVar = 0; iStructureVar < __numStructureVar; ++iStructureVar ) {
-            String varType = __fp.readLittleEndianString1(__varTypeLength).trim();
             if ( __structureVarTypes[iStructureVar].equals("I") ) {
-                __structureVarValues[iStructureVar] = __fp.readLittleEndianString1(__varTypeLength).trim();
+                __structureVarValues[iStructure][iStructureVar] = new Integer(__fp.readLittleEndianInt() );
             }
             else if ( __structureVarTypes[iStructureVar].equals("R") ) {
-                
+                __structureVarValues[iStructure][iStructureVar] = new Float(__fp.readLittleEndianFloat() );
             }
             else if ( __structureVarTypes[iStructureVar].equals("C") ) {
-                __structureVarValues[iStructureVar] = __fp.readLittleEndianString1(__varTypeLength).trim();
+                __structureVarValues[iStructure][iStructureVar] =
+                    __fp.readLittleEndianString1(__structureVarLength[iStructureVar]).trim();
+            }
+            else {
+                throw new IOException ( "Structure variable type \"" + __structureVarTypes[iStructureVar] +
+                    "\" is not recognized." );
             }
             if ( Message.isDebugOn ) {
-                Message.printDebug ( dl, routine, "iStructureVar=" + iStructureVar + " variable type = \"" +
-                        varType + "\"");
+                Message.printDebug ( dl, routine, "Structure[" + iStructure + "] Var[" + iStructureVar + "] = " +
+                        __structureVarValues[iStructure][iStructureVar] );
             }
         }
     }
     
-    if ( true ) {
-        return;
+    // Read the time series data
+    
+    Object dataValue;
+    for ( int iStructure = 0; iStructure < __numStructures; ++iStructure ) {
+        for ( int iTimeStep = 0; iTimeStep < __numTimeSteps; ++iTimeStep ) {
+            for ( int iTimeSeriesVar = 0; iTimeSeriesVar < __numTimeSeriesVar; ++iTimeSeriesVar ) {
+                if ( __tsVarTypes[iTimeSeriesVar].equals("I") ) {
+                    dataValue = new Integer(__fp.readLittleEndianInt() );
+                }
+                else if ( __tsVarTypes[iTimeSeriesVar].equals("R") ) {
+                    dataValue = new Float(__fp.readLittleEndianFloat() );
+                }
+                else if ( __tsVarTypes[iTimeSeriesVar].equals("C") ) {
+                    dataValue = __fp.readLittleEndianString1(__tsVarLength[iTimeSeriesVar]).trim();
+                }
+                else {
+                    throw new IOException ( "Time series variable type \"" + __tsVarTypes[iTimeSeriesVar] +
+                        "\" is not recognized." );
+                }
+                if ( Message.isDebugOn ) {
+                    Message.printDebug ( dl, routine, "Structure[" + iStructure + "] time step [" + iTimeStep +
+                            "] Var[" + iTimeSeriesVar + "] = " + dataValue );
+                }
+            }
+        }
     }
-
-	// Record 2 - start and end year - check the months in record 3 to determine the year type...
-
-	__iystr0 = __fp.readLittleEndianInt ();
-	__iyend0 = __fp.readLittleEndianInt ();
-	if ( Message.isDebugOn ) {
-		Message.printDebug (dl,routine,"Reading binary file header...");
-		Message.printDebug ( dl, routine, "iystr0=" + __iystr0 );
-		Message.printDebug ( dl, routine, "iyend0=" + __iyend0 );
-	}
-
-	// Record 3 - numbers of various stations...
-
-	__fp.seek ( (header_rec + 1)*__record_length );
-	__numsta = __fp.readLittleEndianInt ();
-	if ( Message.isDebugOn ) {
-		Message.printDebug ( dl, routine, "numsta=" + __numsta );
-	}
-	__numdiv = __fp.readLittleEndianInt ();
-	if ( Message.isDebugOn ) {
-		Message.printDebug ( dl, routine, "numdiv=" + __numdiv );
-	}
-	__numifr = __fp.readLittleEndianInt ();
-	if ( Message.isDebugOn ) {
-		Message.printDebug ( dl, routine, "numifr=" + __numifr );
-	}
-	__numres = __fp.readLittleEndianInt ();
-	if ( Message.isDebugOn ) {
-		Message.printDebug ( dl, routine, "numres=" + __numres );
-	}
-	__numown = __fp.readLittleEndianInt ();
-	if ( Message.isDebugOn ) {
-		Message.printDebug ( dl, routine, "numown=" + __numown );
-	}
-	__nrsact = __fp.readLittleEndianInt ();
-	if ( Message.isDebugOn ) {
-		Message.printDebug ( dl, routine, "nrsact=" + __nrsact );
-	}
-	__numrun = __fp.readLittleEndianInt ();
-	if ( Message.isDebugOn ) {
-		Message.printDebug ( dl, routine, "numrun=" + __numrun );
-	}
-	__numdivw= __fp.readLittleEndianInt ();
-	if ( Message.isDebugOn ) {
-		Message.printDebug ( dl, routine, "numdivw=" + __numdivw );
-	}
-	__numdxw = __fp.readLittleEndianInt ();
-	if ( Message.isDebugOn ) {
-		Message.printDebug ( dl, routine, "numdxw=" + __numdxw );
-	}
-	if ( StateCU_Util.isVersionAtLeast(__version_double, 11.0 ) ) { // FIXME StateMod_Util.VERSION_11_00) ) {
-		__maxparm = __fp.readLittleEndianInt ();
-		if ( Message.isDebugOn ) {
-			Message.printDebug ( dl, routine, "maxparm=" + __maxparm );
-		}
-		__ndivO = __fp.readLittleEndianInt ();
-		if ( Message.isDebugOn ) {
-			Message.printDebug ( dl, routine, "ndivO=" + __ndivO );
-		}
-		__nresO = __fp.readLittleEndianInt ();
-		if ( Message.isDebugOn ) {
-			Message.printDebug ( dl, routine, "nresO=" + __nresO );
-		}
-		__nwelO = __fp.readLittleEndianInt ();
-		if ( Message.isDebugOn ) {
-			Message.printDebug ( dl, routine, "nwelO=" + __nwelO );
-		}
-	}
-
-	// Record 4 - month names...
-
-	__fp.seek ( (header_rec + 2)*__record_length );
-	__xmonam = new String[14];
-	char [] xmonam = new char[3];
-	int j = 0;
-	for ( int i = 0; i < 14; i++ ) {
-		// The months are written as 4-character strings but we only need the first 3...
-		for ( j = 0; j < 3; j++ ) {
-			xmonam[j] = __fp.readLittleEndianChar1();
-		}
-		__fp.readLittleEndianChar1();
-		__xmonam[i] = new String ( xmonam );
-		if ( Message.isDebugOn ) {
-			Message.printDebug ( dl, routine, "xmonam[" + i + "]="+ __xmonam[i]);
-		}
-	}
-
-	// Record 5 - number of days per month
-
-	__fp.seek ( (header_rec + 3)*__record_length );
-	__mthday = new int[12];
-	for ( int i = 0; i < 12; i++ ) {
-		__mthday[i] = __fp.readLittleEndianInt();
-		if ( Message.isDebugOn ) {
-			Message.printDebug ( dl, routine, "mthday[" + i + "]="+	__mthday[i]);
-		}
-	}
-	// Create a new array that is always in calendar order.  Therefore,
-	// __mthday2[0] always has the number of days for January.
-	__mthday2 = new int[12];
-	if ( __xmonam[0].equalsIgnoreCase("OCT") ) {	// Water year...
-		__mthday2[9] = __mthday[0];	// Oct...
-		__mthday2[10] = __mthday[1];
-		__mthday2[11] = __mthday[2];
-		__mthday2[0] = __mthday[3];	// Jan...
-		__mthday2[1] = __mthday[4];
-		__mthday2[2] = __mthday[5];
-		__mthday2[3] = __mthday[6];
-		__mthday2[4] = __mthday[7];
-		__mthday2[5] = __mthday[8];
-		__mthday2[6] = __mthday[9];
-		__mthday2[7] = __mthday[10];
-		__mthday2[8] = __mthday[11];
-	}
-	else if ( __xmonam[0].equalsIgnoreCase("NOV") ) { // Irrigation year...
-		__mthday2[10] = __mthday[0];	// Nov...
-		__mthday2[11] = __mthday[1];
-		__mthday2[0] = __mthday[2];	// Jan...
-		__mthday2[1] = __mthday[3];
-		__mthday2[2] = __mthday[4];
-		__mthday2[3] = __mthday[5];
-		__mthday2[4] = __mthday[6];
-		__mthday2[5] = __mthday[7];
-		__mthday2[6] = __mthday[8];
-		__mthday2[7] = __mthday[9];
-		__mthday2[8] = __mthday[10];
-		__mthday2[9] = __mthday[11];
-	}
-	else {
-	    // Calendar...
-		__mthday2 = __mthday;
-	}
-
-	// Record 6 - river stations...
-
-	int offset2 = (header_rec + 4)*__record_length;
-	__cstaid = new String[__numsta];
-	__stanam = new String[__numsta];
-	int counter = 0;
-	for ( int i = 0; i < __numsta; i++ ) {
-		__fp.seek ( offset2 + i*__record_length );
-		// Counter...
-		counter = __fp.readLittleEndianInt();
-		// Identifier as 12 character string...
-		__cstaid[i] = __fp.readLittleEndianString1(12).trim();
-		// Station name as 24 characters, written as 6 reals...
-		__stanam[i] = __fp.readLittleEndianString1(24).trim();
-		if ( Message.isDebugOn ) {
-			Message.printDebug ( dl, routine, "" + counter +
-			" Riv = \"" + __cstaid[i] + "\" \"" + __stanam[i]+"\"");
-		}
-	}
-
-	// Read the station ID/name lists.  The station IDs are matched against
-	// the requested TSID to find the position in the data array.
-
-	// Record 7 - diversion stations...
-
-	offset2 = (header_rec + 4 + __numsta)*__record_length;
-	if ( __numdiv > 0 ) {
-		__cdivid = new String[__numdiv];
-		__divnam = new String[__numdiv];
-		__idvsta = new int[__numdiv];
-	}
-	for ( int i = 0; i < __numdiv; i++ ) {
-		__fp.seek ( offset2 + i*__record_length );
-		// Counter...
-		counter = __fp.readLittleEndianInt();
-		// Identifier as 12 character string...
-		__cdivid[i] = __fp.readLittleEndianString1(12).trim();
-		// Station name as 24 characters, written as 6 reals...
-		__divnam[i] = __fp.readLittleEndianString1(24).trim();
-		__idvsta[i] = __fp.readLittleEndianInt();
-		if ( Message.isDebugOn ) {
-			Message.printDebug ( dl, routine, "" + counter +
-			" Div = \"" + __cdivid[i] + "\" \"" + __divnam[i] +
-			"\" idvsta = " + __idvsta[i]);
-		}
-	}
-
-	// Record 8 - instream flow stations...
-
-	offset2 = (header_rec + 4 + __numsta + __numdiv)*__record_length;
-	if ( __numifr > 0 ) {
-		__cifrid = new String[__numifr];
-		__xfrnam = new String[__numifr];
-		__ifrsta = new int[__numifr];
-	}
-	for ( int i = 0; i < __numifr; i++ ) {
-		__fp.seek ( offset2 + i*__record_length );
-		// Counter...
-		counter = __fp.readLittleEndianInt();
-		// Identifier as 12 character string...
-		__cifrid[i] = __fp.readLittleEndianString1(12).trim();
-		// Station name as 24 characters, written as 6 reals...
-		__xfrnam[i] = __fp.readLittleEndianString1(24).trim();
-		__ifrsta[i] = __fp.readLittleEndianInt();
-		if ( Message.isDebugOn ) {
-			Message.printDebug ( dl, routine, "" + counter +
-			" Ifr = \"" + __cifrid[i] + "\" \"" + __xfrnam[i] +
-			"\" ifrsta = " + __ifrsta[i] );
-		}
-	}
-
-	// Record 9 - reservoir stations...
-
-	offset2 = (header_rec + 4 + __numsta + __numdiv + __numifr)*
-			__record_length;
-	// The value of __nowner is the record number (1+) of the first owner
-	// for the current reservoir.  Therefore, the number of owners is
-	// calculated for the current reservoir by taking the number of owners
-	// in record (i + 1) minus the value in the current record.  Thefore the
-	// last record is necessary to calculate the number of owners for the
-	// last reservoir.  For example:
-	//
-	// __nowner[0] = 1
-	// __nowner[1] = 5
-	//
-	// Indicates that the first reservoir has 5 - 1 = 4 accounts not
-	// counting the total.  Therefore, for this example the accounts would
-	// be:
-	//
-	// 0 - total
-	// 1 - Account 1
-	// 2 - Account 2
-	// 3 - Account 3
-	// 4 - Account 4
-	//
-	// Below, allocate the reservoir arrays one more than the actual number
-	// of reservoirs to capture the extra data, but __numres reflects only
-	// the actual reservoirs, for later processing.
-	int iend = __numres + 1;
-	if ( __numres > 0 ) {
-		__cresid = new String[iend];
-		__resnam = new String[iend];
-		__irssta = new int[iend];
-		__iressw = new int[iend];
-		__nowner = new int[iend];
-		__nowner2 = new int[__numres];
-		__nowner2_cum = new int[__numres];
-		__nowner2_cum2 = new int[__numres];
-	}
-	for ( int i = 0; i < iend; i++ ) {
-		__fp.seek ( offset2 + i*__record_length );
-		// Counter...
-		counter = __fp.readLittleEndianInt();
-		// Identifier as 12 character string...
-		__cresid[i] = __fp.readLittleEndianString1(12).trim();
-		// Station name as 24 characters, written as 6 reals...
-		__resnam[i] = __fp.readLittleEndianString1(24).trim();
-		__irssta[i] = __fp.readLittleEndianInt();
-		__iressw[i] = __fp.readLittleEndianInt();
-		__nowner[i] = __fp.readLittleEndianInt();
-		if ( Message.isDebugOn ) {
-			Message.printDebug ( dl, routine, "" + counter +
-			" Res = \"" + __cresid[i] + "\" \"" +
-			__resnam[i] + "\" irssta = " + __irssta[i] +
-			" iressw=" + __iressw[i]
-			+ " nowner = " + __nowner[i] );
-		}
-	}
-	if ( Message.isDebugOn ) {
-		Message.printDebug ( dl, routine,
-			"The last reservoir record is " +
-			"used to compute the number of accounts.");
-		Message.printDebug ( dl, routine, "In the following, " +
-		"nowner2 is active accounts, including total." );
-		Message.printDebug ( dl, routine,
-		"nowner2_cum is cumulative, including the current reservoir." );
-		Message.printDebug ( dl, routine,
-		"nowner2_cum2 is cumulative, including the current reservoir," +
-		" with inactive reservoir accounts at the end." );
-	}
-	// Compute the actual number of accounts for each reservoir (with
-	// the total).  Only active reservoirs are counted.
-	for ( int i = 0; i < __numres; i++ ) {
-		// The total number of accounts for reservoirs (from StateCU
-		// documentation) is Nrsactx = nrsact + numown
-		// where the "nrsact" accounts for the "total" time series and
-		// "numown" accounts for time series for each account, whether
-		// active or not.  For each reservoir, the individual accounts
-		// are included (whether the reservoir is active or not), but
-		// the total account is only included if the reservoir is active
-		// (see the "else" below).
-		__nowner2[i] = __nowner[i + 1] - __nowner[i];	
-						// Accounts but no total
-		if ( __iressw[i] != 0 ) {
-			// Reservoir is active so add the total...
-			__nowner2[i] += 1;
-		}
-		// Cumulative accounts (including totals), inclusive of the
-		// current reservoir station.
-		if ( i == 0 ) {
-			// Initialize...
-			__nowner2_cum[i] = __nowner2[i];
-			if ( __iressw[i] == 0 ) {
-				// Position for reading is zero (this
-				// time series will never be read but the array
-				// is used to increment later elements)...
-				__nowner2_cum2[i] = 0;
-			}
-			else {	__nowner2_cum2[i] = __nowner2[i];
-			}
-		}
-		else {	// Add the current accounts to the previous cumulative
-			// value...
-			__nowner2_cum[i] = __nowner2_cum[i - 1] + __nowner2[i];
-			if ( __iressw[i] == 0 ) {
-				// Position for reading stays the same (this
-				// time series will never be read but the array
-				// is used to increment later elements)...
-				__nowner2_cum2[i] = __nowner2_cum2[i - 1];
-			}
-			else {	// Increment the counter...
-				__nowner2_cum2[i] = __nowner2_cum2[i - 1] +
-					__nowner2[i];
-			}
-		}
-		Message.printDebug ( dl, routine, 
-		" Res = \"" + __cresid[i] + "\" \"" +
-		__resnam[i] + "\" nowner2 = " + __nowner2[i] +
-		" nowner2_cum = " + __nowner2_cum[i] +
-		" nowner2_cum2 = " + __nowner2_cum2[i] );
-	}
-
-	// A single record after reservoirs contains cumulative account
-	// information for reservoirs.  Just ignore the record and add a +1
-	// below when computing the position...
-
-	// Record 10 - base flow stations...
-
-	offset2 = (header_rec + 4 + __numsta + __numdiv + __numifr +
-			__numres + 1)*
-			__record_length;
-	if ( __numrun > 0 ) {
-		__crunid = new String[__numrun];
-		__runnam = new String[__numrun];
-		__irusta = new int[__numrun];
-	}
-	for ( int i = 0; i < __numrun; i++ ) {
-		__fp.seek ( offset2 + i*__record_length );
-		// Counter...
-		counter = __fp.readLittleEndianInt();
-		// Identifier as 12 character string...
-		__crunid[i] = __fp.readLittleEndianString1(12).trim();
-		// Station name as 24 characters, written as 6 reals...
-		__runnam[i] = __fp.readLittleEndianString1(24).trim();
-		__irusta[i] = __fp.readLittleEndianInt();
-		if ( Message.isDebugOn ) {
-			Message.printDebug ( dl, routine, "" + counter +
-			" Baseflow = \"" + __crunid[i] + "\" \"" + __runnam[i] +
-			"\" irusta = " + __irusta[i] );
-		}
-	}
-
-	// Record 11 - well stations...
-
-	offset2 = (header_rec + 4 + __numsta + __numdiv + __numifr
-			+ __numres + 1 +
-			__numrun)* __record_length;
-	if ( __numdivw > 0 ) {
-		__cdividw = new String[__numdivw];
-		__divnamw = new String[__numdivw];
-		__idvstw = new int[__numdivw];
-	}
-	for ( int i = 0; i < __numdivw; i++ ) {
-		__fp.seek ( offset2 + i*__record_length );
-		// Counter...
-		counter = __fp.readLittleEndianInt();
-		// Identifier as 12 character string...
-		__cdividw[i] = __fp.readLittleEndianString1(12).trim();
-		// Station name as 24 characters, written as 6 reals...
-		__divnamw[i] = __fp.readLittleEndianString1(24).trim();
-		__idvstw[i] = __fp.readLittleEndianInt();
-		if ( Message.isDebugOn ) {
-			Message.printDebug ( dl, routine, "" + counter +
-			" Well = \"" + __cdividw[i] + "\" \"" +
-			__divnamw[i] + "\" idvstw = " + __idvstw[i] );
-		}
-	}
-
-	// Get the parameters that are expected in the file.  Note that this is
-	// the full list in the file, not the list that may be appropriate for
-	// the station type.  It is assumed that code that the calling code is
-	// requesting an appropriate parameter.  For example, TSTool
-	// graphing tool should have already filtered the parameters based on
-	// station type.
-	
-	if ( StateCU_Util.isVersionAtLeast(__version_double,11.0)) { // FIXME StateMod_Util.VERSION_11_00) ) {
-		// Read the parameter lists and units from the file.  The
-		// parameters that are available are the same for streamflow,
-		// diversions, and wells...
-		String [] parameter = null;	// Temporary list - will only
-						// save the one that is needed
-						// for this file
-		// REVISIT SAM 2005-12-23
-		// For now read through but later can just read the set of
-		// parameters that are actually needed for this file.
-		for ( int ip = 0; ip < 3; ip++ ) {
-			// Parameter lists for div, res, well binary files.
-			offset2 = (header_rec + 4 + __numsta + __numdiv +
-				__numifr + __numres + 1 +
-				__numrun + __numdivw + ip*__maxparm)*
-				__record_length;
-			if ( __maxparm > 0 ) {
-				// Reallocate each time so as to not step on the
-				// saved array below...
-				parameter = new String[__maxparm];
-			}
-			for ( int i = 0; i < __maxparm; i++ ) {
-				// 4 is to skip the counter at the beginning of
-				// the line...
-				__fp.seek ( offset2 + i*__record_length + 4 );
-				parameter[i] =
-					__fp.readLittleEndianString1(24).trim();
-				//* Use during development...
-				if ( Message.isDebugOn ) {
-					Message.printDebug ( dl, routine,
-					"Parameter from file...ip=" + ip +
-					" Parameter[" + i + "] = \"" +
-					parameter[i] + "\"" );
-				}
-				//*/
-			}
-			// Because __maxparm only lists the maximum, reduce the
-			// list by decrementing the count if "NA" is at the
-			// end.  Also save the information if for the proper file...
-			if ( (ip == 0) && (__comp_type== StateCU_DataSet.COMP_CU_LOCATIONS) ) {
-				__parameter = parameter;
-				__numparm = __ndivO;
-				Message.printStatus ( 2, routine, "Saving diversion parameters list." );
-			}
-			/*
-			else if ( (ip == 1) &&
-				(__comp_type==
-				StateMod_DataSet.COMP_RESERVOIR_STATIONS) ) {
-				__parameter = parameter;
-				__numparm = __nresO;
-				Message.printStatus ( 2, routine, "Saving reservior parameters list." );
-			}
-			*/
-		}
-	}
-	else {
-	    throw new RuntimeException ( "Only binary files from newer StateCU versions can be read." );
-	}
-
-	// Parameter names...
-
-	if ( Message.isDebugOn ) {
-		Message.printDebug ( dl, routine, "Parameters for the file:" );
-		for ( int i = 0; i < __numparm; i++ ) {
-			Message.printDebug ( dl, routine, "Parameter[" + i
-			+ "] = \"" + __parameter[i] + "\"" );
-		}
-	}
-
-	if ( StateCU_Util.isVersionAtLeast(__version_double, 11.0)) { // FIXME StateMod_Util.VERSION_11_00) ) {
-		offset2 = (header_rec + 4 + __numsta + __numdiv + __numifr +
-			__numres + 1 +
-			__numrun + __numdivw + __maxparm*3)* __record_length;
-		__fp.seek ( offset2 );
-		if ( __numparm > 0 ) {
-			__unit = new String[__numparm];
-		}
-		for ( int i = 0; i < __numparm; i++ ) {
-			__unit[i] = __fp.readLittleEndianString1(4).trim();
-			if ( Message.isDebugOn ) {
-				Message.printDebug ( dl, routine, 
-				"For parameter \"" + __parameter[i] +
-				"\" unit= \"" + __unit[i] + "\"" );
-			}
-		}
-	}
 }
 
 /**
@@ -1421,8 +949,8 @@ empty file).
 */
 private void readHeaderVersion()
 throws IOException
-{	String routine = "StateCU_BTS.readHeaderVersion";
-    /* Does not apply to StateCU binary
+{	/* Does not apply to StateCU binary
+    String routine = "StateCU_BTS.readHeaderVersion";
 	int dl = 1;
 	if ( __version_double > 0.0 ) {
 		// The version has been specified at construction...
