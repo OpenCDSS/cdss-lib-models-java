@@ -28,53 +28,45 @@ CU location      *.b1             *.b??
 ---------------------------------------------------------------------------
 </pre>
 The file and format is determined based on the file extension and/or the
-requested parameter and data interval.  Typically the readTimeSeries() or
-readTimeSeriesList() methods are used, which open a file, read one or more
-time series, and close the file.
+requested parameter and data interval.  Typically the readTimeSeriesList() methods
+is used, which open a file, read one or more time series, and close the file.
 All the methods in this class that use time series index numbers use 0 for the
 first time series.
-The format of the file is described in StateCU documentation.  Each file has
-essentially the same header information, followed by data records.  Relevant
+The format of the file is described in StateCU documentation.  Relevant
 notes:
 <ol>
-TODO SAM 2008-08-21 Review the following for accuracy
-<li>	The individual station lists are used to look up a station identifier.
-	The river node number is then used to find the position in the main
-	river node list.</li>
+<li>	The structure list is used to look up a station identifier.</li>
 <li>	The time series are written in one month blocks, with time series
-	within the block listed in the order of the river nodes for stream/
-	diversion/ISF and in the order of the specific list for reservoirs
-	and wells.</li>
-<li>	For reservoirs, a station's time series consist of a total, and one for
-	each account (therefore the reservoir file has a total number of
-	time series that is the reservoir count (for totals) plus the number
-	of accounts.</li>
+	within the block listed in the order of the structures.</li>
 </ol>
 */
 public class StateCU_BTS
 {
+    
+/**
+ * Types for variables - since internal, just use simple data (no external enumeration).
+ */
+private final String TYPE_REAL = "R";
+private final String TYPE_INT = "I";
+private final String TYPE_CHAR = "C";
 
-private final float CFS_TO_ACFT = (float)1.9835;// Conversion factor from CFS
-						// to ACFT - also need to
-						// multiply by days in month.
+/**
+ * Recognized structure variables that have significance.
+ */
+private final String STRUCTURE_INDEX = "Structure Index";
+private final String STRUCTURE_ID = "Structure ID";
+private final String STRUCTURE_NAME = "Structure Name";
 
-//private String __version = null;		// File format version as a
-						// String (e.g., "9.62").
-						// Before version 11.0 there was
-						// no version in the binary file
-						// so the code just reflects the
-						// documented format for the
-						// 9.62 version, especially
-						// since no documentation exists
-						// for earlier versions of the
-						// binary files.
-private double __version_double = -999.0;	// File format version as a
-						// double, consistent with
-						// __version. used by some
-						// methods where the string is
-						// not.
-//private String __header_program = "";		// Program that created the file.
-//private String __header_date = "";		// Date for the software version.
+/**
+ * Recognized time series variables that have significance.
+ */
+private final String TS_VAR_YEAR = "Year";
+private final String TS_VAR_MONTH_INDEX = "Month Index";
+
+private String __version = "Unknown"; // File format version as a String (e.g., "9.62") or "Unknown".
+private double __versionDouble = -999.0; // File format version as a double
+private String __headerProgram = "StateCU";		// Program that created the file.
+private String __headerDateString = "Unknown";		// Date for the software version.
 
 // Data members...
 
@@ -86,45 +78,29 @@ private EndianRandomAccessFile 	__fp; // Pointer to random access file (StateCU 
 						// are assumed to be little endian since they are written
 						// by Lahey FORTRAN code on a PC).  If necessary, the year
 						// value can be examined to determine the file endianness.
-private static Hashtable __file_Hashtable = new Hashtable();
+private static Hashtable __fileHashtable = new Hashtable();
 						// A hashtable for the file pointers (instances of
 						// StateCU_BTS).  This is used to increase performance.
-private int	__record_length = 140;		// Direct access file record
-						// length, bytes.  140 is the B43 for 9.62, but this is reset below.
-                        // TODO SAM Fix this
-private int	__header_length = 0;		// Length of the header in
+private int	__headerLengthBytes = 0;		// Length of the header in
 						// bytes, including lists of
 						// stations (everything before
 						// the time series data).  This
 						// is assigned after reading the
 						// number of stations.
-private int	__interval_bytes = 0;		// Number of bytes for one full
-						// interval (month or day) of
-						// data for all stations, to
-						// simplify iterations.  This is
-						// assigned after reading the
-						// number of stations.
-private int	__estimated_file_length = 0;	// Estimated size of the file,
+private int	__oneStructureOneTimestepAllVarsBytes = 0; // Number of bytes for one structure, one timestep, all vars
+private int __oneStructureAllTimestepsAllVarsBytes = 0; // Number of bytes for one structure, all timesteps, all vars
+private int	__estimatedFileLength = 0;	// Estimated size of the file,
 						// calculated from the header
 						// information - used for
 						// debugging and to check for
 						// premature end of file.
 
-private int	__interval_base = TimeInterval.MONTH;
+private int	__intervalBase = TimeInterval.MONTH;
 						// Interval base for the binary file that is being read.
 private DateTime	__date1 = null;		// Contains the period for the
 private DateTime	__date2 = null;		// data, full calendar dates to the proper date precision.
 
-private int __numparm = 0;			// Number of parameters for each
-						// data record, for the current
-						// file.  Set below depending on
-						// file contents and version.
-						// This will be set equal to one
-						// of __ndivO, __nresO, __nwelO.
-private int __maxparm = 0;			// Maximum length of parameter list, for all files.
-private String  [] __parameter = null;		// List of the official parameter names.
-
-private int __comp_type = StateCU_DataSet.COMP_UNKNOWN;
+private int __compType = StateCU_DataSet.COMP_UNKNOWN;
 						// Component type for the binary
 						// file:
 						// COMP_CU_LOCATIONS
@@ -132,7 +108,7 @@ private int __comp_type = StateCU_DataSet.COMP_UNKNOWN;
 // Binary header information, according to the StateCU documentation.
 // Currently, only the B1 header information is listed.
 
-private int __varTypeLength = 1;   // Length of variable (parameter) types
+private int __varTypeLength = 1;   // Length of structure variable (parameter) types
 private int __varNameLength = 24;  // Length of parameter name (spaces on end)
 private int __varReportHeaderLength = 60; // Length of report header (spaces on end)
 
@@ -146,6 +122,9 @@ private int __numTimeSteps = 0;
 private int __numTimeSeriesVar = 0;
 private int __numAnnualTimeSeriesSteps = 0;
 
+/**
+Raw structure metadata.
+*/
 private String [] __structureVarTypes = null;
 private int [] __structureVarLength = null;
 private String [] __structureVarNames = null;
@@ -153,59 +132,21 @@ private int [] __structureVarInReport = null;
 private String [] __structureVarReportHeaders = null;
 private Object [][] __structureVarValues = null;
 
+/**
+Processed structure metadata, in the order of the "Index" structure variable.
+*/
+private String [] __structureIds = null;
+private String [] __structureNames = null;
+
+/**
+Raw time series metadata.
+*/
 private String [] __tsVarTypes = null;
 private int [] __tsVarLength = null;
+private int [] __tsVarStartBytes = null;
 private String [] __tsVarNames = null;
 private int [] __tsVarInReport = null;
-private String [] __tsUnits = null;
-
-// Old StateMod information...
-
-
-private int	__iystr0 = 0;	// Beginning year of simulation
-private int	__iyend0 = 0;	// Ending year of simulation
-
-private int	__numsta = 0;	// Number of river nodes.
-private int	__numdiv = 0;	// Number of diversions.
-private int	__numifr = 0;	// Number of instream flows.
-private int	__numres = 0;	// Number of reservoirs.
-private int	__numrun = 0;	// Number of baseflow (stream gage + stream estimate)
-private int	__numdivw= 0;	// Number of wells.
-
-private String []	__xmonam = null;	// List of month names, used to
-						// determine whether the data
-						// are water or calendar year.
-private int []		__mthday2 = null;	// __mthday, always in calendar order.
-
-private String[]	__cstaid = null;	// List of river node IDs.  The
-						// data records are in this order.
-private String[]	__stanam = null;	// Station names for river nodes.
-
-private String[]	__cdivid = null;	// List of diversion IDs.
-private String[]	__divnam = null;	// Diversion names.
-private int[]		__idvsta = null;	// River node position for diversion (1+).
-
-private String[]	__cifrid = null;	// List of instream flow IDs.
-private String[]	__xfrnam = null;	// Instream flow names.
-private int[]		__ifrsta = null;	// River node position for instream flow (1+).
-
-private String[]	__cresid = null;	// List of reservoir IDs.
-private String[]	__resnam = null;	// Reservoir names.
-private int[]		__nowner2 = null;	// Number of owners (accounts)
-						// for each reservoir (not
-						// cumulative like __nowner).
-						// This DOES include the
-						// total account, which is
-						// account 0.
-
-private String[]	__crunid = null;	// List of stream gage and
-						// stream estimate IDs (nodes that have baseflows).
-private String[]	__runnam = null;	// Stream gage and stream estimate names.
-private int[]		__irusta = null;	// River node position for station (1+).
-
-private String[]	__cdividw = null;	// List of well IDs.
-private String[]	__divnamw = null;	// Well names.
-private int[]		__idvstw = null;	// River node position for well (1+).
+private String [] __tsVarUnits = null;
 
 /**
 Open a binary StateCU binary time series file.  It is assumed that the file
@@ -243,7 +184,7 @@ Calculate the file position in bytes for any data value.  This DOES NOT position
 the file pointer!  For example, use this method as follows:
 <pre>
 // Find the month of data for a station and parameter...
-long pos = calculateFilePosition ( date, ista, its, iparam );
+long pos = calculateFilePosition ( date, iStructure, iparam );
 // Position the file...
 __fp.seek ( pos );
 // Read the data...
@@ -251,46 +192,21 @@ param = __fp.readLittleEndianFloat ();
 </pre>
 @param date Date to find.  The month and year are considered by using an
 absolute month offset (year*12 + month).
-@param ista Station index (0+).  For streamflow/diversion/ISF, this is the
-position in the river node list.  For reservoirs and wells, it is the position
-in the specific list (which is in a different order than the river nodes).
-@param its Time series for a location/parameter combination.  Normally this will
-be zero.  For reservoirs, it will be zero for the total time series and 1+ for
-the owner/accounts for a reservoir.
-@param iparam Parameter to find (0+).
-@return byte position in file for requested parameter or -1 if unable to
-calculate.
+@param iStructure Station index (0+).
+@param iTimeSeriesVar Parameter to find (0+).
+@return byte position in file for requested parameter or -1 if unable to calculate.
 */
-private long calculateFilePosition ( DateTime date, int ista, int its, int iparam )
+private long calculateFilePosition ( DateTime date, int iStructure, int iTimeSeriesVar )
 {	long pos = -1;
-	if ( __interval_base == TimeInterval.MONTH ) {
-		// One time series per station.
-		pos = __header_length	// First static records +
-					// lists of stations
-		// Previous full months...
-		+ (date.getAbsoluteMonth() -
-			__date1.getAbsoluteMonth())*__interval_bytes
-		// Previous stations for current month...
-		+ ista*__record_length
-		// Previous parameters for this station (each value is
-		// a 4-byte float)...
-		+ iparam*4;
-	}
-	else {	// Daily data...
-		// One time series per station.
-		pos = __header_length	// First static records +
-					// lists of stations
-		// Previous full months...
-		+ (date.getAbsoluteMonth() -
-			__date1.getAbsoluteMonth())*31*__interval_bytes
-		// Previous full days...
-		+ (date.getDay() - 1)*__interval_bytes
-		// Previous stations for current day...
-		+ ista*__record_length
-		// Previous parameters for this station (each value is
-		// a 4-byte float)...
-		+ iparam*4;
-	}
+    // Assumes monthly interval, which is all that is supported at this time
+	pos = __headerLengthBytes	// Length of metadata
+	// Previous full structures...
+	+ iStructure*__oneStructureAllTimestepsAllVarsBytes +
+	// Previous time steps within the structure...
+	+ (date.getAbsoluteMonth() -
+		__date1.getAbsoluteMonth())*__oneStructureOneTimestepAllVarsBytes
+	// Position within the record...
+	+ __tsVarStartBytes[iTimeSeriesVar];
 	return pos;
 }
 
@@ -302,8 +218,8 @@ public void close()
 throws IOException
 {	__fp.close ();
 	// Remove from the Hashtable...
-	if ( __file_Hashtable.contains(this) ) {
-		__file_Hashtable.remove ( __full_tsfile );
+	if ( __fileHashtable.contains(this) ) {
+		__fileHashtable.remove ( __full_tsfile );
 	}
 }
 
@@ -318,16 +234,16 @@ throws IOException
 	// Loop through the Hashtable and remove all entries...
 	// Remove from the Hashtable...
 
-	Enumeration keysEnumeration = __file_Hashtable.keys();
+	Enumeration keysEnumeration = __fileHashtable.keys();
 
 	StateCU_BTS bts = null;
 	String filename = null;
 
 	while (keysEnumeration.hasMoreElements()) {
 		filename = (String)keysEnumeration.nextElement();	
-		bts = (StateCU_BTS)__file_Hashtable.get(filename);
+		bts = (StateCU_BTS)__fileHashtable.get(filename);
 		bts.close();
-		__file_Hashtable.remove ( filename );
+		__fileHashtable.remove ( filename );
 	}	
 }
 
@@ -378,7 +294,7 @@ Return the interval base (TimeInterval.MONTH or TimeInterval.DAY).
 @return the data interval base.
 */
 public int getDataIntervalBase ()
-{	return __interval_base;
+{	return __intervalBase;
 }
 
 /**
@@ -398,24 +314,24 @@ public DateTime getDate2 ()
 }
 
 /**
-Return the parameter list for the file, which is determined from the file
-header for version 11.x+ and is unknown otherwise.   Only the public parameters
-are provided (not extra ones that may be used internally).
-@return the parameter list read from the file header, or null if it cannot be
-determined from the file.
+Return the time series parameter list for the file, which is determined from the file
+header.  Only the public parameters are provided (not extra ones that may be used internally).
+Currently only the time series variables of type R (floats) are returned.
+@return the parameter list read from the file header.
 */
-public String [] getParameters ()
-{	// Return a copy of the array for only the appropriate parameters.
-	// The array by default will have __maxparm items, but not all of these
-	// are appropriate for other applications.
-	if ( (__numparm == 0) || (__parameter == null) ) {
-		return null;
-	}
-	String [] parameter = new String[__numparm];
-	for ( int i = 0; i < __numparm; i++ ) {
-		parameter[i] = __parameter[i];
-	}
-	return parameter;
+public String [] getTimeSeriesParameters ()
+{	// Create a temporary array for output
+    String [] temp = new String[__numTimeSeriesVar];
+    int paramCount = 0; // count of returned parameters
+    for ( int iTimeSeriesVar = 0; iTimeSeriesVar < __numTimeSeriesVar; ++iTimeSeriesVar ) {
+        if ( __tsVarTypes[iTimeSeriesVar].equals(TYPE_REAL) ) {
+            temp[paramCount++] = __tsVarNames[iTimeSeriesVar];
+        }
+    }
+    // Now create the final array sized to the correct size and copy from the temporary array
+	String [] parameters = new String[paramCount];
+	System.arraycopy(temp, 0, parameters, 0, paramCount );
+	return parameters;
 }
 
 // TODO SAM 2006-01-15
@@ -426,7 +342,7 @@ This information is determined from the file header for version 11.x+ and is unk
 @return the file format version.
 */
 public double getVersion ()
-{	return __version_double;
+{	return __versionDouble;
 }
 
 /**
@@ -439,10 +355,8 @@ private void initialize ( String tsfile, double file_version )
 throws IOException
 {	String routine = "StateCU_BTS.initialize";
 	__tsfile = tsfile;
-	__version_double = file_version;
-
-	// TODO SAM 2003? - for different file extensions, change the
-	// interval to TimeInterval.DAY if necessary.
+	__versionDouble = file_version;
+	int dl = 1;
 
 	// Open the binary file as a random access endian file.  This allows
 	// Big-endian Java to read the little-endian (Microsoft/Lahey) file...
@@ -452,152 +366,67 @@ throws IOException
 
 	// Initialize important data...
 
-	__file_Hashtable.put(__full_tsfile, this);
+	__oneStructureAllTimestepsAllVarsBytes = __oneStructureOneTimestepAllVarsBytes*__numTimeSteps;
+	__fileHashtable.put(__full_tsfile, this);
 
-	__interval_base = TimeInterval.MONTH;	// Default
+	__intervalBase = TimeInterval.MONTH;	// Default
 	String extension = IOUtil.getFileExtension ( __tsfile );
+    if ( extension.equalsIgnoreCase("bd1") ) {
+        // CU Locations...
+        __intervalBase = TimeInterval.MONTH;
+        __compType = StateCU_DataSet.COMP_CU_LOCATIONS;
+    }
+    else {
+        throw new RuntimeException ( "StateCU file extension \"" + extension +
+            "\" is not understood.  Cannot read binary file.");
+    }
 
 	// Read the file header version...
 
 	readHeaderVersion ();
 
-	if ( extension.equalsIgnoreCase("b1") ) {
-		// CU Locations...
-	    __interval_base = TimeInterval.MONTH;
-		__comp_type = StateCU_DataSet.COMP_CU_LOCATIONS;
-		/*if ( StateCU_Util.isVersionAtLeast(__version_double, StateCU_Util.VERSION_11_00) ) {
-			__record_length = 160;
-		} 
-		else {*/
-		    __record_length = 140;
-		//}
-	}
-	/*
-	else if ( extension.equalsIgnoreCase("b49") ) {
-		// Diversions, instream flow, stream (daily)...
-		// Use the diversion parameter list since it is the full list.
-		__interval_base = TimeInterval.DAY;
-		__comp_type = StateMod_DataSet.COMP_DIVERSION_STATIONS;
-		if (	StateMod_Util.isVersionAtLeast(__version_double,
-			StateMod_Util.VERSION_11_00) ) {
-			__record_length = 160;
-		} 
-		else {	__record_length = 144;
-		}
-	}
-	*/
+
 
 	// Read the file header...
 
 	readHeader ();
 
-	if ( Message.isDebugOn ) {
-		Message.printDebug ( 1, "", "Parameters are as follows, where "+
-		"the number equals iparam in following messages." );
-		for ( int iparam = 0; iparam < __numparm; iparam++ ) {
-			Message.printDebug ( 1, "",	"Parameter [" + iparam + "]=\"" + __parameter[iparam] +"\"");
-		}
-	}
+	// Set the dates, determined by reading the first data record.
 
-	// Set the dates...
-
-	if ( __interval_base == TimeInterval.MONTH ) {
-		__date1 = new DateTime ( DateTime.PRECISION_MONTH );
-		__date2 = new DateTime ( DateTime.PRECISION_MONTH );
-	}
-	else {
-	    __date1 = new DateTime ( DateTime.PRECISION_DAY );
-		__date2 = new DateTime ( DateTime.PRECISION_DAY );
-	}
-
-	// Set the day in all cases.  It will be ignored with monthly data...
-
-	if ( __xmonam[0].equalsIgnoreCase("JAN") ) {
-		// Calendar...
-		__date1.setYear ( __iystr0 );
-		__date1.setMonth ( 1 );
-		__date2.setYear ( __iyend0 );
-		__date2.setMonth ( 12 );
-	}
-	else if ( __xmonam[0].equalsIgnoreCase("OCT") ) {
-		// Water year...
-		__date1.setYear ( __iystr0 - 1 );
-		__date1.setMonth ( 10 );
-		__date2.setYear ( __iyend0 );
-		__date2.setMonth ( 9 );
-	}
-	else if ( __xmonam[0].equalsIgnoreCase("NOV") ) {
-		// Irrigation year...
-		__date1.setYear ( __iystr0 - 1 );
-		__date1.setMonth ( 11 );
-		__date2.setYear ( __iyend0 );
-		__date2.setMonth ( 10 );
-	}
-	__date1.setDay ( 1 );
-	__date2.setDay ( TimeUtil.numDaysInMonth(__date2) );
-
-	// Header length, used to position for data records...
-	int offset = 0;
-	if ( StateCU_Util.isVersionAtLeast(__version_double, 11.0 ) ) {// FIXME StateCU_Util.VERSION_11_00) ) {
-		// Offset in addition to header in older format files...
-		offset = 1		// Program version info
-			+ __maxparm*3	// Parameter list
-			+ 1;		// Unit
-	}
-	__header_length = __record_length*(
-			offset	// header rec + parameters for new files
-			+ 4	// period, counts, month names, month days
-			+ __numsta	// Number of river nodes
-			+ __numdiv	// Number of diversions
-			+ __numifr	// Number of ISF reaches
-			+ (__numres+1)	// Number of reservoirs
-			+ __numrun	// Number of base flows
-			+ __numdivw );	// Number of D&W nodes
-	// Number of bytes for one interval (one month or one day) of data for
-	// all stations...
-	if ( __comp_type == StateCU_DataSet.COMP_CU_LOCATIONS ) {
-		__interval_bytes = __record_length*__numsta;
-	}
-	/*
-	else if ( __comp_type == StateMod_DataSet.COMP_WELL_STATIONS ) {
-		__interval_bytes = __record_length*__numdivw;
-	}
-	*/
+	DateTime [] dates = readDates ();
+	__date1 = dates[0];
+	__date2 = dates[1];
 
 	// Estimated file length...
 
-	if ( __interval_base == TimeInterval.MONTH ) {
-		__estimated_file_length = __header_length +
-		__interval_bytes*12*(__iyend0 - __iystr0 + 1);
-	}
-	else {	// One set of parameters per station...
-		__estimated_file_length = __header_length +
-		__interval_bytes*12*31*(__iyend0 - __iystr0 + 1);
-	}
+	__estimatedFileLength = __headerLengthBytes +
+		__oneStructureOneTimestepAllVarsBytes*__numStructures*__numTimeSteps;
+
 	if ( Message.isDebugOn ) {
-		if ( __interval_base == TimeInterval.MONTH ) {
-			Message.printDebug ( 1, "", "Reading monthly data." );
+		if ( __intervalBase == TimeInterval.MONTH ) {
+			Message.printDebug ( dl, "", "Reading monthly data." );
 		}
-		else {	Message.printDebug ( 1, "", "Reading daily data." );
+		else {
+		    Message.printDebug ( dl, "", "Reading daily data." );
 		}
-		Message.printDebug ( 1, "",	"Length of 1 record (bytes) = " + __record_length );
-		Message.printDebug ( 1, "",	"Header length (bytes) = " + __header_length );
-		if ( __comp_type == StateCU_DataSet.COMP_CU_LOCATIONS ) {
-			Message.printDebug ( 1, "", "Number of stations in data set = " + __numsta );
+		Message.printDebug ( dl, "", "Header length (bytes) = " + __headerLengthBytes );
+		if ( __compType == StateCU_DataSet.COMP_CU_LOCATIONS ) {
+			Message.printDebug ( dl, "", "Number of structures in data set = " + __numStructures );
 		}
-		if ( __interval_base == TimeInterval.MONTH ) {
-			Message.printDebug ( 1, "",
-			"Length of 1 complete month (bytes) = " + __interval_bytes );
+		if ( __intervalBase == TimeInterval.MONTH ) {
+			Message.printDebug ( dl, "",
+			"Length of 1 structure's 1 timestep all parameters (bytes) = " + __oneStructureOneTimestepAllVarsBytes );
 		}
 		else {
 		    // Daily
-			Message.printDebug ( 1, "", "Length of 1 complete day (bytes) = " + __interval_bytes );
+			Message.printDebug ( dl, "", "Length of 1 complete day (bytes) = " + __oneStructureOneTimestepAllVarsBytes );
 		}
-		Message.printDebug ( 1, "",	"Estimated file size (bytes) = " + __estimated_file_length );
+		Message.printDebug ( dl, "", "Estimated file size (bytes) = " + __estimatedFileLength );
 	}
 
 	if ( IOUtil.testing() ) {
-		try {	printRecords0 ();
+		try {
+		    printRecords0 ();
 			//printRecords ( 10 );
 		}
 		catch ( Exception e ) {
@@ -617,7 +446,7 @@ from the Hashtable.
 private static StateCU_BTS lookupStateCUBTS ( String full_fname )
 throws Exception
 {	String routine = "StateCU_BTS.lookupStateCUBTS";
-	Object o = __file_Hashtable.get ( full_fname );
+	Object o = __fileHashtable.get ( full_fname );
 	if ( o != null ) {
 		// Have a matching file pointer so assume that it can be used...
 		Message.printStatus(2, routine, "Using existing binary file.");
@@ -627,7 +456,7 @@ throws Exception
 	Message.printStatus(2, routine, "Opening new binary file.");
 	StateCU_BTS bts = new StateCU_BTS ( full_fname );
 	// Add to the HashTable...
-	__file_Hashtable.put ( full_fname, bts );
+	__fileHashtable.put ( full_fname, bts );
 	return bts;
 }
 
@@ -638,11 +467,12 @@ Test code to print records, brute force until data runs out.
 private void printRecords0 ()
 throws Exception
 {
+    /* FIXME SAM 2008-08-26 Evaluate whether needed
 	StringBuffer b = new StringBuffer();
 	double value = 0.0;
 	int iparm;
 	for ( int irec = 0; irec >= 0; irec++ ) {
-		try {	__fp.seek ( __header_length + irec*__record_length );
+		try {	__fp.seek ( __headerLength + irec*__record_length );
 		}
 		catch ( Exception e ) {
 			// End of data...
@@ -663,116 +493,66 @@ throws Exception
 		}
 		Message.printStatus ( 2, "", b.toString() );
 	}
+	*/
 }
 
 /**
-Test code to print records, trying to do so intelligently.  The output in the
-log file can be sorted and
-compared against the standard *.xdd, *.xre, etc. reports.
-@param max_stations Indicate the maximum number of stations to print.
+Read the dates, which are taken from the first time series record.
+The time series variables "Year" and "Month Index" contain the calendar year
+and months 1-12 (Jan - Feb).
 */
-/* TODO SAM Evaluate use
-private void printRecords ( int max_stations )
-throws Exception
+private DateTime[] readDates ()
+throws IOException
 {
-	__fp.seek ( __header_length );
-	StringBuffer b = new StringBuffer();
-	float value;
-	int irec = 0;
-	int iaccount = 0;
-	int naccount = 1;	// For non-reservoirs...
-	int iy, im, ista, iparm, year, month;
-	boolean do_res = false;
-	int numsta = __numsta;	// Streamflow, diversion, ISF
-	if (	StringUtil.endsWithIgnoreCase(__tsfile,"b44") ||
-		StringUtil.endsWithIgnoreCase(__tsfile,"b50") ) {
-		do_res = true;
-		max_stations = __numres;	// Show them all
-		numsta = __numres;
-	}
-	boolean do_well = false;
-	if (	StringUtil.endsWithIgnoreCase(__tsfile,"b42") ||
-		StringUtil.endsWithIgnoreCase(__tsfile,"b65") ) {
-		do_well = true;
-		numsta = __numdivw;
-	}
-	boolean do_water = false;
-	if ( __xmonam[0].equalsIgnoreCase("Oct") ) {
-		do_water = true;
-	}
-	boolean do_month = true;
-	if (	StringUtil.endsWithIgnoreCase(__tsfile,"b49") ||
-		StringUtil.endsWithIgnoreCase(__tsfile,"b50") ||
-		StringUtil.endsWithIgnoreCase(__tsfile,"b65") ) {
-		do_month = false;
-	}
-	// Read the rest of the file and just print out the values...
-	// For stream/diversion/ISF, loop through river station list.
-	// For reservoirs and wells, loop through the specific lists.
-	String [] id_array = __cstaid;
-	for ( iy = __iystr0; iy <= __iyend0; iy++ ) {
-		for ( im = 0; im < 12; im++ ) {
-		for ( ista = 0; ista < numsta; ista++ ) {
-			// REVISIT SAM 2005-12-22 need special
-			// handling of other nodes as well.
-			if ( do_res ) {
-				naccount = __nowner2[ista];
-				id_array = __cresid;
-			}
-			else if ( do_well ) {
-				id_array = __cdividw;
-			}
-			// Else in the diversion binary files, all river
-			// nodes are listed.
-			for (	iaccount=0;
-				iaccount<naccount;
-				iaccount++, irec++ ){
-				if ( ista < max_stations ) {
-				// Read and print the data (otherwise just
-				// rely on the record counter to increment in
-				// the "for" statement)...
-				__fp.seek ( __header_length +
-						irec*__record_length );
-				b.setLength(0);
-				year = iy;
-				month = im + 1;
-				if ( do_water ) {
-					if ( im < 3 ) {
-						month = im + 10;
-						year = iy - 1;
-					}
-					else {	month = im - 2;
-					}
-				}
-				// List this way so that output can be sorted
-				// by station and then time...
-				b.append ( StringUtil.formatString(
-					id_array[ista],"%-12.12s") + " " +
-					StringUtil.formatString(iaccount,
-					"%2d"));
-				b.append ( " " + year + " " +
-					StringUtil.formatString(month,"%02d")
-					+ " " + __xmonam[im]);
-				for (	iparm = 0; iparm < __numparm;
-					iparm++ ) {
-					value = __fp.readLittleEndianFloat();
-					if ( do_month ) {
-						// Convert CFS to ACFT
-						value = value*
-						CFS_TO_ACFT* (float)
-						__mthday2[month - 1];
-					}
-					b.append ( " " +StringUtil.formatString(
-					value,"%#7.0f") );
-				}
-				Message.printStatus ( 2, "", b.toString() );
-				}
-			}
-		}
-		}
-	}
+    DateTime [] dates = new DateTime[2];
+    // Position after the header...
+    __fp.seek ( __headerLengthBytes );
+    // Read until the year and month are known.
+    // For now read intervening variables, although the logic could be changed to jump
+    // directly to the correct position.
+    int startYear = -1, startMonthIndex = -1;
+    Object dataValue;
+    for ( int iTimeSeriesVar = 0; iTimeSeriesVar < __numTimeSeriesVar; ++iTimeSeriesVar ) {
+        if ( __tsVarTypes[iTimeSeriesVar].equals(TYPE_INT) ) {
+            dataValue = new Integer(__fp.readLittleEndianInt() );
+            if ( __tsVarNames[iTimeSeriesVar].equals(TS_VAR_YEAR) ) {
+                startYear = ((Integer)dataValue).intValue();
+            }
+            if ( __tsVarNames[iTimeSeriesVar].equals(TS_VAR_MONTH_INDEX) ) {
+                startMonthIndex = ((Integer)dataValue).intValue();
+            }
+        }
+        else if ( __tsVarTypes[iTimeSeriesVar].equals(TYPE_REAL) ) {
+            dataValue = new Float(__fp.readLittleEndianFloat() );
+        }
+        else if ( __tsVarTypes[iTimeSeriesVar].equals(TYPE_CHAR) ) {
+            dataValue = __fp.readLittleEndianString1(__tsVarLength[iTimeSeriesVar]).trim();
+        }
+        if ( (startYear > 0) && (startMonthIndex > 0) ) {
+            // Done looking
+            break;
+        }
+    }
+    if ( (startYear < 0) || (startMonthIndex < 0) ) {
+        throw new IOException ( "Start year and month cannot be determined - cannot determine data period." );
+    }
+    if ( startMonthIndex != 1 ) {
+        throw new IOException ( "Start month (" + startMonthIndex +
+                ") is not 1.  Corrupt data or out of date software?");
+    }
+    if ( __numTimeSteps%12 != 0 ) {
+        throw new IOException ( "Number of time steps (" + __numTimeSteps +
+                ") is not divisible by 12.  Corrupt data or out of date software?" );
+    }
+    DateTime date1 = new DateTime(DateTime.PRECISION_MONTH);
+    date1.setMonth( startMonthIndex );
+    date1.setYear ( startYear );
+    DateTime date2 = new DateTime(date1);
+    date2.addMonth ( __numTimeSteps - 1 );
+    dates[0] = date1;
+    dates[1] = date2;
+    return dates;
 }
-*/
 
 /**
 Read the header from the opened binary file and save the information in
@@ -784,8 +564,9 @@ throws IOException
 {	String routine = "StateCU_BTS.readHeader";
 	int dl = 1;
 
+	__headerLengthBytes = 0;
 	// First record
-	int header_rec = 0;
+	//int header_rec = 0;
 	/*
 	if ( StateCU_Util.isVersionAtLeast(__version_double, 11.0 ) ) { // FIXME StateCU_Util.VERSION_11_00) ) {
 		// Need to skip the first record that has the file version information.
@@ -796,6 +577,8 @@ throws IOException
 
 	__fp.seek ( 0 );
 	__numStructures = __fp.readLittleEndianInt();
+	__structureIds = new String[__numStructures];
+	__structureNames = new String[__numStructures];
     if ( Message.isDebugOn ) {
         Message.printDebug ( dl, routine, "numStructures=" + __numStructures );
     }
@@ -819,124 +602,140 @@ throws IOException
     }
     __tsVarTypes = new String[__numTimeSeriesVar];
     __tsVarLength = new int[__numTimeSeriesVar];
+    __tsVarStartBytes = new int[__numTimeSeriesVar];
     __tsVarNames = new String[__numTimeSeriesVar];
     __tsVarInReport = new int[__numTimeSeriesVar];
-    __tsUnits = new String[__numTimeSeriesVar];
+    __tsVarUnits = new String[__numTimeSeriesVar];
     __numAnnualTimeSeriesSteps = __fp.readLittleEndianInt();
     if ( Message.isDebugOn ) {
         Message.printDebug ( dl, routine, "numAnnualTimeSeriesSteps=" + __numAnnualTimeSeriesSteps );
     }
+    // Header length is 4 bytes for each of the 5 variables above.
+    __headerLengthBytes += 20;
     
-    // Read the structure metadata records...
+    // Read the structure main metadata records...
     
    for ( int iStructureVar = 0; iStructureVar < __numStructureVar; ++iStructureVar ) {
         __structureVarTypes[iStructureVar] = __fp.readLittleEndianString1(__varTypeLength).trim();
+        __headerLengthBytes += __varTypeLength;
         if ( Message.isDebugOn ) {
-            Message.printDebug ( dl, routine, "structure[" + iStructureVar + "] variable type = \"" +
+            Message.printDebug ( dl, routine, "structureVar[" + iStructureVar + "] variable type = \"" +
                 __structureVarTypes[iStructureVar] + "\"");
         }
         __structureVarLength[iStructureVar] = __fp.readLittleEndianInt();
+        __headerLengthBytes += 4;
         if ( Message.isDebugOn ) {
-            Message.printDebug ( dl, routine, "structure[" + iStructureVar + "] variable length = \"" +
+            Message.printDebug ( dl, routine, "structureVar[" + iStructureVar + "] variable length = \"" +
                 __structureVarLength[iStructureVar] + "\"");
         }
         __structureVarNames[iStructureVar] = __fp.readLittleEndianString1(__varNameLength).trim();
+        __headerLengthBytes += __varNameLength;
         if ( Message.isDebugOn ) {
-            Message.printDebug ( dl, routine, "structure[" + iStructureVar + "] variable name = \"" +
+            Message.printDebug ( dl, routine, "structureVar[" + iStructureVar + "] variable name = \"" +
                 __structureVarNames[iStructureVar] + "\"" );
         }
         __structureVarInReport[iStructureVar] = __fp.readLittleEndianInt();
+        __headerLengthBytes += 4;
         if ( Message.isDebugOn ) {
-            Message.printDebug ( dl, routine, "structure[" + iStructureVar + "] variable in report = \"" +
+            Message.printDebug ( dl, routine, "structureVar[" + iStructureVar + "] variable in report = \"" +
                 __structureVarInReport[iStructureVar] + "\"");
         }
         __structureVarReportHeaders[iStructureVar] = __fp.readLittleEndianString1(__varReportHeaderLength).trim();
+        __headerLengthBytes += __varReportHeaderLength;
         if ( Message.isDebugOn ) {
-            Message.printDebug ( dl, routine, "structure[" + iStructureVar + "] variable report Header = \"" +
+            Message.printDebug ( dl, routine, "structureVar[" + iStructureVar + "] variable report Header = \"" +
                 __structureVarReportHeaders[iStructureVar] + "\"");
         }
     }
-    
+   
     // Time series metadata
     
+   __oneStructureOneTimestepAllVarsBytes = 0;
+   __tsVarStartBytes[0] = 0;
     for ( int iTimeSeriesVar = 0; iTimeSeriesVar < __numTimeSeriesVar; ++iTimeSeriesVar ) {
         __tsVarTypes[iTimeSeriesVar] = __fp.readLittleEndianString1(__tsVarTypeLength).trim();
+        __headerLengthBytes += __tsVarTypeLength;
         if ( Message.isDebugOn ) {
-            Message.printDebug ( dl, routine, "ts[" + iTimeSeriesVar + "] variable type = \"" +
+            Message.printDebug ( dl, routine, "tsVar[" + iTimeSeriesVar + "] variable type = \"" +
                 __tsVarTypes[iTimeSeriesVar] + "\"");
         }
         __tsVarLength[iTimeSeriesVar] = __fp.readLittleEndianInt();
+        __oneStructureOneTimestepAllVarsBytes += __tsVarLength[iTimeSeriesVar];
+        __headerLengthBytes += 4;
+        if ( iTimeSeriesVar != (__numTimeSeriesVar - 1) ) {
+            __tsVarStartBytes[iTimeSeriesVar + 1] += __tsVarLength[iTimeSeriesVar];
+        }
         if ( Message.isDebugOn ) {
-            Message.printDebug ( dl, routine, "ts[" + iTimeSeriesVar + "] variable length = \"" +
+            Message.printDebug ( dl, routine, "tsVar[" + iTimeSeriesVar + "] variable length = \"" +
                 __tsVarLength[iTimeSeriesVar] + "\"");
         }
         __tsVarNames[iTimeSeriesVar] = __fp.readLittleEndianString1(__tsVarNameLength).trim();
+        __headerLengthBytes += __tsVarNameLength;
         if ( Message.isDebugOn ) {
-            Message.printDebug ( dl, routine, "ts[" + iTimeSeriesVar + "] variable name = \"" +
+            Message.printDebug ( dl, routine, "tsVar[" + iTimeSeriesVar + "] variable name = \"" +
                 __tsVarNames[iTimeSeriesVar] + "\"" );
         }
         __tsVarInReport[iTimeSeriesVar] = __fp.readLittleEndianInt();
+        __headerLengthBytes += 4;
         if ( Message.isDebugOn ) {
-            Message.printDebug ( dl, routine, "ts[" + iTimeSeriesVar + "] variable in report = \"" +
+            Message.printDebug ( dl, routine, "tsVar[" + iTimeSeriesVar + "] variable in report = \"" +
                 __tsVarInReport[iTimeSeriesVar] + "\"");
         }
-        __tsUnits[iTimeSeriesVar] = __fp.readLittleEndianString1(__tsVarUnitsLength).trim();
+        __tsVarUnits[iTimeSeriesVar] = __fp.readLittleEndianString1(__tsVarUnitsLength).trim();
+        __headerLengthBytes += __tsVarUnitsLength;
         if ( Message.isDebugOn ) {
-            Message.printDebug ( dl, routine, "ts[" + iTimeSeriesVar + "] units = \"" +
-                __tsUnits[iTimeSeriesVar] + "\"");
+            Message.printDebug ( dl, routine, "tsVar[" + iTimeSeriesVar + "] units = \"" +
+                __tsVarUnits[iTimeSeriesVar] + "\"");
         }
     }
     
     // Now read the structure records
     
+    int structureIndex = -1; // index in processed arrays for IDs, Name
+    String structureID; // ID for one structure
+    String structureName; // Name for one structure
     for ( int iStructure = 0; iStructure < __numStructures; ++iStructure ) {
         for ( int iStructureVar = 0; iStructureVar < __numStructureVar; ++iStructureVar ) {
-            if ( __structureVarTypes[iStructureVar].equals("I") ) {
+            if ( __structureVarTypes[iStructureVar].equals(TYPE_INT) ) {
                 __structureVarValues[iStructure][iStructureVar] = new Integer(__fp.readLittleEndianInt() );
+                __headerLengthBytes += 4;
             }
-            else if ( __structureVarTypes[iStructureVar].equals("R") ) {
+            else if ( __structureVarTypes[iStructureVar].equals(TYPE_REAL) ) {
                 __structureVarValues[iStructure][iStructureVar] = new Float(__fp.readLittleEndianFloat() );
+                __headerLengthBytes += 4;
             }
-            else if ( __structureVarTypes[iStructureVar].equals("C") ) {
+            else if ( __structureVarTypes[iStructureVar].equals(TYPE_CHAR) ) {
                 __structureVarValues[iStructure][iStructureVar] =
                     __fp.readLittleEndianString1(__structureVarLength[iStructureVar]).trim();
+                __headerLengthBytes += __structureVarLength[iStructureVar];
             }
             else {
                 throw new IOException ( "Structure variable type \"" + __structureVarTypes[iStructureVar] +
                     "\" is not recognized." );
             }
             if ( Message.isDebugOn ) {
-                Message.printDebug ( dl, routine, "Structure[" + iStructure + "] Var[" + iStructureVar + "] = " +
+                Message.printDebug ( dl, routine, "Structure[" + iStructure + "] Var[" + iStructureVar + "] " +
+                        __structureVarNames[iStructureVar] + " = " +
                         __structureVarValues[iStructure][iStructureVar] );
+            }
+            // Now process into the ordered arrays.
+            if ( __structureVarNames[iStructureVar].equals(STRUCTURE_INDEX) ) {
+                // Save the index for assignment below.  The index property is always before the ID and name and
+                // is 1+ so need to decrement to get zero-based indices for internal arrays
+                structureIndex = ((Integer)__structureVarValues[iStructure][iStructureVar]).intValue() - 1;
+            }
+            else if ( __structureVarNames[iStructureVar].equals(STRUCTURE_ID) ) {
+                structureID = (String)__structureVarValues[iStructure][iStructureVar];
+                __structureIds[structureIndex] = structureID;
+            }
+            else if ( __structureVarNames[iStructureVar].equals(STRUCTURE_NAME) ) {
+                structureName = (String)__structureVarValues[iStructure][iStructureVar];
+                __structureNames[structureIndex] = structureName;
             }
         }
     }
-    
-    // Read the time series data
-    
-    Object dataValue;
-    for ( int iStructure = 0; iStructure < __numStructures; ++iStructure ) {
-        for ( int iTimeStep = 0; iTimeStep < __numTimeSteps; ++iTimeStep ) {
-            for ( int iTimeSeriesVar = 0; iTimeSeriesVar < __numTimeSeriesVar; ++iTimeSeriesVar ) {
-                if ( __tsVarTypes[iTimeSeriesVar].equals("I") ) {
-                    dataValue = new Integer(__fp.readLittleEndianInt() );
-                }
-                else if ( __tsVarTypes[iTimeSeriesVar].equals("R") ) {
-                    dataValue = new Float(__fp.readLittleEndianFloat() );
-                }
-                else if ( __tsVarTypes[iTimeSeriesVar].equals("C") ) {
-                    dataValue = __fp.readLittleEndianString1(__tsVarLength[iTimeSeriesVar]).trim();
-                }
-                else {
-                    throw new IOException ( "Time series variable type \"" + __tsVarTypes[iTimeSeriesVar] +
-                        "\" is not recognized." );
-                }
-                if ( Message.isDebugOn ) {
-                    Message.printDebug ( dl, routine, "Structure[" + iStructure + "] time step [" + iTimeStep +
-                            "] Var[" + iTimeSeriesVar + "] = " + dataValue );
-                }
-            }
-        }
+    if ( Message.isDebugOn ) {
+        Message.printDebug ( dl, routine, "Length of all header information is " + __headerLengthBytes + " bytes." );
     }
 }
 
@@ -949,74 +748,11 @@ empty file).
 */
 private void readHeaderVersion()
 throws IOException
-{	/* Does not apply to StateCU binary
-    String routine = "StateCU_BTS.readHeaderVersion";
-	int dl = 1;
-	if ( __version_double > 0.0 ) {
-		// The version has been specified at construction...
-		__version = "" + StringUtil.formatString(__version_double,"%.2f");
-		Message.printDebug ( dl, routine,"The file has a specified version " + __version );
-		return;
-		
-	}
-	// Files before version 11 have year start and year end (2 integers)
-	// in the first record.  Therefore, check the characters used for the
-	// date and see if at least two are non-null.  If non-null, assume the
-	// new 11+ format.  If null, assume the old format.
-	boolean pre_11 = false;
-	__fp.seek ( 16 );	// First '/' in date if YYYY/MM/DD
-	char test_char = __fp.readLittleEndianChar1();
-	if ( test_char == '\0' ) {
-		pre_11 = true;
-		__fp.seek ( 19 );	// Second '/' in date if YYYY/MM/DD
-		test_char = __fp.readLittleEndianChar1();
-		if ( test_char == '\0' ) {
-			pre_11 = true;
-		}
-	}	// Else both characters were non-null so pretty sure it is 11+
-	if ( Message.isDebugOn ) {
-		if ( pre_11 ) {
-			Message.printDebug ( dl, routine, "The file has a version < 11.x." );
-		}
-		else {
-		    Message.printDebug ( dl, routine, "The file has a version >= 11.x." );
-		}
-	}
-	if ( pre_11 ) {
-		// No version can be determined from the file...
-		__version = null;
-		__version_double = -999.0;
-	}
-	else {
-	    // Reposition and read the header...
-		__fp.seek ( 0 );
-		// 8 characters for the program name...
-		__header_program = __fp.readLittleEndianString1(8).trim();
-		// Program version...
-		__version_double = (double)__fp.readLittleEndianFloat();
-		__version = "" + StringUtil.formatString(
-		__version_double,"%.2f");	// Format to avoid remainder
-		// Date as 10 characters...
-		__header_date = __fp.readLittleEndianString1(10).trim();
-		if ( Message.isDebugOn ) {
-			Message.printDebug ( dl, routine, "Creator program=\"" +
-			__header_program + "\" file version=" + __version +
-			" software date=\"" + __header_date + "\"" );
-		}
-	}
-
-	// Set the version information so that it can be used elsewhere in the
-	// class (for example to determine the parameters)...
-
-	if ( __version != null ) {
-		__version_double = StringUtil.atod ( __version );
-	}
-	if ( __version_double <= 0.0 ) {
-		// If pre 11.0, then assume that it is the one before 11.0...
-		__version_double = 11.0;// FIXME StateCU_Util.VERSION_9_69;
-		__version = "9.69";
-	}
-	*/
+{	// The initial StateCU binary file specification does not have a header with version.
+    __version = "Unknown";
+	__versionDouble = -999.0;
+	__headerProgram = "StateCU";
+	__headerDateString = null;
 }
 
 /**
@@ -1136,8 +872,45 @@ throws Exception
 }
 
 /**
+Read a single time series.
+*/
+private TS readTimeSeries ()
+throws IOException
+{   String routine = "StateCU_BTS.readTimeSeries";
+    int dl = 1; // Debug level
+    // Read the time series data
+    
+    Object dataValue;
+    for ( int iStructure = 0; iStructure < __numStructures; ++iStructure ) {
+        for ( int iTimeStep = 0; iTimeStep < __numTimeSteps; ++iTimeStep ) {
+            for ( int iTimeSeriesVar = 0; iTimeSeriesVar < __numTimeSeriesVar; ++iTimeSeriesVar ) {
+                if ( __tsVarTypes[iTimeSeriesVar].equals(TYPE_INT) ) {
+                    dataValue = new Integer(__fp.readLittleEndianInt() );
+                }
+                else if ( __tsVarTypes[iTimeSeriesVar].equals(TYPE_REAL) ) {
+                    dataValue = new Float(__fp.readLittleEndianFloat() );
+                }
+                else if ( __tsVarTypes[iTimeSeriesVar].equals(TYPE_CHAR) ) {
+                    dataValue = __fp.readLittleEndianString1(__tsVarLength[iTimeSeriesVar]).trim();
+                }
+                else {
+                    throw new IOException ( "Time series variable type \"" + __tsVarTypes[iTimeSeriesVar] +
+                        "\" is not recognized." );
+                }
+                if ( Message.isDebugOn ) {
+                    Message.printDebug ( dl, routine, "Structure[" + iStructure + "] time step [" + iTimeStep +
+                            "] Var[" + iTimeSeriesVar + "] = " + dataValue );
+                }
+            }
+        }
+    }
+    
+    return null;
+}
+
+/**
 Read a list of time series from the binary file.  A Vector of new time series is returned.
-@param tsident_pattern A regular expression for TSIdents to return.  For example
+@param tsidentPattern A regular expression for TSIdents to return.  For example
 * or null returns all time series.  *.*.XXX.* returns only time series matching
 data type XXX.  Currently only location and data type (output parameter) are
 checked and only a
@@ -1149,18 +922,17 @@ main location part is first matched and the the reservoir account is checked
 if the main location is matched.
 @param date1 First date/time to read, or null to read the full period.
 @param date2 Last date/time to read, or null to read the full period.
-@param req_units Requested units for the time series (currently not
+@param reqUnits Requested units for the time series (currently not
 implemented).
-@param read_data True if all data should be read or false to only read the headers.
+@param readData True if all data should be read or false to only read the headers.
 @exception IOException if the interval for the time series does not match that
 for the file or if a write error occurs.
 */
-public Vector readTimeSeriesList (	String tsident_pattern, DateTime date1,
-					DateTime date2, String req_units,
-					boolean read_data )
+public Vector readTimeSeriesList ( String tsidentPattern, DateTime date1,
+					DateTime date2, String reqUnits, boolean readData )
 throws Exception
 {	String routine = "StateCUd_BTS.readTimeSeriesList";
-	// Using previously read informtion, loop through each time series
+	// Using previously read information, loop through each time series
 	// identifier and see if it matches what we are searching for...
 
 	// TODO (JTS - 2004-08-04)
@@ -1171,12 +943,11 @@ throws Exception
 
 	int iparam = 0;
 	Vector tslist = new Vector();
-	if ( (tsident_pattern == null) || (tsident_pattern.length() == 0) ) {
-		tsident_pattern = "*.*.*.*.*";
+	if ( (tsidentPattern == null) || (tsidentPattern.length() == 0) ) {
+		tsidentPattern = "*.*.*.*.*";
 	}
-	TSIdent tsident_regexp = new TSIdent ( tsident_pattern );
-					// TSIdent containing the regular
-					// expression parts.
+	TSIdent tsident_regexp = new TSIdent ( tsidentPattern );
+					// TSIdent containing the regular expression parts.
 	// Make sure that parts have wildcards if not specified...
 	if ( tsident_regexp.getLocation().length() == 0 ) {
 		tsident_regexp.setLocation("*");
@@ -1212,397 +983,178 @@ throws Exception
 	int dl = 1;
 	if ( Message.isDebugOn ) {
 		Message.printDebug ( dl, routine, "Reading time series for \"" +
-		tsident_pattern + "\" __numsta = " + __numsta );
+		tsidentPattern + "\" __numStructures = " + __numStructures + " read data = " + readData );
 	}
-	// This is used to track matches to ensure that the same
-	// station/datatype combination is only included once.  It is possible
-	// that baseflow stations are listed in more than one list of stations.
-	// Even if there are 1000 nodes and 30 data types, this will only take
-	// 30K of memory, which is relatively small.
-	boolean [][] sta_matched = new boolean[__numsta][__numparm];
-	int j;
-	for ( int i = 0; i < __numsta; i++ ) {
-		for ( j = 0; j < __numparm; j++ ) {
-			sta_matched[i][j] = false;
-		}
-	}
+
 	try {
-	if ( tsident_regexp_loc.indexOf("*") >= 0 ) {
-		station_has_wildcard = true;
-	}
-	if ( tsident_regexp_type.indexOf("*") >= 0 ) {
-		datatype_has_wildcard = true;
-	}
-	boolean match_found = false;
-				// Indicates if a match for the specific station is made.
-				// TODO SAM 2006-01-04.  This seems to be a
-				// remnant of previous code.  It is used but
-				// many checks result in "continue" or "break" out of the loops.
-	String [] ids = null;	// Used to point to each list of station IDs.
-	String [] names = null;	// Used to point to each list of names.
-	int numids = 0;		// Used to point to size of each list.
-	int ista = 0;		// River node position matching the ID.
-	int ista2 = 0;		// Station in data record portion of file to
-				// locate.  For diversion/instream/stream it is
-				// ista.  For reservoirs and wells it is the
-				// position of the reservoir or well in the file.
-	int nts = 0;		// Number of time series per location/parameter
-				// combination (used with reservoir accounts).
-	int its = 0;		// Loop counter for time series.
-	String owner = "";	// Used to append a reservoir owner/account to
-				// the location, blank normally.
-	boolean convert_cfs_to_acft = true;
-				// Indicates whether a parameter's data should
-				// be converted from CFS to ACFT.
-	// Loop through the lists of stations:
-	//
-	int DIV = 0;	// Diversion stations
-	int ISF = 1;	// Instream flow stations
-	int RES = 2;	// Reservoir stations
-	int BF = 3;	// Baseflow stations
-	int WEL = 4;	// Wells
-	int RIV = 5;	// River nodes (to find nodes only in RIN file)
-	//
-	// The original file that was opened indicated what
-	// type of data the file contains and inappropriate types are skipped
-	// below.  Diversions, instream flow, and stream stations are stored
-	// in the same binary file so multiple lists are checked for that file.
-	TSIdent current_tsident = new TSIdent ();
-				// Used for the time series below, to compare to
-				// the pattern.
-	TSIdent tsident = null;	// Used when creating new time series.
-					
-	for ( int istatype = 0; istatype < 6; istatype++ ) {
-		// First check to see if we even need to search the station list
-		// for this loop index...
-		// Diversion stations file has div, isf, baseflow, other (river
-		// nodes that are not another station type)
-		if ( (__comp_type==StateCU_DataSet.COMP_CU_LOCATIONS)
-			&& (istatype != DIV) && (istatype != ISF) &&
-			(istatype != BF) && (istatype != RIV)) {
-			continue;
-		}
-		// If here then the correct station list type has been
-		// determined.  Assign the references to the arrays to search...
-		if ( istatype == DIV ) {
-			// Search diversions...
-			ids = __cdivid;
-			names = __divnam;
-			numids = __numdiv;
-		}
-		else if ( istatype == ISF ) {
-			// Search instream flows...
-			ids = __cifrid;
-			names = __xfrnam;
-			numids = __numifr;
-		}
-		else if ( istatype == RES ) {
-			// Search reservoirs...
-			ids = __cresid;
-			names = __resnam;
-			numids = __numres;
-		}
-		else if ( istatype == BF ) {
-			// Baseflows (stream gage + stream estimate)...
-			ids = __crunid;
-			names = __runnam;
-			numids = __numrun;
-		}
-		else if ( istatype == WEL ) {
-			// Wells...
-			ids = __cdividw;
-			names = __divnamw;
-			numids = __numdivw;
-		}
-		else if ( istatype == RIV ) {
-			// River nodes (nodes not other station will be
-			// found)...
-			ids = __cstaid;
-			names = __stanam;
-			numids = __numsta;
-		}
-		// Loop through the ids in the list...
-		for ( int iid = 0; iid < numids; iid++ ) {
-			if ( Message.isDebugOn ) {
-				Message.printDebug ( dl, routine, "Station[" + iid + "] = " + ids[iid] );
-			}
-			// Loop through the parameters...
-			for ( iparam = 0; iparam < __numparm; iparam++ ) {
-				// Check the station and parameter to see if
-				// they match - all other fields are allowed to be wildcarded...
-				if ( Message.isDebugOn ) {
-					Message.printDebug ( 2, routine, "Parameter = " + __parameter[iparam] );
+    	if ( tsident_regexp_loc.indexOf("*") >= 0 ) {
+    		station_has_wildcard = true;
+    	}
+    	if ( tsident_regexp_type.indexOf("*") >= 0 ) {
+    		datatype_has_wildcard = true;
+    	}
+    	boolean match_found = false; // Indicates if a match for the specific station is made.
+    	//int its = 0;		// Loop counter for time series.
+    	//
+    	TSIdent current_tsident = new TSIdent ();
+    				// Used for the time series below, to compare to the pattern.
+    	TSIdent tsident = null;	// Used when creating new time series.
+    					
+    	// Loop through the structure identifiers in the list...
+    	for ( int iStructure = 0; iStructure < __numStructures; iStructure++ ) {
+    		if ( Message.isDebugOn ) {
+    			Message.printDebug ( dl, routine, "Station[" + iStructure + "] = \"" +
+    			        __structureNames[iStructure] + "\"" );
+    		}
+    		// Loop through the parameters...
+    		for ( iparam = 0; iparam < __numTimeSeriesVar; iparam++ ) {
+    			// Check the station and parameter to see if
+    			// they match - all other fields are allowed to be wildcarded...
+    			if ( Message.isDebugOn ) {
+    				Message.printDebug ( 2, routine, "Parameter = \"" + __tsVarNames[iparam] + "\"");
+    			}
+    			// Need to match against each station ID list.
+    			// Set the information from the file into the working "tsident" to compare...
+    			current_tsident.setLocation ( __structureIds[iStructure] );
+    			current_tsident.setType ( __tsVarNames[iparam] );
+    			// Other TSID fields are left blank to match all.
+    			if ( !current_tsident.matches(
+    				tsident_regexp_loc,
+    				tsident_regexp_source,
+    				tsident_regexp_type,
+    				tsident_regexp_interval,
+    				tsident_regexp_scenario,
+    				null,
+    				null, false) ) {
+    				// This time series does not match one that is requested.  Just need to
+    				// match the location and parameter since that is all that is in the file.
+    			    if ( Message.isDebugOn ) {
+        				Message.printDebug ( dl, routine, "Requested \"" + tsidentPattern +
+        				        "\" does not match \"" + __structureIds[iStructure] + "\" \"" +
+        				        __tsVarNames[iparam]+ "\"" );
+    			    }
+    				continue;
+    			}
+    			if ( Message.isDebugOn ) {
+    				Message.printDebug ( 2, routine, "Requested \"" + tsidentPattern +
+    				"\" does match \"" + __structureIds[iStructure] + "\" \"" + __tsVarNames[iparam]+ "\"" );
+    			}
+
+				if ( __intervalBase == TimeInterval.MONTH ) {
+					ts = new MonthTS();
+					tsident = new TSIdent (
+						__structureIds[iStructure],
+						"StateCU",
+						__tsVarNames[iparam],
+						"Month","",
+						"StateCUB", __tsfile );
 				}
-				// Need to match against each station ID list.
-				// Set the information from the file into the
-				// working "tsident" to compare...
-				current_tsident.setLocation ( ids[iid] );
-				current_tsident.setType ( __parameter[iparam] );
-				// Other TSID fields are left blank to match all.
-				if (	!current_tsident.matches(
-					tsident_regexp_loc,
-					tsident_regexp_source,
-					tsident_regexp_type,
-					tsident_regexp_interval,
-					tsident_regexp_scenario,
-					null,
-					null, false) ) {
-					// This time series does not match one
-					// that is requested.  Just need to
-					// match the location and parameter
-					// since that is all that is in the file.
-					//Message.printStatus ( 1, routine,
-					//"Requested \"" + tsident_pattern +
-					//"\" does not match \"" +
-					//ids[iid] + "\" \""+
-					//__parameter[iparam]+ "\"" );
-					continue;
+				else if( __intervalBase == TimeInterval.DAY ){
+					ts = new DayTS();
+					tsident = new TSIdent (
+						__structureIds[iStructure],
+						"StateCU",
+						__tsVarNames[iparam],
+						"Day","",
+						"StateCUB", __tsfile );
 				}
-				if ( Message.isDebugOn ) {
-					Message.printDebug ( 2, routine,
-					"Requested \"" + tsident_pattern +
-					"\" does match \"" + ids[iid] +
-					"\" \"" + __parameter[iparam]+ "\"" );
+				// Set time series header information...
+				ts.setIdentifier ( tsident );
+				ts.setInputName ( __tsfile );
+				ts.setDescription ( __structureNames[iStructure]);
+				ts.setDataType ( __tsVarNames[iparam] );
+				ts.setDataUnits ( __tsVarUnits[iparam] );
+				
+				// Original dates from file header...
+				ts.setDate1Original ( new DateTime(__date1) );
+				ts.setDate2Original ( new DateTime(__date1) );
+				// Time series dates from requested parameters or file...
+				if ( date1 == null ) {
+					date1 = new DateTime(__date1);
+					ts.setDate1 ( date1 );
 				}
-				// Figure out the river station from the
-				// match.  The original river node positions
-				// start at 1 so subtract 1 to get the in-memory
-				// positions.  The river node id for stations is
-				// only available in StateMod 10.34 or later.
-				// If the following results in a value of ista
-				// <= 0, then try to match the river node ID
-				// directly - this will work with data sets
-				// where the station and river node IDs are the same.
-				ista = -1;	// To allow check below.
-				if ( istatype == DIV ) {
-					// Diversions...
-					ista = __idvsta[iid] - 1;
-					ista2 = ista;
-					match_found = true;
+				else {
+				    ts.setDate1 ( new DateTime( date1) );
 				}
-				else if ( istatype == ISF ) {
-					// Instream flow...
-					ista = __ifrsta[iid] - 1;
-					ista2 = ista;
-					match_found = true;
+				if ( date2 == null ) {
+					date2 = new DateTime(__date2);
+					ts.setDate2 ( date2 );
 				}
-				else if ( istatype == BF ) {
-					// Baseflows (stream gage and estimate)...
-					ista = __irusta[iid] - 1;
-					ista2 = ista;
-					match_found = true;
+				else {
+				    ts.setDate2 ( new DateTime( date2) );
 				}
-				else if ( istatype == WEL ) {
-					// Wells...
-					ista = __idvstw[iid] - 1;
-					ista2 = iid;
-					match_found = true;
-				}
-				else if ( istatype == RIV ) {
-					// Already a river node...
-					ista = iid;
-					ista2 = iid;
-					match_found = true;
-				}
-				if ( match_found && sta_matched[ista][iparam] ){
-					// Already matched this station for the
-					// current parameter so ignore.  It is
-					// possible that a baseflow node is also
-					// another node type but we only want
-					// one instance of the time series.
-					// This will also ensure that river
-					// nodes are not counted twice.
-					match_found = false;
-				}
-				if ( match_found ) {	// Don't just continue
-							// because a check to
-							// break occurs below.
-				sta_matched[ista][iparam] = true;
-				convert_cfs_to_acft = true;
-				if ( __interval_base == TimeInterval.DAY ) {
-					convert_cfs_to_acft = false;
-				}
-				if ( istatype == RES ) {
-					// For each reservoir, have a total and
-					// a time series for each account.
-					if ( station_has_wildcard  ) {
-						// Requesting all available time series...
-						nts = __nowner2[iid];
+				ts.addToGenesis ( "Read from \"" + __tsfile + " for " + date1 +	" to " + date2 );
+				tslist.addElement ( ts );
+				if ( readData ) {
+					if ( Message.isDebugOn ) {
+						Message.printDebug ( 2, routine, "Reading " + date1 + " to " + date2 );
 					}
-					else {	// Requesting a single total or account...
-						nts = 1;
+					// Allocate the data space...
+					if ( ts.allocateDataSpace () != 0 ) {
+						throw new Exception ( "Unable to allocate data space." );
 					}
-				}
-				else {	// Other than reservoirs, only one time
-					// series per location/parameter...
-					nts = 1;
-				}
-				for ( its = 0; its < nts; its++ ) {
-					if ( (istatype == RES) && (its > 0) ) {	
-						// Getting all reservoir time
-						// series for the accounts
-						// - an owner account is added
-						// as a sublocation (1, 2,
-						// etc.)...
-						owner = "-" + its;
-					}
-					if (	__interval_base ==
-						TimeInterval.MONTH ) {
-						ts = new MonthTS();
-						tsident = new TSIdent (
-							ids[iid] + owner,
-							"StateCU",
-							__parameter[iparam],
-							"Month","",
-							"StateCUB", __tsfile );
-					}
-					else if( __interval_base ==
-						TimeInterval.DAY ){
-						ts = new DayTS();
-						tsident = new TSIdent (
-							ids[iid] + owner,
-							"StateCU",
-							__parameter[iparam],
-							"Day","",
-							"StateCUB", __tsfile );
-					}
-					// Set time series header information...
-					ts.setIdentifier ( tsident );
-					ts.setInputName ( __tsfile );
-					ts.setDescription ( names[iid]);
-					ts.setDataType ( __parameter[iparam] );
-					// Data in file are CFS but we convert to ACFT
-					if ( convert_cfs_to_acft ) {
-						ts.setDataUnits ( "ACFT" );
-					}
-					else {
-					    ts.setDataUnits ( "CFS" );
-					}
-					// Original dates from file header...
-					ts.setDate1Original ( new DateTime(__date1) );
-					ts.setDate2Original ( new DateTime(__date1) );
-					// Time series dates from requested parameters or file...
-					if ( date1 == null ) {
-						date1 = new DateTime(__date1);
-						ts.setDate1 ( date1 );
-					}
-					else {
-					    ts.setDate1 ( new DateTime( date1) );
-					}
-					if ( date2 == null ) {
-						date2 = new DateTime(__date2);
-						ts.setDate2 ( date2 );
-					}
-					else {
-					    ts.setDate2 ( new DateTime( date2) );
-					}
-					ts.addToGenesis ( "Read from \"" + __tsfile + " for " + date1 +	" to " + date2 );
-					tslist.addElement ( ts );
-					if ( read_data ) {
-						if ( Message.isDebugOn ) {
-							Message.printDebug ( 2, routine, "Reading " + date1 + " to " + date2 );
+					// Read the data for the time series...
+					for ( date = new DateTime( date1); date.lessThanOrEqualTo( date2); date.addInterval(
+						__intervalBase, 1) ){
+						if((date.getMonth()==2) &&(date.getDay()==29) ){
+							// StateCU does not handle.
+						    // FIXME Check on StateCU
+							continue;
 						}
-						// Allocate the data space...
-						if ( ts.allocateDataSpace () != 0 ) {
-							throw new Exception ( "Unable to allocate data space." );
+						filepos = calculateFilePosition( date, iStructure, iparam );
+						if ( Message.isDebugOn){
+							Message.printDebug ( dl, routine,
+							"Reading for " + date + " iStructure=" + iStructure+
+							" iparam="+ iparam +
+							" filepos=" + filepos );
 						}
-						// Read the data for the time series...
-						for ( date = new DateTime( date1); date.lessThanOrEqualTo( date2); date.addInterval(
-							__interval_base, 1) ){
-							if((date.getMonth()==2) &&(date.getDay()==29) ){
-								// StateCU does not handle.
-							    // FIXME Check on StateCU
-								continue;
-							}
-							filepos = calculateFilePosition( date, ista2,its,iparam);
-							if ( Message.isDebugOn){
-								Message.
-								printDebug ( 2,
-								routine,
-								"Reading for "+
-								date +
-								" ista2="+ista2+
-								" iparam="+
-								iparam +
-								" its=" + its +
-								" filepos=" +
-								filepos );
-							}
-							if ( filepos < 0 ) {
-								continue;
-							}
-							__fp.seek ( filepos );
-							// Convert CFS to ACFT so output is monthly volume...
-							try {
-							    param = __fp.readLittleEndianFloat();
-							}
-							catch ( Exception e ) {
-								// Assume end of
-								// file so break
-								// out of read.
-								Message.
-								printWarning (
-								3, routine,
-								"Unexpected " +
-								"error - stop "+
-								"reading data. "
-								+ "Expected " +
-								"file size ="+
-								__estimated_file_length
-								);
-								break;
-							}
-							// Convert to ACFT if necessary...
-							if (
-							convert_cfs_to_acft){
-								param =
-								param*
-								CFS_TO_ACFT*
-								(float)
-								__mthday2[
-								date.getMonth()
-								- 1];
-							}
-							if ( Message.isDebugOn){
-								Message.
-								printDebug ( 2,
-								routine,
-								"Parameter " +
-								"value (AF) is "
-								+ param );
-							}
-							ts.setDataValue(date,param);
+						if ( filepos < 0 ) {
+							continue;
 						}
+						__fp.seek ( filepos );
+						try {
+						    // Only real values should be attempted because only data types associated
+						    // with reals will be in the parameter list that is visible to external code.
+						    param = __fp.readLittleEndianFloat();
+						}
+						catch ( Exception e ) {
+							// Assume end of file so break out of read.
+							Message.printWarning ( 3, routine,
+							"Unexpected error - stop reading data.  Expected file size =" +
+							__estimatedFileLength );
+							break;
+						}
+						// Convert units if requested...
+						// FIXME SAM Need to enable units conversion
+						if ( Message.isDebugOn){
+							Message.printDebug ( 2, routine, "Parameter value is " + param );
+						}
+						ts.setDataValue(date,param);
 					}
-				}
-				} // End match_found
-				if ( !datatype_has_wildcard ) {
-					// No need to keep searching...
-					break;
-				}
-			}
-			if (	!datatype_has_wildcard &&
-				!station_has_wildcard && match_found ) {
+    			}
+			} // End match_found
+			if ( !datatype_has_wildcard ) {
 				// No need to keep searching...
 				break;
 			}
-		}
-	}
+    		if ( !datatype_has_wildcard && !station_has_wildcard && match_found ) {
+    			// No need to keep searching...
+    			break;
+    		}
+        }
 	}
 	catch ( Exception e ) {
 		Message.printWarning ( 3, "", e );
 	}
-	// TODO 2007-01-18 old comment
-	// Might return null if match_found == false????
 	return tslist;
 }
 
 /**
-Return the number of time series in the file.
-@return the number of time series in the file.
+Return the number of time series in the file, including only public time series.
+@return the number of public time series in the file.
 */
 public int size ()
-{	return __numsta*__numparm;
+{	return __numStructures*getTimeSeriesParameters().length;
 }
 
 } // End StateCU_BTS

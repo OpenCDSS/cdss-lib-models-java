@@ -176,8 +176,7 @@ consuming to check for the validity of output time series, output time series
 are not checked.  This flag is currently not used.
 @param add_group If true, a group is added to the front of the data type to
 allow grouping of the parameters.  Currently this should only be used for
-output parametes (e.g., in TSTool) because other data types have not been
-grouped.
+output parameters (e.g., in TSTool) because other data types have not been grouped.
 @param add_note If true, the string " - Input", " - Output" will be added to the
 data types, to help identify input and output parameters.  This is particularly
 useful when retrieving time series.
@@ -197,6 +196,7 @@ public static Vector getTimeSeriesDataTypes (   String binary_filename,
                         boolean add_note )
 {   String routine = "StateCU_Util.getTimeSeriesDataTypes";
     Vector data_types = new Vector();
+    /* FIXME SAM 2008-08-26 Need to clean up - tet rid of StateMod code
     String [] diversion_types0 = null;
     String [] instream_types0 = null;
     String [] reservoir_types0 = null;
@@ -207,13 +207,15 @@ public static Vector getTimeSeriesDataTypes (   String binary_filename,
     String [] reservoir_types = null;
     String [] stream_types = null;
     String [] well_types = null;
+    */
 
     // If a filename is given and reading it shows a version >= ??11.0??, read
     // information from the file for use below.
 
     StateCU_BTS bts = null;
     if ( binary_filename != null ) {
-        try {   bts = new StateCU_BTS ( binary_filename );
+        try {
+            bts = new StateCU_BTS ( binary_filename );
         }
         catch ( Exception e ) {
             // Error reading the file.  Print a warning but go on
@@ -225,24 +227,26 @@ public static Vector getTimeSeriesDataTypes (   String binary_filename,
             bts = null;
         }
         // Close the file below after getting information...
-        double version_double = bts.getVersion();
+        //double version_double = bts.getVersion();
+        /* FIXME SAM 2008-08-26 Fix to deal with version
         if ( isVersionAtLeast ( version_double, 11.0 ) ) { // FIXME SAM 2008-08-22 VERSION_11_00) ) {
             // Reset information to override possible user flags.
             statecu_version = version_double;
             add_group = false;  // Not available from file
             add_note = false;   // Not available from file
         }
+        */
     }
     
     // Get the list of output data types based on the StateCU version.
     // These are then used below.
  
-    if ( statecu_version >= 11.0 ) {
+    //if ( statecu_version >= 0.0 ) {
         // The parameters come from the binary file header.
         // Close the file because it is no longer needed...
         String [] parameters = null;
         if ( bts != null ) {
-            parameters = bts.getParameters();
+            parameters = bts.getTimeSeriesParameters();
             // TODO SAM 2006-01-15
             // Remove when tested in production.
             Message.printStatus ( 2, routine, "Parameters from file:  " + StringUtil.toVector(parameters) );
@@ -254,12 +258,16 @@ public static Vector getTimeSeriesDataTypes (   String binary_filename,
             }
             bts = null;
         }
-        // The binary file applies only to certain node types...
-        if ( comp_type==StateCU_DataSet.COMP_CU_LOCATIONS ) {
-            String [] types0 = parameters;
-        }
+    //}
+        
+    // FIXME SAM 2008-08-26 Need feedback from Rice/State as to whether input/output
+    // are needed.  For now just pass back as is
+    data_types = new Vector(parameters.length);
+    for ( int i = 0; i < parameters.length; i++ ) {
+        data_types.add ( parameters[i] );
     }
  
+    /*
     // Based on the requested data type, put together a list of time series
     // data types.  To simplify determination of whether a type is input or
     // output, add one of the following descriptors to the end if requested...
@@ -558,6 +566,7 @@ public static Vector getTimeSeriesDataTypes (   String binary_filename,
                 StringUtil.toVector ( well_types ) );
         }
     }
+    */
 
     return data_types;
 }
