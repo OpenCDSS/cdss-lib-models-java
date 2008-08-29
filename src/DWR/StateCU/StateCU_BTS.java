@@ -13,10 +13,8 @@ import RTi.Util.IO.EndianRandomAccessFile;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
-import RTi.Util.String.StringUtil;
 import RTi.Util.Time.DateTime;
 import RTi.Util.Time.TimeInterval;
-import RTi.Util.Time.TimeUtil;
 
 /**
 Provide an interface to a StateCU binary files.  Binary data are organized as
@@ -53,13 +51,14 @@ private final String TYPE_CHAR = "C";
 /**
  * Recognized structure variables that have significance.
  */
-private final String STRUCTURE_INDEX = "Structure Index";
-private final String STRUCTURE_ID = "Structure ID";
-private final String STRUCTURE_NAME = "Structure Name";
+private final String STRUCTURE_VAR_STRUCTURE_INDEX = "Structure Index";
+private final String STRUCTURE_VAR_STRUCTURE_ID = "Structure ID";
+private final String STRUCTURE_VAR_STRUCTURE_NAME = "Structure Name";
 
 /**
  * Recognized time series variables that have significance.
  */
+private final String TS_VAR_STRUCTURE_INDEX = "Structure Index";
 private final String TS_VAR_YEAR = "Year";
 private final String TS_VAR_MONTH_INDEX = "Month Index";
 
@@ -114,7 +113,7 @@ private int __varReportHeaderLength = 60; // Length of report header (spaces on 
 
 private int __tsVarTypeLength = 1;   // Length of variable (parameter) types
 private int __tsVarNameLength = 24;  // Length of parameter name (spaces on end)
-private int __tsVarUnitsLength = 10; // Length of report header (spaces on end) 
+private int __tsVarUnitsLength = 10; // Length of report header (spaces on end)
 
 private int __numStructures = 0;
 private int __numStructureVar = 0;
@@ -131,6 +130,16 @@ private String [] __structureVarNames = null;
 private int [] __structureVarInReport = null;
 private String [] __structureVarReportHeaders = null;
 private Object [][] __structureVarValues = null;
+/**
+Order of structures in the time series data section.  For example, structure 1 in
+the metadata may actually be in slot 13 in the time series data, due to the header
+and time series data being written at different times.  The information in the
+array is as follows (all indices are 0+):
+<pre>
+__tsStructureOrder[indexFrom __structureVar*] = index in time series data space
+</pre>
+*/
+private int [] __tsStructureOrder;
 
 /**
 Processed structure metadata, in the order of the "Index" structure variable.
@@ -190,21 +199,28 @@ __fp.seek ( pos );
 // Read the data...
 param = __fp.readLittleEndianFloat ();
 </pre>
-@param date Date to find.  The month and year are considered by using an
-absolute month offset (year*12 + month).
+@param dateAbsoluteMonth Date to find as absolute month.  The month and year are considered by using an
+absolute month offset (year*12 + month).  Absolute month is used to increase performance since all data
+are currently month.
+@param date1AbsoluteMonth The data file's first month as absolute month.
+@param date2AbsoluteMonth The data file's last month as absolute month.
 @param iStructure Station index (0+).
 @param iTimeSeriesVar Parameter to find (0+).
 @return byte position in file for requested parameter or -1 if unable to calculate.
 */
-private long calculateFilePosition ( DateTime date, int iStructure, int iTimeSeriesVar )
+private long calculateFilePosition ( int dateAbsoluteMonth, int date1AbsoluteMonth, int date2AbsoluteMonth,
+        int iStructure, int iTimeSeriesVar )
 {	long pos = -1;
+    if ( (dateAbsoluteMonth < date1AbsoluteMonth) || (dateAbsoluteMonth > date2AbsoluteMonth) ) {
+        // Requested date is not in the file.
+        return -1;
+    }
     // Assumes monthly interval, which is all that is supported at this time
 	pos = __headerLengthBytes	// Length of metadata
 	// Previous full structures...
 	+ iStructure*__oneStructureAllTimestepsAllVarsBytes +
 	// Previous time steps within the structure...
-	+ (date.getAbsoluteMonth() -
-		__date1.getAbsoluteMonth())*__oneStructureOneTimestepAllVarsBytes
+	+ (dateAbsoluteMonth - date1AbsoluteMonth)*__oneStructureOneTimestepAllVarsBytes
 	// Position within the record...
 	+ __tsVarStartBytes[iTimeSeriesVar];
 	return pos;
@@ -385,8 +401,6 @@ throws IOException
 
 	readHeaderVersion ();
 
-
-
 	// Read the file header...
 
 	readHeader ();
@@ -396,6 +410,21 @@ throws IOException
 	DateTime [] dates = readDates ();
 	__date1 = dates[0];
 	__date2 = dates[1];
+	
+	__tsStructureOrder = readStructureOrderForTimeSeriesData ( __numStructures);
+	
+	// Print out some useful debug information
+	
+	if ( Message.isDebugOn ) {
+	    for ( int iStructure = 0; iStructure < __numStructures; iStructure++ ) {
+	        Message.printStatus(2, routine, "Structure[" + iStructure + "] \"" + __structureNames[iStructure] +
+	                "\" time series data is in position " + __tsStructureOrder[iStructure] );
+	    }
+        for ( int iTimeSeriesVar = 0; iTimeSeriesVar < __numTimeSeriesVar; iTimeSeriesVar++ ) {
+            Message.printStatus(2, routine, "Time series var [" + iTimeSeriesVar + "] \"" + __tsVarNames[iTimeSeriesVar] +
+                    "\" starts at position " + __tsVarStartBytes[iTimeSeriesVar] + " in record.");
+        }
+    }
 
 	// Estimated file length...
 
@@ -651,7 +680,6 @@ throws IOException
     // Time series metadata
     
    __oneStructureOneTimestepAllVarsBytes = 0;
-   __tsVarStartBytes[0] = 0;
     for ( int iTimeSeriesVar = 0; iTimeSeriesVar < __numTimeSeriesVar; ++iTimeSeriesVar ) {
         __tsVarTypes[iTimeSeriesVar] = __fp.readLittleEndianString1(__tsVarTypeLength).trim();
         __headerLengthBytes += __tsVarTypeLength;
@@ -662,8 +690,14 @@ throws IOException
         __tsVarLength[iTimeSeriesVar] = __fp.readLittleEndianInt();
         __oneStructureOneTimestepAllVarsBytes += __tsVarLength[iTimeSeriesVar];
         __headerLengthBytes += 4;
-        if ( iTimeSeriesVar != (__numTimeSeriesVar - 1) ) {
-            __tsVarStartBytes[iTimeSeriesVar + 1] += __tsVarLength[iTimeSeriesVar];
+        // Increment the starting position of the variable in the time series data record.
+        // The position of the first variable within the record will be 0.
+        if ( iTimeSeriesVar == 0 ) {
+            __tsVarStartBytes[0] = 0;
+        }
+        else {
+            __tsVarStartBytes[iTimeSeriesVar] =
+                __tsVarStartBytes[iTimeSeriesVar - 1] + __tsVarLength[iTimeSeriesVar - 1];
         }
         if ( Message.isDebugOn ) {
             Message.printDebug ( dl, routine, "tsVar[" + iTimeSeriesVar + "] variable length = \"" +
@@ -719,16 +753,16 @@ throws IOException
                         __structureVarValues[iStructure][iStructureVar] );
             }
             // Now process into the ordered arrays.
-            if ( __structureVarNames[iStructureVar].equals(STRUCTURE_INDEX) ) {
+            if ( __structureVarNames[iStructureVar].equals(STRUCTURE_VAR_STRUCTURE_INDEX) ) {
                 // Save the index for assignment below.  The index property is always before the ID and name and
                 // is 1+ so need to decrement to get zero-based indices for internal arrays
                 structureIndex = ((Integer)__structureVarValues[iStructure][iStructureVar]).intValue() - 1;
             }
-            else if ( __structureVarNames[iStructureVar].equals(STRUCTURE_ID) ) {
+            else if ( __structureVarNames[iStructureVar].equals(STRUCTURE_VAR_STRUCTURE_ID) ) {
                 structureID = (String)__structureVarValues[iStructure][iStructureVar];
                 __structureIds[structureIndex] = structureID;
             }
-            else if ( __structureVarNames[iStructureVar].equals(STRUCTURE_NAME) ) {
+            else if ( __structureVarNames[iStructureVar].equals(STRUCTURE_VAR_STRUCTURE_NAME) ) {
                 structureName = (String)__structureVarValues[iStructure][iStructureVar];
                 __structureNames[structureIndex] = structureName;
             }
@@ -872,7 +906,8 @@ throws Exception
 }
 
 /**
-Read a single time series.
+Read a single time series.  This is currently not used because the reading is done
+in readTimeSeriesList().
 */
 private TS readTimeSeries ()
 throws IOException
@@ -920,16 +955,16 @@ can be matched, and the returned list of time series will include time series
 for all accounts.  When matching a specific time series (no wildcards), the
 main location part is first matched and the the reservoir account is checked
 if the main location is matched.
-@param date1 First date/time to read, or null to read the full period.
-@param date2 Last date/time to read, or null to read the full period.
+@param reqDate1 First date/time to read, or null to read the full period.
+@param reqDate2 Last date/time to read, or null to read the full period.
 @param reqUnits Requested units for the time series (currently not
 implemented).
 @param readData True if all data should be read or false to only read the headers.
 @exception IOException if the interval for the time series does not match that
 for the file or if a write error occurs.
 */
-public Vector readTimeSeriesList ( String tsidentPattern, DateTime date1,
-					DateTime date2, String reqUnits, boolean readData )
+public Vector readTimeSeriesList ( String tsidentPattern, DateTime reqDate1,
+					DateTime reqDate2, String reqUnits, boolean readData )
 throws Exception
 {	String routine = "StateCUd_BTS.readTimeSeriesList";
 	// Using previously read information, loop through each time series
@@ -941,7 +976,6 @@ throws Exception
 	// SAM 2006-01-04 - non-static is used because there is a penalty
 	// reading the header.  This needs to be considered.
 
-	int iparam = 0;
 	Vector tslist = new Vector();
 	if ( (tsidentPattern == null) || (tsidentPattern.length() == 0) ) {
 		tsidentPattern = "*.*.*.*.*";
@@ -977,9 +1011,11 @@ throws Exception
 	boolean station_has_wildcard = false;		// Use to speed up
 	boolean datatype_has_wildcard = false;		// loops.
 	TS ts = null;
-	float param;
+	float param = -999;
 	long filepos;
 	DateTime date;
+	// Absolute months to improve performance, since only monthly data is supported
+	int date1AbsoluteMonth = __date1.getAbsoluteMonth(), date2AbsoluteMonth = __date2.getAbsoluteMonth();
 	int dl = 1;
 	if ( Message.isDebugOn ) {
 		Message.printDebug ( dl, routine, "Reading time series for \"" +
@@ -1007,7 +1043,7 @@ throws Exception
     			        __structureNames[iStructure] + "\"" );
     		}
     		// Loop through the parameters...
-    		for ( iparam = 0; iparam < __numTimeSeriesVar; iparam++ ) {
+    		for ( int iparam = 0; iparam < __numTimeSeriesVar; iparam++ ) {
     			// Check the station and parameter to see if
     			// they match - all other fields are allowed to be wildcarded...
     			if ( Message.isDebugOn ) {
@@ -1039,7 +1075,6 @@ throws Exception
     				Message.printDebug ( 2, routine, "Requested \"" + tsidentPattern +
     				"\" does match \"" + __structureIds[iStructure] + "\" \"" + __tsVarNames[iparam]+ "\"" );
     			}
-
 				if ( __intervalBase == TimeInterval.MONTH ) {
 					ts = new MonthTS();
 					tsident = new TSIdent (
@@ -1067,41 +1102,52 @@ throws Exception
 				
 				// Original dates from file header...
 				ts.setDate1Original ( new DateTime(__date1) );
-				ts.setDate2Original ( new DateTime(__date1) );
+				ts.setDate2Original ( new DateTime(__date2) );
 				// Time series dates from requested parameters or file...
-				if ( date1 == null ) {
-					date1 = new DateTime(__date1);
-					ts.setDate1 ( date1 );
+				if ( reqDate1 == null ) {
+					reqDate1 = new DateTime(__date1);
+					ts.setDate1 ( reqDate1 );
 				}
 				else {
-				    ts.setDate1 ( new DateTime( date1) );
+				    ts.setDate1 ( new DateTime( reqDate1) );
 				}
-				if ( date2 == null ) {
-					date2 = new DateTime(__date2);
-					ts.setDate2 ( date2 );
+				if ( reqDate2 == null ) {
+					reqDate2 = new DateTime(__date2);
+					ts.setDate2 ( reqDate2 );
 				}
 				else {
-				    ts.setDate2 ( new DateTime( date2) );
+				    ts.setDate2 ( new DateTime( reqDate2) );
 				}
-				ts.addToGenesis ( "Read from \"" + __tsfile + " for " + date1 +	" to " + date2 );
+				ts.addToGenesis ( "Read from \"" + __tsfile + " for " + reqDate1 +	" to " + reqDate2 );
 				tslist.addElement ( ts );
 				if ( readData ) {
 					if ( Message.isDebugOn ) {
-						Message.printDebug ( 2, routine, "Reading " + date1 + " to " + date2 );
+						Message.printDebug ( 2, routine, "Reading " + reqDate1 + " to " + reqDate2 );
 					}
 					// Allocate the data space...
 					if ( ts.allocateDataSpace () != 0 ) {
 						throw new Exception ( "Unable to allocate data space." );
 					}
 					// Read the data for the time series...
-					for ( date = new DateTime( date1); date.lessThanOrEqualTo( date2); date.addInterval(
+		            // To optimize reading of values, use a couple of booleans to indicate the data type
+					boolean paramTypeReal = false;
+					boolean paramTypeInt = false;
+					if ( __tsVarTypes[iparam].equals(TYPE_REAL) ) {
+					    paramTypeReal = true;
+					}
+					else if ( __tsVarTypes[iparam].equals(TYPE_INT) ) {
+                        paramTypeInt = true;
+                    }
+					for ( date = new DateTime( reqDate1); date.lessThanOrEqualTo( reqDate2); date.addInterval(
 						__intervalBase, 1) ){
 						if((date.getMonth()==2) &&(date.getDay()==29) ){
 							// StateCU does not handle.
 						    // FIXME Check on StateCU
 							continue;
 						}
-						filepos = calculateFilePosition( date, iStructure, iparam );
+						filepos = calculateFilePosition( date.getAbsoluteMonth(),
+						        date1AbsoluteMonth, date2AbsoluteMonth,
+						        __tsStructureOrder[iStructure], iparam );
 						if ( Message.isDebugOn){
 							Message.printDebug ( dl, routine,
 							"Reading for " + date + " iStructure=" + iStructure+
@@ -1109,13 +1155,20 @@ throws Exception
 							" filepos=" + filepos );
 						}
 						if ( filepos < 0 ) {
+						    // Leave missing in the result.
 							continue;
 						}
+						// Move the file pointer to the read position
 						__fp.seek ( filepos );
 						try {
 						    // Only real values should be attempted because only data types associated
 						    // with reals will be in the parameter list that is visible to external code.
-						    param = __fp.readLittleEndianFloat();
+						    if ( paramTypeReal ) {
+						        param = __fp.readLittleEndianFloat();
+						    }
+						    else if ( paramTypeInt ) {
+                                param = (float)__fp.readLittleEndianInt();
+                            }
 						}
 						catch ( Exception e ) {
 							// Assume end of file so break out of read.
@@ -1127,7 +1180,8 @@ throws Exception
 						// Convert units if requested...
 						// FIXME SAM Need to enable units conversion
 						if ( Message.isDebugOn){
-							Message.printDebug ( 2, routine, "Parameter value is " + param );
+							Message.printDebug ( 2, routine,
+							        "At byte " + filepos + ", parameter value is " + param );
 						}
 						ts.setDataValue(date,param);
 					}
@@ -1147,6 +1201,63 @@ throws Exception
 		Message.printWarning ( 3, "", e );
 	}
 	return tslist;
+}
+
+/**
+Read the the time series to structure mapping array.
+This requires reading the first time series record from each structure to determine
+the "Structure Index" value for the time series.  The structures themselves are
+listed in the order of the output but does not agree with the initial structure
+order.
+@param numStructures the number of structures.
+@return the array indicating the position of the structures in the time series data
+block records for each of the structures in the metadata.
+*/
+private int[] readStructureOrderForTimeSeriesData ( int numStructures )
+throws IOException
+{
+    int [] tsStructureOrder = new int[numStructures];
+    // Read until the year and month are known.
+    // For now read intervening variables, although the logic could be changed to jump
+    // directly to the correct position.
+    int pos;
+    for ( int iStructure = 0; iStructure < __numStructures; ++iStructure ) {
+        // Position the pointer at the start of the structures data
+        pos = __headerLengthBytes + iStructure*__oneStructureAllTimestepsAllVarsBytes;
+        __fp.seek(pos);
+        // Looping through the first time step for the structure - no need to process
+        // any other timesteps.
+        // Brute force read through the variables for each time series and look for the
+        // "Structure Index" variable (the first one according to code example from Jim Brannon
+        // so it should be fast).
+        int structurePosInHeader = -1;
+        for ( int iTimeSeriesVar = 0; iTimeSeriesVar < __numTimeSeriesVar; ++iTimeSeriesVar ) {
+            if ( __tsVarTypes[iTimeSeriesVar].equals(TYPE_INT) ) {
+                int i = __fp.readLittleEndianInt();
+                if ( __tsVarNames[iTimeSeriesVar].equals(TS_VAR_STRUCTURE_INDEX) ) {
+                    // Have the value of interest.
+                    structurePosInHeader = i - 1;   // Data is 1+, but internally need 0+
+                    // No need to keep reading variables
+                    break;
+                }
+            }
+            else if ( __tsVarTypes[iTimeSeriesVar].equals(TYPE_REAL) ) {
+                // Read and skip...
+                __fp.readLittleEndianFloat();
+            }
+            else if ( __tsVarTypes[iTimeSeriesVar].equals(TYPE_CHAR) ) {
+                // Read and skip...
+                __fp.readLittleEndianString1(__tsVarLength[iTimeSeriesVar]);
+            }
+        }
+        if ( structurePosInHeader < 0 ) {
+            // Something is wrong - could not figure out the structure index for the structure.
+            throw new IOException (
+                "Unable to find Structure Index for time series.  Corrupt data or out of date software?");
+        }
+        tsStructureOrder[structurePosInHeader] = iStructure;
+    }
+    return tsStructureOrder;
 }
 
 /**
