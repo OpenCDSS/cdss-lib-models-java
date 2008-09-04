@@ -1434,29 +1434,22 @@ will be grouped and output together.
 @exception Exception if an error occurs writing the file.
 */
 public static void writeFrostDatesFile ( Vector tslist, String outfile,
-					String [] newcomments,
-					DateTime req_date1,
-					DateTime req_date2 )
+					String [] newcomments, DateTime req_date1, DateTime req_date2 )
 throws Exception
 {	PrintWriter out;
 	String [] comment_str = { "#" }; 
 	String [] ignore_str = { "#>" };
 	String rtn = "StateCU_TS.writeFrostDatesFile";
 
-	Message.printStatus ( 1, rtn, 
-		"Writing new time series to file \"" + outfile + "\"" );
+	Message.printStatus ( 1, rtn, "Writing new time series to file \"" + outfile + "\"" );
 
 	// Process the header from the old file...
 
-	out = IOUtil.processFileHeaders (
-		(String)null,
-		IOUtil.getPathUsingWorkingDir(outfile),
-			newcomments, comment_str, ignore_str, 0 );
+	out = IOUtil.processFileHeaders ( (String)null,
+		IOUtil.getPathUsingWorkingDir(outfile), newcomments, comment_str, ignore_str, 0 );
 	if ( out == null ) {
-		Message.printWarning ( 2, rtn,
-		"Error writing time series to \"" + outfile + "\"" );
-		throw new Exception (
-		"Error writing time series to \"" + outfile + "\"" );
+		Message.printWarning ( 2, rtn, "Error writing time series to \"" + outfile + "\"" );
+		throw new Exception ( "Error writing time series to \"" + outfile + "\"" );
 	}
 
 	// Get the contents of the file...
