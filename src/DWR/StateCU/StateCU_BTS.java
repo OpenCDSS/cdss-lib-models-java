@@ -382,7 +382,6 @@ throws IOException
 
 	// Initialize important data...
 
-	__oneStructureAllTimestepsAllVarsBytes = __oneStructureOneTimestepAllVarsBytes*__numTimeSteps;
 	__fileHashtable.put(__full_tsfile, this);
 
 	__intervalBase = TimeInterval.MONTH;	// Default
@@ -411,7 +410,7 @@ throws IOException
 	__date1 = dates[0];
 	__date2 = dates[1];
 	
-	__tsStructureOrder = readStructureOrderForTimeSeriesData ( __numStructures);
+	__tsStructureOrder = readStructureOrderForTimeSeriesData ( __numStructures );
 	
 	// Print out some useful debug information
 	
@@ -444,24 +443,22 @@ throws IOException
 		}
 		if ( __intervalBase == TimeInterval.MONTH ) {
 			Message.printDebug ( dl, "",
-			"Length of 1 structure's 1 timestep all parameters (bytes) = " + __oneStructureOneTimestepAllVarsBytes );
+			"Length of one structure one timestep (month) all parameters (bytes) = " + __oneStructureOneTimestepAllVarsBytes );
 		}
 		else {
 		    // Daily
-			Message.printDebug ( dl, "", "Length of 1 complete day (bytes) = " + __oneStructureOneTimestepAllVarsBytes );
+			Message.printDebug ( dl, "", "Length of one complete day (bytes) = " + __oneStructureOneTimestepAllVarsBytes );
 		}
+		Message.printDebug ( dl, "",
+	            "Length of one structure all timesteps all parameters (bytes) = " + __oneStructureAllTimestepsAllVarsBytes );
 		Message.printDebug ( dl, "", "Estimated file size (bytes) = " + __estimatedFileLength );
 	}
 
-	if ( IOUtil.testing() ) {
-		try {
-		    printRecords0 ();
-			//printRecords ( 10 );
-		}
-		catch ( Exception e ) {
-			Message.printWarning ( 3, routine, "Error printing records." );
-			Message.printWarning ( 3, routine, e );
-		}
+	// Set the following to true for troubleshooting
+	boolean testing = false;
+	if ( testing ) {
+	    // Read the data brute force to check values
+	    readTimeSeriesData();
 	}
 }
 
@@ -487,42 +484,6 @@ throws Exception
 	// Add to the HashTable...
 	__fileHashtable.put ( full_fname, bts );
 	return bts;
-}
-
-/**
-Test code to print records, brute force until data runs out.
-@param max_stations Indicate the maximum number of stations to print.
-*/
-private void printRecords0 ()
-throws Exception
-{
-    /* FIXME SAM 2008-08-26 Evaluate whether needed
-	StringBuffer b = new StringBuffer();
-	double value = 0.0;
-	int iparm;
-	for ( int irec = 0; irec >= 0; irec++ ) {
-		try {	__fp.seek ( __headerLength + irec*__record_length );
-		}
-		catch ( Exception e ) {
-			// End of data...
-			break;
-		}
-		b.setLength(0);
-		b.append ( StringUtil.formatString(irec,"%4d") + " " );
-		for (	iparm = 0; iparm < __numparm;
-			iparm++ ) {
-			try {	value = __fp.readLittleEndianFloat();
-			}
-			catch ( Exception e ) {
-				// End of data...
-				irec = -2;
-				break;
-			}
-			b.append ( " "+StringUtil.formatString(value,"%#7.0f"));
-		}
-		Message.printStatus ( 2, "", b.toString() );
-	}
-	*/
 }
 
 /**
@@ -722,6 +683,8 @@ throws IOException
                 __tsVarUnits[iTimeSeriesVar] + "\"");
         }
     }
+    // Size of full time series block for a structure
+    __oneStructureAllTimestepsAllVarsBytes = __oneStructureOneTimestepAllVarsBytes*__numTimeSteps;
     
     // Now read the structure records
     
@@ -909,12 +872,14 @@ throws Exception
 Read a single time series.  This is currently not used because the reading is done
 in readTimeSeriesList().
 */
-private TS readTimeSeries ()
+private TS readTimeSeriesData ()
 throws IOException
 {   String routine = "StateCU_BTS.readTimeSeries";
     int dl = 1; // Debug level
     // Read the time series data
     
+    long pos = __headerLengthBytes;
+    __fp.seek(pos);
     Object dataValue;
     for ( int iStructure = 0; iStructure < __numStructures; ++iStructure ) {
         for ( int iTimeStep = 0; iTimeStep < __numTimeSteps; ++iTimeStep ) {
@@ -932,9 +897,11 @@ throws IOException
                     throw new IOException ( "Time series variable type \"" + __tsVarTypes[iTimeSeriesVar] +
                         "\" is not recognized." );
                 }
+                // Increment position by length of variable, for debugging below
+                pos += __tsVarLength[iTimeSeriesVar];
                 if ( Message.isDebugOn ) {
                     Message.printDebug ( dl, routine, "Structure[" + iStructure + "] time step [" + iTimeStep +
-                            "] Var[" + iTimeSeriesVar + "] = " + dataValue );
+                            "] Var[" + iTimeSeriesVar + "] = " + dataValue + " starting at byte " + pos );
                 }
             }
         }
@@ -1186,12 +1153,12 @@ throws Exception
 						ts.setDataValue(date,param);
 					}
     			}
-			} // End match_found
-			if ( !datatype_has_wildcard ) {
-				// No need to keep searching...
-				break;
-			}
-    		if ( !datatype_has_wildcard && !station_has_wildcard && match_found ) {
+	            if ( !datatype_has_wildcard && match_found) {
+	                // No need to keep searching...
+	                break;
+	            }
+			} // End data type match_found
+    		if ( !station_has_wildcard && match_found ) {
     			// No need to keep searching...
     			break;
     		}
@@ -1215,12 +1182,12 @@ block records for each of the structures in the metadata.
 */
 private int[] readStructureOrderForTimeSeriesData ( int numStructures )
 throws IOException
-{
+{   String routine = "StateCU_BTS.readStructureOrderForTimeSeriesData";
     int [] tsStructureOrder = new int[numStructures];
     // Read until the year and month are known.
     // For now read intervening variables, although the logic could be changed to jump
     // directly to the correct position.
-    int pos;
+    long pos;
     for ( int iStructure = 0; iStructure < __numStructures; ++iStructure ) {
         // Position the pointer at the start of the structures data
         pos = __headerLengthBytes + iStructure*__oneStructureAllTimestepsAllVarsBytes;
@@ -1237,6 +1204,10 @@ throws IOException
                 if ( __tsVarNames[iTimeSeriesVar].equals(TS_VAR_STRUCTURE_INDEX) ) {
                     // Have the value of interest.
                     structurePosInHeader = i - 1;   // Data is 1+, but internally need 0+
+                    if ( Message.isDebugOn ) {
+                        Message.printDebug( 1, routine, "Structure index in time series loop [" + iStructure +
+                                "] is [" + structurePosInHeader + "] read from byte " + pos);
+                    }
                     // No need to keep reading variables
                     break;
                 }
@@ -1249,6 +1220,8 @@ throws IOException
                 // Read and skip...
                 __fp.readLittleEndianString1(__tsVarLength[iTimeSeriesVar]);
             }
+            // For debugging
+            pos += __tsVarLength[iTimeSeriesVar];
         }
         if ( structurePosInHeader < 0 ) {
             // Something is wrong - could not figure out the structure index for the structure.
