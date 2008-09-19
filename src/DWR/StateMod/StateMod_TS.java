@@ -507,15 +507,12 @@ to fill missing data using TSUtil.fillUsingPattern().
 The IOUtil.getPathUsingWorkingDir() method is applied to the filename.
 @return A Vector of StringMonthTS containing pattern data.
 @param filename Name of pattern file to read.
-@param read_data true if all the data should be read, false if only the header
-should be read.
+@param read_data true if all the data should be read, false if only the header should be read.
 */
-public static Vector readPatternTimeSeriesList (	String filename,
-							boolean read_data )
+public static Vector readPatternTimeSeriesList ( String filename, boolean read_data )
 {	int	dl = 1, i, m1, m2, y1, y2, num_years, year = 0, len,
 		currentTSindex, current_year=0, init_year, numts = 0;
-	String	chval, iline, message,
-		rtn="StateMod_TS.readPatternTimeSeriesList", value;
+	String	chval, iline, message, rtn="StateMod_TS.readPatternTimeSeriesList", value;
 	DateTime date = new DateTime (DateTime.PRECISION_MONTH);
 	DateTime date1 = new DateTime (DateTime.PRECISION_MONTH);
 	DateTime date2 = new DateTime (DateTime.PRECISION_MONTH);
@@ -526,12 +523,11 @@ public static Vector readPatternTimeSeriesList (	String filename,
 	String full_filename = IOUtil.getPathUsingWorkingDir(filename);
 	try {
 	if ( Message.isDebugOn ) {
-		Message.printDebug ( dl, rtn,
-		"Reading StateMod format pattern file: \"" +
-		full_filename + "\"");
+		Message.printDebug ( dl, rtn, "Reading StateMod format pattern file: \"" + full_filename + "\"");
 	}
 	BufferedReader ifp = null;
-	try {	ifp = new BufferedReader ( new FileReader ( full_filename));
+	try {
+	    ifp = new BufferedReader ( new FileReader ( full_filename));
 	}
 	catch ( Exception e ) {
 		message = "Unable to open file \"" + full_filename + "\"";
@@ -575,16 +571,15 @@ public static Vector readPatternTimeSeriesList (	String filename,
 	String format_0 = null;
 	if ( iline.charAt(3) == '/' ) {
 		Message.printWarning ( 1, rtn,
-		"Non-standard header for file \"" + full_filename +
-		"\" allowing with work-around." );
+		"Non-standard header for file \"" + full_filename +	"\" allowing with work-around." );
 		format_0 = "i3x1i4x3i5x1i4s5s5";
 	}
-	else {	// Probably formatted correctly...
+	else {
+	    // Probably formatted correctly...
 		format_0 = "i5x1i4x5i5x1i4s5s5";
 	}
 	if ( Message.isDebugOn ) {
-		Message.printDebug ( dl, rtn, "Parsing line for calperiod: \"" +
-		iline + "\"" );
+		Message.printDebug ( dl, rtn, "Parsing line for calperiod: \"" + iline + "\"" );
 	}
 	v = StringUtil.fixedRead ( iline, format_0 );
 	m1 = ((Integer)v.elementAt(0)).intValue();
@@ -601,93 +596,97 @@ public static Vector readPatternTimeSeriesList (	String filename,
 		if (m2 < m1) {
 			y2 = 1;	// Treat as calendar year 0...1
 		}
-		else {	y2 = 0;	// Treat as calendar year 0
+		else {
+		    y2 = 0;	// Treat as calendar year 0
 		}
 	}
 
 	if ( m2<m1 ) {
 		num_years = y2 - y1;
 	}
-	else {	num_years = y2 - y1 + 1;
+	else {
+	    num_years = y2 - y1 + 1;
 	}
 
-	int [] format_month = {	StringUtil.TYPE_INTEGER,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING };
-	int [] format_month_w = {	5,
-					12,
-					8,
-					8,
-					8,
-					8,
-					8,
-					8,
-					8,
-					8,
-					8,
-					8,
-					8,
-					8 };
-	int [] format_annual = {StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING };
-	int [] format_annual_w = {	5,
-					12,
-					8,
-					8,
-					8,
-					8,
-					8,
-					8,
-					8,
-					8,
-					8,
-					8,
-					8,
-					8 };
+	int [] format_month = {
+	    StringUtil.TYPE_INTEGER,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING };
+	int [] format_month_w = {
+	    5,
+		12,
+		8,
+		8,
+		8,
+		8,
+		8,
+		8,
+		8,
+		8,
+		8,
+		8,
+		8,
+		8 };
+	int [] format_annual = {
+	    StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING };
+	int [] format_annual_w = {
+	    5,
+		12,
+		8,
+		8,
+		8,
+		8,
+		8,
+		8,
+		8,
+		8,
+		8,
+		8,
+		8,
+		8 };
 	iline = ifp.readLine();
 	if ( Message.isDebugOn ) {
 		Message.printDebug ( dl, rtn, "Parsing line: \"" + iline +"\"");
 	}
 	if (y1 != 0) { // this is monthly and includes year
 		if ( Message.isDebugOn ) {
-			Message.printDebug ( dl, rtn,
-			"Found monthly time series" );	
+			Message.printDebug ( dl, rtn, "Found monthly time series" );	
 		}
 		StringUtil.fixedRead ( iline, format_month, format_month_w, v );
 		current_year = ((Integer)v.elementAt(0)).intValue();
 		if ( Message.isDebugOn ) {
-			Message.printDebug ( dl, rtn, "current year set to: " +
-			current_year );
+			Message.printDebug ( dl, rtn, "current year set to: " +	current_year );
 		}
 		init_year = current_year;
 	}
-	else { // this is annual and will not include year
+	else {
+	    // this is annual and will not include year
 		if ( Message.isDebugOn ) {
-			Message.printDebug ( dl, rtn,
-			"Found annual time series" );	
+			Message.printDebug ( dl, rtn, "Found annual time series" );	
 		}
 		StringUtil.fixedRead ( iline, format_annual, format_annual_w,v);	
 		init_year = 0;
@@ -698,12 +697,10 @@ public static Vector readPatternTimeSeriesList (	String filename,
 	// for each time series as a new station is encountered...
 
 	//while ( iline.length() > 0 )
-	StringMonthTS currentTS = null, month_ts = null;
-					// Used to fill data.
+	StringMonthTS currentTS = null, month_ts = null; // Used to fill data.
 	while ( iline != null ) {
 		if ( Message.isDebugOn ) {
-			Message.printDebug ( dl, rtn, "Parsing line: \"" +
-			iline + "\"" );
+			Message.printDebug ( dl, rtn, "Parsing line: \"" + iline + "\"" );
 		}
 		if ( iline.length() == 0 ) {
 			// Blank line - probably at the bottom but handle
@@ -713,13 +710,11 @@ public static Vector readPatternTimeSeriesList (	String filename,
 			if ( (iline != null) && (iline.length() > 0) ) {
 				if (y1 != 0) {
 					// this is monthly and includes year
-					StringUtil.fixedRead ( 
-					iline, format_month, format_month_w, v);
-					current_year = (
-					(Integer)v.elementAt(0)).intValue();
+					StringUtil.fixedRead ( iline, format_month, format_month_w, v);
+					current_year = ( (Integer)v.elementAt(0)).intValue();
 				}
-				else {	StringUtil.fixedRead ( 
-					iline,format_annual,format_annual_w,v);	
+				else {
+				    StringUtil.fixedRead ( iline,format_annual,format_annual_w,v);	
 				}
 			}
 			continue;
@@ -746,11 +741,10 @@ public static Vector readPatternTimeSeriesList (	String filename,
 			// Create a new time series...
 
 			if ( read_data ) {
-				month_ts = new StringMonthTS(
-					ident.getIdentifier(), date1, date2);
+				month_ts = new StringMonthTS( ident.getIdentifier(), date1, date2);
 			}
-			else {	month_ts = new StringMonthTS(
-					ident.getIdentifier(), null, null);
+			else {
+			    month_ts = new StringMonthTS( ident.getIdentifier(), null, null);
 			}
 
 			month_ts.setIdentifier ( ident );
@@ -760,26 +754,23 @@ public static Vector readPatternTimeSeriesList (	String filename,
 
 			// Genesis information...
 
-			month_ts.addToGenesis (
-			"Read StateMod TS for " + date1.toString() + " to " +
-			date2.toString() + " from \"" +
-			full_filename + "\"" );
+			month_ts.addToGenesis ( "Read StateMod TS for " + date1.toString() + " to " +
+			        date2.toString() + " from \"" + full_filename + "\"" );
 
 			// Attach new time series to list.
 			tslist.addElement ( month_ts );
 			numts++;
 		}
-		else {	if ( !read_data ) {
+		else {
+		    if ( !read_data ) {
 				// Done reading the data.
 				break;
 			}
 		}
 
-		// If we are working through the first year, currentTS
-		// will be = TStail.  On the other hand, if we have already
-		// established the list and are filling the rest of the
-		// rows, currentTS should be reset to the head of the list
-		// and the year should be increased 
+		// If we are working through the first year, currentTS will be = TStail.
+		// On the other hand, if we have already established the list and are filling the rest of the
+		// rows, currentTS should be reset to the head of the list and the year should be increased 
 
 		if (currentTSindex >= numts ) {
 			currentTSindex = 0;
@@ -796,9 +787,7 @@ public static Vector readPatternTimeSeriesList (	String filename,
 		for ( i=0; i<12; i++ ) {
 			value =	((String)v.elementAt(i+2)).trim();
 			if ( Message.isDebugOn ) {
-				Message.printDebug ( dl, rtn, 
-				"Setting data value for " + date.toString() + 
-				" to " + value );
+				Message.printDebug ( dl, rtn, "Setting data value for " + date.toString() + " to " + value );
 			}
 			currentTS.setDataValue ( date, value );
 			date.addMonth ( 1 );
@@ -810,13 +799,11 @@ public static Vector readPatternTimeSeriesList (	String filename,
 
 		if ( iline != null && iline.length()>0) {
 			if (y1 != 0) { // this is monthly and includes year
-				StringUtil.fixedRead ( 
-				iline, format_month, format_month_w, v );
-				current_year = (
-					(Integer)v.elementAt(0)).intValue();
+				StringUtil.fixedRead ( iline, format_month, format_month_w, v );
+				current_year = ( (Integer)v.elementAt(0)).intValue();
 			}
-			else {	StringUtil.fixedRead ( 
-				iline, format_annual, format_annual_w, v );	
+			else {
+			    StringUtil.fixedRead ( iline, format_annual, format_annual_w, v );	
 			}
 		}
 
@@ -830,8 +817,7 @@ public static Vector readPatternTimeSeriesList (	String filename,
 	format_annual_w = null;
 	v = null;
 	} catch ( Exception e ) {
-		Message.printWarning ( 2, rtn,
-		"Error reading file.  See log file." );
+		Message.printWarning ( 2, rtn, "Error reading file.  See log file." );
 		Message.printWarning ( 2, rtn, e );
 	}
 	return tslist;
@@ -842,20 +828,15 @@ Read a time series from a StateMod format file.  The TSID string is specified
 in addition to the path to the file.  It is expected that a TSID in the file
 matches the TSID (and the path to the file, if included in the TSID would not
 properly allow the TSID to be specified).  This method can be used with newer
-code where the I/O path is separate from the TSID that is used to identify the
-time series.
+code where the I/O path is separate from the TSID that is used to identify the time series.
 The IOUtil.getPathUsingWorkingDir() method is applied to the filename.
-@return a pointer to a newly-allocated time series if successful, a NULL pointer
-if not.
-@param tsident_string The full identifier for the time series to
-read.
+@return a pointer to a newly-allocated time series if successful, a NULL pointer if not.
+@param tsident_string The full identifier for the time series to read.
 @param filename The name of a file to read
 (in which case the tsident_string must match one of the TSID strings in the
 file).
-@param date1 Starting date to initialize period (null to read the entire time
-series).
-@param date2 Ending date to initialize period (null to read the entire time
-series).
+@param date1 Starting date to initialize period (null to read the entire time series).
+@param date2 Ending date to initialize period (null to read the entire time series).
 @param units Units to convert to.
 @param read_data Indicates whether data should be read (false=no, true=yes).
 */
