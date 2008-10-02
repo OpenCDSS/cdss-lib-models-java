@@ -13,6 +13,7 @@ import RTi.Util.IO.EndianRandomAccessFile;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
+import RTi.Util.String.StringUtil;
 import RTi.Util.Time.DateTime;
 import RTi.Util.Time.TimeInterval;
 
@@ -291,6 +292,21 @@ throws Exception
 	else {	// Version is in the file...
 		return version_double;
 	}
+}
+
+/**
+Replace reserved characters in regular expressions with literals, needed because
+some data types have -/%() characters.
+@param s String to process.
+@return String where special characters are escaped to literals.
+*/
+private String escapeRegExpressionChars ( String s )
+{
+    String specialChars = "-/%()[]!^<>=?+:,|{}";
+    for ( int i = 0; i < specialChars.length(); i++ ) {
+        s = StringUtil.replaceString(s, ""+specialChars.charAt(i), "\\" + specialChars.charAt(i) );
+    }
+    return s;
 }
 
 /**
@@ -945,10 +961,10 @@ throws Exception
 
 	Vector tslist = new Vector();
 	if ( (tsidentPattern == null) || (tsidentPattern.length() == 0) ) {
+	    // Match all parts when searching the data.
 		tsidentPattern = "*.*.*.*.*";
 	}
-	TSIdent tsident_regexp = new TSIdent ( tsidentPattern );
-					// TSIdent containing the regular expression parts.
+	TSIdent tsident_regexp = new TSIdent ( tsidentPattern ); // TSIdent containing the regular expression parts.
 	// Make sure that parts have wildcards if not specified...
 	if ( tsident_regexp.getLocation().length() == 0 ) {
 		tsident_regexp.setLocation("*");
@@ -970,11 +986,11 @@ throws Exception
 	tsident_regexp.setSource ( "*" );
 	tsident_regexp.setInterval ( "*" );
 	tsident_regexp.setScenario ( "*" );
-	String tsident_regexp_loc = tsident_regexp.getLocation();
-	String tsident_regexp_source = tsident_regexp.getSource();
-	String tsident_regexp_type = tsident_regexp.getType();
-	String tsident_regexp_interval = tsident_regexp.getInterval();
-	String tsident_regexp_scenario = tsident_regexp.getScenario();
+	String tsident_regexp_loc = escapeRegExpressionChars(tsident_regexp.getLocation());
+	String tsident_regexp_source = escapeRegExpressionChars(tsident_regexp.getSource());
+	String tsident_regexp_type = escapeRegExpressionChars(tsident_regexp.getType());
+	String tsident_regexp_interval = escapeRegExpressionChars(tsident_regexp.getInterval());
+	String tsident_regexp_scenario = escapeRegExpressionChars(tsident_regexp.getScenario());
 	boolean station_has_wildcard = false;		// Use to speed up
 	boolean datatype_has_wildcard = false;		// loops.
 	TS ts = null;
@@ -1012,7 +1028,7 @@ throws Exception
     		// Loop through the parameters...
     		for ( int iparam = 0; iparam < __numTimeSeriesVar; iparam++ ) {
     			// Check the station and parameter to see if
-    			// they match - all other fields are allowed to be wildcarded...
+    			// they match - all other fields are allowed to be wild-carded...
     			if ( Message.isDebugOn ) {
     				Message.printDebug ( 2, routine, "Parameter = \"" + __tsVarNames[iparam] + "\"");
     			}
@@ -1037,6 +1053,9 @@ throws Exception
         				        __tsVarNames[iparam]+ "\"" );
     			    }
     				continue;
+    			}
+    			if ( !shouldTimeSeriesBeIncluded(iparam)) {
+    			    continue;
     			}
     			if ( Message.isDebugOn ) {
     				Message.printDebug ( 2, routine, "Requested \"" + tsidentPattern +
@@ -1115,12 +1134,6 @@ throws Exception
 						filepos = calculateFilePosition( date.getAbsoluteMonth(),
 						        date1AbsoluteMonth, date2AbsoluteMonth,
 						        __tsStructureOrder[iStructure], iparam );
-						if ( Message.isDebugOn){
-							Message.printDebug ( dl, routine,
-							"Reading for " + date + " iStructure=" + iStructure+
-							" iparam="+ iparam +
-							" filepos=" + filepos );
-						}
 						if ( filepos < 0 ) {
 						    // Leave missing in the result.
 							continue;
@@ -1136,20 +1149,22 @@ throws Exception
 						    else if ( paramTypeInt ) {
                                 param = (float)__fp.readLittleEndianInt();
                             }
+						    if ( Message.isDebugOn){
+						        Message.printDebug ( dl, routine,
+                                    "Read value " + param + " for " + date + " iStructure=" + iStructure+
+                                    " iparam="+ iparam + " filepos=" + filepos );
+                            }
 						}
 						catch ( Exception e ) {
 							// Assume end of file so break out of read.
 							Message.printWarning ( 3, routine,
-							"Unexpected error - stop reading data.  Expected file size =" +
-							__estimatedFileLength );
+							"Unexpected error reading for date " + date + " structure[" + iStructure +
+							"] param[" + iparam + "] filepos(byte)=" + filepos +
+							" - stop reading data.  Expected file size =" + __estimatedFileLength );
 							break;
 						}
 						// Convert units if requested...
 						// FIXME SAM Need to enable units conversion
-						if ( Message.isDebugOn){
-							Message.printDebug ( 2, routine,
-							        "At byte " + filepos + ", parameter value is " + param );
-						}
 						ts.setDataValue(date,param);
 					}
     			}
@@ -1239,6 +1254,21 @@ Return the number of time series in the file, including only public time series.
 */
 public int size ()
 {	return __numStructures*getTimeSeriesParameters().length;
+}
+
+/**
+Determine whether time series should be included in output.  Only time series data types
+that have real data are included.
+@param iTimeSeriesVar time series parameter
+*/
+private boolean shouldTimeSeriesBeIncluded ( int iTimeSeriesVar )
+{
+    if ( __tsVarTypes[iTimeSeriesVar].equals(TYPE_REAL) ) {
+        return true;
+    }
+    else {
+        return false;
+    }
 }
 
 } // End StateCU_BTS
