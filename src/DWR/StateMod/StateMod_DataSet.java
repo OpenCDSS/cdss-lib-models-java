@@ -237,8 +237,7 @@ maintained and is displayed by StateMod_DataSetManager.
 public class StateMod_DataSet extends DataSet
 {
 
-// REVISIT - are these really needed?  Are they consistent with some StateMod
-// choices?
+// TODO - are these really needed?  Are they consistent with some StateMod choices?
 
 /**
 Calendar year. (January - December) Potential parameter in setCyrl.
@@ -310,8 +309,7 @@ private final String __ESTIMATED = "Estimated";	// Appended to some daily time
 						// series data types to indicate
 						// an estimated time series.
 
-// REVISIT - SAM - StateMod data set types are not the same as StateCU and may
-// not be needed at all.
+// TODO - SAM - StateMod data set types are not the same as StateCU and may not be needed at all.
 
 /**
 The StateMod data set type is unknown.
@@ -337,8 +335,7 @@ public final static int COMP_OTHER_NODE = -5;	// Used when defining other
 // values are checked in methods like lookupComponentName() but do not have
 // sequential arrays.
 //
-// REVISIT SAM 2005-01-19 - Evaluate whether sub-components should be handled
-// in the arrays.
+// TODO SAM 2005-01-19 - Evaluate whether sub-components should be handled in the arrays.
 
 public final static int
 	COMP_CONTROL_GROUP = 0,
@@ -1513,9 +1510,7 @@ private Vector checkComponentData_WellRights ( PropList props )
 		}
 		id_i = wes_i.getID();
 		rights = StateMod_Util.getRightsForStation ( id_i, wer_Vector );
-		// REVISIT SAM 2007-01-02
-		// Evaluate how to put this code in a separate method and share
-		// between rights and stations.
+		// TODO SAM 2007-01-02 Evaluate how to put this code in a separate method and share between rights and stations.
 		if ( (rights == null) || (rights.size() == 0) ) {
 			// The following is essentially a copy of code for well
 			// stations. Keep the code consistent.  Note that the
@@ -1523,8 +1518,7 @@ private Vector checkComponentData_WellRights ( PropList props )
 			// HydroBase that lists of parcels are saved with well
 			// stations.  This will clobber any parcel data that
 			// may have been saved at the time that well stations
-			// were processed (if processed in the same commands
-			// file).
+			// were processed (if processed in the same commands file).
 			++count;
 			// Check for parcels...
 			wes_parcel_count = 0;
@@ -2336,7 +2330,7 @@ private Network createNetworkFromStateModRiverNetwork()
 			stadata =(StateMod_StreamGage)sta_data.elementAt(pos);
 			// In the river station file but only truly a stream
 			// station if it has historical time series..
-			// REVISIT - this is handled better now.
+			// TODO - this is handled better now.
 			if (	(stadata.getHistoricalMonthTS() != null) ||
 				(stadata.getHistoricalDayTS() != null) ) {
 				network.addFeature (
@@ -3425,7 +3419,7 @@ public Vector getSummary()
 		StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS).getData();
 	size = data_Vector.size();
 	infoVector.addElement("Number of stream estimate stations: " + size);
-// REVISIT - do actual counts of non-null time series links.
+// TODO - do actual counts of non-null time series links.
 /*
 	infoVector.addElement("Number of river stations with estimated " +
 		"baseflows: " + _baseflowsVector.size());
@@ -3484,7 +3478,7 @@ public Vector getSummary()
 	int rsize = rights_Vector.size();
 	infoVector.addElement("Number of rights: " + rsize );
 	if ( areTSRead() ) {
-/* REVISIT - need actual counts...
+/* TODO - need actual counts...
 		infoVector.addElement(
 			"Number of historical monthly time series: " + 
 			_divHistTSVector.size());
@@ -3531,7 +3525,7 @@ public Vector getSummary()
 	rsize = rights_Vector.size();
 	infoVector.addElement("Number of rights: " + rsize );
 	if ( areTSRead() ) {
-/* REVISIT 
+/* TODO 
 		infoVector.addElement("Number of monthly demand time series: "+
 			_isfMonthlyDemandTSVector.size());
 		infoVector.addElement(
@@ -3544,8 +3538,7 @@ public Vector getSummary()
 		}
 */
 	}
-	infoVector.addElement("Instream flow stations without "
-		+ "geographic locations:");
+	infoVector.addElement("Instream flow stations without geographic locations:");
 	infoVector.addElement("             # ID           Name");
 	StateMod_InstreamFlow isf;
 	count = 0;
@@ -3592,7 +3585,7 @@ public Vector getSummary()
 	rsize = rights_Vector.size();
 	infoVector.addElement("Number of rights: " + rsize );
 	if ( areTSRead() ) {
-/* REVISIT
+/* TODO
 		infoVector.addElement(
 			"Number of historical end of month time series: "+ 
 			_eomVector.size());
@@ -3639,7 +3632,7 @@ public Vector getSummary()
 	rsize = rights_Vector.size();
 	infoVector.addElement("Number of rights: " + rsize );
 	if ( areTSRead() ) {
-/* REVISIT
+/* TODO
 		infoVector.addElement(
 		"Number of historical monthly well pumping time series: " +
 		_wellHistTSVector.size());
@@ -3721,8 +3714,7 @@ public Vector getSummary()
 	return infoVector;
 }
 
-// REVISIT - need to support other data set or file using the input name part
-// of the TSID.
+// TODO - need to support other data set or file using the input name part of the TSID.
 /**
 Get the appropriate time series from a data set.  Only input time series
 (actual and estimated) are processed.  If the time series does not exist in
@@ -4593,7 +4585,7 @@ throws Exception
 		if ( interval.equalsIgnoreCase("Month") ) {
 			ts = res.getMaxTargetMonthTS ();
 			if ( (ts == null) && !areTSRead() && read_data ) {
-				// REVISIT - need to read 2nd time series in
+				// TODO - need to read 2nd time series in
 				// pair - code does not handle because it will
 				// find the first time series.
 			}
@@ -4602,7 +4594,7 @@ throws Exception
 		if ( interval.equalsIgnoreCase("Day") ) {
 			ts = res.getMaxTargetDayTS ();
 			if ( (ts == null) && !areTSRead() && read_data ) {
-				// REVISIT - need to read 2nd time series in
+				// TODO - need to read 2nd time series in
 				// pair - code does not handle because it will
 				// find the first time series.
 			}
@@ -5106,11 +5098,11 @@ private void initialize()
 	// consistent with StateMod GUI initializing data vectors to empty at
 	// startup.
 	//
-	// REVISIT - need to turn on data set components (set visible, etc.) as
+	// TODO - need to turn on data set components (set visible, etc.) as
 	// the control file is changed.  This allows new components to be
 	// enabled in the right order.
 	//
-	// REVISIT - should be allowed to have null data Vector but apparently
+	// TODO - should be allowed to have null data Vector but apparently
 	// StateMod GUI cannot handle yet - need to allow null later and use
 	// hasData() or similar to check.
 
@@ -5494,7 +5486,8 @@ public String lookupComponentName ( int comp_type )
 	else if ( comp_type == COMP_WELL_STATION_COLLECTIONS ) {
 		return __COMPNAME_WELL_STATION_COLLECTIONS;
 	}
-	else {	return super.lookupComponentName(comp_type);
+	else {
+	    return super.lookupComponentName(comp_type);
 	}
 }
 
@@ -5597,8 +5590,7 @@ if the component should be marked clean (from data read, or edits saved).
 */
 public void setDirty(int component_type, boolean is_dirty)
 {	DataSetComponent comp = getComponentForComponentType ( component_type );
-	// REVISIT SAM 2006-08-22
-	// What is this?  Left over from Tom???
+	// TODO SAM 2006-08-22 What is this?  Left over from Tom???
 /*
 	if (DUMP_DIRTY && component_type == COMP_OPERATION_RIGHTS) {
 		RTi.Util.GUI.JWorksheet.except(2, 4);
@@ -7872,8 +7864,7 @@ throws Exception
 	if ( (fn == null) || (fn.length() == 0) ) {
 		throw new Exception(description + " file name unavailable.");
 	}
-	// REVISIT - need to know whether this is an error that the user
-	// should acknowlege...
+	// TODO - need to know whether this is an error that the user should acknowlege...
 	if ( !IOUtil.fileExists(fn) ) {
 		throw new Exception(description + " file \""
 			+ fn + "\" does not exist.");

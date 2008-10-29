@@ -133,8 +133,7 @@ import RTi.Util.Time.TimeInterval;
 import RTi.Util.Time.TimeUtil;
 
 /**
-Provide an interface to a StateMod binary files.  Binary data are organized as
-follows:
+Provide an interface to a StateMod binary files.  Binary data are organized as follows:
 <pre>
 Station Type     Monthly File     Daily File
 --------------------------------------------
@@ -171,185 +170,264 @@ notes:
 public class StateMod_BTS
 {
 
-private final float CFS_TO_ACFT = (float)1.9835;// Conversion factor from CFS
-						// to ACFT - also need to
-						// multiply by days in month.
+/**
+Conversion factor from CFSto ACFT - also need to multiply by days in month.
+*/
+private final float CFS_TO_ACFT = (float)1.9835;
 
-private String __version = null;		// File format version as a
-						// String (e.g., "9.62").
-						// Before version 11.0 there was
-						// no version in the binary file
-						// so the code just reflects the
-						// documented format for the
-						// 9.62 version, especially
-						// since no documentaion exists
-						// for earlier versions of the
-						// binary files.
-private double __version_double = -999.0;	// File format version as a
-						// double, consistent with
-						// __version. used by some
-						// methods where the string is
-						// not.
-private String __header_program = "";		// Program that created the file.
-private String __header_date = "";		// Date for the software version.
+/**
+File format version as a String (e.g., "9.62").  Before version 11.0 there was no version in the binary file
+so the code just reflects the documented format for the 9.62 version, especially
+since no documentation exists for earlier versions of the binary files.
+ */
+private String __version = null;
+
+/**
+Program that created the file, typically "StateMod".
+*/
+private String __headerProgram = "";
+/**
+Date for the software version, in format YYYY/MM/DD.
+*/
+private String __headerDate = "";
 
 // Data members...
 
-private String __tsfile;			// Name of the binary file being
-						// operated on (may or may not
-						// be a full path).
-private String __full_tsfile;			// Full path to binary file
-						// being operated on.  This is
-						// used as the key in the
-						// __file_Hashtable.
-
-private EndianRandomAccessFile 	__fp;		// Pointer to random access
-						// file (StateMod binary files
-						// are assumed to be little
-						// endian since they are written
-						// by Lahey FORTRAN code on a
-						// PC).  If necessary, the year
-						// value can be examined to
-						// determine the file
-						// endianness.
+/**
+Name of the binary file being operated on (may or may not be an absolute path).
+*/
+private String __tsfile;
+/**
+Full path to binary file being operated on.  This is used as the key in the __file_Hashtable.
+*/
+private String __tsfileFull;
+/**
+Pointer to random access file (StateMod binary files are assumed to be little endian since they are written
+by Lahey FORTRAN code on a PC).  If necessary, the year value can be examined to determine the file endian-ness.
+*/
+private EndianRandomAccessFile 	__fp;
+/**
+A hashtable for the file pointers (instances of StateMod_BTS).  This is used to increase performance.
+*/
 private static Hashtable __file_Hashtable = new Hashtable();
-						// A hashtable for the file
-						// pointers (instances of
-						// StateMod_BTS).  This is used
-						// to increase performance.
-private int	__record_length = 140;		// Direct access file record
-						// length, bytes.  140 is the
-						// B43 for 9.62, but this is
-						// reset below.
-private int	__header_length = 0;		// Length of the header in
-						// bytes, including lists of
-						// stations (everything before
-						// the time series data).  This
-						// is assigned after reading the
-						// number of stations.
-private int	__interval_bytes = 0;		// Number of bytes for one full
-						// interval (month or day) of
-						// data for all stations, to
-						// simplify iterations.  This is
-						// assigned after reading the
-						// number of stations.
-private int	__estimated_file_length = 0;	// Estimated size of the file,
-						// calculated from the header
-						// information - used for
-						// debugging and to check for
-						// premature end of file.
-
-private int	__interval_base = TimeInterval.MONTH;
-						// Interval base for the binary
-						// file that is being read.
-private DateTime	__date1 = null;		// Contains the period for the
-private DateTime	__date2 = null;		// data, full calendar dates to
-						// the proper date precision.
-
-private int __numparm = 0; // Number of parameters for each
-						// data record, for the current
-						// file.  Set below depending on
-						// file contents and version.
-						// This will be set equal to one
-						// of __ndivO, __nresO, __nwelO.
-private int __maxparm = 0; // Maximum length of parameter list, for all files.
-private int __ndivO = 0; // Number of parameters specific to the diversion file.
-private int __nresO = 0; // Number of parameters specific to the reservoir file.
-private int __nwelO = 0; // Number of parameters specific to the well file.
-private String  [] __parameter = null; // List of the official parameter names.
-private String  [] __unit = null; // Units for each parameter.
-
+/**
+Direct access file record length, bytes.  140 is the B43 for 9.62, but this is reset below.
+*/
+private int	__recordLength = 140;
+/**
+Length of the header in bytes, including lists of stations (everything before the time series data).  This
+is assigned after reading the number of stations.  The first record format various between versions but
+always fits into one record.
+*/
+private int	__headerLength = 0;
+/**
+Number of bytes for one full interval (month or day) of data for all stations, to
+simplify iterations.  This is assigned after reading the number of stations.
+*/
+private int	__intervalBytes = 0;
+/**
+Estimated size of the file, calculated from the header information - used for
+debugging and to check for premature end of file.
+*/
+private int	__estimatedFileLengthBytes = 0;
+/**
+Interval base for the binary file that is being read.
+*/
+private int	__intervalBase = TimeInterval.MONTH;
+/**
+Start of the data, in calendar year, to proper date precision.
+*/
+private DateTime __date1 = null;
+/**
+End of the data, in calendar year, to proper date precision.
+*/
+private DateTime __date2 = null;
+/**
+Number of parameters for each data record, for the current file.  Set below depending on
+file contents and version.  This will be set equal to one of __ndivO, __nresO, __nwelO.
+*/
+private int __numparm = 0;
+/**
+Maximum length of parameter list, for all files.
+*/
+private int __maxparm = 0;
+/**
+Number of parameters specific to the diversion file.
+*/
+private int __ndivO = 0;
+/**
+Number of parameters specific to the reservoir file.
+*/
+private int __nresO = 0;
+/**
+Number of parameters specific to the well file.
+*/
+private int __nwelO = 0;
+/**
+List of the official parameter names.
+*/
+private String  [] __parameters = null;
+/**
+Units for each parameter.
+*/
+private String  [] __unit = null;
+/**
+Component type for the binary file: COMP_DIVERSION_STATIONS, COMP_RESERVOIR_STATIONS, or COMP_WELL_STATIONS.
+*/
 private int __comp_type = StateMod_DataSet.COMP_UNKNOWN;
-						// Component type for the binary file:
-						// COMP_DIVERSION_STATIONS
-						// COMP_RESERVOIR_STATIONS
-						// COMP_WELL_STATIONS
 
 // Binary header information, according to the StateMod documentation.
 // Currently, only the B43 header information is listed.
 
-private int	__iystr0 = 0;	// Beginning year of simulation
-private int	__iyend0 = 0;	// Ending year of simulation
-
-private int	__numsta = 0;	// Number of river nodes.
-private int	__numdiv = 0;	// Number of diversions.
-private int	__numifr = 0;	// Number of instream flows.
-private int	__numres = 0;	// Number of reservoirs.
-private int	__numown = 0;	// Number of reservoir owners.
-private int	__nrsact = 0;	// Number of active reservoirs
-private int	__numrun = 0;	// Number of baseflow (stream gage + stream estimate)
-private int	__numdivw= 0;	// Number of wells.
-private int	__numdxw = 0;	// Number of ?
-
-private String []	__xmonam = null;	// List of month names, used to
-						// determine whether the data
-						// are water or calendar year.
-private int []		__mthday = null;	// Number of days per month,
-						// corresponding to __xmonam.
-						// This is used to convert CFS
-						// to ACFT.  Note February
-						// always has 28 days.
-private int []		__mthday2 = null;	// __mthday, always in calendar order.
-
-private String[]	__cstaid = null;	// List of river node IDs.  The
-						// data records are in this order.
-private String[]	__stanam = null;	// Station names for river nodes.
-
-private String[]	__cdivid = null;	// List of diversion IDs.
-private String[]	__divnam = null;	// Diversion names.
-private int[]		__idvsta = null;	// River node position for diversion (1+).
-
-private String[]	__cifrid = null;	// List of instream flow IDs.
-private String[]	__xfrnam = null;	// Instream flow names.
-private int[]		__ifrsta = null;	// River node position for instream flow (1+).
-
-private String[]	__cresid = null;	// List of reservoir IDs.
-private String[]	__resnam = null;	// Reservoir names.
-private int[]		__irssta = null;	// River node position for reservoir (1+).
-private int[]		__iressw = null;	// Indicates whether reservoir
-						// is on or off.  Reservoirs
-						// that are off do not have
-						// output records.
-private int[]		__nowner = null;	// Number of owners (accounts) for each reservoir,
-						// cumulative, and does not
-						// include, totals, which are
-						// stored as account 0 for each
-						// reservoir.
-private int[]		__nowner2 = null;	// Number of owners (accounts)
-						// for each reservoir (not
-						// cumulative like __nowner).
-						// This DOES include the
-						// total account, which is
-						// account 0.
-private int[]		__nowner2_cum = null;	// Number of owners (accounts)
-						// for each reservoir,
-						// cumulative, including
-						// the current reservoir.  This
-						// includes the total and is
-						// only for active reservoirs.
-						// This is used when figuring
-						// out how many records to skip
-						// for previous stations.
-private int[]		__nowner2_cum2 = null;	// Number of owners (accounts)
-						// for each reservoir,
-						// cumulative, taking into
-						// account that inactive
-						// reservoirs are at the end
-						// of the list of time series
-						// and can be ignored.
-
-private String[]	__crunid = null;	// List of stream gage and
-						// stream estimate IDs (nodes
-						// that have baseflows).
-private String[]	__runnam = null;	// Stream gage and stream
-						// estimate names.
-private int[]		__irusta = null;	// River node position for
-						// station (1+).
-
-private String[]	__cdividw = null;	// List of well IDs.
-private String[]	__divnamw = null;	// Well names.
-private int[]		__idvstw = null;	// River node position for
-						// well (1+).
+/**
+Beginning year of simulation.
+*/
+private int	__iystr0 = 0;
+/**
+Ending year of simulation.
+*/
+private int	__iyend0 = 0;
+/**
+Number of river nodes.
+*/
+private int	__numsta = 0;
+/**
+Number of diversions.
+*/
+private int	__numdiv = 0;
+/**
+Number of instream flow locations.
+*/
+private int	__numifr = 0;
+/**
+Number of reservoirs.
+*/
+private int	__numres = 0;
+/**
+Number of reservoir owners.
+*/
+private int	__numown = 0;
+/**
+Number of active reservoirs.
+*/
+private int	__nrsact = 0;
+/**
+Number of baseflow (stream gage + stream estimate)
+*/
+private int	__numrun = 0;
+/**
+Number of wells.
+*/
+private int	__numdivw= 0;
+/**
+Number of ?
+*/
+private int	__numdxw = 0;
+/**
+List of month names, used to determine whether the data are water or calendar year.
+*/
+private String [] __xmonam = null;
+/**
+Number of days per month, corresponding to __xmonam.  This is used to convert CFS
+to ACFT.  Note February always has 28 days.
+*/
+private int [] __mthday = null;
+/**
+__mthday, always in calendar order.
+*/
+private int [] __mthdayCalendar = null;
+/**
+List of river node IDs.  The data records are in this order.
+*/
+private String[] __cstaid = null;
+/**
+Station names for river nodes.
+*/
+private String[] __stanam = null;
+/**
+List of diversion IDs.
+*/
+private String[] __cdivid = null;
+/**
+Diversion names.
+*/
+private String[] __divnam = null;
+/**
+River node position for diversion (1+).
+*/
+private int[] __idvsta = null;
+/**
+List of instream flow IDs.
+*/
+private String[] __cifrid = null;
+/**
+Instream flow names.
+*/
+private String[] __xfrnam = null;
+/**
+River node position for instream flow (1+).
+*/
+private int[] __ifrsta = null;
+/**
+List of reservoir IDs.
+*/
+private String[] __cresid = null;
+/**
+Reservoir names.
+*/
+private String[] __resnam = null;
+/**
+River node position for reservoir (1+).
+*/
+private int[] __irssta = null;
+/**
+Indicates whether reservoir is on or off.  Reservoirs that are off do not have output records.
+*/
+private int[] __iressw = null;
+/**
+Number of owners (accounts) for each reservoir, cumulative, and does not include, totals, which are
+stored as account 0 for each reservoir.
+*/
+private int[] __nowner = null;
+/**
+Number of owners (accounts) for each reservoir (not cumulative like __nowner).
+This DOES include the total account, which is account 0.
+*/
+private int[] __nowner2 = null;
+/**
+Number of owners (accounts) for each reservoir, cumulative, including the current reservoir.  This includes the total
+and is only for active reservoirs.  This is used when figuring out how many records to skip for previous stations.
+*/
+private int[] __nowner2_cum = null;
+/**
+Number of owners (accounts) for each reservoir, cumulative, taking into account that inactive reservoirs are at
+the end of the list of time series and can be ignored.
+*/
+private int[] __nowner2_cum2 = null;
+/**
+List of stream gage and stream estimate IDs (nodes that have baseflows).
+*/
+private String[] __crunid = null;
+/**
+Stream gage and stream estimate names.
+*/
+private String[] __runnam = null;
+/**
+River node position for station (1+).
+*/
+private int[] __irusta = null;
+/**
+List of well IDs.
+*/
+private String[] __cdividw = null;
+/**
+Well names.
+*/
+private String[] __divnamw = null;
+/**
+River node position for well (1+).
+*/
+private int[] __idvstw = null;
 
 /**
 Open a binary StateMod binary time series file.  It is assumed that the file
@@ -358,12 +436,12 @@ to the file.  The header information is immediately read and is available for
 access by other methods.  After opening the file, the readTimeSeries*() methods
 can be called to read time series using time series identifiers.
 @param tsfile Name of binary file to write.
-@exception IOException if unabled to open the file.
+@exception IOException if unable to open the file.
 */
 public StateMod_BTS ( String tsfile )
 throws IOException
 {	// Initialize the file using the version in the header if available...
-	initialize ( tsfile, -999.0 );
+	initialize ( tsfile, "" );
 }
 
 /**
@@ -373,13 +451,13 @@ to the file.  The header information is immediately read and is available for
 access by other methods.  After opening the file, the readTimeSeries*() methods
 can be called to read time series using time series identifiers.
 @param tsfile Name of binary file to write.
-@param file_version Version of StateMod that wrote the file.
+@param fileVersion Version of StateMod that wrote the file.
 This is used, for example, by some TSTool commands to read old file formats.
-@exception IOException if unabled to open the file.
+@exception IOException if unable to open the file.
 */
-public StateMod_BTS ( String tsfile, double file_version )
+public StateMod_BTS ( String tsfile, String fileVersion )
 throws IOException
-{	initialize ( tsfile, file_version );
+{	initialize ( tsfile, fileVersion );
 }
 
 /**
@@ -406,26 +484,26 @@ the owner/accounts for a reservoir.
 */
 private long calculateFilePosition ( DateTime date, int ista, int its, int iparam )
 {	long pos = -1;
-	if ( __interval_base == TimeInterval.MONTH ) {
+	if ( __intervalBase == TimeInterval.MONTH ) {
 		if ( __comp_type == StateMod_DataSet.COMP_RESERVOIR_STATIONS ) {
 			int nowner2_cum_prev = 0;
 			if ( ista > 0 ) {
 				nowner2_cum_prev = __nowner2_cum2[ista - 1];
 			}
-			pos = __header_length	// First static records + lists of stations Previous full months...
-			+ (date.getAbsoluteMonth() - __date1.getAbsoluteMonth())*__interval_bytes
+			pos = __headerLength	// First static records + lists of stations Previous full months...
+			+ (date.getAbsoluteMonth() - __date1.getAbsoluteMonth())*__intervalBytes
 			// Reservoir accounts...
-			+ nowner2_cum_prev*__record_length
+			+ nowner2_cum_prev*__recordLength
 			// Previous account time series for this station...
-			+ its*__record_length
+			+ its*__recordLength
 			// Previous parameters for this station (each value is a 4-byte float)...
 			+ iparam*4;
 		}
 		else {
 		    // Non-reservoirs have only one time series per station.
-			pos = __header_length	// First static records + lists of stations
-			+ (date.getAbsoluteMonth() - __date1.getAbsoluteMonth())*__interval_bytes // Previous full months...
-			+ ista*__record_length // Previous stations for current month...
+			pos = __headerLength	// First static records + lists of stations
+			+ (date.getAbsoluteMonth() - __date1.getAbsoluteMonth())*__intervalBytes // Previous full months...
+			+ ista*__recordLength // Previous stations for current month...
 			+ iparam*4; // Previous parameters for this station (each value is a 4-byte float)...
 		}
 	}
@@ -436,27 +514,27 @@ private long calculateFilePosition ( DateTime date, int ista, int its, int ipara
 			if ( ista > 0 ) {
 				nowner2_cum_prev = __nowner2_cum2[ista - 1];
 			}
-			pos = __header_length	// First static records + lists of stations
+			pos = __headerLength	// First static records + lists of stations
 			// Previous full months...
-			+ (date.getAbsoluteMonth() - __date1.getAbsoluteMonth())*31*__interval_bytes
+			+ (date.getAbsoluteMonth() - __date1.getAbsoluteMonth())*31*__intervalBytes
 			// Previous full days in month...
-			+ (date.getDay() - 1)*__interval_bytes
+			+ (date.getDay() - 1)*__intervalBytes
 			// Reservoir accounts...
-			+ nowner2_cum_prev*__record_length
+			+ nowner2_cum_prev*__recordLength
 			// Previous account time series for this station...
-			+ its*__record_length +
+			+ its*__recordLength +
 			// Previous parameters for this station (each value is a 4-byte float)...
 			+ iparam*4;
 		}
 		else {
 		    // Non-reservoirs have only one time series per station.
-			pos = __header_length	// First static records + lists of stations
+			pos = __headerLength	// First static records + lists of stations
 			// Previous full months...
-			+ (date.getAbsoluteMonth() - __date1.getAbsoluteMonth())*31*__interval_bytes
+			+ (date.getAbsoluteMonth() - __date1.getAbsoluteMonth())*31*__intervalBytes
 			// Previous full days...
-			+ (date.getDay() - 1)*__interval_bytes
+			+ (date.getDay() - 1)*__intervalBytes
 			// Previous stations for current day...
-			+ ista*__record_length
+			+ ista*__recordLength
 			// Previous parameters for this station (each value is a 4-byte float)...
 			+ iparam*4;
 		}
@@ -473,7 +551,7 @@ throws IOException
 {	__fp.close ();
 	// Remove from the Hashtable...
 	if ( __file_Hashtable.contains(this) ) {
-		__file_Hashtable.remove ( __full_tsfile );
+		__file_Hashtable.remove ( __tsfileFull );
 	}
 }
 
@@ -512,20 +590,13 @@ version 9.69 is returned, since this version has been in use for some time and i
 are made; therefore a full path should be provided to prevent errors.
 @exception Exception if there is an error opening or reading the file.
 */
-public static double determineFileVersion ( String filename )
+public static String determineFileVersion ( String filename )
 throws Exception
 {	StateMod_BTS bts = new StateMod_BTS ( filename );
-	double version_double = bts.getVersion();
+	String version = bts.getVersion();
 	bts.close();
 	bts = null;
-	if ( version_double < 0.0 ) {
-		// Default to common old version...
-		return StateMod_Util.VERSION_9_69;
-	}
-	else {
-	    // Version is in the file...
-		return version_double;
-	}
+	return version;
 }
 
 /**
@@ -536,7 +607,7 @@ throws Throwable
 {	__fp.close();
 	__fp = null;
 	__tsfile = null;
-	__full_tsfile = null;
+	__tsfileFull = null;
 	super.finalize();
 }
 
@@ -545,7 +616,7 @@ Return the interval base (TimeInterval.MONTH or TimeInterval.DAY).
 @return the data interval base.
 */
 public int getDataIntervalBase ()
-{	return __interval_base;
+{	return __intervalBase;
 }
 
 /**
@@ -568,19 +639,18 @@ public DateTime getDate2 ()
 Return the parameter list for the file, which is determined from the file
 header for version 11.x+ and is unknown otherwise.   Only the public parameters
 are provided (not extra ones that may be used internally).
-@return the parameter list read from the file header, or null if it cannot be
-determined from the file.
+@return the parameter list read from the file header, or null if it cannot be determined from the file.
 */
 public String [] getParameters ()
 {	// Return a copy of the array for only the appropriate parameters.
 	// The array by default will have __maxparm items, but not all of these
 	// are appropriate for other applications.
-	if ( (__numparm == 0) || (__parameter == null) ) {
+	if ( (__numparm == 0) || (__parameters == null) ) {
 		return null;
 	}
 	String [] parameter = new String[__numparm];
 	for ( int i = 0; i < __numparm; i++ ) {
-		parameter[i] = __parameter[i];
+		parameter[i] = __parameters[i];
 	}
 	return parameter;
 }
@@ -592,21 +662,21 @@ Return the version of the file (the StateMod version that wrote the file).
 This information is determined from the file header for version 11.x+ and is unknown otherwise. 
 @return the file format version.
 */
-public double getVersion ()
-{	return __version_double;
+public String getVersion ()
+{	return __version;
 }
 
 /**
 Initialize the binary file.  The file is opened and the header is read.
 @param tsfile Name of binary file.
-@param file_version Version of StateMod that wrote the file.
+@param fileVersion Version of StateMod that wrote the file.
 @exception IOException If the file cannot be opened or read.
 */
-private void initialize ( String tsfile, double file_version )
+private void initialize ( String tsfile, String fileVersion )
 throws IOException
 {	String routine = "StateMod_BTS.initialize";
 	__tsfile = tsfile;
-	__version_double = file_version;
+	__version = "";
 
 	// TODO SAM 2003? - for different file extensions, change the
 	// interval to TimeInterval.DAY if necessary.
@@ -614,14 +684,14 @@ throws IOException
 	// Open the binary file as a random access endian file.  This allows
 	// Big-endian Java to read the little-endian (Microsoft/Lahey) file...
 
-	__full_tsfile = IOUtil.getPathUsingWorkingDir ( tsfile );
-	__fp = new EndianRandomAccessFile ( __full_tsfile, "r" );
+	__tsfileFull = IOUtil.getPathUsingWorkingDir ( tsfile );
+	__fp = new EndianRandomAccessFile ( __tsfileFull, "r" );
 
 	// Initialize important data...
 
-	__file_Hashtable.put(__full_tsfile, this);
+	__file_Hashtable.put(__tsfileFull, this);
 
-	__interval_base = TimeInterval.MONTH;	// Default
+	__intervalBase = TimeInterval.MONTH;	// Default
 	String extension = IOUtil.getFileExtension ( __tsfile );
 
 	// Read the file header version...
@@ -632,58 +702,58 @@ throws IOException
 		// Diversions, instream flow, stream (monthly)...
 		// Use the diversion parameter list since it is the full list.
 		__comp_type = StateMod_DataSet.COMP_DIVERSION_STATIONS;
-		if ( StateMod_Util.isVersionAtLeast(__version_double, StateMod_Util.VERSION_11_00) ) {
-			__record_length = 160;
+		if ( StateMod_Util.isVersionAtLeast(__version, StateMod_Util.VERSION_11_00) ) {
+			__recordLength = 160;
 		} 
 		else {
-		    __record_length = 140;
+		    __recordLength = 140;
 		}
 	}
 	else if ( extension.equalsIgnoreCase("b49") ) {
 		// Diversions, instream flow, stream (daily)...
 		// Use the diversion parameter list since it is the full list.
-		__interval_base = TimeInterval.DAY;
+		__intervalBase = TimeInterval.DAY;
 		__comp_type = StateMod_DataSet.COMP_DIVERSION_STATIONS;
-		if ( StateMod_Util.isVersionAtLeast(__version_double, StateMod_Util.VERSION_11_00) ) {
-			__record_length = 160;
+		if ( StateMod_Util.isVersionAtLeast(__version, StateMod_Util.VERSION_11_00) ) {
+			__recordLength = 160;
 		} 
 		else {
-		    __record_length = 144;
+		    __recordLength = 144;
 		}
 	}
 	else if ( extension.equalsIgnoreCase("b44") ) {
 		// Reservoirs (monthly)...
 		__comp_type = StateMod_DataSet.COMP_RESERVOIR_STATIONS;
-		if ( StateMod_Util.isVersionAtLeast(__version_double, StateMod_Util.VERSION_11_00) ) {
-			__record_length = 160;
+		if ( StateMod_Util.isVersionAtLeast(__version, StateMod_Util.VERSION_11_00) ) {
+			__recordLength = 160;
 		} 
 		else {
-		    __record_length = 96;
+		    __recordLength = 96;
 		}
 	}
 	else if ( extension.equalsIgnoreCase("b50") ) {
 		// Reservoirs (daily)...
-		__interval_base = TimeInterval.DAY;
+		__intervalBase = TimeInterval.DAY;
 		__comp_type = StateMod_DataSet.COMP_RESERVOIR_STATIONS;
-		if ( StateMod_Util.isVersionAtLeast(__version_double, StateMod_Util.VERSION_11_00) ) {
-			__record_length = 160;
+		if ( StateMod_Util.isVersionAtLeast(__version, StateMod_Util.VERSION_11_00) ) {
+			__recordLength = 160;
 		}
 		else {
-		    __record_length = 96;
+		    __recordLength = 96;
 		}
 	}
 	else if ( extension.equalsIgnoreCase("b42") ) {
 		// Well (monthly)...
 		__comp_type = StateMod_DataSet.COMP_WELL_STATIONS;
 		// Same for all versions...
-		__record_length = 92;
+		__recordLength = 92;
 	}
 	else if ( extension.equalsIgnoreCase("b65") ) {
 		// Well (daily)...
-		__interval_base = TimeInterval.DAY;
+		__intervalBase = TimeInterval.DAY;
 		__comp_type = StateMod_DataSet.COMP_WELL_STATIONS;
 		// Same for all versions...
-		__record_length = 92;
+		__recordLength = 92;
 	}
 
 	// Read the file header...
@@ -691,16 +761,16 @@ throws IOException
 	readHeader ();
 
 	if ( Message.isDebugOn ) {
-		Message.printDebug ( 1, "", "Parameters are as follows, where "+
+		Message.printDebug ( 1, routine, "Parameters are as follows, where "+
 		"the number equals iparam in following messages." );
 		for ( int iparam = 0; iparam < __numparm; iparam++ ) {
-			Message.printDebug ( 1, "", "Parameter [" + iparam + "]=\"" + __parameter[iparam] +"\"");
+			Message.printDebug ( 1, "", "Parameter [" + iparam + "]=\"" + __parameters[iparam] +"\"");
 		}
 	}
 
 	// Set the dates...
 
-	if ( __interval_base == TimeInterval.MONTH ) {
+	if ( __intervalBase == TimeInterval.MONTH ) {
 		__date1 = new DateTime ( DateTime.PRECISION_MONTH );
 		__date2 = new DateTime ( DateTime.PRECISION_MONTH );
 	}
@@ -737,14 +807,14 @@ throws IOException
 
 	// Header length, used to position for data records...
 	int offset = 0;
-	if ( StateMod_Util.isVersionAtLeast(__version_double, StateMod_Util.VERSION_11_00) ) {
+	if ( StateMod_Util.isVersionAtLeast(__version, StateMod_Util.VERSION_11_00) ) {
 		// Offset in addition to header in older format files...
 		offset = 1		// Program version info
 			+ __maxparm*3	// Parameter list
 			+ 1;		// Unit
 	}
 	int resTotalAccountRec = 1;
-	__header_length = __record_length*(
+	__headerLength = __recordLength*(
 			offset	// header rec + parameters for new files
 			+ 4	// period, counts, month names, month days
 			+ __numsta	// Number of river nodes
@@ -755,7 +825,7 @@ throws IOException
 			+ __numdivw );	// Number of D&W nodes
 	// Number of bytes for one interval (one month or one day) of data for all stations...
 	if ( __comp_type == StateMod_DataSet.COMP_DIVERSION_STATIONS ) {
-		__interval_bytes = __record_length*__numsta;
+		__intervalBytes = __recordLength*__numsta;
 	}
 	else if ( __comp_type == StateMod_DataSet.COMP_RESERVOIR_STATIONS ) {
 		// Include owner/account records in addition to the 1 record
@@ -763,52 +833,50 @@ throws IOException
 		// reservoirs have the accounts included at the end, but no
 		// total (__nowner2_cum is used for the block size but
 		// __nowner2_cum2 is used to locate specific time series).
-		__interval_bytes = __record_length*__nowner2_cum[__numres - 1];
+		__intervalBytes = __recordLength*__nowner2_cum[__numres - 1];
 	}
 	else if ( __comp_type == StateMod_DataSet.COMP_WELL_STATIONS ) {
-		__interval_bytes = __record_length*__numdivw;
+		__intervalBytes = __recordLength*__numdivw;
 	}
 
 	// Estimated file length...
 
-	if ( __interval_base == TimeInterval.MONTH ) {
-		__estimated_file_length = __header_length +
-		__interval_bytes*12*(__iyend0 - __iystr0 + 1);
+	if ( __intervalBase == TimeInterval.MONTH ) {
+		__estimatedFileLengthBytes = __headerLength + __intervalBytes*12*(__iyend0 - __iystr0 + 1);
 	}
 	else {
 	    // One set of parameters per station...
-		__estimated_file_length = __header_length +
-		__interval_bytes*12*31*(__iyend0 - __iystr0 + 1);
+		__estimatedFileLengthBytes = __headerLength + __intervalBytes*12*31*(__iyend0 - __iystr0 + 1);
 	}
 	if ( Message.isDebugOn ) {
-		if ( __interval_base == TimeInterval.MONTH ) {
-			Message.printDebug ( 1, "", "Reading monthly data." );
+		if ( __intervalBase == TimeInterval.MONTH ) {
+			Message.printDebug ( 1, routine, "Reading monthly data." );
 		}
 		else {
-		    Message.printDebug ( 1, "", "Reading daily data." );
+		    Message.printDebug ( 1, routine, "Reading daily data." );
 		}
-		Message.printDebug ( 1, "", "Length of 1 record (bytes) = " + __record_length );
-		Message.printDebug ( 1, "",	"Header length (bytes) = " + __header_length );
+		Message.printDebug ( 1, routine, "Length of 1 record (bytes) = " + __recordLength );
+		Message.printDebug ( 1, routine,	"Header length (bytes) = " + __headerLength );
 		if ( __comp_type == StateMod_DataSet.COMP_DIVERSION_STATIONS ) {
 			Message.printDebug ( 1, "", "Number of stations in data set = " + __numsta );
 		}
 		else if ( __comp_type == StateMod_DataSet.COMP_RESERVOIR_STATIONS ) {
-			Message.printDebug ( 1, "",	"Number of reservoirs in data set = " + __numres);
-			Message.printDebug ( 1, "",
+			Message.printDebug ( 1, routine,	"Number of reservoirs in data set = " + __numres);
+			Message.printDebug ( 1, routine,
 			"Total number of reservoir accounts (does not include "+
 			"total accounts, does include inactive) = " + __numown);
 		}
 		else if ( __comp_type == StateMod_DataSet.COMP_WELL_STATIONS ) {
-			Message.printDebug ( 1, "", "Number of wells in data set = " + __numdivw );
+			Message.printDebug ( 1, routine, "Number of wells in data set = " + __numdivw );
 		}
-		if ( __interval_base == TimeInterval.MONTH ) {
-			Message.printDebug ( 1, "", "Length of 1 complete month (bytes) = " + __interval_bytes );
+		if ( __intervalBase == TimeInterval.MONTH ) {
+			Message.printDebug ( 1, routine, "Length of 1 complete month (bytes) = " + __intervalBytes );
 		}
 		else {
 		    // Daily
-			Message.printDebug ( 1, "", "Length of 1 complete day (bytes) = " +	__interval_bytes );
+			Message.printDebug ( 1, routine, "Length of 1 complete day (bytes) = " +	__intervalBytes );
 		}
-		Message.printDebug ( 1, "", "Estimated file size (bytes) = " + __estimated_file_length );
+		Message.printDebug ( 1, routine, "Estimated file size (bytes) = " + __estimatedFileLengthBytes );
 	}
 
 	if ( IOUtil.testing() ) {
@@ -826,8 +894,7 @@ throws IOException
 /**
 Look up the file pointer to use when opening a new file.  If the file is already
 open and is in the internal __file_HashTable, use it.  Otherwise, open the file
-and add it to the Hashtable.  The code to close the file must remove the file
-from the Hashtable.
+and add it to the Hashtable.  The code to close the file must remove the file from the Hashtable.
 @param full_fname Full path to file to open.
 */
 private static StateMod_BTS lookupStateModBTS ( String full_fname )
@@ -853,13 +920,13 @@ Test code to print records, brute force until data runs out.
 */
 private void printRecords0 ()
 throws Exception
-{
+{   String routine = "StateMod_BTS.printRecords0";
 	StringBuffer b = new StringBuffer();
 	double value = 0.0;
 	int iparm;
 	for ( int irec = 0; irec >= 0; irec++ ) {
 		try {
-		    __fp.seek ( __header_length + irec*__record_length );
+		    __fp.seek ( __headerLength + irec*__recordLength );
 		}
 		catch ( Exception e ) {
 			// End of data...
@@ -878,13 +945,12 @@ throws Exception
 			}
 			b.append ( " "+StringUtil.formatString(value,"%#7.0f"));
 		}
-		Message.printStatus ( 2, "", b.toString() );
+		Message.printStatus ( 2, routine, b.toString() );
 	}
 }
 
 /**
-Test code to print records, trying to do so intelligently.  The output in the
-log file can be sorted and
+Test code to print records, trying to do so intelligently.  The output in the log file can be sorted and
 compared against the standard *.xdd, *.xre, etc. reports.
 @param max_stations Indicate the maximum number of stations to print.
 */
@@ -980,7 +1046,7 @@ throws Exception
 					b.append ( " " +StringUtil.formatString(
 					value,"%#7.0f") );
 				}
-				Message.printStatus ( 2, "", b.toString() );
+				Message.printStatus ( 2, routine, b.toString() );
 				}
 			}
 		}
@@ -1001,7 +1067,7 @@ throws IOException
 	int dl = 1;
 
 	int header_rec = 0;
-	if ( StateMod_Util.isVersionAtLeast(__version_double, StateMod_Util.VERSION_11_00) ) {
+	if ( StateMod_Util.isVersionAtLeast(__version, StateMod_Util.VERSION_11_00) ) {
 		// Need to skip the first record that has the file version information.
 		// The period for the file is in record 2...
 		header_rec = 1;
@@ -1011,10 +1077,9 @@ throws IOException
 		header_rec = 0;
 		// Below we refer to record 2 since this is the newest format.
 	}
-	__fp.seek ( header_rec*__record_length );
+	__fp.seek ( header_rec*__recordLength );
 
-	// Record 2 - start and end year - check the months in record 3 to
-	// determine the year type...
+	// Record 2 - start and end year - check the months in record 3 to determine the year type...
 
 	__iystr0 = __fp.readLittleEndianInt ();
 	__iyend0 = __fp.readLittleEndianInt ();
@@ -1026,7 +1091,7 @@ throws IOException
 
 	// Record 3 - numbers of various stations...
 
-	__fp.seek ( (header_rec + 1)*__record_length );
+	__fp.seek ( (header_rec + 1)*__recordLength );
 	__numsta = __fp.readLittleEndianInt ();
 	if ( Message.isDebugOn ) {
 		Message.printDebug ( dl, routine, "numsta=" + __numsta );
@@ -1063,7 +1128,7 @@ throws IOException
 	if ( Message.isDebugOn ) {
 		Message.printDebug ( dl, routine, "numdxw=" + __numdxw );
 	}
-	if ( StateMod_Util.isVersionAtLeast(__version_double, StateMod_Util.VERSION_11_00) ) {
+	if ( StateMod_Util.isVersionAtLeast(__version, StateMod_Util.VERSION_11_00) ) {
 		__maxparm = __fp.readLittleEndianInt ();
 		if ( Message.isDebugOn ) {
 			Message.printDebug ( dl, routine, "maxparm=" + __maxparm );
@@ -1084,12 +1149,12 @@ throws IOException
 
 	// Record 4 - month names...
 
-	__fp.seek ( (header_rec + 2)*__record_length );
+	__fp.seek ( (header_rec + 2)*__recordLength );
 	__xmonam = new String[14];
 	char [] xmonam = new char[3];
 	int j = 0;
 	for ( int i = 0; i < 14; i++ ) {
-		// The months are written as 4-character strings but we only need the first 3...
+		// The months are written as 4-character strings but only need the first 3...
 		for ( j = 0; j < 3; j++ ) {
 			xmonam[j] = __fp.readLittleEndianChar1();
 		}
@@ -1102,7 +1167,7 @@ throws IOException
 
 	// Record 5 - number of days per month
 
-	__fp.seek ( (header_rec + 3)*__record_length );
+	__fp.seek ( (header_rec + 3)*__recordLength );
 	__mthday = new int[12];
 	for ( int i = 0; i < 12; i++ ) {
 		__mthday[i] = __fp.readLittleEndianInt();
@@ -1112,48 +1177,50 @@ throws IOException
 	}
 	// Create a new array that is always in calendar order.  Therefore,
 	// __mthday2[0] always has the number of days for January.
-	__mthday2 = new int[12];
-	if ( __xmonam[0].equalsIgnoreCase("OCT") ) {	// Water year...
-		__mthday2[9] = __mthday[0];	// Oct...
-		__mthday2[10] = __mthday[1];
-		__mthday2[11] = __mthday[2];
-		__mthday2[0] = __mthday[3];	// Jan...
-		__mthday2[1] = __mthday[4];
-		__mthday2[2] = __mthday[5];
-		__mthday2[3] = __mthday[6];
-		__mthday2[4] = __mthday[7];
-		__mthday2[5] = __mthday[8];
-		__mthday2[6] = __mthday[9];
-		__mthday2[7] = __mthday[10];
-		__mthday2[8] = __mthday[11];
+	__mthdayCalendar = new int[12];
+	if ( __xmonam[0].equalsIgnoreCase("OCT") ) {
+	    // Water year...
+		__mthdayCalendar[9] = __mthday[0];	// Oct...
+		__mthdayCalendar[10] = __mthday[1];
+		__mthdayCalendar[11] = __mthday[2];
+		__mthdayCalendar[0] = __mthday[3];	// Jan...
+		__mthdayCalendar[1] = __mthday[4];
+		__mthdayCalendar[2] = __mthday[5];
+		__mthdayCalendar[3] = __mthday[6];
+		__mthdayCalendar[4] = __mthday[7];
+		__mthdayCalendar[5] = __mthday[8];
+		__mthdayCalendar[6] = __mthday[9];
+		__mthdayCalendar[7] = __mthday[10];
+		__mthdayCalendar[8] = __mthday[11];
 	}
-	else if ( __xmonam[0].equalsIgnoreCase("NOV") ) { // Irrigation year...
-		__mthday2[10] = __mthday[0];	// Nov...
-		__mthday2[11] = __mthday[1];
-		__mthday2[0] = __mthday[2];	// Jan...
-		__mthday2[1] = __mthday[3];
-		__mthday2[2] = __mthday[4];
-		__mthday2[3] = __mthday[5];
-		__mthday2[4] = __mthday[6];
-		__mthday2[5] = __mthday[7];
-		__mthday2[6] = __mthday[8];
-		__mthday2[7] = __mthday[9];
-		__mthday2[8] = __mthday[10];
-		__mthday2[9] = __mthday[11];
+	else if ( __xmonam[0].equalsIgnoreCase("NOV") ) {
+	    // Irrigation year...
+		__mthdayCalendar[10] = __mthday[0];	// Nov...
+		__mthdayCalendar[11] = __mthday[1];
+		__mthdayCalendar[0] = __mthday[2];	// Jan...
+		__mthdayCalendar[1] = __mthday[3];
+		__mthdayCalendar[2] = __mthday[4];
+		__mthdayCalendar[3] = __mthday[5];
+		__mthdayCalendar[4] = __mthday[6];
+		__mthdayCalendar[5] = __mthday[7];
+		__mthdayCalendar[6] = __mthday[8];
+		__mthdayCalendar[7] = __mthday[9];
+		__mthdayCalendar[8] = __mthday[10];
+		__mthdayCalendar[9] = __mthday[11];
 	}
 	else {
 	    // Calendar...
-		__mthday2 = __mthday;
+		__mthdayCalendar = __mthday;
 	}
 
 	// Record 6 - river stations...
 
-	int offset2 = (header_rec + 4)*__record_length;
+	int offset2 = (header_rec + 4)*__recordLength;
 	__cstaid = new String[__numsta];
 	__stanam = new String[__numsta];
 	int counter = 0;
 	for ( int i = 0; i < __numsta; i++ ) {
-		__fp.seek ( offset2 + i*__record_length );
+		__fp.seek ( offset2 + i*__recordLength );
 		// Counter...
 		counter = __fp.readLittleEndianInt();
 		// Identifier as 12 character string...
@@ -1171,14 +1238,14 @@ throws IOException
 
 	// Record 7 - diversion stations...
 
-	offset2 = (header_rec + 4 + __numsta)*__record_length;
+	offset2 = (header_rec + 4 + __numsta)*__recordLength;
 	if ( __numdiv > 0 ) {
 		__cdivid = new String[__numdiv];
 		__divnam = new String[__numdiv];
 		__idvsta = new int[__numdiv];
 	}
 	for ( int i = 0; i < __numdiv; i++ ) {
-		__fp.seek ( offset2 + i*__record_length );
+		__fp.seek ( offset2 + i*__recordLength );
 		// Counter...
 		counter = __fp.readLittleEndianInt();
 		// Identifier as 12 character string...
@@ -1195,14 +1262,14 @@ throws IOException
 
 	// Record 8 - instream flow stations...
 
-	offset2 = (header_rec + 4 + __numsta + __numdiv)*__record_length;
+	offset2 = (header_rec + 4 + __numsta + __numdiv)*__recordLength;
 	if ( __numifr > 0 ) {
 		__cifrid = new String[__numifr];
 		__xfrnam = new String[__numifr];
 		__ifrsta = new int[__numifr];
 	}
 	for ( int i = 0; i < __numifr; i++ ) {
-		__fp.seek ( offset2 + i*__record_length );
+		__fp.seek ( offset2 + i*__recordLength );
 		// Counter...
 		counter = __fp.readLittleEndianInt();
 		// Identifier as 12 character string...
@@ -1218,7 +1285,7 @@ throws IOException
 
 	// Record 9 - reservoir stations...
 
-	offset2 = (header_rec + 4 + __numsta + __numdiv + __numifr)*__record_length;
+	offset2 = (header_rec + 4 + __numsta + __numdiv + __numifr)*__recordLength;
 	// The value of __nowner is the record number (1+) of the first owner
 	// for the current reservoir.  Therefore, the number of owners is
 	// calculated for the current reservoir by taking the number of owners
@@ -1256,7 +1323,7 @@ throws IOException
 		__nowner2_cum2 = new int[__numres];
 	}
 	for ( int i = 0; i < iend; i++ ) {
-		__fp.seek ( offset2 + i*__record_length );
+		__fp.seek ( offset2 + i*__recordLength );
 		// Counter...
 		counter = __fp.readLittleEndianInt();
 		// Identifier as 12 character string...
@@ -1296,8 +1363,7 @@ throws IOException
 			// Reservoir is active so add the total...
 			__nowner2[i] += 1;
 		}
-		// Cumulative accounts (including totals), inclusive of the
-		// current reservoir station.
+		// Cumulative accounts (including totals), inclusive of the current reservoir station.
 		if ( i == 0 ) {
 			// Initialize...
 			__nowner2_cum[i] = __nowner2[i];
@@ -1335,14 +1401,14 @@ throws IOException
 	// Record 10 - base flow stations...
 
 	int resTotalAccountRec = 1;
-	offset2 = (header_rec + 4 + __numsta + __numdiv + __numifr + __numres + resTotalAccountRec)*__record_length;
+	offset2 = (header_rec + 4 + __numsta + __numdiv + __numifr + __numres + resTotalAccountRec)*__recordLength;
 	if ( __numrun > 0 ) {
 		__crunid = new String[__numrun];
 		__runnam = new String[__numrun];
 		__irusta = new int[__numrun];
 	}
 	for ( int i = 0; i < __numrun; i++ ) {
-		__fp.seek ( offset2 + i*__record_length );
+		__fp.seek ( offset2 + i*__recordLength );
 		// Counter...
 		counter = __fp.readLittleEndianInt();
 		// Identifier as 12 character string...
@@ -1358,14 +1424,14 @@ throws IOException
 
 	// Record 11 - well stations...
 
-	offset2 = (header_rec + 4 + __numsta + __numdiv + __numifr + __numres + resTotalAccountRec + __numrun)* __record_length;
+	offset2 = (header_rec + 4 + __numsta + __numdiv + __numifr + __numres + resTotalAccountRec + __numrun)* __recordLength;
 	if ( __numdivw > 0 ) {
 		__cdividw = new String[__numdivw];
 		__divnamw = new String[__numdivw];
 		__idvstw = new int[__numdivw];
 	}
 	for ( int i = 0; i < __numdivw; i++ ) {
-		__fp.seek ( offset2 + i*__record_length );
+		__fp.seek ( offset2 + i*__recordLength );
 		// Counter...
 		counter = __fp.readLittleEndianInt();
 		// Identifier as 12 character string...
@@ -1383,52 +1449,51 @@ throws IOException
 	// the full list in the file, not the list that may be appropriate for
 	// the station type.  It is assumed that code that the calling code is
 	// requesting an appropriate parameter.  For example, the StateMod GUI
-	// graphing tool should have already filtered the parameters based on
-	// station type.
+	// graphing tool should have already filtered the parameters based on station type.
 	
-	if ( StateMod_Util.isVersionAtLeast(__version_double, StateMod_Util.VERSION_11_00) ) {
+	if ( StateMod_Util.isVersionAtLeast(__version, StateMod_Util.VERSION_11_00) ) {
+	    if ( Message.isDebugOn ) {
+	        Message.printDebug( dl, routine, "Reading parameters from file" );
+	    }
 		// Read the parameter lists and units from the file.  The
-		// parameters that are available are the same for streamflow,
-		// diversions, and wells...
-		String [] parameter = null;	// Temporary list - will only save the one that is needed for this file
+		// parameters that are available are the same for streamflow, diversions, and wells...
+		String [] parameters = null;	// Temporary list - will only save the one that is needed for this file
 		// TODO SAM 2005-12-23
 		// For now read through but later can just read the set of
 		// parameters that are actually needed for this file.
 		for ( int ip = 0; ip < 3; ip++ ) {
 			// Parameter lists for div, res, well binary files.
-			offset2 = (header_rec + 4 + __numsta + __numdiv +
-				__numifr + (__numres + resTotalAccountRec) +
-				__numrun + __numdivw + ip*__maxparm)*__record_length;
+			offset2 = (header_rec + 4 + __numsta + __numdiv + __numifr + (__numres + resTotalAccountRec) +
+				__numrun + __numdivw + ip*__maxparm)*__recordLength;
 			if ( __maxparm > 0 ) {
 				// Reallocate each time so as to not step on the saved array below...
-				parameter = new String[__maxparm];
+				parameters = new String[__maxparm];
 			}
 			for ( int i = 0; i < __maxparm; i++ ) {
 				// 4 is to skip the counter at the beginning of the line...
-				__fp.seek ( offset2 + i*__record_length + 4 );
-				parameter[i] = __fp.readLittleEndianString1(24).trim();
+				__fp.seek ( offset2 + i*__recordLength + 4 );
+				parameters[i] = __fp.readLittleEndianString1(24).trim();
 				//* Use during development...
 				if ( Message.isDebugOn ) {
 					Message.printDebug ( dl, routine, "Parameter from file...ip=" + ip +
-					" Parameter[" + i + "] = \"" + parameter[i] + "\"" );
+					" Parameter[" + i + "] = \"" + parameters[i] + "\"" );
 				}
 				//*/
 			}
-			// Because __maxparm only lists the maximum, reduce the
-			// list by decrementing the count if "NA" is at the
-			// end.  Also save the information if for the proper file...
+			// Because __maxparm only lists the maximum, reduce the list by decrementing the count if "NA" is at the
+			// end.  Also save the information if for the proper file.
 			if ( (ip == 0) && (__comp_type == StateMod_DataSet.COMP_DIVERSION_STATIONS) ) {
-				__parameter = parameter;
+				__parameters = parameters;
 				__numparm = __ndivO;
 				Message.printStatus ( 2, routine, "Saving diversion parameters list." );
 			}
 			else if ( (ip == 1) && (__comp_type == StateMod_DataSet.COMP_RESERVOIR_STATIONS) ) {
-				__parameter = parameter;
+				__parameters = parameters;
 				__numparm = __nresO;
-				Message.printStatus ( 2, routine, "Saving reservior parameters list." );
+				Message.printStatus ( 2, routine, "Saving reservoir parameters list." );
 			}
 			else if ( (ip == 2) && (__comp_type == StateMod_DataSet.COMP_WELL_STATIONS) ) {
-				__parameter = parameter;
+				__parameters = parameters;
 				__numparm = __nwelO;
 				Message.printStatus ( 2, routine, "Saving well parameters list." );
 			}
@@ -1436,34 +1501,35 @@ throws IOException
 	}
 	else {
 	    // Get the parameter list from hard-coded lists...
-		__parameter = StringUtil.toArray (
+	    Message.printDebug( dl, routine, "Getting parameters from hard-coded lists for older file version." );
+		__parameters = StringUtil.toArray (
 			StateMod_Util.getTimeSeriesDataTypes (
 			__comp_type,	// Componnent
 			null,	// ID - we want all in the file
 			null,	// DataSet - for now assume none
-			__version_double,	// Really need to get this from the file!
-			__interval_base,
+			__version,	// Really need to get this from the file!
+			__intervalBase,
 			false,	// Do not include input parameters
 			false,	// Do not include estimated input param.
 			true,	// Do include output parameters
 			false,	// No data set so false.
 			false,	// No group - not needed here
 			false));// No note - not needed here
-			__numparm = __parameter.length;
+			__numparm = __parameters.length;
 	}
 
 	// Parameter names...
 
 	if ( Message.isDebugOn ) {
-		Message.printDebug ( dl, routine, "Parameters for the file:" );
+		Message.printDebug ( dl, routine, "Parameters for the file (size is " + __numparm + "):" );
 		for ( int i = 0; i < __numparm; i++ ) {
-			Message.printDebug ( dl, routine, "Parameter[" + i + "] = \"" + __parameter[i] + "\"" );
+			Message.printDebug ( dl, routine, "Parameter[" + i + "] = \"" + __parameters[i] + "\"" );
 		}
 	}
 
-	if ( StateMod_Util.isVersionAtLeast(__version_double, StateMod_Util.VERSION_11_00) ) {
+	if ( StateMod_Util.isVersionAtLeast(__version, StateMod_Util.VERSION_11_00) ) {
 		offset2 = (header_rec + 4 + __numsta + __numdiv + __numifr +
-			(__numres + resTotalAccountRec) + __numrun + __numdivw + __maxparm*3)* __record_length;
+			(__numres + resTotalAccountRec) + __numrun + __numdivw + __maxparm*3)* __recordLength;
 		__fp.seek ( offset2 );
 		if ( __numparm > 0 ) {
 			__unit = new String[__numparm];
@@ -1472,7 +1538,7 @@ throws IOException
 			__unit[i] = __fp.readLittleEndianString1(4).trim();
 			if ( Message.isDebugOn ) {
 				Message.printDebug ( dl, routine, 
-				"For parameter \"" + __parameter[i] + "\" unit= \"" + __unit[i] + "\"" );
+				"For parameter \"" + __parameters[i] + "\" unit= \"" + __unit[i] + "\"" );
 			}
 		}
 	}
@@ -1488,77 +1554,85 @@ private void readHeaderVersion()
 throws IOException
 {	String routine = "StateMod_BTS.readHeaderVersion";
 	int dl = 1;
-	if ( __version_double > 0.0 ) {
-		// The version has been specified at construction...
-		__version = "" + StringUtil.formatString(__version_double,"%.2f");
-		Message.printDebug ( dl, routine, "The file has a specified version " + __version );
-		return;
-		
+	if ( Message.isDebugOn) {
+		Message.printDebug ( dl, routine, "The file version before reading is \"" + __version + "\"" );
 	}
-	// Files before version 11 have year start and year end (2 integers)
-	// in the first record.  Therefore, check the characters used for the
-	// date and see if at least two are non-null.  If non-null, assume the
-	// new 11+ format.  If null, assume the old format.
-	boolean pre_11 = false;
-	__fp.seek ( 16 );	// First '/' in date if YYYY/MM/DD
+    boolean pre11Format = false; // Indicates old format files
+    boolean newestFormat = false; // Indicates new format files
+	// Files >= 12.29 use the following (from Ray Bennett 2008-10-27):
+    // write(nf,rec=j1) CodeName, ver, vdate 
+    // where codename is character*8, 
+    //    ver is character *8, and 
+    //    vdate is character *10
+	// Therefore, check position [10] for a '.' which indicates the newer header format.
+	__fp.seek(10);
 	char test_char = __fp.readLittleEndianChar1();
-	if ( test_char == '\0' ) {
-		pre_11 = true;
-		__fp.seek ( 19 );	// Second '/' in date if YYYY/MM/DD
-		test_char = __fp.readLittleEndianChar1();
-		if ( test_char == '\0' ) {
-			pre_11 = true;
-		}
-	}	// Else both characters were non-null so pretty sure it is 11+
-	if ( Message.isDebugOn ) {
-		if ( pre_11 ) {
-			Message.printDebug ( dl, routine, "The file has a version < 11.x." );
-		}
-		else {
-		    Message.printDebug ( dl, routine, "The file has a version >= 11.x." );
-		}
-	}
-	if ( pre_11 ) {
-		// No version can be determined from the file...
-		__version = null;
-		__version_double = -999.0;
+	if ( test_char == '.') {
+	    // Have the latest header format
+	    newestFormat = true;
 	}
 	else {
+    	// Files before version 11 have year start and year end (2 integers)
+    	// in the first record.  Therefore, check the characters used for the
+    	// date and see if at least two are non-null.  If non-null, assume the
+    	// new 11+ format.  If null, assume the old format.
+    	__fp.seek ( 16 );	// First '/' in date if YYYY/MM/DD
+    	test_char = __fp.readLittleEndianChar1();
+    	if ( test_char == '\0' ) {
+    		pre11Format = true;
+    		__fp.seek ( 19 );	// Second '/' in date if YYYY/MM/DD
+    		test_char = __fp.readLittleEndianChar1();
+    		if ( test_char == '\0' ) {
+    			pre11Format = true;
+    		}
+    	}	// Else both characters were non-null so pretty sure it is 11+
+	}
+    if ( newestFormat ) {
+        Message.printStatus ( 2, routine, "The file version detected from header is >= 12.29." );
+    }
+    else if ( pre11Format ) {
+		Message.printStatus ( 2, routine, "The file version detected from header is < 11.x." );
+	}
+	else {
+	    Message.printStatus ( 2, routine, "The file version detected from header is >= 11.x. and < 12.29" );
+	}
+	if ( pre11Format ) {
+		// No version can be determined from the file...
+		__version = "";
+	}
+	else {
+	    // Version 11+ format
 	    // Reposition and read the header...
 		__fp.seek ( 0 );
 		// 8 characters for the program name...
-		__header_program = __fp.readLittleEndianString1(8).trim();
+		__headerProgram = __fp.readLittleEndianString1(8).trim();
 		// Program version...
-		__version_double = (double)__fp.readLittleEndianFloat();
-		__version = "" + StringUtil.formatString(
-		__version_double,"%.2f");	// Format to avoid remainder
+		if ( newestFormat ) {
+		    __version = __fp.readLittleEndianString1(8).trim();
+		}
+		else {
+		    // Version 11+ to < 12.29 used NN.NN format as float
+    		double versionDouble = (double)__fp.readLittleEndianFloat();
+    		__version = "" + StringUtil.formatString(versionDouble,"%.2f");	// Format to avoid remainder
+		}
 		// Date as 10 characters...
-		__header_date = __fp.readLittleEndianString1(10).trim();
+		__headerDate = __fp.readLittleEndianString1(10).trim();
 		if ( Message.isDebugOn ) {
 			Message.printDebug ( dl, routine, "Creator program=\"" +
-			__header_program + "\" file version=" + __version +
-			" software date=\"" + __header_date + "\"" );
+			__headerProgram + "\" file version=" + __version + " software date=\"" + __headerDate + "\"" );
 		}
 	}
 
 	// Set the version information so that it can be used elsewhere in the
 	// class (for example to determine the parameters)...
 
-	if ( __version != null ) {
-		__version_double = StringUtil.atod ( __version );
-	}
-	/**  Not certain
-	if ( __version_double <= 0.0 ) {
-		// Make a guess that the version can be determined from the
-		// StateMod -v...
-		__version_double = StateMod_Util.getStateModVersion();
-		__version = "" + __version_double;
-	}
-	*/
-	if ( __version_double <= 0.0 ) {
+	if ( __version.equals("") ) {
 		// If pre 11.0, then assume that it is the one before 11.0...
-		__version_double = StateMod_Util.VERSION_9_69;
-		__version = "9.69";
+        __version = "9.69";
+	    Message.printStatus( 2, routine, "Appears to be old file format - assuming that the StateMod file version is " + __version );
+	}
+	else {
+	    Message.printStatus( 2, routine, "Read StateMod file version from header: " + __version );
 	}
 }
 
@@ -1609,20 +1683,15 @@ read (where the scenario is NOT the file name).
 @param date2 Ending date to initialize period (NULL to read the entire time series).
 @param units Units to convert to (currently not supported).
 @param read_data Indicates whether data should be read (false=no, true=yes).
-@param props A PropList containing information to control the read.  Recognized
-properties include:
+@param props A PropList containing information to control the read.  Recognized properties include:
 <table width=100% cellpadding=10 cellspacing=0 border=2>
 
 <tr>
 <td><b>Property</b></td>   <td><b>Description</b></td>   <td><b>Default</b></td>
 </tr>
-<tr><td>CloseWhenDone</td>	<td>Specifies whether to close the<br>
-				file once the time series has been<br>
-				read from it</td>
-							<td>False<br>
-							True is the only <br>
-							other acceptable <br>
-							value.</td>
+<tr><td>CloseWhenDone</td>
+<td>Specifies whether to close the file once the time series has been read from it (False or True).</td>
+<td>False.</td>
 </tr>
 </table>
 */
@@ -1651,7 +1720,7 @@ throws Exception
 	}
 	catch ( Exception e ) {
 		Message.printWarning( 2,
-		"StateMod_BTS.readTimeSeries(String,...)", "Unable to open file \"" + full_fname + "\"" );
+		    "StateMod_BTS.readTimeSeries(String,...)", "Unable to open file \"" + full_fname + "\"" );
 		return ts;
 	}
 	// Call the fully-loaded method...
@@ -1675,14 +1744,12 @@ throws Exception
 Read a list of time series from the binary file.  A Vector of new time series is returned.
 @param tsident_pattern A regular expression for TSIdents to return.  For example
 * or null returns all time series.  *.*.XXX.* returns only time series matching
-data type XXX.  Currently only location and data type (output parameter) are
-checked and only a
+data type XXX.  Currently only location and data type (output parameter) are checked and only a
 * wildcard can be specified, if used.  This is useful for TSTool in order to
 list all stations that have a data type.  For reservoirs, only the main location
 can be matched, and the returned list of time series will include time series
 for all accounts.  When matching a specific time series (no wildcards), the
-main location part is first matched and the the reservoir account is checked
-if the main location is matched.
+main location part is first matched and the the reservoir account is checked if the main location is matched.
 @param date1 First date/time to read, or null to read the full period.
 @param date2 Last date/time to read, or null to read the full period.
 @param req_units Requested units for the time series (currently not implemented).
@@ -1691,8 +1758,7 @@ if the main location is matched.
 for the file or if a write error occurs.
 */
 public Vector readTimeSeriesList (	String tsident_pattern, DateTime date1,
-					DateTime date2, String req_units,
-					boolean read_data )
+					DateTime date2, String req_units, boolean read_data )
 throws Exception
 {	String routine = "StateMod_BTS.readTimeSeriesList";
 	// Using previously read informtion, loop through each time series
@@ -1726,8 +1792,7 @@ throws Exception
 	if ( tsident_regexp.getScenario().length() == 0 ) {
 		tsident_regexp.setScenario("*");
 	}
-	// These fields really have no bearing on the filter, but if not
-	// wildcarded, may cause a match to not be found...
+	// These fields really have no bearing on the filter, but if not wildcarded, may cause a match to not be found...
 	tsident_regexp.setSource ( "*" );
 	tsident_regexp.setInterval ( "*" );
 	tsident_regexp.setScenario ( "*" );
@@ -1776,12 +1841,9 @@ throws Exception
 		tsident_regexp_loc = tsident_regexp.getLocation();
 	}
 	boolean match_found = false;
-				// Indicates if a match for the specific station
-				// is made.
-				// TODO SAM 2006-01-04.  This seems to be a
-				// remnant of previous code.  It is used but
-				// many checks result in "continue" or "break"
-				// out of the loops.
+				// Indicates if a match for the specific station is made.
+				// TODO SAM 2006-01-04.  This seems to be a remnant of previous code.  It is used but
+				// many checks result in "continue" or "break" out of the loops.
 	String [] ids = null;	// Used to point to each list of station IDs.
 	String [] names = null;	// Used to point to each list of names.
 	int numids = 0;		// Used to point to size of each list.
@@ -1789,15 +1851,13 @@ throws Exception
 	int ista2 = 0;		// Station in data record portion of file to
 				// locate.  For diversion/instream/stream it is
 				// ista.  For reservoirs and wells it is the
-				// position of the reservoir or well in the
-				// file.
+				// position of the reservoir or well in the file.
 	int nts = 0;		// Number of time series per location/parameter
 				// combination (used with reservoir accounts).
 	int its = 0;		// Loop counter for time series.
 	String owner = "";	// Used to append a reservoir owner/account to the location, blank normally.
 	boolean convert_cfs_to_acft = true;
-				// Indicates whether a parameter's data should
-				// be converted from CFS to ACFT.
+				// Indicates whether a parameter's data should be converted from CFS to ACFT.
 	// Loop through the lists of stations:
 	//
 	int DIV = 0;	// Diversion stations
@@ -1812,13 +1872,11 @@ throws Exception
 	// below.  Diversions, instream flow, and stream stations are stored
 	// in the same binary file so multiple lists are checked for that file.
 	TSIdent current_tsident = new TSIdent ();
-				// Used for the time series below, to compare to
-				// the pattern.
+				// Used for the time series below, to compare to the pattern.
 	TSIdent tsident = null;	// Used when creating new time series.
 					
 	for ( int istatype = 0; istatype < 6; istatype++ ) {
-		// First check to see if we even need to search the station list
-		// for this loop index...
+		// First check to see if we even need to search the station list for this loop index...
 		// Diversion stations file has div, isf, baseflow, other (river
 		// nodes that are not another station type)
 		if ( (__comp_type==StateMod_DataSet.COMP_DIVERSION_STATIONS)
@@ -1879,12 +1937,12 @@ throws Exception
 				// Check the station and parameter to see if
 				// they match - all other fields are allowed to be wildcarded...
 				if ( Message.isDebugOn ) {
-					Message.printDebug ( 2, routine, "Parameter = " + __parameter[iparam] );
+					Message.printDebug ( 2, routine, "Parameter = " + __parameters[iparam] );
 				}
 				// Need to match against each station ID list.
 				// Set the information from the file into the working "tsident" to compare...
 				current_tsident.setLocation ( ids[iid] );
-				current_tsident.setType ( __parameter[iparam] );
+				current_tsident.setType ( __parameters[iparam] );
 				// Other TSID fields are left blank to match all.
 				if ( !current_tsident.matches(
 					tsident_regexp_loc,
@@ -1902,7 +1960,7 @@ throws Exception
 				}
 				if ( Message.isDebugOn ) {
 					Message.printDebug ( 2, routine, "Requested \"" + tsident_pattern +
-					"\" does match \"" + ids[iid] + "\" \"" + __parameter[iparam]+ "\"" );
+					"\" does match \"" + ids[iid] + "\" \"" + __parameters[iparam]+ "\"" );
 				}
 				// Figure out the river station from the match.  The original river node positions
 				// start at 1 so subtract 1 to get the in-memory positions.  The river node id for stations is
@@ -1975,7 +2033,7 @@ throws Exception
 				if ( match_found ) { // Don't just continue because a check to break occurs below.
 				sta_matched[ista][iparam] = true;
 				convert_cfs_to_acft = true;
-				if ( __interval_base == TimeInterval.DAY ) {
+				if ( __intervalBase == TimeInterval.DAY ) {
 					convert_cfs_to_acft = false;
 				}
 				if ( istatype == RES ) {
@@ -2011,21 +2069,21 @@ throws Exception
 					    // A reservoir total (no sub-location) or other station time series...
 						owner = "";
 					}
-					if ( __interval_base == TimeInterval.MONTH ) {
+					if ( __intervalBase == TimeInterval.MONTH ) {
 						ts = new MonthTS();
 						tsident = new TSIdent (
 							ids[iid] + owner,
 							"StateMod",
-							__parameter[iparam],
+							__parameters[iparam],
 							"Month","",
 							"StateModB", __tsfile );
 					}
-					else if( __interval_base == TimeInterval.DAY ){
+					else if( __intervalBase == TimeInterval.DAY ){
 						ts = new DayTS();
 						tsident = new TSIdent (
 							ids[iid] + owner,
 							"StateMod",
-							__parameter[iparam],
+							__parameters[iparam],
 							"Day","",
 							"StateModB", __tsfile );
 					}
@@ -2039,7 +2097,7 @@ throws Exception
 					else {
 					    ts.setDescription ( names[iid]);
 					}
-					ts.setDataType ( __parameter[iparam] );
+					ts.setDataType ( __parameters[iparam] );
 					// Data in file are CFS but we convert to ACFT
 					if ( convert_cfs_to_acft ) {
 						ts.setDataUnits ( "ACFT" );
@@ -2077,7 +2135,7 @@ throws Exception
 						}
 						// Read the data for the time series...
 						for ( date = new DateTime(date1); date.lessThanOrEqualTo(date2);
-							date.addInterval(__interval_base, 1) ){
+							date.addInterval(__intervalBase, 1) ){
 							if ( (date.getMonth()==2)	&& (date.getDay()==29) ){
 								// StateMod does not handle.
 								continue;
@@ -2100,7 +2158,7 @@ throws Exception
 								// Assume end of file so break out of read.
 								Message.printWarning ( 3, routine,
 								"Unexpected error reading byte " + filepos + " - stop reading data.  Expected file size ="+
-								__estimated_file_length );
+								__estimatedFileLengthBytes );
 								if ( Message.isDebugOn ) {
 								    Message.printWarning(3, routine, e);
 								}
@@ -2108,7 +2166,7 @@ throws Exception
 							}
 							// Convert to ACFT if necessary...
 							if ( convert_cfs_to_acft){
-								param = param*CFS_TO_ACFT*(float)__mthday2[date.getMonth() - 1];
+								param = param*CFS_TO_ACFT*(float)__mthdayCalendar[date.getMonth() - 1];
 							}
 							if ( Message.isDebugOn){
 								Message.printDebug ( 2, routine, "Parameter value (AF) is " + param );

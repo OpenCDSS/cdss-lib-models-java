@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-// StateMod_Util - Utility functions for statemod operation
+// StateMod_Util - Utility functions for StateMod operation
 //------------------------------------------------------------------------------
 // Copyright:	See the COPYRIGHT file.
 //------------------------------------------------------------------------------
@@ -173,12 +173,20 @@ private static double MISSING_DOUBLE_CEILING = -998.9;
 public static DateTime MISSING_DATE = null;
 
 /**
+Floating point values indicating binary file versions.  These are used by StateMod_BTS and
+other software to determine appropriate parameters to list.
+*/
+public static final double VERSION_9_01_DOUBLE = 9.01;
+public static final double VERSION_9_69_DOUBLE = 9.69;
+public static final double VERSION_11_00_DOUBLE = 11.00;
+
+/**
 Strings indicating binary file versions.  These are used by StateMod_BTS and
 other software to determine appropriate parameters to list.
 */
-public static final double VERSION_9_01 = 9.01;
-public static final double VERSION_9_69 = 9.69;
-public static final double VERSION_11_00 = 11.00;
+public static final String VERSION_9_01 = "9.01";
+public static final String VERSION_9_69 = "9.69";
+public static final String VERSION_11_00 = "11.00";
 
 /**
 Strings for the station types.  These should be used in displays (e.g., graphing
@@ -195,11 +203,9 @@ public static final String STATION_TYPE_STREAMGAGE = "Stream Gage Station";
 public static final String STATION_TYPE_WELL = "Well";
 
 /**
-Used for looking up properties for data types which do not have separate 
-components.
+Used for looking up properties for data types which do not have separate components.
 */
-public static final int 
-	COMP_RESERVOIR_AREA_CAP = -102;
+public static final int COMP_RESERVOIR_AREA_CAP = -102;
 
 // Used by getStationTypes().
 private static final String[] __station_types = {
@@ -555,7 +561,7 @@ The version of StateMod that is being run as a number (e.g., 11.5).  This is nor
 beginning of a StateMod GUI session by calling runStateMod ( ... "-version" ).
 Then its value can be checked with getStateModVersion();
 */
-private static double __statemodVersion = 0.0;
+private static String __statemodVersion = "";
 
 /**
 The StateMod revision date.  This is normally set at the
@@ -568,7 +574,7 @@ private static String __statemodRevisionDate = "Unknown";
 The latest known version is returned by getStateModVersionLatest() as a
 default.  This is used by StateMod_BTS when requesting parameters.
 */
-private static double __statemodVersionLatest = 12.20;
+private static String __statemodVersionLatest = "12.20";
 
 /**
 The program to use when running StateMod.  If relying on the path, this should just be the
@@ -578,8 +584,7 @@ See the system/StateModGUI.cfg file for configuration properties.
 private static String __statemodExecutable = "StateMod";
 
 /**
-The program to use when running the SmDelta utility program.
-If relying on the path, this should just be the
+The program to use when running the SmDelta utility program.  If relying on the path, this should just be the
 program name.  However, a full path can be specified to override the PATH.
 See the system/StateModGUI.cfg file for configuration properties.
 */
@@ -602,12 +607,11 @@ public static Vector arrayToVector(String[] array) {
 	return v;
 }
 
-// REVISIST SAM 2004-09-07 JTS needs to javadoc.
+// TODO SAM 2004-09-07 JTS needs to javadoc.
 public static double calculateTimeSeriesDifference(TS ts1, TS ts2,
 boolean percent) 
 throws Exception
-{	// Loop through the time series and convert to yearly...  Do it the
-	// brute force way right now...
+{	// Loop through the time series and convert to yearly...  Do it the brute force way right now...
 
 	if (ts1 == null || ts2 == null) {
 		return -999.0;
@@ -648,16 +652,14 @@ throws Exception
 			dt1.setMonth(1);
 			dt2 = tsArray[its].getDate2();
 			dt2.setMonth(12);
-			for (; dt1.lessThanOrEqualTo(dt2);
-				dt1.addMonth(1)) {
+			for (; dt1.lessThanOrEqualTo(dt2); dt1.addMonth(1)) {
 				value = tsArray[its].getDataValue(dt1);
 				if (!tsArray[its].isDataMissing(value)) {
 					total += value;
 					++count;
 				}
 				if (dt1.getMonth() == 12) {
-					// Transfer to year time series only if
-					// all data are available in month...
+					// Transfer to year time series only if all data are available in month...
 					if (count == 12) {
 						yts.setDataValue(dt1, total);
 					}
@@ -680,7 +682,6 @@ throws Exception
 	if (ytsArray[1].getDate2().greaterThan(dt2)) {
 		dt2 = new DateTime(ytsArray[1].getDate2());
 	}
-
 
 	count = 0;
 	double total1 = 0;
@@ -737,12 +738,11 @@ public static String[] checkForMissingValues( String[] data )
 }
 
 
-// REVISIT SAM 2005-03-03 This simple test needs to be evaluated to determine
+// TODO SAM 2005-03-03 This simple test needs to be evaluated to determine
 // if it should be supported in all the file types.  For example, this code
 // could be moved to each StateMod class.
 /**
-Compare similar StateMod files and generate a summary of the files, with
-differences.
+Compare similar StateMod files and generate a summary of the files, with differences.
 @param path1 Path to first file.
 @param path2 Path to second file.
 @param comp_type Component type.
@@ -771,8 +771,7 @@ throws Exception
 		int missing_n2 = 0;
 		Vector onlyin1_Vector = new Vector();
 		Vector onlyin2_Vector = new Vector();
-		// Get a list of all identifiers.  This is used to summarize
-		// results by location...
+		// Get a list of all identifiers.  This is used to summarize results by location...
 		for ( i = 0; i < n1; i++ ) {
 			// Add to list of all identifiers...
 			wer1 = (StateMod_WellRight)data1_Vector.elementAt(i);
@@ -784,15 +783,11 @@ throws Exception
 			allids_Vector.addElement ( wer2.getCgoto() );
 		}
 		// Sort all the identifiers...
-		allids_Vector = StringUtil.sortStringList (
-			allids_Vector, StringUtil.SORT_ASCENDING, null,
-			false, true );
-		Message.printStatus ( 1, "", "Count after sort= " +
-			allids_Vector.size() );
+		allids_Vector = StringUtil.sortStringList ( allids_Vector, StringUtil.SORT_ASCENDING, null, false, true );
+		Message.printStatus ( 1, "", "Count after sort= " + allids_Vector.size() );
 		// Remove the duplicates...
 		StringUtil.removeDuplicates ( allids_Vector, true, true );
-		Message.printStatus ( 1, "","Count after removing duplicates= "+
-			allids_Vector.size() );
+		Message.printStatus ( 1, "","Count after removing duplicates= "+ allids_Vector.size() );
 		int nall = allids_Vector.size();
 		// Initialize the totals for each location...
 		double [] decree1_total = new double[nall];
@@ -810,22 +805,22 @@ throws Exception
 			if ( StateMod_Util.isMissing( decree ) ) {
 				++missing_n1;
 			}
-			else {	// Data set...
+			else {
+			    // Data set...
 				decree1_alltotal += decree;
 				// By structure...
-				pos = StringUtil.indexOf (
-					allids_Vector, wer1.getCgoto() );
+				pos = StringUtil.indexOf ( allids_Vector, wer1.getCgoto() );
 				if ( pos >= 0 ) {
 					if ( decree1_total[pos] < 0.0 ) {
 						decree1_total[pos] = decree;
 					}
-					else { decree1_total[pos] += decree;
+					else {
+					    decree1_total[pos] += decree;
 					}
 				}
 			}
 			// Search other list...
-			pos = StateMod_Util.indexOf ( data2_Vector,
-				wer1.getID() );
+			pos = StateMod_Util.indexOf ( data2_Vector, wer1.getID() );
 			if ( pos < 0 ) {
 				onlyin1_Vector.addElement ( wer1 );
 			}
@@ -836,22 +831,22 @@ throws Exception
 			if ( StateMod_Util.isMissing( decree ) ) {
 				++missing_n2;
 			}
-			else {	// By data set...
+			else {
+			    // By data set...
 				decree2_alltotal += decree;
 				// By structure...
-				pos = StringUtil.indexOf (
-					allids_Vector, wer2.getCgoto() );
+				pos = StringUtil.indexOf ( allids_Vector, wer2.getCgoto() );
 				if ( pos >= 0 ) {
 					if ( decree2_total[pos] < 0.0 ) {
 						decree2_total[pos] = decree;
 					}
-					else { decree2_total[pos] += decree;
+					else {
+					    decree2_total[pos] += decree;
 					}
 				}
 			}
 			// Search other list...
-			pos = StateMod_Util.indexOf ( data1_Vector,
-				wer2.getID() );
+			pos = StateMod_Util.indexOf ( data1_Vector, wer2.getID() );
 			if ( pos < 0 ) {
 				onlyin2_Vector.addElement ( wer2 );
 			}
@@ -861,50 +856,40 @@ throws Exception
 
 		v.addElement ( "First file:            " + full_path1 );
 		v.addElement ( "Number of rights:      " + n1 );
-		v.addElement ( "Total decrees (CFS):   " +
-			StringUtil.formatString(decree1_alltotal,"%.2f") );
+		v.addElement ( "Total decrees (CFS):   " + StringUtil.formatString(decree1_alltotal,"%.2f") );
 		v.addElement ( "Second file:           " + full_path2 );
 		v.addElement ( "Number of rights:      " + n2 );
-		v.addElement ( "Total decrees (CFS):   " +
-			StringUtil.formatString(decree2_alltotal,"%.2f") );
+		v.addElement ( "Total decrees (CFS):   " + StringUtil.formatString(decree2_alltotal,"%.2f") );
 		v.addElement ( "" );
 		v.addElement ( "Summary of decree differences, by location:" );
 		v.addElement ( "" );
-		v.addElement (
-		"Well ID      | File2 Total | File1 Total | File2-File1" );
+		v.addElement ( "Well ID      | File2 Total | File1 Total | File2-File1" );
 		for ( i = 0; i < nall; i++ ) {
 			b.setLength(0);
-			b.append ( StringUtil.formatString(
-				allids_Vector.elementAt(i),"%-12.12s") + " | ");
+			b.append ( StringUtil.formatString( allids_Vector.elementAt(i),"%-12.12s") + " | ");
 			if ( decree2_total[i] >= 0.0 ) {
-				b.append ( StringUtil.formatString(
-				decree2_total[i],"%11.2f") + " | " );
+				b.append ( StringUtil.formatString( decree2_total[i],"%11.2f") + " | " );
 			}
-			else {	b.append ( "            | " );
+			else {
+			    b.append ( "            | " );
 			}
 			if ( decree1_total[i] >= 0.0 ) {
-				b.append ( StringUtil.formatString(
-				decree1_total[i],"%11.2f") + " | " );
+				b.append ( StringUtil.formatString( decree1_total[i],"%11.2f") + " | " );
 			}
-			else {	b.append ( "            | " );
+			else {
+			    b.append ( "            | " );
 			}
-			if (	(decree1_total[i] >= 0.0) &&
-				(decree2_total[i] >= 0.0) ) {
-				b.append ( StringUtil.formatString(
-				(decree2_total[i] -
-				decree1_total[i]),"%11.2f") );
+			if ( (decree1_total[i] >= 0.0) && (decree2_total[i] >= 0.0) ) {
+				b.append ( StringUtil.formatString( (decree2_total[i] - decree1_total[i]),"%11.2f") );
 			}
-			else {	b.append ( "           " );
+			else {
+			    b.append ( "           " );
 			}
 			v.addElement ( b.toString() );
 		}
-		v.addElement ( "Total        | " +
-			StringUtil.formatString (decree2_alltotal,"%11.2f") +
-			" | " +
-			StringUtil.formatString (decree1_alltotal,"%11.2f") +
-			" | " +
-			StringUtil.formatString (
-				(decree2_alltotal-decree1_alltotal),"%11.2f") );
+		v.addElement ( "Total        | " + StringUtil.formatString (decree2_alltotal,"%11.2f") +
+			" | " + StringUtil.formatString (decree1_alltotal,"%11.2f") +
+			" | " + StringUtil.formatString ( (decree2_alltotal-decree1_alltotal),"%11.2f") );
 		v.addElement ( "" );
 		v.addElement ( "First file:" );
 		v.addElement ( "" );
@@ -914,18 +899,13 @@ throws Exception
 			v.addElement ( "Rights only in first file:" );
 			v.addElement ( "All are found in 2nd file." );
 		}
-		else {	v.addElement ( "Rights only in first file (" +
-				size + " total):" );
+		else {
+		    v.addElement ( "Rights only in first file (" + size + " total):" );
 			v.addElement ("    ID           Decree    AdminNumber");
 			for ( i = 0; i < size; i++ ) {
-				wer1 = (StateMod_WellRight)
-					onlyin1_Vector.elementAt(i);
-				v.addElement (
-					StringUtil.formatString(
-					wer1.getID(),"%-12.12s") +
-					" " + StringUtil.formatString(
-					wer1.getDcrdivw(),"%11.2f") + " " +
-					wer1.getIrtem() );
+				wer1 = (StateMod_WellRight)onlyin1_Vector.elementAt(i);
+				v.addElement ( StringUtil.formatString(wer1.getID(),"%-12.12s") +
+					" " + StringUtil.formatString( wer1.getDcrdivw(),"%11.2f") + " " + wer1.getIrtem() );
 			}
 		}
 		v.addElement ( "" );
@@ -937,18 +917,13 @@ throws Exception
 			v.addElement ( "Rights only in second file:" );
 			v.addElement ( "All are found in 1st file." );
 		}
-		else {	v.addElement ( "Rights only in second file (" +
-				size + " total):" );
+		else {
+		    v.addElement ( "Rights only in second file (" + size + " total):" );
 			v.addElement ("    ID           Decree    AdminNumber");
 			for ( i = 0; i < size; i++ ) {
-				wer2 = (StateMod_WellRight)
-					onlyin2_Vector.elementAt(i);
-				v.addElement (
-					StringUtil.formatString(
-					wer2.getID(),"%-12.12s") +
-					" " + StringUtil.formatString(
-					wer2.getDcrdivw(),"%11.2f") + " " +
-					wer2.getIrtem() );
+				wer2 = (StateMod_WellRight)onlyin2_Vector.elementAt(i);
+				v.addElement (StringUtil.formatString(wer2.getID(),"%-12.12s") +
+					" " + StringUtil.formatString( wer2.getDcrdivw(),"%11.2f") + " " + wer2.getIrtem() );
 			}
 		}
 	}
@@ -962,11 +937,9 @@ Create a label for a single data objects, for use in choices, etc.
 @param include_name If false, the string will consist of only the value
 returned from StateMod_Data.getID().  If true the string will contain the ID,
 followed by " - xxxx", where xxxx is the value returned from
-StateMod_Data.getName().  If the identifier and name are the same only one
-part will be returned.
+StateMod_Data.getName().  If the identifier and name are the same only one part will be returned.
 */
-public static String createDataLabel (	StateMod_Data smdata,
-					boolean include_name )
+public static String createDataLabel ( StateMod_Data smdata, boolean include_name )
 {	if ( smdata == null ) {
 		return "";
 	}
@@ -979,7 +952,8 @@ public static String createDataLabel (	StateMod_Data smdata,
 	else if ( include_name ) {
 		return id + " - " + name;
 	}
-	else {	return id;
+	else {
+	    return id;
 	}
 }
 
@@ -990,16 +964,15 @@ from createDataList in that it contains the Cgoto instead of the ID.
 non-null list is guaranteed; however, the list may have zero items.
 @param include_name If false, each string will consist of only the value
 returned from StateMod_Data.getID().  If true the string will contain the ID,
-followed by " - xxxx", where xxxx is the value returned from
-StateMod_Data.getName().
+followed by " - xxxx", where xxxx is the value returned from StateMod_Data.getName().
 */
-public static Vector createCgotoDataList (	Vector smdata_Vector,
-						boolean include_name )
+public static Vector createCgotoDataList ( Vector smdata_Vector, boolean include_name )
 {	Vector v = null;
 	if ( smdata_Vector == null ) {
 		return new Vector();
 	}
-	else {	// This optimizes memory management...
+	else {
+	    // This optimizes memory management...
 		v = new Vector ( smdata_Vector.size() );
 	}
 	int size = smdata_Vector.size();
@@ -1022,8 +995,8 @@ public static Vector createCgotoDataList (	Vector smdata_Vector,
 			cgoto = ts.getLocation();
 			name = ts.getDescription();
 		}
-		else {	Message.printWarning ( 2,"StateMod_Util.createDataList",
-			"Unrecognized StateMod data." );
+		else {
+		    Message.printWarning ( 2,"StateMod_Util.createDataList", "Unrecognized StateMod data." );
 		}
 		if ( cgoto.equalsIgnoreCase(name) ) {
 			v.addElement ( cgoto );
@@ -1031,7 +1004,8 @@ public static Vector createCgotoDataList (	Vector smdata_Vector,
 		else if ( include_name ) {
 			v.addElement ( cgoto + " - " + name );
 		}
-		else {	v.addElement ( cgoto );
+		else {
+		    v.addElement ( cgoto );
 		}
 	}
 	return v;
@@ -1041,8 +1015,7 @@ public static Vector createCgotoDataList (	Vector smdata_Vector,
 Create a daily estimate a time series, for viewing only.  The time series
 should match the estimate that StateMod will make at run time.
 @return a new time series containing the daily estimate, or null if the
-estimate cannot be created.  The period of the daily time series will be that
-of the monthly time series.
+estimate cannot be created.  The period of the daily time series will be that of the monthly time series.
 @param id Identifier (location) for the time series.
 @param desc Description for the time series.
 @param datatype Data type for the time series.
@@ -1056,28 +1029,25 @@ series is estimated using one of the following methods:
 	from the mid-points of the monthly time series (day 15).</li>
 <li>	Other values indicate that the monthly total time series should be used
 	to get the ACFT total for the month and the daily values should use the
-	pattern in the supplied daily time series to generate a new daily time
-	series.<li>
+	pattern in the supplied daily time series to generate a new daily time series.<li>
 </ol>
 @param monthts The monthly time series needed for estimation.
 @param dayts The daily time series needed for estimation.
 */
 public static DayTS createDailyEstimateTS (	String id, String desc,
-						String datatype, String units,
-						String dayflag, MonthTS monthts,
-						DayTS dayts )
+						String datatype, String units, String dayflag, MonthTS monthts, DayTS dayts )
 {	DayTS estdayts = null;
 
 	String tsid = id + ".StateMod." + datatype + ".Day.Estimated";
 	DateTime date1;
 	DateTime date2;
 	if ( dayflag.equals("0") ) {
-		// Convert the monthly time series to daily by assuming the
-		// monthly value is the average daily value...
+		// Convert the monthly time series to daily by assuming the monthly value is the average daily value...
 		if ( monthts == null ) {
 			return null;
 		}
-		try {	estdayts = (DayTS)TSUtil.newTimeSeries ( tsid, true );
+		try {
+		    estdayts = (DayTS)TSUtil.newTimeSeries ( tsid, true );
 			estdayts.setIdentifier ( tsid );
 		}
 		catch ( Exception e ) {
@@ -1098,52 +1068,42 @@ public static DayTS createDailyEstimateTS (	String id, String desc,
 		if ( estdayts.allocateDataSpace () != 0 ) {
 			return null;
 		}
-		// Iterate based on the daily data and grab data from the
-		// monthly when day = 1...
+		// Iterate based on the daily data and grab data from the monthly when day = 1...
 		double value = 0.0;
 		int ndays_in_month;
-		for (	DateTime date = new DateTime (date1);
-			date.lessThanOrEqualTo(date2);
+		for ( DateTime date = new DateTime (date1); date.lessThanOrEqualTo(date2);
 			date.addInterval(TimeInterval.DAY,1) ) {
 			if ( date.getDay() == 1 ) {
-				// Get a new value from the monthly time
-				// series...
+				// Get a new value from the monthly time series...
 				value = monthts.getDataValue ( date );
 				if ( !monthts.isDataMissing(value) ) {
-					ndays_in_month =
-					TimeUtil.numDaysInMonth(date);
+					ndays_in_month = TimeUtil.numDaysInMonth(date);
 					if ( units.equalsIgnoreCase("cfs") ) {
-						// Monthlies are always ACFT so
-						// convert to CFS...
-						// (ACFT/daysInMonth)
-						// (43560FT2/AC)
-						// (1day/86400s).
-						value = value/
-							(1.9835*ndays_in_month);
+						// Monthlies are always ACFT so convert to CFS...
+						// (ACFT/daysInMonth)(43560FT2/AC)(1day/86400s).
+						value = value/(1.9835*ndays_in_month);
 					}
-					// Else leave value as the monthly
-					// value for assignment.
+					// Else leave value as the monthly value for assignment.
 				}
 			}
 			estdayts.setDataValue ( date, value );
 		}
 		if ( units.equalsIgnoreCase("cfs") ) {
-			estdayts.addToGenesis ( "Daily data were estimated " +
-			"by using monthly data as average" +
+			estdayts.addToGenesis ( "Daily data were estimated by using monthly data as average" +
 			" daily values (divide by 1.9835*DaysInMonth)." );
 		}
-		else {	estdayts.addToGenesis ( "Daily data were estimated " +
-			"by using monthly data as average" +
+		else {
+		    estdayts.addToGenesis ( "Daily data were estimated by using monthly data as average" +
 			" daily values (Assign monthly value to daily)." );
 		}
 	}
 	else if ( dayflag.equals("4") ) {
-		// Convert the monthly time series to daily by interpolating
-		// the midpoint values.
+		// Convert the monthly time series to daily by interpolating the midpoint values.
 		if ( monthts == null ) {
 			return null;
 		}
-		try {	estdayts = (DayTS)TSUtil.newTimeSeries ( tsid, true );
+		try {
+		    estdayts = (DayTS)TSUtil.newTimeSeries ( tsid, true );
 			estdayts.setIdentifier ( tsid );
 		}
 		catch ( Exception e ) {
@@ -1164,42 +1124,31 @@ public static DayTS createDailyEstimateTS (	String id, String desc,
 		if ( estdayts.allocateDataSpace () != 0 ) {
 			return null;
 		}
-		// Iterate based on the daily data and grab data from the
-		// monthly when day = 1...
+		// Iterate based on the daily data and grab data from the monthly when day = 1...
 		double value = 0.0;
 		int ndays_in_month;
-		for (	DateTime date = new DateTime (date1);
-			date.lessThanOrEqualTo(date2);
-			date.addInterval(TimeInterval.DAY,1) ) {
+		for ( DateTime date = new DateTime (date1); date.lessThanOrEqualTo(date2); date.addInterval(TimeInterval.DAY,1) ) {
 			if ( date.getDay() == 1 ) {
-				// Get a new value from the monthly time
-				// series...
+				// Get a new value from the monthly time series...
 				value = monthts.getDataValue ( date );
 				if ( !monthts.isDataMissing(value) ) {
-					ndays_in_month =
-					TimeUtil.numDaysInMonth(date);
+					ndays_in_month = TimeUtil.numDaysInMonth(date);
 					if ( units.equalsIgnoreCase("cfs") ) {
-						// Monthlies are always ACFT so
-						// convert to CFS...
-						// (ACFT/daysInMonth)
-						// (43560FT2/AC)
-						// (1day/86400s).
-						value = value/
-							(1.9835*ndays_in_month);
+						// Monthlies are always ACFT so convert to CFS...
+						// (ACFT/daysInMonth)(43560FT2/AC)(1day/86400s).
+						value = value/(1.9835*ndays_in_month);
 					}
-					// Else leave value as the monthly
-					// value for assignment.
+					// Else leave value as the monthly value for assignment.
 				}
 			}
 			estdayts.setDataValue ( date, value );
 		}
 		if ( units.equalsIgnoreCase("cfs") ) {
-			estdayts.addToGenesis ( "Daily data were estimated " +
-			"by using monthly data as average" +
+			estdayts.addToGenesis ( "Daily data were estimated by using monthly data as average" +
 			" daily values (divide by 1.9835*DaysInMonth)." );
 		}
-		else {	estdayts.addToGenesis ( "Daily data were estimated " +
-			"by using monthly data as average" +
+		else {
+		    estdayts.addToGenesis ( "Daily data were estimated by using monthly data as average" +
 			" daily values (Assign monthly value to daily)." );
 		}
 	}
@@ -1212,8 +1161,7 @@ a data set.  This time series can be used for summaries.
 The period of the time series is the maximum of the time series in the list.
 The total value will be set if one or more values in the parts is available.  If
 no value is available, the total will be missing.
-@return a time series that is the sum of all the time series in the input
-Vector.
+@return a time series that is the sum of all the time series in the input Vector.
 @param tslist a Vector of time series to process.
 @param dataset_location the location to use for the total time series.
 @param dataset_datasource the data source to use for the total time series.
@@ -1222,15 +1170,13 @@ Vector.
 information for the new time series.
 @exception Exception if there is an error creating the time series.
 */
-public static TS createTotalTS (	Vector tslist, String dataset_location,
-					String dataset_datasource,
-					String dataset_description,
-					int comp_type )
+public static TS createTotalTS ( Vector tslist, String dataset_location,
+					String dataset_datasource, String dataset_description, int comp_type )
 throws Exception
 {	String routine = "StateMod_Util.createTotalTS";
 	TS newts = null;
 	String interval = "";
-	if (	(comp_type == StateMod_DataSet.COMP_DIVERSION_TS_MONTHLY) ||
+	if ( (comp_type == StateMod_DataSet.COMP_DIVERSION_TS_MONTHLY) ||
 		(comp_type == StateMod_DataSet.COMP_DEMAND_TS_MONTHLY) ||
 		(comp_type == StateMod_DataSet.COMP_WELL_PUMPING_TS_MONTHLY) ||
 		(comp_type == StateMod_DataSet.COMP_WELL_DEMAND_TS_MONTHLY) ) {
@@ -1244,9 +1190,9 @@ throws Exception
 		newts = new DayTS();
 		interval = "Day";
 	}
-	else {	Message.printWarning ( 3, routine,
-		"Cannot create total - cannot handle component type " +
-		comp_type );
+	else {
+	    Message.printWarning ( 3, routine,
+		"Cannot create total - cannot handle component type " + comp_type );
 		throw new Exception ( "Cannot create total TS." );
 	}
 	if ( (dataset_location == null) || (dataset_location.length()==0) ) {
@@ -1256,16 +1202,11 @@ throws Exception
 		dataset_datasource = "StateMod";
 	}
 	if ( (dataset_description == null) ||(dataset_description.length()==0)){
-		dataset_description = "Dataset " +
-			StateMod_DataSet.lookupTimeSeriesDataType(comp_type);
+		dataset_description = "Dataset " + StateMod_DataSet.lookupTimeSeriesDataType(comp_type);
 	}
-	newts.setIdentifier (
-		new TSIdent(	dataset_location, dataset_datasource,
-				StateMod_DataSet.
-				lookupTimeSeriesDataType(comp_type),
-				interval, "" ) );
-	newts.setDataUnits (
-		StateMod_DataSet.lookupTimeSeriesDataUnits(comp_type));
+	newts.setIdentifier ( new TSIdent( dataset_location, dataset_datasource,
+		StateMod_DataSet.lookupTimeSeriesDataType(comp_type), interval, "" ) );
+	newts.setDataUnits ( StateMod_DataSet.lookupTimeSeriesDataUnits(comp_type));
 	// Get the period for the total time series...
 	// Try to get from the data...
 	TSLimits valid_dates = TSUtil.getPeriodFromTS ( tslist, TSUtil.MAX_POR);
@@ -1293,15 +1234,14 @@ the input time series is 12 months long.  Therefore, the repeating time series
 is created by allocating a time series for the requested period and setting
 all January values to the January value of ts, etc.  All of the header
 information is retained (description, etc.).
-@return a longer time series consisting of repeating the 12 values in the
-original time series.
+@return a longer time series consisting of repeating the 12 values in the original time series.
 @param date1 Start date for long time series.
 @param date2 End date for long time series.
 */
-public static MonthTS createRepeatingAverageMonthTS (	TS ts, DateTime date1,
-							DateTime date2 )
+public static MonthTS createRepeatingAverageMonthTS ( TS ts, DateTime date1, DateTime date2 )
 {	MonthTS newts = new MonthTS();
-	try {	newts.setIdentifier ( new TSIdent(ts.getIdentifier()) );
+	try {
+	    newts.setIdentifier ( new TSIdent(ts.getIdentifier()) );
 	}
 	catch ( Exception e ) {
 		// Should not happen.
@@ -1327,31 +1267,31 @@ public static MonthTS createRepeatingAverageMonthTS (	TS ts, DateTime date1,
 /**
 Create a water right time series, in which each interval has a value of the
 total water rights in effect at the time.  Switches are considered.  This method
-can be used when processing rights for a single structure (e.g., when plotting
-rights in the StateMod GUI).
-@param smdata A StateMod data object (e.g., StateMod_Diversion) that the time
-series is being created for.
+can be used when processing rights for a single structure (e.g., when plotting rights in the StateMod GUI).
+@param smdata A StateMod data object (e.g., StateMod_Diversion) that the time series is being created for.
 @param interval TimeInterval.MONTH or TimeInterval.DAY.
 @param units Data units for the time series.
 @param date1 Starting date for the time series.  Must not be null.
 @param date2 Ending date for the time series.  Must not be null.
 */
-public static TS createWaterRightTS (	StateMod_Data smdata,
-					int interval, String units,
+public static TS createWaterRightTS ( StateMod_Data smdata, int interval, String units,
 					DateTime date1, DateTime date2)
 {	TS ts = null;
 	String tsid = null;
 	if ( interval == TimeInterval.MONTH ) {
 		tsid = smdata.getID() + ".StateMod.TotalWaterRights.Month";
-		try {	ts = (MonthTS)TSUtil.newTimeSeries ( tsid, true );
+		try {
+		    ts = (MonthTS)TSUtil.newTimeSeries ( tsid, true );
 			ts.setIdentifier ( tsid );
 		}
 		catch ( Exception e ) {
 			// Should not occur.
 		}
 	}
-	else {	tsid = smdata.getID() + ".StateMod.TotalWaterRights.Day";
-		try {	ts = (DayTS)TSUtil.newTimeSeries ( tsid, true );
+	else {
+	    tsid = smdata.getID() + ".StateMod.TotalWaterRights.Day";
+		try {
+		    ts = (DayTS)TSUtil.newTimeSeries ( tsid, true );
 			ts.setIdentifier ( tsid );
 		}
 		catch ( Exception e ) {
@@ -1370,7 +1310,8 @@ public static TS createWaterRightTS (	StateMod_Data smdata,
 			return null;
 		}
 	}
-	else {	if ( ((DayTS)ts).allocateDataSpace ( 0.0 ) != 0 ) {
+	else {
+	    if ( ((DayTS)ts).allocateDataSpace ( 0.0 ) != 0 ) {
 			return null;
 		}
 	}
@@ -1411,36 +1352,26 @@ public static TS createWaterRightTS (	StateMod_Data smdata,
 				fill_date2 = date2;
 			}
 			else if ( onoff < 0 ) {
-				// On at begining but off in a given year...
+				// On at beginning but off in a given year...
 				fill_date1 = date1;
 				fill_date2 = new DateTime();
 				fill_date2.setYear ( onoff );
-				// TODO SAM 2007-03-01 Evaluate logic
-				//decree = (decree);
+				// TODO SAM 2007-03-01 Evaluate logic decree = (decree);
 			}
 		}
 		if ( interval == TimeInterval.MONTH ) {
-			for (	DateTime date = new DateTime (fill_date1);
-				date.lessThanOrEqualTo(fill_date2);
-				date.addInterval(TimeInterval.MONTH,1) ) {
-				// Monthlies are always ACFT so
-				// convert from CFS...
-				// (ACFT/daysInMonth)
-				// (43560FT2/AC)
-				// (1day/86400s).
-				ts.setDataValue ( date,
-					ts.getDataValue(date) + 
-					decree*(1.9835*
-					TimeUtil.numDaysInMonth(date)) );
+			for ( DateTime date = new DateTime (fill_date1);
+				date.lessThanOrEqualTo(fill_date2); date.addInterval(TimeInterval.MONTH,1) ) {
+				// Monthlies are always ACFT so convert from CFS...
+				// (ACFT/daysInMonth)(43560FT2/AC)(1day/86400s).
+				ts.setDataValue ( date, ts.getDataValue(date) + decree*(1.9835*TimeUtil.numDaysInMonth(date)) );
 			}
 		}
 		else if ( interval == TimeInterval.DAY ) {
-			for (	DateTime date = new DateTime (fill_date1);
-				date.lessThanOrEqualTo(fill_date2);
+			for ( DateTime date = new DateTime (fill_date1); date.lessThanOrEqualTo(fill_date2);
 				date.addInterval(TimeInterval.DAY,1) ) {
 				// Dailies are always CFS...
-				ts.setDataValue ( date,
-					ts.getDataValue(date) + decree );
+				ts.setDataValue ( date, ts.getDataValue(date) + decree );
 			}
 		}
 	}
@@ -1448,8 +1379,7 @@ public static TS createWaterRightTS (	StateMod_Data smdata,
 }
 
 /**
-Create a list of time series from a list of water rights.  A non-null list
-is guaranteed.
+Create a list of time series from a list of water rights.  A non-null list is guaranteed.
 @param smrights A Vector of StateMod_Right.
 @param interval_base Time series interval for returned time series, either
 TimeInterval.DAY, TimeInterval.MONTH, TimeInterval.YEAR, or TimeInterval.IRREGULAR
@@ -1457,10 +1387,8 @@ TimeInterval.DAY, TimeInterval.MONTH, TimeInterval.YEAR, or TimeInterval.IRREGUL
 @param spatial_aggregation If 0, create a time series for the location,
 which is the sum of the water rights at that location.  If 1, time series will
 be created by parcel (requires parcel information in right - only for well rights).
-If 2, individual
-time series will be created (essentially step functions with one step).
-@parcel_year If spatial_aggregation = 1, include the year to specify the years
-for parcel indentifiers.
+If 2, individual time series will be created (essentially step functions with one step).
+@param parcel_year If spatial_aggregation = 1, include the year to specify the years for parcel indentifiers.
 @param include_dataset_totals If true, create a time series including a total
 of all time series.
 @param start Start DateTime for the time series.  If not specified, the date
@@ -1526,15 +1454,15 @@ throws Exception
 	String adminnum_String = null;
 	double adminnum_double;
 	StateMod_AdministrationNumber adminnum = null;
-						// Administration number corresponding to
-						// date for right.
+						// Administration number corresponding to date for right.
 	DateTime decree_DateTime = null; // Right appropriation date, to day.
 	// Get the locations that have water rights.
 	Vector loc_Vector = null;
 	if ( spatial_aggregation == BYPARCEL ) {
 		loc_Vector = getWaterRightParcelList ( smrights, parcel_year );
 	}
-	else { // Process by location or individual rights...
+	else {
+	    // Process by location or individual rights...
 		loc_Vector = getWaterRightLocationList ( smrights, parcel_year );
 	}
 	int loc_size = 0;
@@ -1546,15 +1474,13 @@ throws Exception
 		smrights_size = smrights.size();
 	}
 	if ( spatial_aggregation == BYLOC ) {
-		Message.printStatus ( 2, routine, "Found " + loc_size + " locations from " +
-			smrights_size + " rights.");
+		Message.printStatus ( 2, routine, "Found " + loc_size + " locations from " + smrights_size + " rights.");
 	}
 	else if ( spatial_aggregation == BYPARCEL ) {
-		Message.printStatus ( 2, routine, "Found " + loc_size + " parcels from " +
-				smrights_size + " rights.");
+		Message.printStatus ( 2, routine, "Found " + loc_size + " parcels from " + smrights_size + " rights.");
 	}
-	else { Message.printStatus ( 2, routine, "Found " + loc_size + " rights from " +
-			smrights_size + " rights.");
+	else {
+	    Message.printStatus ( 2, routine, "Found " + loc_size + " rights from " + smrights_size + " rights.");
 	}
 	String loc_id = null;	// Identifier for a location or parcel
 	Vector loc_rights = null; // Vector of StateMod_Right
@@ -1585,8 +1511,7 @@ throws Exception
 		min_DateTime = null;	// Initialize
 		max_DateTime = null;
 		free_right_count = 0;
-		if ( (spatial_aggregation == BYLOC) ||
-				(spatial_aggregation == BYPARCEL) ) {
+		if ( (spatial_aggregation == BYLOC) || (spatial_aggregation == BYPARCEL) ) {
 			for ( int i = 0; i < size; i++ ) {
 				smright = (StateMod_Right)loc_rights.elementAt(i);
 				if ( smright == null ) {
@@ -1596,12 +1521,10 @@ throws Exception
 				adminnum_double = StringUtil.atod(adminnum_String);
 				adminnum = new StateMod_AdministrationNumber ( adminnum_double );
 				decree_DateTime = new DateTime(adminnum.getAppropriationDate());
-				if ( (min_DateTime == null) ||
-						decree_DateTime.lessThan(min_DateTime) ) {
+				if ( (min_DateTime == null) || decree_DateTime.lessThan(min_DateTime) ) {
 					min_DateTime = decree_DateTime;
 				}
-				if ( (max_DateTime == null) ||
-						decree_DateTime.greaterThan(max_DateTime) ) {
+				if ( (max_DateTime == null) || decree_DateTime.greaterThan(max_DateTime) ) {
 					max_DateTime = decree_DateTime;
 				}
 				// Check whether a free water right...
@@ -1621,17 +1544,16 @@ throws Exception
 			// Get the appropriation date from the admin number.
 			adminnum_String = smright.getAdministrationNumber();
 			adminnum_double = StringUtil.atod(adminnum_String);
-			if ( (adminnum_double >= FreeWaterAdministrationNumber_double) &&
-					(FreeWaterMethod != null) ) {
+			if ( (adminnum_double >= FreeWaterAdministrationNumber_double) && (FreeWaterMethod != null) ) {
 				// The right is a free water right.  Adjust if requested
 				if ( FreeWaterMethod_int == AlwaysOn_int ) {
 					// Set to earliest of starting date and most senior
-					if ( (spatial_aggregation == BYRIGHT) ||
-							(free_right_count == size) ) {
+					if ( (spatial_aggregation == BYRIGHT) || (free_right_count == size) ) {
 						// Minimum date will not have been determined.
 						decree_DateTime = OutputStart_DateTime;
 					}
-					else {	// have a valid minimum
+					else {
+					    // have a valid minimum
 						decree_DateTime = min_DateTime;
 						if ( OutputStart_DateTime.lessThan(decree_DateTime)) {
 							decree_DateTime = OutputStart_DateTime;
@@ -1642,12 +1564,13 @@ throws Exception
 					if (min_DateTime != null ) {
 						decree_DateTime = min_DateTime;
 					}
-					else { decree_DateTime =
-						FreeWaterAppropriationDate_DateTime;
+					else {
+					    decree_DateTime = FreeWaterAppropriationDate_DateTime;
 					}
 				}
 			}
-			else {	// Process the admin number to get the decree date...
+			else {
+			    // Process the admin number to get the decree date...
 				adminnum = new StateMod_AdministrationNumber ( adminnum_double );
 				decree_DateTime = new DateTime(adminnum.getAppropriationDate());
 			}
@@ -1656,39 +1579,37 @@ throws Exception
 			need_to_create_ts = false;
 			if ( spatial_aggregation == BYLOC ) {
 				// Search for the location in the time series list.
-				// If found, add to the time series.  Otherwise, create
-				// a new time series.
-				pos = TSUtil.indexOf ( tslist, smright.getLocationIdentifier(),
-					"Location", 1 );
+				// If found, add to the time series.  Otherwise, create a new time series.
+				pos = TSUtil.indexOf ( tslist, smright.getLocationIdentifier(), "Location", 1 );
 				if ( pos >= 0 ) {
 					// Will add to the matched right
 					ts = (TS)tslist.elementAt(pos);
 				}
-				else {	// Need to create a new total right.
+				else {
+				    // Need to create a new total right.
 					id = smright.getLocationIdentifier();
 					need_to_create_ts = true;
 				}
 			}
 			else if ( spatial_aggregation == BYPARCEL ) {
 				// Search for the location in the time series list.
-				// If found, add to the time series.  Otherwise, create
-				// a new time series.
+				// If found, add to the time series.  Otherwise, create a new time series.
 				smwellright = (StateMod_WellRight)smright;
-				pos = TSUtil.indexOf ( tslist, smwellright.getParcelID(),
-					"Location", 1 );
+				pos = TSUtil.indexOf ( tslist, smwellright.getParcelID(), "Location", 1 );
 				if ( pos >= 0 ) {
 					// Will add to the matched right
 					ts = (TS)tslist.elementAt(pos);
 				}
-				else {	// Need to create a new total right.
+				else {
+				    // Need to create a new total right.
 					id = smwellright.getParcelID();
 					need_to_create_ts = true;
 				}
 			}
-			else {	// Create an individual time series for each right.
+			else {
+			    // Create an individual time series for each right.
 				need_to_create_ts = true;
-				id = smright.getLocationIdentifier() + "-" +
-				smright.getIdentifier();
+				id = smright.getLocationIdentifier() + "-" + smright.getIdentifier();
 			}
 			// Create the time series (either first right for a location or
 			// time series are being created for each right).
@@ -1747,30 +1668,26 @@ throws Exception
 					ts.setDescription ( smright.getName() );
 				}
 				ts.setDataUnits ( smright.getDecreeUnits() );
-				// Set the dates for the time series. If a single right
-				// is being used, use the specific date.  Otherwise,
-				// use the extent of the dates found for all rights.  If
-				// a period has been specified, use that.
-				// Set the original dates to that from the data...
-				if ( (spatial_aggregation == BYLOC) ||
-					(spatial_aggregation == BYPARCEL)) {
+				// Set the dates for the time series. If a single right is being used, use the specific date.
+				// Otherwise, use the extent of the dates found for all rights.  If
+				// a period has been specified, use that. Set the original dates to that from the data...
+				if ( (spatial_aggregation == BYLOC) || (spatial_aggregation == BYPARCEL)) {
 					ts.setDate1Original ( min_DateTime );
 					ts.setDate2Original ( max_DateTime );
 				}
-				else { ts.setDate1Original( decree_DateTime );
+				else {
+				    ts.setDate1Original( decree_DateTime );
 					ts.setDate2Original ( decree_DateTime );
 				}
 				// Set the active dates to that requested or found...
 				if ( (OutputStart_DateTime != null) && (OutputEnd_DateTime != null) ) {
 					ts.setDate1 ( OutputStart_DateTime );
 					ts.setDate2 ( OutputEnd_DateTime );
-					Message.printStatus ( 2, routine,
-							"Setting right time series period to requested " +
-							ts.getDate1() + " to " + ts.getDate2() );
+					Message.printStatus ( 2, routine, "Setting right time series period to requested " +
+					    ts.getDate1() + " to " + ts.getDate2() );
 				}
 				else {
-					if ( (spatial_aggregation == BYLOC) ||
-							(spatial_aggregation == BYPARCEL)) {
+					if ( (spatial_aggregation == BYLOC) || (spatial_aggregation == BYPARCEL)) {
 						ts.setDate1 ( min_DateTime );
 						ts.setDate2 ( max_DateTime );
 					}
@@ -1778,8 +1695,7 @@ throws Exception
 						ts.setDate1 ( decree_DateTime );
 						ts.setDate2 ( decree_DateTime );
 					}
-					Message.printStatus ( 2, routine,
-							"Setting right time series period to data limit " +
+					Message.printStatus ( 2, routine, "Setting right time series period to data limit " +
 							ts.getDate1() + " to " + ts.getDate2() );
 				}
 				// Initialize to zero...
@@ -1798,8 +1714,7 @@ throws Exception
 						continue;
 					}
 				}
-				// No need to allocate space for irregular.
-				// Add the time series to the list...
+				// No need to allocate space for irregular.  Add the time series to the list...
 				tslist.addElement ( ts );
 			}
 			// Now add to the right.  If daily, add to each time step.
@@ -1814,8 +1729,7 @@ throws Exception
 				}
 				else if ( onoff > 1 ) {
 					// On/off is a year.
-					// Only turn on the right for the indicated
-					// year.  Reset the year of the right to the on/off but
+					// Only turn on the right for the indicated year.  Reset the year of the right to the on/off but
 					// only if it is later than the year from the admin number.
 					if ( onoff > decree_DateTime.getYear() ) {
 						Message.printStatus(2,"", "Resetting decree year from " +
@@ -1830,11 +1744,9 @@ throws Exception
 							"Software not able to handle negative on/off well right switch.  Skipping right.");
 					continue;
 				}
-				if ( (interval_base == TimeInterval.DAY) ||
-						(interval_base == TimeInterval.MONTH) ||
+				if ( (interval_base == TimeInterval.DAY) || (interval_base == TimeInterval.MONTH) ||
 						(interval_base == TimeInterval.YEAR)) {
-					if ( (spatial_aggregation == BYLOC) ||
-							(spatial_aggregation == BYPARCEL)) {
+					if ( (spatial_aggregation == BYLOC) || (spatial_aggregation == BYPARCEL)) {
 						if ( decree > 0.0 ) {
 							Message.printStatus(2,"", "Adding constant decree " + decree + " starting in " + decree_DateTime + " to " + ts.getDate2());
 							TSUtil.addConstant ( ts, decree_DateTime, ts.getDate2(), -1, decree,
@@ -1846,7 +1758,8 @@ throws Exception
 						ts.setDataValue ( decree_DateTime, decree );
 					}
 				}
-				else { // Irregular...
+				else {
+				    // Irregular...
 					ts.setDataValue ( decree_DateTime, decree );
 				}
 			}
@@ -1899,10 +1812,8 @@ throws Exception
 			value = ts.getDataValue( date );
 			if ( !ts.isDataMissing(value)) {
 				// Add constant at the end of the time series.
-				date.addInterval ( ts.getDataIntervalBase(),
-						ts.getDataIntervalMult() );
-				TSUtil.addConstant ( totalts, date, totalts.getDate2(), -1, value,
-						TSUtil.IGNORE_MISSING);
+				date.addInterval ( ts.getDataIntervalBase(), ts.getDataIntervalMult() );
+				TSUtil.addConstant ( totalts, date, totalts.getDate2(), -1, value, TSUtil.IGNORE_MISSING);
 				Message.printStatus ( 2, routine, "Add constant " + value + " " +
 						ts.getLocation() + " " + date + " to " + totalts.getDate2() );
 			}
@@ -1919,16 +1830,15 @@ Create a list of data objects, for use in choices, etc.
 non-null list is guaranteed; however, the list may have zero items.
 @param include_name If false, each string will consist of only the value
 returned from StateMod_Data.getID().  If true the string will contain the ID,
-followed by " - xxxx", where xxxx is the value returned from
-StateMod_Data.getName().
+followed by " - xxxx", where xxxx is the value returned from StateMod_Data.getName().
 */
-public static Vector createDataList (	Vector smdata_Vector,
-					boolean include_name )
+public static Vector createDataList ( Vector smdata_Vector, boolean include_name )
 {	Vector v = null;
 	if ( smdata_Vector == null ) {
 		return new Vector();
 	}
-	else {	// This optimizes memory management...
+	else {
+	    // This optimizes memory management...
 		v = new Vector ( smdata_Vector.size() );
 	}
 	int size = smdata_Vector.size();
@@ -1951,8 +1861,8 @@ public static Vector createDataList (	Vector smdata_Vector,
 			id = ts.getLocation();
 			name = ts.getDescription();
 		}
-		else {	Message.printWarning ( 2,"StateMod_Util.createDataList",
-			"Unrecognized StateMod data." );
+		else {
+		    Message.printWarning ( 2,"StateMod_Util.createDataList", "Unrecognized StateMod data." );
 		}
 		if ( id.equalsIgnoreCase(name) ) {
 			v.addElement ( id );
@@ -1960,7 +1870,8 @@ public static Vector createDataList (	Vector smdata_Vector,
 		else if ( include_name ) {
 			v.addElement ( id + " - " + name );
 		}
-		else {	v.addElement ( id );
+		else {
+		    v.addElement ( id );
 		}
 	}
 	return v;
@@ -1969,8 +1880,7 @@ public static Vector createDataList (	Vector smdata_Vector,
 /**
 Creates a new ID given an ID used for rights.  If the previous right ID was
 12345.05, 12345.06 will be returned.  This also works for alphanumeric IDs
-(ABC_003.05 becomes ABC_003.06).  If the old ID doesn't contain a '.', the
-same old ID is returned.
+(ABC_003.05 becomes ABC_003.06).  If the old ID doesn't contain a '.', the same old ID is returned.
 @return the new ID.
 */
 public static String createNewID(String oldID) {
@@ -1991,8 +1901,7 @@ public static String createNewID(String oldID) {
 	}
 	catch (NumberFormatException e) {
 		Message.printWarning(1, routine, "Could not create new ID "
-			+ "because old ID does not have a number after the "
-			+ "decimal: '" + back + "'");
+			+ "because old ID does not have a number after the decimal: '" + back + "'");
 		return oldID;
 	}
 	int d = D.intValue();
@@ -2012,8 +1921,7 @@ public static String createNewID(String oldID) {
 
 /**
 Calculates the earliest date in the period of record for the time series in the
-dataset.  Note that this is always a calendar date.  The time series that are
-checked are:<br>
+dataset.  Note that this is always a calendar date.  The time series that are checked are:<br>
 <ol>
 <li>StateMod_DataSet.COMP_STREAMGAGE_BASEFLOW_TS_MONTHLY</li>
 <li>StateMod_DataSet.COMP_INSTREAM_DEMAND_TS_AVERAGE_MONTHLY</li>
@@ -2025,8 +1933,7 @@ checked are:<br>
 <li>StateMod_DataSet.COMP_STREAMGAGE_HISTORICAL_TS_MONTHLY</li>
 </ol>
 @param dataset the dataset in which to check for the earliest POR
-@return a DateTime object with the earliest POR, or null if the earliest date
-cannot be found.
+@return a DateTime object with the earliest POR, or null if the earliest date cannot be found.
 */
 public static DateTime findEarliestDateInPOR(StateMod_DataSet dataset)
 {	DateTime newDate = null;
@@ -2049,15 +1956,12 @@ public static DateTime findEarliestDateInPOR(StateMod_DataSet dataset)
 
 	for (int i = 0; i < numFiles; i++) {
 		if (dataset.getComponentForComponentType(files[i]).hasData()) {
-			tsVector = (Vector)(
-				(dataset.getComponentForComponentType(
-				files[i])).getData());
+			tsVector = (Vector)((dataset.getComponentForComponentType(files[i])).getData());
 			if ( newDate == null ) {
-				tempDate = findEarliestDateInPORHelper(tsVector,
-						seedDate);
+				tempDate = findEarliestDateInPORHelper(tsVector,seedDate);
 			}
-			else {	tempDate = findEarliestDateInPORHelper(tsVector,
-						newDate);
+			else {
+			    tempDate = findEarliestDateInPORHelper(tsVector,newDate);
 			}
 			if (tempDate != null) {
 				newDate = tempDate;
@@ -2092,8 +1996,7 @@ DateTime newDate) {
 
 /**
 Calculates the latest date in the period of record for the time series in the
-dataset.  Note that this is always a calendar date.  The time series that are
-checked are:<br>
+dataset.  Note that this is always a calendar date.  The time series that are checked are:<br>
 <ol>
 <li>StateMod_DataSet.COMP_STREAMGAGE_BASEFLOW_TS_MONTHLY</li>
 <li>StateMod_DataSet.COMP_INSTREAM_DEMAND_TS_AVERAGE_MONTHLY</li>
@@ -2129,15 +2032,12 @@ public static DateTime findLatestDateInPOR(StateMod_DataSet dataset)
 	
 	for (int i = 0; i < numFiles; i++) {
 		if (dataset.getComponentForComponentType(files[i]).hasData()) {
-			tsVector = (Vector)(
-				(dataset.getComponentForComponentType(
-				files[i])).getData());
+			tsVector = (Vector)((dataset.getComponentForComponentType(files[i])).getData());
 			if ( newDate == null ) {
-				tempDate = findLatestDateInPORHelper(tsVector,
-						seedDate);
+				tempDate = findLatestDateInPORHelper(tsVector,seedDate);
 			}
-			else {	tempDate = findLatestDateInPORHelper(tsVector,
-						newDate);
+			else {
+			    tempDate = findLatestDateInPORHelper(tsVector,newDate);
 			}
 			if (tempDate != null) {
 				newDate = tempDate;
@@ -2173,7 +2073,7 @@ private static DateTime findLatestDateInPORHelper (	Vector tsVector,
 	return null;
 }
 
-// REVISIT SAM 2004-09-07 JTS needs to javadoc?
+// TODO SAM 2004-09-07 JTS needs to javadoc?
 public static String findNameInVector(String id, Vector v, boolean includeDash)
 {	int size = v.size();
 
@@ -2227,7 +2127,7 @@ public static int findWaterRightInsertPosition ( Vector data_Vector,
 	}
 	// Add at the end...
 	return -1;
-	/* REVISIT - all of this seemed to be getting too complicated.  Just
+	/* TODO - all of this seemed to be getting too complicated.  Just
 	 inserting based on the right ID seems to be simplest
 	int pos = locateIndexFromCGOTO ( item.getCgoto(), data_Vector );
 	int size = 0;
@@ -2373,19 +2273,13 @@ public static DayTS getDailyTimeSeries ( String ID, String dailyID,
 	if ( dailyID.equalsIgnoreCase ( "0" )) {
 		if ( monthTS == null ) {
 			Message.printWarning ( 2, 
-				"StateMod_GUIUtil.getDailyTimeSeries", 
-			"Monthly time series is null.  Unable to calculate" +
-			" daily." );
+				"StateMod_GUIUtil.getDailyTimeSeries", "Monthly time series is null.  Unable to calculate daily." );
 			return null;
 		}
 		String monthTSUnits = monthTS.getDataUnits();
-		if ( ! ( monthTSUnits.equalsIgnoreCase ( "ACFT" ) ||
-		     monthTSUnits.equalsIgnoreCase ( "AF/M" )))
-		{
-			Message.printWarning ( 2, 
-				"StateMod_GUIUtil.getDailyTimeSeries",
-			"Monthly time series units \"" + monthTSUnits +
-			"\" not \"ACFT\".  Unable to process daily ts." );
+		if ( ! ( monthTSUnits.equalsIgnoreCase ( "ACFT" ) || monthTSUnits.equalsIgnoreCase ( "AF/M" ))) {
+			Message.printWarning ( 2, "StateMod_GUIUtil.getDailyTimeSeries",
+			"Monthly time series units \"" + monthTSUnits + "\" not \"ACFT\".  Unable to process daily ts." );
 			return null;
 		}
 
@@ -2407,13 +2301,11 @@ public static DayTS getDailyTimeSeries ( String ID, String dailyID,
 		int numDaysInMonth;
 		double avgValue;
 		DateTime ddate;
-		for ( DateTime date = new DateTime ( date1 );
-			date.lessThanOrEqualTo ( date2 );
+		for ( DateTime date = new DateTime ( date1 ); date.lessThanOrEqualTo ( date2 );
 			date.addInterval ( TimeInterval.MONTH, 1 )) 
 		{
 			numDaysInMonth = TimeUtil.numDaysInMonth ( date );
-			avgValue = monthTS.getDataValue ( date )
-				* convertAFtoCFS / numDaysInMonth;
+			avgValue = monthTS.getDataValue ( date )* convertAFtoCFS / numDaysInMonth;
 
 			ddate = new DateTime ( date );
 			for ( int i=0; i<numDaysInMonth; i++ ) 
@@ -2428,9 +2320,7 @@ public static DayTS getDailyTimeSeries ( String ID, String dailyID,
 	// if dailyID = ID identifier
 	else if ( dailyID.equalsIgnoreCase ( ID ))
 	{	if ( dayTS == null ) {
-			Message.printWarning ( 1, 
-				"StateMod_GUIUtil.getDailyTimeSeries", 
-			"Daily time series is null." );
+			Message.printWarning ( 1, "StateMod_GUIUtil.getDailyTimeSeries", "Daily time series is null." );
 			return null;
 		}
 		return dayTS;
@@ -2440,9 +2330,7 @@ public static DayTS getDailyTimeSeries ( String ID, String dailyID,
 	else if ( !calculate )
 	{
 		if ( dayTS == null ) {
-			Message.printWarning ( 1, 
-				"StateMod_GUIUtil.getDailyTimeSeries", 
-			"Daily time series pattern is null." );
+			Message.printWarning ( 1, "StateMod_GUIUtil.getDailyTimeSeries", "Daily time series pattern is null." );
 			return null;
 		}
 		return dayTS;
@@ -2451,15 +2339,11 @@ public static DayTS getDailyTimeSeries ( String ID, String dailyID,
 	else
 	{
 		if ( dayTS == null ) {
-			Message.printWarning ( 1, 
-				"StateMod_GUIUtil.getDailyTimeSeries", 
-			"Daily time series pattern is null." );
+			Message.printWarning ( 1, "StateMod_GUIUtil.getDailyTimeSeries", "Daily time series pattern is null." );
 			return null;
 		}
 		if ( monthTS == null ) {
-			Message.printWarning ( 1, 
-				"StateMod_GUIUtil.getDailyTimeSeries", 
-			"Monthly time series is null." );
+			Message.printWarning ( 1, "StateMod_GUIUtil.getDailyTimeSeries", "Monthly time series is null." );
 			return null;
 		}
 
@@ -2474,28 +2358,23 @@ public static DayTS getDailyTimeSeries ( String ID, String dailyID,
 
 		double convertAFtoCFS = 43560.0 / (3600.0 * 24.0);
 		String dayTSUnits = dayTS.getDataUnits();
-		if ( dayTSUnits.equalsIgnoreCase ( "ACFT" ) ||
-		     dayTSUnits.equalsIgnoreCase ( "AF/M" ))
+		if ( dayTSUnits.equalsIgnoreCase ( "ACFT" ) || dayTSUnits.equalsIgnoreCase ( "AF/M" ))
 			isFlow = false;
 		else if ( dayTSUnits.equalsIgnoreCase ( "CFS" ))
 			isFlow = true;
 		else {
 			Message.printWarning ( 2, 
-				"StateMod_GUIUtil.getDailyTimeSeries", 
-				"Unable to process dayTS due to units \"" + 
-				dayTSUnits + "\"" );
+				"StateMod_GUIUtil.getDailyTimeSeries", "Unable to process dayTS due to units \"" + dayTSUnits + "\"" );
 			return null;
 		}
 
 		if ( Message.isDebugOn )
-			Message.printDebug ( 30, rtn, "convertAFtoCFS is " +
-			convertAFtoCFS );
+			Message.printDebug ( 30, rtn, "convertAFtoCFS is " + convertAFtoCFS );
 
 		// check for units we can handle
 
 
-		Message.printStatus ( 1, rtn, "Looking through dates " +
-			dayTS.getDate1() + " " + dayTS.getDate2());
+		Message.printStatus ( 1, rtn, "Looking through dates " + dayTS.getDate1() + " " + dayTS.getDate2());
 		for ( DateTime date = new DateTime ( dayTS.getDate1() );
 			date.lessThanOrEqualTo ( dayTS.getDate2() );
 			date.addInterval ( TimeInterval.MONTH, 1 )) 
@@ -2506,9 +2385,7 @@ public static DayTS getDailyTimeSeries ( String ID, String dailyID,
 
 			numValuesInMonth = 0;
 			sum = 0;
-			for ( ddate = new DateTime ( date ); 
-				ddate.lessThan( enddate ); 
-				ddate.addInterval ( TimeInterval.DAY, 1 ) )
+			for ( ddate = new DateTime ( date ); ddate.lessThan( enddate ); ddate.addInterval ( TimeInterval.DAY, 1 ) )
 			{
 				value = dayTS.getDataValue(ddate);
 				if ( !dayTS.isDataMissing ( value )) {
@@ -2519,50 +2396,30 @@ public static DayTS getDailyTimeSeries ( String ID, String dailyID,
 			}
 
 			if ( Message.isDebugOn ) {
-				Message.printDebug ( 30, rtn, 
-					"Sum for month " + 
-					date.getMonth() + " is " + sum );
-				Message.printDebug ( 30, rtn, 
-					"monthTS data value is " +
-					monthTS.getDataValue(date));
-				Message.printDebug ( 30, rtn, 
-					"numDaysInMonth is " +
-					TimeUtil.numDaysInMonth ( date ) );
-				Message.printDebug ( 30, rtn, 
-					"numValuesInMonth is " +
-					numValuesInMonth );
+				Message.printDebug ( 30, rtn, "Sum for month " + date.getMonth() + " is " + sum );
+				Message.printDebug ( 30, rtn, "monthTS data value is " + monthTS.getDataValue(date));
+				Message.printDebug ( 30, rtn, "numDaysInMonth is " + TimeUtil.numDaysInMonth ( date ) );
+				Message.printDebug ( 30, rtn, "numValuesInMonth is " + numValuesInMonth );
 			}
 				
 			// to accomodate for missing, create a ratio as follows
-			//   monthly value / numDaysInMonth divided by
-			//   sum / numValuesInMonth
+			//   monthly value / numDaysInMonth divided by sum / numValuesInMonth
 			if ( isFlow )
-				ratio = ( 
-				monthTS.getDataValue(date)*convertAFtoCFS / 
-				TimeUtil.numDaysInMonth ( date)) /
-				( sum / numValuesInMonth );
+				ratio = ( monthTS.getDataValue(date)*convertAFtoCFS / 
+				TimeUtil.numDaysInMonth ( date)) / ( sum / numValuesInMonth );
 			else
-				ratio =
-				monthTS.getDataValue(date) / 
-				( sum / numValuesInMonth );
+				ratio = monthTS.getDataValue(date) / ( sum / numValuesInMonth );
 			if ( Message.isDebugOn )
-				Message.printDebug ( 30,
-				"StateMod_GUIUtil.getDailyTimeSeries", 
-				"Ratio is " + ratio );
+				Message.printDebug ( 30, "StateMod_GUIUtil.getDailyTimeSeries", "Ratio is " + ratio );
 
-			for ( ddate = new DateTime ( date ); 
-				ddate.lessThan( enddate ); 
-				ddate.addInterval ( TimeInterval.DAY, 1 ) )
-			{
-				newDayTS.setDataValue ( ddate, 
-					dayTS.getDataValue (ddate) * ratio );
+			for ( ddate = new DateTime ( date ); ddate.lessThan( enddate ); ddate.addInterval ( TimeInterval.DAY, 1 ) ){
+				newDayTS.setDataValue ( ddate, dayTS.getDataValue (ddate) * ratio );
 			}
 			} catch ( Exception e ) {
 				Message.printWarning ( 2, rtn, e);
 			}
 		}
 		return newDayTS;
-		
 	}
 }
 
@@ -2572,8 +2429,7 @@ Helper method to return validators to check an ID.
  */
 public static Validator[] getIDValidators()
 {
-	return new Validator[] { Validators.notBlankValidator(),
-		Validators.regexValidator( "^[0-9a-zA-Z\\._]+$" ) };
+	return new Validator[] { Validators.notBlankValidator(), Validators.regexValidator( "^[0-9a-zA-Z\\._]+$" ) };
 }
 
 /**
@@ -2595,8 +2451,7 @@ public static Validator[] getOnOffSwitchValidator()
 	Validator[] orValidator = new Validator[] {
 		Validators.isEquals( new Integer( 0 )),
 		Validators.isEquals( new Integer( 1 )) };		
-	return new Validator[] { Validators.notBlankValidator(),
-		Validators.or( orValidator ) };
+	return new Validator[] { Validators.notBlankValidator(), Validators.or( orValidator ) };
 }
 
 /**
@@ -2668,8 +2523,7 @@ the software installation home).
 @return the SmDelta executable name.
 @param expanded If false, ${properties} will not be expanded (e.g., use to show in
 configuration dialogs).  If true, properties will be expanced.  Currently ${Home}
-(case-insensitive) is expanced using a call to RTi.Util.IO.IOUtil.getApplicationHomeDir(), if
-not empty.
+(case-insensitive) is expanced using a call to RTi.Util.IO.IOUtil.getApplicationHomeDir(), if not empty.
 */
 public static String getSmDeltaExecutable ( boolean expanded )
 {	
@@ -2683,8 +2537,7 @@ public static String getSmDeltaExecutable ( boolean expanded )
 	String home = IOUtil.getApplicationHomeDir();
 	if ( (home != null) && (home.length() > 0) ) {
 		// Replace ${Home} with supplied value.  Since there is currently no elegant
-		// way to deal with case (and not enforcing on the input end yet), check
-		// several variants.
+		// way to deal with case (and not enforcing on the input end yet), check several variants.
 		String s = StringUtil.replaceString(__smdeltaExecutable, "${Home}", home );
 		s = StringUtil.replaceString(s, "${HOME}", home );
 		s = StringUtil.replaceString(s, "${home}", home );
@@ -2714,8 +2567,7 @@ the software installation home).
 @return the StateMod executable name.
 @param expanded If false, ${properties} will not be expanded (e.g., use to show in
 configuration dialogs).  If true, properties will be expanced.  Currently ${Home}
-(case-insensitive) is expanced using a call to RTi.Util.IO.IOUtil.getApplicationHomeDir(), if
-not empty.
+(case-insensitive) is expanced using a call to RTi.Util.IO.IOUtil.getApplicationHomeDir(), if not empty.
 */
 public static String getStateModExecutable ( boolean expanded )
 {	
@@ -2729,8 +2581,7 @@ public static String getStateModExecutable ( boolean expanded )
 	String home = IOUtil.getApplicationHomeDir();
 	if ( (home != null) && (home.length() > 0) ) {
 		// Replace ${Home} with supplied value.  Since there is currently no elegant
-		// way to deal with case (and not enforcing on the input end yet), check
-		// several variants.
+		// way to deal with case (and not enforcing on the input end yet), check several variants.
 		String s = StringUtil.replaceString(__statemodExecutable, "${Home}", home );
 		s = StringUtil.replaceString(s, "${HOME}", home );
 		s = StringUtil.replaceString(s, "${home}", home );
@@ -2742,16 +2593,14 @@ public static String getStateModExecutable ( boolean expanded )
 }
 
 /**
-Return the StateMod model version, which was determined in the last call to
-runStateMod ( ... "-version" ).
+Return the StateMod model version, which was determined in the last call to runStateMod ( ... "-version" ).
 */
-public static double getStateModVersion()
+public static String getStateModVersion()
 {	return __statemodVersion;
 }
 
 /**
-Get the StateMod model revision date, which was determined in the last call to
-runStateMod ( ... "-version" ).
+Get the StateMod model revision date, which was determined in the last call to runStateMod ( ... "-version" ).
 */
 public static String getStateModRevisionDate()
 {	return __statemodRevisionDate;
@@ -2759,11 +2608,11 @@ public static String getStateModRevisionDate()
 
 /**
 Return the latest known StateMod model version.  This can be used as a default
-if getStateModVersion() returns zero, meaning the version has not been
+if getStateModVersion() returns blank, meaning the version has not been
 determined.  In this case, the latest version is a good guess, especially for
 determining binary file parameters, which don't change much between versions.
 */
-public static double getStateModVersionLatest()
+public static String getStateModVersionLatest()
 {	return __statemodVersionLatest;
 }
 
@@ -2778,28 +2627,6 @@ public static Vector getStationTypes ()
 }
 
 /**
-Get the appropriate time series from a StateMod DataSetComponent.  This method
-is called in two main ways:
-<ol>
-<li>	From a specific display window, where the StateMod_Data object is
-	known.</li>
-<li>	From the StateMod_GraphingTool_JFrame, where the TSID is initially
-	known.  The TSID is used to call ?????, which determines the proper
-	StateMod_Data object to retrieve the time series.</li>
-</ol>
-@param smdata StateMod_Data object
-StateMod GUI graphing tool or a time series product.
-*/
-/* REVISIT - thrashing as to whether this is needed.
-public TS getTimeSeries (	StateMod_Data smdata,
-				DateTime req_date1, DateTime req_date2,
-				String req_units, boolean read_data )
-{
-	return null;
-}
-*/
-
-/**
 Get the time series data types associated with a component, for use with the
 graphing tool.  Currently this returns all possible data types but does not
 cut down the lists based on what is actually available.
@@ -2815,72 +2642,12 @@ choices to those appropriate for the dataset.
 @param dataset If a non-null StateMod_DataSet is specified, it will be used with
 the id to check for valid time series data types.  For example, it can be used
 to return data types for estimated time series.
-@param statemod_version StateMod version as a floating point number.  If a
-negative number, then the parameters for 9.69 will be returned.
+@param statemodVersion StateMod version as a string.
+If unknown (blank), the parameters for the older version 9.69 will be returned.
 @param interval TimeInterval.DAY or TimeInterval.MONTH.
 @param include_input If true, input time series including historic data from
-ASCII input files are returned with the
-list (suitable for StateMod GUI graphing tool).
-@param include_input_estimated If true, input time series that are estimated are
-included.
-@param include_output If true, output time series are included in the list (this
-is used by the graphing tool).  Note that some output time series are for
-internal model use and are not suitable for viewing (as per Ray Bennett) and
-are therefore not returned in this list.
-@param check_availability If true, an input data type will only be added if it
-is available in the input data set.  Because it is difficult and somewhat time
-consuming to check for the validity of output time series, output time series
-are not checked.  This flag is currently not used.
-@param add_note If true, the string " - Input", " - Output" will be added to the
-data types, to help identify input and output parameters.  This is particularly
-useful when retrieving time series.
-@return a non-null list of data types.  The list will have zero size if no
-data types are requested or are valid.
-@deprecated Use the version that has add_group and add_note.
-*/
-public static Vector getTimeSeriesDataTypes (	int comp_type, String id,
-						StateMod_DataSet dataset,
-						double statemod_version,
-						int interval,
-						boolean include_input,
-						boolean include_input_estimated,
-						boolean include_output,
-						boolean check_availability,
-						boolean add_note )
-{	return getTimeSeriesDataTypes ( comp_type, id, dataset,
-					statemod_version, interval,
-					include_input,
-					include_input_estimated,
-					include_output,
-					check_availability,
-					false,	// No group for backward-comp.
-					add_note );
-}
-
-/**
-Get the time series data types associated with a component, for use with the
-graphing tool.  Currently this returns all possible data types but does not
-cut down the lists based on what is actually available.
-@param comp_type Component type for a station:
-StateMod_DataSet.COMP_STREAMGAGE_STATIONS,
-StateMod_DataSet.COMP_DIVERSION_STATIONS,
-StateMod_DataSet.COMP_RESERVOIR_STATIONS,
-StateMod_DataSet.COMP_INSTREAM_STATIONS,
-StateMod_DataSet.COMP_WELL_STATIONS, or
-StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS.
-@param id If non-null, it will be used with the data set to limit returned
-choices to those appropriate for the dataset.
-@param dataset If a non-null StateMod_DataSet is specified, it will be used with
-the id to check for valid time series data types.  For example, it can be used
-to return data types for estimated time series.
-@param statemod_version StateMod version as a floating point number.
-If a negative number, the parameters for version 9.69 will be returned.
-@param interval TimeInterval.DAY or TimeInterval.MONTH.
-@param include_input If true, input time series including historic data from
-ASCII input files are returned with the
-list (suitable for StateMod GUI graphing tool).
-@param include_input_estimated If true, input time series that are estimated are
-included.
+ASCII input files are returned with the list (suitable for StateMod GUI graphing tool).
+@param include_input_estimated If true, input time series that are estimated are included.
 @param include_output If true, output time series are included in the list (this
 is used by the graphing tool).  Note that some output time series are for
 internal model use and are not suitable for viewing (as per Ray Bennett) and
@@ -2891,17 +2658,16 @@ consuming to check for the validity of output time series, output time series
 are not checked.  This flag is currently not used.
 @param add_group If true, a group is added to the front of the data type to
 allow grouping of the parameters.  Currently this should only be used for
-output parametes (e.g., in TSTool) because other data types have not been
-grouped.
+output parametes (e.g., in TSTool) because other data types have not been grouped.
 @param add_note If true, the string " - Input", " - Output" will be added to the
 data types, to help identify input and output parameters.  This is particularly
 useful when retrieving time series.
 @return a non-null list of data types.  The list will have zero size if no
 data types are requested or are valid.
 */
-public static Vector getTimeSeriesDataTypes (	int comp_type, String id,
+public static Vector getTimeSeriesDataTypes ( int comp_type, String id,
 						StateMod_DataSet dataset,
-						double statemod_version,
+						String statemodVersion,
 						int interval,
 						boolean include_input,
 						boolean include_input_estimated,
@@ -2909,10 +2675,11 @@ public static Vector getTimeSeriesDataTypes (	int comp_type, String id,
 						boolean check_availability,
 						boolean add_group,
 						boolean add_note )
-{	return getTimeSeriesDataTypes ( 	null,	// No filename
+{	return getTimeSeriesDataTypes (
+                        null,	// No filename
 						comp_type, id,
 						dataset,
-						statemod_version,
+						statemodVersion,
 						interval,
 						include_input,
 						include_input_estimated,
@@ -2933,26 +2700,22 @@ StateMod_DataSet.COMP_RESERVOIR_STATIONS,
 StateMod_DataSet.COMP_INSTREAM_STATIONS,
 StateMod_DataSet.COMP_WELL_STATIONS, or
 StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS.
-@param binary_filename name of the binary output file for which data types (
-parameters) are being returned, typically selected by the user with a file
-chooser.  The path to the file is not adjusted to a working directory so do that
-before calling, if necessary.
+@param binary_filename name of the binary output file for which data types (parameters) are being returned,
+typically selected by the user with a file chooser.  The path to the file is not adjusted to a working
+directory so do that before calling, if necessary.
 @param id If non-null, it will be used with the data set to limit returned
 choices to those appropriate for the dataset.
 @param dataset If a non-null StateMod_DataSet is specified, it will be used with
 the id to check for valid time series data types.  For example, it can be used
 to return data types for estimated time series.
-@param statemod_version StateMod version as a floating point number.  If this
-is greater than VERSION_11_00, then binary file parameters are read from the
-file.  Otherwise, the parameters are hard-coded in this method, based on
-StateMod documentation.
-If a negative number, the parameters for version 9.69 will be returned.
+@param statemodVersion StateMod version as a string.  If this
+is greater than or equal to VERSION_11_00, then binary file parameters are read from the
+file.  Otherwise, the parameters are hard-coded in this method, based on StateMod documentation.
+If blank, the parameters for version 9.69 will be returned.
 @param interval TimeInterval.DAY or TimeInterval.MONTH.
 @param include_input If true, input time series including historic data from
-ASCII input files are returned with the
-list (suitable for StateMod GUI graphing tool).
-@param include_input_estimated If true, input time series that are estimated are
-included.
+ASCII input files are returned with the list (suitable for StateMod GUI graphing tool).
+@param include_input_estimated If true, input time series that are estimated are included.
 @param include_output If true, output time series are included in the list (this
 is used by the graphing tool).  Note that some output time series are for
 internal model use and are not suitable for viewing (as per Ray Bennett) and
@@ -2963,18 +2726,17 @@ consuming to check for the validity of output time series, output time series
 are not checked.  This flag is currently not used.
 @param add_group If true, a group is added to the front of the data type to
 allow grouping of the parameters.  Currently this should only be used for
-output parametes (e.g., in TSTool) because other data types have not been
-grouped.
+output parametes (e.g., in TSTool) because other data types have not been grouped.
 @param add_note If true, the string " - Input", " - Output" will be added to the
 data types, to help identify input and output parameters.  This is particularly
 useful when retrieving time series.
 @return a non-null list of data types.  The list will have zero size if no
 data types are requested or are valid.
 */
-public static Vector getTimeSeriesDataTypes (	String binary_filename,
+public static Vector getTimeSeriesDataTypes ( String binary_filename,
 						int comp_type, String id,
 						StateMod_DataSet dataset,
-						double statemod_version,
+						String statemodVersion,
 						int interval,
 						boolean include_input,
 						boolean include_input_estimated,
@@ -3000,57 +2762,47 @@ public static Vector getTimeSeriesDataTypes (	String binary_filename,
 
 	StateMod_BTS bts = null;
 	if ( binary_filename != null ) {
-		try {	bts = new StateMod_BTS ( binary_filename );
+		try {
+		    bts = new StateMod_BTS ( binary_filename );
 		}
 		catch ( Exception e ) {
-			// Error reading the file.  Print a warning but go on
-			// and just do not have a list of parameters...
+			// Error reading the file.  Print a warning but go on and just do not have a list of parameters...
 			Message.printWarning ( 3, routine,
-			"Error opening/reading binary file \"" +
-			binary_filename + "\" to determine parameters." );
+			"Error opening/reading binary file \"" + binary_filename + "\" to determine parameters." );
 			Message.printWarning ( 3, routine, e );
 			bts = null;
 		}
 		// Close the file below after getting information...
-		double version_double = bts.getVersion();
-		if ( isVersionAtLeast ( version_double, VERSION_11_00) ) {
-			// Reset information to override possible user flags.
-			statemod_version = version_double;
+		String version = bts.getVersion();
+		if ( isVersionAtLeast ( version, VERSION_11_00) ) {
+			// Reset information to override possible user flags because information in file controls.
+			statemodVersion = version;
 			add_group = false;	// Not available from file
 			add_note = false;	// Not available from file
 		}
 	}
 	
-	if (	(comp_type == StateMod_DataSet.COMP_RESERVOIR_STATIONS) &&
-		(id != null) && (id.indexOf('-') > 0) ) {
+	if ( (comp_type == StateMod_DataSet.COMP_RESERVOIR_STATIONS) && (id != null) && (id.indexOf('-') > 0) ) {
 		// If the identifier includes a dash, turn off the input data
-		// types because only output time series are available for
-		// owner/accounts...
+		// types because only output time series are available for owner/accounts...
 		include_input = false;
 		include_input_estimated = false;
 	}
 
-	// Get the list of output data types based on the StateMod version.
-	// These are then used below.
-	if ( statemod_version < 0.0 ) {
-		// Default is the latest version before the parameters are in
-		// the binary file...
-		statemod_version = VERSION_9_69;
+	// Get the list of output data types based on the StateMod version.  These are then used below.
+	if ( statemodVersion.equals("") ) {
+		// Default is the latest version before the parameters are in the binary file...
+		statemodVersion = VERSION_9_69;
 	}
-	if ( statemod_version >= VERSION_11_00 ) {
-		// The parameters come from the binary file header.
-		// Close the file because it is no longer needed...
+	if ( isVersionAtLeast(statemodVersion, VERSION_11_00) ) {
+		// The parameters come from the binary file header.  Close the file because it is no longer needed...
 		String [] parameters = null;
 		if ( bts != null ) {
 			parameters = bts.getParameters();
-			// REVISIT SAM 2006-01-15
-			// Remove when tested in production.
-			/*
-			Message.printStatus ( 2, routine,
-			"Parameters from file:  " +
-			StringUtil.toVector(parameters) );
-			*/
-			try {	bts.close();
+			// TODO SAM 2006-01-15 Remove when tested in production.
+			//Message.printStatus ( 2, routine, "Parameters from file:  " + StringUtil.toVector(parameters) );
+			try {
+			    bts.close();
 			}
 			catch ( Exception e ) {
 				// Ignore - problem would have occurred at open.
@@ -3058,9 +2810,8 @@ public static Vector getTimeSeriesDataTypes (	String binary_filename,
 			bts = null;
 		}
 		// The binary file applies only to certain node types...
-		if (	(comp_type==StateMod_DataSet.COMP_STREAMGAGE_STATIONS)||
-			(comp_type==
-			StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS) ||
+		if ( (comp_type==StateMod_DataSet.COMP_STREAMGAGE_STATIONS)||
+			(comp_type==StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS) ||
 			(comp_type==StateMod_DataSet.COMP_DIVERSION_STATIONS)||
 			(comp_type==StateMod_DataSet.COMP_INSTREAM_STATIONS) ) {
 			diversion_types0 = parameters;
@@ -3074,61 +2825,46 @@ public static Vector getTimeSeriesDataTypes (	String binary_filename,
 			well_types0 = parameters;
 		}
 	}
-	else if ( statemod_version >= VERSION_9_69 ) {
-		// The parameters are hard-coded because they are not in the
-		// binary file header.
+	else if ( isVersionAtLeast(statemodVersion, VERSION_9_69) ) {
+		// The parameters are hard-coded because they are not in the binary file header.
 		diversion_types0 = __output_ts_data_types_diversion_0969;
 		instream_types0 = __output_ts_data_types_instream_0969;
 		reservoir_types0 = __output_ts_data_types_reservoir_0969;
 		stream_types0 = __output_ts_data_types_stream_0969;
 		well_types0 = __output_ts_data_types_well_0969;
 	}
-	else if ( statemod_version >= VERSION_9_01 ) {
-		// The parameters are hard-coded because they are not in the
-		// binary file header.
+	else if ( isVersionAtLeast(statemodVersion, VERSION_9_01) ) {
+		// The parameters are hard-coded because they are not in the binary file header.
 		diversion_types0 = __output_ts_data_types_diversion_0901;
 		instream_types0 = __output_ts_data_types_instream_0901;
 		reservoir_types0 = __output_ts_data_types_reservoir_0901;
 		stream_types0 = __output_ts_data_types_stream_0901;
 		well_types0 = __output_ts_data_types_well_0901;
 	}
-	else {	// Assume very old...
-		// The parameters are hard-coded because they are not in the
-		// binary file header.
+	else {
+	    // Assume very old...
+		// The parameters are hard-coded because they are not in the binary file header.
 		diversion_types0 = __output_ts_data_types_diversion_0100;
 		instream_types0 = __output_ts_data_types_instream_0100;
 		reservoir_types0 = __output_ts_data_types_reservoir_0100;
 		stream_types0 = __output_ts_data_types_stream_0100;
 		well_types0 = null;	// Should never happen.
 	}
-	// REVISIT SAM 2006-01-15
-	// Remove when tested in production.
+	// TODO SAM 2006-01-15 Remove when tested in production.
 	/*
-	Message.printStatus ( 2, routine,
-	"Diversion parameters from file:  " +
-	StringUtil.toVector(diversion_types0) );
-	Message.printStatus ( 2, routine,
-	"Reservoir parameters from file:  " +
-	StringUtil.toVector(reservoir_types0) );
-	Message.printStatus ( 2, routine,
-	"Instream parameters from file:  " +
-	StringUtil.toVector(instream_types0) );
-	Message.printStatus ( 2, routine,
-	"Stream parameters from file:  " +
-	StringUtil.toVector(stream_types0) );
-	Message.printStatus ( 2, routine,
-	"Well parameters from file:  " +
-	StringUtil.toVector(well_types0) );
+	Message.printStatus ( 2, routine, "Diversion parameters from file:  " + StringUtil.toVector(diversion_types0) );
+	Message.printStatus ( 2, routine, "Reservoir parameters from file:  " + StringUtil.toVector(reservoir_types0) );
+	Message.printStatus ( 2, routine, "Instream parameters from file:  " + StringUtil.toVector(instream_types0) );
+	Message.printStatus ( 2, routine, "Stream parameters from file:  " + StringUtil.toVector(stream_types0) );
+	Message.printStatus ( 2, routine, "Well parameters from file:  " + StringUtil.toVector(well_types0) );
 	*/
 
 	// Based on the requested data type, put together a list of time series
 	// data types.  To simplify determination of whether a type is input or
-	// output, add one of the following descriptors to the end if
-	// requested...
+	// output, add one of the following descriptors to the end if requested...
 	String input = "";
 	String output = "";
-	// The above lists contain the data group.  If the group is NOT desired,
-	// remove the group below...
+	// The above lists contain the data group.  If the group is NOT desired, remove the group below...
 	if ( add_note ) {
 		input = " - Input";
 		output = " - Output";
@@ -3162,12 +2898,13 @@ public static Vector getTimeSeriesDataTypes (	String binary_filename,
 		if ( add_group ) {
 			diversion_types[i] = diversion_types0[i] + output;
 		}
-		else {	// Remove group from front if necessary...
+		else {
+		    // Remove group from front if necessary...
 			if ( diversion_types0[i].indexOf("-") > 0 ) {
-				diversion_types[i] = StringUtil.getToken(
-				diversion_types0[i],"-",0,1).trim() + output;
+				diversion_types[i] = StringUtil.getToken( diversion_types0[i],"-",0,1).trim() + output;
 			}
-			else {	diversion_types[i] = diversion_types0[i];
+			else {
+			    diversion_types[i] = diversion_types0[i];
 			}
 		}
 	}
@@ -3175,12 +2912,13 @@ public static Vector getTimeSeriesDataTypes (	String binary_filename,
 		if ( add_group ) {
 			instream_types[i] = instream_types0[i] + output;
 		}
-		else {	// Remove group from front if necessary...
+		else {
+		    // Remove group from front if necessary...
 			if ( instream_types0[i].indexOf("-") > 0 ) {
-				instream_types[i] = StringUtil.getToken(
-				instream_types0[i],"-",0,1).trim() + output;
+				instream_types[i] = StringUtil.getToken( instream_types0[i],"-",0,1).trim() + output;
 			}
-			else {	instream_types[i] = instream_types0[i];
+			else {
+			    instream_types[i] = instream_types0[i];
 			}
 		}
 	}
@@ -3188,12 +2926,13 @@ public static Vector getTimeSeriesDataTypes (	String binary_filename,
 		if ( add_group ) {
 			reservoir_types[i] = reservoir_types0[i] + output;
 		}
-		else {	// Remove group from front if necessary...
+		else {
+		    // Remove group from front if necessary...
 			if ( reservoir_types0[i].indexOf("-") > 0 ) {
-				reservoir_types[i] = StringUtil.getToken(
-				reservoir_types0[i],"-",0,1).trim() + output;
+				reservoir_types[i] = StringUtil.getToken( reservoir_types0[i],"-",0,1).trim() + output;
 			}
-			else {	reservoir_types[i] = reservoir_types0[i];
+			else {
+			    reservoir_types[i] = reservoir_types0[i];
 			}
 		}
 	}
@@ -3201,12 +2940,13 @@ public static Vector getTimeSeriesDataTypes (	String binary_filename,
 		if ( add_group ) {
 			stream_types[i] = stream_types0[i] + output;
 		}
-		else {	// Remove group from front if necessary...
+		else {
+		    // Remove group from front if necessary...
 			if ( stream_types0[i].indexOf("-") > 0 ) {
-				stream_types[i] = StringUtil.getToken(
-				stream_types0[i],"-",0,1).trim() + output;
+				stream_types[i] = StringUtil.getToken( stream_types0[i],"-",0,1).trim() + output;
 			}
-			else {	stream_types[i] = stream_types0[i];
+			else {
+			    stream_types[i] = stream_types0[i];
 			}
 		}
 	}
@@ -3214,282 +2954,182 @@ public static Vector getTimeSeriesDataTypes (	String binary_filename,
 		if ( add_group ) {
 			well_types[i] = well_types0[i] + output;
 		}
-		else {	// Remove group from front if necessary...
+		else {
+		    // Remove group from front if necessary...
 			if ( well_types0[i].indexOf("-") > 0 ) {
-				well_types[i] = StringUtil.getToken(
-				well_types0[i],"-",0,1).trim() + output;
+				well_types[i] = StringUtil.getToken( well_types0[i],"-",0,1).trim() + output;
 			}
-			else {	well_types[i] = well_types0[i];
+			else {
+			    well_types[i] = well_types0[i];
 			}
 		}
 	}
 
-	if (	(comp_type == StateMod_DataSet.COMP_STREAMGAGE_STATIONS) ||
+	if ( (comp_type == StateMod_DataSet.COMP_STREAMGAGE_STATIONS) ||
 		(comp_type == StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS) ) {
 		// Stream gage and stream estimate stations are the same other
 		// than stream estimate do not have historical time series...
 		// Include input time series if reqeusted...
 		// Input baseflow...
 		if ( include_input && (interval == TimeInterval.MONTH) ) {
-			data_types.addElement ( 
-			StateMod_DataSet.lookupTimeSeriesDataType (
-			StateMod_DataSet.COMP_STREAMGAGE_BASEFLOW_TS_MONTHLY) +
-			input );
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			StateMod_DataSet.COMP_STREAMGAGE_BASEFLOW_TS_MONTHLY) + input );
 		}
 		else if(include_input && (interval == TimeInterval.DAY) ) {
-			data_types.addElement ( 
-				StateMod_DataSet.lookupTimeSeriesDataType (
-			StateMod_DataSet.COMP_STREAMGAGE_BASEFLOW_TS_DAILY) +
-			input );
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			StateMod_DataSet.COMP_STREAMGAGE_BASEFLOW_TS_DAILY) + input );
 		}
 		// Input historical time series if requested...
-		if (	include_input && (interval == TimeInterval.MONTH) &&
+		if ( include_input && (interval == TimeInterval.MONTH) &&
 			(comp_type==StateMod_DataSet.COMP_STREAMGAGE_STATIONS)){
-			data_types.addElement ( 
-				StateMod_DataSet.lookupTimeSeriesDataType (
-				StateMod_DataSet.
-				COMP_STREAMGAGE_HISTORICAL_TS_MONTHLY) + input);
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+				StateMod_DataSet.COMP_STREAMGAGE_HISTORICAL_TS_MONTHLY) + input);
 		}
 		else if (include_input && (interval == TimeInterval.DAY) &&
 			(comp_type==StateMod_DataSet.COMP_STREAMGAGE_STATIONS)){
-			data_types.addElement ( 
-				StateMod_DataSet.lookupTimeSeriesDataType (
-				StateMod_DataSet.
-				COMP_STREAMGAGE_HISTORICAL_TS_DAILY) + input);
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+				StateMod_DataSet.COMP_STREAMGAGE_HISTORICAL_TS_DAILY) + input);
 		}
 		// Include the estimated input time series if requested...
 		// Add the estimated input...
-		if (	include_input_estimated &&
-			(interval == TimeInterval.DAY) ) {
-			// REVISIT - need to check daily ID on station...
-			data_types.addElement ( 
-				StateMod_DataSet.lookupTimeSeriesDataType (
-			StateMod_DataSet.COMP_STREAMGAGE_BASEFLOW_TS_DAILY) +
-			"Estimated" + input);
+		if ( include_input_estimated && (interval == TimeInterval.DAY) ) {
+			// TODO - need to check daily ID on station...
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			StateMod_DataSet.COMP_STREAMGAGE_BASEFLOW_TS_DAILY) + "Estimated" + input);
 		}
 		// Input historical time series if requested...
-		if (	include_input_estimated &&
-			(interval == TimeInterval.DAY) &&
+		if ( include_input_estimated && (interval == TimeInterval.DAY) &&
 			(comp_type==StateMod_DataSet.COMP_STREAMGAGE_STATIONS)){
-			// REVISIT - need to check daily ID on station...
-			data_types.addElement ( 
-				StateMod_DataSet.lookupTimeSeriesDataType (
-				StateMod_DataSet.
-				COMP_STREAMGAGE_HISTORICAL_TS_DAILY) +
-				"Estimated" + input);
+			// TODO - need to check daily ID on station...
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+				StateMod_DataSet.COMP_STREAMGAGE_HISTORICAL_TS_DAILY) + "Estimated" + input);
 		}
 		// Include the output time series if requested...
 		if ( include_output ) {
-			data_types = StringUtil.addListToStringList (data_types,
-				StringUtil.toVector ( stream_types ) );
+			data_types = StringUtil.addListToStringList (data_types, StringUtil.toVector ( stream_types ) );
 		}
 	}
 	else if ( comp_type == StateMod_DataSet.COMP_DIVERSION_STATIONS ) {
 		if ( include_input && (interval == TimeInterval.MONTH) ) {
-			data_types.addElement (
-				StateMod_DataSet.lookupTimeSeriesDataType (
-				StateMod_DataSet.COMP_DIVERSION_TS_MONTHLY) +
-				input);
-			data_types.addElement (
-				StateMod_DataSet.lookupTimeSeriesDataType (
-				StateMod_DataSet.COMP_DEMAND_TS_MONTHLY) +
-				input);
-			data_types.addElement (
-				StateMod_DataSet.lookupTimeSeriesDataType (
-				StateMod_DataSet.
-				COMP_DEMAND_TS_OVERRIDE_MONTHLY) +
-				input);
-			data_types.addElement (
-				StateMod_DataSet.lookupTimeSeriesDataType (
-				StateMod_DataSet.
-				COMP_DEMAND_TS_AVERAGE_MONTHLY) +
-				input);
-			data_types.addElement (
-				StateMod_DataSet.lookupTimeSeriesDataType (
-				StateMod_DataSet.
-				COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_MONTHLY) +
-				input);
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+				StateMod_DataSet.COMP_DIVERSION_TS_MONTHLY) + input);
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+				StateMod_DataSet.COMP_DEMAND_TS_MONTHLY) + input);
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+				StateMod_DataSet.COMP_DEMAND_TS_OVERRIDE_MONTHLY) + input);
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+				StateMod_DataSet.COMP_DEMAND_TS_AVERAGE_MONTHLY) + input);
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+				StateMod_DataSet.COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_MONTHLY) + input);
 		}
 		else if ( include_input && (interval == TimeInterval.DAY) ) {
-			data_types.addElement ( 
-				StateMod_DataSet.lookupTimeSeriesDataType (
-				StateMod_DataSet.COMP_DIVERSION_TS_DAILY) +
-				input);
-			data_types.addElement ( 
-				StateMod_DataSet.lookupTimeSeriesDataType (
-				StateMod_DataSet.COMP_DEMAND_TS_DAILY) +
-				input);
-			data_types.addElement (
-				StateMod_DataSet.lookupTimeSeriesDataType (
-				StateMod_DataSet.
-				COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_DAILY) +
-				input);
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+				StateMod_DataSet.COMP_DIVERSION_TS_DAILY) + input);
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+				StateMod_DataSet.COMP_DEMAND_TS_DAILY) + input);
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+				StateMod_DataSet.COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_DAILY) + input);
 		}
 		if ( include_input ) {
-			data_types.addElement (
-				StateMod_DataSet.lookupTimeSeriesDataType (
-				StateMod_DataSet.COMP_DIVERSION_RIGHTS) +
-				input);
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+				StateMod_DataSet.COMP_DIVERSION_RIGHTS) + input);
 		}
-		if (	include_input_estimated &&
-			(interval == TimeInterval.DAY) ) {
-			data_types.addElement ( 
-				StateMod_DataSet.lookupTimeSeriesDataType (
-				StateMod_DataSet.COMP_DIVERSION_TS_DAILY) +
-				"Estimated" + input);
-			data_types.addElement ( 
-				StateMod_DataSet.lookupTimeSeriesDataType (
-				StateMod_DataSet.COMP_DEMAND_TS_DAILY) +
-				"Estimated" + input);
-			data_types.addElement (
-				StateMod_DataSet.lookupTimeSeriesDataType (
-				StateMod_DataSet.
-				COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_DAILY) +
-				"Estimate" + input);
+		if ( include_input_estimated && (interval == TimeInterval.DAY) ) {
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+				StateMod_DataSet.COMP_DIVERSION_TS_DAILY) + "Estimated" + input);
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+				StateMod_DataSet.COMP_DEMAND_TS_DAILY) + "Estimated" + input);
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+				StateMod_DataSet.COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_DAILY) + "Estimate" + input);
 		}
 		if ( include_output ) {
-			data_types = StringUtil.addListToStringList (data_types,
-				StringUtil.toVector ( diversion_types ) );
+			data_types = StringUtil.addListToStringList (data_types, StringUtil.toVector ( diversion_types ) );
 		}
 	}
 	else if ( comp_type == StateMod_DataSet.COMP_RESERVOIR_STATIONS ) {
 		// Include input time series if requested...
 		if ( include_input && (interval == TimeInterval.MONTH) ) {
-			data_types.addElement ( 
-				StateMod_DataSet.lookupTimeSeriesDataType (
-				StateMod_DataSet.
-				COMP_RESERVOIR_CONTENT_TS_MONTHLY) + input);
-			data_types.addElement ( 
-				StateMod_DataSet.lookupTimeSeriesDataType (
-				StateMod_DataSet.
-				COMP_RESERVOIR_TARGET_TS_MONTHLY) + "Min" +
-				input);
-			data_types.addElement ( 
-				StateMod_DataSet.lookupTimeSeriesDataType (
-				StateMod_DataSet.
-				COMP_RESERVOIR_TARGET_TS_MONTHLY) + "Max" +
-				input);
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+				StateMod_DataSet.COMP_RESERVOIR_CONTENT_TS_MONTHLY) + input);
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+				StateMod_DataSet.COMP_RESERVOIR_TARGET_TS_MONTHLY) + "Min" + input);
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+				StateMod_DataSet.COMP_RESERVOIR_TARGET_TS_MONTHLY) + "Max" + input);
 		}
 		else if ( include_input && (interval == TimeInterval.DAY) ) {
-			data_types.addElement ( 
-				StateMod_DataSet.lookupTimeSeriesDataType (
-				StateMod_DataSet.
-				COMP_RESERVOIR_CONTENT_TS_DAILY) + input );
-			data_types.addElement ( 
-				StateMod_DataSet.lookupTimeSeriesDataType (
-				StateMod_DataSet.
-				COMP_RESERVOIR_TARGET_TS_DAILY) +"Min" + input);
-			data_types.addElement ( 
-				StateMod_DataSet.lookupTimeSeriesDataType (
-				StateMod_DataSet.
-				COMP_RESERVOIR_TARGET_TS_DAILY) +"Max" + input);
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+				StateMod_DataSet.COMP_RESERVOIR_CONTENT_TS_DAILY) + input );
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+				StateMod_DataSet.COMP_RESERVOIR_TARGET_TS_DAILY) +"Min" + input);
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+				StateMod_DataSet.COMP_RESERVOIR_TARGET_TS_DAILY) +"Max" + input);
 		}
 		if ( include_input ) {
-			data_types.addElement (
-				StateMod_DataSet.lookupTimeSeriesDataType (
-				StateMod_DataSet.COMP_RESERVOIR_RIGHTS) +
-				input);
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+				StateMod_DataSet.COMP_RESERVOIR_RIGHTS) + input);
 		}
 		// Include estimated input if requested...
-		if (	include_input_estimated &&
-			(interval == TimeInterval.DAY) ) {
-			data_types.addElement ( 
-				StateMod_DataSet.lookupTimeSeriesDataType (
-				StateMod_DataSet.
-				COMP_RESERVOIR_CONTENT_TS_DAILY) + "Estimated" +
-				input);
-			data_types.addElement ( 
-				StateMod_DataSet.lookupTimeSeriesDataType (
-				StateMod_DataSet.
-				COMP_RESERVOIR_TARGET_TS_DAILY)+"MinEstimated" +
-				input);
-			data_types.addElement ( 
-				StateMod_DataSet.lookupTimeSeriesDataType (
-				StateMod_DataSet.
-				COMP_RESERVOIR_TARGET_TS_DAILY)+"MaxEstimated" +
-				input);
+		if ( include_input_estimated && (interval == TimeInterval.DAY) ) {
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+				StateMod_DataSet.COMP_RESERVOIR_CONTENT_TS_DAILY) + "Estimated" + input);
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+				StateMod_DataSet.COMP_RESERVOIR_TARGET_TS_DAILY)+"MinEstimated" + input);
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+				StateMod_DataSet.COMP_RESERVOIR_TARGET_TS_DAILY)+"MaxEstimated" + input);
 		}
 		// Include output if requested...
 		if ( include_output ) {
-			data_types = StringUtil.addListToStringList (data_types,
-				StringUtil.toVector ( reservoir_types ) );
+			data_types = StringUtil.addListToStringList (data_types, StringUtil.toVector ( reservoir_types ) );
 		}
 	}
 	else if ( comp_type == StateMod_DataSet.COMP_INSTREAM_STATIONS ) {
 		if ( include_input && (interval == TimeInterval.MONTH) ) {
-			data_types.addElement ( 
-				StateMod_DataSet.lookupTimeSeriesDataType (
-				StateMod_DataSet.
-				COMP_INSTREAM_DEMAND_TS_MONTHLY) + input);
-			data_types.addElement ( 
-				StateMod_DataSet.lookupTimeSeriesDataType (
-				StateMod_DataSet.
-				COMP_INSTREAM_DEMAND_TS_AVERAGE_MONTHLY) +
-				input);
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+				StateMod_DataSet.COMP_INSTREAM_DEMAND_TS_MONTHLY) + input);
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+				StateMod_DataSet.COMP_INSTREAM_DEMAND_TS_AVERAGE_MONTHLY) + input);
 		}
 		else if ( include_input && (interval == TimeInterval.DAY) ) {
-			data_types.addElement ( 
-				StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
 			StateMod_DataSet.COMP_INSTREAM_DEMAND_TS_DAILY) +input);
 		}
 		if ( include_input ) {
-			data_types.addElement (
-				StateMod_DataSet.lookupTimeSeriesDataType (
-				StateMod_DataSet.COMP_INSTREAM_RIGHTS) +
-				input);
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+				StateMod_DataSet.COMP_INSTREAM_RIGHTS) + input);
 		}
-		if (	include_input_estimated &&
-			(interval == TimeInterval.DAY) ) {
-			data_types.addElement ( 
-				StateMod_DataSet.lookupTimeSeriesDataType (
-				StateMod_DataSet.COMP_INSTREAM_DEMAND_TS_DAILY)+
-				"Estimated" + input);
+		if ( include_input_estimated && (interval == TimeInterval.DAY) ) {
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+				StateMod_DataSet.COMP_INSTREAM_DEMAND_TS_DAILY)+ "Estimated" + input);
 		}
 		if ( include_output ) {
-			data_types = StringUtil.addListToStringList (data_types,
-				StringUtil.toVector ( instream_types ) );
+			data_types = StringUtil.addListToStringList (data_types, StringUtil.toVector ( instream_types ) );
 		}
 	}
 	else if ( comp_type == StateMod_DataSet.COMP_WELL_STATIONS ) {
 		if ( include_input && (interval == TimeInterval.MONTH) ) {
-			data_types.addElement ( 
-				StateMod_DataSet.lookupTimeSeriesDataType (
-				StateMod_DataSet.COMP_WELL_PUMPING_TS_MONTHLY) +
-				input);
-			data_types.addElement ( 
-				StateMod_DataSet.lookupTimeSeriesDataType (
-				StateMod_DataSet.COMP_WELL_DEMAND_TS_MONTHLY) +
-				input);
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+				StateMod_DataSet.COMP_WELL_PUMPING_TS_MONTHLY) + input);
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+				StateMod_DataSet.COMP_WELL_DEMAND_TS_MONTHLY) + input);
 		}
 		else if ( include_input && (interval == TimeInterval.DAY) ) {
-			data_types.addElement ( 
-				StateMod_DataSet.lookupTimeSeriesDataType (
-				StateMod_DataSet.COMP_WELL_PUMPING_TS_DAILY) +
-				input);
-			data_types.addElement (
-				StateMod_DataSet.lookupTimeSeriesDataType (
-				StateMod_DataSet.COMP_WELL_DEMAND_TS_DAILY) +
-				input);
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+				StateMod_DataSet.COMP_WELL_PUMPING_TS_DAILY) + input);
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+				StateMod_DataSet.COMP_WELL_DEMAND_TS_DAILY) + input);
 		}
 		if ( include_input ) {
 			data_types.addElement (
-				StateMod_DataSet.lookupTimeSeriesDataType (
-				StateMod_DataSet.COMP_WELL_RIGHTS) + input);
+				StateMod_DataSet.lookupTimeSeriesDataType ( StateMod_DataSet.COMP_WELL_RIGHTS) + input);
 		}
-		if (	include_input_estimated &&
-			(interval == TimeInterval.DAY) ) {
-			data_types.addElement ( 
-				StateMod_DataSet.lookupTimeSeriesDataType (
-				StateMod_DataSet.COMP_WELL_PUMPING_TS_DAILY) +
-				"Estimated" + input);
-			data_types.addElement (
-				StateMod_DataSet.lookupTimeSeriesDataType (
-				StateMod_DataSet.COMP_WELL_DEMAND_TS_DAILY) +
-				"Estimated" + input);
+		if ( include_input_estimated && (interval == TimeInterval.DAY) ) {
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+				StateMod_DataSet.COMP_WELL_PUMPING_TS_DAILY) + "Estimated" + input);
+			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+				StateMod_DataSet.COMP_WELL_DEMAND_TS_DAILY) + "Estimated" + input);
 		}
 		if ( include_output ) {
-			data_types = StringUtil.addListToStringList (data_types,
-				StringUtil.toVector ( well_types ) );
+			data_types = StringUtil.addListToStringList (data_types, StringUtil.toVector ( well_types ) );
 		}
 	}
 
@@ -3515,14 +3155,12 @@ public static int getTimeSeriesOutputPrecision ( Vector tslist )
 		if ( outputformat != null ) {
 			precision = outputformat.getPrecision();
 			if ( precision > 0 ) {
-				// Change to negative so output code will handle
-				// overflow...
+				// Change to negative so output code will handle overflow...
 				precision *= -1;
 			}
 		}
 		outputformat = null;
-		Message.printStatus ( 2, "",
-			"Precision from units output format *-1 is "+precision);
+		Message.printStatus ( 2, "", "Precision from units output format *-1 is "+precision);
 	}
 	// Old code that we still need to support...
 	// In year of CRDSS 2, we changed the precision to 0 for RSTO.
@@ -3532,8 +3170,7 @@ public static int getTimeSeriesOutputPrecision ( Vector tslist )
 		if ( tspt == null ) {
 			continue;
 		}
-		if (	tspt.getIdentifier().getType(
-			).equalsIgnoreCase( "RSTO") ) {
+		if ( tspt.getIdentifier().getType().equalsIgnoreCase( "RSTO") ) {
 			precision = 0;
 			break;
 		}
@@ -3541,8 +3178,7 @@ public static int getTimeSeriesOutputPrecision ( Vector tslist )
 	return precision;
 }
 
-// REVISIT - might move this to a different class once the network builder falls
-// into place.
+// TODO - might move this to a different class once the network builder falls into place.
 /**
 Determine the nodes that are immediately upstream of a given downstream node.
 @return Vector of StateMod_RiverNetworkNode that are upstream of the node for
@@ -3550,12 +3186,10 @@ the given identifier.  If none are found, an empty non-null Vector is returned.
 @param node_Vector Vector of StateMod_RiverNetworkNode.
 @param downstream_id Downstream identifier of interest.
 */
-public static Vector getUpstreamNetworkNodes (	Vector node_Vector,
-						String downstream_id )
+public static Vector getUpstreamNetworkNodes ( Vector node_Vector, String downstream_id )
 {	String rtn = "StateMod_Util.getUpstreamNetworkNodes";
 	if ( Message.isDebugOn ) {
-		Message.printDebug ( 1, rtn,
-		"Trying to find upstream nodes for " + downstream_id );
+		Message.printDebug ( 1, rtn, "Trying to find upstream nodes for " + downstream_id );
 	}
 	Vector v = new Vector ();
 	if ( node_Vector == null ) {
@@ -3567,8 +3201,7 @@ public static Vector getUpstreamNetworkNodes (	Vector node_Vector,
 		riv = (StateMod_RiverNetworkNode)node_Vector.elementAt(i);	
 		if ( riv.getCstadn().equalsIgnoreCase ( downstream_id )) {
 			if ( Message.isDebugOn ) {
-				Message.printDebug ( 1, rtn,
-				"Adding upstream node " + riv.getID() );
+				Message.printDebug ( 1, rtn, "Adding upstream node " + riv.getID() );
 			}
 			v.addElement ( riv );
 		}
@@ -3578,8 +3211,7 @@ public static Vector getUpstreamNetworkNodes (	Vector node_Vector,
 
 /**
 Get a list of water right identifiers for a location.  The locations are the
-nodes at which the rights apply.  One or more water right can exist with
-the same identifier.
+nodes at which the rights apply.  One or more water right can exist with the same identifier.
 @param smrights List of StateMod_Right to search.
 @param loc_id Location identifier to match (case-insensitive).
 @param req_parcel_year Parcel year for data or -1 to use all (only used with well rights).
@@ -3606,13 +3238,11 @@ public static Vector getWaterRightIdentifiersForLocation ( Vector smrights, Stri
 				continue;
 			}
 		}
-		if ( (loc_id != null) &&
-			!loc_id.equalsIgnoreCase(right.getLocationIdentifier()) ) {
+		if ( (loc_id != null) && !loc_id.equalsIgnoreCase(right.getLocationIdentifier()) ) {
 			// Not a matching location
 			continue;
 		}
-		// If here need to add the identifier if not already in the
-		// list...
+		// If here need to add the identifier if not already in the list...
 		right_id = right.getIdentifier();
 		found = false;
 		for ( int j = 0; j < matchlist_size; j++ ) {
@@ -3631,8 +3261,7 @@ public static Vector getWaterRightIdentifiersForLocation ( Vector smrights, Stri
 }
 
 /**
-Get a list of water rights for a location.  The locations are the
-nodes at which the rights apply.
+Get a list of water rights for a location.  The locations are the nodes at which the rights apply.
 @param smrights List of StateMod_Right to search.
 @param loc_id Location identifier to match (case-insensitive).
 @param req_parcel_year Parcel year for data or -1 to use all (only used with well rights).
@@ -3870,8 +3499,7 @@ public static int [] getWaterRightParcelYearList ( Vector smrights )
 
 /**
 Works in coordination with getDailyTimeSeries - make sure to keep in sync
-@return whether daily time series is available or not, based on rules for 
-getting daily TS
+@return whether daily time series is available or not, based on rules for getting daily TS
 	dailyID = dayTS identifier, return true if daily ts exists
 	dailyID = 0, return true if month ts exists
 	else return true if both monthly and daily ts exist
@@ -3883,8 +3511,7 @@ getting daily TS
 public static boolean isDailyTimeSeriesAvailable(String ID, String dailyID, 
 MonthTS monthTS, DayTS dayTS, boolean calculate) {
 	if (Message.isDebugOn) {
-		Message.printDebug(30, "StateMod_GUIUtil."
-			+ "isDailyTimeSeriesAvailable",
+		Message.printDebug(30, "StateMod_GUIUtil.isDailyTimeSeriesAvailable",
 			"ID: " + ID + ", dailyID: " + dailyID
 			+ ", monthTS: " +(monthTS!=null)+ ", dayTS: " 
 			+ (dayTS!=null) + ", calculate: " + calculate);
@@ -3933,15 +3560,24 @@ MonthTS monthTS, DayTS dayTS, boolean calculate) {
 /**
 Indicate whether the StateMod version is at least some standard value.  This is
 useful when checking binary formats against a recognized version.
-@return true if the version is >= the known version that is being checked.
+@return true if the version is >= the known version that is being checked.  Return false
+if the version is null or empty.
 @param version A version to check.
-@param known_version A known version to check against (see VERSION_*).
+@param knownVersion A known version to check against (see VERSION_*).
 */
-public static boolean isVersionAtLeast ( double version, double known_version )
-{	if ( version >= known_version ) {
+public static boolean isVersionAtLeast ( String version, String knownVersion )
+{	if ( (version == null) || version.equals("") ) {
+        return false;
+    }   
+    if ( version.compareTo(knownVersion) >= 0 ) {
+        //Message.printStatus(2,"isVersionAtLeast","Checking version \"" + version + "\" against known version \"" +
+        //        knownVersion + "\" - returning true" );
 		return true;
 	}
-	else {	return false;
+	else {
+        //Message.printStatus(2,"isVersionAtLeast","Checking version \"" + version + "\" against known version \"" +
+        //        knownVersion + "\" - returning false" );
+	    return false;
 	}
 }
 
@@ -4007,19 +3643,17 @@ public static int indexOfRiverNodeID ( Vector data, String id )
 		// base class.
 		d = (StateMod_Data)data.elementAt(i);
 		if ( d instanceof StateMod_StreamGage ) {
-			if ( id.equalsIgnoreCase (
-				((StateMod_StreamGage)d).getCgoto() ) ) {
+			if ( id.equalsIgnoreCase ( ((StateMod_StreamGage)d).getCgoto() ) ) {
 				return i;
 			}
 		}
 		else if ( d instanceof StateMod_StreamEstimate ) {
-			if ( id.equalsIgnoreCase (
-				((StateMod_StreamEstimate)d).getCgoto() ) ) {
+			if ( id.equalsIgnoreCase ( ((StateMod_StreamEstimate)d).getCgoto() ) ) {
 				return i;
 			}
 		}
-		else {	if ( id.equalsIgnoreCase (
-				((StateMod_Data)d).getCgoto() ) ) {
+		else {
+		    if ( id.equalsIgnoreCase ( ((StateMod_Data)d).getCgoto() ) ) {
 				return i;
 			}
 		}
@@ -4045,12 +3679,10 @@ Determine whether a double value is missing.
 @return true if the value is missing, false, if not.
 */
 public static boolean isMissing ( double d )
-{	if (	(d < MISSING_DOUBLE_CEILING) &&
-		(d > MISSING_DOUBLE_FLOOR) ) {
+{	if ( (d < MISSING_DOUBLE_CEILING) && (d > MISSING_DOUBLE_FLOOR) ) {
 		return true;
 	}
-	else {	return false;
-	}
+    return false;
 }
 
 /**
@@ -4059,12 +3691,10 @@ Determine whether a float value is missing.
 @return true if the value is missing, false, if not.
 */
 public static boolean isMissing ( float f )
-{	if (	(f < (float)MISSING_DOUBLE_CEILING) &&
-		(f > (float)MISSING_DOUBLE_FLOOR) ) {
+{	if ( (f < (float)MISSING_DOUBLE_CEILING) && (f > (float)MISSING_DOUBLE_FLOOR) ) {
 		return true;
 	}
-	else {	return false;
-	}
+    return false;
 }
 
 /**
@@ -4076,8 +3706,7 @@ public static boolean isMissing ( int i )
 {	if ( i == MISSING_INT ) {
 		return true;
 	}
-	else {	return false;
-	}
+	return false;
 }
 
 /**
@@ -4089,8 +3718,7 @@ public static boolean isMissing ( long i )
 {	if ( i == MISSING_INT ) {
 		return true;
 	}
-	else {	return false;
-	}
+	return false;
 }
 
 /**
@@ -4102,14 +3730,12 @@ public static boolean isMissing ( String s )
 {	if ( (s == null) || (s.length() == 0) ) {
 		return true;
 	}
-	else {	return false;
-	}
+	return false;
 }
 
 /**
 Locates the index of an StateMod_Data node.  The node can be a diversion, 
-reservoir, or any other StateMod object which has been derived from the 
-StateMod_Data type.
+reservoir, or any other StateMod object which has been derived from the StateMod_Data type
 from the specified CGoto.
 @param ID CGoto ID to search for
 @param theData vector of StateMod_Data objects
@@ -4121,8 +3747,7 @@ public static int locateIndexFromCGOTO(String ID, Vector theData) {
 	}
 	
 	for (int i = 0; i<num; i++) {
-		if (ID.equalsIgnoreCase( 
-			((StateMod_Data)theData.elementAt(i)).getCgoto())) {
+		if (ID.equalsIgnoreCase( ((StateMod_Data)theData.elementAt(i)).getCgoto())) {
 			return i;
 		}
 	}
@@ -4142,8 +3767,7 @@ public static int locateIndexFromID(String ID, Vector theData) {
 	}
 	
 	for (int i = 0; i < num; i++) {
-		if (ID.equalsIgnoreCase( 
-			((StateMod_Data)theData.elementAt(i)).getID())) {
+		if (ID.equalsIgnoreCase( ((StateMod_Data)theData.elementAt(i)).getID())) {
 			return i;
 		}
 	}
@@ -4153,13 +3777,11 @@ public static int locateIndexFromID(String ID, Vector theData) {
 /**
 Returns the property value for a component.  
 @param componentType the kind of component to look up for.
-@param propType the property to look up.  One of "FieldName", 
-"FieldNameHeader", "ToolTip", or "Format".  
+@param propType the property to look up.  One of "FieldName", "FieldNameHeader", "ToolTip", or "Format".  
 @param field the field for which to return the property.  
 @return the property, or if it could not be found null will be returned.
 */
-public static String lookupPropValue(int componentType, String propType,
-String field) {
+public static String lookupPropValue(int componentType, String propType, String field) {
 	if (componentType == StateMod_DataSet.COMP_DELAY_TABLES_DAILY) {
 		return lookupDelayTableDailyPropValue(propType, field);
 	}
@@ -4175,8 +3797,7 @@ String field) {
 	else if (componentType == StateMod_DataSet.COMP_DIVERSION_STATION_COLLECTIONS) {
 	    	return lookupDiversionCollectionPropValue(propType, field);
 	}
-	else if (componentType
-	     == StateMod_DataSet.COMP_DIVERSION_STATION_DELAY_TABLES) {
+	else if (componentType == StateMod_DataSet.COMP_DIVERSION_STATION_DELAY_TABLES) {
 	     	return lookupDiversionReturnFlowPropValue(propType, field);
 	}
 	else if (componentType == StateMod_DataSet.COMP_INSTREAM_RIGHTS) {
@@ -4188,23 +3809,19 @@ String field) {
 	else if (componentType == StateMod_DataSet.COMP_RESERVOIR_STATIONS) {
 		return lookupReservoirPropValue(propType, field);
 	}
-	else if (componentType 
-	    == StateMod_DataSet.COMP_RESERVOIR_STATION_ACCOUNTS) {
+	else if (componentType == StateMod_DataSet.COMP_RESERVOIR_STATION_ACCOUNTS) {
 		return lookupReservoirAccountPropValue(propType, field);
 	}
 	else if (componentType == StateMod_Util.COMP_RESERVOIR_AREA_CAP) {	
 		return lookupReservoirAreaCapPropValue(propType, field);
 	}
-	else if (componentType 
-	    == StateMod_DataSet.COMP_RESERVOIR_STATION_PRECIP_STATIONS) {
+	else if (componentType == StateMod_DataSet.COMP_RESERVOIR_STATION_PRECIP_STATIONS) {
 		return lookupReservoirPrecipStationPropValue(propType, field);
 	}
-	else if (componentType 
-	    == StateMod_DataSet.COMP_RESERVOIR_STATION_EVAP_STATIONS) {
+	else if (componentType == StateMod_DataSet.COMP_RESERVOIR_STATION_EVAP_STATIONS) {
 		return lookupReservoirEvapStationPropValue(propType, field);
 	}	
-	else if (componentType 
-	    == StateMod_DataSet.COMP_RESERVOIR_STATION_COLLECTIONS) {
+	else if (componentType == StateMod_DataSet.COMP_RESERVOIR_STATION_COLLECTIONS) {
 	    	return lookupReservoirCollectionPropValue(propType, field);
 	}
 	else if (componentType == StateMod_DataSet.COMP_RESERVOIR_RIGHTS) {	
@@ -4213,12 +3830,10 @@ String field) {
 	else if (componentType == StateMod_DataSet.COMP_RIVER_NETWORK) {
 		return lookupRiverNodePropValue(propType, field);
 	}
-	else if (componentType 
-	    == StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS) {
+	else if (componentType == StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS) {
 	    	return lookupStreamEstimatePropValue(propType, field);
 	}
-	else if (componentType
-	    == StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS) {
+	else if (componentType == StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS) {
 	    	return lookupStreamEstimateCoefficientPropValue(propType,field);
 	}
 	else if (componentType == StateMod_DataSet.COMP_STREAMGAGE_STATIONS) {
@@ -4227,16 +3842,13 @@ String field) {
 	else if (componentType == StateMod_DataSet.COMP_WELL_STATIONS) {
 		return lookupWellPropValue(propType, field);
 	}
-	else if (componentType 
-	    == StateMod_DataSet.COMP_WELL_STATION_COLLECTIONS) {
+	else if (componentType == StateMod_DataSet.COMP_WELL_STATION_COLLECTIONS) {
 	    	return lookupWellCollectionPropValue(propType, field);
 	}
-	else if (componentType 
-	    == StateMod_DataSet.COMP_WELL_STATION_DEPLETION_TABLES) {
+	else if (componentType == StateMod_DataSet.COMP_WELL_STATION_DEPLETION_TABLES) {
 		return lookupWellDepletionPropValue(propType, field);
 	}
-	else if (componentType 
-	    == StateMod_DataSet.COMP_WELL_STATION_DELAY_TABLES) {
+	else if (componentType == StateMod_DataSet.COMP_WELL_STATION_DELAY_TABLES) {
 	    	return lookupWellReturnFlowPropValue(propType, field);
 	}
 	else if (componentType == StateMod_DataSet.COMP_WELL_RIGHTS) {
@@ -4248,13 +3860,11 @@ String field) {
 
 /**
 Returns property values for daily delay tables.
-@param propType the property to look up.  One of "FieldName", 
-"FieldNameHeader", "ToolTip", or "Format".  
+@param propType the property to look up.  One of "FieldName", "FieldNameHeader", "ToolTip", or "Format".  
 @param field the field for which to return the property.  
 @return the property, or if it could not be found null will be returned.
 */
-private static String lookupDelayTableDailyPropValue(String propType, 
-String field) {
+private static String lookupDelayTableDailyPropValue(String propType, String field) {
 	if (propType.equalsIgnoreCase("FieldName")) {
 		if (field.equalsIgnoreCase("DelayTableID")) {
 			return "DELAY TABLE ID";
@@ -4602,8 +4212,7 @@ String field) {
 	}	
 	else if (propType.equalsIgnoreCase("ToolTip")) {
 		if (field.equalsIgnoreCase("ID")) {
-			return "<html>The diversion station identifier is the "
-				+ "main link between diversion data<BR>" 
+			return "<html>The diversion station identifier is the main link between diversion data<BR>" 
 				+ "and must be unique in the data set.</html>";
 		}
 		else if (field.equalsIgnoreCase("Name")) {
@@ -4613,8 +4222,7 @@ String field) {
 			return "River node where diversion station is located.";
 		}
 		else if (field.equalsIgnoreCase("OnOff")) {
-			return "Indicates whether diversion station is on (1) "
-				+ "or off (0)";
+			return "Indicates whether diversion station is on (1) or off (0)";
 		}
 		else if (field.equalsIgnoreCase("Capacity")) {
 			return "Diversion station capacity (CFS)";
@@ -4641,8 +4249,7 @@ String field) {
 			return "Demand source.";
 		}
 		else if (field.equalsIgnoreCase("EffAnnual")) {
-			return "Efficiency, annual (%).  Negative indicates "
-				+ "monthly efficiencies.";
+			return "Efficiency, annual (%).  Negative indicates monthly efficiencies.";
 		}
 		else if (field.equalsIgnoreCase("EffMonthly01")) {
 			return "Diversion efficiency for month 1 of year.";
@@ -4681,7 +4288,6 @@ String field) {
 			return "Diversion efficiency for month 12 of year.";
 		}
 	}
-
 	return null;
 }
 
@@ -4762,14 +4368,12 @@ String field) {
 			return "";
 		}
 	}
-
 	return null;
 }
 
 /**
 Returns property values for diversion return flows.
-@param propType the property to look up.  One of "FieldName", 
-"FieldNameHeader", "ToolTip", or "Format".  
+@param propType the property to look up.  One of "FieldName", "FieldNameHeader", "ToolTip", or "Format".  
 @param field the field for which to return the property.  
 @return the property, or if it could not be found null will be returned.
 */
@@ -4831,19 +4435,16 @@ String field) {
 			return "Delay table identifier";
 		}	
 	}
-
 	return null;
 }
 
 /**
 Returns property values for diversion rights
-@param propType the property to look up.  One of "FieldName", 
-"FieldNameHeader", "ToolTip", or "Format".  
+@param propType the property to look up.  One of "FieldName", "FieldNameHeader", "ToolTip", or "Format".  
 @param field the field for which to return the property.  
 @return the property, or if it could not be found null will be returned.
 */
-private static String lookupDiversionRightPropValue(String propType, 
-String field) {
+private static String lookupDiversionRightPropValue(String propType, String field) {
 	if (propType.equalsIgnoreCase("FieldName")) {
 		if (field.equalsIgnoreCase("ID")) {
 			return "DIVERSION RIGHT ID";
@@ -4907,40 +4508,33 @@ String field) {
 	else if (propType.equalsIgnoreCase("ToolTip")) {
 		if (field.equalsIgnoreCase("ID")) {
 			return "<html>The diversion right ID is typically the "
-				+ "diversion station ID<br> followed by .01, "
-				+ ".02, etc.</html>";
+				+ "diversion station ID<br> followed by .01, .02, etc.</html>";
 		}
 		else if (field.equalsIgnoreCase("Name")) {
 			return "Diversion right name";
 		}
 		else if (field.equalsIgnoreCase("StationID")) {
 			return "<HTML>The diversion ID is the link between "
-				+ "diversion stations and their "
-				+ "right(s).</HTML>";
+				+ "diversion stations and their right(s).</HTML>";
 		}
 		else if (field.equalsIgnoreCase("AdministrationNumber")) {
 			return "<HTML>Lower admininistration numbers indicate "
-				+ "greater seniority.<BR>99999 is typical for "
-				+ "a very junior right.</html>";
+				+ "greater seniority.<BR>99999 is typical for a very junior right.</html>";
 		}
 		else if (field.equalsIgnoreCase("Decree")) {
 			return "Decree amount (CFS)";
 		}
 		else if (field.equalsIgnoreCase("OnOff")) {	
-			return "<HTML>0 = OFF<BR>1 = ON<BR>" 
-				+ "YYYY indicates to turn on the right in "
-				+ "year YYYY.<BR>-YYYY indicates to turn off "
-				+ "the right in year YYYY.</HTML>";
+			return "<HTML>0 = OFF<BR>1 = ON<BR>YYYY indicates to turn on the right in "
+				+ "year YYYY.<BR>-YYYY indicates to turn off the right in year YYYY.</HTML>";
 		}
 	}
-
 	return null;
 }
 
 /**
 Returns property values for instream flows.
-@param propType the property to look up.  One of "FieldName", 
-"FieldNameHeader", "ToolTip", or "Format".  
+@param propType the property to look up.  One of "FieldName", "FieldNameHeader", "ToolTip", or "Format".  
 @param field the field for which to return the property.  
 @return the property, or if it could not be found null will be returned.
 */
@@ -5017,16 +4611,14 @@ String field) {
 	}	
 	else if (propType.equalsIgnoreCase("ToolTip")) {
 		if (field.equalsIgnoreCase("ID")) {
-			return "<html>The instream flow identifier is the "
-				+ "main link between instream data data<BR>"
+			return "<html>The instream flow identifier is the main link between instream data data<BR>"
 				+ "and must be unique in the data set.</html>";
 		}
 		else if (field.equalsIgnoreCase("Name")) {
 			return "<html>Instream flow name.</html>";
 		}
 		else if (field.equalsIgnoreCase("UpstreamRiverNodeID")) {
-			return "Upstream river ID where instream flow "
-				+ "is located.";
+			return "Upstream river ID where instream flow is located.";
 		}
 		else if (field.equalsIgnoreCase("OnOff")) {
 			return "<html>Switch.<br>0 = off<br>1 = on</html";
@@ -5035,8 +4627,7 @@ String field) {
 			return "<html>Daily instream flow ID.</html>";
 		}
 		else if (field.equalsIgnoreCase("DailyID")) {
-			return "<html>Downstream river node, for instream flow "
-				+ "reach.</html>";
+			return "<html>Downstream river node, for instream flow reach.</html>";
 		}
 		else if (field.equalsIgnoreCase("DemandType")) {	
 			return "<html>Data type switch.</html>";
@@ -5048,8 +4639,7 @@ String field) {
 
 /**
 Returns property values for instream flow rights.
-@param propType the property to look up.  One of "FieldName", 
-"FieldNameHeader", "ToolTip", or "Format".  
+@param propType the property to look up.  One of "FieldName", "FieldNameHeader", "ToolTip", or "Format".  
 @param field the field for which to return the property.  
 @return the property, or if it could not be found null will be returned.
 */
@@ -5063,8 +4653,7 @@ String field) {
 			return "RIGHT NAME";
 		}
 		else if (field.equalsIgnoreCase("StationID")) {
-			return "INSTREAM FLOW STATION ID ASSOCIATED"
-				+ " WITH RIGHT";
+			return "INSTREAM FLOW STATION ID ASSOCIATED WITH RIGHT";
 		}
 		else if (field.equalsIgnoreCase("AdministrationNumber")) {
 			return "ADMINISTRATION NUMBER";
@@ -5084,8 +4673,7 @@ String field) {
 			return "\n\n\nRIGHT NAME";
 		}
 		else if (field.equalsIgnoreCase("StationID")) {
-			return "INSTREAM FLOW\nSTATION ID\nASSOCIATED"
-				+ "\nWITH RIGHT";
+			return "INSTREAM FLOW\nSTATION ID\nASSOCIATED\nWITH RIGHT";
 		}
 		else if (field.equalsIgnoreCase("AdministrationNumber")) {
 			return "\n\nADMINISTRATION\nNUMBER";
@@ -5120,40 +4708,33 @@ String field) {
 	else if (propType.equalsIgnoreCase("ToolTip")) {
 		if (field.equalsIgnoreCase("ID")) {
 			return "<html>The instream flow right ID is typically "
-				+ "the instream flow ID<br> followed by .01, "
-				+ ".02, etc.</html>";
+				+ "the instream flow ID<br> followed by .01, .02, etc.</html>";
 		}
 		else if (field.equalsIgnoreCase("Name")) {
 			return "Instream flow right name.";
 		}
 		else if (field.equalsIgnoreCase("StationID")) {
 			return "<HTML>The instream flow ID is the link between "
-				+ "instream  flows and their right<BR>(not "
-				+ "editable here).</HTML>";
+				+ "instream  flows and their right<BR>(not editable here).</HTML>";
 		}
 		else if (field.equalsIgnoreCase("AdministrationNumber")) {
 			return "<HTML>Lower admininistration numbers indicate "
-				+ "greater seniority.<BR>99999 is typical for "
-				+ "a very junior right.</html>";
+				+ "greater seniority.<BR>99999 is typical for a very junior right.</html>";
 		}
 		else if (field.equalsIgnoreCase("Decree")) {
 			return "Decreed amount (CFS).";
 		}
 		else if (field.equalsIgnoreCase("OnOff")) {	
-			return "<HTML>0 = OFF<BR>1 = ON<BR>"
-				+ "YYYY indicates to turn on the right in year "
-				+ "YYYY.<BR>-YYYY indicates to turn off the "
-				+ "right in year YYYY.</HTML>";
+			return "<HTML>0 = OFF<BR>1 = ON<BR>YYYY indicates to turn on the right in year "
+				+ "YYYY.<BR>-YYYY indicates to turn off the right in year YYYY.</HTML>";
 		}
 	}
-
 	return null;
 }
 
 /**
 Returns property values for reservoirs.
-@param propType the property to look up.  One of "FieldName", 
-"FieldNameHeader", "ToolTip", or "Format".  
+@param propType the property to look up.  One of "FieldName", "FieldNameHeader", "ToolTip", or "Format".  
 @param field the field for which to return the property.  
 @return the property, or if it could not be found null will be returned.
 */
@@ -5294,8 +4875,7 @@ String field) {
 	else if (propType.equalsIgnoreCase("ToolTip")) {
 		if (field.equalsIgnoreCase("ID")) {
 			return "<html>The reservoir station identifier is the "
-				+ "main link between reservoir data<BR>" 
-				+ "and must be unique in the data set.</html>";
+				+ "main link between reservoir data<BR>and must be unique in the data set.</html>";
 		}
 		else if (field.equalsIgnoreCase("Name")) {
 			return "Reservoir station name.";
@@ -5337,14 +4917,12 @@ String field) {
 			return "Number of curve rows.";
 		}
 	}
-
 	return null;
 }
 
 /**
 Returns property values for reservoir accounts.
-@param propType the property to look up.  One of "FieldName", 
-"FieldNameHeader", "ToolTip", or "Format".  
+@param propType the property to look up.  One of "FieldName", "FieldNameHeader", "ToolTip", or "Format".  
 @param field the field for which to return the property.  
 @return the property, or if it could not be found null will be returned.
 */
@@ -5421,9 +4999,7 @@ String field) {
 	}	
 	else if (propType.equalsIgnoreCase("ToolTip")) {
 		if (field.equalsIgnoreCase("ReservoirID")) {
-			return "<html>The reservoir station ID of the "
-				+ "reservoir to which<br>the rights "
-				+ "belong.</html>";
+			return "<html>The reservoir station ID of the reservoir to which<br>the rights belong.</html>";
 		}
 		else if (field.equalsIgnoreCase("OwnerID")) {
 			return "Sequential number 1+ (not used by StateMod)";
@@ -5444,14 +5020,12 @@ String field) {
 			return "One fill rule calculation flag.";
 		}
 	}
-
 	return null;
 }
 
 /**
 Returns property values for reservoir area caps.
-@param propType the property to look up.  One of "FieldName", 
-"FieldNameHeader", "ToolTip", or "Format".  
+@param propType the property to look up.  One of "FieldName", "FieldNameHeader", "ToolTip", or "Format".  
 @param field the field for which to return the property.  
 @return the property, or if it could not be found null will be returned.
 */
@@ -5501,8 +5075,7 @@ String field) {
 	}	
 	else if (propType.equalsIgnoreCase("ToolTip")) {
 		if (field.equalsIgnoreCase("ReservoirID")) {
-			return "<html>The reservoir station ID of the "
-				+ "reservoir to which<br>the area capacity "
+			return "<html>The reservoir station ID of the reservoir to which<br>the area capacity "
 				+ "information belongs.</html>";
 		}
 		else if (field.equalsIgnoreCase("Content")) {
@@ -5515,19 +5088,16 @@ String field) {
 			return "Reservoir seepage (AF/M).";
 		}
 	}
-
 	return null;
 }
 
 /**
 Returns property values for reservoir precipitation stations.
-@param propType the property to look up.  One of "FieldName", 
-"FieldNameHeader", "ToolTip", or "Format".  
+@param propType the property to look up.  One of "FieldName", "FieldNameHeader", "ToolTip", or "Format".  
 @param field the field for which to return the property.  
 @return the property, or if it could not be found null will be returned.
 */
-private static String lookupReservoirPrecipStationPropValue(String propType, 
-String field) {
+private static String lookupReservoirPrecipStationPropValue(String propType, String field) {
 	if (propType.equalsIgnoreCase("FieldName")) {
 		if (field.equalsIgnoreCase("ReservoirID")) {
 			return "RESERVOIR ID";
@@ -5563,9 +5133,7 @@ String field) {
 	}	
 	else if (propType.equalsIgnoreCase("ToolTip")) {
 		if (field.equalsIgnoreCase("ReservoirID")) {
-			return "<html>The reservoir station ID of the "
-				+ "reservoir to which<br>the climate data "
-				+ "belong.</html>";
+			return "<html>The reservoir station ID of the reservoir to which<br>the climate data belong.</html>";
 		}
 		else if (field.equalsIgnoreCase("StationID")) {
 			return "Station identifier.";
@@ -5574,19 +5142,16 @@ String field) {
 			return "Weight for station's data (%).";
 		}
 	}
-
 	return null;
 }
 
 /**
 Returns property values for reservoir evaporation stations.
-@param propType the property to look up.  One of "FieldName", 
-"FieldNameHeader", "ToolTip", or "Format".  
+@param propType the property to look up.  One of "FieldName", "FieldNameHeader", "ToolTip", or "Format".  
 @param field the field for which to return the property.  
 @return the property, or if it could not be found null will be returned.
 */
-private static String lookupReservoirEvapStationPropValue(String propType, 
-String field) {
+private static String lookupReservoirEvapStationPropValue(String propType, String field) {
 	if (propType.equalsIgnoreCase("FieldName")) {
 		if (field.equalsIgnoreCase("ReservoirID")) {
 			return "RESERVOIR ID";
@@ -5622,9 +5187,7 @@ String field) {
 	}	
 	else if (propType.equalsIgnoreCase("ToolTip")) {
 		if (field.equalsIgnoreCase("ReservoirID")) {
-			return "<html>The reservoir station ID of the "
-				+ "reservoir to which<br>the climate data "
-				+ "belong.</html>";
+			return "<html>The reservoir station ID of the reservoir to which<br>the climate data belong.</html>";
 		}
 		else if (field.equalsIgnoreCase("StationID")) {
 			return "Station identifier.";
@@ -5633,14 +5196,12 @@ String field) {
 			return "Weight for station's data (%).";
 		}
 	}
-
 	return null;
 }
 
 /**
 Returns property values for reservoir collections.
-@param propType the property to look up.  One of "FieldName", 
-"FieldNameHeader", "ToolTip", or "Format".  
+@param propType the property to look up.  One of "FieldName", "FieldNameHeader", "ToolTip", or "Format".  
 @param field the field for which to return the property.  
 @return the property, or if it could not be found null will be returned.
 */
@@ -5714,19 +5275,16 @@ String field) {
 			return "";
 		}
 	}
-
 	return null;
 }
 
 /**
 Returns property values for reservoir rights.
-@param propType the property to look up.  One of "FieldName", 
-"FieldNameHeader", "ToolTip", or "Format".  
+@param propType the property to look up.  One of "FieldName", "FieldNameHeader", "ToolTip", or "Format".  
 @param field the field for which to return the property.  
 @return the property, or if it could not be found null will be returned.
 */
-private static String lookupReservoirRightPropValue(String propType, 
-String field) {
+private static String lookupReservoirRightPropValue(String propType, String field) {
 	if (propType.equalsIgnoreCase("FieldName")) {
 		if (field.equalsIgnoreCase("ID")) {
 			return "RIGHT ID";
@@ -5825,31 +5383,25 @@ String field) {
 	}	
 	else if (propType.equalsIgnoreCase("ToolTip")) {
 		if (field.equalsIgnoreCase("ID")) {
-			return "<html>The reservoir right ID is typically the "
-				+ "reservoir station ID<br> followed by .01, "
+			return "<html>The reservoir right ID is typically the reservoir station ID<br> followed by .01, "
 				+ ".02, etc.</html>";
 		}
 		else if (field.equalsIgnoreCase("Name")) {
 			return "Reservoir right name";
 		}
 		else if (field.equalsIgnoreCase("StructureID")) {
-			return "<HTML>The reservoir ID is the link between "
-				+ "reservoir stations and their "
-				+ "right(s).</HTML>";
+			return "<HTML>The reservoir ID is the link between reservoir stations and their right(s).</HTML>";
 		}
 		else if (field.equalsIgnoreCase("AdministrationNumber")) {
-			return "<HTML>Lower admininistration numbers indicate "
-				+ "greater seniority.<BR>99999 is typical for "
+			return "<HTML>Lower admininistration numbers indicate greater seniority.<BR>99999 is typical for "
 				+ "a very junior right.</html>";
 		}
 		else if (field.equalsIgnoreCase("DecreedAmount")) {
 			return "Decreed amount (ACFT)";
 		}
 		else if (field.equalsIgnoreCase("OnOff")) {
-			return "<HTML>0 = OFF<BR>1 = ON<BR>" 
-				+ "YYYY indicates to turn on the right in year "
-				+ "YYYY.<BR>-YYYY indicates to turn off the "
-				+ "right in year YYYY.</HTML>";
+			return "<HTML>0 = OFF<BR>1 = ON<BR>YYYY indicates to turn on the right in year "
+				+ "YYYY.<BR>-YYYY indicates to turn off the right in year YYYY.</HTML>";
 		}
 		else if (field.equalsIgnoreCase("AccountDistribution")) {
 			return "Account distribution switch.";
@@ -5870,13 +5422,11 @@ String field) {
 
 /**
 Returns property values for river nodes.
-@param propType the property to look up.  One of "FieldName", 
-"FieldNameHeader", "ToolTip", or "Format".  
+@param propType the property to look up.  One of "FieldName", "FieldNameHeader", "ToolTip", or "Format".  
 @param field the field for which to return the property.  
 @return the property, or if it could not be found null will be returned.
 */
-private static String lookupRiverNodePropValue(String propType, 
-String field) {
+private static String lookupRiverNodePropValue(String propType, String field) {
 	if (propType.equalsIgnoreCase("FieldName")) {
 		if (field.equalsIgnoreCase("ID")) {
 			return "RIVER NODE ID";
@@ -5933,19 +5483,16 @@ String field) {
 			return "";
 		}
 	}
-
 	return null;
 }
 
 /**
 Returns property values for stream estimate stations.
-@param propType the property to look up.  One of "FieldName", 
-"FieldNameHeader", "ToolTip", or "Format".  
+@param propType the property to look up.  One of "FieldName", "FieldNameHeader", "ToolTip", or "Format".  
 @param field the field for which to return the property.  
 @return the property, or if it could not be found null will be returned.
 */
-private static String lookupStreamEstimatePropValue(String propType, 
-String field) {
+private static String lookupStreamEstimatePropValue(String propType, String field) {
 	if (propType.equalsIgnoreCase("FieldName")) {
 		if (field.equalsIgnoreCase("ID")) {
 			return "ID";
@@ -6008,13 +5555,11 @@ String field) {
 
 /**
 Returns property values for stream estimate coefficients.
-@param propType the property to look up.  One of "FieldName", 
-"FieldNameHeader", "ToolTip", or "Format".  
+@param propType the property to look up.  One of "FieldName", "FieldNameHeader", "ToolTip", or "Format".  
 @param field the field for which to return the property.  
 @return the property, or if it could not be found null will be returned.
 */
-private static String lookupStreamEstimateCoefficientPropValue(String propType, 
-String field) {
+private static String lookupStreamEstimateCoefficientPropValue(String propType, String field) {
 	if (propType.equalsIgnoreCase("FieldName")) {
 		if (field.equalsIgnoreCase("ID")) {
 			return "ID";
@@ -6095,19 +5640,16 @@ String field) {
 			return "";
 		}
 	}
-
 	return null;
 }
 
 /**
 Returns property values for stream gages.
-@param propType the property to look up.  One of "FieldName", 
-"FieldNameHeader", "ToolTip", or "Format".  
+@param propType the property to look up.  One of "FieldName", "FieldNameHeader", "ToolTip", or "Format".  
 @param field the field for which to return the property.  
 @return the property, or if it could not be found null will be returned.
 */
-private static String lookupStreamGagePropValue(String propType, 
-String field) {
+private static String lookupStreamGagePropValue(String propType, String field) {
 	if (propType.equalsIgnoreCase("FieldName")) {
 		if (field.equalsIgnoreCase("ID")) {
 			return "ID";
@@ -6164,26 +5706,21 @@ String field) {
 			return "";
 		}
 	}
-
 	return null;
 }
 
 /**
 Get the matching time series for an identifier.  This is used, for example, 
 to find the time series associated with a StateMod data object, when the time
-series is not a reference data member within the data object (e.g., climate
-time series for reservoirs.
+series is not a reference data member within the data object (e.g., climate time series for reservoirs.
 @param id Identifier associated with a StateMod data object, which will be
 compared with the location part of the time series identifier.
-@param tslist Vector of time series to search, typically read from one of the
-time series data files.
+@param tslist Vector of time series to search, typically read from one of the time series data files.
 @param match_count Indicates which match to return.  In most cases this will be
-1 but for some time series (e.g., reservoir targets) the second match may be
-requested.
+1 but for some time series (e.g., reservoir targets) the second match may be requested.
 @return matching time series or null if no match is found.
 */
-public static TS lookupTimeSeries (	String id, Vector tslist,
-					int match_count )
+public static TS lookupTimeSeries (	String id, Vector tslist, int match_count )
 {	if ( (id == null) || id.equals("") ) {
 		return null;
 	}
@@ -6218,19 +5755,16 @@ Currently this simply returns the component name, replacing " TS " with " Time S
 */
 public static String lookupTimeSeriesGraphTitle ( int comp_type )
 {	StateMod_DataSet dataset = new StateMod_DataSet();
-	return dataset.lookupComponentName (
-		comp_type ).replaceAll(" TS ", " Time Series " );
+	return dataset.lookupComponentName ( comp_type ).replaceAll(" TS ", " Time Series " );
 }
 
 /**
 Returns property values for wells.
-@param propType the property to look up.  One of "FieldName", 
-"FieldNameHeader", "ToolTip", or "Format".  
+@param propType the property to look up.  One of "FieldName", "FieldNameHeader", "ToolTip", or "Format".  
 @param field the field for which to return the property.  
 @return the property, or if it could not be found null will be returned.
 */
-private static String lookupWellPropValue(String propType, 
-String field) {
+private static String lookupWellPropValue(String propType, String field) {
 	if (propType.equalsIgnoreCase("FieldName")) {
 		if (field.equalsIgnoreCase("ID")) {
 			return "ID";
@@ -6464,8 +5998,7 @@ String field) {
 	}	
 	else if (propType.equalsIgnoreCase("ToolTip")) {
 		if (field.equalsIgnoreCase("ID")) {
-			return "<html>The well station identifier is the main "
-				+ "link between well data<BR>and must be "
+			return "<html>The well station identifier is the main link between well data<BR>and must be "
 				+ "unique in the data set.</html>";
 		}
 		else if (field.equalsIgnoreCase("Name")) {
@@ -6475,8 +6008,7 @@ String field) {
 			return "River node where well station is located.";
 		}
 		else if (field.equalsIgnoreCase("OnOff")) {
-			return "Indicates whether well station is on (1) "
-				+ "or off (0)";	
+			return "Indicates whether well station is on (1) or off (0)";	
 		}
 		else if (field.equalsIgnoreCase("Capacity")) {
 			return "<html>Well capacity (CFS)</html>";
@@ -6497,8 +6029,7 @@ String field) {
 			return "<html>System efficiency (%).</html>";
 		}
 		else if (field.equalsIgnoreCase("IrrigatedAcres")) {
-			return "<html>Irrigated area associated with the "
-				+ "well.</html>";
+			return "<html>Irrigated area associated with the well.</html>";
 		}
 		else if (field.equalsIgnoreCase("UseType")) {
 			return "<html>Use type.</html>";
@@ -6543,19 +6074,16 @@ String field) {
 			return "Well efficiency for month 12 of year.";
 		}
 	}
-
 	return null;
 }
 
 /**
 Returns property values for well collections.
-@param propType the property to look up.  One of "FieldName", 
-"FieldNameHeader", "ToolTip", or "Format".  
+@param propType the property to look up.  One of "FieldName", "FieldNameHeader", "ToolTip", or "Format".  
 @param field the field for which to return the property.  
 @return the property, or if it could not be found null will be returned.
 */
-private static String lookupWellCollectionPropValue(String propType, 
-String field) {
+private static String lookupWellCollectionPropValue(String propType, String field) {
 	if (propType.equalsIgnoreCase("FieldName")) {
 		if (field.equalsIgnoreCase("LocationID")) {
 			return "WELL ID";
@@ -6624,19 +6152,16 @@ String field) {
 			return "";
 		}
 	}
-
 	return null;
 }
 
 /**
 Returns property values for well depletions.
-@param propType the property to look up.  One of "FieldName", 
-"FieldNameHeader", "ToolTip", or "Format".  
+@param propType the property to look up.  One of "FieldName", "FieldNameHeader", "ToolTip", or "Format".  
 @param field the field for which to return the property.  
 @return the property, or if it could not be found null will be returned.
 */
-private static String lookupWellDepletionPropValue(String propType, 
-String field) {
+private static String lookupWellDepletionPropValue(String propType, String field) {
 	if (propType.equalsIgnoreCase("FieldName")) {
 		if (field.equalsIgnoreCase("ID")) {
 			return "WELL ID";
@@ -6693,19 +6218,16 @@ String field) {
 			return "Delay table identifier";
 		}	
 	}
-
 	return null;
 }
 
 /**
 Returns property values for well return flows.
-@param propType the property to look up.  One of "FieldName", 
-"FieldNameHeader", "ToolTip", or "Format".  
+@param propType the property to look up.  One of "FieldName", "FieldNameHeader", "ToolTip", or "Format".  
 @param field the field for which to return the property.  
 @return the property, or if it could not be found null will be returned.
 */
-private static String lookupWellReturnFlowPropValue(String propType, 
-String field) {
+private static String lookupWellReturnFlowPropValue(String propType, String field) {
 	if (propType.equalsIgnoreCase("FieldName")) {
 		if (field.equalsIgnoreCase("ID")) {
 			return "WELL ID";
@@ -6762,19 +6284,16 @@ String field) {
 			return "Delay table identifier";
 		}	
 	}
-
 	return null;
 }
 
 /**
 Returns property values for well rights.
-@param propType the property to look up.  One of "FieldName", 
-"FieldNameHeader", "ToolTip", or "Format".  
+@param propType the property to look up.  One of "FieldName", "FieldNameHeader", "ToolTip", or "Format".  
 @param field the field for which to return the property.  
 @return the property, or if it could not be found null will be returned.
 */
-private static String lookupWellRightPropValue(String propType, 
-String field) {
+private static String lookupWellRightPropValue(String propType, String field) {
 	if (propType.equalsIgnoreCase("FieldName")) {
 		if (field.equalsIgnoreCase("ID")) {
 			return "RIGHT ID";
@@ -6837,33 +6356,27 @@ String field) {
 	}	
 	else if (propType.equalsIgnoreCase("ToolTip")) {
 		if (field.equalsIgnoreCase("ID")) {
-			return "<html>The well right ID is typically the well" 
-				+ " station ID<br> followed by .01, .02, "
+			return "<html>The well right ID is typically the well station ID<br> followed by .01, .02, "
 				+ "etc.</html>";
 		}
 		else if (field.equalsIgnoreCase("Name")) {
 			return "Well right name";
 		}
 		else if (field.equalsIgnoreCase("StationID")) {
-			return "<HTML>The well ID is the link between well "
-				+ "stations and their right(s).</HTML>";
+			return "<HTML>The well ID is the link between well stations and their right(s).</HTML>";
 		}
 		else if (field.equalsIgnoreCase("AdministrationNumber")) {
 			return "<HTML>Lower admininistration numbers indicate "
-				+ "greater seniority.<BR>99999 is typical for "
-				+ "a very junior right.</html>";
+				+ "greater seniority.<BR>99999 is typical for a very junior right.</html>";
 		}
 		else if (field.equalsIgnoreCase("Decree")) {
 			return "Decreed amount (CFS)";
 		}
 		else if (field.equalsIgnoreCase("OnOff")) {	
-			return "<HTML>0 = OFF<BR>1 = ON<BR>" 
-				+ "YYYY indicates to turn on the right in "
-				+ "year YYYY.<BR>-YYYY indicates to turn off "
-				+ "the right in year YYYY.</HTML>";
+			return "<HTML>0 = OFF<BR>1 = ON<BR>YYYY indicates to turn on the right in "
+				+ "year YYYY.<BR>-YYYY indicates to turn off the right in year YYYY.</HTML>";
 		}
 	}
-
 	return null;
 }
 
@@ -6891,8 +6404,7 @@ Run the command "statemod <response_file_name> <option>".
 @param dataset Data set to get the response file from.
 @param option Option to run (e.g., "-simx" for a fast simulate).
 @param withGUI If true, the process manager gui will be displayed.  True should
-typcially be used for model run options but is normally false when running the
-StateMod report mode.
+typcially be used for model run options but is normally false when running the StateMod report mode.
 @param parent Calling JFrame, used when withGUI is true.
 @exception Exception if there is an error running the command (non Stop 0 from StateMod).
 */
@@ -6904,13 +6416,11 @@ throws Exception
 
 /**
 Run the command "statemod <response_file_name> <option>".
-The response file is typically the original response file that was used to open
-the data set.
+The response file is typically the original response file that was used to open the data set.
 @param response_file_name Response file name, with full path.
 @param option Option to run (e.g., "-simx" for a fast simulate).
 @param withGUI If true, the process manager gui will be displayed.  True should
-typcially be used for model run options but is normally false when running the
-StateMod report mode.
+typcially be used for model run options but is normally false when running the StateMod report mode.
 @param parent Calling JFrame, used when withGUI is true.
 @exception Exception if there is an error running the command (non Stop 0 from StateMod).
 */
@@ -6933,8 +6443,7 @@ will not be shown (although a DOS window may pop up).
 @param wait_after Number of milliseconds to wait after running.  This is
 sometimes needed to allow the output file (e.g., .x*g) file to be recognized
 by the operating system.  This will not be needed if time series are read from
-binary model output files but may be needed if reports are viewed immediately
-after running.
+binary model output files but may be needed if reports are viewed immediately after running.
 @exception Exception if there is an error running the command (non Stop 0 from StateMod).
 */
 public static void runStateMod ( String response_file_name, String option, boolean withGUI, JFrame parent, int wait_after )
@@ -6996,7 +6505,7 @@ throws Exception
 			if (str.indexOf("Version:") >= 0) {
 				String version = StringUtil.getToken( str.trim(),":", StringUtil.DELIM_SKIP_BLANKS,1).trim();
 				// For now treat as a floating point number...
-				setStateModVersion ( StringUtil.atof(version) );
+				setStateModVersion ( version );
 				versionFound = true;
 			}
 			if (str.indexOf("revision date:") >= 0) {
@@ -7005,10 +6514,8 @@ throws Exception
 			}
 		}
 		if (!versionFound) {
-			Message.printWarning(1, routine,
-			"Unable to determine StateMod version from version output using:\n" +
-			"   " + getStateModExecutable() + "\n" +
-			"StateMod may not run and output may not be accessible.\n"
+			Message.printWarning(1, routine, "Unable to determine StateMod version from version output using:\n" +
+			"   " + getStateModExecutable() + "\n" + "StateMod may not run and output may not be accessible.\n"
 			+"Is statemod.exe in the PATH or specified as a full path (see Tools ... Options)?");
 			return;	// To skip sleep below.
 		}
@@ -7083,34 +6590,30 @@ public static void setStateModRevisionDate ( String statemodRevisionDate )
 /**
  * Set the StateMod version, for internal use.  This information is useful
  * for checking version "greater than" for software features and file formats, etc.
- * @param statemodVersion StateMod version as a double.
+ * @param statemodVersion StateMod version as a string.
  */
-private static void setStateModVersion ( double statemodVersion )
+private static void setStateModVersion ( String statemodVersion )
 {
 	__statemodVersion = statemodVersion;
 }
 
 /**
-Sorts a Vector of StateMod_Data objects, depending on the compareTo() method
-for the specific object.
+Sorts a Vector of StateMod_Data objects, depending on the compareTo() method for the specific object.
 @param data a Vector of StateMod_Data objects.  Can be null.
 @return a new sorted Vector with references to the same data objects in the
-passed-in Vector.  If a null Vector is passed in, an empty Vector will be
-returned.
+passed-in Vector.  If a null Vector is passed in, an empty Vector will be returned.
 */
 public static Vector sortStateMod_DataVector ( Vector data )
 {	return sortStateMod_DataVector ( data, true );
 }
 
 /**
-Sorts a Vector of StateMod_Data objects, depending on the compareTo() method
-for the specific object.
+Sorts a Vector of StateMod_Data objects, depending on the compareTo() method for the specific object.
 @param data a Vector of StateMod_Data objects.  Can be null.
 @param return_new If true, return a new Vector with references to the data.
 If false, return the original Vector, with sorted contents.
 @return a sorted Vector with references to the same data objects in the
-passed-in Vector.  If a null Vector is passed in, an empty Vector will be
-returned.
+passed-in Vector.  If a null Vector is passed in, an empty Vector will be returned.
 */
 public static Vector sortStateMod_DataVector ( Vector data, boolean return_new )
 {	if (data == null) {
@@ -7140,8 +6643,7 @@ public static Vector sortStateMod_DataVector ( Vector data, boolean return_new )
 Sets description field in each time series using supplied StateMod_Data object
 identifiers.  The StateMod time series files include only the start/end period
 of record, units, year type, ID and values only, no descriptions are included.
-This method correlates the descriptions in the stations files with the
-TimeSeries.
+This method correlates the descriptions in the stations files with the time series.
 @param theData StateMod_Data objects from which we will use the name is used 
 to fill in the description field in the time series
 @param theTS vector of time series
