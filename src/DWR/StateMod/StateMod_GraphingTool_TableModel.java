@@ -71,16 +71,14 @@ extends JWorksheet_AbstractRowTableModel {
 
 private final int __COLUMNS = 6;		// The number of columns.
 protected final int _COL_STATION_TYPE = 0;
-protected final int _COL_ID = 		1;
-protected final int _COL_INTERVAL = 	2;
-protected final int _COL_DATA_TYPE = 	3;
-protected final int _COL_INPUT_TYPE = 	4;
-protected final int _COL_INPUT_NAME = 	5;
+protected final int _COL_ID = 1;
+protected final int _COL_INTERVAL = 2;
+protected final int _COL_DATA_TYPE = 3;
+protected final int _COL_INPUT_TYPE = 4;
+protected final int _COL_INPUT_NAME = 5;
 
-private final String __BROWSE_INPUT_NAME_ABSOLUTE =
-		"Browse for file (absolute path)...";
-private final String __BROWSE_INPUT_NAME_RELATIVE =
-		"Browse for file (relative path)...";
+private final String __BROWSE_INPUT_NAME_ABSOLUTE = "Browse for file (absolute path)...";
+private final String __BROWSE_INPUT_NAME_RELATIVE = "Browse for file (relative path)...";
 
 /**
 The parent frame on which the JWorksheet for this model is displayed.
@@ -126,10 +124,7 @@ Constructor.
 @param data the data to display in the worksheet.
 @throws Exception if an invalid data was passed in.
 */
-public StateMod_GraphingTool_TableModel (
-				StateMod_GraphingTool_JFrame parent,
-				StateMod_DataSet dataset,
-				Vector data )
+public StateMod_GraphingTool_TableModel ( StateMod_GraphingTool_JFrame parent, StateMod_DataSet dataset, Vector data )
 throws Exception {
 	__parent = parent;
 
@@ -148,8 +143,7 @@ throws Exception {
 		StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS).getData();
 	
 	if (data == null) {
-		throw new Exception ("Invalid data Vector passed to " 
-			+ "StateMod_GraphingTool_TableModel constructor.");
+		throw new Exception ("Invalid data Vector passed to StateMod_GraphingTool_TableModel constructor.");
 	}
 	_rows = data.size();
 	_data = data;
@@ -183,12 +177,10 @@ public boolean canAddNewRow() {
 
 /**
 Creates a list of the available IDs for a Vector of StateMod_Data-extending
-objects.  Reservoirs will include an identifier for each reservoir total and
-each account for the reservoir.
+objects.  Reservoirs will include an identifier for each reservoir total and each account for the reservoir.
 @param nodes the nodes for which to create a list of IDs.
 @param include_accounts If true, the 
-@return a Vector of Strings, each of which contains an ID followed by the 
-name of Structure in parentheses
+@return a Vector of Strings, each of which contains an ID followed by the name of Structure in parentheses
 */
 private Vector createAvailableIDsList ( Vector nodes ) {
 	Vector v = new Vector();
@@ -197,8 +189,7 @@ private Vector createAvailableIDsList ( Vector nodes ) {
 	boolean is_reservoir = false;	// To allow check below
 	if (nodes != null) {
 		num = nodes.size();
-		if (	(num > 0) && ((StateMod_Data)nodes.elementAt(0))
-			instanceof StateMod_Reservoir ) {
+		if ( (num > 0) && ((StateMod_Data)nodes.elementAt(0))instanceof StateMod_Reservoir ) {
 			is_reservoir = true;
 		}
 	}
@@ -235,42 +226,38 @@ the ID of that structure, and the interval that is selected.
 @param id the ID of the station (column _COL_ID)
 @param interval_string the data interval (column _COL_INTERVAL )
 */
-public void fillDataTypeColumn (	int row, boolean outputOnly,
-					String station_type, String id,
-					String interval_string )
+public void fillDataTypeColumn ( int row, boolean outputOnly,
+					String station_type, String id, String interval_string )
 {	Vector dataTypes = new Vector();
 	int interval = TimeInterval.MONTH;
 	if ( interval_string.equalsIgnoreCase("Day") ) {
 		interval = TimeInterval.DAY;
 	}
 
-	if (	station_type.equalsIgnoreCase(
-		StateMod_Util.STATION_TYPE_DIVERSION)) {
+	if ( station_type.equalsIgnoreCase(	StateMod_Util.STATION_TYPE_DIVERSION)) {
 		dataTypes = StateMod_Util.getTimeSeriesDataTypes(
 			StateMod_DataSet.COMP_DIVERSION_STATIONS,
 			id, __dataset,
-			-999.0,	// Use default
+			"",	// Use default version
 			//StateMod_Util.getStateModVersion(),
 			interval,
 			true, true, true, true, false, true );
 	}
-	else if (station_type.equalsIgnoreCase(
-		StateMod_Util.STATION_TYPE_INSTREAM_FLOW)) {
+	else if (station_type.equalsIgnoreCase( StateMod_Util.STATION_TYPE_INSTREAM_FLOW)) {
 		dataTypes = StateMod_Util.getTimeSeriesDataTypes(
 			StateMod_DataSet.COMP_INSTREAM_STATIONS,
 			id, __dataset,
-			-999.0,	// Use default
+			"",	// Use default version
 			//StateMod_Util.getStateModVersion(),
 			interval,
 			true, true, true, true, false, true );
 	}
-	else if (station_type.equalsIgnoreCase(
-		StateMod_Util.STATION_TYPE_RESERVOIR)) {
+	else if (station_type.equalsIgnoreCase( StateMod_Util.STATION_TYPE_RESERVOIR)) {
 		if (outputOnly) {
 			dataTypes = StateMod_Util.getTimeSeriesDataTypes(
 				StateMod_DataSet.COMP_RESERVOIR_STATIONS,
 				id, __dataset,
-				-999.0,	// Use default
+				"", // Use default version
 				//StateMod_Util.getStateModVersion(),
 				interval,
 				false, false, true, true, false, true );
@@ -279,28 +266,26 @@ public void fillDataTypeColumn (	int row, boolean outputOnly,
 			dataTypes = StateMod_Util.getTimeSeriesDataTypes(
 				StateMod_DataSet.COMP_RESERVOIR_STATIONS,
 				id, __dataset,
-				-999.0,	// Use default
+				"", // Use default version
 				//StateMod_Util.getStateModVersion(),
 				interval,
 				true, true, true, true, false, true );
 		}
 	}
-	else if (station_type.equalsIgnoreCase(
-		StateMod_Util.STATION_TYPE_STREAMGAGE)) {
+	else if (station_type.equalsIgnoreCase( StateMod_Util.STATION_TYPE_STREAMGAGE)) {
 		dataTypes = StateMod_Util.getTimeSeriesDataTypes(
 			StateMod_DataSet.COMP_STREAMGAGE_STATIONS,
 			id, __dataset,
-			-999.0,	// Use default
+			"",  // Use default version
 			//StateMod_Util.getStateModVersion(),
 			interval,
 			true, true, true, true, false, true );
 	}
-	else if (station_type.equalsIgnoreCase(
-		StateMod_Util.STATION_TYPE_STREAMESTIMATE)) {
+	else if (station_type.equalsIgnoreCase( StateMod_Util.STATION_TYPE_STREAMESTIMATE)) {
 		dataTypes = StateMod_Util.getTimeSeriesDataTypes(
 			StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS,
 			id, __dataset,
-			-999.0,	// Use default
+			"",  // Use default version
 			//StateMod_Util.getStateModVersion(),
 			interval,
 			true, true, true, true, false, true );
@@ -309,17 +294,15 @@ public void fillDataTypeColumn (	int row, boolean outputOnly,
 		dataTypes = StateMod_Util.getTimeSeriesDataTypes(
 			StateMod_DataSet.COMP_WELL_STATIONS,
 			id, __dataset,
-			-999.0,	// Use default
+			"",  // Use default version
 			//StateMod_Util.getStateModVersion(),
 			interval,
 			true, true, true, true, false, true );
 	}
 
 	if (__worksheet != null) {
-		__worksheet.setCellSpecificJComboBoxValues(
-			row, _COL_DATA_TYPE, dataTypes);
-		Vector v = __worksheet.getCellSpecificJComboBoxValues(
-			row, _COL_DATA_TYPE);
+		__worksheet.setCellSpecificJComboBoxValues(	row, _COL_DATA_TYPE, dataTypes);
+		Vector v = __worksheet.getCellSpecificJComboBoxValues(row, _COL_DATA_TYPE);
 		String s = null;
 		if (v == null || v.size() == 0) {
 			s = "";
@@ -344,11 +327,9 @@ public void fillIDColumn(int row, String type)
 		}
 		ids = __diversionIDs;
 	}
-	else if (type.equalsIgnoreCase(
-		StateMod_Util.STATION_TYPE_INSTREAM_FLOW)) {
+	else if (type.equalsIgnoreCase(StateMod_Util.STATION_TYPE_INSTREAM_FLOW)) {
 		if (__instreamFlowIDs == null) {
-			__instreamFlowIDs = createAvailableIDsList(
-				__instreamFlows);
+			__instreamFlowIDs = createAvailableIDsList(__instreamFlows);
 		}
 		ids = __instreamFlowIDs;
 	}
@@ -358,19 +339,16 @@ public void fillIDColumn(int row, String type)
 		}
 		ids = __reservoirIDs;
 	}
-	else if (type.equalsIgnoreCase(
-		StateMod_Util.STATION_TYPE_STREAMGAGE)) {
+	else if (type.equalsIgnoreCase(StateMod_Util.STATION_TYPE_STREAMGAGE)) {
 		if (__streamGageStationIDs == null) {
-			__streamGageStationIDs = createAvailableIDsList(
-				__streamGageStations);
+			__streamGageStationIDs = createAvailableIDsList(__streamGageStations);
 		}
 		ids = __streamGageStationIDs;
 	}
 	else if (type.equalsIgnoreCase(
 		StateMod_Util.STATION_TYPE_STREAMESTIMATE)) {
 		if (__streamEstimateStationIDs == null) {
-			__streamEstimateStationIDs = createAvailableIDsList(
-				__streamEstimateStations);
+			__streamEstimateStationIDs = createAvailableIDsList(__streamEstimateStations);
 		}
 		ids = __streamEstimateStationIDs;
 	}
@@ -387,8 +365,7 @@ public void fillIDColumn(int row, String type)
 
 	if (__worksheet != null) {
 		__worksheet.setCellSpecificJComboBoxValues(row, _COL_ID, ids);
-		Vector v = __worksheet.getCellSpecificJComboBoxValues(
-			row, _COL_ID);
+		Vector v = __worksheet.getCellSpecificJComboBoxValues( row, _COL_ID);
 		String s = null;
 		if (v == null || v.size() == 0) {
 			s = "";
@@ -410,9 +387,8 @@ interval, data type, and input type that is selected.
 @param data_type The data type (column _COL_DATA_TYPE).
 @param input_type The input type (column _COL_INPUT_TYPE).
 */
-public void fillInputNameColumn (	int row, String station_type, String id,
-					String interval_string,
-					String data_type, String input_type )
+public void fillInputNameColumn ( int row, String station_type, String id,
+					String interval_string, String data_type, String input_type )
 {	Vector input_names = new Vector();
 	int interval = TimeInterval.MONTH;
 	if ( interval_string.equalsIgnoreCase("Day") ) {
@@ -420,70 +396,61 @@ public void fillInputNameColumn (	int row, String station_type, String id,
 	}
 	if ( StringUtil.indexOfIgnoreCase(data_type, "Output", 0) > 0 ) {
 		// Have an output time series...
-		if (	station_type.equalsIgnoreCase (
-			StateMod_Util.STATION_TYPE_DIVERSION) ||
-			station_type.equalsIgnoreCase (
-			StateMod_Util.STATION_TYPE_STREAMGAGE) ||
-			station_type.equalsIgnoreCase (
-			StateMod_Util.STATION_TYPE_STREAMESTIMATE) ||
-			station_type.equalsIgnoreCase (
-			StateMod_Util.STATION_TYPE_INSTREAM_FLOW) ) {
+		if ( station_type.equalsIgnoreCase ( StateMod_Util.STATION_TYPE_DIVERSION) ||
+			station_type.equalsIgnoreCase ( StateMod_Util.STATION_TYPE_STREAMGAGE) ||
+			station_type.equalsIgnoreCase ( StateMod_Util.STATION_TYPE_STREAMESTIMATE) ||
+			station_type.equalsIgnoreCase ( StateMod_Util.STATION_TYPE_INSTREAM_FLOW) ) {
 			if ( interval == TimeInterval.MONTH ) {
 				// Substitute base name later...
 				input_names.addElement ( "*.b43" );
 				// Explicitly specify base name...
-				input_names.addElement (
-					__dataset.getBaseName() + ".b43" );
+				input_names.addElement ( __dataset.getBaseName() + ".b43" );
 			}
-			else {	// Daily...
+			else {
+			    // Daily...
 				input_names.addElement ( "*.b49" );
 				// Explicitly specify base name...
-				input_names.addElement (
-					__dataset.getBaseName() + ".b49" );
+				input_names.addElement ( __dataset.getBaseName() + ".b49" );
 			}
 		}
-		else if(station_type.equalsIgnoreCase (
-			StateMod_Util.STATION_TYPE_RESERVOIR) ) {
+		else if(station_type.equalsIgnoreCase ( StateMod_Util.STATION_TYPE_RESERVOIR) ) {
 			if ( interval == TimeInterval.MONTH ) {
 				// Substitute base name later...
 				input_names.addElement ( "*.b44" );
 				// Explicitly specify base name...
-				input_names.addElement (
-					__dataset.getBaseName() + ".b44" );
+				input_names.addElement ( __dataset.getBaseName() + ".b44" );
 			}
-			else {	// Daily...
+			else {
+			    // Daily...
 				input_names.addElement ( "*.b50" );
 				// Explicitly specify base name...
-				input_names.addElement (
-					__dataset.getBaseName() + ".b50" );
+				input_names.addElement ( __dataset.getBaseName() + ".b50" );
 			}
 		}
-		else if(station_type.equalsIgnoreCase (
-			StateMod_Util.STATION_TYPE_WELL) ) {
+		else if(station_type.equalsIgnoreCase ( StateMod_Util.STATION_TYPE_WELL) ) {
 			if ( interval == TimeInterval.MONTH ) {
 				// Substitute base name later...
 				input_names.addElement ( "*.b42" );
 				// Explicitly specify base name...
-				input_names.addElement (
-					__dataset.getBaseName() + ".b42" );
+				input_names.addElement ( __dataset.getBaseName() + ".b42" );
 			}
-			else {	// Daily...
+			else {
+			    // Daily...
 				input_names.addElement ( "*.b65" );
 				// Explicitly specify base name...
-				input_names.addElement (
-					__dataset.getBaseName() + ".b65" );
+				input_names.addElement ( __dataset.getBaseName() + ".b65" );
 			}
 		}
 	}
-	else {	// Need to pick the correct input name from the type...
+	else {
+	    // Need to pick the correct input name from the type...
 		// This needs to be relative if at all possible!
 		String ext = StateMod_DataSet.lookupTimeSeriesDataFileExtension (
 			StringUtil.getToken(data_type," ",0,0), interval );
 		if ( !ext.equals("") ) {
 			input_names.addElement ( "*." + ext );
 		}
-		String filename =
-		__dataset.getComponentDataFileNameFromTimeSeriesDataType (
+		String filename = __dataset.getComponentDataFileNameFromTimeSeriesDataType (
 			StringUtil.getToken(data_type," ",0,0), interval );
 		if ( !filename.equals("") ) {
 			input_names.addElement ( filename );
@@ -495,10 +462,8 @@ public void fillInputNameColumn (	int row, String station_type, String id,
 	input_names.addElement ( __BROWSE_INPUT_NAME_RELATIVE );
 
 	if (__worksheet != null) {
-		__worksheet.setCellSpecificJComboBoxValues(
-			row, _COL_INPUT_NAME, input_names);
-		Vector v = __worksheet.getCellSpecificJComboBoxValues(
-			row,_COL_INPUT_NAME);
+		__worksheet.setCellSpecificJComboBoxValues( row, _COL_INPUT_NAME, input_names);
+		Vector v = __worksheet.getCellSpecificJComboBoxValues( row,_COL_INPUT_NAME);
 		String s = null;
 		if (v == null || v.size() == 0) {
 			s = "";
@@ -519,23 +484,21 @@ interval, and data type that is selected.
 @param interval_string The data interval (column _COL_INTERVAL).
 @param data_type The data type (column _COL_DATA_TYPE).
 */
-public void fillInputTypeColumn (	int row, String station_type, String id,
-					String interval_string,
-					String data_type )
+public void fillInputTypeColumn ( int row, String station_type, String id,
+					String interval_string, String data_type )
 {	Vector input_types = new Vector();
 
 	if ( StringUtil.indexOfIgnoreCase(data_type, "Output", 0) > 0 ) {
 		// Have an output time series...
 		input_types.addElement ( "StateModB" );
 	}
-	else {	input_types.addElement ( "StateMod" );
+	else {
+	    input_types.addElement ( "StateMod" );
 	}
 
 	if (__worksheet != null) {
-		__worksheet.setCellSpecificJComboBoxValues(
-			row, _COL_INPUT_TYPE, input_types);
-		Vector v = __worksheet.getCellSpecificJComboBoxValues(
-			row,_COL_INPUT_TYPE);
+		__worksheet.setCellSpecificJComboBoxValues( row, _COL_INPUT_TYPE, input_types);
+		Vector v = __worksheet.getCellSpecificJComboBoxValues( row,_COL_INPUT_TYPE);
 		String s = null;
 		if (v == null || v.size() == 0) {
 			s = "";
@@ -549,10 +512,9 @@ public void fillInputTypeColumn (	int row, String station_type, String id,
 	}
 }
 
-// REVISIT - need to check the data set to see if daily data are available
+// TODO - need to check the data set to see if daily data are available
 /**
-Fills the interval column combo box according to the type of station selected
-and the ID of that station.
+Fills the interval column combo box according to the type of station selected and the ID of that station.
 @param row the row of the data type column that is being dealt with
 @param station_type the type of the station (column _COL_STATION_TYPE)
 @param id the ID of the structure (column _COL_ID)
@@ -563,10 +525,8 @@ public void fillIntervalColumn ( int row, String station_type, String id )
 	intervals.add ( "Day" );
 
 	if (__worksheet != null) {
-		__worksheet.setCellSpecificJComboBoxValues(
-			row, _COL_INTERVAL, intervals);
-		Vector v = __worksheet.getCellSpecificJComboBoxValues(
-			row, _COL_INTERVAL);
+		__worksheet.setCellSpecificJComboBoxValues( row, _COL_INTERVAL, intervals);
+		Vector v = __worksheet.getCellSpecificJComboBoxValues( row, _COL_INTERVAL);
 		String s = null;
 		if (v == null || v.size() == 0) {
 			s = "";
@@ -579,8 +539,7 @@ public void fillIntervalColumn ( int row, String station_type, String id )
 }
 
 /**
-From AbstractTableModel.  Returns the class of the data stored in a given
-column.
+From AbstractTableModel.  Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 */
 public Class getColumnClass (int columnIndex) {
@@ -627,28 +586,21 @@ public String[] getColumnToolTips() {
 	String[] tips = new String[__COLUMNS];
 
 	tips[_COL_STATION_TYPE] =
-		"<html>The station type indicates the list of identifiers " +
-		"that should be displayed.</html>";
+		"<html>The station type indicates the list of identifiers that should be displayed.</html>";
 	tips[_COL_ID] =
-		"<html>The identifier corresponds to a station that has " +
-		"time series.</html>";
+		"<html>The identifier corresponds to a station that has time series.</html>";
 	tips[_COL_INTERVAL] =
-		"<html>The interval indicates whether monthly or daily time" +
-		" series are graphed.</html>";
+		"<html>The interval indicates whether monthly or daily time series are graphed.</html>";
 	tips[_COL_DATA_TYPE] =
 		"<html>Data types identify the time series parameter to be "+
-		"graphed.<BR>Parameters are listed as input, estimated input, "+
-		"and output.</HTML>";
+		"graphed.<BR>Parameters are listed as input, estimated input, and output.</HTML>";
 	tips[_COL_INPUT_TYPE] =
 		"<HTML>The input type indicates the file format for data." +
-		"<BR>Input time series by default are read from Statemod" +
-		" time series files (StateMod)." +
-		"<BR>Output time series by default are read from " +
-		"binary output files (StateModB).</HTML>";
+		"<BR>Input time series by default are read from Statemod time series files (StateMod)." +
+		"<BR>Output time series by default are read from binary output files (StateModB).</HTML>";
 	tips[_COL_INPUT_NAME] =
 		"<HTML>The input name indicates the file to be read.<BR>" +
-		"Input time series available in memory will be used before " +
-		"reading a matching file.<BR>" +
+		"Input time series available in memory will be used before reading a matching file.<BR>" +
 		"Select a file from a different data set if appropriate.<BR>" +
 		"Use the * choice to share a graph between data sets.</HTML>";
 	return tips;
@@ -677,8 +629,7 @@ public int[] getColumnWidths() {
 Returns the format that the specified column should be displayed in when
 the table is being displayed in the given table format. 
 @param column column for which to return the format.
-@return the format (as used by StringUtil.formatString() in which to display the
-column.
+@return the format (as used by StringUtil.formatString() in which to display the column.
 */
 public String getFormat(int column) {
 	switch (column) {
@@ -699,8 +650,7 @@ public int getRowCount() {
 }
 
 /**
-From AbstractTableModel; returns the data that should be placed in the JTable
-at the given row and column.
+From AbstractTableModel; returns the data that should be placed in the JTable at the given row and column.
 @param row the row for which to return data.
 @param col the column for which to return data.
 @return the data that should be placed in the JTable at the given row and col.
@@ -727,8 +677,7 @@ public Object getValueAt(int row, int col) {
 Returns whether the cell is editable or not.  In this model, all the cells in
 columns 3 and greater are editable.
 @param rowIndex unused.
-@param columnIndex the index of the column to check whether it is editable
-or not.
+@param columnIndex the index of the column to check whether it is editable.
 @return whether the cell is editable or not.
 */
 public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -779,21 +728,17 @@ public void setValueAt(Object value, int row, int col)
 			tsident.setAlias((String)value);
 			tsident.setLocation("");
 			setValueAt("", row, _COL_INTERVAL);
-			// this next line wouldn't seem to make any sense,
-			// but leave it in!!
-			setValueAt(getValueAt(row, _COL_DATA_TYPE), 
-				row, _COL_DATA_TYPE);
+			// this next line wouldn't seem to make any sense, but leave it in!!
+			setValueAt(getValueAt(row, _COL_DATA_TYPE), row, _COL_DATA_TYPE);
 			fireTableDataChanged();
 			overrideCellEdit(row, _COL_ID, true);
 			fillIDColumn(row, (String)value);
 			// Since the ID is filled, select the first item by
 			// default to force something to be displayed...
 			if ( __worksheet != null ) {
-				Vector ids = __worksheet.
-				getCellSpecificJComboBoxValues(row, _COL_ID);
+				Vector ids = __worksheet.getCellSpecificJComboBoxValues(row, _COL_ID);
 				if ( ids.size() > 0 ) {
-					setValueAt(ids.elementAt(0), row, 
-						_COL_ID);
+					setValueAt(ids.elementAt(0), row, _COL_ID);
 				}
 				else {
 					setValueAt("", row, _COL_ID);
@@ -804,79 +749,66 @@ public void setValueAt(Object value, int row, int col)
 			String id = (String)value;
 			tsident.setLocation(id);
 			boolean outputOnly = false;
-			String staType =(String)getValueAt(row, 
-				_COL_STATION_TYPE);
-			if (staType.equals(
-				StateMod_Util.STATION_TYPE_RESERVOIR)) {
+			String staType =(String)getValueAt(row, _COL_STATION_TYPE);
+			if (staType.equals(	StateMod_Util.STATION_TYPE_RESERVOIR)) {
 				if (id.indexOf("-") > -1) {
 					outputOnly = true;
 				}
 			}
 			overrideCellEdit(row, _COL_DATA_TYPE, true);
-			// Fill the interval cell, given the station type and
-			// identifier...
+			// Fill the interval cell, given the station type and identifier...
 			if (((String)value).length() == 0) {
 				fireTableDataChanged();
 			}
-			fillIntervalColumn(row,
-				(String)getValueAt(row, _COL_STATION_TYPE),
-				(String)value );
+			fillIntervalColumn(row, (String)getValueAt(row, _COL_STATION_TYPE),	(String)value );
 			if (outputOnly) {
 				fillDataTypeColumn(row, true,
-					(String)getValueAt(row, 
-						_COL_STATION_TYPE),
+					(String)getValueAt(row, _COL_STATION_TYPE),
 					(String)getValueAt(row, _COL_ID),
 					(String)value);				
 			}
 			else {
 				fillDataTypeColumn(row, false,
-					(String)getValueAt(row, 
-						_COL_STATION_TYPE),
+					(String)getValueAt(row, _COL_STATION_TYPE),
 					(String)getValueAt(row, _COL_ID),
 					(String)value);				
 			}			
 			fireTableDataChanged();
 			break;
 		case _COL_INTERVAL:
-			try {	tsident.setInterval((String)value);
+			try {
+			    tsident.setInterval((String)value);
 			}
 			catch ( Exception e ) {
 				// Should not happen.
 			}
 			boolean ioutputOnly = false;
-			String istaType = (String)getValueAt(row, 
-				_COL_STATION_TYPE);
+			String istaType = (String)getValueAt(row, _COL_STATION_TYPE);
 			String iid = (String)getValueAt(row, _COL_ID);
-			if (istaType.equals(
-				StateMod_Util.STATION_TYPE_RESERVOIR)) {
+			if (istaType.equals(StateMod_Util.STATION_TYPE_RESERVOIR)) {
 				if (iid.indexOf("-") > -1) {
 					ioutputOnly = true;
 				}
 			}
 			if (ioutputOnly) {
 				fillDataTypeColumn(row, true,
-					(String)getValueAt(row, 
-						_COL_STATION_TYPE),
+					(String)getValueAt(row, _COL_STATION_TYPE),
 					(String)getValueAt(row, _COL_ID),
 					(String)value);				
 			}
 			else {
 				fillDataTypeColumn(row, false,
-					(String)getValueAt(row, 
-						_COL_STATION_TYPE),
+					(String)getValueAt(row, _COL_STATION_TYPE),
 					(String)getValueAt(row, _COL_ID),
 					(String)value);				
 			}						
-			// this next line wouldn't seem to make any sense,
-			// but leave it in!!				
-			setValueAt(getValueAt(row, _COL_DATA_TYPE), 
-				row, _COL_DATA_TYPE);				
+			// this next line wouldn't seem to make any sense, but leave it in!!				
+			setValueAt(getValueAt(row, _COL_DATA_TYPE), row, _COL_DATA_TYPE);				
 			fireTableDataChanged();
 			break;
 		case _COL_DATA_TYPE:
 			tsident.setType((String)value);
-			// Fill the input type cell, given the station type,
-			// identifier, and interval...
+			// Fill the input type cell, given the station type, identifier, and interval...
 			fillInputTypeColumn(row,
 				(String)getValueAt(row, _COL_STATION_TYPE),
 				(String)getValueAt(row, _COL_ID),
@@ -902,27 +834,20 @@ public void setValueAt(Object value, int row, int col)
 			else if (s.equals(__BROWSE_INPUT_NAME_RELATIVE)) {
 				String file = browseForFile();
 				if (file != null) {
-				try {
-				int index = file.lastIndexOf(File.separator);
-				String workingDir = 
-					__dataset.getDataSetDirectory();
-				String dir = IOUtil.toRelativePath(workingDir,
-					file.substring(0, index));
-				s = dir + File.separator + file.substring(
-					index + 1, file.length());
-				}
-				catch (Exception ex) {
-					// REVISIT (JTS - 2003-11-05)
-					// maybe handle this better.  Right now
-					// just defaults to the absolute
-					// filename
-					s = file;
-				}
+    				try {
+        				int index = file.lastIndexOf(File.separator);
+        				String workingDir = __dataset.getDataSetDirectory();
+        				String dir = IOUtil.toRelativePath(workingDir,file.substring(0, index));
+        				s = dir + File.separator + file.substring(index + 1, file.length());
+    				}
+    				catch (Exception ex) {
+    					// TODO (JTS - 2003-11-05)  maybe handle this better.  Right now just defaults to the absolute filename
+    					s = file;
+    				}
 				}
 			}			
 			tsident.setInputName(s);
-			// don't go through the super.setValueAt() at 
-			// the end of the method ...
+			// don't go through the super.setValueAt() at the end of the method ...
 			super.setValueAt(s, row, col);
 			return;
 	}	
@@ -934,8 +859,7 @@ public void setValueAt(Object value, int row, int col)
 Inserts the specified value into the data object at the given position.  This
 is not like setValueAt() because it doesn't change any combo box values or
 update other columns' data.  It simply puts the data into the data object
-and notifies the table that data has changed so that it displays the updated
-values.
+and notifies the table that data has changed so that it displays the updated values.
 @param value the object to store in the table cell.
 @param row the row of the cell in which to place the object.
 @param col the column of the cell in which to place the object.
@@ -962,7 +886,8 @@ public void setInternalValueAt(Object value, int row, int col) {
 			tsident.setLocation((String)value);
 			break;
 		case _COL_INTERVAL:
-			try {	tsident.setInterval((String)value);
+			try {
+			    tsident.setInterval((String)value);
 			}
 			catch ( Exception e ) {
 				// Should not happen.
@@ -982,27 +907,20 @@ public void setInternalValueAt(Object value, int row, int col) {
 			else if (s.equals(__BROWSE_INPUT_NAME_RELATIVE)) {
 				String file = browseForFile();
 				if (file != null) {
-				try {
-				int index = file.lastIndexOf(File.separator);
-				String workingDir = 
-					__dataset.getDataSetDirectory();
-				String dir = IOUtil.toRelativePath(workingDir,
-					file.substring(0, index));
-				s = dir + File.separator + file.substring(
-					index + 1, file.length());
-				}
-				catch (Exception ex) {
-					// REVISIT (JTS - 2003-11-05)
-					// maybe handle this better.  Right now
-					// just defaults to the absolute
-					// filename
-					s = file;
-				}
+    				try {
+        				int index = file.lastIndexOf(File.separator);
+        				String workingDir = __dataset.getDataSetDirectory();
+        				String dir = IOUtil.toRelativePath(workingDir, file.substring(0, index));
+        				s = dir + File.separator + file.substring( index + 1, file.length());
+    				}
+    				catch (Exception ex) {
+    					// TODO (JTS - 2003-11-05) maybe handle this better.  Right now just defaults to the absolute filename
+    					s = file;
+    				}
 				}
 			}			
 			tsident.setInputName(s);
-			// don't go through the super.setValueAt() at 
-			// the end of the method ...
+			// don't go through the super.setValueAt() at the end of the method ...
 			super.setValueAt(s, row, col);
 			return;		
 	}	
@@ -1024,15 +942,12 @@ Browse for a statemod output file.
 */
 private String browseForFile() {
 	JGUIUtil.setWaitCursor(__parent, true);
-	String lastDirectorySelected = 
-		JGUIUtil.getLastFileDialogDirectory();
+	String lastDirectorySelected = JGUIUtil.getLastFileDialogDirectory();
 
-	JFileChooser fc = JFileChooserFactory.createJFileChooser(
-		lastDirectorySelected );
+	JFileChooser fc = JFileChooserFactory.createJFileChooser( lastDirectorySelected );
 
 	fc.setDialogTitle("Select file");
-//	SimpleFileFilter ff = new SimpleFileFilter("???",
-//		"?Some kind of file?");
+//	SimpleFileFilter ff = new SimpleFileFilter("???", "?Some kind of file?");
 //	fc.addChoosableFileFilter(ff);
 //	fc.setAcceptAllFileFilterUsed(false);
 //	fc.setFileFilter(ff);
