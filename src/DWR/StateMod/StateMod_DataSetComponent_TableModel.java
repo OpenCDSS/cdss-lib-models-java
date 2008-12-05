@@ -16,7 +16,7 @@
 
 package DWR.StateMod;
 
-import java.util.Vector;
+import java.util.List;
 
 import DWR.StateCU.StateCU_Data;
 import RTi.TS.TS;
@@ -25,8 +25,7 @@ import RTi.Util.IO.DataSetComponent;
 import RTi.Util.Message.Message;
 
 /**
-This class is a table model for the data objects in a StateMod_DataSet
-component.
+This class is a table model for the data objects in a StateMod_DataSet component.
 It is not designed for the group components or control objects.
 */
 public class StateMod_DataSetComponent_TableModel extends
@@ -62,10 +61,9 @@ component, the group component will be determined.
 @param comp the DataSetComponent to be displayed.
 @throws Exception an invalid component is passed in.
 */
-public StateMod_DataSetComponent_TableModel (	StateMod_DataSet dataset,
-						DataSetComponent comp )
+public StateMod_DataSetComponent_TableModel ( StateMod_DataSet dataset, DataSetComponent comp )
 throws Exception
-{	Vector data = null;
+{	List data = null;
 	String routine = "StateMod_DataSetComponent_TableModel";
 	// Make sure that the list is for a group component...
 	if ( (comp != null) && !comp.isGroup() ) {
@@ -73,7 +71,8 @@ throws Exception
 		//Message.printStatus ( 1, routine,
 		//"Component is not a group.  Parent is:  " +__component_group);
 	}
-	else {	__component_group = comp;
+	else {
+		__component_group = comp;
 	}
 	if ( __component_group == null ) {
 		_rows = 0;
@@ -84,20 +83,18 @@ throws Exception
 	// of data objects.  For example, if working on climate stations, there
 	// is no list with the group so we need to use the climate stations
 	// component list...
-	int comptype = dataset.lookupPrimaryComponentTypeForComponentGroup
-		( __component_group.getComponentType() );
+	int comptype = dataset.lookupPrimaryComponentTypeForComponentGroup ( __component_group.getComponentType() );
 	if ( comptype >= 0 ) {
 		__component = dataset.getComponentForComponentType ( comptype );
 	}
 	else {	comp = null;
 		Message.printWarning ( 2, routine,
-		"Unable to find primary component for group:  " +
-		__component_group.getComponentName() );
+		"Unable to find primary component for group:  " + __component_group.getComponentName() );
 	}
 	if ( __component == null ) {
 		_rows = 0;
 	}
-	else {	data = ((Vector)__component.getData());
+	else {	data = ((List)__component.getData());
 		if ( data == null ) {
 			_rows = 0;
 		}
@@ -108,8 +105,7 @@ throws Exception
 }
 
 /**
-From AbstractTableModel.  Returns the class of the data stored in a given
-column.
+From AbstractTableModel.  Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 */
 public Class getColumnClass (int columnIndex)
@@ -170,8 +166,7 @@ public int getRowCount() {
 }
 
 /**
-From AbstractTableMode.  Returns the data that should be placed in the JTable
-at the given row and column.
+From AbstractTableMode.  Returns the data that should be placed in the JTable at the given row and column.
 @param row the row for which to return data.
 @param col the column for which to return data.
 @return the data that should be placed in the JTable at the given row and col.
@@ -181,7 +176,7 @@ public Object getValueAt(int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	Object o = (Object)_data.elementAt(row);
+	Object o = (Object)_data.get(row);
 	if ( o instanceof TS ) {
 		TS ts = (TS)o;
 		switch (col) {
@@ -200,7 +195,7 @@ public Object getValueAt(int row, int col) {
 		(__component.getComponentType() ==
 		StateMod_DataSet.COMP_SOIL_MOISTURE) ) {
 		// StateCU_Data...
-		StateCU_Data data = (StateCU_Data)_data.elementAt(row);
+		StateCU_Data data = (StateCU_Data)_data.get(row);
 		switch (col) {
 			case COL_ID:	return data.getID();
 			case COL_NAME: 	return data.getName();
@@ -208,7 +203,7 @@ public Object getValueAt(int row, int col) {
 		}
 	}
 	else {	// StateMod_Data...
-		StateMod_Data data = (StateMod_Data)_data.elementAt(row);
+		StateMod_Data data = (StateMod_Data)_data.get(row);
 		switch (col) {
 			case COL_ID:	return data.getID();
 			case COL_NAME: 	return data.getName();
@@ -228,4 +223,4 @@ public int[] getColumnWidths() {
 	return widths;
 }
 
-} // End StateMod_DataSetComponent_TableModel
+}

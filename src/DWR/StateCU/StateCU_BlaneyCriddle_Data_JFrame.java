@@ -15,7 +15,7 @@
 
 package DWR.StateCU;
 
-import java.util.Vector;
+import java.util.List;
 
 import DWR.StateMod.StateMod_Data_JFrame;
 import RTi.Util.GUI.JScrollWorksheet;
@@ -35,7 +35,7 @@ Constructor.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateCU_BlaneyCriddle_Data_JFrame(Vector data, String titleString,
+public StateCU_BlaneyCriddle_Data_JFrame(List data, String titleString,
 boolean editable)
 throws Exception {
 	super(data, titleString, editable);
@@ -43,22 +43,20 @@ throws Exception {
 }
 
 /**
-Called when the Apply button is pressed. This commits any changes to the data
-objects.
+Called when the Apply button is pressed. This commits any changes to the data objects.
 */
 protected void apply() {
 	StateCU_BlaneyCriddle station = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		station = (StateCU_BlaneyCriddle)_data.elementAt(i);
+		station = (StateCU_BlaneyCriddle)_data.get(i);
 		station.createBackup();
 	}
 }
 
 /**
 Creates a JScrollWorksheet for the current data and returns it.
-@return a JScrollWorksheet containing the data Vector passed in to the 
-constructor.
+@return a JScrollWorksheet containing the data Vector passed in to the constructor.
 */
 protected JScrollWorksheet buildJScrollWorksheet() 
 throws Exception {
@@ -71,27 +69,25 @@ throws Exception {
 }
 
 /**
-Called when the cancel button is pressed.  This discards any changes made to 
-the data objects.
+Called when the cancel button is pressed.  This discards any changes made to the data objects.
 */
 protected void cancel() {
 	StateCU_BlaneyCriddle station = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		station = (StateCU_BlaneyCriddle)_data.elementAt(i);
+		station = (StateCU_BlaneyCriddle)_data.get(i);
 		station.restoreOriginal();
 	}
 }
 
 /**
-Creates backups of all the data objects in the Vector so that changes can 
-later be cancelled if necessary.
+Creates backups of all the data objects in the Vector so that changes can later be cancelled if necessary.
 */
 protected void createDataBackup() {
 	StateCU_BlaneyCriddle station = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		station = (StateCU_BlaneyCriddle)_data.elementAt(i);
+		station = (StateCU_BlaneyCriddle)_data.get(i);
 		station.createBackup();
 	}
 }

@@ -40,6 +40,7 @@
 package DWR.StateMod;
 
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.IO.IOUtil;
@@ -153,7 +154,7 @@ be null.
 be null.
 @return true if they are the same, false if not.
 */
-public static boolean equals(Vector v1, Vector v2) {
+public static boolean equals(List v1, List v2) {
 	String routine = "StateMod_ReservoirAccount.equals(Vector, Vector)";
 	StateMod_ReservoirAccount r1;	
 	StateMod_ReservoirAccount r2;	
@@ -166,13 +167,13 @@ public static boolean equals(Vector v1, Vector v2) {
 		// and data will need to be saved back into the dataset.
 		int size = v1.size();
 		Message.printStatus(1, routine, "Vectors are of size: " + size);
-		Vector v1Sort = StateMod_Util.sortStateMod_DataVector(v1);
-		Vector v2Sort = StateMod_Util.sortStateMod_DataVector(v2);
+		List v1Sort = StateMod_Util.sortStateMod_DataVector(v1);
+		List v2Sort = StateMod_Util.sortStateMod_DataVector(v2);
 		Message.printStatus(1, routine, "Vectors have been sorted");
 	
 		for (int i = 0; i < size; i++) {			
-			r1 = (StateMod_ReservoirAccount)v1Sort.elementAt(i);	
-			r2 = (StateMod_ReservoirAccount)v2Sort.elementAt(i);	
+			r1 = (StateMod_ReservoirAccount)v1Sort.get(i);	
+			r2 = (StateMod_ReservoirAccount)v2Sort.get(i);	
 			Message.printStatus(1, routine, r1.toString());
 			Message.printStatus(1, routine, r2.toString());
 			Message.printStatus(1, routine, "Element " + i 
@@ -242,16 +243,16 @@ The options are of the form "1" if include_notes is false and
 @param include_notes Indicate whether notes should be added after the parameter
 values.
 */
-public static Vector getN2ownChoices ( boolean include_notes )
-{	Vector v = new Vector(2);
-	v.addElement ( "1 - Ownership is tied to first fill right(s)" );
-	v.addElement ( "2 - Ownership is tied to second fill right(s)" );
+public static List getN2ownChoices ( boolean include_notes )
+{	List v = new Vector(2);
+	v.add ( "1 - Ownership is tied to first fill right(s)" );
+	v.add ( "2 - Ownership is tied to second fill right(s)" );
 	if ( !include_notes ) {
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.setElementAt(StringUtil.getToken(
-				(String)v.elementAt(i), " ", 0, 0), i );
+			v.set(i,StringUtil.getToken(
+				(String)v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
@@ -286,20 +287,20 @@ The options are of the form "0" if include_notes is false and
 @param include_notes Indicate whether notes should be added after the parameter
 values.
 */
-public static Vector getPctevaChoices ( boolean include_notes )
-{	Vector v = new Vector(2);
-	v.addElement ( "0 - Prorate evaporation based on current storage" );
+public static List getPctevaChoices ( boolean include_notes )
+{	List v = new Vector(2);
+	v.add ( "0 - Prorate evaporation based on current storage" );
 	for ( int i = 100; i >= 1; i-- ) {
-		v.addElement ( "" + i + " - Apply " + i +
+		v.add ( "" + i + " - Apply " + i +
 		" % of evaporation to account" );
 	}
-	v.addElement ( "-1 - No evaporation for this account" );
+	v.add ( "-1 - No evaporation for this account" );
 	if ( !include_notes ) {
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.setElementAt(StringUtil.getToken(
-				(String)v.elementAt(i), " ", 0, 0), i );
+			v.set(i,StringUtil.getToken(
+				(String)v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
@@ -484,14 +485,14 @@ header (true) or to create a new file with a new header.
 @throws Exception if an error occurs.
 */
 public static void writeListFile(String filename, String delimiter,
-boolean update, Vector data) 
+boolean update, List data) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
 		size = data.size();
 	}
 	
-	Vector fields = new Vector();
+	List fields = new Vector();
 	fields.add("ReservoirID");
 	fields.add("OwnerID");
 	fields.add("OwnerAccount");
@@ -506,7 +507,7 @@ throws Exception {
 	int comp = StateMod_DataSet.COMP_RESERVOIR_STATION_ACCOUNTS;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.elementAt(i);
+		s = (String)fields.get(i);
 		names[i] = StateMod_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateMod_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -542,7 +543,7 @@ throws Exception {
 		out.println(buffer.toString());
 		
 		for (int i = 0; i < size; i++) {
-			acct = (StateMod_ReservoirAccount)data.elementAt(i);
+			acct = (StateMod_ReservoirAccount)data.get(i);
 			
 			line[0] = StringUtil.formatString(acct.getCgoto(), 
 				formats[0]).trim();

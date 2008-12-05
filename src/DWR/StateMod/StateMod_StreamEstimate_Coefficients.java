@@ -95,6 +95,7 @@ package DWR.StateMod;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.IO.IOUtil;
@@ -111,12 +112,12 @@ public static final int MAX_BASEFLOWS = 15;
 
 protected String 	_flowX;	// node where flow is to be estimated
 protected int		_N;	// number of stations upstream X
-protected Vector	_coefn;	// double - factors to weight the gaged flow
-protected Vector	_upper;	// String - station id upstream X
+protected List	_coefn;	// double - factors to weight the gaged flow
+protected List	_upper;	// String - station id upstream X
 protected double	_proratnf;	// factor to distribute the gain
 protected int		_M;	// number of stations used to calc the gain
-protected Vector	_coefm;	// double - factors to weight the flow for gain
-protected Vector	_flowm;	// String - station id upstream X
+protected List	_coefm;	// double - factors to weight the flow for gain
+protected List	_flowm;	// String - station id upstream X
 	
 /**
 Constructor.
@@ -139,7 +140,7 @@ public void addCoefm(double d) {
 }
 
 public void addCoefm(Double d) {
-	_coefm.addElement(d);
+	_coefm.add(d);
 	int size = _coefm.size();
 	if (size > _M) {
 		_M = size;
@@ -156,7 +157,7 @@ public void addCoefn(double d) {
 }
 
 public void addCoefn(Double d) {
-	_coefn.addElement(d);
+	_coefn.add(d);
 	int size = _coefn.size();
 	if (size > _N) {
 		_N = size;
@@ -170,7 +171,7 @@ public void addCoefn(Double d) {
 
 public void addUpper(String s) {
 	if (s != null) {
-		_upper.addElement(s.trim());
+		_upper.add(s.trim());
 		int size = _upper.size();
 		if (size > _N) {
 			_N = size;
@@ -219,11 +220,23 @@ public Object clone() {
 	StateMod_StreamEstimate_Coefficients c 
 		= (StateMod_StreamEstimate_Coefficients)super.clone();
 	c._isClone = true;
-
-	c._coefn = (Vector)_coefn.clone();
-	c._upper = (Vector)_upper.clone();
-	c._coefm = (Vector)_coefm.clone();
-	c._flowm = (Vector)_flowm.clone();
+	// Copy contents of lists...
+	c._coefn = new Vector(_coefn.size());
+	for ( int i = 0; i < _coefn.size(); i++ ) {
+		c._coefn.add(new Double(((Double)_coefn.get(i)).doubleValue()));
+	}
+	c._upper = new Vector(_upper.size());
+	for ( int i = 0; i < _upper.size(); i++ ) {
+		c._upper.add(new String((String)_upper.get(i)));
+	}
+	c._coefm = new Vector(_coefm.size());
+	for ( int i = 0; i < _coefm.size(); i++ ) {
+		c._coefm.add(new Double(((Double)_coefm.get(i)).doubleValue()));
+	}
+	c._flowm = new Vector(_flowm.size());
+	for ( int i = 0; i < _flowm.size(); i++ ) {
+		c._flowm.add(new String((String)_flowm.get(i)));
+	}
 	return c;
 }
 
@@ -293,8 +306,8 @@ public int compareTo(Object o) {
 	}
 	else {
 		for (int i = 0; i < size1; i++) {
-			d1 = ((Double)_coefn.elementAt(i)).doubleValue();
-			d2 = ((Double)c._coefn.elementAt(i)).doubleValue();
+			d1 = ((Double)_coefn.get(i)).doubleValue();
+			d2 = ((Double)c._coefn.get(i)).doubleValue();
 			if (d1 < d2) {
 				return -1;
 			}
@@ -322,8 +335,8 @@ public int compareTo(Object o) {
 	}
 	else {
 		for (int i = 0; i < size1; i++) {
-			s1 = (String)_upper.elementAt(i);
-			s2 = (String)c._upper.elementAt(i);
+			s1 = (String)_upper.get(i);
+			s2 = (String)c._upper.get(i);
 			res = s1.compareTo(s2);
 			if (res != 0) {
 				return res;
@@ -349,8 +362,8 @@ public int compareTo(Object o) {
 	}
 	else {
 		for (int i = 0; i < size1; i++) {
-			d1 = ((Double)_coefm.elementAt(i)).doubleValue();
-			d2 = ((Double)c._coefm.elementAt(i)).doubleValue();
+			d1 = ((Double)_coefm.get(i)).doubleValue();
+			d2 = ((Double)c._coefm.get(i)).doubleValue();
 			if (d1 < d2) {
 				return -1;
 			}
@@ -379,8 +392,8 @@ public int compareTo(Object o) {
 	}
 	else {
 		for (int i = 0; i < size1; i++) {
-			s1 = (String)_flowm.elementAt(i);
-			s2 = (String)c._flowm.elementAt(i);
+			s1 = (String)_flowm.get(i);
+			s2 = (String)c._flowm.get(i);
 			res = s1.compareTo(s2);
 			if (res != 0) {
 				return res;
@@ -418,13 +431,13 @@ throws Throwable {
 Retrieve the coefm corresponding to a particular index.
 */
 public double getCoefm(int index) {
-	return ((Double)_coefm.elementAt(index)).doubleValue();
+	return ((Double)_coefm.get(index)).doubleValue();
 }
 
 /**
 Retrieve the coefm corresponding to a particular index.
 */
-public Vector getCoefm() {
+public List getCoefm() {
 	return _coefm;
 }
 
@@ -432,13 +445,13 @@ public Vector getCoefm() {
 Return the coefn corresponding to a particular index.
 */
 public double getCoefn(int index) {
-	return ((Double)_coefn.elementAt(index)).doubleValue();
+	return ((Double)_coefn.get(index)).doubleValue();
 }
 
 /**
 Return the coefn corresponding to a particular index.
 */
-public Vector getCoefn() {
+public List getCoefn() {
 	return _coefn;
 }
 
@@ -458,13 +471,13 @@ public static String[] getDataHeader()
 Return the upper id corresponding to a particular index.
 */
 public String getFlowm(int index) {
-	return (String)_flowm.elementAt(index);
+	return (String)_flowm.get(index);
 }
 
 /**
 Return the upper id corresponding to a particular index.
 */
-public Vector getFlowm() {
+public List getFlowm() {
 	return _flowm;
 }
 
@@ -500,13 +513,13 @@ public double getProratnf() {
 Retrun the upper id corresponding to a particular index.
 */
 public String getUpper(int index) {
-	return (String)_upper.elementAt(index);
+	return (String)_upper.get(index);
 }
 
 /**
 Retrun the upper id corresponding to a particular index.
 */
-public Vector getUpper() {
+public List getUpper() {
 	return _upper;
 }
 
@@ -558,7 +571,7 @@ public void setCoefm(int index, double str) {
 		addCoefm(new Double(str));
 	}
 	else {	
-		_coefm.setElementAt(new Double(str), index);
+		_coefm.set(index,new Double(str));
 		if (!_isClone) {
 			if ( _dataset != null ) {
 				_dataset.setDirty( StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS,true);
@@ -584,7 +597,7 @@ public void setCoefn(int index, double str) {
 		addCoefn(new Double(str));
 	}
 	else {	
-		_coefn.setElementAt(new Double(str), index);
+		_coefn.set(index, new Double(str));
 		if (!_isClone) {
 			if ( _dataset != null ) {
 				_dataset.setDirty( StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS,true);
@@ -619,7 +632,7 @@ public void setFlowm(int index, String str) {
 			addFlowm(str.trim());
 		}
 		else {	
-			_flowm.setElementAt(str.trim(), index);
+			_flowm.set(index, str.trim());
 			if (!_isClone) {
 				if ( _dataset != null ) {
 					_dataset.setDirty( StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS,true);
@@ -634,7 +647,7 @@ Add id to vector of station ids upstream X.
 */
 public void addFlowm(String s) {
 	if (s != null) {
-		_flowm.addElement(s.trim());
+		_flowm.add(s.trim());
 		int size = _flowm.size();
 		if (size > _M) {
 			_M = size;
@@ -660,8 +673,8 @@ public void setM(int i) {
 		_M = i;
 		if ( i == 0 ) {
 			// Clear vector...
-			_coefm.removeAllElements();
-			_flowm.removeAllElements();
+			_coefm.clear();
+			_flowm.clear();
 		}
 	}
 }
@@ -696,8 +709,8 @@ public void setN(int i) {
 		_N = i;
 		if ( i == 0 ) {
 			// Clear vector...
-			_coefn.removeAllElements();
-			_upper.removeAllElements();
+			_coefn.clear();
+			_upper.clear();
 		}
 	}
 }
@@ -757,7 +770,7 @@ public void setUpper(int index, String str) {
 			addUpper(str.trim());
 		}
 		else {	
-			_upper.setElementAt(str.trim(), index);
+			_upper.set(index,str.trim());
 			if (!_isClone) {
 				if ( _dataset != null ) {
 					_dataset.setDirty( StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS, true);
@@ -774,13 +787,13 @@ the same, or null if not found.
 @param id Baseflow node identifier to locate.
 */
 public static StateMod_StreamEstimate_Coefficients
-		locateBaseNode(Vector baseflow, 
+		locateBaseNode(List baseflow, 
 String id) {
 	int index = StateMod_Util.locateIndexFromID(id, baseflow);
 	if (index < 0) {
 		return null;
 	}
-	return (StateMod_StreamEstimate_Coefficients)baseflow.elementAt(index);
+	return (StateMod_StreamEstimate_Coefficients)baseflow.get(index);
 }
 
 /**
@@ -789,13 +802,13 @@ Read stream estimate coefficients and store in a Vector.
 @return Vector of baseflow data
 @exception Exception if there is an error reading the file.
 */
-public static Vector readStateModFile(String filename)
+public static List readStateModFile(String filename)
 throws Exception {
 	String routine ="StateMod_StreamEstimate_Coefficients.readStateModFile";
-	Vector theBaseflows = new Vector();
+	List theBaseflows = new Vector();
 	
 	String iline = null;
-	Vector v = new Vector(2);	// used to retrieve from fixedRead
+	List v = new Vector(2);	// used to retrieve from fixedRead
 	String adnl = null;
 	int [] format_0 = {	StringUtil.TYPE_STRING,
 				StringUtil.TYPE_SPACE,
@@ -846,8 +859,8 @@ throws Exception {
 
 			// read in first of two lines for each baseflow
 			StringUtil.fixedRead(iline, format_0, format_0w, v);
-			aBaseflow.setFlowX(((String)v.elementAt(0)).trim());
-			aBaseflow.setN((Integer)v.elementAt(1));
+			aBaseflow.setFlowX(((String)v.get(0)).trim());
+			aBaseflow.setN((Integer)v.get(1));
 
 			num_adnl = aBaseflow.getN();
 			for (i = 0; i < num_adnl; i++) {
@@ -866,15 +879,15 @@ throws Exception {
 				adnl = iline.substring(begin_pos, end_pos);
 				StringUtil.fixedRead(adnl, format_1,
 					format_1w, v);
-				aBaseflow.addCoefn((Double)v.elementAt(0));
-				aBaseflow.addUpper((String)v.elementAt(1));
+				aBaseflow.addCoefn((Double)v.get(0));
+				aBaseflow.addUpper((String)v.get(1));
 			}
 
 			// read in second of two lines for each baseflow
 			iline = in.readLine();
 			StringUtil.fixedRead(iline, format_2, format_2w, v);
-			aBaseflow.setProratnf((Double)v.elementAt(0));
-			aBaseflow.setM((Integer)v.elementAt(1));
+			aBaseflow.setProratnf((Double)v.get(0));
+			aBaseflow.setM((Integer)v.get(1));
 
 			num_adnl = aBaseflow.getM();
 			for (i = 0; i < num_adnl; i++) {
@@ -883,12 +896,12 @@ throws Exception {
 				adnl = iline.substring(begin_pos, end_pos);
 				StringUtil.fixedRead(adnl, format_3,
 					format_3w, v);
-				aBaseflow.addCoefm((Double)v.elementAt(0));
-				aBaseflow.addFlowm((String)v.elementAt(1));
+				aBaseflow.addCoefm((Double)v.get(0));
+				aBaseflow.addFlowm((String)v.get(1));
 			}
 
 			// add the baseflow to the vector of baseflows
-			theBaseflows.addElement(aBaseflow);
+			theBaseflows.add(aBaseflow);
 		}
 	}
 	catch (Exception e) {
@@ -944,7 +957,7 @@ information is also maintained by calling this routine.
 @exception Exception if an error occurs.
 */
 public static void writeStateModFile(String infile, String outfile,
-Vector theBaseflows, String[] newComments)
+		List theBaseflows, String[] newComments)
 throws Exception {
 	String routine =
 		"StateMod_StreamStation_Coefficients.writeStateModFile";
@@ -968,7 +981,7 @@ throws Exception {
 	String format_1 = "%-12.12s        %8d";
 	String format_2 = "%8.3f %-12.12s";
 	String format_3 = "            %8.3f%8d";
-	Vector v = new Vector(2);
+	List v = new Vector(2);
 
 		out.println(cmnt 
 			+ "---------------------------------------------" 
@@ -1050,37 +1063,37 @@ throws Exception {
 		}
 		for (int i = 0; i < num; i++) {
 			bf = (StateMod_StreamEstimate_Coefficients)
-				theBaseflows.elementAt(i);
+				theBaseflows.get(i);
 			if (bf == null) {
 				continue;
 			}
 
 			// 1st line
-			v.removeAllElements();
-			v.addElement(bf.getFlowX());
-			v.addElement(new Integer(bf.getN()));
+			v.clear();
+			v.add(bf.getFlowX());
+			v.add(new Integer(bf.getN()));
 			iline = StringUtil.formatString(v, format_1);
 			out.print(iline);
 
 			for (int j = 0; j < bf.getN(); j++) {
-				v.removeAllElements();
-				v.addElement(new Double(bf.getCoefn(j)));
-				v.addElement(bf.getUpper(j));
+				v.clear();
+				v.add(new Double(bf.getCoefn(j)));
+				v.add(bf.getUpper(j));
 				iline = StringUtil.formatString(v, format_2);
 				out.print(iline);
 			}
 			out.println();
 	
 			// 2nd line
-			v.removeAllElements();
-			v.addElement(new Double(bf.getProratnf()));
-			v.addElement(new Integer(bf.getM()));
+			v.clear();
+			v.add(new Double(bf.getProratnf()));
+			v.add(new Integer(bf.getM()));
 			iline = StringUtil.formatString(v, format_3);
 			out.print(iline);
 			for (int j = 0; j < bf.getM(); j++) {
-				v.removeAllElements();
-				v.addElement(new Double(bf.getCoefm(j)));
-				v.addElement(bf.getFlowm(j));
+				v.clear();
+				v.add(new Double(bf.getCoefm(j)));
+				v.add(bf.getFlowm(j));
 				iline = StringUtil.formatString(v, format_2);
 				out.print(iline);
 			}
@@ -1119,15 +1132,14 @@ header (true) or to create a new file with a new header.
 @param data the Vector of objects to write.  
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter,
-boolean update, Vector data) 
+public static void writeListFile(String filename, String delimiter, boolean update, List data) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
 		size = data.size();
 	}
 	
-	Vector fields = new Vector();
+	List fields = new Vector();
 	fields.add("ID");
 	fields.add("Name");
 	fields.add("UpstreamGage");
@@ -1141,7 +1153,7 @@ throws Exception {
 	int comp = StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.elementAt(i);
+		s = (String)fields.get(i);
 		names[i] = StateMod_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateMod_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -1181,8 +1193,7 @@ throws Exception {
 		out.println(buffer.toString());
 		
 		for (int i = 0; i < size; i++) {
-			coeff = (StateMod_StreamEstimate_Coefficients)
-				data.elementAt(i);
+			coeff = (StateMod_StreamEstimate_Coefficients)data.get(i);
 
 			id = coeff.getID();
 

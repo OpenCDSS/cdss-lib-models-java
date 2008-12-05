@@ -3,6 +3,7 @@ package DWR.StateCU;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Vector;
 
 import RTi.TS.DayTS;
@@ -868,8 +869,7 @@ throws Exception
 	// Call the fully-loaded method...
 	// Pass the file pointer and an empty time series, which
 	// will be used to locate the time series in the file.
-	Vector tslist = in.readTimeSeriesList ( tsident_string, date1, date2,
-				units, read_data );
+	List tslist = in.readTimeSeriesList ( tsident_string, date1, date2, units, read_data );
 
 	if (closeFile) {
 		in.close();
@@ -881,7 +881,7 @@ throws Exception
 		"Unable to read time series for \"" + tsident_string + "\"" );
 		return ts;
 	}
-	return (TS)tslist.elementAt(0);
+	return (TS)tslist.get(0);
 }
 
 /**
@@ -946,7 +946,7 @@ implemented).
 @exception IOException if the interval for the time series does not match that
 for the file or if a write error occurs.
 */
-public Vector readTimeSeriesList ( String tsidentPattern, DateTime reqDate1,
+public List readTimeSeriesList ( String tsidentPattern, DateTime reqDate1,
 					DateTime reqDate2, String reqUnits, boolean readData )
 throws Exception
 {	String routine = "StateCUd_BTS.readTimeSeriesList";
@@ -959,7 +959,7 @@ throws Exception
 	// SAM 2006-01-04 - non-static is used because there is a penalty
 	// reading the header.  This needs to be considered.
 
-	Vector tslist = new Vector();
+	List tslist = new Vector();
 	if ( (tsidentPattern == null) || (tsidentPattern.length() == 0) ) {
 	    // Match all parts when searching the data.
 		tsidentPattern = "*.*.*.*.*";
@@ -1105,7 +1105,7 @@ throws Exception
 				    ts.setDate2 ( new DateTime( reqDate2) );
 				}
 				ts.addToGenesis ( "Read from \"" + __tsfile + " for " + reqDate1 +	" to " + reqDate2 );
-				tslist.addElement ( ts );
+				tslist.add ( ts );
 				if ( readData ) {
 					if ( Message.isDebugOn ) {
 						Message.printDebug ( 2, routine, "Reading " + reqDate1 + " to " + reqDate2 );

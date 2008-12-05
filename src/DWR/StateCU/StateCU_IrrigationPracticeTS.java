@@ -68,6 +68,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
+import java.util.List;
 import java.util.Vector;
 
 import RTi.TS.DateValueTS;
@@ -185,10 +186,9 @@ The file that is read, used to set the time series input name.
 private String __filename = "";
 
 /**
-The list of StateCU_Parcel observations, as an archive of observations to use
-with data filling.
+The list of StateCU_Parcel observations, as an archive of observations to use with data filling.
 */
-private Vector __parcel_Vector = new Vector();
+private List __parcel_Vector = new Vector();
 
 /**
 Construct a new StateCU_IrrigationPracticeTS object for the specified CU
@@ -569,7 +569,7 @@ Add a parcel containing observations.
 @param parcel StateCU_Parcel to add.
 */
 public void addParcel ( StateCU_Parcel parcel )
-{	__parcel_Vector.addElement ( parcel );
+{	__parcel_Vector.add ( parcel );
 }
 
 /**
@@ -1161,18 +1161,18 @@ filling.
 @param year Parcel year of interest or <= number if all years should be returned.
 @return the list of StateCU_Parcel for a year
 */
-public Vector getParcelListForYear ( int year )
-{	Vector parcels = new Vector();
+public List getParcelListForYear ( int year )
+{	List parcels = new Vector();
 	int size = __parcel_Vector.size();
 	StateCU_Parcel parcel;
 	for ( int i = 0; i < size; i++ ) {
-		parcel = (StateCU_Parcel)__parcel_Vector.elementAt(i);
+		parcel = (StateCU_Parcel)__parcel_Vector.get(i);
 		if ( (year > 0) && (parcel.getYear() != year) ) {
 			// Requested year does not match.
 			continue;
 		}
 		// Criteria are met
-		parcels.addElement ( parcel );
+		parcels.add ( parcel );
 	}
 	return parcels;
 }
@@ -1303,8 +1303,7 @@ is a flag that is not suitable for numerical filling.
 @param include_notes If true, include " - Note" notes after the data type.
 This is currently disabled.
 */
-public static Vector getTimeSeriesDataTypes (	boolean include_gwmode,
-						boolean include_notes )
+public static List getTimeSeriesDataTypes (	boolean include_gwmode, boolean include_notes )
 {	return getTimeSeriesDataTypes ( include_gwmode, include_notes, null );
 }
 
@@ -1321,13 +1320,12 @@ This is currently disabled.
 @param version File version.  Use null or blank for the most recent version or
 use "10" for version 10 data types.
 */
-public static Vector getTimeSeriesDataTypes (	boolean include_gwmode,
-						boolean include_notes, String version )
-{	Vector datatypes = new Vector (12);
+public static List getTimeSeriesDataTypes (	boolean include_gwmode, boolean include_notes, String version )
+{	List datatypes = new Vector (12);
 	
-	datatypes.addElement ( TSTYPE_Eff_SurfaceMax );
-	datatypes.addElement ( TSTYPE_Eff_FloodMax );
-	datatypes.addElement ( TSTYPE_Eff_SprinklerMax );
+	datatypes.add ( TSTYPE_Eff_SurfaceMax );
+	datatypes.add ( TSTYPE_Eff_FloodMax );
+	datatypes.add ( TSTYPE_Eff_SprinklerMax );
 	
 	/* FIXME SAM 2007-10-18 Remove later when tested out
 	if( (version != null) && version.equals("10") ) {
@@ -1337,19 +1335,19 @@ public static Vector getTimeSeriesDataTypes (	boolean include_gwmode,
 	else {*/
 		//TODO SAM Determine whether old types should be totally removed
 		// after generating data
-		datatypes.addElement ( TSTYPE_CropArea_Total );
-		datatypes.addElement ( TSTYPE_CropArea_SurfaceWaterOnly );
-		datatypes.addElement ( TSTYPE_CropArea_GroundWater );
-		datatypes.addElement ( TSTYPE_CropArea_SurfaceWaterOnlyFlood );
-		datatypes.addElement ( TSTYPE_CropArea_SurfaceWaterOnlySprinkler );
-		datatypes.addElement ( TSTYPE_CropArea_GroundWaterFlood );
-		datatypes.addElement ( TSTYPE_CropArea_GroundWaterSprinkler );
+		datatypes.add ( TSTYPE_CropArea_Total );
+		datatypes.add ( TSTYPE_CropArea_SurfaceWaterOnly );
+		datatypes.add ( TSTYPE_CropArea_GroundWater );
+		datatypes.add ( TSTYPE_CropArea_SurfaceWaterOnlyFlood );
+		datatypes.add ( TSTYPE_CropArea_SurfaceWaterOnlySprinkler );
+		datatypes.add ( TSTYPE_CropArea_GroundWaterFlood );
+		datatypes.add ( TSTYPE_CropArea_GroundWaterSprinkler );
 	//}
 	
-	datatypes.addElement ( TSTYPE_PumpingMax );
+	datatypes.add ( TSTYPE_PumpingMax );
 
 	if ( include_gwmode ) {
-		datatypes.addElement ( TSTYPE_GWUseMode );
+		datatypes.add ( TSTYPE_GWUseMode );
 	}
 	
 	return datatypes;
@@ -1372,7 +1370,7 @@ public boolean hasGroundWaterSupply ()
 {	int size = __parcel_Vector.size();
 	StateCU_Parcel parcel = null;
 	for ( int i = 0; i < size; i++ ) {
-		parcel = (StateCU_Parcel)__parcel_Vector.elementAt(i);
+		parcel = (StateCU_Parcel)__parcel_Vector.get(i);
 		if ( parcel.hasGroundWaterSupply() ) {
 			return true;
 		}
@@ -1468,8 +1466,7 @@ private static boolean isVersion_10( String filename ) throws IOException
 	}
 	// Check the line of data...
 	// Old IPY format has only 10 elements on lines after the header
-	Vector tmp = StringUtil.breakStringList(
-		line," ",StringUtil.DELIM_SKIP_BLANKS);
+	List tmp = StringUtil.breakStringList( line," ",StringUtil.DELIM_SKIP_BLANKS);
 	if(tmp.size() < 12 ) {
 		Message.printStatus(2, routine, 
 			"IPY file found to be in version 10 format: " + tmp.size() +
@@ -1490,8 +1487,7 @@ StateCU_IrrigationPracticeTS.
 @param date1_req Requested start of period.
 @param date2_req Requested end of period.
 */
-public static Vector readStateCUFile (	String filename,
-					DateTime date1_req, DateTime date2_req )
+public static List readStateCUFile ( String filename, DateTime date1_req, DateTime date2_req )
 throws Exception
 {	return readStateCUFile ( filename, date1_req, date2_req, null );
 }
@@ -1517,14 +1513,12 @@ most current format will be read.</td>
 
 </table>
 */
-public static Vector readStateCUFile (	String filename,
-					DateTime date1_req, DateTime date2_req,
-					PropList props )
+public static List readStateCUFile ( String filename, DateTime date1_req, DateTime date2_req, PropList props )
 throws Exception
 {	String routine = "StateCU_IrrigationPracticeTS.readStateCUFile";
 	String iline = null;
-	Vector v = new Vector ( 5 );
-	Vector ipyts_Vector = new Vector ( 100 );	// Data to return.
+	List v = new Vector ( 5 );
+	List ipyts_Vector = new Vector ( 100 );	// Data to return.
 	if ( props == null ) {
 		props = new PropList ( "IPY" );
 	}
@@ -1654,25 +1648,22 @@ throws Exception
 		ra.read ( b );
 		String string = null;
 		String bs = new String ( b );
-		Vector v2 = StringUtil.breakStringList ( bs, "\n\r",
-			StringUtil.DELIM_SKIP_BLANKS );
+		List v2 = StringUtil.breakStringList ( bs, "\n\r", StringUtil.DELIM_SKIP_BLANKS );
 		// Loop through and figure out the first date.
 		int size = v2.size();
 		String date1_string = null;
-		Vector	tokens = null;
+		List tokens = null;
 		for ( int i = 0; i < size; i++ ) {
-			string = ((String)v2.elementAt(i)).trim();
+			string = ((String)v2.get(i)).trim();
 			if (	(string.length() == 0) ||
 				(string.charAt(0) == '#') ||
 				(string.charAt(0) == ' ') ) {
 				continue;
 			}
-			tokens = StringUtil.breakStringList( string, " \t",
-				StringUtil.DELIM_SKIP_BLANKS );
-			date1_string = (String)tokens.elementAt(0);
+			tokens = StringUtil.breakStringList( string, " \t", StringUtil.DELIM_SKIP_BLANKS );
+			date1_string = (String)tokens.get(0);
 			// Check for reasonable dates...
-			if (	StringUtil.isInteger(date1_string) &&
-				(StringUtil.atoi(date1_string) < 2050) ) {
+			if ( StringUtil.isInteger(date1_string) && (StringUtil.atoi(date1_string) < 2050) ) {
 				break;
 			}
 		}
@@ -1698,15 +1689,14 @@ throws Exception
 		size = v2.size();
 		String date2_string = null;
 		for ( int i = 1; i < size; i++ ) {
-			string = ((String)v2.elementAt(i)).trim();
+			string = ((String)v2.get(i)).trim();
 			if (	(string.length() == 0) ||
 				(string.charAt(0) == '#') ||
 				(string.charAt(0) == ' ') ) {
 				continue;
 			}
-			tokens = StringUtil.breakStringList( string, " \t",
-				StringUtil.DELIM_SKIP_BLANKS );
-			string = (String)tokens.elementAt(0);
+			tokens = StringUtil.breakStringList( string, " \t", StringUtil.DELIM_SKIP_BLANKS );
+			string = (String)tokens.get(0);
 			// Check for reasonable dates...
 			if (	StringUtil.isInteger(string) &&
 				(StringUtil.atoi(string) < 2050) ) {
@@ -1741,7 +1731,7 @@ throws Exception
 	int pos = 0;
 	int linecount = 0;
 	int count = 0;	// counts the lines that are not comments
-	Vector tokens = null;
+	List tokens = null;
 	String year_type = "CYR";
 	int pos_error_count = 0;	// Counter for error when the first year
 					// of data does not contain the IDs.
@@ -1775,11 +1765,9 @@ throws Exception
 			tokens = StringUtil.fixedRead ( iline,
 					format_header );
 			date1_file = new DateTime ( DateTime.PRECISION_YEAR );
-			date1_file.setYear ( StringUtil.atoi(
-					((String)tokens.elementAt(0)).trim()) );
+			date1_file.setYear ( StringUtil.atoi( ((String)tokens.get(0)).trim()) );
 			date2_file = new DateTime ( DateTime.PRECISION_YEAR );
-			date2_file.setYear ( StringUtil.atoi(
-					((String)tokens.elementAt(1)).trim()) );
+			date2_file.setYear ( StringUtil.atoi( ((String)tokens.get(1)).trim()) );
 			// Year type is always assumed to be "CYR".
 			year1 = date1_file.getYear();	// Expect the first line
 							// to match this.
@@ -1805,8 +1793,8 @@ throws Exception
 		
 		// Process the line of data...
 		StringUtil.fixedRead ( iline, format_0, format_0w, v );
-		year = StringUtil.atoi(((String)v.elementAt(0)).trim());
-		culoc = ((String)v.elementAt(1)).trim();
+		year = StringUtil.atoi(((String)v.get(0)).trim());
+		culoc = ((String)v.get(1)).trim();
 		
 		if ( year == year1 ) {
 			// First year of data in the file.
@@ -1822,8 +1810,7 @@ throws Exception
 				"CU Location \"" + culoc +
 				"\" is listed more than once in the" +
 				" first year." );
-				ipyts = (StateCU_IrrigationPracticeTS)
-					ipyts_Vector.elementAt(pos);
+				ipyts = (StateCU_IrrigationPracticeTS)ipyts_Vector.get(pos);
 			}
 			else {	if ( Version_10 ) {
 						ipyts = new StateCU_IrrigationPracticeTS (
@@ -1835,7 +1822,7 @@ throws Exception
 								culoc, date1, date2, year_type,
 								full_filename, 12 );
 					}
-				ipyts_Vector.addElement ( ipyts );
+				ipyts_Vector.add ( ipyts );
 			}
 		}
 		else {	// Find the object of interest for this CU Location so it
@@ -1852,19 +1839,19 @@ throws Exception
 				ipyts = new StateCU_IrrigationPracticeTS(culoc,
 					date1, date2, year_type,
 					full_filename );
-				ipyts_Vector.addElement ( ipyts );
+				ipyts_Vector.add ( ipyts );
 			}
 			else {	ipyts = (StateCU_IrrigationPracticeTS)
-					ipyts_Vector.elementAt(pos);
+					ipyts_Vector.get(pos);
 			}
 		}
 		// Now set the values...
 		ipyts.setCeff ( year,
-			StringUtil.atof(((String)v.elementAt(2)).trim()) );
+			StringUtil.atof(((String)v.get(2)).trim()) );
 		ipyts.setFeff ( year,
-			StringUtil.atof(((String)v.elementAt(3)).trim()) );
+			StringUtil.atof(((String)v.get(3)).trim()) );
 		ipyts.setSeff ( year,
-			StringUtil.atof(((String)v.elementAt(4)).trim()) );
+			StringUtil.atof(((String)v.get(4)).trim()) );
 		
 		if( !period_in_header || Version_10 ) {
 			// Have 2 acreage values and total acreage if version 10
@@ -1875,25 +1862,25 @@ throws Exception
 				StringUtil.atof(((String)v.elementAt(6)).trim()) );
 				*/
 			ipyts.setMprate ( year,
-				StringUtil.atof(((String)v.elementAt(7)).trim()) );
+				StringUtil.atof(((String)v.get(7)).trim()) );
 			ipyts.setGmode ( year,
-				StringUtil.atoi(((String)v.elementAt(8)).trim()) );
+				StringUtil.atoi(((String)v.get(8)).trim()) );
 			if ( Version_10 ) {
 				ipyts.setTacre ( year,
-						StringUtil.atof(((String)v.elementAt(9)).trim()) );
+						StringUtil.atof(((String)v.get(9)).trim()) );
 			}
 		}
 		else {	// New version 12 format
-			acswfl = StringUtil.atof(((String)v.elementAt(5)).trim());
+			acswfl = StringUtil.atof(((String)v.get(5)).trim());
 			ipyts.setAcswfl ( year, acswfl );
 
-			acswspr = StringUtil.atof(((String)v.elementAt(6)).trim());
+			acswspr = StringUtil.atof(((String)v.get(6)).trim());
 			ipyts.setAcswspr ( year, acswspr );
 				
-			acgwfl = StringUtil.atof(((String)v.elementAt(7)).trim());
+			acgwfl = StringUtil.atof(((String)v.get(7)).trim());
 			ipyts.setAcgwfl ( year, acgwfl );
 			
-			acgwspr = StringUtil.atof(((String)v.elementAt(8)).trim());
+			acgwspr = StringUtil.atof(((String)v.get(8)).trim());
 			ipyts.setAcgwspr ( year, acgwspr );
 			
 			// Refresh the total by supply type...
@@ -1901,12 +1888,9 @@ throws Exception
 			ipyts.refreshAcsw(year);
 			ipyts.refreshAcgw(year);
 				
-			ipyts.setMprate ( year,
-				StringUtil.atof(((String)v.elementAt(9)).trim()) );
-			ipyts.setGmode ( year,
-				StringUtil.atoi(((String)v.elementAt(10)).trim()) );
-			ipyts.setTacre ( year,
-			StringUtil.atof(((String)v.elementAt(11)).trim()) );
+			ipyts.setMprate ( year, StringUtil.atof(((String)v.get(9)).trim()) );
+			ipyts.setGmode ( year, StringUtil.atoi(((String)v.get(10)).trim()) );
+			ipyts.setTacre ( year, StringUtil.atof(((String)v.get(11)).trim()) );
 			
 			/* FIXME SAM 2007-10-18 Remove later when tested out
 			// Set the Gacre and Sacre totals based on the sum
@@ -1992,10 +1976,9 @@ public static TS readTimeSeries (	String tsident_string, String filename,
 					String units, boolean read_data )
 throws Exception
 {	TS ts = null;
-	Vector v = readTimeSeriesList (	tsident_string, filename,
-			date1, date2, units, read_data );
+	List v = readTimeSeriesList ( tsident_string, filename, date1, date2, units, read_data );
 	if ( (v != null) && (v.size() > 0) ) {
-		ts = (TS)v.elementAt(0);
+		ts = (TS)v.get(0);
 	}
 	return ts;
 }
@@ -2013,15 +1996,13 @@ series).
 @param units Units to convert to.
 @param read_data Indicates whether data should be read.
 */
-public static Vector readTimeSeriesList (	String fname,
-						DateTime date1, DateTime date2,
+public static List readTimeSeriesList (	String fname, DateTime date1, DateTime date2,
 						String units, boolean read_data)
 throws Exception
-{	Vector	tslist = null;
+{	List tslist = null;
 
 	String full_fname = IOUtil.getPathUsingWorkingDir(fname);
-	tslist = readTimeSeriesList (	null, full_fname,
-					date1, date2, units, read_data );
+	tslist = readTimeSeriesList ( null, full_fname, date1, date2, units, read_data );
 	// Return all the time series.
 	return tslist;
 }
@@ -2043,7 +2024,7 @@ the entire time series).
 @param read_data Indicates whether data should be read.
 @exception Exception if there is an error reading the time series.
 */
-private static Vector readTimeSeriesList (	String req_tsident,
+private static List readTimeSeriesList ( String req_tsident,
 						String full_filename,
 						DateTime req_date1,
 						DateTime req_date2,
@@ -2053,14 +2034,13 @@ throws Exception
 {	// TODO - can optimize this later to only read one time series...
 	// First read the whole file...
 
-	Vector data_Vector = readStateCUFile (	full_filename,
-						req_date1, req_date2 );
+	List data_Vector = readStateCUFile ( full_filename, req_date1, req_date2 );
 	// If all the time series are required, return all...
 	int size = 0;
 	if ( data_Vector != null ) {
 		size = data_Vector.size();
 	}
-	Vector tslist = new Vector(size*8);
+	List tslist = new Vector(size*8);
 	StateCU_IrrigationPracticeTS ipy;
 	TSIdent tsident = null;
 	String req_data_type = null;
@@ -2071,7 +2051,7 @@ throws Exception
 	boolean include_ts = true;
 	for ( int i = 0; i < size; i++ ) {
 		include_ts = true;
-		ipy = (StateCU_IrrigationPracticeTS)data_Vector.elementAt(i);
+		ipy = (StateCU_IrrigationPracticeTS)data_Vector.get(i);
 		if ( req_tsident != null ) {
 			// Check to see if the location match...
 			if (	!ipy.getID().equalsIgnoreCase(
@@ -2084,15 +2064,15 @@ throws Exception
 		}
 		if (	(req_data_type == null) ||
 			req_data_type.equalsIgnoreCase(TSTYPE_Eff_SurfaceMax) ) {
-			tslist.addElement ( ipy.getCeffTS() );
+			tslist.add ( ipy.getCeffTS() );
 		}
 		if ( (req_data_type == null) ||
 			req_data_type.equalsIgnoreCase(TSTYPE_Eff_FloodMax) ) {
-			tslist.addElement ( ipy.getFeffTS() );
+			tslist.add ( ipy.getFeffTS() );
 		}
 		if ( (req_data_type == null) ||
 			req_data_type.equalsIgnoreCase(TSTYPE_Eff_SprinklerMax) ) {
-			tslist.addElement ( ipy.getSeffTS() );
+			tslist.add ( ipy.getSeffTS() );
 		}
 		// Check for null time series below and only add the ones
 		// that are not null.  This reflects the fact that version settings
@@ -2114,51 +2094,51 @@ throws Exception
 		if ( (req_data_type == null) ||
 				req_data_type.equalsIgnoreCase(TSTYPE_CropArea_SurfaceWaterOnly)){
 				if ( ipy.getAcswTS() != null ) {
-					tslist.addElement ( ipy.getAcswTS() );
+					tslist.add ( ipy.getAcswTS() );
 				}
 			}
 		if ( (req_data_type == null) ||
 			req_data_type.equalsIgnoreCase(TSTYPE_CropArea_SurfaceWaterOnlyFlood)){
 			if ( ipy.getAcswflTS() != null ) {
-				tslist.addElement ( ipy.getAcswflTS() );
+				tslist.add ( ipy.getAcswflTS() );
 			}
 		}
 		if ( (req_data_type == null) ||
 			req_data_type.equalsIgnoreCase(TSTYPE_CropArea_SurfaceWaterOnlySprinkler)){
 			if ( ipy.getAcswsprTS() != null ) {
-				tslist.addElement ( ipy.getAcswsprTS() );
+				tslist.add ( ipy.getAcswsprTS() );
 			}
 		}
 		if ( (req_data_type == null) ||
 				req_data_type.equalsIgnoreCase(TSTYPE_CropArea_GroundWater)){
 				if ( ipy.getAcgwTS() != null ) {
-					tslist.addElement ( ipy.getAcgwTS() );
+					tslist.add ( ipy.getAcgwTS() );
 				}
 			}
 		if ( (req_data_type == null) ||
 			req_data_type.equalsIgnoreCase(TSTYPE_CropArea_GroundWaterFlood)){
 			if ( ipy.getAcgwflTS() != null ) {
-				tslist.addElement ( ipy.getAcgwflTS() );
+				tslist.add ( ipy.getAcgwflTS() );
 			}
 		}
 		if ( (req_data_type == null) ||
 			req_data_type.equalsIgnoreCase(TSTYPE_CropArea_GroundWaterSprinkler)){
 			if ( ipy.getAcgwsprTS() != null ) {
-				tslist.addElement ( ipy.getAcgwsprTS() );
+				tslist.add ( ipy.getAcgwsprTS() );
 			}
 		}
 		if ( (req_data_type == null) ||
 				req_data_type.equalsIgnoreCase(TSTYPE_PumpingMax)){
-			tslist.addElement ( ipy.getMprateTS() );
+			tslist.add ( ipy.getMprateTS() );
 		}
 		if ( (req_data_type == null) ||
 			req_data_type.equalsIgnoreCase(TSTYPE_GWUseMode)){
-			tslist.addElement ( ipy.getGmodeTS() );
+			tslist.add ( ipy.getGmodeTS() );
 		}
 		if ( (req_data_type == null) ||
 			req_data_type.equalsIgnoreCase(	TSTYPE_CropArea_Total)){
 			if ( ipy.getTacreTS() != null ) {
-				tslist.addElement ( ipy.getTacreTS() );
+				tslist.add ( ipy.getTacreTS() );
 			}
 		}
 	}
@@ -2496,41 +2476,36 @@ public String toString()
 }
 
 /**
-Return a Vector containing all the time series in the data list.  Only the raw
-time series are returned.  Use the overloaded version to also return total time
-series.
+Return a List containing all the time series in the data list.  Only the raw
+time series are returned.  Use the overloaded version to also return total time series.
 @return a Vector containing all the time series in the data list.
-@param data_Vector A Vector of StateCU_IrrigationPracticeTS.
+@param dataList A list of StateCU_IrrigationPracticeTS.
 */
-public static Vector toTSVector ( Vector data_Vector )
-{	return toTSVector ( data_Vector, false, null, null );
+public static List toTSList ( List dataList )
+{	return toTSList ( dataList, false, null, null );
 }
 
 /**
-Return a Vector containing all the time series in the data list.
-Optionally, process the time series in the instance and add total time series
-for the entire data set.
+Return a List containing all the time series in the data list.
+Optionally, process the time series in the instance and add total time series for the entire data set.
 This is a performance hit but is useful for summarizing the data.  Any non-zero
 value in the individual time series will result in a value in the total.
 Missing for all time series will result in missing in the total.  The period for
-the totals is the overal period from all StateCU_IrrigationPracticeTS being
-processed.
+the totals is the overal period from all StateCU_IrrigationPracticeTS being processed.
 @return a Vector containing all the time series in the data list.
-@param data_Vector A Vector of StateCU_IrrigationPracticeTS.
+@param data_Vector A list of StateCU_IrrigationPracticeTS.
 @param include_dataset_totals If true, include totals for the entire data set,
-including the groundwater, sprinkler, and total acreage, and the total of
-maximum monthly pumping.
+including the groundwater, sprinkler, and total acreage, and the total of maximum monthly pumping.
 @param dataset_location A string used as the location for the data set totals.
 If not specified, "DataSet" will be used.  A non-null value should be supplied,
-in particular, if the totals for different data sets will be graphed or
-manipulated.
+in particular, if the totals for different data sets will be graphed or manipulated.
 */
-public static Vector toTSVector (	Vector data_Vector,
+public static List toTSList ( List data_Vector,
 					boolean include_dataset_totals,
 					String dataset_location,
 					String dataset_datasource )
 {	String routine = "StateCU_IrrigationPracticeTS.toTSVector";
-	Vector tslist = new Vector();
+	List tslist = new Vector();
 	int size = 0;
 	if ( data_Vector != null ) {
 		size = data_Vector.size();
@@ -2548,26 +2523,21 @@ public static Vector toTSVector (	Vector data_Vector,
 		yts_acgwspr = null;
 	
 	if ( include_dataset_totals ) {
-		if (	(dataset_location == null) ||
-			(dataset_location.length() == 0) ) {
+		if ( (dataset_location == null) || (dataset_location.length() == 0) ) {
 			dataset_location = "DataSet";
 		}
-		if (	(dataset_datasource == null) ||
-			(dataset_datasource.length() == 0) ) {
+		if ( (dataset_datasource == null) || (dataset_datasource.length() == 0) ) {
 			dataset_location = "StateCU";
 		}
 		// Determine the period to use for new time series...
 		for ( int i = 0; i < size; i++ ) {
-			ipy = (StateCU_IrrigationPracticeTS)
-				data_Vector.elementAt(i);
+			ipy = (StateCU_IrrigationPracticeTS)data_Vector.get(i);
 			date = ipy.getDate1();
-			if (	(start_DateTime == null) ||
-				date.lessThan(start_DateTime) ) {
+			if ( (start_DateTime == null) || date.lessThan(start_DateTime) ) {
 				start_DateTime = new DateTime ( date );
 			}
 			date = ipy.getDate2();
-			if (	(end_DateTime == null) ||
-				date.greaterThan(end_DateTime) ) {
+			if ( (end_DateTime == null) || date.greaterThan(end_DateTime) ) {
 				end_DateTime = new DateTime ( date );
 			}
 		}
@@ -2804,35 +2774,35 @@ public static Vector toTSVector (	Vector data_Vector,
 		yts_pump.allocateDataSpace();
 	}
 	for ( int i = 0; i < size; i++ ) {
-		ipy = (StateCU_IrrigationPracticeTS)data_Vector.elementAt(i);
-		tslist.addElement ( ipy.__ceff_ts );
-		tslist.addElement ( ipy.__feff_ts );
-		tslist.addElement ( ipy.__seff_ts );
+		ipy = (StateCU_IrrigationPracticeTS)data_Vector.get(i);
+		tslist.add ( ipy.__ceff_ts );
+		tslist.add ( ipy.__feff_ts );
+		tslist.add ( ipy.__seff_ts );
 		
 		if ( ipy.__tacre_ts != null ) {
-			tslist.addElement ( ipy.__tacre_ts );
+			tslist.add ( ipy.__tacre_ts );
 		}
 		if ( ipy.__acsw_ts != null ) {
-			tslist.addElement ( ipy.__acsw_ts );
+			tslist.add ( ipy.__acsw_ts );
 		}
 		if ( ipy.__acgw_ts != null ){
-			tslist.addElement ( ipy.__acgw_ts );
+			tslist.add ( ipy.__acgw_ts );
 		}
 		if ( ipy.__acswfl_ts != null ) {
-			tslist.addElement ( ipy.__acswfl_ts );
+			tslist.add ( ipy.__acswfl_ts );
 		}
 		if ( ipy.__acswspr_ts != null ) {
-			tslist.addElement ( ipy.__acswspr_ts );
+			tslist.add ( ipy.__acswspr_ts );
 		}
 		if ( ipy.__acgwfl_ts != null ) {
-			tslist.addElement ( ipy.__acgwfl_ts );
+			tslist.add ( ipy.__acgwfl_ts );
 		}
 		if ( ipy.__acgwspr_ts != null ) {
-			tslist.addElement ( ipy.__acgwspr_ts );
+			tslist.add ( ipy.__acgwspr_ts );
 		}
 		
-		tslist.addElement ( ipy.__mprate_ts );
-		tslist.addElement ( ipy.__gmode_ts );
+		tslist.add ( ipy.__mprate_ts );
+		tslist.add ( ipy.__gmode_ts );
 
 		if ( include_dataset_totals ) {
 				// Totals for version 10+ format...
@@ -2907,31 +2877,31 @@ public static Vector toTSVector (	Vector data_Vector,
 		// And also do for the version 10+ time series...
 		yts_acswfl.setDescription ( dataset_location + " " +
 			yts_acswfl.getDataType() );
-		tslist.addElement ( yts_acswfl );
+		tslist.add ( yts_acswfl );
 		yts_acswspr.setDescription ( dataset_location + " " +
 			yts_acswspr.getDataType() );
-		tslist.addElement ( yts_acswspr );
+		tslist.add ( yts_acswspr );
 		yts_acgwfl.setDescription ( dataset_location + " " +
 			yts_acgwfl.getDataType() );
-		tslist.addElement ( yts_acgwfl );
+		tslist.add ( yts_acgwfl );
 		yts_acgwspr.setDescription ( dataset_location + " " +
 			yts_acgwspr.getDataType() );
-		tslist.addElement ( yts_acgwspr );
+		tslist.add ( yts_acgwspr );
 		
 		// Do for totals by supply type...
 		yts_acsw.setDescription ( dataset_location + " " +
 			yts_acsw.getDataType() );
-		tslist.addElement ( yts_acsw );
+		tslist.add ( yts_acsw );
 		yts_acgw.setDescription ( dataset_location + " " +
 		yts_acgw.getDataType() );
-			tslist.addElement ( yts_acgw );
+			tslist.add ( yts_acgw );
 		
 		yts_pump.setDescription ( dataset_location + " " +
 			yts_pump.getDataType() );
-		tslist.addElement ( yts_pump );
+		tslist.add ( yts_pump );
 		yts_tot.setDescription ( dataset_location + " " +
 			yts_tot.getDataType() );
-		tslist.addElement ( yts_tot );
+		tslist.add ( yts_tot );
 	}
 	return tslist;
 }
@@ -2948,9 +2918,8 @@ processing headers).  Specify as null if no previous file is available.
 if no comments are available.
 @exception IOException if there is an error writing the file.
 */
-public static void writeStateCUFile (	String filename_prev, String filename,
-		Vector data_Vector,
-		String [] new_comments )
+public static void writeStateCUFile ( String filename_prev, String filename,
+		List data_Vector, String [] new_comments )
 throws IOException
 {	writeStateCUFile ( filename_prev, filename, data_Vector, new_comments,
 	null );
@@ -2970,9 +2939,8 @@ if no comments are available.
 @param end DateTime to end output.
 @exception IOException if there is an error writing the file.
 */
-public static void writeStateCUFile (	String filename_prev, String filename,
-					Vector data_Vector,	String [] new_comments,
-					DateTime start, DateTime end, PropList props )
+public static void writeStateCUFile ( String filename_prev, String filename,
+					List data_Vector, String [] new_comments, DateTime start, DateTime end, PropList props )
 throws IOException
 {	String [] comment_str = { "#" };
 	String [] ignore_comment_str = { "#>" };
@@ -3003,9 +2971,8 @@ processing headers).  Specify as null if no previous file is available.
 if no comments are available.
 @exception IOException if there is an error writing the file.
 */
-public static void writeStateCUFile (	String filename_prev, String filename,
-					Vector data_Vector,
-					String [] new_comments, PropList props )
+public static void writeStateCUFile ( String filename_prev, String filename,
+					List data_Vector, String [] new_comments, PropList props )
 throws IOException
 {	writeStateCUFile ( filename_prev, filename, data_Vector,
 		new_comments, null, null, props );
@@ -3018,18 +2985,18 @@ IOUtil.getPathUsingWorkingDir().
 @param filename_prev The name of the previous version of the file (for
 processing headers).  Specify as null if no previous file is available.
 @param filename The name of the file to write.
-@param data_Vector A Vector of StateCU_IrrigationPracticeTS to write.
+@param dataList A list of StateCU_IrrigationPracticeTS to write.
 @param new_comments Comments to add to the top of the file.  Specify as null 
 if no comments are available.
 @exception IOException if there is an error writing the file.
 */
 public static void writeDateValueFile (	String filename_prev, String filename,
-					Vector data_Vector,
+					List dataList,
 					String [] new_comments )
 throws Exception
 {	// For now ignore the previous file and new comments.
 	// Create a new Vector with the time series data...
-	Vector tslist = toTSVector ( data_Vector );
+	List tslist = toTSList ( dataList );
 	// Now write using a standard DateValueTS call...
 	String full_filename = IOUtil.getPathUsingWorkingDir ( filename );
 	DateValueTS.writeTimeSeriesList ( tslist, full_filename );	
@@ -3047,7 +3014,7 @@ should be recomputed from the parts (default=true).  PrecisionArea indicates the
 precision for area formatting.
 @exception IOException if an error occurs.
 */
-private static void writeVector ( Vector data_Vector, PrintWriter out, 
+private static void writeVector ( List data_Vector, PrintWriter out, 
 DateTime start, DateTime end, PropList props ) throws IOException 
 {
 	int i;
@@ -3106,7 +3073,7 @@ DateTime start, DateTime end, PropList props ) throws IOException
 		" PumpingMax GMode  AcTot";
 	}
 	
-	Vector v = new Vector(11);	// Reuse for all output lines.
+	List v = new Vector(11);	// Reuse for all output lines.
 
 	out.println ( cmnt );
 	out.println ( cmnt +
@@ -3222,8 +3189,7 @@ DateTime start, DateTime end, PropList props ) throws IOException
 	// Write the header...
 	// The dates by default are taken from the first object and are assumed to be
 	// consistent between objects...
-	StateCU_IrrigationPracticeTS tsp =
-		(StateCU_IrrigationPracticeTS)data_Vector.elementAt(0);
+	StateCU_IrrigationPracticeTS tsp = (StateCU_IrrigationPracticeTS)data_Vector.get(0);
 	DateTime date1 = tsp.getDate1();
 	DateTime date2 = tsp.getDate2();
 	if ( start != null ) {
@@ -3277,12 +3243,11 @@ DateTime start, DateTime end, PropList props ) throws IOException
 		temp_DateTime.setYear ( year );
 		// Inner loop is for each CULocation
 		for ( i=0; i<num; i++ ) {
-			tsp = (StateCU_IrrigationPracticeTS)
-				data_Vector.elementAt(i);
+			tsp = (StateCU_IrrigationPracticeTS)data_Vector.get(i);
 			if ( tsp == null ) {
 				continue;
 			}
-			v.removeAllElements();
+			v.clear();
 			v.add(StringUtil.formatString(date.getYear(),"%4d"));
 			v.add(tsp._id);
 			ceff_yts = tsp.getCeffTS();

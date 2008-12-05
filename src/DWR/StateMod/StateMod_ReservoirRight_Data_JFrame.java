@@ -21,7 +21,7 @@
 
 package DWR.StateMod;
 
-import java.util.Vector;
+import java.util.List;
 
 import RTi.Util.GUI.JScrollWorksheet;
 
@@ -42,7 +42,7 @@ which case an empty worksheet is shown.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_ReservoirRight_Data_JFrame(Vector data, String titleString,
+public StateMod_ReservoirRight_Data_JFrame(List data, String titleString,
 boolean editable)
 throws Exception {
 	super(data, titleString, editable);
@@ -59,7 +59,7 @@ protected void apply() {
 	StateMod_ReservoirRight right = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		right = (StateMod_ReservoirRight)_data.elementAt(i);
+		right = (StateMod_ReservoirRight)_data.get(i);
 		right.createBackup();
 	}
 }
@@ -88,7 +88,7 @@ protected void cancel() {
 	StateMod_ReservoirRight right = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		right = (StateMod_ReservoirRight)_data.elementAt(i);
+		right = (StateMod_ReservoirRight)_data.get(i);
 		right.restoreOriginal();
 	}
 }
@@ -101,7 +101,7 @@ protected void createDataBackup() {
 	StateMod_ReservoirRight right = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		right = (StateMod_ReservoirRight)_data.elementAt(i);
+		right = (StateMod_ReservoirRight)_data.get(i);
 		right.createBackup();
 	}
 }

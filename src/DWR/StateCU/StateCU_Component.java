@@ -18,6 +18,5 @@ public interface StateCU_Component {
 	// This method provides for a more abstract coding when running
 	// data checks on a specific component.
 	// Each component should implement this method.
-    String[] checkComponentData( int count, StateCU_DataSet dataset,
-    		PropList props );
+    String[] checkComponentData( int count, StateCU_DataSet dataset, PropList props );
 }

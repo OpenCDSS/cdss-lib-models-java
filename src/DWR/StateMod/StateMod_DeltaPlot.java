@@ -41,6 +41,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.Message.Message;
@@ -49,8 +50,8 @@ import RTi.Util.String.StringUtil;
 public class StateMod_DeltaPlot extends StateMod_Data {
 
 protected String	_type;	// "Difference", "Single", etc.
-protected Vector	_columnTitles;	// String vector, column titles
-protected Vector	_nodes;	// StateMod_DeltaPlotNode vector
+protected List	_columnTitles;	// String vector, column titles
+protected List	_nodes;	// StateMod_DeltaPlotNode vector
 
 /**
 Constructor.
@@ -62,7 +63,7 @@ public StateMod_DeltaPlot ()
 
 public void addColumnTitle(String s)
 {	if ( s != null ) {
-		_columnTitles.addElement (s);
+		_columnTitles.add (s);
 	}
 }
 
@@ -71,7 +72,7 @@ Add big picture nodes.
 */
 public void addNode ( StateMod_DeltaPlotNode node )
 {	if ( node != null ) {
-		_nodes.addElement ( node );	
+		_nodes.add ( node );	
 	}
 }
 
@@ -90,7 +91,7 @@ throws Throwable
 Get the column titles.
 */
 public String getColumnTitle(int index) {
-	return (String)_columnTitles.elementAt(index);
+	return (String)_columnTitles.get(index);
 }
 
 public int getColumnTitleSize() {
@@ -98,7 +99,7 @@ public int getColumnTitleSize() {
 }
 
 public StateMod_DeltaPlotNode getNode ( int index )
-{	return (StateMod_DeltaPlotNode)_nodes.elementAt(index);
+{	return (StateMod_DeltaPlotNode)_nodes.get(index);
 }
 
 /**
@@ -134,7 +135,7 @@ throws IOException
 	String type = null;
 	String yrOrAve = null;
 	String colTitle = null;
-	Vector list = null;
+	List list = null;
 	StateMod_DeltaPlotNode node = null;
 	String id = null;
 	String name = null;
@@ -157,10 +158,10 @@ throws IOException
 		int size = _columnTitles.size();
 		for ( int i=0; i<size; i++ ) {
 			list = StringUtil.breakStringList (
-				(String)_columnTitles.elementAt(i), " ", 
+				(String)_columnTitles.get(i), " ", 
 				StringUtil.DELIM_SKIP_BLANKS );
-			yrOrAve = (String)list.elementAt(0);
-			colTitle = ((String)list.elementAt(1)).replace(',','_');
+			yrOrAve = (String)list.get(0);
+			colTitle = ((String)list.get(1)).replace(',','_');
 			if ( !include_type ) {
 				iline += ",";
 			}
@@ -171,7 +172,7 @@ throws IOException
 		// print data
 		int num = _nodes.size();
 		for ( int i=0; i<num; i++ ) {
-			node = (StateMod_DeltaPlotNode)_nodes.elementAt(i);
+			node = (StateMod_DeltaPlotNode)_nodes.get(i);
 			id = node.getID();
 			name = node.getName();
 			if ( id == null || id.length() == 0 ) {
@@ -226,13 +227,13 @@ throws IOException
 {	String rtn = "StateMod_DeltaPlot.readStateModDeltaOutputFile";
 	String iline = null;
 	BufferedReader in = null;
-	Vector list1 = null;
+	List list1 = null;
 	String a = null;
 	Integer b = null;
 	String format ="s12s1s24s1d10s1d10s1d10s1d10s1d10s1d10s1d10" +
 			"s1d10s1d10s1d10s1d10s1d10s1d10s1d10s1d10s1d10s1d10" +
 			"s1d10s1d10s1d10";
-	Vector v = null;
+	List v = null;
 
 	Message.printStatus ( 1, rtn, "Reading delplt output file: " 
 		+ filename );
@@ -253,12 +254,12 @@ throws IOException
 			Message.printDebug ( 50, rtn, iline );
 		}
 
-		a = (String)list1.elementAt(0);
+		a = (String)list1.get(0);
 		//Message.printDebug ( 10, rtn, a );
 		b = new Integer ( a );
 		int nz = b.intValue();
 		//Message.printDebug ( 10, rtn, "" + nz );
-		int nbigtitles = (new Integer ((String)list1.elementAt(1))).
+		int nbigtitles = (new Integer ((String)list1.get(1))).
 			intValue();
 
 		// second line: type
@@ -291,12 +292,12 @@ throws IOException
 				+ iline );
 				return 1;
 			}
-			node.setID(((String)v.elementAt(0)).trim());
-			node.setName(((String)v.elementAt(2)).trim());
+			node.setID(((String)v.get(0)).trim());
+			node.setName(((String)v.get(2)).trim());
 			for ( int j=2; j<2+nz; j++ )
-				node.addZ((Double)v.elementAt(2*j));
+				node.addZ((Double)v.get(2*j));
 
-			_nodes.addElement ( node );
+			_nodes.add ( node );
 			} catch ( Exception e ) {
 				Message.printWarning ( 2, rtn, 
 					"Trouble parsing xgr line \"" + 

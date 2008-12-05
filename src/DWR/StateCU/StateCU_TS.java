@@ -32,6 +32,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Vector;
 
 import RTi.TS.MonthTS;
@@ -94,8 +95,7 @@ public static boolean isFrostDatesFile ( String filename )
 			else if ( header_read ) {
 				// See if line has 6 tokens and 4 instances of
 				// "/" - this assumes no missing...
-				Vector v = StringUtil.breakStringList (
-					iline," ",StringUtil.DELIM_SKIP_BLANKS);
+				List v = StringUtil.breakStringList ( iline," ",StringUtil.DELIM_SKIP_BLANKS);
 				if (	(v != null) && (v.size() == 6) &&
 					((StringUtil.patternCount(iline,"/") +
 					StringUtil.patternCount(iline,"-"))
@@ -220,14 +220,13 @@ throws Exception
 		"Unable to open file \"" + full_fname + "\"" );
 		return ts;
 	}
-	Vector v = readTimeSeriesList (	tsident_string, in, full_fname,
-			date1, date2, units, read_data );
+	List v = readTimeSeriesList ( tsident_string, in, full_fname, date1, date2, units, read_data );
 	in.close();
 	if ( (v == null) || (v.size() == 0) ) {
 		// Did not find the time series...
 		return null;
 	}
-	else {	return (TS)v.elementAt(0);
+	else {	return (TS)v.get(0);
 	}
 }
 
@@ -256,18 +255,15 @@ series).
 @param units Units to convert to.
 @param read_data Indicates whether data should be read (false=no, true=yes).
 */
-public static Vector readTimeSeriesList (	
-					String tsident_string, String filename,
-					DateTime date1, DateTime date2,
-					String units, boolean read_data )
+public static List readTimeSeriesList ( String tsident_string, String filename,
+					DateTime date1, DateTime date2, String units, boolean read_data )
 throws Exception
 {	String routine = "StateCU_TS.readTimeSeriesList";
 
 	String input_name = filename;
 	String full_fname = IOUtil.getPathUsingWorkingDir ( filename );
 	if ( !IOUtil.fileReadable(full_fname) ) {
-		Message.printWarning( 2, routine,
-		"Unable to determine file for \"" + filename + "\"" );
+		Message.printWarning( 2, routine, "Unable to determine file for \"" + filename + "\"" );
 		return null;
 	}
 	BufferedReader in = null;
@@ -280,8 +276,7 @@ throws Exception
 		"Unable to open file \"" + full_fname + "\"" );
 		return null;
 	}
-	Vector tslist = readTimeSeriesList (	tsident_string, in, full_fname,
-						date1, date2, units, read_data);
+	List tslist = readTimeSeriesList ( tsident_string, in, full_fname, date1, date2, units, read_data);
 	in.close();
 	TS ts;
 	int nts = 0;
@@ -289,7 +284,7 @@ throws Exception
 		nts = tslist.size();
 	}
 	for ( int i = 0; i < nts; i++ ) {
-		ts = (TS)tslist.elementAt(i);
+		ts = (TS)tslist.get(i);
 		if ( ts != null ) {
 			ts.setInputName ( full_fname );
 			ts.getIdentifier().setInputName ( input_name );
@@ -304,15 +299,12 @@ The IOUtil.getPathUsingWorkingDir() method is applied to the filename.
 @return a pointer to a newly-allocated Vector of time series if successful,
 a NULL pointer if not.
 @param fname Name of file to read.
-@param date1 Starting date to initialize period (NULL to read the entire time
-series).
-@param date2 Ending date to initialize period (NULL to read the entire time
-series).
+@param date1 Starting date to initialize period (NULL to read the entire time series).
+@param date2 Ending date to initialize period (NULL to read the entire time series).
 @param units Units to convert to.
 @param read_data Indicates whether data should be read.
 */
-public static Vector readTimeSeriesList (	String fname,
-						DateTime date1, DateTime date2,
+public static List readTimeSeriesList (	String fname, DateTime date1, DateTime date2,
 						String units, boolean read_data)
 throws Exception
 {	return readTimeSeriesList ( null, fname, date1, date2, units,read_data);
@@ -334,7 +326,7 @@ the entire time series).
 @param read_data Indicates whether data should be read.
 @exception Exception if there is an error reading the time series.
 */
-private static Vector readTimeSeriesList (	String req_tsident_string,
+private static List readTimeSeriesList ( String req_tsident_string,
 						BufferedReader in,
 						String full_filename,
 						DateTime req_date1,
@@ -384,7 +376,7 @@ the entire time series).
 @param read_data Indicates whether data should be read.
 @exception Exception if there is an error reading the time series.
 */
-private static Vector readTimeSeriesListFromFrostDatesFile (
+private static List readTimeSeriesListFromFrostDatesFile (
 						String req_tsident_string,
 						BufferedReader ifp,
 						String full_filename,
@@ -399,8 +391,8 @@ throws Exception
 		line_count = 0;			// Count of lines that are read
 	String	chval, iline, message,
 		rtn="StateCU_TS.readTimeSeriesListFromFrostDatesFile";
-	Vector	v;
-	Vector tslist = new Vector();		// Time series data to return.
+	List	v;
+	List tslist = new Vector();		// Time series data to return.
 	DateTime date = new DateTime(DateTime.PRECISION_YEAR);
 	TSIdent tsident = null;			// Time series identifier used
 						// when creating time series -
@@ -472,9 +464,9 @@ throws Exception
 	}
 
 	v = StringUtil.fixedRead ( iline, format_0 );
-	y1 = ((Integer)v.elementAt(2)).intValue();
-	y2 = ((Integer)v.elementAt(6)).intValue();
-	String units = ((String)v.elementAt(7)).trim();
+	y1 = ((Integer)v.get(2)).intValue();
+	y2 = ((Integer)v.get(6)).intValue();
+	String units = ((String)v.get(7)).trim();
 	if ( Message.isDebugOn ) {
 		Message.printDebug ( dl, rtn, "Retrieved: year1=" + 
 		y1 + " year2=" + y2 + " units=" + units );	
@@ -537,7 +529,7 @@ throws Exception
 				v = StringUtil.fixedRead(iline,format_annual );	
 				line_parsed = true;
 			}
-			current_year = ((Integer)v.elementAt(0)).intValue();
+			current_year = ((Integer)v.get(0)).intValue();
 			if ( current_year != y1 ) {
 				message = "First data record does not match " +
 					"start of period:  " + y1;
@@ -577,7 +569,7 @@ throws Exception
 			v = StringUtil.fixedRead (iline, format_annual);	
 			line_parsed = true;
 		}
-		current_year = ((Integer)v.elementAt(0)).intValue();
+		current_year = ((Integer)v.get(0)).intValue();
 		if ( Message.isDebugOn ) {
 			Message.printDebug ( dl, rtn,
 			"Found id!  Read annual format." );
@@ -586,7 +578,7 @@ throws Exception
 		if ( requested_id == null ) {
 			// Need to get because it is parsed above only when
 			// searching for a requested ID...
-			id = ((String)v.elementAt(1)).trim();
+			id = ((String)v.get(1)).trim();
 		}
 
 		if ( Message.isDebugOn ) {
@@ -717,7 +709,7 @@ throws Exception
 				tsident.setInterval ( "Year" );
 				tsident.setInputType ( "StateCU" );
 				year_ts0.setIdentifier ( tsident );
-				tslist.addElement ( year_ts0 );
+				tslist.add ( year_ts0 );
 			}
 
 			if ( year_ts1 != null ) {
@@ -732,7 +724,7 @@ throws Exception
 				tsident.setInterval ( "Year" );
 				tsident.setInputType ( "StateCU" );
 				year_ts1.setIdentifier ( tsident );
-				tslist.addElement ( year_ts1 );
+				tslist.add ( year_ts1 );
 			}
 
 			if ( year_ts2 != null ) {
@@ -747,7 +739,7 @@ throws Exception
 				tsident.setInterval ( "Year" );
 				tsident.setInputType ( "StateCU" );
 				year_ts2.setIdentifier ( tsident );
-				tslist.addElement ( year_ts2 );
+				tslist.add ( year_ts2 );
 			}
 
 			if ( year_ts3 != null ) {
@@ -762,7 +754,7 @@ throws Exception
 				tsident.setInterval ( "Year" );
 				tsident.setInputType ( "StateCU" );
 				year_ts3.setIdentifier ( tsident );
-				tslist.addElement ( year_ts3 );
+				tslist.add ( year_ts3 );
 			}
 
 			numids++;
@@ -811,29 +803,29 @@ throws Exception
 
 		if ( !requested_id_found ) {
 			// Reading all data...
-			currentTS0 = (YearTS)tslist.elementAt(
+			currentTS0 = (YearTS)tslist.get(
 				currentIDindex*4);
-			currentTS1 = (YearTS)tslist.elementAt(
+			currentTS1 = (YearTS)tslist.get(
 				currentIDindex*4 + 1);
-			currentTS2 = (YearTS)tslist.elementAt(
+			currentTS2 = (YearTS)tslist.get(
 				currentIDindex*4 + 2);
-			currentTS3 = (YearTS)tslist.elementAt(
+			currentTS3 = (YearTS)tslist.get(
 				currentIDindex*4 + 3);
 		}
 		else {	// The requested identifier has been found.  Point to
 			// the specific time series - there will only be one
 			// since only one time series can be returned...
 			if ( requested_col == 0 ) {
-				currentTS0 = (YearTS)tslist.elementAt(0);
+				currentTS0 = (YearTS)tslist.get(0);
 			}
 			else if ( requested_col == 1 ) {
-				currentTS1 = (YearTS)tslist.elementAt(0);
+				currentTS1 = (YearTS)tslist.get(0);
 			}
 			else if ( requested_col == 2 ) {
-				currentTS2 = (YearTS)tslist.elementAt(0);
+				currentTS2 = (YearTS)tslist.get(0);
 			}
 			else if ( requested_col == 3 ) {
-				currentTS3 = (YearTS)tslist.elementAt(0);
+				currentTS3 = (YearTS)tslist.get(0);
 			}
 		}
 
@@ -842,10 +834,10 @@ throws Exception
 
 		try {	// Might return a null...
 			// Need to save the data...
-			current_year = ((Integer)v.elementAt(0)).intValue();
+			current_year = ((Integer)v.get(0)).intValue();
 			date.setYear ( current_year );
 			if ( currentTS0 != null ) {
-				string = ((String)v.elementAt(2)).trim();
+				string = ((String)v.get(2)).trim();
 				if ( string.charAt(0) != '-' ) {
 					// Not missing...
 					try {	tsdate = DateTime.parse(string);
@@ -862,7 +854,7 @@ throws Exception
 				}
 			}
 			if ( currentTS1 != null ) {
-				string = ((String)v.elementAt(3)).trim();
+				string = ((String)v.get(3)).trim();
 				if ( string.charAt(0) != '-' ) {
 					try {	tsdate = DateTime.parse(string);
 						tsdate.setYear ( current_year );
@@ -878,7 +870,7 @@ throws Exception
 				}
 			}
 			if ( currentTS2 != null ) {
-				string = ((String)v.elementAt(4)).trim();
+				string = ((String)v.get(4)).trim();
 				if ( string.charAt(0) != '-' ) {
 					try {	tsdate = DateTime.parse(string);
 						tsdate.setYear ( current_year );
@@ -894,7 +886,7 @@ throws Exception
 				}
 			}
 			if ( currentTS3 != null ) {
-				string = ((String)v.elementAt(5)).trim();
+				string = ((String)v.get(5)).trim();
 				if ( string.charAt(0) != '-' ) {
 					try {	tsdate = DateTime.parse(string);
 						tsdate.setYear ( current_year );
@@ -952,7 +944,7 @@ the entire time series).
 @param read_data Indicates whether data should be read.
 @exception Exception if there is an error reading the time series.
 */
-private static Vector readTimeSeriesListFromReportFile (
+private static List readTimeSeriesListFromReportFile (
 						String req_tsident_string,
 						BufferedReader in,
 						String full_filename,
@@ -966,7 +958,7 @@ throws Exception
 	String req_data_type = null;
 	String req_interval = null;
 	String req_id_pattern = null;	// Need for wildcarding
-	Vector tslist = new Vector();
+	List tslist = new Vector();
 	int dl = 1;
 	int line_count = 0;
 	TSIdent req_tsident = null;
@@ -1031,12 +1023,12 @@ throws Exception
 	DateTime date2 = new DateTime( DateTime.PRECISION_MONTH);
 					// Period to allocate time series.
 	DateTime date = new DateTime();	// Used for data iteration.
-	Vector ilines = new Vector();	// Buffer to hold lines for a single
+	List ilines = new Vector();	// Buffer to hold lines for a single
 					// time series.
 	TSIdent tsident = null;		// Used to create new time series.
 	YearTS area_ts = null, yts = null, depth_ts = null;
 	MonthTS mts = null;		// The time series to return.
-	Vector v = null;		// Used to parse
+	List v = null;		// Used to parse
 	String iline;			// Line read from file.
 	boolean include_area_ts = true;	// Indicate which time series to include
 	boolean include_mts = true;
@@ -1088,7 +1080,7 @@ throws Exception
 		iline = in.readLine();	++line_count;
 		// Now read the data associated with the time series - one line
 		// per year...
-		ilines.removeAllElements ();
+		ilines.clear ();
 		while ( true ) {
 			iline = in.readLine();
 			if ( iline == null ) {
@@ -1134,15 +1126,15 @@ throws Exception
 					// first column from the first and last
 					// lines for this location...
 					v = StringUtil.fixedRead((String)
-						ilines.elementAt(0),
+						ilines.get(0),
 						format, format_w, v );
 					year1 = ((Integer)
-						v.elementAt(0)).intValue();
+						v.get(0)).intValue();
 					v = StringUtil.fixedRead((String)
-						ilines.elementAt( size- 1),
+						ilines.get( size- 1),
 						format, format_w, v );
 					year2 = ((Integer)
-						v.elementAt(0)).intValue();
+						v.get(0)).intValue();
 					date1.setMonth(1);
 					date1.setYear(year1);
 					date2.setMonth(12);
@@ -1249,7 +1241,7 @@ throws Exception
 					tsident.setInputType("StateCU");
 					tsident.setInputName( full_filename);
 					area_ts.setIdentifier (tsident);
-					tslist.addElement ( area_ts );
+					tslist.add ( area_ts );
 				}
 
 				// Monthly data...
@@ -1271,7 +1263,7 @@ throws Exception
 					tsident.setInputType("StateCU");
 					tsident.setInputName( full_filename);
 					mts.setIdentifier (tsident);
-					tslist.addElement ( mts );
+					tslist.add ( mts );
 				}
 
 				// Yearly data...
@@ -1293,7 +1285,7 @@ throws Exception
 					tsident.setInputType("StateCU");
 					tsident.setInputName( full_filename);
 					yts.setIdentifier (tsident);
-					tslist.addElement ( yts );
+					tslist.add ( yts );
 				}
 
 				// Yearly depth...
@@ -1317,7 +1309,7 @@ throws Exception
 					tsident.setInputType("StateCU");
 					tsident.setInputName( full_filename);
 					depth_ts.setIdentifier(tsident);
-					tslist.addElement ( depth_ts );
+					tslist.add ( depth_ts );
 				}
 
 				if (	!include_area_ts &&
@@ -1349,9 +1341,9 @@ throws Exception
 					for ( i = 0; i < size; i++ ) {
 						v = StringUtil.fixedRead(
 							(String)
-							ilines.elementAt(i),
+							ilines.get(i),
 							format, format_w, v );
-						year =((Integer)v.elementAt(0)).
+						year =((Integer)v.get(0)).
 							intValue();
 						date.setYear(year);
 						date.setMonth(1);
@@ -1359,7 +1351,7 @@ throws Exception
 							area_ts.setDataValue(
 								date,
 							 	((Double)v.
-								elementAt(1)).
+								get(1)).
 								doubleValue() );
 						}
 						if ( include_mts ) {
@@ -1370,7 +1362,7 @@ throws Exception
 								setDataValue(
 								date,
 							 	((Double)v.
-								elementAt(
+								get(
 								icol)).
 								doubleValue() );
 							}
@@ -1380,14 +1372,14 @@ throws Exception
 						if ( include_yts ) {
 							yts.setDataValue(
 							date, ((Double)v.
-							elementAt(14)).
+							get(14)).
 							doubleValue() );
 						}
 						if ( include_depth_ts ) {
 							depth_ts.setDataValue(
 								date,
 							 	((Double)v.
-								elementAt(15)).
+								get(15)).
 								doubleValue() );
 						}
 					}
@@ -1400,7 +1392,7 @@ throws Exception
 			else {	// Else add to data vector so it can be
 				// processed when the end of this time series
 				// is detected...
-				ilines.addElement ( iline );
+				ilines.add ( iline );
 			}
 		}
 		if ( (req_id != null) && !req_id_has_wildcards && req_id_found){
@@ -1433,7 +1425,7 @@ will be grouped and output together.
 @param req_date2 Requested output end of period (only year is used).
 @exception Exception if an error occurs writing the file.
 */
-public static void writeFrostDatesFile ( Vector tslist, String outfile,
+public static void writeFrostDatesFile ( List tslist, String outfile,
 					String [] newcomments, DateTime req_date1, DateTime req_date2 )
 throws Exception
 {	PrintWriter out;
@@ -1454,7 +1446,7 @@ throws Exception
 
 	// Get the contents of the file...
 
-	Vector strings = formatFrostDatesOutput ( tslist, req_date1, req_date2);
+	List strings = formatFrostDatesOutput ( tslist, req_date1, req_date2);
 	// Now write the new data...
 
 	int size = 0;
@@ -1462,7 +1454,7 @@ throws Exception
 		size = strings.size();
 	}
 	for ( int i = 0; i < size; i++ ) {
-		out.println ( (String)strings.elementAt(i) );
+		out.println ( (String)strings.get(i) );
 	}
 
 	out.flush();
@@ -1478,15 +1470,13 @@ location (see the writeFrostDatesFile() method for more information).
 @param req_date2 Requested end year, or null to write all data.
 @return Vector of String suitable for a report or file.
 */
-private static Vector formatFrostDatesOutput (	Vector tslist,
-						DateTime req_date1,
-						DateTime req_date2 )
+private static List formatFrostDatesOutput ( List tslist, DateTime req_date1, DateTime req_date2 )
 throws Exception
 {	String	cmnt = "#>";	// Non-permanent comment for header.
 	String	message = null;
 	String	rtn="StateCU_TS.formatFrostDatesOutput";
-	Vector	strings = new Vector ( 50, 50 );
-	Vector	v = new Vector ( 50 );
+	List	strings = new Vector ( 50, 50 );
+	List	v = new Vector ( 50 );
 
 	if ( Message.isDebugOn ) {
 		Message.printStatus ( 1, rtn, "Creating frost dates output " +
@@ -1502,14 +1492,14 @@ throws Exception
 	// This defines the locations.
 
 	int size = tslist.size();
-	Vector ids = new Vector(size/4 + 4);
+	List ids = new Vector(size/4 + 4);
 	TS ts;
 	int ids_size = 0;
 	boolean found = false;
 	String id;
 	int j = 0;		// Reused in loop below
 	for ( int i = 0; i < size; i++ ) {
-		ts = (TS)tslist.elementAt(i);
+		ts = (TS)tslist.get(i);
 		if ( ts == null ) {
 			continue;
 		}
@@ -1517,14 +1507,14 @@ throws Exception
 		id = ts.getLocation();
 		ids_size = ids.size();
 		for ( j = 0; j < ids_size; j++ ) {
-			if ( id.equalsIgnoreCase((String)ids.elementAt(j)) ) {
+			if ( id.equalsIgnoreCase((String)ids.get(j)) ) {
 				found = true;
 				break;
 			}
 		}
 		if ( !found ) {
 			// The location was not found so add it to the list...
-			ids.addElement ( id );
+			ids.add ( id );
 		}
 	}
 
@@ -1550,12 +1540,12 @@ throws Exception
 			ts_array[i][2] = ts_array[i][3] = null;
 		// Fill up the rows in the order of the ids, finding time series
 		// of the proper data types for the columns...
-		id = (String)ids.elementAt(i);
+		id = (String)ids.get(i);
 		// Loop through the original full list of time series to find
 		// ones that match the identifier and data type...
 		for ( idatatype = 0; idatatype < 4; idatatype++ ) {
 			for ( j = 0; j < size; j++ ) {
-				ts = (TS)tslist.elementAt(j);
+				ts = (TS)tslist.get(j);
 				if (	ts.getLocation().equalsIgnoreCase(id) &&
 					ts.getDataType().equalsIgnoreCase(
 						datatypes[idatatype]) ) {
@@ -1612,36 +1602,36 @@ throws Exception
 
 	// Print comments at the top of the file...
 
-	strings.addElement ( cmnt );
-	strings.addElement ( cmnt );
-	strings.addElement ( cmnt +
+	strings.add ( cmnt );
+	strings.add ( cmnt );
+	strings.add ( cmnt +
 	" StateCU frost dates time series" );
-	strings.addElement ( cmnt +
+	strings.add ( cmnt +
 	" *******************************" );
-	strings.addElement ( cmnt );
-	strings.addElement ( cmnt );
+	strings.add ( cmnt );
+	strings.add ( cmnt );
 
 	// Always do calendar year...
 
-	strings.addElement ( cmnt + " Years Shown = Calendar Years" );
+	strings.add ( cmnt + " Years Shown = Calendar Years" );
 
-	strings.addElement ( cmnt + 
+	strings.add ( cmnt + 
 		" The period of record for each time series may vary");
-	strings.addElement ( cmnt + 
+	strings.add ( cmnt + 
 		" because of the original input and data processing steps.");
-	strings.addElement ( cmnt );
-	strings.addElement ( cmnt );
+	strings.add ( cmnt );
+	strings.add ( cmnt );
 
 	// Print each time series id, description, and type...
 
-	strings.addElement ( cmnt + "     TS ID                    Type" +
+	strings.add ( cmnt + "     TS ID                    Type" +
 	"   Source   Units  Period of Record    Location    Description");
 
 	String		empty_string = "-", tmpdesc, tmpid, tmplocation,
 			tmpsource, tmptype, tmpunits;
 	String	format;
 	for ( i=0; i<nseries; i++ ) {
-		ts = (TS)tslist.elementAt(i);
+		ts = (TS)tslist.get(i);
 
 		tmpid = ts.getIdentifierString();
 		if (tmpid.length() == 0 ) {
@@ -1675,34 +1665,34 @@ throws Exception
 
 		format= "%s %3d %-24.24s %-6.6s %-8.8s %-6.6s     %d - "
 			+ "%d     %-12.12s%-24.24s";
-		v.removeAllElements();
-		v.addElement ( cmnt );
-		v.addElement ( new Integer ( i+1 ));
-		v.addElement ( tmpid );
-		v.addElement ( tmptype );
-		v.addElement ( tmpsource );
-		v.addElement ( tmpunits );
-		v.addElement ( new Integer ( ts.getDate1().getYear()));
-		v.addElement ( new Integer ( ts.getDate2().getYear()));
-		v.addElement ( tmplocation );
-		v.addElement ( tmpdesc );
+		v.clear();
+		v.add ( cmnt );
+		v.add ( new Integer ( i+1 ));
+		v.add ( tmpid );
+		v.add ( tmptype );
+		v.add ( tmpsource );
+		v.add ( tmpunits );
+		v.add ( new Integer ( ts.getDate1().getYear()));
+		v.add ( new Integer ( ts.getDate2().getYear()));
+		v.add ( tmplocation );
+		v.add ( tmpdesc );
 
 		iline = StringUtil.formatString ( v, format );
-		strings.addElement ( iline );
+		strings.add ( iline );
 	}
-	strings.addElement ( cmnt );
-	strings.addElement ( cmnt );
-	strings.addElement ( cmnt );
+	strings.add ( cmnt );
+	strings.add ( cmnt );
+	strings.add ( cmnt );
 
 	// Ready to print table
 	//
 	// check a few conditions which would end this routine...
 	if ( nseries == 0 ) {
-		strings.addElement ( "No time series data." );
+		strings.add ( "No time series data." );
 		return strings;
 	}
 	for (i=0; i<nseries; i++ ) {
-		ts = (TS)tslist.elementAt(i);
+		ts = (TS)tslist.get(i);
 		if ( ts.getDataIntervalBase() != TimeInterval.YEAR ) {
 			message = "A TS interval other than year detected:" +
 		   	ts.getDataIntervalBase();		
@@ -1711,20 +1701,20 @@ throws Exception
 		}
 	}
 
-	strings.addElement( cmnt + "Temperatures are degrees F" );
-	strings.addElement( cmnt );
-	strings.addElement( cmnt +
+	strings.add( cmnt + "Temperatures are degrees F" );
+	strings.add( cmnt );
+	strings.add( cmnt +
 	"               Last    Last    First   First" );
-	strings.addElement( cmnt +
+	strings.add( cmnt +
 	" Yr ID         Spr 28  Spr 32  Fall 32 Fall 28" );
 
-	strings.addElement ( 
+	strings.add ( 
 		cmnt + "-e-b----------eb------eb------eb------eb------e" );
-	strings.addElement( cmnt + "EndHeader" );
+	strings.add( cmnt + "EndHeader" );
 
 	// For now, always output in calendar year...
 
-	strings.addElement ( "    1/" +
+	strings.add ( "    1/" +
 	StringUtil.formatString(earliest_year,"%4d") + "  -     12/" +
 	StringUtil.formatString(latest_year,"%4d") + " DATE  CYR" );
 
@@ -1732,7 +1722,7 @@ throws Exception
 	double	missing = -999.0;
 	Double	missing_Double = new Double ( missing );
 	
-	Vector iline_v = new Vector(30);
+	List iline_v = new Vector(30);
 	DateTime date = new DateTime ( DateTime.PRECISION_YEAR );
 	date.setYear ( earliest_year );
 	int [] date_array;	// Returned from TimeUtil below - reused.
@@ -1742,13 +1732,13 @@ throws Exception
 		// Loop through the number of identifiers...
 		for (j=0; j<nseries; j++ ) {
 			// First, clear this string out, then append to it
-			iline_v.removeAllElements();
+			iline_v.clear();
 
 			// This is always the same...
 
 			iline_format = "%4d %-12.12s";
-			iline_v.addElement ( new Integer (year));
-			iline_v.addElement ( (String)ids.elementAt(j) );
+			iline_v.add ( new Integer (year));
+			iline_v.add ( (String)ids.get(j) );
 
 			// Get the data from the time series...
 
@@ -1778,13 +1768,13 @@ throws Exception
 			if ( days28spring < 0.0 ) {
 				// No date...
 				iline_format += "%8d";
-				iline_v.addElement ( missing_Double );
+				iline_v.add ( missing_Double );
 			}
 			else {	iline_format += "%8.8s";
 				date_array =
 					TimeUtil.getMonthAndDayFromDayOfYear(
 					year, (int)(days28spring + .01) );
-				iline_v.addElement (
+				iline_v.add (
 				StringUtil.formatString(date_array[0],"%02d") +
 				"/" + 
 				StringUtil.formatString(date_array[1],"%02d"));
@@ -1792,13 +1782,13 @@ throws Exception
 			if ( days32spring < 0.0 ) {
 				// No date...
 				iline_format += "%8d";
-				iline_v.addElement ( missing_Double );
+				iline_v.add ( missing_Double );
 			}
 			else {	iline_format += "%8.8s";
 				date_array =
 					TimeUtil.getMonthAndDayFromDayOfYear(
 					year, (int)(days32spring + .01) );
-				iline_v.addElement (
+				iline_v.add (
 				StringUtil.formatString(date_array[0],"%02d") +
 				"/" + 
 				StringUtil.formatString(date_array[1],"%02d"));
@@ -1806,13 +1796,13 @@ throws Exception
 			if ( days32fall < 0.0 ) {
 				// No date...
 				iline_format += "%8d";
-				iline_v.addElement ( missing_Double );
+				iline_v.add ( missing_Double );
 			}
 			else {	iline_format += "%8.8s";
 				date_array =
 					TimeUtil.getMonthAndDayFromDayOfYear(
 					year, (int)(days32fall + .01) );
-				iline_v.addElement (
+				iline_v.add (
 				StringUtil.formatString(date_array[0],"%02d") +
 				"/" + 
 				StringUtil.formatString(date_array[1],"%02d"));
@@ -1820,18 +1810,18 @@ throws Exception
 			if ( days28fall < 0.0 ) {
 				// No date...
 				iline_format += "%8d";
-				iline_v.addElement ( missing_Double );
+				iline_v.add ( missing_Double );
 			}
 			else {	iline_format += "%8.8s";
 				date_array =
 					TimeUtil.getMonthAndDayFromDayOfYear(
 					year, (int)(days28fall + .01) );
-				iline_v.addElement (
+				iline_v.add (
 				StringUtil.formatString(date_array[0],"%02d") +
 				"/" + 
 				StringUtil.formatString(date_array[1],"%02d"));
 			}
-			strings.addElement ( StringUtil.formatString(
+			strings.add ( StringUtil.formatString(
 				iline_v, iline_format) );
 		}
 

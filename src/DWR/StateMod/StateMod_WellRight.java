@@ -71,6 +71,7 @@ package DWR.StateMod;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.IO.IOUtil;
@@ -223,7 +224,7 @@ be null.
 be null.
 @return true if they are the same, false if not.
 */
-public static boolean equals(Vector v1, Vector v2) {
+public static boolean equals(List v1, List v2) {
 	String routine = "StateMod_WellRight.equals(Vector, Vector)";
 	StateMod_WellRight r1;	
 	StateMod_WellRight r2;	
@@ -236,13 +237,13 @@ public static boolean equals(Vector v1, Vector v2) {
 		// and data will need to be saved back into the dataset.
 		int size = v1.size();
 		Message.printStatus(1, routine, "Vectors are of size: " + size);
-		Vector v1Sort = StateMod_Util.sortStateMod_DataVector(v1);
-		Vector v2Sort = StateMod_Util.sortStateMod_DataVector(v2);
+		List v1Sort = StateMod_Util.sortStateMod_DataVector(v1);
+		List v2Sort = StateMod_Util.sortStateMod_DataVector(v2);
 		Message.printStatus(1, routine, "Vectors have been sorted");
 	
 		for (int i = 0; i < size; i++) {			
-			r1 = (StateMod_WellRight)v1Sort.elementAt(i);	
-			r2 = (StateMod_WellRight)v2Sort.elementAt(i);	
+			r1 = (StateMod_WellRight)v1Sort.get(i);	
+			r2 = (StateMod_WellRight)v2Sort.get(i);	
 			Message.printStatus(1, routine, r1.toString());
 			Message.printStatus(1, routine, r2.toString());
 			Message.printStatus(1, routine, "Element " + i 
@@ -408,10 +409,10 @@ rights passed in the parameter list.
 @param filename name of file containing well rights
 @return Vector of well rights
 */
-public static Vector readStateModFile(String filename)
+public static List readStateModFile(String filename)
 throws Exception {
 	String routine = "StateMod_WellRight.readStateModFile";
-	Vector theWellRights = new Vector();
+	List theWellRights = new Vector();
 	int [] format_0 = {
 				StringUtil.TYPE_STRING,
 				StringUtil.TYPE_STRING,
@@ -440,7 +441,7 @@ throws Exception {
 				5,
 				7};
 	String iline = null;
-	Vector v = new Vector(10);
+	List v = new Vector(10);
 	BufferedReader in = null;
 	StateMod_WellRight aRight = null;
 
@@ -463,26 +464,26 @@ throws Exception {
 				"iline: " + iline);
 			}
 			StringUtil.fixedRead(iline, format_0, format_0w, v);
-			aRight.setID(((String)v.elementAt(0)).trim());
-			aRight.setName(((String)v.elementAt(1)).trim());
-			aRight.setCgoto(((String)v.elementAt(2)).trim());
-			aRight.setIrtem(((String)v.elementAt(3)).trim());
-			aRight.setDcrdivw((Double)v.elementAt(4));
-			aRight.setSwitch((Integer)v.elementAt(5));
+			aRight.setID(((String)v.get(0)).trim());
+			aRight.setName(((String)v.get(1)).trim());
+			aRight.setCgoto(((String)v.get(2)).trim());
+			aRight.setIrtem(((String)v.get(3)).trim());
+			aRight.setDcrdivw((Double)v.get(4));
+			aRight.setSwitch((Integer)v.get(5));
 			/* If comments used
 			if ( v.size() > 6 ) {
 				// Save the comment at the end of the line
-				comment = (String)v.elementAt(6);
+				comment = (String)v.get(6);
 				if ( comment != null ) {
 					aRight.setComment ( comment.trim() );
 				}
 			}
 			*/
 			// Evaluate handling parcel data... 
-			aRight.setParcelYear((Integer)v.elementAt(6));
-			aRight.setParcelMatchClass((Integer)v.elementAt(7));
-			aRight.setParcelID(((String)v.elementAt(8)).trim());
-			theWellRights.addElement(aRight);
+			aRight.setParcelYear((Integer)v.get(6));
+			aRight.setParcelMatchClass((Integer)v.get(7));
+			aRight.setParcelID(((String)v.get(8)).trim());
+			theWellRights.add(aRight);
 		}
 	} 
 	catch(Exception e) {
@@ -640,30 +641,11 @@ for evaluation during development but are not a part of the standard file.
 @param outfile name of output file to print to
 @param theRights vector of rights to print
 @param new_comments additional comments to print to the comment section
-@deprecated Use overloaded method with PropList parameter.
-*/
-public static void writeStateModFile(String infile, String outfile,
-Vector theRights, String[]new_comments)
-throws Exception {
-	writeStateModFile ( infile, outfile, theRights, new_comments, null );
-}
-
-/**
-Write the well rights file.  The comments from the previous
-rights file are transferred into the next one.  Also, a history is maintained
-and printed in the header fo the file.  Additional header comments can be added
-through the new_comments parameter.
-Comments for each data item will be written if provided - these are being used
-for evaluation during development but are not a part of the standard file.
-@param infile name of file to retrieve previous comments and history from
-@param outfile name of output file to print to
-@param theRights vector of rights to print
-@param new_comments additional comments to print to the comment section
 @param write_props Properties to control the rights.  Currently only
 WriteDataComments=True/False is recognized
 */
 public static void writeStateModFile(String infile, String outfile,
-Vector theRights, String[]new_comments, PropList write_props )
+		List theRights, String[]new_comments, PropList write_props )
 throws Exception {
 	String [] comment_str = { "#" };
 	String [] ignore_comment_str = { "#>" };
@@ -700,7 +682,7 @@ throws Exception {
 	String cmnt = "#>";
 	String format_0 = "%-12.12s%-24.24s%-12.12s%16.16s%8.2F%8d";
 	StateMod_WellRight right = null;
-	Vector v = new Vector(6);
+	List v = new Vector(6);
 
 		out.println(cmnt);
 		out.println(cmnt 
@@ -766,18 +748,18 @@ throws Exception {
 
 		String comment = null;	// Comment for data item
 		for (int i = 0; i < num; i++) {
-			right = (StateMod_WellRight)theRights.elementAt(i);
+			right = (StateMod_WellRight)theRights.get(i);
 			if (right == null) {
 				continue;
 			}
 
-			v.removeAllElements();
-			v.addElement(right.getID());
-			v.addElement(right.getName());
-			v.addElement(right.getCgoto());
-			v.addElement(right.getIrtem());
-			v.addElement(new Double(right.getDcrdivw()));
-			v.addElement(new Integer(right.getSwitch()));
+			v.clear();
+			v.add(right.getID());
+			v.add(right.getName());
+			v.add(right.getCgoto());
+			v.add(right.getIrtem());
+			v.add(new Double(right.getDcrdivw()));
+			v.add(new Integer(right.getSwitch()));
 			iline = StringUtil.formatString(v, format_0);
 			if ( WriteDataComments_boolean ) {
 				comment = right.getComment();
@@ -817,8 +799,7 @@ throws Exception {
 /**
 Writes a Vector of StateMod_WellRight objects to a list file.  A header is 
 printed to the top of the file, containing the commands used to generate the 
-file.  Any strings in the body of the file that contain the field delimiter 
-will be wrapped in "...".  
+file.  Any strings in the body of the file that contain the field delimiter will be wrapped in "...".  
 @param filename the name of the file to which the data will be written.
 @param delimiter the delimiter to use for separating field values.
 @param update whether to update an existing file, retaining the current 
@@ -826,15 +807,14 @@ header (true) or to create a new file with a new header.
 @param data the Vector of objects to write.  
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter,
-boolean update, Vector data) 
+public static void writeListFile(String filename, String delimiter, boolean update, List data) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
 		size = data.size();
 	}
 	
-	Vector fields = new Vector();
+	List fields = new Vector();
 	fields.add("ID");
 	fields.add("Name");
 	fields.add("StationID");
@@ -848,7 +828,7 @@ throws Exception {
 	int comp = StateMod_DataSet.COMP_WELL_RIGHTS;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.elementAt(i);
+		s = (String)fields.get(i);
 		names[i] = StateMod_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateMod_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -883,7 +863,7 @@ throws Exception {
 		out.println(buffer.toString());
 		
 		for (int i = 0; i < size; i++) {
-			right = (StateMod_WellRight)data.elementAt(i);
+			right = (StateMod_WellRight)data.get(i);
 			
 			line[0] = StringUtil.formatString(right.getID(), 
 				formats[0]).trim();

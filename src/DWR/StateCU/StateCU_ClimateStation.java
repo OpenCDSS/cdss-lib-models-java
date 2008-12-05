@@ -21,6 +21,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.IO.IOUtil;
@@ -57,15 +58,13 @@ public StateCU_ClimateStation()
 }
 
 /**
-Performs specific data checks and returns a list of data
-that failed the data checks.
+Performs specific data checks and returns a list of data that failed the data checks.
 @param count Index of the data vector currently being checked.
 @param dataset StateCU dataset currently in memory.
 @param props Extra properties to perform checks with.
 @return List of invalid data.
  */
-public String[] checkComponentData( int count, StateCU_DataSet dataset,
-PropList props ) {
+public String[] checkComponentData( int count, StateCU_DataSet dataset, PropList props ) {
 	// TODO KAT 2007-04-12 Add specific checks here ...
 	return null;
 }
@@ -136,16 +135,15 @@ public String getRegion2() {
 }
 
 /**
-Read the StateCU climate stations file and return as a Vector of
-CUClimateStation.
+Read the StateCU climate stations file and return as a Vector of CUClimateStation.
 @param filename filename containing CLI records.
 */
-public static Vector readStateCUFile ( String filename )
+public static List readStateCUFile ( String filename )
 throws IOException
 {	String rtn = "StateCU_ClimateStation.readStateCUFile";
 	String iline = null;
-	Vector v = new Vector ( 10 );
-	Vector sta_Vector = new Vector ( 100 );	// Data to return.
+	List v = new Vector ( 10 );
+	List sta_Vector = new Vector ( 100 );	// Data to return.
 	int format_0[] = {	StringUtil.TYPE_STRING,		// station id
 				StringUtil.TYPE_STRING,		// latitude
 				StringUtil.TYPE_STRING,		// elevation
@@ -166,9 +164,7 @@ throws IOException
 	StateCU_ClimateStation sta = null;
 	BufferedReader in = null;
 
-	Message.printStatus ( 1, rtn,
-		"Reading StateCU climate station file: \"" +
-		filename + "\"" );
+	Message.printStatus ( 1, rtn, "Reading StateCU climate station file: \"" + filename + "\"" );
 	// The following throws an IOException if the file cannot be opened...
 	in = new BufferedReader ( new FileReader (filename));
 	String string;
@@ -182,21 +178,21 @@ throws IOException
 		sta = new StateCU_ClimateStation();
 
 		StringUtil.fixedRead ( iline, format_0, format_0w, v );
-		sta.setID ( ((String)v.elementAt(0)).trim() ); 
-		string = ((String)v.elementAt(1)).trim();
+		sta.setID ( ((String)v.get(0)).trim() ); 
+		string = ((String)v.get(1)).trim();
 		if ( (string.length() != 0) && StringUtil.isDouble(string) ) {
 			sta.setLatitude ( StringUtil.atod(string) );
 		}
-		string = ((String)v.elementAt(2)).trim();
+		string = ((String)v.get(2)).trim();
 		if ( (string.length() != 0) && StringUtil.isDouble(string) ) {
 			sta.setElevation ( StringUtil.atod(string) );
 		}
-		sta.setRegion1 ( ((String)v.elementAt(3)).trim() ); 
-		sta.setRegion2 ( ((String)v.elementAt(4)).trim() ); 
-		sta.setName ( ((String)v.elementAt(5)).trim() ); 
+		sta.setRegion1 ( ((String)v.get(3)).trim() ); 
+		sta.setRegion2 ( ((String)v.get(4)).trim() ); 
+		sta.setName ( ((String)v.get(5)).trim() ); 
 
 		// add the StateCU_ClimateStation to the vector...
-		sta_Vector.addElement ( sta );
+		sta_Vector.add ( sta );
 	}
 	if ( in != null ) {
 		in.close();
@@ -265,7 +261,7 @@ if no comments are available.
 @exception IOException if there is an error writing the file.
 */
 public static void writeStateCUFile (	String filename_prev, String filename,
-					Vector data_Vector,
+		List data_Vector,
 					String [] new_comments )
 throws IOException
 {	String [] comment_str = { "#" };
@@ -290,9 +286,9 @@ throws IOException
 Write a Vector of StateCU_ClimateStation to an opened file.
 @param data_Vector A Vector of StateCU_ClimateStation to write.
 @param out output PrintWriter.
-@exceptoin IOException if an error occurs.
+@exception IOException if an error occurs.
 */
-private static void writeVector ( Vector data_Vector, PrintWriter out )
+private static void writeVector ( List data_Vector, PrintWriter out )
 throws IOException
 {	int i;
 	String iline;
@@ -300,7 +296,7 @@ throws IOException
 	// Missing data handled by formatting all as strings...
 	String format =
 	"%-12.12s%6.6s%9.9s  %-20.20s%-8.8s  %-24.24s";
-	Vector v = new Vector(6);	// Reuse for all output lines.
+	List v = new Vector(6);	// Reuse for all output lines.
 
 	out.println ( cmnt );
 	out.println ( cmnt + "  StateCU Climate Stations File" );
@@ -335,12 +331,12 @@ throws IOException
 	}
 	StateCU_ClimateStation sta = null;
 	for ( i=0; i<num; i++ ) {
-		sta = (StateCU_ClimateStation)data_Vector.elementAt(i);
+		sta = (StateCU_ClimateStation)data_Vector.get(i);
 		if ( sta == null ) {
 			continue;
 		}
 
-		v.removeAllElements();
+		v.clear();
 		v.add(sta._id);
 		// Latitude...
 		if ( StateCU_Util.isMissing(sta.__latitude) ) {
@@ -366,24 +362,24 @@ throws IOException
 /**
 Writes a Vector of StateCU_ClimateStation objects to a list file.  A header is 
 printed to the top of the file, containing the commands used to generate the 
-file.  Any strings in the body of the file that contain the field delimiter 
-will be wrapped in "...".  
+file.  Any strings in the body of the file that contain the field delimiter will be wrapped in "...".  
 @param filename the name of the file to which the data will be written.
 @param delimiter the delimiter to use for separating field values.
 @param update whether to update an existing file, retaining the current 
 header (true) or to create a new file with a new header.
+@param outputComments Comments to add to the header, usually the command file and database information.
 @param data the Vector of objects to write.  
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter,
-boolean update, Vector data) 
+public static void writeListFile(String filename, String delimiter, boolean update, List outputComments,
+		List data) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
 		size = data.size();
 	}
 	
-	Vector fields = new Vector();
+	List fields = new Vector();
 	fields.add("ID");
 	fields.add("Name");
 	fields.add("Latitude");
@@ -397,7 +393,7 @@ throws Exception {
 	int comp = StateCU_DataSet.COMP_CLIMATE_STATIONS;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.elementAt(i);
+		s = (String)fields.get(i);
 		names[i] = StateCU_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateCU_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -413,7 +409,7 @@ throws Exception {
 	String[] commentString = { "#" };
 	String[] ignoreCommentString = { "#>" };
 	String[] line = new String[fieldCount];
-	String[] newComments = null;
+	String[] newComments = StringUtil.toArray(outputComments);
 	StringBuffer buffer = new StringBuffer();
 	
 	try {	
@@ -432,20 +428,14 @@ throws Exception {
 		out.println(buffer.toString());
 		
 		for (int i = 0; i < size; i++) {
-			cli = (StateCU_ClimateStation)data.elementAt(i);
+			cli = (StateCU_ClimateStation)data.get(i);
 			
-			line[0] = StringUtil.formatString(cli.getID(), 
-				formats[0]).trim();
-			line[1] = StringUtil.formatString(cli.getName(), 
-				formats[1]).trim();
-			line[2] = StringUtil.formatString(cli.getLatitude(), 
-				formats[2]).trim();
-			line[3] = StringUtil.formatString(cli.getElevation(), 
-				formats[3]).trim();
-			line[4] = StringUtil.formatString(cli.getRegion1(), 
-				formats[4]).trim();
-			line[5] = StringUtil.formatString(cli.getRegion2(), 
-				formats[5]).trim();
+			line[0] = StringUtil.formatString(cli.getID(), formats[0]).trim();
+			line[1] = StringUtil.formatString(cli.getName(), formats[1]).trim();
+			line[2] = StringUtil.formatString(cli.getLatitude(), formats[2]).trim();
+			line[3] = StringUtil.formatString(cli.getElevation(), formats[3]).trim();
+			line[4] = StringUtil.formatString(cli.getRegion1(), formats[4]).trim();
+			line[5] = StringUtil.formatString(cli.getRegion2(), formats[5]).trim();
 
 			buffer = new StringBuffer();	
 			for (j = 0; j < fieldCount; j++) {
@@ -474,4 +464,4 @@ throws Exception {
 	}
 }
 
-} // End StateCU_ClimateStation
+}

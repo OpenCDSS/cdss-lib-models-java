@@ -42,6 +42,7 @@ import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JFileChooser;
@@ -165,11 +166,10 @@ by this class's constructor when the derived classes call super().  Must be
 passed to this class via the constructor in order for the Apply|Cancel|OK 
 buttons to function properly.
 */
-protected Vector _data = null;
+protected List _data = null;
 
 /**
-Constructor.  This constructor should only be called if initialize() will be
-called later.
+Constructor.  This constructor should only be called if initialize() will be called later.
 */
 public StateMod_Data_JFrame()
 throws Exception {
@@ -185,7 +185,7 @@ which case an empty worksheet is shown.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_Data_JFrame(Vector data, String titleString, boolean editable) 
+public StateMod_Data_JFrame(List data, String titleString, boolean editable) 
 throws Exception {
 	super();
 
@@ -218,7 +218,7 @@ public void actionPerformed(ActionEvent event) {
 			return;
 		}
 
-		Vector v = formatOutput(s[1], true, true);
+		List v = formatOutput(s[1], true, true);
 		try {
 			export(s[0], v);
 		}
@@ -306,7 +306,7 @@ Exports a Vector of strings to a file.
 @param strings a non-null Vector of Strings, each element of which will be
 another line in the file.
 */
-protected void export(String filename, Vector strings)
+protected void export(String filename, List strings)
 throws Exception {
 	String routine = "StateMod_Data_JFrame.export";
 	// First see if we can write the file given the security
@@ -342,7 +342,7 @@ throws Exception {
 		int size = strings.size();
 		for (int i = 0; i < size; i++) {
 			oStream.print(
-				strings.elementAt(i).toString() + linesep);
+				strings.get(i).toString() + linesep);
 		}
 		oStream.flush(); 
 		oStream.close(); 
@@ -377,9 +377,9 @@ surrounded by quotes.  If false, nothing will be surrounded by quotes.
 @return a Vector of delimited strings.  Each element in the Vector is one
 row in the worksheet.
 */
-protected Vector formatOutput(String delimiter, boolean trimFieldValue,
+protected List formatOutput(String delimiter, boolean trimFieldValue,
 boolean quotes) {
-	Vector v = new Vector();
+	List v = new Vector();
 
 	int rows = _worksheet.getRowCount();
 	int cols = _worksheet.getColumnCount();
@@ -476,9 +476,9 @@ protected String[] getFilenameAndFormat() {
 		SimpleFileFilter sff = (SimpleFileFilter)fc.getFileFilter();
 
 		// this will always return a one-element vector
-		Vector extensionV = sff.getFilters();
+		List extensionV = sff.getFilters();
 
-		String extension = (String)extensionV.elementAt(0);
+		String extension = (String)extensionV.get(0);
 		
 		String desc = sff.getShortDescription();
 		String delimiter = "\t";
@@ -518,7 +518,7 @@ which case an empty worksheet is shown.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public void initialize(Vector data, String titleString, boolean editable) 
+public void initialize(List data, String titleString, boolean editable) 
 throws Exception {
 	if (data == null) {
 		_data = new Vector();
@@ -551,10 +551,10 @@ public void print() {
 	if (index > -1) {
 		titleString = (titleString.substring(index + 1)).trim();
 	}
-	Vector v = formatOutput(" ", false, false);
+	List v = formatOutput(" ", false, false);
 	if (v.size() > 40) {
 		for (int i = v.size() - 1; i > 40; i--) {
-			v.removeElementAt(i);
+			v.remove(i);
 		}
 	}
 	String s = (new RTi.Util.GUI.TextResponseJDialog(this, 

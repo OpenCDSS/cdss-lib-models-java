@@ -60,7 +60,7 @@
 
 package DWR.StateMod;
 
-import java.util.Vector;
+import java.util.List;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 
@@ -119,7 +119,7 @@ Constructor.
 @param editable whether the table data can be modified or not.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_ReservoirRight_TableModel(Vector data, boolean editable)
+public StateMod_ReservoirRight_TableModel(List data, boolean editable)
 throws Exception {
 	this(data, editable, true);
 }
@@ -133,7 +133,7 @@ a single reservoir's right data.  This means that the reservoir ID field will
 not be shown.  If false then the reservoir right field will be included.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_ReservoirRight_TableModel(Vector data, boolean editable,
+public StateMod_ReservoirRight_TableModel(List data, boolean editable,
 boolean singleReservoir)
 throws Exception {
 	if (data == null) {
@@ -356,8 +356,7 @@ public int getRowCount() {
 }
 
 /**
-Returns the data that should be placed in the JTable
-at the given row and column.
+Returns the data that should be placed in the JTable at the given row and column.
 @param row the row for which to return data.
 @param col the column for which to return data.
 @return the data that should be placed in the JTable at the given row and col.
@@ -367,8 +366,7 @@ public Object getValueAt(int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	StateMod_ReservoirRight rr 
-		= (StateMod_ReservoirRight)_data.elementAt(row);
+	StateMod_ReservoirRight rr = (StateMod_ReservoirRight)_data.get(row);
 
 	// necessary for table models that display rights for 1+ reservoirs,
 	// so that the -1st column (ID) can also be displayed.  By doing it
@@ -427,8 +425,7 @@ public void setValueAt(Object value, int row, int col) {
 	}
 	double dval;
 	int ival;
-	StateMod_ReservoirRight rr 
-		= (StateMod_ReservoirRight)_data.elementAt(row);
+	StateMod_ReservoirRight rr = (StateMod_ReservoirRight)_data.get(row);
 
 	// necessary for table models that display rights for 1+ reservoirs,
 	// so that the -1st column (ID) can also be displayed.  By doing it

@@ -23,6 +23,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JFrame;
@@ -78,7 +79,7 @@ private StateMod_DataSet_WindowManager __dataset_wm;
 
 private InputFilter_JPanel __input_filter_diversion_JPanel = null;
 
-private Vector __matches_Vector = null;	// The list of matching data.
+private List __matches_Vector = null;	// The list of matching data.
 
 /** 
 Constructor.
@@ -223,7 +224,7 @@ private void doQuery ()
 		input_string = StateMod_Util.MISSING_STRING;
 		comp = __dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_DIVERSION_STATIONS);
-		Vector dds_Vector = (Vector)comp.getData ();
+		List dds_Vector = (List)comp.getData ();
 		size = 0;
 		if ( dds_Vector != null ) {
 			size = dds_Vector.size();
@@ -363,7 +364,7 @@ private void doQuery ()
 			" " + do_DemandSource );
 			*/
 			for ( i = 0; i < size; i++ ) {
-				dds=(StateMod_Diversion)dds_Vector.elementAt(i);
+				dds=(StateMod_Diversion)dds_Vector.get(i);
 				// Get the specific data to compare...
 				if ( do_ID ) {
 					input_string = dds.getID();
@@ -457,8 +458,8 @@ private void doQuery ()
 				if ( matches[i] ) {
 					// The diversion station matches so add
 					// to the list...
-					__matches_Vector.addElement(
-						dds_Vector.elementAt(i) );
+					__matches_Vector.add(
+						dds_Vector.get(i) );
 				}
 			}
 		}

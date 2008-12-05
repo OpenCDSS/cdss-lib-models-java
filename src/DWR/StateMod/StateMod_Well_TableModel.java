@@ -31,7 +31,7 @@
 
 package DWR.StateMod;
 
-import java.util.Vector;
+import java.util.List;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 
@@ -91,7 +91,7 @@ Constructor.
 @param editable whether the table data is editable or not
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_Well_TableModel(Vector data, boolean editable)
+public StateMod_Well_TableModel(List data, boolean editable)
 throws Exception {	
 	this(data, editable, true);
 }
@@ -100,11 +100,10 @@ throws Exception {
 Constructor.  
 @param data the well station data that will be displayed in the table.
 @param editable whether the table data is editable or not
-@param compactForm whether to only show the ID and name columns (true) or all
-data columns.
+@param compactForm whether to only show the ID and name columns (true) or all data columns.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_Well_TableModel(Vector data, boolean editable, 
+public StateMod_Well_TableModel(List data, boolean editable, 
 boolean compactForm)
 throws Exception {	
 	if (data == null) {
@@ -346,7 +345,7 @@ public Object getValueAt(int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	StateMod_Well well = (StateMod_Well)_data.elementAt(row);
+	StateMod_Well well = (StateMod_Well)_data.get(row);
 
 	switch (col) {
 		case COL_ID:	
@@ -412,7 +411,7 @@ public void setValueAt(Object value, int row, int col)
 		row = _sortOrder[row];
 	}
 
-	StateMod_Well smw = (StateMod_Well)_data.elementAt(row);
+	StateMod_Well smw = (StateMod_Well)_data.get(row);
 
 	switch (col) {
 		case COL_ID:

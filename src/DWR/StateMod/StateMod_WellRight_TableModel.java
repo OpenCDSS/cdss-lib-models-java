@@ -24,7 +24,7 @@
 
 package DWR.StateMod;
 
-import java.util.Vector;
+import java.util.List;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 import RTi.Util.Message.Message;
@@ -78,7 +78,7 @@ a single well's right data.  This means that the well ID field will
 not be shown.  If false then the well right field will be included.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_WellRight_TableModel(Vector data, boolean editable,
+public StateMod_WellRight_TableModel(List data, boolean editable,
 boolean singleWell)
 throws Exception {
 	if (data == null) {
@@ -98,24 +98,6 @@ throws Exception {
 		// additional one is necessary.
 		__COLUMNS++;
 	}
-}
-
-/**
-Constructor.  
-@param dataset the dataset in which the data are displayed
-@param data the data that will be displayed in the table.
-@param editable whether the table data is editable or not
-@param singleWell if true, then the table model is set up to only display
-a single well's right data.  This means that the well ID field will
-not be shown.  If false then the well right field will be included.
-@throws Exception if an invalid data or dmi was passed in.
-@deprecated use the other constructor.  This will be phased out soon 
-(2005-01-25)
-*/
-public StateMod_WellRight_TableModel(StateMod_DataSet dataset, 
-Vector data, boolean editable, boolean singleWell)
-throws Exception {	
-	this(data, editable, singleWell);
 }
 
 /**
@@ -289,8 +271,7 @@ public int getRowCount() {
 }
 
 /**
-Returns the data that should be placed in the JTable
-at the given row and column.
+Returns the data that should be placed in the JTable at the given row and column.
 @param row the row for which to return data.
 @param col the column for which to return data.
 @return the data that should be placed in the JTable at the given row and col.
@@ -300,7 +281,7 @@ public Object getValueAt(int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	StateMod_WellRight wellr = (StateMod_WellRight)_data.elementAt(row);
+	StateMod_WellRight wellr = (StateMod_WellRight)_data.get(row);
 
 	// necessary for table models that display rights for 1+ wells so that
 	// the -1st column (ID) can also be displayed.  By doing it this way,
@@ -360,7 +341,7 @@ public void setValueAt(Object value, int row, int col) {
 	double dval;
 	int ival;
 
-	StateMod_WellRight wellr = (StateMod_WellRight)_data.elementAt(row);
+	StateMod_WellRight wellr = (StateMod_WellRight)_data.get(row);
 
 	// necessary for table models that display rights for 1+ wells so that
 	// the -1st column (ID) can also be displayed.  By doing it this way,

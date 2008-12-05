@@ -15,7 +15,7 @@ package DWR.StateMod;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
-import java.util.Vector;
+import java.util.List;
 
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -44,8 +44,7 @@ private boolean __isDepletion = false;
 /**
 The table model for the worksheet in the GUI.
 */
-private StateMod_Well_DelayTableAssignment_Data_TableModel __tableModel 
-	= null;
+private StateMod_Well_DelayTableAssignment_Data_TableModel __tableModel = null;
 
 /**
 Constructor. 
@@ -56,7 +55,7 @@ the data can be edited, if false they can not.
 @param isDepletion whether the data are depletions or not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_Well_DelayTableAssignment_Data_JFrame(Vector data, 
+public StateMod_Well_DelayTableAssignment_Data_JFrame(List data, 
 String titleString, boolean editable, boolean isDepletion)
 throws Exception {
 	super();
@@ -81,7 +80,7 @@ throws Exception {
 	
 	setSize(410, getHeight());
 	__tableModel = (StateMod_Well_DelayTableAssignment_Data_TableModel)
-		_worksheet.getTableModel();
+	_worksheet.getTableModel();
 	__tableModel.setJWorksheet(_worksheet);
 }
 
@@ -99,23 +98,20 @@ public void actionPerformed(ActionEvent event) {
 }
 
 /**
-Called when the Apply button is pressed. This commits any changes to the data
-objects.
+Called when the Apply button is pressed. This commits any changes to the data objects.
 */
 protected void apply() {
 	StateMod_Well well = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		well = (StateMod_Well)
-			_data.elementAt(i);
+		well = (StateMod_Well)_data.get(i);
 		well.createBackup();
 	}
 }
 
 /**
 Creates a JScrollWorksheet for the current data and returns it.
-@return a JScrollWorksheet containing the data Vector passed in to the 
-constructor.
+@return a JScrollWorksheet containing the data Vector passed in to the constructor.
 */
 protected JScrollWorksheet buildJScrollWorksheet() 
 throws Exception {
@@ -123,8 +119,7 @@ throws Exception {
 		= new StateMod_Well_DelayTableAssignment_Data_TableModel(
 		_data, _editable, __isDepletion);
 	StateMod_Well_DelayTableAssignment_Data_CellRenderer cellRenderer 
-		= new StateMod_Well_DelayTableAssignment_Data_CellRenderer(
-		tableModel);
+		= new StateMod_Well_DelayTableAssignment_Data_CellRenderer(	tableModel);
 
 	// Note (JTS - 2005-03-31)
 	// while it would seem the right thing to do would be to here assign
@@ -139,27 +134,25 @@ throws Exception {
 }
 
 /**
-Called when the cancel button is pressed.  This discards any changes made to 
-the data objects.
+Called when the cancel button is pressed.  This discards any changes made to the data objects.
 */
 protected void cancel() {
 	StateMod_Well well = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		well = (StateMod_Well)_data.elementAt(i);
+		well = (StateMod_Well)_data.get(i);
 		well.restoreOriginal();
 	}
 }
 
 /**
-Creates backups of all the data objects in the Vector so that changes can 
-later be cancelled if necessary.
+Creates backups of all the data objects in the Vector so that changes can later be cancelled if necessary.
 */
 protected void createDataBackup() {
 	StateMod_Well well = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		well = (StateMod_Well)_data.elementAt(i);
+		well = (StateMod_Well)_data.get(i);
 		well.createBackup();
 	}
 }

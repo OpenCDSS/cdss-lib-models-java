@@ -15,6 +15,7 @@
 
 package DWR.StateMod;
 
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
@@ -52,8 +53,7 @@ Constructor.
 @param data the data that will be displayed in the table.
 @param editable whether the table data is editable or not
 */
-public StateMod_InstreamFlowRight_Data_TableModel(Vector data, 
-boolean editable) {
+public StateMod_InstreamFlowRight_Data_TableModel(List data, boolean editable) {
 	if (data == null) {
 		_data = new Vector();
 	}
@@ -112,8 +112,7 @@ public String getColumnName(int columnIndex) {
 Returns the format that the specified column should be displayed in when
 the table is being displayed in the given table format. 
 @param column column for which to return the format.
-@return the format (as used by StringUtil.formatString() in which to display the
-column.
+@return the format (as used by StringUtil.formatString() in which to display the column.
 */
 public String getFormat(int column) {
 	switch (column) {
@@ -167,7 +166,7 @@ public Object getValueAt( int row, int col ) {
 	}
 
 	StateMod_InstreamFlowRight infr = 
-		       (StateMod_InstreamFlowRight)_data.elementAt(row);
+		       (StateMod_InstreamFlowRight)_data.get(row);
 	switch (col) {
 		case COL_RIGHT_ID:	return infr.getID();
 		case COL_RIGHT_NAME:	return infr.getName();
@@ -227,8 +226,7 @@ public void setValueAt(Object value, int row, int col)
 	}
 	double dval;
 	int ival;
-	StateMod_InstreamFlowRight ifr =
-		(StateMod_InstreamFlowRight)_data.elementAt(row);
+	StateMod_InstreamFlowRight ifr = (StateMod_InstreamFlowRight)_data.get(row);
 
 	switch (col) {
 		case COL_RIGHT_ID:

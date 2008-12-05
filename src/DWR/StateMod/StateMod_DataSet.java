@@ -206,6 +206,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.StringTokenizer;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JFrame;
@@ -295,7 +296,7 @@ public static final int SM_GAINS = 2;
 public final int WAIT = 0;
 public final int READY = 1;
 
-private Vector __processListeners = null;
+private List __processListeners = null;
 private boolean __tsAreRead = false;		// Should time series be read
 						// when reading the data set?
 private boolean __is_free_format = false;	// Is the response file free
@@ -1344,7 +1345,7 @@ public StateMod_DataSet ( StateMod_DataSet dataset, boolean deep_copy )
 {	this ();	// To initialize a new instance.  Next - clear out all
 			// the components.  Otherwise they are added again!
 	String routine = "StateMod_DataSet";
-	getComponents().removeAllElements();
+	getComponents().clear();
 	setDataSetDirectory(dataset.getDataSetDirectory());
 	// Internal data...
 	__tsAreRead = dataset.__tsAreRead;
@@ -1386,14 +1387,14 @@ public StateMod_DataSet ( StateMod_DataSet dataset, boolean deep_copy )
 
 	// Add each component, doing a shallow copy...
 
-	Vector data_Vector = dataset.getComponents();
+	List data_Vector = dataset.getComponents();
 	int size = 0;
 	if (data_Vector != null) {
 		size = data_Vector.size();
 	}
 	DataSetComponent comp, comp2, newcomp = null, newcomp2;
 	for ( int i = 0; i < size; i++ ) {
-		comp = (DataSetComponent)data_Vector.elementAt(i);
+		comp = (DataSetComponent)data_Vector.get(i);
 		if ( comp == null ) {
 			addComponent ( null );
 		}
@@ -1410,14 +1411,14 @@ public StateMod_DataSet ( StateMod_DataSet dataset, boolean deep_copy )
 			}
 			if ( comp.isGroup() ) {
 				// Need to add components to the group...
-				Vector data2 = (Vector)comp.getData();
+				List data2 = (List)comp.getData();
 				int size2 = 0;
 				if ( data2 != null ) {
 					size2 = data2.size();
 				}
 				for ( int j = 0; j < size2; j++ ) {
 					comp2 = (DataSetComponent)
-					data2.elementAt(j);
+					data2.get(j);
 					try {	newcomp2 = new DataSetComponent(
 							comp2, this, false );
 						// Need to manually set...
@@ -1453,7 +1454,7 @@ Check a component's data, using other available components as appropriate.
 be used to control whether results are returned, and in what format.
 @return the Vector of check results messages.
 */
-public Vector checkComponentData ( int comp_type, PropList props )
+public List checkComponentData ( int comp_type, PropList props )
 {	if ( comp_type == COMP_WELL_STATIONS ) {
 		return checkComponentData_WellStations ( props );
 	}
@@ -1473,8 +1474,8 @@ Helper method to check well rights component data.  The following are checked:
 	This requires that the dataset include well stations.<li>
 </ol>
 */
-private Vector checkComponentData_WellRights ( PropList props )
-{	Vector message_list = new Vector();
+private List checkComponentData_WellRights ( PropList props )
+{	List message_list = new Vector();
 
 	// Make sure that there is at least one well right for each well
 	// station...
@@ -1483,8 +1484,8 @@ private Vector checkComponentData_WellRights ( PropList props )
 		COMP_WELL_STATIONS );
 	DataSetComponent wer_comp = getComponentForComponentType (
 		COMP_WELL_RIGHTS );
-	Vector wes_Vector = (Vector)wes_comp.getData();
-	Vector wer_Vector = (Vector)wer_comp.getData();
+	List wes_Vector = (List)wes_comp.getData();
+	List wer_Vector = (List)wer_comp.getData();
 	int size = 0;
 	if ( wes_Vector != null ) {
 		size = wes_Vector.size();
@@ -1498,13 +1499,13 @@ private Vector checkComponentData_WellRights ( PropList props )
 	double wes_well_parcel_area = 0.0;
 					// Area of parcels with wells for well
 					// station.
-	Vector parcel_Vector;		// List of parcels for well station.
+	List parcel_Vector;		// List of parcels for well station.
 	int count = 0;			// Count of well stations with
 					// potential problems.
 	String id_i = null;
-	Vector rights = null;
+	List rights = null;
 	for ( int i = 0; i < size; i++ ) {
-		wes_i = (StateMod_Well)wes_Vector.elementAt(i);
+		wes_i = (StateMod_Well)wes_Vector.get(i);
 		if ( wes_i == null ) {
 			continue;
 		}
@@ -1530,7 +1531,7 @@ private Vector checkComponentData_WellRights ( PropList props )
 				wes_parcel_count = parcel_Vector.size();
 				for ( int j = 0; j < wes_parcel_count; j++ ) {
 					parcel = (StateMod_Parcel)
-						parcel_Vector.elementAt(j);
+						parcel_Vector.get(j);
 					if ( parcel.getArea() > 0.0 ) {
 						wes_parcel_area +=
 							parcel.getArea();
@@ -1545,7 +1546,7 @@ private Vector checkComponentData_WellRights ( PropList props )
 			}
 			// Format suitable for output in a list that
 			// can be copied to a spreadsheet or table.
-			message_list.addElement (
+			message_list.add (
 				StringUtil.formatString(count,"%4d") +
 				", " +
 				StringUtil.formatString(id_i,"%-12.12s") +
@@ -1569,30 +1570,26 @@ private Vector checkComponentData_WellRights ( PropList props )
 	if ( message_list.size() > 0 ) {
 		int line = 0;		// Line number for output (zero index).
 		// Prepend introduction to the specific warnings...
-		message_list.insertElementAt ( "", line++ );
-		message_list.insertElementAt (
+		message_list.add ( line++, "" );
+		message_list.add ( line++,
 		"The following well stations (" + count + " out of " + size +
 		") have no water rights (no irrigated parcels served by " +
-		"wells).", line++ );
-		message_list.insertElementAt (
-		"Data may be OK if the station has no wells.", line++ );
-		message_list.insertElementAt ( "", line++ );
-		message_list.insertElementAt (
+		"wells)." );
+		message_list.add ( line++,
+		"Data may be OK if the station has no wells." );
+		message_list.add ( line++, "" );
+		message_list.add ( line++,
 		"Parcel count and area in the following table are available " +
-		"only if well rights are read from HydroBase.", line++ );
-		message_list.insertElementAt ( "", line++ );
-		message_list.insertElementAt (
-		"    ,             ,           , # PARCELS, TOTAL      , # PARCELS, PARCELS    , WELL",
-		line++ );
-		message_list.insertElementAt (
-		"    , WELL        , COLLECTION, FOR WELL , PARCEL     , WITH     , WITH WELLS , STATION",
-		line++ );
-		message_list.insertElementAt (
-		"NUM., STATION ID  , TYPE      , STATION  , AREA (ACRE), WELLS    , AREA (ACRE), NAME",
-		line++ );
-		message_list.insertElementAt (
-		"----,-------------,-----------,----------,------------,----------,------------,-------------------------",
-		line++ );
+		"only if well rights are read from HydroBase." );
+		message_list.add ( line++, "" );
+		message_list.add ( line++,
+		"    ,             ,           , # PARCELS, TOTAL      , # PARCELS, PARCELS    , WELL" );
+		message_list.add (line++,
+		"    , WELL        , COLLECTION, FOR WELL , PARCEL     , WITH     , WITH WELLS , STATION" );
+		message_list.add (line++,
+		"NUM., STATION ID  , TYPE      , STATION  , AREA (ACRE), WELLS    , AREA (ACRE), NAME" );
+		message_list.add (line++,
+		"----,-------------,-----------,----------,------------,----------,------------,-------------------------" );
 	}
 
 	// Check to make sure the sum of well rights equals the well station
@@ -1610,13 +1607,13 @@ private Vector checkComponentData_WellRights ( PropList props )
 	int pos = 0;			// Position in well station vector
 	String wes_name = null;		// Well station name
 	String wes_id = null;		// Well station ID
-	Vector message_list2 = new Vector();
+	List message_list2 = new Vector();
 	String wer_id = null;		// Well right identifier
 	count = 0;
 	double decree = 0.0;
 	StateMod_WellRight wer_i = null;
 	for ( int i = 0; i < size; i++ ) {
-		wer_i = (StateMod_WellRight)wer_Vector.elementAt(i);
+		wer_i = (StateMod_WellRight)wer_Vector.get(i);
 		wer_id = wer_i.getID();
 		// Format to two digits to match StateMod output...
 		decree =StringUtil.atod(
@@ -1629,7 +1626,7 @@ private Vector checkComponentData_WellRights ( PropList props )
 				wer_i.getCgoto() );
 			wes_i = null;
 			if ( pos >= 0 ) {
-				wes_i = (StateMod_Well)wes_Vector.elementAt(pos);
+				wes_i = (StateMod_Well)wes_Vector.get(pos);
 			}
 			wes_name = "";
 			if ( wes_i != null ) {
@@ -1638,7 +1635,7 @@ private Vector checkComponentData_WellRights ( PropList props )
 			}
 			// Format suitable for output in a list that
 			// can be copied to a spreadsheet or table.
-			message_list2.addElement (
+			message_list2.add (
 				StringUtil.formatString(count,"%4d") +
 				", " +
 				StringUtil.formatString(wer_id,"%-12.12s") +
@@ -1649,19 +1646,19 @@ private Vector checkComponentData_WellRights ( PropList props )
 	}
 	if ( message_list2.size() > 0 ) {
 		// Prepend introduction to the specific warnings...
-		message_list2.insertElementAt ( "", 0 );
-		message_list2.insertElementAt (
+		message_list2.add ( 0, "" );
+		message_list2.add ( 1,
 		"The following well rights (" + count + " out of " + size +
-		") have no decree (checked to StateMod file .XX precision).",1);
-		message_list2.insertElementAt (
-		"Well yield data may not be available.", 2 );
-		message_list2.insertElementAt ( "", 3 );
-		message_list2.insertElementAt (
-		"    , WELL        , WELL        ,", 4);
-		message_list2.insertElementAt (
-		"NUM., RIGHT ID    , STATION ID  , WELL NAME", 5);
-		message_list2.insertElementAt (
-		"----,-------------,-------------,------------------------", 5);
+		") have no decree (checked to StateMod file .XX precision).");
+		message_list2.add ( 2,
+		"Well yield data may not be available." );
+		message_list2.add ( 3, "" );
+		message_list2.add ( 4,
+		"    , WELL        , WELL        ,");
+		message_list2.add ( 5,
+		"NUM., RIGHT ID    , STATION ID  , WELL NAME" );
+		message_list2.add ( 6,
+		"----,-------------,-------------,------------------------");
 
 		StringUtil.addListToStringList ( message_list, message_list2 );
 	}
@@ -1678,15 +1675,15 @@ by formatting the capacity and decree sum to .NN precision.
 @param message_list Vector of string to be printed to the check file, which will
 be added to in this method.
 */
-void checkComponentData_WellRights_Capacity ( Vector message_list )
-{	Vector message_list2 = new Vector();	// New messages generated by
+void checkComponentData_WellRights_Capacity ( List message_list )
+{	List message_list2 = new Vector();	// New messages generated by
 						// this method.
 	DataSetComponent wes_comp = getComponentForComponentType (
 		COMP_WELL_STATIONS );
 	DataSetComponent wer_comp = getComponentForComponentType (
 		COMP_WELL_RIGHTS );
-	Vector wes_Vector = (Vector)wes_comp.getData();
-	Vector wer_Vector = (Vector)wer_comp.getData();
+	List wes_Vector = (List)wes_comp.getData();
+	List wer_Vector = (List)wer_comp.getData();
 	StateMod_WellRight wer_i = null;
 	StateMod_Well wes_i = null;
 	int size = 0;
@@ -1699,9 +1696,9 @@ void checkComponentData_WellRights_Capacity ( Vector message_list )
 	int onoff = 0;		// On/off switch for right
 	int size_rights = 0;
 	String id_i = null;
-	Vector rights = null;
+	List rights = null;
 	for ( int i = 0; i < size; i++ ) {
-		wes_i = (StateMod_Well)wes_Vector.elementAt(i);
+		wes_i = (StateMod_Well)wes_Vector.get(i);
 		if ( wes_i == null ) {
 			continue;
 		}
@@ -1720,7 +1717,7 @@ void checkComponentData_WellRights_Capacity ( Vector message_list )
 		// capacity)...
 		decree_sum = 0.0;
 		for ( int iright = 0; iright < size_rights; iright++ ) {
-			wer_i = (StateMod_WellRight)rights.elementAt(iright);
+			wer_i = (StateMod_WellRight)rights.get(iright);
 			decree = wer_i.getDcrdivw();
 			onoff = wer_i.getSwitch();
 			if ( decree < 0.0 ) {
@@ -1742,7 +1739,7 @@ void checkComponentData_WellRights_Capacity ( Vector message_list )
 			StringUtil.formatString(wes_i.getDivcapw(),"%.2f")) ) {
 			// Format suitable for output in a list that
 			// can be copied to a spreadsheet or table.
-			message_list2.addElement (
+			message_list2.add (
 				StringUtil.formatString(++count,"%4d") +
 				", " +
 				StringUtil.formatString(id_i,"%-12.12s") +
@@ -1762,31 +1759,27 @@ void checkComponentData_WellRights_Capacity ( Vector message_list )
 	if ( message_list2.size() > 0 ) {
 		// Prepend introduction to the specific warnings...
 		int line = 0;
-		message_list2.insertElementAt ( "", line++ );
-		message_list2.insertElementAt (
+		message_list2.add ( line++, ""  );
+		message_list2.add ( line++,
 		"The following well stations (" + count + " out of " + size +
 		") have capacity different from the sum of well rights for " +
-		"the station.", line++ );
-		message_list2.insertElementAt (
+		"the station." );
+		message_list2.add ( line++,
 		"Check that the StateDMI command parameters used to process " +
-		"well stations and rights are consistent.", line++ );
-		message_list2.insertElementAt ( "", line++ );
-		message_list2.insertElementAt (
+		"well stations and rights are consistent." );
+		message_list2.add ( line++, "" );
+		message_list2.add ( line++,
 		"Parcel count and area in the following table are available " +
-		"only if well rights are read from HydroBase.", line++ );
-		message_list2.insertElementAt ( "", line++ );
-		message_list2.insertElementAt (
-		"    ,             ,           , WELL    , SUM OF  , NUMBER , WELL",
-		line++ );
-		message_list2.insertElementAt (
-		"    , WELL        , COLLECTION, CAPACITY, RIGHTS  , OF     , STATION",
-		line++ );
-		message_list2.insertElementAt (
-		"NUM., STATION ID  , TYPE      , (CFS)   , (CFS)   , RIGHTS , NAME",
-		line++ );
-		message_list2.insertElementAt (
-		"----,-------------,-----------,---------,---------,--------,-------------------------",
-		line++ );
+		"only if well rights are read from HydroBase." );
+		message_list2.add ( line++, "" );
+		message_list2.add ( line++,
+		"    ,             ,           , WELL    , SUM OF  , NUMBER , WELL" );
+		message_list2.add ( line++,
+		"    , WELL        , COLLECTION, CAPACITY, RIGHTS  , OF     , STATION" );
+		message_list2.add ( line++,
+		"NUM., STATION ID  , TYPE      , (CFS)   , (CFS)   , RIGHTS , NAME" );
+		message_list2.add ( line++,
+		"----,-------------,-----------,---------,---------,--------,-------------------------" );
 		// Add to the main message list...
 		StringUtil.addListToStringList ( message_list, message_list2 );
 	}
@@ -1800,12 +1793,12 @@ Helper method to check well stations component data.  The following are checked:
 	that well rights are also available in memory).
 </ol>
 */
-private Vector checkComponentData_WellStations ( PropList props )
-{	Vector message_list = new Vector();
+private List checkComponentData_WellStations ( PropList props )
+{	List message_list = new Vector();
 
 	DataSetComponent wes_comp = getComponentForComponentType (
 		COMP_WELL_STATIONS );
-	Vector wes_Vector = (Vector)wes_comp.getData();
+	List wes_Vector = (List)wes_comp.getData();
 	int size = 0;
 	if ( wes_Vector != null ) {
 		size = wes_Vector.size();
@@ -1824,11 +1817,11 @@ private Vector checkComponentData_WellStations ( PropList props )
 	double wes_well_parcel_area = 0.0;
 					// Area of parcels with wells for well
 					// station.
-	Vector parcel_Vector;		// List of parcels for well station.
+	List parcel_Vector;		// List of parcels for well station.
 	int count = 0;			// Count of well stations with
 					// potential problems.
 	for ( int i = 0; i < size; i++ ) {
-		wes_i = (StateMod_Well)wes_Vector.elementAt(i);
+		wes_i = (StateMod_Well)wes_Vector.get(i);
 		id_i = wes_i.getID();
 		if ( wes_i.getAreaw() <= 0.0 ) {
 			++count;
@@ -1842,7 +1835,7 @@ private Vector checkComponentData_WellStations ( PropList props )
 				wes_parcel_count = parcel_Vector.size();
 				for ( int j = 0; j < wes_parcel_count; j++ ) {
 					parcel = (StateMod_Parcel)
-						parcel_Vector.elementAt(j);
+						parcel_Vector.get(j);
 					if ( parcel.getArea() > 0.0 ) {
 						wes_parcel_area +=
 							parcel.getArea();
@@ -1857,7 +1850,7 @@ private Vector checkComponentData_WellStations ( PropList props )
 			}
 			// Format suitable for output in a list that
 			// can be copied to a spreadsheet or table.
-			message_list.addElement (
+			message_list.add (
 				StringUtil.formatString(count,"%4d") +
 				", " +
 				StringUtil.formatString(id_i,"%-12.12s") +
@@ -1880,29 +1873,25 @@ private Vector checkComponentData_WellStations ( PropList props )
 	}
 	if ( message_list.size() > 0 ) {
 		// Prepend introduction to the specific warnings...
-		message_list.insertElementAt ( "", 0 );
-		message_list.insertElementAt (
+		message_list.add ( 0, "" );
+		message_list.add ( 1,
 		"The following well stations (" + count + " out of " + size +
-		") have no irrigated parcels served by wells.", 1 );
-		message_list.insertElementAt (
-		"Data may be OK if the station is an M&I or has no wells.", 2 );
-		message_list.insertElementAt ( "", 3 );
-		message_list.insertElementAt (
+		") have no irrigated parcels served by wells." );
+		message_list.add ( 2,
+		"Data may be OK if the station is an M&I or has no wells." );
+		message_list.add ( 3, "" );
+		message_list.add ( 4,
 		"Parcel count and area in the following table are available " +
-		"only if well stations are read from HydroBase.", 4 );
-		message_list.insertElementAt ( "", 5 );
-		message_list.insertElementAt (
-		"    ,             ,           , # PARCELS, TOTAL      , # PARCELS, PARCELS    , WELL",
-		6 );
-		message_list.insertElementAt (
-		"    , WELL        , COLLECTION, FOR WELL , PARCEL     , WITH     , WITH WELLS , STATION",
-		7 );
-		message_list.insertElementAt (
-		"NUM., STATION ID  , TYPE      , STATION  , AREA (ACRE), WELLS    , AREA (ACRE), NAME",
-		8 );
-		message_list.insertElementAt (
-		"----,-------------,-----------,----------,------------,----------,------------,-------------------------",
-		9 );
+		"only if well stations are read from HydroBase." );
+		message_list.add ( 5, "" );
+		message_list.add ( 6,
+		"    ,             ,           , # PARCELS, TOTAL      , # PARCELS, PARCELS    , WELL" );
+		message_list.add ( 7,
+		"    , WELL        , COLLECTION, FOR WELL , PARCEL     , WITH     , WITH WELLS , STATION" );
+		message_list.add ( 8,
+		"NUM., STATION ID  , TYPE      , STATION  , AREA (ACRE), WELLS    , AREA (ACRE), NAME" );
+		message_list.add ( 9,
+		"----,-------------,-----------,----------,------------,----------,------------,-------------------------" );
 	}
 
 	// Check to make sure the sum of well rights equals the well station
@@ -1931,9 +1920,9 @@ parts for every file into tokens based on the path separator and check for:
 messages will be printed to the log file only, depending on the global warning
 level.
 */
-public boolean checkComponentFilenames ( Vector file_names, int warning_level )
+public boolean checkComponentFilenames ( List file_names, int warning_level )
 {	// For now check each part of all, even though the path is reused...
-	Vector parts = null;
+	List parts = null;
 	String fullname = null;
 	StringBuffer warnings = new StringBuffer();
 	String part = null;
@@ -1950,7 +1939,7 @@ public boolean checkComponentFilenames ( Vector file_names, int warning_level )
 		// really careful about knowing the positions of specific files
 		// in the list.  When Ray Bennett starts using a PropList it
 		// should be a lot easier...
-		file_name = (String)file_names.elementAt(i);
+		file_name = (String)file_names.get(i);
 		//if ( == StateMod_DataSet.COMP_GEOVIEW) {}
 		if (	StringUtil.endsWithIgnoreCase(file_name,".gvp") ||
 			StringUtil.endsWithIgnoreCase(file_name,".net") ) {
@@ -1971,7 +1960,7 @@ public boolean checkComponentFilenames ( Vector file_names, int warning_level )
 		}
 		
 		for (j = 0; j < size; j++) {
-			part = (String)parts.elementAt(j);
+			part = (String)parts.get(j);
 			if (part == null) {
 				continue;
 			}
@@ -2559,42 +2548,42 @@ Return a concatenation of the data component data check results.
 The results are listed in the order of data components.
 @return a concatenation of the data component data check results.
 */
-public Vector getDataCheckResults ()
+public List getDataCheckResults ()
 {	// Loop through the components and append to the overall data check
 	// results...
-	Vector check_Vector = new Vector();
-	Vector data_Vector = getComponents();
+	List check_Vector = new Vector();
+	List data_Vector = getComponents();
 	int size = 0;
 	if ( data_Vector != null ) {
 		size = data_Vector.size();
 	}
 	DataSetComponent comp;
-	Vector check_Vector2 = null;	// Data check comments from a component
+	List check_Vector2 = null;	// Data check comments from a component
 	for ( int i = 0; i < size; i++ ) {
-		comp = (DataSetComponent)data_Vector.elementAt(i);
+		comp = (DataSetComponent)data_Vector.get(i);
 		if ( comp.isGroup() ) {
 			// Process components within the group...
-			Vector data2 = (Vector)comp.getData();
+			List data2 = (List)comp.getData();
 			int size2 = 0;
 			if ( data2 != null ) {
 				size2 = data2.size();
 			}
 			for ( int j = 0; j < size2; j++ ) {
-				comp = (DataSetComponent)data2.elementAt(j);
+				comp = (DataSetComponent)data2.get(j);
 				// Append the data check results, if
 				// available...
 				check_Vector2 = comp.getDataCheckResults();
 				if (	(check_Vector2 != null) &&
 					(check_Vector2.size() > 0) ) {
-					check_Vector.addElement ( "" );
-					check_Vector.addElement (
+					check_Vector.add ( "" );
+					check_Vector.add (
 					"====================================" +
 					"====================================" +
 					"========" );
-					check_Vector.addElement (
+					check_Vector.add (
 						"DATA CHECK RESULTS FOR: " +
 						comp.getComponentName() );
-					check_Vector.addElement ( "" );
+					check_Vector.add ( "" );
 					check_Vector =
 						StringUtil.addListToStringList (
 						check_Vector,
@@ -2604,14 +2593,13 @@ public Vector getDataCheckResults ()
 		}
 	}
 	if ( check_Vector.size() > 0 ) {
-		check_Vector.insertElementAt ( "", 0 );
-		check_Vector.insertElementAt ( "Data check results are " +
-		"listed for output products that have potential data issues.",
-		1);
-		check_Vector.insertElementAt (
+		check_Vector.add ( 0, "" );
+		check_Vector.add ( 1, "Data check results are " +
+		"listed for output products that have potential data issues." );
+		check_Vector.add ( 2,
 		"The following data check results are listed in order of " +
-		"StateDMI components (data products).", 2 );
-		check_Vector.insertElementAt ( "", 3 );
+		"StateDMI components (data products)." );
+		check_Vector.add ( 3, "" );
 	}
 	return check_Vector;
 }
@@ -2623,15 +2611,15 @@ evaporation station, what diversions use a delay table, etc.).
 @param comp_type Component type to examine.
 @param id Identifier of specific object to examine.
 */
-public Vector getDataObjectDetails ( int comp_type, String id )
-{	Vector v = new Vector();
+public List getDataObjectDetails ( int comp_type, String id )
+{	List v = new Vector();
 	DataSetComponent comp1;			// "1" corresponds to "id" above
-	Vector data1;
+	List data1;
 	int pos1;
 	DataSetComponent comp2;			// "2" corresponds to the first
-	Vector data2;				// level of related data
+	List data2;				// level of related data
 	int size2;
-	Vector data3;				// level of related data
+	List data3;				// level of related data
 	int size3;
 	StateMod_Diversion div;			// All these are for general use
 	StateMod_RiverNetworkNode netnode;	// below
@@ -2640,86 +2628,86 @@ public Vector getDataObjectDetails ( int comp_type, String id )
 	if ( comp_type == COMP_DIVERSION_STATIONS ) {
 		comp1 = getComponentForComponentType (
 				StateMod_DataSet.COMP_DIVERSION_STATIONS );
-		data1 = (Vector)comp1.getData();
+		data1 = (List)comp1.getData();
 		pos1 = StateMod_Util.indexOf ( data1, id );
-		div = (StateMod_Diversion)data1.elementAt(pos1);
-		v.addElement("Data set details for diversion: "+
+		div = (StateMod_Diversion)data1.get(pos1);
+		v.add("Data set details for diversion: "+
 			StateMod_Util.formatDataLabel ( id, div.getName()));
-		v.addElement ( "Network nodes that are directly upstream:" );
-		v.addElement ( "" );
-		v.addElement (
+		v.add ( "Network nodes that are directly upstream:" );
+		v.add ( "" );
+		v.add (
 		"Upstream" );
-		v.addElement (
+		v.add (
 		"Node ID       Upstream Node Name                  " );
-		v.addElement (
+		v.add (
 		"--------------------------------------------------" );
 		comp2 = getComponentForComponentType (
 				StateMod_DataSet.COMP_RIVER_NETWORK );
-		data2 = (Vector)comp2.getData();
+		data2 = (List)comp2.getData();
 		size2 = data2.size();
 		for ( int i = 0; i < size2; i++ ) {
-			netnode = (StateMod_RiverNetworkNode)data2.elementAt(i);
+			netnode = (StateMod_RiverNetworkNode)data2.get(i);
 			if ( netnode.getCstadn().equalsIgnoreCase(id) ) {
-				v.addElement (
+				v.add (
 				StringUtil.formatString(
 					netnode.getID(),"%-12.12s")+ "  " + 
 				StringUtil.formatString(netnode.getName(),
 					"%-24.24s") );
 			}
 		}
-		v.addElement ( "" );
-		v.addElement (
+		v.add ( "" );
+		v.add (
 		"Search of nodes that return to this diversion - " +
 		"not implemented" );
-		v.addElement ( "" );
-		v.addElement (
+		v.add ( "" );
+		v.add (
 		"Search of diversion rights for this diversion - " +
 		"not implemented" );
-		v.addElement ( "" );
-		v.addElement (
+		v.add ( "" );
+		v.add (
 		"Search of operational rights using this diversion - " +
 		"not implemented" );
-		v.addElement ( "" );
-		v.addElement (
+		v.add ( "" );
+		v.add (
 		"Search of stream estimate node for this diversion - " +
 		"not implemented" );
-		v.addElement ( "" );
-		v.addElement (
+		v.add ( "" );
+		v.add (
 		"Search of time series for this diversion - " +
 		"not implemented" );
-		v.addElement (
+		v.add (
 		"Search of soil moisture for this diversion - " +
 		"not implemented" );
-		v.addElement (
+		v.add (
 		"Search of irrigation practice for diversion - " +
 		"not implemented" );
 	}
 	else if ( comp_type == COMP_PRECIPITATION_TS_MONTHLY ) {
-		v.addElement("Data set details for precipitation time series: "+
+		v.add("Data set details for precipitation time series: "+
 		id );
-		v.addElement ( "Reservoirs that use the time series:" );
-		v.addElement ( "" );
-		v.addElement (
+		v.add ( "Reservoirs that use the time series:" );
+		v.add ( "" );
+		v.add (
 		"Res ID        Res Name                  Weight (%)" );
-		v.addElement (
+		v.add (
 		"--------------------------------------------------" );
 		comp2 = getComponentForComponentType (
 				StateMod_DataSet.COMP_RESERVOIR_STATIONS );
-		data2 = (Vector)comp2.getData();
+		data2 = (List)comp2.getData();
 		size2 = data2.size();
 		for ( int i = 0; i < size2; i++ ) {
-			res = (StateMod_Reservoir)data2.elementAt(i);
+			res = (StateMod_Reservoir)data2.get(i);
 			data3 = res.getClimates();
 			size3 = data3.size();
 			for ( int j = 0; j < size3; j++ ) {
 				climate = (StateMod_ReservoirClimate)
-					data3.elementAt(j);
+					data3.get(j);
 				if (	(climate.getType() ==
 					StateMod_ReservoirClimate.CLIMATE_PTPX)
 					&&climate.getID().equalsIgnoreCase(id)){
 					// Found a reservoir that uses the
 					// station...
-					v.addElement (
+					v.add (
 					StringUtil.formatString(
 						res.getID(),"%-12.12s")+ "  " + 
 					StringUtil.formatString(res.getName(),
@@ -2731,31 +2719,31 @@ public Vector getDataObjectDetails ( int comp_type, String id )
 		}
 	}
 	else if ( comp_type == COMP_EVAPORATION_TS_MONTHLY ) {
-		v.addElement ( "Data set details for evaporation time series: "+
+		v.add ( "Data set details for evaporation time series: "+
 		id );
-		v.addElement ( "Reservoirs that use the time series:" );
-		v.addElement ( "" );
-		v.addElement (
+		v.add ( "Reservoirs that use the time series:" );
+		v.add ( "" );
+		v.add (
 		"Res ID        Res Name                  Weight (%)" );
-		v.addElement (
+		v.add (
 		"--------------------------------------------------" );
 		comp2 = getComponentForComponentType (
 				StateMod_DataSet.COMP_RESERVOIR_STATIONS );
-		data2 = (Vector)comp2.getData();
+		data2 = (List)comp2.getData();
 		size2 = data2.size();
 		for ( int i = 0; i < size2; i++ ) {
-			res = (StateMod_Reservoir)data2.elementAt(i);
+			res = (StateMod_Reservoir)data2.get(i);
 			data3 = res.getClimates();
 			size3 = data3.size();
 			for ( int j = 0; j < size3; j++ ) {
 				climate = (StateMod_ReservoirClimate)
-					data3.elementAt(j);
+					data3.get(j);
 				if (	(climate.getType() ==
 					StateMod_ReservoirClimate.CLIMATE_EVAP)
 					&&climate.getID().equalsIgnoreCase(id)){
 					// Found a reservoir that uses the
 					// station...
-					v.addElement (
+					v.add (
 					StringUtil.formatString(
 						res.getID(),"%-12.12s")+ "  " + 
 					StringUtil.formatString(res.getName(),
@@ -3009,55 +2997,55 @@ Return a Vector of String containing information about modified data in the data
 set.  This can be used during development to see how a GUI modifies data when
 it is set.
 */
-public Vector getModifiedDataSummary ()
-{	Vector v = new Vector();
+public List getModifiedDataSummary ()
+{	List v = new Vector();
 
-	v.addElement (
+	v.add (
 	"Summary of data objects that have been modified in computer memory" );
-	v.addElement (
+	v.add (
 	"but not yet written to files." );
-	v.addElement (
+	v.add (
 	"Components are listed by data group and files within each group." );
-	v.addElement ( "" );
+	v.add ( "" );
 
 	DataSetComponent comp1;
-	Vector data1;
+	List data1;
 	int size1;
 
 	// Stream gage...
 
-	v.addElement ( "" );
-	v.addElement ( "Stream Gage Data are not checked." );
-	v.addElement ( "" );
+	v.add ( "" );
+	v.add ( "Stream Gage Data are not checked." );
+	v.add ( "" );
 
 	// Delay Table (Monthly)...
 
-	v.addElement ( "" );
-	v.addElement ( "Delay Tables (Monthly) are not checked." );
-	v.addElement ( "" );
+	v.add ( "" );
+	v.add ( "Delay Tables (Monthly) are not checked." );
+	v.add ( "" );
 
 	// Delay Table (Daily)...
 
-	v.addElement ( "" );
-	v.addElement ( "Delay Tables (Daily) are not checked." );
-	v.addElement ( "" );
+	v.add ( "" );
+	v.add ( "Delay Tables (Daily) are not checked." );
+	v.add ( "" );
 
 	// Diversions...
 
 	comp1 = getComponentForComponentType ( COMP_DIVERSION_STATIONS );
 	if ( comp1.hasData() ) {
-	v.addElement ( comp1.getComponentName() );
-	v.addElement ( "" );
-	v.addElement (
+	v.add ( comp1.getComponentName() );
+	v.add ( "" );
+	v.add (
 	"Diversion ID  Diversion Name" );
-	v.addElement ( "-----------------------------------------");
-	data1 = (Vector)comp1.getData();
+	v.add ( "-----------------------------------------");
+	data1 = (List)comp1.getData();
 	size1 = data1.size();
 	StateMod_Data smdata1;
 	for ( int i = 0; i < size1; i++ ) {
-		smdata1 = (StateMod_Data)data1.elementAt(i);
+		smdata1 = (StateMod_Data)data1.get(i);
 		if ( smdata1.isDirty() ) {
-			v.addElement (
+			v.add (
 			StringUtil.formatString(
 				smdata1.getID(),"%-12.12s")+"  "+
 			StringUtil.formatString(
@@ -3068,19 +3056,19 @@ public Vector getModifiedDataSummary ()
 
 	comp1 = getComponentForComponentType ( COMP_DIVERSION_RIGHTS );
 	if ( comp1.hasData() ) {
-	v.addElement ( "" );
-	v.addElement ( comp1.getComponentName() );
-	v.addElement ( "" );
-	v.addElement (
+	v.add ( "" );
+	v.add ( comp1.getComponentName() );
+	v.add ( "" );
+	v.add (
 	"Div Right ID   Diversion Name" );
-	v.addElement ( "-----------------------------------------");
-	data1 = (Vector)comp1.getData();
+	v.add ( "-----------------------------------------");
+	data1 = (List)comp1.getData();
 	size1 = data1.size();
 	StateMod_Data smdata1;
 	for ( int i = 0; i < size1; i++ ) {
-		smdata1 = (StateMod_Data)data1.elementAt(i);
+		smdata1 = (StateMod_Data)data1.get(i);
 		if ( smdata1.isDirty() ) {
-			v.addElement (
+			v.add (
 			StringUtil.formatString(
 				smdata1.getID(),"%-12.12s")+"  "+
 			StringUtil.formatString(
@@ -3089,15 +3077,15 @@ public Vector getModifiedDataSummary ()
 	}
 	} // End comp1.hasData()
 
-	v.addElement ( "" );
-	v.addElement ( "Diversion time series data are not checked." );
-	v.addElement ( "" );
+	v.add ( "" );
+	v.add ( "Diversion time series data are not checked." );
+	v.add ( "" );
 
 	// Precipitation time series (monthly)...
 
-	v.addElement ( "" );
-	v.addElement ( "Precipitation data are not checked." );
-	v.addElement ( "" );
+	v.add ( "" );
+	v.add ( "Precipitation data are not checked." );
+	v.add ( "" );
 
 /*
 	comp1 = getComponentForComponentType ( COMP_PRECIPITATION_TS_MONTHLY );
@@ -3153,9 +3141,9 @@ public Vector getModifiedDataSummary ()
 
 	// Evaporation time series (monthly)...
 
-	v.addElement ( "" );
-	v.addElement ( "Evaporation data are not checked." );
-	v.addElement ( "" );
+	v.add ( "" );
+	v.add ( "Evaporation data are not checked." );
+	v.add ( "" );
 
 /*
 	comp1 = getComponentForComponentType ( COMP_EVAPORATION_TS_MONTHLY );
@@ -3211,45 +3199,45 @@ public Vector getModifiedDataSummary ()
 
 	// Reservoirs...
 
-	v.addElement ( "" );
-	v.addElement ( "Reservoirs are not checked." );
-	v.addElement ( "" );
+	v.add ( "" );
+	v.add ( "Reservoirs are not checked." );
+	v.add ( "" );
 
 	// Instream flows...
 
-	v.addElement ( "" );
-	v.addElement ( "Instream flows are not checked." );
-	v.addElement ( "" );
+	v.add ( "" );
+	v.add ( "Instream flows are not checked." );
+	v.add ( "" );
 
 	// Wells...
 
-	v.addElement ( "" );
-	v.addElement ( "Wells are not checked." );
-	v.addElement ( "" );
+	v.add ( "" );
+	v.add ( "Wells are not checked." );
+	v.add ( "" );
 
 	// Plans...
 
-	v.addElement ( "" );
-	v.addElement ( "Plans are not checked." );
-	v.addElement ( "" );
+	v.add ( "" );
+	v.add ( "Plans are not checked." );
+	v.add ( "" );
 
 	// Stream Estimate stations...
 
-	v.addElement ( "" );
-	v.addElement ( "Stream estimate stations are not checked." );
-	v.addElement ( "" );
+	v.add ( "" );
+	v.add ( "Stream estimate stations are not checked." );
+	v.add ( "" );
 
 	// River network...
 
-	v.addElement ( "" );
-	v.addElement ( "River network data are not checked." );
-	v.addElement ( "" );
+	v.add ( "" );
+	v.add ( "River network data are not checked." );
+	v.add ( "" );
 
 	// Operational rights.
 
-	v.addElement ( "" );
-	v.addElement ( "Operational rights data are not checked." );
-	v.addElement ( "" );
+	v.add ( "" );
+	v.add ( "Operational rights data are not checked." );
+	v.add ( "" );
 
 	return v;
 }
@@ -3360,326 +3348,326 @@ public String getStateModFileProperty ( int component_type )
 Return a summary of the data set.
 @return a summary of the data set as a Vector of String.
 */
-public Vector getSummary()
-{	Vector data_Vector = null;	// Reuse as needed below.
-	Vector rights_Vector = null;	// Reuse as needed below.
-	Vector infoVector = new Vector (100);
-	infoVector.addElement("                                STATEMOD "
+public List getSummary()
+{	List data_Vector = null;	// Reuse as needed below.
+	List rights_Vector = null;	// Reuse as needed below.
+	List infoVector = new Vector (100);
+	infoVector.add("                                STATEMOD "
 		+ "DATA SET SUMMARY");
-	infoVector.addElement("Basin                 : " 
+	infoVector.add("Basin                 : " 
 		+ getHeading1().trim());
-	infoVector.addElement("Base name (from *.rsp): " + getBaseName() );
+	infoVector.add("Base name (from *.rsp): " + getBaseName() );
 	if ( !areTSRead() ) {
-		infoVector.addElement("Note:     " +
+		infoVector.add("Note:     " +
 		"You elected NOT to read the time series information");
-		infoVector.addElement(
+		infoVector.add(
 		"          after initially selecting this scenario.");
-		infoVector.addElement(
+		infoVector.add(
 		"          Minimal time series information can be " +
 		"provided here.");
 	}
-	infoVector.addElement("");
+	infoVector.add("");
 
-	infoVector.addElement("RIVER NETWORK:");
-	infoVector.addElement("");
-	data_Vector = (Vector)getComponentForComponentType(
+	infoVector.add("RIVER NETWORK:");
+	infoVector.add("");
+	data_Vector = (List)getComponentForComponentType(
 		StateMod_DataSet.COMP_RIVER_NETWORK).getData();
 	int size = data_Vector.size();
-	infoVector.addElement("Number of nodes/stations in network: " + size);
+	infoVector.add("Number of nodes/stations in network: " + size);
 
-	infoVector.addElement("");
-	infoVector.addElement("STREAM GAGE STATIONS:");
-	infoVector.addElement("");
-	data_Vector = (Vector)getComponentForComponentType(
+	infoVector.add("");
+	infoVector.add("STREAM GAGE STATIONS:");
+	infoVector.add("");
+	data_Vector = (List)getComponentForComponentType(
 		StateMod_DataSet.COMP_STREAMGAGE_STATIONS).getData();
 	size = data_Vector.size();
-	infoVector.addElement("Number of stream gage stations: " + size);
-	infoVector.addElement("Stream gage stations without geographic " +
+	infoVector.add("Number of stream gage stations: " + size);
+	infoVector.add("Stream gage stations without geographic " +
 			"locations:");
-	infoVector.addElement("             # ID           Name");
+	infoVector.add("             # ID           Name");
 	StateMod_StreamGage sta;
 	int count = 0;
 	for (int i = 0; i < size; i++) {
-		sta = (StateMod_StreamGage)data_Vector.elementAt(i);
+		sta = (StateMod_StreamGage)data_Vector.get(i);
 		if ( sta.getGeoRecord() == null ) {
-			infoVector.addElement("        " +
+			infoVector.add("        " +
 			StringUtil.formatString((i + 1),"%6d") + " " +
 			StringUtil.formatString(sta.getID(),"%-12.12s")+
 			" " + sta.getName());
 			++count;
 		}
 	}
-	infoVector.addElement("        " +
+	infoVector.add("        " +
 	StringUtil.formatString(count,"%6d") + " Total missing");
-	infoVector.addElement("");
+	infoVector.add("");
 
-	infoVector.addElement("STREAM ESTIMATE STATIONS (PRORATED FLOW):");
-	infoVector.addElement("");
-	data_Vector = (Vector)getComponentForComponentType(
+	infoVector.add("STREAM ESTIMATE STATIONS (PRORATED FLOW):");
+	infoVector.add("");
+	data_Vector = (List)getComponentForComponentType(
 		StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS).getData();
 	size = data_Vector.size();
-	infoVector.addElement("Number of stream estimate stations: " + size);
+	infoVector.add("Number of stream estimate stations: " + size);
 // TODO - do actual counts of non-null time series links.
 /*
-	infoVector.addElement("Number of river stations with estimated " +
+	infoVector.add("Number of river stations with estimated " +
 		"baseflows: " + _baseflowsVector.size());
-	infoVector.addElement("Number of stations with monthly base flow " +
+	infoVector.add("Number of stations with monthly base flow " +
 		"time series: " + _baseflowTSVector.size());
 	if (controls.hasDailyData(false)&& _areTSRead) {
-		infoVector.addElement("Number of river stations with " +
+		infoVector.add("Number of river stations with " +
 			"historic daily time series: " +
 			_dailyHistStreamflowTSVector.size());
-		infoVector.addElement(
+		infoVector.add(
 		"Number of stations with daily base flow time series: " +
 		_dailyBaseflowTSVector.size());
 	}
 */
-	infoVector.addElement("Stream estimate stations without geographic " +
+	infoVector.add("Stream estimate stations without geographic " +
 	"locations:");
-	infoVector.addElement("             # ID           Name");
+	infoVector.add("             # ID           Name");
 	StateMod_StreamEstimate bsta;
 	count = 0;
 	for (int i = 0; i < size; i++) {
-		bsta = (StateMod_StreamEstimate)data_Vector.elementAt(i);
+		bsta = (StateMod_StreamEstimate)data_Vector.get(i);
 		if ( bsta.getGeoRecord() == null ) {
-			infoVector.addElement("        " +
+			infoVector.add("        " +
 			StringUtil.formatString((i + 1),"%6d") + " " +
 			StringUtil.formatString(bsta.getID(),"%-12.12s")+
 			" " + bsta.getName());
 			++count;
 		}
 	}
-	infoVector.addElement("        " +
+	infoVector.add("        " +
 	StringUtil.formatString(count,"%6d") + " Total missing");
-	infoVector.addElement("");
+	infoVector.add("");
 
-	infoVector.addElement("DELAY TABLE:");
-	infoVector.addElement("");
-	data_Vector = (Vector)getComponentForComponentType(
+	infoVector.add("DELAY TABLE:");
+	infoVector.add("");
+	data_Vector = (List)getComponentForComponentType(
 		StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY).getData();
 	size = data_Vector.size();
-	infoVector.addElement("Number of delay tables (monthly): " + size);
+	infoVector.add("Number of delay tables (monthly): " + size);
 	if ( hasDailyData(false) ) {
-		data_Vector = (Vector)getComponentForComponentType(
+		data_Vector = (List)getComponentForComponentType(
 		StateMod_DataSet.COMP_DELAY_TABLES_DAILY).getData();
 		size = data_Vector.size();
-		infoVector.addElement("Number of delay tables (daily): " +size);
+		infoVector.add("Number of delay tables (daily): " +size);
 	}
-	infoVector.addElement("");
+	infoVector.add("");
 
-	infoVector.addElement("DIVERSION STATIONS:");
-	infoVector.addElement("");
-	data_Vector = (Vector)getComponentForComponentType(
+	infoVector.add("DIVERSION STATIONS:");
+	infoVector.add("");
+	data_Vector = (List)getComponentForComponentType(
 		StateMod_DataSet.COMP_DIVERSION_STATIONS).getData();
 	size = data_Vector.size();
-	infoVector.addElement("Number of diversion stations: " + size);
-	rights_Vector = (Vector)getComponentForComponentType(
+	infoVector.add("Number of diversion stations: " + size);
+	rights_Vector = (List)getComponentForComponentType(
 		StateMod_DataSet.COMP_DIVERSION_RIGHTS).getData();
 	int rsize = rights_Vector.size();
-	infoVector.addElement("Number of rights: " + rsize );
+	infoVector.add("Number of rights: " + rsize );
 	if ( areTSRead() ) {
 /* TODO - need actual counts...
-		infoVector.addElement(
+		infoVector.add(
 			"Number of historical monthly time series: " + 
 			_divHistTSVector.size());
-		infoVector.addElement(
+		infoVector.add(
 			"Number of monthly demand time series: " + 
 			_demandTSVector.size());
 		if (controls.hasDailyData(false)) {
-			infoVector.addElement(
+			infoVector.add(
 				"Number of historical daily time series: " + 
 				_dailyHistDiversionTSVector.size());
-			infoVector.addElement(
+			infoVector.add(
 				"Number of daily demand time series: " + 
 				_dailyDemandTSVector.size());
 		}
 */
 	}
-	infoVector.addElement("Diversion stations without geographic "
+	infoVector.add("Diversion stations without geographic "
 		+ "locations:");
-	infoVector.addElement("             # ID           Name");
+	infoVector.add("             # ID           Name");
 	StateMod_Diversion div;
 	count = 0;
 	for (int i = 0; i < size; i++) {
-		div = (StateMod_Diversion)data_Vector.elementAt(i);
+		div = (StateMod_Diversion)data_Vector.get(i);
 		if ( div.getGeoRecord() == null ) {
-			infoVector.addElement("        " +
+			infoVector.add("        " +
 			StringUtil.formatString((i + 1),"%6d") + " " +
 			StringUtil.formatString(div.getID(),"%-12.12s") +
 			" " + div.getName());
 			++count;
 		}
 	}
-	infoVector.addElement("        " +
+	infoVector.add("        " +
 	StringUtil.formatString(count,"%6d") + " Total missing");
-	infoVector.addElement("");
+	infoVector.add("");
 
-	infoVector.addElement("INSTREAM FLOW STATIONS:");
-	infoVector.addElement("");
-	data_Vector = (Vector)getComponentForComponentType(
+	infoVector.add("INSTREAM FLOW STATIONS:");
+	infoVector.add("");
+	data_Vector = (List)getComponentForComponentType(
 		StateMod_DataSet.COMP_INSTREAM_STATIONS).getData();
 	size = data_Vector.size();
-	infoVector.addElement("Number of instream flow stations:" + size);
-	rights_Vector = (Vector)getComponentForComponentType(
+	infoVector.add("Number of instream flow stations:" + size);
+	rights_Vector = (List)getComponentForComponentType(
 		StateMod_DataSet.COMP_INSTREAM_RIGHTS).getData();
 	rsize = rights_Vector.size();
-	infoVector.addElement("Number of rights: " + rsize );
+	infoVector.add("Number of rights: " + rsize );
 	if ( areTSRead() ) {
 /* TODO 
-		infoVector.addElement("Number of monthly demand time series: "+
+		infoVector.add("Number of monthly demand time series: "+
 			_isfMonthlyDemandTSVector.size());
-		infoVector.addElement(
+		infoVector.add(
 			"Number of monthly average demand time series: " + 
 			_isfDemandTSVector.size());
 		if (controls.hasDailyData(false)) {
-			infoVector.addElement(
+			infoVector.add(
 			"Number of daily instream flow demand time series: "+
 			_dailyInsfTSVector.size());
 		}
 */
 	}
-	infoVector.addElement("Instream flow stations without geographic locations:");
-	infoVector.addElement("             # ID           Name");
+	infoVector.add("Instream flow stations without geographic locations:");
+	infoVector.add("             # ID           Name");
 	StateMod_InstreamFlow isf;
 	count = 0;
 	for (int i = 0; i < size; i++) {
-		isf = (StateMod_InstreamFlow)data_Vector.elementAt(i);
+		isf = (StateMod_InstreamFlow)data_Vector.get(i);
 		if ( isf.getGeoRecord() == null ) {
-			infoVector.addElement("        " +
+			infoVector.add("        " +
 			StringUtil.formatString((i + 1),"%6d") + " " +
 			StringUtil.formatString(isf.getID(),"%-12.12s") +
 			" " + isf.getName());
 			++count;
 		}
 	}
-	infoVector.addElement("        " +
+	infoVector.add("        " +
 	StringUtil.formatString(count,"%6d") + " Total missing");
-	infoVector.addElement("");
+	infoVector.add("");
 
-	infoVector.addElement("PRECIPITATION STATIONS:");
-	infoVector.addElement("");
-	data_Vector = (Vector)getComponentForComponentType(
+	infoVector.add("PRECIPITATION STATIONS:");
+	infoVector.add("");
+	data_Vector = (List)getComponentForComponentType(
 		StateMod_DataSet.COMP_PRECIPITATION_TS_MONTHLY).getData();
 	size = data_Vector.size();
-	infoVector.addElement(
+	infoVector.add(
 		"Number of monthly precipitation time series: " + size );
-	infoVector.addElement("");
+	infoVector.add("");
 
-	infoVector.addElement("EVAPORATION STATIONS:");
-	infoVector.addElement("");
-	data_Vector = (Vector)getComponentForComponentType(
+	infoVector.add("EVAPORATION STATIONS:");
+	infoVector.add("");
+	data_Vector = (List)getComponentForComponentType(
 		StateMod_DataSet.COMP_EVAPORATION_TS_MONTHLY).getData();
 	size = data_Vector.size();
-	infoVector.addElement(
+	infoVector.add(
 		"Number of monthly evaporation time series: " + size );
-	infoVector.addElement("");
+	infoVector.add("");
 
-	infoVector.addElement("RESERVOIR STATIONS:");
-	infoVector.addElement("");
-	data_Vector = (Vector)getComponentForComponentType(
+	infoVector.add("RESERVOIR STATIONS:");
+	infoVector.add("");
+	data_Vector = (List)getComponentForComponentType(
 		StateMod_DataSet.COMP_RESERVOIR_STATIONS).getData();
 	size = data_Vector.size();
-	infoVector.addElement("Number of reservoir stations: " + size);
-	rights_Vector = (Vector)getComponentForComponentType(
+	infoVector.add("Number of reservoir stations: " + size);
+	rights_Vector = (List)getComponentForComponentType(
 		StateMod_DataSet.COMP_RESERVOIR_RIGHTS).getData();
 	rsize = rights_Vector.size();
-	infoVector.addElement("Number of rights: " + rsize );
+	infoVector.add("Number of rights: " + rsize );
 	if ( areTSRead() ) {
 /* TODO
-		infoVector.addElement(
+		infoVector.add(
 			"Number of historical end of month time series: "+ 
 			_eomVector.size());
-		infoVector.addElement(
+		infoVector.add(
 			"Number of monthly min/max target time series: "+
 			_minMaxVector.size()/ 2);
 		if (controls.hasDailyData(false)) {
-			infoVector.addElement(
+			infoVector.add(
 			"Number of historical end of day time series: "+ 
 			_dailyHistResEODTSVector.size());
-			infoVector.addElement(
+			infoVector.add(
 			"Number of daily min/max daily target time series: "+
 			_dailyResTargetTSVector.size()/ 2);
 		}
 */
 	}
-	infoVector.addElement("Reservoir stations without geographic "
+	infoVector.add("Reservoir stations without geographic "
 		+ "locations:");
-	infoVector.addElement("             # ID           Name");
+	infoVector.add("             # ID           Name");
 	StateMod_Reservoir res;
 	count = 0;
 	for (int i = 0; i < size; i++) {
-		res = (StateMod_Reservoir)data_Vector.elementAt(i);
+		res = (StateMod_Reservoir)data_Vector.get(i);
 		if (res.getGeoRecord() == null) {
-			infoVector.addElement("        " +
+			infoVector.add("        " +
 			StringUtil.formatString((i + 1),"%6d") + " " +
 			StringUtil.formatString(res.getID(),"%-12.12s")
 			+ " " + res.getName());
 			++count;
 		}
 	}
-	infoVector.addElement("        " +
+	infoVector.add("        " +
 	StringUtil.formatString(count,"%6d") + " Total missing");
-	infoVector.addElement("");
+	infoVector.add("");
 
-	infoVector.addElement("WELL STATIONS:");
-	infoVector.addElement("");
-	data_Vector = (Vector)getComponentForComponentType(
+	infoVector.add("WELL STATIONS:");
+	infoVector.add("");
+	data_Vector = (List)getComponentForComponentType(
 		StateMod_DataSet.COMP_WELL_STATIONS).getData();
 	size = data_Vector.size();
-	infoVector.addElement("Number of well stations: " + size);
-	rights_Vector = (Vector)getComponentForComponentType(
+	infoVector.add("Number of well stations: " + size);
+	rights_Vector = (List)getComponentForComponentType(
 		StateMod_DataSet.COMP_WELL_RIGHTS).getData();
 	rsize = rights_Vector.size();
-	infoVector.addElement("Number of rights: " + rsize );
+	infoVector.add("Number of rights: " + rsize );
 	if ( areTSRead() ) {
 /* TODO
-		infoVector.addElement(
+		infoVector.add(
 		"Number of historical monthly well pumping time series: " +
 		_wellHistTSVector.size());
-		infoVector.addElement(
+		infoVector.add(
 		"Number of monthly well demand time series: " +
 		_wellDemandTSVector.size());
 		if (controls.hasDailyData(false)) {
-			infoVector.addElement(
+			infoVector.add(
 			"Number of historical daily well pumping time series: "+
 			_dailyHistWellTSVector.size());
-			infoVector.addElement(
+			infoVector.add(
 			"Number of daily well demand time series: "+
 			_dailyWellDemandTSVector.size());
 		}
 */
 	}
-	infoVector.addElement("Well stations without geographic locations:");
-	infoVector.addElement("             # ID           Name");
+	infoVector.add("Well stations without geographic locations:");
+	infoVector.add("             # ID           Name");
 	StateMod_Well well;
 	count = 0;
 	for (int i = 0; i < size; i++) {
-		well = (StateMod_Well)data_Vector.elementAt(i);
+		well = (StateMod_Well)data_Vector.get(i);
 		if (well.getGeoRecord() == null) {
-			infoVector.addElement("        " +
+			infoVector.add("        " +
 			StringUtil.formatString((i + 1),"%6d") + " " +
 			StringUtil.formatString(well.getID(),"%-12.12s")
 			+ " " + well.getName());
 			++count;
 		}
 	}
-	infoVector.addElement("        " +
+	infoVector.add("        " +
 	StringUtil.formatString(count,"%6d") + " Total missing");
-	infoVector.addElement("");
+	infoVector.add("");
 
-	infoVector.addElement("OPERATIONAL RIGHTS:");
-	infoVector.addElement("");
-	data_Vector = (Vector)getComponentForComponentType(
+	infoVector.add("OPERATIONAL RIGHTS:");
+	infoVector.add("");
+	data_Vector = (List)getComponentForComponentType(
 		StateMod_DataSet.COMP_OPERATION_RIGHTS).getData();
 	size = data_Vector.size();
-	infoVector.addElement( 
+	infoVector.add( 
 		"Type Name                                           "
 		+ "                   Count");
 	// Figure out the maximum operational right number...
 	int ityopr_max = 0;
 	StateMod_OperationalRight opright = null;
 	for ( int i = 0; i < size; i++ ) {
-		opright = (StateMod_OperationalRight)data_Vector.elementAt(i);
+		opright = (StateMod_OperationalRight)data_Vector.get(i);
 		if ( opright.getItyopr() > ityopr_max ) {
 			ityopr_max = opright.getItyopr();
 		}
@@ -3691,7 +3679,7 @@ public Vector getSummary()
 		count2[i] = 0;
 	}
 	for ( int i = 0; i < size; i++ ) {
-		opright = (StateMod_OperationalRight)data_Vector.elementAt(i);
+		opright = (StateMod_OperationalRight)data_Vector.get(i);
 		++count2[opright.getItyopr()];
 	}
 	String name = null;
@@ -3701,15 +3689,15 @@ public Vector getSummary()
 		if ( i <= StateMod_OperationalRight.NAMES.length ) {
 			name = StateMod_OperationalRight.NAMES[i];
 		}
-		infoVector.addElement( " " +
+		infoVector.add( " " +
 		StringUtil.formatString(i,"%2d") + "  " +
 		StringUtil.formatString( name, "%-64.64s") + "  " +
 		StringUtil.formatString(count2[i],"%4d"));
 	}
-	infoVector.addElement( "     Total                               " +
+	infoVector.add( "     Total                               " +
 		"                              "+
 		StringUtil.formatString(size,"%4d") );
-	infoVector.addElement("");
+	infoVector.add("");
 
 	return infoVector;
 }
@@ -3737,7 +3725,7 @@ throws Exception
 	String datatype = tsident.getType();
 	String interval = tsident.getInterval();
 	DataSetComponent comp = null, comp2 = null;
-	Vector data = null;
+	List data = null;
 	int pos = 0;
 	StateMod_StreamGage gage = null;
 	StateMod_StreamEstimate estimate = null;
@@ -3775,10 +3763,10 @@ throws Exception
 		// Historical flow...
 		// Always a stream gage...
 		comp = getComponentForComponentType( COMP_STREAMGAGE_STATIONS);
-		data = (Vector)comp.getData();
+		data = (List)comp.getData();
 		pos = StateMod_Util.indexOf ( data, id );
 		if ( pos >= 0 ) {
-			gage = (StateMod_StreamGage)data.elementAt(pos);
+			gage = (StateMod_StreamGage)data.get(pos);
 		}
 		// Stream gage data are always in memory...
 		if ( interval.equalsIgnoreCase("Month") ) {
@@ -3792,10 +3780,10 @@ throws Exception
 		COMP_STREAMGAGE_HISTORICAL_TS_DAILY ) + __ESTIMATED )) {
 		// Always a stream gage and daily...
 		comp = getComponentForComponentType( COMP_STREAMGAGE_STATIONS);
-		data = (Vector)comp.getData();
+		data = (List)comp.getData();
 		pos = StateMod_Util.indexOf ( data, id );
 		if ( pos >= 0 ) {
-			gage = (StateMod_StreamGage)data.elementAt(pos);
+			gage = (StateMod_StreamGage)data.get(pos);
 		}
 		// Inputs are always in memory...
 		return StateMod_Util.createDailyEstimateTS ( id,
@@ -3815,10 +3803,10 @@ throws Exception
 		// Could be a stream gage or base flow node.  Try the stream
 		// gage first...
 		comp = getComponentForComponentType( COMP_STREAMGAGE_STATIONS);
-		data = (Vector)comp.getData();
+		data = (List)comp.getData();
 		pos = StateMod_Util.indexOf ( data, id );
 		if ( pos >= 0 ) {
-			gage = (StateMod_StreamGage)data.elementAt(pos);
+			gage = (StateMod_StreamGage)data.get(pos);
 			// Stream gage data are always in memory...
 			if ( interval.equalsIgnoreCase("Month") ) {
 				return gage.getBaseflowMonthTS ();
@@ -3831,10 +3819,10 @@ throws Exception
 		// stream estimate.
 		comp = getComponentForComponentType(
 			COMP_STREAMESTIMATE_STATIONS);
-		data = (Vector)comp.getData();
+		data = (List)comp.getData();
 		pos = StateMod_Util.indexOf ( data, id );
 		if ( pos >= 0 ) {
-			estimate = (StateMod_StreamEstimate)data.elementAt(pos);
+			estimate = (StateMod_StreamEstimate)data.get(pos);
 			// Stream estimate data are always in memory...
 			if ( interval.equalsIgnoreCase("Month") ) {
 				return estimate.getBaseflowMonthTS ();
@@ -3851,10 +3839,10 @@ throws Exception
 		// Could be a stream gage or base flow node but always daily.
 		// Try the stream gage first...
 		comp = getComponentForComponentType( COMP_STREAMGAGE_STATIONS);
-		data = (Vector)comp.getData();
+		data = (List)comp.getData();
 		pos = StateMod_Util.indexOf ( data, id );
 		if ( pos >= 0 ) {
-			gage = (StateMod_StreamGage)data.elementAt(pos);
+			gage = (StateMod_StreamGage)data.get(pos);
 			// Stream gage data are always in memory...
 			return StateMod_Util.createDailyEstimateTS ( id,
 				"Daily base flow estimate",
@@ -3865,10 +3853,10 @@ throws Exception
 		// If here then the stream gage did not have the data...
 		comp = getComponentForComponentType(
 			COMP_STREAMESTIMATE_STATIONS);
-		data = (Vector)comp.getData();
+		data = (List)comp.getData();
 		pos = StateMod_Util.indexOf ( data, id );
 		if ( pos >= 0 ) {
-			estimate = (StateMod_StreamEstimate)data.elementAt(pos);
+			estimate = (StateMod_StreamEstimate)data.get(pos);
 			// Stream estimate data are always in memory...
 			return StateMod_Util.createDailyEstimateTS ( id,
 				"Daily base flow estimate",
@@ -3883,10 +3871,10 @@ throws Exception
 			COMP_DEMAND_TS_OVERRIDE_MONTHLY ) ) ) {
 		// Always a diversion...
 		comp = getComponentForComponentType( COMP_DIVERSION_STATIONS);
-		data = (Vector)comp.getData();
+		data = (List)comp.getData();
 		pos = StateMod_Util.indexOf ( data, id );
 		if ( pos >= 0 ) {
-			div = (StateMod_Diversion)data.elementAt(pos);
+			div = (StateMod_Diversion)data.get(pos);
 		}
 		// Diversion data might be in memory...
 		if (	datatype.equalsIgnoreCase( lookupTimeSeriesDataType(
@@ -3972,10 +3960,10 @@ throws Exception
 		COMP_WELL_DEMAND_TS_DAILY )) ) {
 		// May be a diversion, instream flow, or well...
 		comp = getComponentForComponentType( COMP_DIVERSION_STATIONS);
-		data = (Vector)comp.getData();
+		data = (List)comp.getData();
 		pos = StateMod_Util.indexOf ( data, id );
 		if ( pos >= 0 ) {
-			div = (StateMod_Diversion)data.elementAt(pos);
+			div = (StateMod_Diversion)data.get(pos);
 			// Diversion data might be in memory...
 			if ( interval.equalsIgnoreCase("Month") ) {
 				ts = div.getDemandMonthTS ();
@@ -4025,10 +4013,10 @@ throws Exception
 		// If here, did not find a matching diversion so try the
 		// instream flow stations...
 		comp = getComponentForComponentType( COMP_INSTREAM_STATIONS);
-		data = (Vector)comp.getData();
+		data = (List)comp.getData();
 		pos = StateMod_Util.indexOf ( data, id );
 		if ( pos >= 0 ) {
-			instream = (StateMod_InstreamFlow)data.elementAt(pos);
+			instream = (StateMod_InstreamFlow)data.get(pos);
 			// Instream flow data might be in memory...
 			if ( interval.equalsIgnoreCase("Month") ) {
 				ts = instream.getDemandMonthTS ();
@@ -4079,10 +4067,10 @@ throws Exception
 		// If here, did not find a matching instream flow so try the
 		// well stations...
 		comp = getComponentForComponentType( COMP_WELL_STATIONS);
-		data = (Vector)comp.getData();
+		data = (List)comp.getData();
 		pos = StateMod_Util.indexOf ( data, id );
 		if ( pos >= 0 ) {
-			well = (StateMod_Well)data.elementAt(pos);
+			well = (StateMod_Well)data.get(pos);
 			// Well data might be in memory...
 			if ( interval.equalsIgnoreCase("Month") ) {
 				ts = well.getDemandMonthTS ();
@@ -4136,10 +4124,10 @@ throws Exception
 		COMP_INSTREAM_DEMAND_TS_AVERAGE_MONTHLY ) ) ) {
 		// May be a diversion or instream flow...
 		comp = getComponentForComponentType( COMP_DIVERSION_STATIONS);
-		data = (Vector)comp.getData();
+		data = (List)comp.getData();
 		pos = StateMod_Util.indexOf ( data, id );
 		if ( pos >= 0 ) {
-			div = (StateMod_Diversion)data.elementAt(pos);
+			div = (StateMod_Diversion)data.get(pos);
 			// Diversion data might be in memory...
 			ts = div.getDemandAverageMonthTS ();
 			if ( (ts == null) && !areTSRead() && read_data){
@@ -4169,10 +4157,10 @@ throws Exception
 		// If get to here, a diversion was not matched so try the
 		// instream flows...
 		comp = getComponentForComponentType( COMP_INSTREAM_STATIONS);
-		data = (Vector)comp.getData();
+		data = (List)comp.getData();
 		pos = StateMod_Util.indexOf ( data, id );
 		if ( pos >= 0 ) {
-			instream = (StateMod_InstreamFlow)data.elementAt(pos);
+			instream = (StateMod_InstreamFlow)data.get(pos);
 			// Instream flow data might be in memory...
 			ts = instream.getDemandAverageMonthTS ();
 			if ( (ts == null) && !areTSRead() && read_data){
@@ -4204,10 +4192,10 @@ throws Exception
 		COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_MONTHLY )) ) {
 		// May be a diversion or well...
 		comp = getComponentForComponentType( COMP_DIVERSION_STATIONS);
-		data = (Vector)comp.getData();
+		data = (List)comp.getData();
 		pos = StateMod_Util.indexOf ( data, id );
 		if ( pos >= 0 ) {
-			div = (StateMod_Diversion)data.elementAt(pos);
+			div = (StateMod_Diversion)data.get(pos);
 			// Diversion data might be in memory...
 			if ( interval.equalsIgnoreCase("Month") ) {
 				ts =div.getConsumptiveWaterRequirementMonthTS();
@@ -4257,10 +4245,10 @@ throws Exception
 		// If here, did not find a matching instream flow so try the
 		// well stations...
 		comp = getComponentForComponentType( COMP_WELL_STATIONS);
-		data = (Vector)comp.getData();
+		data = (List)comp.getData();
 		pos = StateMod_Util.indexOf ( data, id );
 		if ( pos >= 0 ) {
-			well = (StateMod_Well)data.elementAt(pos);
+			well = (StateMod_Well)data.get(pos);
 			// Well data might be in memory...
 			if ( interval.equalsIgnoreCase("Month") ) {
 				ts=well.getConsumptiveWaterRequirementMonthTS();
@@ -4312,10 +4300,10 @@ throws Exception
 		COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_DAILY ) + __ESTIMATED )) {
 		// Always diversion or well...
 		comp = getComponentForComponentType( COMP_DIVERSION_STATIONS);
-		data = (Vector)comp.getData();
+		data = (List)comp.getData();
 		pos = StateMod_Util.indexOf ( data, id );
 		if ( pos >= 0 ) {
-			div = (StateMod_Diversion)data.elementAt(pos);
+			div = (StateMod_Diversion)data.get(pos);
 			return StateMod_Util.createDailyEstimateTS ( id,
 				"Daily CWR, estimated",
 				datatype,
@@ -4328,10 +4316,10 @@ throws Exception
 		}
 		// If here, no diversion was found, so try well...
 		comp = getComponentForComponentType ( COMP_WELL_STATIONS );
-		data = (Vector)comp.getData();
+		data = (List)comp.getData();
 		pos = StateMod_Util.indexOf ( data, id );
 		if ( pos >= 0 ) {
-			well = (StateMod_Well)data.elementAt(pos);
+			well = (StateMod_Well)data.get(pos);
 			return StateMod_Util.createDailyEstimateTS ( id,
 				"Daily CWR, estimated",
 				datatype,
@@ -4355,10 +4343,10 @@ throws Exception
 		// May be a diversion, instream flow, reservoir, or well...
 		// Figure out which one and then create a time series...
 		comp = getComponentForComponentType( COMP_DIVERSION_STATIONS);
-		data = (Vector)comp.getData();
+		data = (List)comp.getData();
 		pos = StateMod_Util.indexOf ( data, id );
 		if ( pos >= 0 ) {
-			div = (StateMod_Diversion)data.elementAt(pos);
+			div = (StateMod_Diversion)data.get(pos);
 			if ( interval.equalsIgnoreCase("Month") ) {
 				ts =	StateMod_Util.createWaterRightTS ( div,
 					TimeInterval.MONTH,
@@ -4381,10 +4369,10 @@ throws Exception
 		// If here, did not find a matching diversion so try the
 		// instream flow stations...
 		comp = getComponentForComponentType( COMP_INSTREAM_STATIONS);
-		data = (Vector)comp.getData();
+		data = (List)comp.getData();
 		pos = StateMod_Util.indexOf ( data, id );
 		if ( pos >= 0 ) {
-			instream = (StateMod_InstreamFlow)data.elementAt(pos);
+			instream = (StateMod_InstreamFlow)data.get(pos);
 			if ( interval.equalsIgnoreCase("Month") ) {
 				ts =	StateMod_Util.createWaterRightTS (
 					instream, TimeInterval.MONTH,
@@ -4407,10 +4395,10 @@ throws Exception
 		// If here, did not find a matching diversion so try the
 		// reservoir stations...
 		comp = getComponentForComponentType( COMP_RESERVOIR_STATIONS);
-		data = (Vector)comp.getData();
+		data = (List)comp.getData();
 		pos = StateMod_Util.indexOf ( data, id );
 		if ( pos >= 0 ) {
-			res = (StateMod_Reservoir)data.elementAt(pos);
+			res = (StateMod_Reservoir)data.get(pos);
 			if ( interval.equalsIgnoreCase("Month") ) {
 				ts =	StateMod_Util.createWaterRightTS (
 					res, TimeInterval.MONTH,
@@ -4433,10 +4421,10 @@ throws Exception
 		// If here, did not find a matching instream flow so try the
 		// well stations...
 		comp = getComponentForComponentType( COMP_WELL_STATIONS);
-		data = (Vector)comp.getData();
+		data = (List)comp.getData();
 		pos = StateMod_Util.indexOf ( data, id );
 		if ( pos >= 0 ) {
-			well = (StateMod_Well)data.elementAt(pos);
+			well = (StateMod_Well)data.get(pos);
 			// Get the units from the diversion time series...
 			if ( interval.equalsIgnoreCase("Month") ) {
 				ts =	StateMod_Util.createWaterRightTS (
@@ -4464,10 +4452,10 @@ throws Exception
 			COMP_RESERVOIR_CONTENT_TS_DAILY ) ) ) {
 		// Always a reservoir...
 		comp = getComponentForComponentType( COMP_RESERVOIR_STATIONS);
-		data = (Vector)comp.getData();
+		data = (List)comp.getData();
 		pos = StateMod_Util.indexOf ( data, id );
 		if ( pos >= 0 ) {
-			res = (StateMod_Reservoir)data.elementAt(pos);
+			res = (StateMod_Reservoir)data.get(pos);
 		}
 		// Reservoir data might be in memory...
 		if ( interval.equalsIgnoreCase("Month") ) {
@@ -4519,10 +4507,10 @@ throws Exception
 			COMP_RESERVOIR_TARGET_TS_DAILY ) + "Min" ) ) {
 		// Always a reservoir...
 		comp = getComponentForComponentType( COMP_RESERVOIR_STATIONS);
-		data = (Vector)comp.getData();
+		data = (List)comp.getData();
 		pos = StateMod_Util.indexOf ( data, id );
 		if ( pos >= 0 ) {
-			res = (StateMod_Reservoir)data.elementAt(pos);
+			res = (StateMod_Reservoir)data.get(pos);
 		}
 		// Reservoir data might be in memory...
 		if ( interval.equalsIgnoreCase("Month") ) {
@@ -4576,10 +4564,10 @@ throws Exception
 			COMP_RESERVOIR_TARGET_TS_DAILY ) + "Max") ) {
 		// Always a reservoir...
 		comp = getComponentForComponentType( COMP_RESERVOIR_STATIONS);
-		data = (Vector)comp.getData();
+		data = (List)comp.getData();
 		pos = StateMod_Util.indexOf ( data, id );
 		if ( pos >= 0 ) {
-			res = (StateMod_Reservoir)data.elementAt(pos);
+			res = (StateMod_Reservoir)data.get(pos);
 		}
 		// Reservoir data might be in memory...
 		if ( interval.equalsIgnoreCase("Month") ) {
@@ -4604,10 +4592,10 @@ throws Exception
 	else if ( datatype.equalsIgnoreCase( lookupTimeSeriesDataType(
 			COMP_RESERVOIR_CONTENT_TS_DAILY ) + __ESTIMATED )) {
 		comp = getComponentForComponentType( COMP_RESERVOIR_STATIONS);
-		data = (Vector)comp.getData();
+		data = (List)comp.getData();
 		pos = StateMod_Util.indexOf ( data, id );
 		if ( pos >= 0 ) {
-			res = (StateMod_Reservoir)data.elementAt(pos);
+			res = (StateMod_Reservoir)data.get(pos);
 			// Try to get the estimated time series...
 			return StateMod_Util.createDailyEstimateTS ( id,
 				"End of day content, estimated",
@@ -4622,10 +4610,10 @@ throws Exception
 			COMP_WELL_PUMPING_TS_DAILY ) ) ) {
 		// Always a well...
 		comp = getComponentForComponentType( COMP_WELL_STATIONS);
-		data = (Vector)comp.getData();
+		data = (List)comp.getData();
 		pos = StateMod_Util.indexOf ( data, id );
 		if ( pos >= 0 ) {
-			well = (StateMod_Well)data.elementAt(pos);
+			well = (StateMod_Well)data.get(pos);
 		}
 		// Well data might be in memory...
 		if ( interval.equalsIgnoreCase("Month") ) {
@@ -4674,10 +4662,10 @@ throws Exception
 	else if ( datatype.equalsIgnoreCase( lookupTimeSeriesDataType(
 			COMP_WELL_PUMPING_TS_DAILY ) + __ESTIMATED )) {
 		comp = getComponentForComponentType( COMP_WELL_STATIONS);
-		data = (Vector)comp.getData();
+		data = (List)comp.getData();
 		pos = StateMod_Util.indexOf ( data, id );
 		if ( pos >= 0 ) {
-			well = (StateMod_Well)data.elementAt(pos);
+			well = (StateMod_Well)data.get(pos);
 			// Try to get the estimated time series...
 			return StateMod_Util.createDailyEstimateTS ( id,
 				"Well pumping, historical, estimated",
@@ -4699,73 +4687,73 @@ Return a Vector of String containing information about unused data in the data
 set.  For example, these may be evaporation time series or delay tables that
 are not used.
 */
-public Vector getUnusedDataSummary ()
-{	Vector v = new Vector();
+public List getUnusedDataSummary ()
+{	List v = new Vector();
 
-	v.addElement (
+	v.add (
 	"Summary of data objects that are not used in the data set");
-	v.addElement ( "" );
+	v.add ( "" );
 
 	DataSetComponent comp1, comp2;
-	Vector data1, data2;
+	List data1, data2;
 	int size1, size2, size3;
 	TS ts;
 
 	// Stream gage...
 
-	v.addElement ( "" );
-	v.addElement ( "Stream Gage Data are not checked." );
-	v.addElement ( "" );
+	v.add ( "" );
+	v.add ( "Stream Gage Data are not checked." );
+	v.add ( "" );
 
 	// Delay Table (Monthly)...
 
-	v.addElement ( "" );
-	v.addElement ( "Delay Tables (Monthly) are not checked." );
-	v.addElement ( "" );
+	v.add ( "" );
+	v.add ( "Delay Tables (Monthly) are not checked." );
+	v.add ( "" );
 
 	// Delay Table (Daily)...
 
-	v.addElement ( "" );
-	v.addElement ( "Delay Tables (Daily) are not checked." );
-	v.addElement ( "" );
+	v.add ( "" );
+	v.add ( "Delay Tables (Daily) are not checked." );
+	v.add ( "" );
 
 	// Diversions...
 
-	v.addElement ( "" );
-	v.addElement ( "Diversion data are not checked." );
-	v.addElement ( "" );
+	v.add ( "" );
+	v.add ( "Diversion data are not checked." );
+	v.add ( "" );
 
 	// Precipitation time series (monthly)...
 
 	comp1 = getComponentForComponentType ( COMP_PRECIPITATION_TS_MONTHLY );
 	if ( comp1.hasData() ) {
-	v.addElement ( comp1.getComponentName() );
-	v.addElement ( "" );
-	v.addElement (
+	v.add ( comp1.getComponentName() );
+	v.add ( "" );
+	v.add (
 	"Precip TS ID   Precip TS Name" );
-	v.addElement ( "-----------------------------------------");
-	data1 = (Vector)comp1.getData();
+	v.add ( "-----------------------------------------");
+	data1 = (List)comp1.getData();
 	size1 = data1.size();
 	String id;
 	boolean found = false;
 	for ( int i = 0; i < size1; i++ ) {
 		found = false;
-		ts = (TS)data1.elementAt(i);
+		ts = (TS)data1.get(i);
 		id = ts.getLocation();
 		StateMod_Reservoir res;
 		comp2 = getComponentForComponentType (
 			StateMod_DataSet.COMP_RESERVOIR_STATIONS );
-		data2 = (Vector)comp2.getData();
+		data2 = (List)comp2.getData();
 		size2 = data2.size();
-		Vector climates;
+		List climates;
 		StateMod_ReservoirClimate climate;
 		for ( int j = 0; j < size2; j++ ) {
-			res = (StateMod_Reservoir)data2.elementAt(j);
+			res = (StateMod_Reservoir)data2.get(j);
 			climates = res.getClimates();
 			size3 = climates.size();
 			for ( int k = 0; k < size3; k++ ) {
 				climate = (StateMod_ReservoirClimate)
-					climates.elementAt(k);
+					climates.get(k);
 				if (	(climate.getType() ==
 					StateMod_ReservoirClimate.CLIMATE_PTPX)
 					&&climate.getID().equalsIgnoreCase(id)){
@@ -4779,7 +4767,7 @@ public Vector getUnusedDataSummary ()
 		if ( !found ) {
 			// The precipitation station is not used in the data
 			// set so print...
-			v.addElement (
+			v.add (
 				StringUtil.formatString(id,"%-12.12s") + "  " + 
 				StringUtil.formatString( ts.getDescription(),
 				"%-24.24s") );
@@ -4791,34 +4779,34 @@ public Vector getUnusedDataSummary ()
 
 	comp1 = getComponentForComponentType ( COMP_EVAPORATION_TS_MONTHLY );
 	if ( comp1.hasData() ) {
-	v.addElement ( "" );
-	v.addElement ( comp1.getComponentName() );
-	v.addElement ( "" );
-	v.addElement (
+	v.add ( "" );
+	v.add ( comp1.getComponentName() );
+	v.add ( "" );
+	v.add (
 	"Evap TS ID    Evap TS Name" );
-	v.addElement ( "-----------------------------------------");
-	data1 = (Vector)comp1.getData();
+	v.add ( "-----------------------------------------");
+	data1 = (List)comp1.getData();
 	size1 = data1.size();
 	String id;
 	boolean found = false;
 	for ( int i = 0; i < size1; i++ ) {
 		found = false;
-		ts = (TS)data1.elementAt(i);
+		ts = (TS)data1.get(i);
 		id = ts.getLocation();
 		StateMod_Reservoir res;
 		comp2 = getComponentForComponentType (
 			StateMod_DataSet.COMP_RESERVOIR_STATIONS );
-		data2 = (Vector)comp2.getData();
+		data2 = (List)comp2.getData();
 		size2 = data2.size();
-		Vector climates;
+		List climates;
 		StateMod_ReservoirClimate climate;
 		for ( int j = 0; j < size2; j++ ) {
-			res = (StateMod_Reservoir)data2.elementAt(j);
+			res = (StateMod_Reservoir)data2.get(j);
 			climates = res.getClimates();
 			size3 = climates.size();
 			for ( int k = 0; k < size3; k++ ) {
 				climate = (StateMod_ReservoirClimate)
-					climates.elementAt(k);
+					climates.get(k);
 				if (	(climate.getType() ==
 					StateMod_ReservoirClimate.CLIMATE_EVAP)
 					&&climate.getID().equalsIgnoreCase(id)){
@@ -4832,7 +4820,7 @@ public Vector getUnusedDataSummary ()
 		if ( !found ) {
 			// The evaporation station is not used in the data
 			// set so print...
-			v.addElement (
+			v.add (
 				StringUtil.formatString(id,"%-12.12s") + "  " + 
 				StringUtil.formatString( ts.getDescription(),
 				"%-24.24s") );
@@ -4842,39 +4830,39 @@ public Vector getUnusedDataSummary ()
 
 	// Reservoirs...
 
-	v.addElement ( "" );
-	v.addElement ( "Reservoirs are not checked." );
-	v.addElement ( "" );
+	v.add ( "" );
+	v.add ( "Reservoirs are not checked." );
+	v.add ( "" );
 
 	// Instream flows...
 
-	v.addElement ( "" );
-	v.addElement ( "Instream flows are not checked." );
-	v.addElement ( "" );
+	v.add ( "" );
+	v.add ( "Instream flows are not checked." );
+	v.add ( "" );
 
 	// Wells...
 
-	v.addElement ( "" );
-	v.addElement ( "Wells are not checked." );
-	v.addElement ( "" );
+	v.add ( "" );
+	v.add ( "Wells are not checked." );
+	v.add ( "" );
 
 	// Stream Estimate stations...
 
-	v.addElement ( "" );
-	v.addElement ( "Stream estimate stations are not checked." );
-	v.addElement ( "" );
+	v.add ( "" );
+	v.add ( "Stream estimate stations are not checked." );
+	v.add ( "" );
 
 	// River network...
 
-	v.addElement ( "" );
-	v.addElement ( "River network data are not checked." );
-	v.addElement ( "" );
+	v.add ( "" );
+	v.add ( "River network data are not checked." );
+	v.add ( "" );
 
 	// Operational rights.
 
-	v.addElement ( "" );
-	v.addElement ( "Operational rights data are not checked." );
-	v.addElement ( "" );
+	v.add ( "" );
+	v.add ( "Operational rights data are not checked." );
+	v.add ( "" );
 
 	return v;
 }
@@ -5373,7 +5361,7 @@ set previously and "ext" is the default extension for the file.
 All file names are initialized, even if they are not used.
 */
 public void initializeDataFileNames ()
-{	Vector data_Vector = getComponents();
+{	List data_Vector = getComponents();
 	int size = 0;
 	if (data_Vector != null) {
 		size = data_Vector.size();
@@ -5381,7 +5369,7 @@ public void initializeDataFileNames ()
 	DataSetComponent comp;
 	String basename = getBaseName();
 	for ( int i = 0; i < size; i++ ) {
-		comp = (DataSetComponent)data_Vector.elementAt(i);
+		comp = (DataSetComponent)data_Vector.get(i);
 		if ( !comp.isGroup() ) {
 			// Set the name...
 			comp.setDataFileName ( basename + "." +
@@ -5390,13 +5378,13 @@ public void initializeDataFileNames ()
 			continue;
 		}
 		// Need to add components to the group...
-		Vector data2 = (Vector)comp.getData();
+		List data2 = (List)comp.getData();
 		int size2 = 0;
 		if ( data2 != null ) {
 			size2 = data2.size();
 		}
 		for ( int j = 0; j < size2; j++ ) {
-			comp = (DataSetComponent)data2.elementAt(j);
+			comp = (DataSetComponent)data2.get(j);
 			comp.setDataFileName ( basename + "." +
 				__component_file_extensions[
 				comp.getComponentType()] );
@@ -6138,7 +6126,7 @@ throws Exception
 			comp.setDirty ( false );
 			Message.printStatus ( 1, routine, "Connecting instream flow rights to stations.");
 			StateMod_InstreamFlow.connectAllRights(
-				(Vector)getComponentForComponentType ( COMP_INSTREAM_STATIONS ).getData(), (Vector)comp.getData() );
+				(List)getComponentForComponentType ( COMP_INSTREAM_STATIONS ).getData(), (List)comp.getData() );
 			readTime.stop();
 			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
@@ -6175,7 +6163,7 @@ throws Exception
 			readInputAnnounce2(comp, readTime.getSeconds() );
 			Message.printStatus ( 1, routine, "Connecting reservoir rights with reservoir stations.");
 			StateMod_Reservoir.connectAllRights(
-				(Vector)getComponentForComponentType( COMP_RESERVOIR_STATIONS).getData(), (Vector)comp.getData());
+				(List)getComponentForComponentType( COMP_RESERVOIR_STATIONS).getData(), (List)comp.getData());
 		}
 	} catch (Exception e) {
 		Message.printWarning(1, routine, "Error reading reservoir rights file:\n\"" + fn + "\"");
@@ -6210,7 +6198,7 @@ throws Exception
 			readInputAnnounce2(comp, readTime.getSeconds() );
 			Message.printStatus ( 1, routine, "Connecting diversion rights to diversion stations" );
 			StateMod_Diversion.connectAllRights(
-				(Vector)getComponentForComponentType ( COMP_DIVERSION_STATIONS).getData(), (Vector)comp.getData());
+				(List)getComponentForComponentType ( COMP_DIVERSION_STATIONS).getData(), (List)comp.getData());
 		}
 	} catch (Exception e) {
 		Message.printWarning(1, routine, "Error reading diversion rights file:\n\"" + fn + "\"");
@@ -6279,7 +6267,7 @@ throws Exception
 				readInputAnnounce2(comp, readTime.getSeconds());
 				Message.printStatus ( 1, routine, "Connecting well rights to well stations.");
 				StateMod_Well.connectAllRights(
-					(Vector)getComponentForComponentType( COMP_WELL_STATIONS).getData(), (Vector)comp.getData() );
+					(List)getComponentForComponentType( COMP_WELL_STATIONS).getData(), (List)comp.getData() );
 			}
 		} catch (Exception e) {
 			Message.printWarning(1, routine, "Error reading well rights file:\n\"" + fn + "\"");
@@ -6310,7 +6298,7 @@ throws Exception
 			readTime.start();
 			fn = getDataFilePathAbsolute ( fn );
 			readInputAnnounce1(comp);
-			Vector v = StateMod_TS.readTimeSeriesList(fn, null,	null, null, true);
+			List v = StateMod_TS.readTimeSeriesList(fn, null,	null, null, true);
 			if (v == null) {
 				v = new Vector();
 			}
@@ -6318,7 +6306,7 @@ throws Exception
 			// TODO Old-style data that may be removed in new StateMod...
 			setNumpre ( size );
 			for (i = 0; i < size; i++) {
-				((MonthTS)v.elementAt(i)).setDataType(
+				((MonthTS)v.get(i)).setDataType(
 				lookupTimeSeriesDataType( COMP_PRECIPITATION_TS_MONTHLY ) );
 			}
 			comp.setData(v);
@@ -6353,7 +6341,7 @@ throws Exception
 			readTime.start();
 			fn = getDataFilePathAbsolute ( fn );
 			readInputAnnounce1(comp);
-			Vector v = StateMod_TS.readTimeSeriesList(fn, null,	null, null, true);
+			List v = StateMod_TS.readTimeSeriesList(fn, null,	null, null, true);
 			if (v == null) {
 				v = new Vector();
 			}
@@ -6361,7 +6349,7 @@ throws Exception
 			// TODO Old-style data that may be removed in new StateMod...
 			setNumeva ( size );
 			for (i = 0; i < size; i++) {
-				((MonthTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType( COMP_EVAPORATION_TS_MONTHLY ) );
+				((MonthTS)v.get(i)).setDataType( lookupTimeSeriesDataType( COMP_EVAPORATION_TS_MONTHLY ) );
 			}
 			comp.setData(v);
 			comp.setDirty ( false );
@@ -6396,13 +6384,13 @@ throws Exception
 			readTime.start();
 			fn = getDataFilePathAbsolute ( fn );
 			readInputAnnounce1(comp);
-			Vector v = StateMod_TS.readTimeSeriesList(fn, null,	null, null, true);
+			List v = StateMod_TS.readTimeSeriesList(fn, null,	null, null, true);
 			if (v == null) {
 				v = new Vector();
 			}
 			size = v.size();
 			for (i = 0; i < size; i++) {
-				((MonthTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType( COMP_STREAMGAGE_BASEFLOW_TS_MONTHLY ) );
+				((MonthTS)v.get(i)).setDataType( lookupTimeSeriesDataType( COMP_STREAMGAGE_BASEFLOW_TS_MONTHLY ) );
 			}
 			comp.setData(v);
 			comp.setDirty ( false );
@@ -6446,13 +6434,13 @@ throws Exception
 			readTime.start();
 			readInputAnnounce1(comp);
 			fn = getDataFilePathAbsolute ( fn );
-			Vector v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
+			List v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 			if (v == null) {
 				v = new Vector();
 			}
 			size = v.size();
 			for (i = 0; i < size; i++) {
-				((MonthTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType( COMP_DEMAND_TS_MONTHLY ) );
+				((MonthTS)v.get(i)).setDataType( lookupTimeSeriesDataType( COMP_DEMAND_TS_MONTHLY ) );
 			}
 			comp.setData(v);
 			comp.setDirty ( false );
@@ -6488,13 +6476,13 @@ throws Exception
 			readTime.start();
 			readInputAnnounce1(comp);
 			fn = getDataFilePathAbsolute ( fn );
-			Vector v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
+			List v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 			if (v == null) {
 				v = new Vector();
 			}
 			size = v.size();
 			for (i = 0; i < size; i++) {
-				((MonthTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType(COMP_DEMAND_TS_OVERRIDE_MONTHLY ) );
+				((MonthTS)v.get(i)).setDataType( lookupTimeSeriesDataType(COMP_DEMAND_TS_OVERRIDE_MONTHLY ) );
 			}
 			comp.setData(v);
 			comp.setDirty ( false );
@@ -6530,13 +6518,13 @@ throws Exception
 			readTime.start();
 			readInputAnnounce1(comp);
 			fn = getDataFilePathAbsolute ( fn );
-			Vector v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
+			List v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 			if (v == null) {
 				v = new Vector();
 			}
 			size = v.size();
 			for (i = 0; i < size; i++) {
-				((MonthTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType( COMP_DEMAND_TS_AVERAGE_MONTHLY ) );
+				((MonthTS)v.get(i)).setDataType( lookupTimeSeriesDataType( COMP_DEMAND_TS_AVERAGE_MONTHLY ) );
 			}
 			comp.setData(v);
 			comp.setDirty ( false );
@@ -6572,13 +6560,13 @@ throws Exception
 				readTime.start();
 				readInputAnnounce1(comp);
 				fn = getDataFilePathAbsolute ( fn );
-				Vector v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
+				List v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 				if (v == null) {
 					v = new Vector();
 				}
 				size = v.size();
 				for (i = 0; i<size; i++) {
-					((MonthTS)v.elementAt(i)).setDataType(lookupTimeSeriesDataType(COMP_INSTREAM_DEMAND_TS_MONTHLY ) );
+					((MonthTS)v.get(i)).setDataType(lookupTimeSeriesDataType(COMP_INSTREAM_DEMAND_TS_MONTHLY ) );
 				}
 				comp.setData(v);
 				comp.setDirty ( false );
@@ -6615,13 +6603,13 @@ throws Exception
 			readTime.start();
 			fn = getDataFilePathAbsolute ( fn );
 			readInputAnnounce1(comp);
-			Vector v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
+			List v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 			if (v == null) {
 				v = new Vector();
 			}
 			size = v.size();
 			for (i = 0; i< size; i++) {
-				((MonthTS)v.elementAt(i)).setDataType(
+				((MonthTS)v.get(i)).setDataType(
 						lookupTimeSeriesDataType( COMP_INSTREAM_DEMAND_TS_AVERAGE_MONTHLY ) );
 			}
 			comp.setData(v);
@@ -6658,13 +6646,13 @@ throws Exception
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
-				Vector v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
+				List v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 				if (v == null) {
 					v = new Vector();
 				}
 				size = v.size();				
 				for (i = 0; i < size; i++) {
-					((MonthTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType( COMP_WELL_DEMAND_TS_MONTHLY ) );
+					((MonthTS)v.get(i)).setDataType( lookupTimeSeriesDataType( COMP_WELL_DEMAND_TS_MONTHLY ) );
 				}
 				comp.setData(v);
 				comp.setDirty ( false );
@@ -6733,18 +6721,18 @@ throws Exception
 			readTime.start();
 			fn = getDataFilePathAbsolute ( fn );
 			readInputAnnounce1(comp);
-			Vector v = StateMod_TS.readTimeSeriesList(fn, null,	null, null, true);
+			List v = StateMod_TS.readTimeSeriesList(fn, null,	null, null, true);
 			if (v == null) {
 				v = new Vector();
 			}
 			size = v.size();
 			for (i = 0; i < size; i++) {
 				if ( (i%2) == 0 ) {
-					((MonthTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType(
+					((MonthTS)v.get(i)).setDataType( lookupTimeSeriesDataType(
 					COMP_RESERVOIR_TARGET_TS_MONTHLY) +	"Min" );
 				}
 				else {
-					((MonthTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType(
+					((MonthTS)v.get(i)).setDataType( lookupTimeSeriesDataType(
 					COMP_RESERVOIR_TARGET_TS_MONTHLY) +	"Max" );
 				}
 			}
@@ -6845,13 +6833,13 @@ throws Exception
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
-				Vector v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
+				List v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 				if (v == null) {
 					v = new Vector();
 				}
 				size = v.size();				
 				for (i = 0; i < size; i++) {
-					((MonthTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType (
+					((MonthTS)v.get(i)).setDataType( lookupTimeSeriesDataType (
 							COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_MONTHLY));
 				}
 				comp.setData(v);
@@ -6917,14 +6905,14 @@ throws Exception
 			readTime.start();
 			fn = getDataFilePathAbsolute ( fn );
 			readInputAnnounce1(comp);
-			Vector v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
+			List v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 			if (v == null) {
 				v = new Vector();
 			}
 			// Set the data type because it is not in the StateMod file...
 			size = v.size();
 			for (i = 0; i < size; i++) {
-				((MonthTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType ( COMP_RESERVOIR_CONTENT_TS_MONTHLY ));
+				((MonthTS)v.get(i)).setDataType( lookupTimeSeriesDataType ( COMP_RESERVOIR_CONTENT_TS_MONTHLY ));
 			}
 			comp.setData(v);
 			comp.setDirty ( false );
@@ -6992,14 +6980,14 @@ throws Exception
 			readTime.start();
 			fn = getDataFilePathAbsolute ( fn );
 			readInputAnnounce1(comp);
-			Vector v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
+			List v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 			if (v == null) {
 				v = new Vector();
 			}
 			size = v.size();
 			for (i = 0; i<size; i++) {
 				// Set this information because it is not in the StateMod time series file...
-				((MonthTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType (COMP_STREAMGAGE_HISTORICAL_TS_MONTHLY ));
+				((MonthTS)v.get(i)).setDataType( lookupTimeSeriesDataType (COMP_STREAMGAGE_HISTORICAL_TS_MONTHLY ));
 			}
 			comp.setData(v);
 			comp.setDirty ( false );
@@ -7034,13 +7022,13 @@ throws Exception
 			readTime.start();
 			readInputAnnounce1(comp);
 			fn = getDataFilePathAbsolute ( fn );
-			Vector v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
+			List v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 			if (v == null) {
 				v = new Vector();
 			}
 			size = v.size();
 			for (i = 0; i < size; i++) {
-				((MonthTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType (COMP_DIVERSION_TS_MONTHLY ));
+				((MonthTS)v.get(i)).setDataType( lookupTimeSeriesDataType (COMP_DIVERSION_TS_MONTHLY ));
 			}
 			comp.setData ( v );
 			comp.setDirty ( false );
@@ -7076,13 +7064,13 @@ throws Exception
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
-				Vector v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
+				List v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 				if (v == null) {
 					v = new Vector();
 				}
 				size = v.size();
 				for (i = 0; i < size; i++) {
-					((MonthTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType ( COMP_WELL_PUMPING_TS_MONTHLY ));
+					((MonthTS)v.get(i)).setDataType( lookupTimeSeriesDataType ( COMP_WELL_PUMPING_TS_MONTHLY ));
 				}
 				comp.setData(v);
 				comp.setDirty ( false );
@@ -7180,13 +7168,13 @@ throws Exception
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
-				Vector v = StateMod_TS.readTimeSeriesList( fn, null, null, null, true);
+				List v = StateMod_TS.readTimeSeriesList( fn, null, null, null, true);
 				if (v == null) {
 					v = new Vector();
 				}
 				size = v.size();
 				for (i = 0; i < size; i++) {
-					((DayTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType ( COMP_STREAMGAGE_BASEFLOW_TS_DAILY ));
+					((DayTS)v.get(i)).setDataType( lookupTimeSeriesDataType ( COMP_STREAMGAGE_BASEFLOW_TS_DAILY ));
 				}
 				comp.setData(v);
 				comp.setDirty ( false );
@@ -7232,13 +7220,13 @@ throws Exception
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
-				Vector v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
+				List v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 				if (v == null) {
 					v = new Vector();
 				}
 				size = v.size();
 				for (i = 0; i < size; i++) {
-					((DayTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType (	COMP_DEMAND_TS_DAILY ));
+					((DayTS)v.get(i)).setDataType( lookupTimeSeriesDataType (	COMP_DEMAND_TS_DAILY ));
 				}
 				comp.setData(v);
 				comp.setDirty ( false );
@@ -7276,13 +7264,13 @@ throws Exception
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
-				Vector v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
+				List v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 				if (v == null) {
 					v = new Vector();
 				}
 				size = v.size();
 				for (i = 0; i< size; i++) {
-					((DayTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType ( COMP_INSTREAM_DEMAND_TS_DAILY ));
+					((DayTS)v.get(i)).setDataType( lookupTimeSeriesDataType ( COMP_INSTREAM_DEMAND_TS_DAILY ));
 				}
 				comp.setData(v);
 				comp.setDirty ( false );
@@ -7320,13 +7308,13 @@ throws Exception
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
-				Vector v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
+				List v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 				if (v == null) {
 					v = new Vector();
 				}
 				size = v.size();				
 				for (i = 0; i < size; i++) {
-					((DayTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType ( COMP_WELL_DEMAND_TS_DAILY ));
+					((DayTS)v.get(i)).setDataType( lookupTimeSeriesDataType ( COMP_WELL_DEMAND_TS_DAILY ));
 				}
 				comp.setData(v);
 				comp.setDirty ( false );
@@ -7363,18 +7351,18 @@ throws Exception
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
-				Vector v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
+				List v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 				if (v == null) {
 					v = new Vector();
 				}
 				size = v.size();
 				for (i = 0; i < size; i++) {
 					if ( (i%2) == 0 ) {
-						((DayTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType (
+						((DayTS)v.get(i)).setDataType( lookupTimeSeriesDataType (
 								COMP_RESERVOIR_TARGET_TS_DAILY)+ "Min");
 					}
 					else {
-						((DayTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType (
+						((DayTS)v.get(i)).setDataType( lookupTimeSeriesDataType (
 								COMP_RESERVOIR_TARGET_TS_DAILY)+ "Max");
 					}
 				}
@@ -7449,13 +7437,13 @@ throws Exception
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
-				Vector v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
+				List v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 				if (v == null) {
 					v = new Vector();
 				}
 				size = v.size();				
 				for (i = 0; i < size; i++) {
-					((DayTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType (
+					((DayTS)v.get(i)).setDataType( lookupTimeSeriesDataType (
 							COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_DAILY) );
 				}
 				comp.setData(v);
@@ -7495,14 +7483,14 @@ throws Exception
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
-				Vector v = StateMod_TS.readTimeSeriesList(fn, null,null, null, true);
+				List v = StateMod_TS.readTimeSeriesList(fn, null,null, null, true);
 				if (v == null) {
 					v = new Vector();
 				}
 				size = v.size();
 				for (i = 0; i<size; i++) {
 					// Set this information because it is not in the StateMod time series file...
-					((DayTS)v.elementAt(i)).setDataType(
+					((DayTS)v.get(i)).setDataType(
 					lookupTimeSeriesDataType ( COMP_STREAMGAGE_HISTORICAL_TS_DAILY) );
 				}
 				comp.setData(v);
@@ -7542,7 +7530,7 @@ throws Exception
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
-				Vector v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
+				List v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 				if (v == null) {
 					v = new Vector();
 				}
@@ -7550,7 +7538,7 @@ throws Exception
 				// StateMod file...
 				size = v.size();
 				for (i = 0; i < size; i++) {
-					((DayTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType (	COMP_DIVERSION_TS_DAILY) );
+					((DayTS)v.get(i)).setDataType( lookupTimeSeriesDataType (	COMP_DIVERSION_TS_DAILY) );
 				}
 				comp.setData(v);
 				comp.setDirty ( false );
@@ -7587,14 +7575,14 @@ throws Exception
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
-				Vector v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
+				List v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 				if (v == null) {
 					v = new Vector();
 				}
 				// Set the data type because it is not in the StateMod file...
 				size = v.size();
 				for (i = 0; i < size; i++) {
-					((MonthTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType ( COMP_WELL_PUMPING_TS_DAILY) );
+					((MonthTS)v.get(i)).setDataType( lookupTimeSeriesDataType ( COMP_WELL_PUMPING_TS_DAILY) );
 				}
 				comp.setData(v);
 				comp.setDirty ( false );
@@ -7631,14 +7619,14 @@ throws Exception
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
-				Vector v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
+				List v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 				if (v == null) {
 					v = new Vector();
 				}
 				// Set the data type because it is not in the StateMod file...
 				size = v.size();
 				for (i = 0; i < size; i++) {
-					((MonthTS)v.elementAt(i)).setDataType( lookupTimeSeriesDataType ( COMP_RESERVOIR_CONTENT_TS_DAILY) );
+					((MonthTS)v.get(i)).setDataType( lookupTimeSeriesDataType ( COMP_RESERVOIR_CONTENT_TS_DAILY) );
 				}
 				comp.setData(v);
 				comp.setDirty ( false );
@@ -7655,75 +7643,75 @@ throws Exception
 
 	Message.printStatus (1,routine,"Connect all instream flow time series");
 	StateMod_InstreamFlow.connectAllTS (
-		(Vector)getComponentForComponentType( COMP_INSTREAM_STATIONS).getData(),
-		(Vector)getComponentForComponentType( COMP_INSTREAM_DEMAND_TS_MONTHLY).getData(),
-		(Vector)getComponentForComponentType( COMP_INSTREAM_DEMAND_TS_AVERAGE_MONTHLY).getData(),
-		(Vector)getComponentForComponentType( COMP_INSTREAM_DEMAND_TS_DAILY).getData() );
+		(List)getComponentForComponentType( COMP_INSTREAM_STATIONS).getData(),
+		(List)getComponentForComponentType( COMP_INSTREAM_DEMAND_TS_MONTHLY).getData(),
+		(List)getComponentForComponentType( COMP_INSTREAM_DEMAND_TS_AVERAGE_MONTHLY).getData(),
+		(List)getComponentForComponentType( COMP_INSTREAM_DEMAND_TS_DAILY).getData() );
 
 	// Connect all the reservoir time series to the stations...
 
 	StateMod_Reservoir.connectAllTS (
-		(Vector)getComponentForComponentType( COMP_RESERVOIR_STATIONS).getData(),
-		(Vector)getComponentForComponentType( COMP_RESERVOIR_CONTENT_TS_MONTHLY).getData(),
-		(Vector)getComponentForComponentType( COMP_RESERVOIR_CONTENT_TS_DAILY).getData(),
-		(Vector)getComponentForComponentType( COMP_RESERVOIR_TARGET_TS_MONTHLY).getData(),
-		(Vector)getComponentForComponentType( COMP_RESERVOIR_TARGET_TS_DAILY).getData());
+		(List)getComponentForComponentType( COMP_RESERVOIR_STATIONS).getData(),
+		(List)getComponentForComponentType( COMP_RESERVOIR_CONTENT_TS_MONTHLY).getData(),
+		(List)getComponentForComponentType( COMP_RESERVOIR_CONTENT_TS_DAILY).getData(),
+		(List)getComponentForComponentType( COMP_RESERVOIR_TARGET_TS_MONTHLY).getData(),
+		(List)getComponentForComponentType( COMP_RESERVOIR_TARGET_TS_DAILY).getData());
 
 	// Connect all the diversion time series to the stations...
 
 	Message.printStatus ( 1, routine, "Connect all diversion time series");
 	StateMod_Diversion.connectAllTS(
-		(Vector)getComponentForComponentType( COMP_DIVERSION_STATIONS).getData(),
-		(Vector)getComponentForComponentType( COMP_DIVERSION_TS_MONTHLY).getData(),
-		(Vector)getComponentForComponentType( COMP_DIVERSION_TS_DAILY).getData(),
-		(Vector)getComponentForComponentType( COMP_DEMAND_TS_MONTHLY).getData(),
-		(Vector)getComponentForComponentType( COMP_DEMAND_TS_OVERRIDE_MONTHLY).getData(),
-		(Vector)getComponentForComponentType( COMP_DEMAND_TS_AVERAGE_MONTHLY).getData(),
-		(Vector)getComponentForComponentType( COMP_DEMAND_TS_DAILY).getData(),
-		(Vector)getComponentForComponentType( COMP_IRRIGATION_PRACTICE_TS_YEARLY).getData(),
-		(Vector)getComponentForComponentType( COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_MONTHLY).getData(),
-		(Vector)getComponentForComponentType( COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_DAILY).getData());
+		(List)getComponentForComponentType( COMP_DIVERSION_STATIONS).getData(),
+		(List)getComponentForComponentType( COMP_DIVERSION_TS_MONTHLY).getData(),
+		(List)getComponentForComponentType( COMP_DIVERSION_TS_DAILY).getData(),
+		(List)getComponentForComponentType( COMP_DEMAND_TS_MONTHLY).getData(),
+		(List)getComponentForComponentType( COMP_DEMAND_TS_OVERRIDE_MONTHLY).getData(),
+		(List)getComponentForComponentType( COMP_DEMAND_TS_AVERAGE_MONTHLY).getData(),
+		(List)getComponentForComponentType( COMP_DEMAND_TS_DAILY).getData(),
+		(List)getComponentForComponentType( COMP_IRRIGATION_PRACTICE_TS_YEARLY).getData(),
+		(List)getComponentForComponentType( COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_MONTHLY).getData(),
+		(List)getComponentForComponentType( COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_DAILY).getData());
 
 	// Connect all the well time series to the stations...
 
 	Message.printStatus ( 1, routine, "Connect all well time series");
 	StateMod_Well.connectAllTS(
-		(Vector)getComponentForComponentType( COMP_WELL_STATIONS).getData(),
-		(Vector)getComponentForComponentType( COMP_WELL_PUMPING_TS_MONTHLY).getData(), 
-		(Vector)getComponentForComponentType( COMP_WELL_PUMPING_TS_DAILY).getData(), 
-		(Vector)getComponentForComponentType( COMP_WELL_DEMAND_TS_MONTHLY).getData(),
-		(Vector)getComponentForComponentType( COMP_WELL_DEMAND_TS_DAILY).getData(),
-		(Vector)getComponentForComponentType( COMP_IRRIGATION_PRACTICE_TS_YEARLY).getData(),
-		(Vector)getComponentForComponentType( COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_MONTHLY).getData(),
-		(Vector)getComponentForComponentType( COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_DAILY).getData());
+		(List)getComponentForComponentType( COMP_WELL_STATIONS).getData(),
+		(List)getComponentForComponentType( COMP_WELL_PUMPING_TS_MONTHLY).getData(), 
+		(List)getComponentForComponentType( COMP_WELL_PUMPING_TS_DAILY).getData(), 
+		(List)getComponentForComponentType( COMP_WELL_DEMAND_TS_MONTHLY).getData(),
+		(List)getComponentForComponentType( COMP_WELL_DEMAND_TS_DAILY).getData(),
+		(List)getComponentForComponentType( COMP_IRRIGATION_PRACTICE_TS_YEARLY).getData(),
+		(List)getComponentForComponentType( COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_MONTHLY).getData(),
+		(List)getComponentForComponentType( COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_DAILY).getData());
 
 	// Process the old-style ris, rim, rid files for the new convention...
 
 	if ( !__is_free_format ) {
 		StateMod_StreamEstimate.processStreamData ( 
-		(Vector)getComponentForComponentType( COMP_STREAMGAGE_STATIONS).getData(),
-		(Vector)getComponentForComponentType( COMP_STREAMGAGE_HISTORICAL_TS_MONTHLY).getData(),
-		(Vector)getComponentForComponentType( COMP_STREAMESTIMATE_STATIONS).getData(),
-		(Vector)getComponentForComponentType( COMP_STREAMESTIMATE_COEFFICIENTS).getData() );
+		(List)getComponentForComponentType( COMP_STREAMGAGE_STATIONS).getData(),
+		(List)getComponentForComponentType( COMP_STREAMGAGE_HISTORICAL_TS_MONTHLY).getData(),
+		(List)getComponentForComponentType( COMP_STREAMESTIMATE_STATIONS).getData(),
+		(List)getComponentForComponentType( COMP_STREAMESTIMATE_COEFFICIENTS).getData() );
 	}	// Else the StreamGage and StreamEstimate stations are already split into separate files.
 
 	// Connect all the stream gage station time series to the stations...
 
 	Message.printStatus (1,routine,"Connect all river station time series");
 	StateMod_StreamGage.connectAllTS(
-		(Vector)getComponentForComponentType( COMP_STREAMGAGE_STATIONS).getData(),
-		(Vector)getComponentForComponentType( COMP_STREAMGAGE_HISTORICAL_TS_MONTHLY).getData(),
-		(Vector)getComponentForComponentType( COMP_STREAMGAGE_HISTORICAL_TS_DAILY).getData(),
-		(Vector)getComponentForComponentType( COMP_STREAMGAGE_BASEFLOW_TS_MONTHLY).getData(),
-		(Vector)getComponentForComponentType( COMP_STREAMGAGE_BASEFLOW_TS_DAILY).getData());
+		(List)getComponentForComponentType( COMP_STREAMGAGE_STATIONS).getData(),
+		(List)getComponentForComponentType( COMP_STREAMGAGE_HISTORICAL_TS_MONTHLY).getData(),
+		(List)getComponentForComponentType( COMP_STREAMGAGE_HISTORICAL_TS_DAILY).getData(),
+		(List)getComponentForComponentType( COMP_STREAMGAGE_BASEFLOW_TS_MONTHLY).getData(),
+		(List)getComponentForComponentType( COMP_STREAMGAGE_BASEFLOW_TS_DAILY).getData());
 
 	// Connect all the stream estimate station time series to the stations...
 
 	Message.printStatus (1,routine, "Connect all stream estimate station time series");
 	StateMod_StreamEstimate.connectAllTS(
-		(Vector)getComponentForComponentType( COMP_STREAMESTIMATE_STATIONS).getData(),
-		(Vector)getComponentForComponentType( COMP_STREAMESTIMATE_BASEFLOW_TS_MONTHLY).getData(),
-		(Vector)getComponentForComponentType( COMP_STREAMESTIMATE_BASEFLOW_TS_DAILY).getData());
+		(List)getComponentForComponentType( COMP_STREAMESTIMATE_STATIONS).getData(),
+		(List)getComponentForComponentType( COMP_STREAMESTIMATE_BASEFLOW_TS_MONTHLY).getData(),
+		(List)getComponentForComponentType( COMP_STREAMESTIMATE_BASEFLOW_TS_DAILY).getData());
 
 	totalReadTime.stop();
 	Message.printStatus(1, routine, "Total time to read StateMod files is "
@@ -7909,7 +7897,7 @@ public void removeProcessListener(ProcessListener p) {
 	if (__processListeners == null) {
 		return;
 	}
-	__processListeners.removeElement(p);
+	__processListeners.remove(p);
 }
 
 /**
@@ -8002,7 +7990,7 @@ throws IOException {
 		+ "\"" + "BaseName=\"" + dataset.getBaseName() + "\">");
 	
 	int num = 0;
-	Vector data_Vector = dataset.getComponents();
+	List data_Vector = dataset.getComponents();
 	if (data_Vector != null) {
 		num = data_Vector.size();
 	}
@@ -8011,7 +7999,7 @@ throws IOException {
 	String indent2 = indent1 + indent1;
 
 	for (int i = 0; i < num; i++) {
-		comp = (DataSetComponent)data_Vector.elementAt(i);
+		comp = (DataSetComponent)data_Vector.get(i);
 		if (comp == null) {
 			continue;
 		}
@@ -8059,7 +8047,7 @@ public void sendProcessListenerMessage ( int status, String message )
 
 	ProcessListener p = null;
 	for (int i = 0; i < size; i++) {
-		p = (ProcessListener)__processListeners.elementAt(i);
+		p = (ProcessListener)__processListeners.get(i);
 		p.processStatus(status, message);
 	}
 }
@@ -9005,7 +8993,7 @@ throws Exception
 	String formatf1 = "%8.1f";
 	String formatf0 = "%8.0f";
 	String formats12 = "%-12.12s";
-	Vector v = new Vector(1);
+	List v = new Vector(1);
 
 	if (dataset.getCyrl()== SM_CYR) {
 		month_del = "CYR";
@@ -9029,73 +9017,73 @@ throws Exception
 	out.println(dataset.getHeading1());
 	out.println(dataset.getHeading2());
 
-	v.addElement(new Integer(dataset.getIystr()));
+	v.add(new Integer(dataset.getIystr()));
 	iline = StringUtil.formatString(v, formatd);
 	out.println(iline + " : iystr   STARTING YEAR OF SIMULATION");
 
-	v.setElementAt(new Integer(dataset.getIyend()), 0);
+	v.set(0,new Integer(dataset.getIyend()));
 	iline = StringUtil.formatString(v, formatd);
 	out.println(iline + " : iyend   ENDING YEAR OF SIMULATION");
 
-	v.setElementAt(new Integer(dataset.getIresop()), 0);
+	v.set(0,new Integer(dataset.getIresop()));
 	iline = StringUtil.formatString(v, formatd);
 	out.println(iline + " : iresop  OUTPUT UNITS 1=cfs," +
 		"2-acft,3=KAF,4=cfs day acft mon,5=cms");
 
-	v.setElementAt(new Integer(dataset.getMoneva()), 0);
+	v.set(0,new Integer(dataset.getMoneva()));
 	iline = StringUtil.formatString(v, formatd);
 	out.println(iline + " : moneva  TYPE OF EVAP/PRECIP. DATA. "
 		+ "0=monthly, 1=average");
 
-	v.setElementAt(new Integer(dataset.getIopflo()), 0);
+	v.set(0,new Integer(dataset.getIopflo()));
 	iline = StringUtil.formatString(v, formatd);
 	out.println(iline + " : iopflo  TYPE OF STREAM INFLOW. "
 		+ "1=Total, 2=Gains");
 
-	v.setElementAt(new Integer(dataset.getNumpre()), 0);
+	v.set(0,new Integer(dataset.getNumpre()));
 	iline = StringUtil.formatString(v, formatd);
 	out.println(iline + " : numpre  NO. OF PRECIPITATION STATIONS");
 
-	v.setElementAt(new Integer(dataset.getNumeva()), 0);
+	v.set(0,new Integer(dataset.getNumeva()));
 	iline = StringUtil.formatString(v, formatd);
 	out.println(iline + " : numeva  NO. OF EVAPORATION STATIONS");
 
-	v.setElementAt(new Integer(dataset.getInterv()), 0);
+	v.set(0,new Integer(dataset.getInterv()));
 	iline = StringUtil.formatString(v, formatd);
 	out.println(iline + " : interv  INTERVALS IN DELAY"
 		+ " TABLE n=fixed, %;-1=var, %; -100=var, dec.");
 
-	v.setElementAt(new Double(dataset.getFactor()), 0);
+	v.set(0,new Double(dataset.getFactor()));
 	iline = StringUtil.formatString(v, formatf);
 	out.println(iline + " : factor  FACTOR TO CONVERT CFS "
 		+ "TO AC-FT/DAY (1.9835)");
 
-	v.setElementAt(new Double(dataset.getRfacto()), 0);
+	v.set(0,new Double(dataset.getRfacto()));
 	iline = StringUtil.formatString(v, formatf);
 	out.println(iline + " : rfacto  DIVISOR FOR STREAM FLOW DATA."
 		+ " 0 FOR DATA IN cfs, 1.9835 af/mo");
 
-	v.setElementAt(new Double(dataset.getDfacto()), 0);
+	v.set(0,new Double(dataset.getDfacto()));
 	iline = StringUtil.formatString(v, formatf);
 	out.println(iline + " : dfacto  DIVISOR FOR DIVERSION DATA. " 
 		+ "0 FOR DATA IN cfs, 1.9835 af/mo");
 
-	v.setElementAt(new Double(dataset.getFfacto()), 0);
+	v.set(0,new Double(dataset.getFfacto()));
 	iline = StringUtil.formatString(v, formatf);
 	out.println(iline + " : ffacto  DIVISOR FOR INSTREAM FLOW DATA."
 		+ " 0 FOR DATA IN cfs, 1.9835 af/mo");
 
-	v.setElementAt(new Double(dataset.getCfacto()), 0);
+	v.set(0,new Double(dataset.getCfacto()));
 	iline = StringUtil.formatString(v, formatf);
 	out.println(iline + " : cfacto  FACTOR TO CONVERT RESERVOIR "
 		+ "CONTENT TO AC-FT");
 
-	v.setElementAt(new Double(dataset.getEfacto()), 0);
+	v.set(0,new Double(dataset.getEfacto()));
 	iline = StringUtil.formatString(v, formatf);
 	out.println(iline + " : efacto  FACTOR TO CONVERT EVAPORATION "
 		+ "DATA TO FEET");
 
-	v.setElementAt(new Double(dataset.getPfacto()), 0);
+	v.set(0,new Double(dataset.getPfacto()));
 	iline = StringUtil.formatString(v, formatf);
 	out.println(iline + " : pfacto  FACTOR TO CONVERT "
 		+ "PRECIPITATION DATA TO FEET");
@@ -9104,73 +9092,73 @@ throws Exception
 		+ "    : cyr1    YEAR TYPE (a5, All caps, "
 		+ "right justified!) CYR, WYR, or IYR");
 
-	v.setElementAt(new Integer(dataset.getIcondem()), 0);
+	v.set(0,new Integer(dataset.getIcondem()));
 	iline = StringUtil.formatString(v, formatd);
 	out.println(iline + " : icondem Demand type. "
 		+ "1=HistDem,2=HistSum,3=StrDem,4=SupDem,5=DecDem");
 
-	v.setElementAt(new Integer(dataset.getIchk()), 0);
+	v.set(0,new Integer(dataset.getIchk()));
 	iline = StringUtil.formatString(v, formatd);
 	out.println(iline + " : ichk    Detailed print. "
 		+ "0=off,1=net,4=calls,5=dem,6=day,7=ret,"
 		+ "91=well,92=soil,-NodeId)");
 
-	v.setElementAt(new Integer(dataset.getIreopx()), 0);
+	v.set(0,new Integer(dataset.getIreopx()));
 	iline = StringUtil.formatString(v, formatd);
 	out.println(iline + " : ireopx  Reoperation. "
 		+ "(0=reoperate,1=no reop,-n=reop for releases>n) ");
 
-	v.setElementAt(new Integer(dataset.getIreach()), 0);
+	v.set(0,new Integer(dataset.getIreach()));
 	iline = StringUtil.formatString(v, formatd);
 	out.println(iline + " : ireach  ISF approach. 0=Phase II,"
 		+ "1=Phase III,2=0+.ifm,3=1+.ifm");
 
-	v.setElementAt(new Integer(dataset.getIcall()), 0);
+	v.set(0,new Integer(dataset.getIcall()));
 	iline = StringUtil.formatString(v, formatd);
 	out.println(iline + " : icall   Detailed call data. "
 		+ "0=no, 1=yes");
 
-	v.setElementAt(dataset.getCcall(), 0);
+	v.set(0,dataset.getCcall());
 	iline = StringUtil.formatString(v, formats12);
 	out.println(iline + "    :ccall Detailed call water right ID"
 		+ " (if icall != 0)");
 
-	v.setElementAt(new Integer(dataset.getIday()), 0);
+	v.set(0,new Integer(dataset.getIday()));
 	iline = StringUtil.formatString(v, formatd);
 	out.println(iline + " : iday    Daily calculations. "
 		+ "0=monthly, 1=daily");
 
-	v.setElementAt(new Integer(dataset.getIwell()), 0);
+	v.set(0,new Integer(dataset.getIwell()));
 	iline = StringUtil.formatString(v, formatd);
 	out.println(iline + " : iwell   Wells "
 		+ "-1=no,in .rsp;0=no;1=no gwmaxrc,2=gwmaxrc,3=var gwmaxrc");
 
-	v.setElementAt(new Double(dataset.getGwmaxrc()), 0);
+	v.set(0,new Double(dataset.getGwmaxrc()));
 	iline = StringUtil.formatString(v, formatf1);
 	out.println(iline + " : gwmaxrc Constanct max recharge, CFS"
 		+ " (if iwell=2)");
 
-	v.setElementAt(new Integer(dataset.getIsjrip()), 0);
+	v.set(0,new Integer(dataset.getIsjrip()));
 	iline = StringUtil.formatString(v, formatd);
 	out.println(iline + " : isjrip  (SJRIP) sediment file. "
 		+ "-1=no but in .rsp, 0=no, 1=yes");
 
-	v.setElementAt(new Integer(dataset.getItsfile()), 0);
+	v.set(0,new Integer(dataset.getItsfile()));
 	iline = StringUtil.formatString(v, formatd);
 	out.println(iline + " : itsfile Use *.tsp file "
 		+ "-1=no,in .rsp;0=no;1=annual GW lim,10=all data");
 
-	v.setElementAt(new Integer(dataset.getIeffmax()), 0);
+	v.set(0,new Integer(dataset.getIeffmax()));
 	iline = StringUtil.formatString(v, formatd);
 	out.println(iline + " : ieffmax Use IWR file. "
 		+ "-1=no but in .rsp, 0=no, 1=yes");
 
-	v.setElementAt(new Integer(dataset.getIsprink()), 0);
+	v.set(0,new Integer(dataset.getIsprink()));
 	iline = StringUtil.formatString(v, formatd);
 	out.println(iline + " : isprink Use sprinkler data. "
 		+ "0=no, 1=yes");
 
-	v.setElementAt(new Double(dataset.getSoild()), 0);
+	v.set(0,new Double(dataset.getSoild()));
 	if (dataset.getSoild()> 0.0) {
 		iline = StringUtil.formatString(v, formatf1);
 	}
@@ -9180,7 +9168,7 @@ throws Exception
 	out.println(iline + " : soild   Soil moist acct. "
 		+ "-1=no,.par in .rsp;0=no;+n=soil zone dep,ft");
 
-	v.setElementAt(new Integer(dataset.getIsig()), 0);
+	v.set(0,new Integer(dataset.getIsig()));
 	iline = StringUtil.formatString(v, formatd);
 	out.println(iline + " : isig    0=none, 1=one, 2=two");
 
@@ -9486,9 +9474,9 @@ private static void writeStateModFileHelper (	PrintWriter out,
 						String filename, 
 						String description )
 {	String format = "%-73.73s%-24s";
-	Vector v = new Vector(2);
-	v.addElement(filename);
-	v.addElement(description);
+	List v = new Vector(2);
+	v.add(filename);
+	v.add(description);
 	out.println ( StringUtil.formatString ( v, format ) );
 }
 

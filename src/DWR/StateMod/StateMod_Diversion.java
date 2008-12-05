@@ -164,6 +164,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.PrintWriter;
 import java.util.StringTokenizer;
+import java.util.List;
 import java.util.Vector;
 
 import DWR.StateCU.StateCU_IrrigationPracticeTS;
@@ -249,12 +250,12 @@ protected int		_irturn;
 /**
 river nodes receiving return flow
 */
-protected Vector	_rivret;
+protected List	_rivret;
 
 /**
 Direct diversions rights
 */
-protected Vector	_rights;
+protected List	_rights;
 
 /**
 Acreage source
@@ -330,7 +331,7 @@ protected GeoRecord _georecord;
 Vector of parcel data, in particular to allow StateDMI to detect when a
 diverion had no data.
 */
-protected Vector _parcel_Vector = new Vector();
+protected List _parcel_Vector = new Vector();
 
 // Collections are set up to be specified by year, although currently for
 // diversions collections are always the same for the full period.
@@ -377,7 +378,7 @@ private String __collection_type = StateMod_Util.MISSING_STRING;
 private String __collection_part_type = "Ditch";
 					// Used by DMI software - currently no
 					// options.
-private Vector __collection_Vector = null;
+private List __collection_Vector = null;
 					// The identifiers for data that are
 					// collected - null if not a collection
 					// location.  This is actually a Vector
@@ -467,7 +468,7 @@ public void addReturnFlow(StateMod_ReturnFlow rivret)
 {	if (rivret == null) {
 		return;
 	}
-	_rivret.addElement(rivret);
+	_rivret.add(rivret);
 	setDirty(true);
 	if ( !_isClone && _dataset != null ) {
 		_dataset.setDirty(StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
@@ -479,7 +480,7 @@ Adds a right for the diversion.
 */
 public void addRight ( StateMod_DiversionRight right )
 {	if ( right != null ) {
-		_rights.addElement ( right );
+		_rights.add ( right );
 	}
 	// No need to set dirty because right is not saved in station file.
 }
@@ -671,7 +672,7 @@ already exists, we are just connecting next and previous pointers.
 @param diversions all diversions
 @param rights all rights
 */
-public static void connectAllRights ( Vector diversions, Vector rights )
+public static void connectAllRights ( List diversions, List rights )
 {	if ((diversions == null)||(rights == null)) {
 		return;
 	}
@@ -679,7 +680,7 @@ public static void connectAllRights ( Vector diversions, Vector rights )
 	
 	StateMod_Diversion div;
 	for (int i = 0; i < num_divs; i++) {
-		div = (StateMod_Diversion)diversions.elementAt(i);
+		div = (StateMod_Diversion)diversions.get(i);
 		if (div == null) {
 			continue;
 		}
@@ -708,16 +709,16 @@ or null.
 @param cwr_DayTS Vector of daily consumptive water requirement time series,
 or null.
 */
-public static void connectAllTS (	Vector diversions,
-					Vector diversion_MonthTS,
-					Vector diversion_DayTS,
-					Vector demand_MonthTS, 
-					Vector demand_override_MonthTS, 
-					Vector demand_average_MonthTS, 
-					Vector demand_DayTS,
-					Vector ipy_YearTS,
-					Vector cwr_MonthTS,
-					Vector cwr_DayTS )
+public static void connectAllTS (	List diversions,
+		List diversion_MonthTS,
+		List diversion_DayTS,
+		List demand_MonthTS, 
+		List demand_override_MonthTS, 
+		List demand_average_MonthTS, 
+		List demand_DayTS,
+		List ipy_YearTS,
+		List cwr_MonthTS,
+		List cwr_DayTS )
 {	if (diversions == null) {
 		return;
 	}
@@ -726,7 +727,7 @@ public static void connectAllTS (	Vector diversions,
 	
 	StateMod_Diversion div;
 	for (i = 0; i < num_divs; i++) {
-		div = (StateMod_Diversion)diversions.elementAt(i);
+		div = (StateMod_Diversion)diversions.get(i);
 		if (div == null) {
 			continue;
 		}
@@ -767,7 +768,7 @@ Connect daily CWR series pointer.  The connection is made using the
 value of "cdividy" for the diversion.
 @param tslist demand time series
 */
-public void connectCWRDayTS ( Vector tslist )
+public void connectCWRDayTS ( List tslist )
 {	if ( tslist == null) {
 		return;
 	}
@@ -776,7 +777,7 @@ public void connectCWRDayTS ( Vector tslist )
 
 	DayTS ts;
 	for (int i = 0; i < num_TS; i++) {
-		ts = (DayTS)tslist.elementAt(i);
+		ts = (DayTS)tslist.get(i);
 		if ( ts == null ) {
 			return;
 		}
@@ -793,7 +794,7 @@ Connect monthly CWR time series pointer.  The time series name is set to
 that of the diversion.
 @param tslist Time series list.
 */
-public void connectCWRMonthTS ( Vector tslist )
+public void connectCWRMonthTS ( List tslist )
 {	if ( tslist == null ) {
 		return;
 	}
@@ -802,7 +803,7 @@ public void connectCWRMonthTS ( Vector tslist )
 	MonthTS ts;
 	_cwr_MonthTS = null;
 	for ( int i = 0; i < num_TS; i++ ) {
-		ts = (MonthTS)tslist.elementAt(i);
+		ts = (MonthTS)tslist.get(i);
 		if ( ts == null ) {
 			continue;
 		}
@@ -819,7 +820,7 @@ Connect average monthly demand time series pointer.  The time series
 name is set to that of the diversion.
 @param tslist Time series list.
 */
-public void connectDemandAverageMonthTS ( Vector tslist )
+public void connectDemandAverageMonthTS ( List tslist )
 {	if ( tslist == null ) {
 		return;
 	}
@@ -828,7 +829,7 @@ public void connectDemandAverageMonthTS ( Vector tslist )
 	MonthTS ts;
 	_demand_average_MonthTS = null;
 	for ( int i = 0; i < num_TS; i++ ) {
-		ts = (MonthTS)tslist.elementAt(i);
+		ts = (MonthTS)tslist.get(i);
 		if ( ts == null ) {
 			continue;
 		}
@@ -845,7 +846,7 @@ Connect daily demand time series pointer.  The connection is made using the
 value of "cdividy" for the diversion.
 @param tslist demand time series
 */
-public void connectDemandDayTS ( Vector tslist )
+public void connectDemandDayTS ( List tslist )
 {	if ( tslist == null) {
 		return;
 	}
@@ -854,7 +855,7 @@ public void connectDemandDayTS ( Vector tslist )
 
 	DayTS ts;
 	for (int i = 0; i < num_TS; i++) {
-		ts = (DayTS)tslist.elementAt(i);
+		ts = (DayTS)tslist.get(i);
 		if ( ts == null ) {
 			return;
 		}
@@ -871,7 +872,7 @@ Connect monthly demand time series pointer.  The time series name is set to
 that of the diversion.
 @param tslist Time series list.
 */
-public void connectDemandMonthTS ( Vector tslist )
+public void connectDemandMonthTS ( List tslist )
 {	if ( tslist == null ) {
 		return;
 	}
@@ -880,7 +881,7 @@ public void connectDemandMonthTS ( Vector tslist )
 	MonthTS ts;
 	_demand_MonthTS = null;
 	for ( int i = 0; i < num_TS; i++ ) {
-		ts = (MonthTS)tslist.elementAt(i);
+		ts = (MonthTS)tslist.get(i);
 		if ( ts == null ) {
 			continue;
 		}
@@ -897,7 +898,7 @@ Connect monthly demand override time series pointer.  The time series name is
 set to that of the diversion.
 @param tslist Time series list.
 */
-public void connectDemandOverrideMonthTS ( Vector tslist )
+public void connectDemandOverrideMonthTS ( List tslist )
 {	if ( tslist == null ) {
 		return;
 	}
@@ -906,7 +907,7 @@ public void connectDemandOverrideMonthTS ( Vector tslist )
 	MonthTS ts;
 	_demand_override_MonthTS = null;
 	for ( int i = 0; i < num_TS; i++ ) {
-		ts = (MonthTS)tslist.elementAt(i);
+		ts = (MonthTS)tslist.get(i);
 		if ( ts == null ) {
 			continue;
 		}
@@ -922,7 +923,7 @@ public void connectDemandOverrideMonthTS ( Vector tslist )
 Connect historical daily diversion time series pointer.  
 @param tslist Vector of historical daily diversion time series.
 */
-public void connectDiversionDayTS ( Vector tslist )
+public void connectDiversionDayTS ( List tslist )
 {	if ( tslist == null ) {
 		return;
 	}
@@ -931,7 +932,7 @@ public void connectDiversionDayTS ( Vector tslist )
 	DayTS ts;
 	_diversion_DayTS = null;
 	for ( int i = 0; i < num_TS; i++ ) {
-		ts = (DayTS)tslist.elementAt(i);
+		ts = (DayTS)tslist.get(i);
 		if ( ts == null ) {
 			continue;
 		}
@@ -947,7 +948,7 @@ public void connectDiversionDayTS ( Vector tslist )
 Connect historical monthly time series pointer.  
 @param tslist Vector of historical monthly time series.
 */
-public void connectDiversionMonthTS ( Vector tslist )
+public void connectDiversionMonthTS ( List tslist )
 {	if ( tslist == null ) {
 		return;
 	}
@@ -956,7 +957,7 @@ public void connectDiversionMonthTS ( Vector tslist )
 	MonthTS ts;
 	_diversion_MonthTS = null;
 	for ( int i = 0; i < num_TS; i++ ) {
-		ts = (MonthTS)tslist.elementAt(i);
+		ts = (MonthTS)tslist.get(i);
 		if ( ts == null ) {
 			continue;
 		}
@@ -972,7 +973,7 @@ public void connectDiversionMonthTS ( Vector tslist )
 Connect the irrigation practice TS object.
 @param tslist Time series list.
 */
-public void connectIrrigationPracticeYearTS ( Vector tslist )
+public void connectIrrigationPracticeYearTS ( List tslist )
 {	if ( tslist == null ) {
 		return;
 	}
@@ -981,7 +982,7 @@ public void connectIrrigationPracticeYearTS ( Vector tslist )
 	_ipy_YearTS = null;
 	StateCU_IrrigationPracticeTS ipy_YearTS;
 	for ( int i = 0; i < num_TS; i++ ) {
-		ipy_YearTS = (StateCU_IrrigationPracticeTS)tslist.elementAt(i);
+		ipy_YearTS = (StateCU_IrrigationPracticeTS)tslist.get(i);
 		if ( ipy_YearTS == null ) {
 			continue;
 		}
@@ -998,7 +999,7 @@ right to the diversion identifier.  Multiple rights may be associated with a
 diversion.
 @param rights all rights.
 */
-public void connectRights ( Vector rights )
+public void connectRights ( List rights )
 {	if (rights == null) {
 		return;
 	}
@@ -1006,12 +1007,12 @@ public void connectRights ( Vector rights )
 
 	StateMod_DiversionRight right;
 	for ( int i = 0; i < num_rights; i++) {
-		right = (StateMod_DiversionRight)rights.elementAt(i);
+		right = (StateMod_DiversionRight)rights.get(i);
 		if (right == null) {
 			continue;
 		}
 		if ( _id.equalsIgnoreCase(right.getCgoto()) ) {
-			_rights.addElement ( right );
+			_rights.add ( right );
 		}
 	}
 	right = null;
@@ -1032,7 +1033,7 @@ Delete return flow node at a specified index.
 @param index index desired to delete
 */
 public void deleteReturnFlowAt(int index)
-{	_rivret.removeElementAt(index);
+{	_rivret.remove(index);
 	setDirty(true);
 	if ( !_isClone && _dataset != null ) {
 		_dataset.setDirty(StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
@@ -1056,9 +1057,9 @@ public void disconnectRight ( StateMod_DiversionRight right )
 	// Assume that more than on instance can exist, even though this is
 	// not allowed...
 	for ( int i = 0; i < size; i++ ) {
-		right2 = (StateMod_DiversionRight)_rights.elementAt(i);
+		right2 = (StateMod_DiversionRight)_rights.get(i);
 		if ( right2.getID().equalsIgnoreCase(right.getID()) ) {
-			_rights.removeElementAt(i);
+			_rights.remove(i);
 		}
 	}
 }
@@ -1067,7 +1068,7 @@ public void disconnectRight ( StateMod_DiversionRight right )
 Disconnect all rights.
 */
 public void disconnectRights ()
-{	_rights.removeAllElements();
+{	_rights.clear();
 }
 
 /**
@@ -1151,13 +1152,13 @@ aggregate/system list is currently supported so the same information is returned
 regardless of the year value.
 @return the list of collection part IDS, or null if not defined.
 */
-public Vector getCollectionPartIDs ( int year )
+public List getCollectionPartIDs ( int year )
 {	if ( __collection_Vector.size() == 0 ) {
 		return null;
 	}
 	//if ( __collection_part_type.equalsIgnoreCase("Ditch") ) {
 		// The list of part IDs will be the first and only list...
-		return (Vector)__collection_Vector.elementAt(0);
+		return (List)__collection_Vector.get(0);
 	//}
 	/* Not supported
 	else if ( __collection_part_type.equalsIgnoreCase("Parcel") ) {
@@ -1263,25 +1264,24 @@ The options are of the form "1" if include_notes is false and
 @return a list of demand source option strings, for use in GUIs.
 @param include_notes Indicate whether notes should be included.
 */
-public static Vector getDemsrcChoices ( boolean include_notes )
-{	Vector v = new Vector(8);
-	v.addElement ( "0 - Irrigated acres source unknown" );
-	v.addElement ( "1 - Irrigated acres from GIS" );
-	v.addElement ( "2 - Irrigated acres from structure file (tia)" );
-	v.addElement (
+public static List getDemsrcChoices ( boolean include_notes )
+{	List v = new Vector(8);
+	v.add ( "0 - Irrigated acres source unknown" );
+	v.add ( "1 - Irrigated acres from GIS" );
+	v.add ( "2 - Irrigated acres from structure file (tia)" );
+	v.add (
 	"3 - Irr. acr. from GIS, primary comp. served by mult. structs" );
-	v.addElement ( "4 - Same as 3 but data from struct. file (tia)" );
-	v.addElement (
+	v.add ( "4 - Same as 3 but data from struct. file (tia)" );
+	v.add (
 	"5 - Irr. acr. from GIS, secondary comp. served by mult. structs" );
-	v.addElement ( "6 - Municipal, industrial, or transmountain structure");
-	v.addElement ( "7 - Carrier structure (no irrigated acres)" );
-	v.addElement ( "8 - Irrigated acres provided by user" );
+	v.add ( "6 - Municipal, industrial, or transmountain structure");
+	v.add ( "7 - Carrier structure (no irrigated acres)" );
+	v.add ( "8 - Irrigated acres provided by user" );
 	if ( !include_notes ) {
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.setElementAt(StringUtil.getToken(
-				(String)v.elementAt(i), " ", 0, 0), i );
+			v.set(i,StringUtil.getToken((String)v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
@@ -1385,16 +1385,16 @@ The options are of the form "0" if include_notes is false and
 @param include_notes Indicate whether notes should be added after the parameter
 values.
 */
-public static Vector getIdivswChoices ( boolean include_notes )
-{	Vector v = new Vector(2);
-	v.addElement ( "0 - Off" );	// Possible options are listed here.
-	v.addElement ( "1 - On" );
+public static List getIdivswChoices ( boolean include_notes )
+{	List v = new Vector(2);
+	v.add ( "0 - Off" );	// Possible options are listed here.
+	v.add ( "1 - On" );
 	if ( !include_notes ) {
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.setElementAt(StringUtil.getToken(
-				(String)v.elementAt(i), " ", 0, 0), i );
+			v.set(i,StringUtil.getToken(
+				(String)v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
@@ -1428,19 +1428,18 @@ The options are of the form "1" if include_notes is false and
 @return a list of monthly demand type option strings, for use in GUIs.
 @param include_notes Indicate whether notes should be included.
 */
-public static Vector getIdvcomChoices ( boolean include_notes )
-{	Vector v = new Vector(5);
-	v.addElement ( "1 - Monthly total demand" );
-	v.addElement ( "2 - Annual total demand" );
-	v.addElement ( "3 - Monthly irrigation water requirement" );
-	v.addElement ( "4 - Annual irrigation water requirement" );
-	v.addElement ( "5 - Estimate to be zero" );
+public static List getIdvcomChoices ( boolean include_notes )
+{	List v = new Vector(5);
+	v.add ( "1 - Monthly total demand" );
+	v.add ( "2 - Annual total demand" );
+	v.add ( "3 - Monthly irrigation water requirement" );
+	v.add ( "4 - Annual irrigation water requirement" );
+	v.add ( "5 - Estimate to be zero" );
 	if ( !include_notes ) {
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.setElementAt(StringUtil.getToken(
-				(String)v.elementAt(i), " ", 0, 0), i );
+			v.set(i,StringUtil.getToken((String)v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
@@ -1473,17 +1472,16 @@ The options are of the form "0" if include_notes is false and
 @return a list of reservoir replacement option strings, for use in GUIs.
 @param include_notes Indicate whether notes should be included.
 */
-public static Vector getIreptypeChoices ( boolean include_notes )
-{	Vector v = new Vector(3);
-	v.addElement ( "0 - Do not provide replacement res. benefits" );
-	v.addElement ( "1 - Provide 100% replacement" );
-	v.addElement ( "-1 - Provide depletion replacement" );
+public static List getIreptypeChoices ( boolean include_notes )
+{	List v = new Vector(3);
+	v.add ( "0 - Do not provide replacement res. benefits" );
+	v.add ( "1 - Provide 100% replacement" );
+	v.add ( "-1 - Provide depletion replacement" );
 	if ( !include_notes ) {
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.setElementAt(StringUtil.getToken(
-				(String)v.elementAt(i), " ", 0, 0), i );
+			v.set(i, StringUtil.getToken((String)v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
@@ -1523,20 +1521,19 @@ The options are of the form "1" if include_notes is false and
 @return a list of use type option strings, for use in GUIs.
 @param include_notes Indicate whether notes should be included.
 */
-public static Vector getIrturnChoices ( boolean include_notes )
-{	Vector v = new Vector(6);
-	v.addElement ( "0 - Storage" );
-	v.addElement ( "1 - Irrigation" );
-	v.addElement ( "2 - Municipal" );
-	v.addElement ( "3 - N/A" );
-	v.addElement ( "4 - Transmountain" );
-	v.addElement ( "5 - Other" );
+public static List getIrturnChoices ( boolean include_notes )
+{	List v = new Vector(6);
+	v.add ( "0 - Storage" );
+	v.add ( "1 - Irrigation" );
+	v.add ( "2 - Municipal" );
+	v.add ( "3 - N/A" );
+	v.add ( "4 - Transmountain" );
+	v.add ( "5 - Other" );
 	if ( !include_notes ) {
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.setElementAt(StringUtil.getToken(
-				(String)v.elementAt(i), " ", 0, 0), i );
+			v.set(i,StringUtil.getToken((String)v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
@@ -1562,7 +1559,7 @@ public StateMod_DiversionRight getLastRight()
 {	if ( (_rights == null) || (_rights.size() == 0) ) {
 		return null;
 	}
-	return (StateMod_DiversionRight)_rights.elementAt(_rights.size() - 1);
+	return (StateMod_DiversionRight)_rights.get(_rights.size() - 1);
 }
 
 /**
@@ -1586,7 +1583,7 @@ public int getNrtn() {
 Return the Vector of parcels.
 @return the Vector of parcels.
 */
-public Vector getParcels()
+public List getParcels()
 {	return _parcel_Vector;
 }
 
@@ -1595,13 +1592,13 @@ Return the return flow at a particular index.
 @param index index desired to retrieve.
 */
 public StateMod_ReturnFlow getReturnFlow(int index)
-{	return ((StateMod_ReturnFlow)_rivret.elementAt(index));
+{	return ((StateMod_ReturnFlow)_rivret.get(index));
 }
 
 /**
 Retrieve the return flow vector.
 */
-public Vector getReturnFlows()
+public List getReturnFlows()
 {	return _rivret;
 }
 
@@ -1614,7 +1611,7 @@ public StateMod_DiversionRight getRight(int index)
 {	if ( (index < 0) || (index >= _rights.size()) ) {
 		return null;
 	}
-	else {	return (StateMod_DiversionRight)_rights.elementAt(index);
+	else {	return (StateMod_DiversionRight)_rights.get(index);
 	}
 }
 
@@ -1622,7 +1619,7 @@ public StateMod_DiversionRight getRight(int index)
 Return the rights Vector.
 @return the rights Vector.
 */
-public Vector getRights()
+public List getRights()
 {	return _rights;
 }
 
@@ -1717,12 +1714,12 @@ The new diversions are added to the end of the previously stored diversions.
 @param filename filename containing diversion information
 @throws Exception if an error occurs
 */
-public static Vector readStateModFile(String filename)
+public static List readStateModFile(String filename)
 throws Exception
 {	String routine = "StateMod_Diversion.readStateModFile";
 	String iline = null;
-	Vector v = new Vector(9);
-	Vector theDiversions = new Vector();
+	List v = new Vector(9);
+	List theDiversions = new Vector();
 	int i;
 	int linecount = 0;
 	String s = null;
@@ -1796,13 +1793,13 @@ throws Exception
 				"line 1: " + iline);
 			}
 			StringUtil.fixedRead(iline, format_0, format_0w, v);
-			aDiversion.setID(((String)v.elementAt(0)).trim()); 
-			aDiversion.setName(((String)v.elementAt(1)).trim()); 
-			aDiversion.setCgoto(((String)v.elementAt(2)).trim());
-			aDiversion.setSwitch((Integer)v.elementAt(3));
-			aDiversion.setDivcap((Double)v.elementAt(4));
-			aDiversion.setIreptype(((Integer)v.elementAt(6)));
-			aDiversion.setCdividy(((String)v.elementAt(8)).trim());
+			aDiversion.setID(((String)v.get(0)).trim()); 
+			aDiversion.setName(((String)v.get(1)).trim()); 
+			aDiversion.setCgoto(((String)v.get(2)).trim());
+			aDiversion.setSwitch((Integer)v.get(3));
+			aDiversion.setDivcap((Double)v.get(4));
+			aDiversion.setIreptype(((Integer)v.get(6)));
+			aDiversion.setCdividy(((String)v.get(8)).trim());
 
 			// line 2
 			iline = in.readLine();
@@ -1812,13 +1809,13 @@ throws Exception
 				"line 2: " + iline);
 			}
 			StringUtil.fixedRead(iline, format_1, format_1w, v);
-			aDiversion.setUsername(((String)v.elementAt(1)).trim());
-			aDiversion.setIdvcom(((Integer)v.elementAt(3)));
-			int nrtn =((Integer)v.elementAt(4)).intValue();
-			aDiversion.setDivefc(((Double)v.elementAt(5)));
-			aDiversion.setArea(((Double)v.elementAt(6)));
-			aDiversion.setIrturn(((Integer)v.elementAt(7)));
-			aDiversion.setDemsrc(((Integer)v.elementAt(8)));
+			aDiversion.setUsername(((String)v.get(1)).trim());
+			aDiversion.setIdvcom(((Integer)v.get(3)));
+			int nrtn =((Integer)v.get(4)).intValue();
+			aDiversion.setDivefc(((Double)v.get(5)));
+			aDiversion.setArea(((Double)v.get(6)));
+			aDiversion.setIrturn(((Integer)v.get(7)));
+			aDiversion.setDemsrc(((Integer)v.get(8)));
 
 			// get the efficiency information
 			if (aDiversion.getDivefc() < 0) {
@@ -1861,10 +1858,10 @@ throws Exception
 					format_2w, v);
 				aReturnNode = new StateMod_ReturnFlow(
 				StateMod_DataSet.COMP_DIVERSION_STATIONS);
-				s = ((String)v.elementAt(1)).trim();
+				s = ((String)v.get(1)).trim();
 				if (s.length() <= 0) {
 					aReturnNode.setCrtnid(
-					((String)v.elementAt(0)).trim());
+					((String)v.get(0)).trim());
 					Message.printWarning(2, routine, 
 						"Return node for structure \""
 						+ aDiversion.getID()
@@ -1875,9 +1872,9 @@ throws Exception
 				}
 
 				aReturnNode.setPcttot(
-					((Double)v.elementAt(2)));
+					((Double)v.get(2)));
 				aReturnNode.setIrtndl(
-					((Integer)v.elementAt(3)));
+					((Integer)v.get(3)));
 				aDiversion.addReturnFlow(aReturnNode);
 			}
 
@@ -1887,7 +1884,7 @@ throws Exception
 			aDiversion.setDirty ( false );
 
 			// add the diversion to the vector of diversions
-			theDiversions.addElement(aDiversion);
+			theDiversions.add(aDiversion);
 		}
 	} 
 	catch (Exception e) {
@@ -2063,20 +2060,19 @@ The options are of the form "3" if include_notes is false and
 @return a list of daily ID option strings, for use in GUIs.
 @param include_notes Indicate whether notes should be included.
 */
-public static Vector getCdividyChoices ( boolean include_notes )
-{	Vector v = new Vector(8);
-	v.addElement (
+public static List getCdividyChoices ( boolean include_notes )
+{	List v = new Vector(8);
+	v.add (
 		"0 - Use monthly time series to get average daily values" );
-	v.addElement (
+	v.add (
 		"3 - Daily time series are supplied" );
-	v.addElement (
+	v.add (
 	"4 - Daily time series interpolated from midpoints of monthly data" );
 	if ( !include_notes ) {
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.setElementAt(StringUtil.getToken(
-				(String)v.elementAt(i), " ", 0, 0), i );
+			v.set(i,StringUtil.getToken((String)v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
@@ -2124,16 +2120,16 @@ Set the collection list for an aggregate/system.  It is assumed that the
 collection applies to all years of data.
 @param ids The identifiers indicating the locations to collection.
 */
-public void setCollectionPartIDs ( Vector ids )
+public void setCollectionPartIDs ( List ids )
 {	if ( __collection_Vector == null ) {
 		__collection_Vector = new Vector ( 1 );
 		__collection_year = new int[1];
 	}
 	else {	// Remove the previous contents...
-		__collection_Vector.removeAllElements();
+		__collection_Vector.clear();
 	}
 	// Now assign...
-	__collection_Vector.addElement ( ids );
+	__collection_Vector.add ( ids );
 	__collection_year[0] = 0;
 }
 
@@ -2514,14 +2510,14 @@ public void setModelEfficiencies ( double [] model_efficiencies )
 Set the parcel Vector.
 @param parcel_Vector the Vector of StateMod_Parcel to set for parcel data.
 */
-void setParcels ( Vector parcel_Vector )
+void setParcels ( List parcel_Vector )
 {	_parcel_Vector = parcel_Vector;
 }
 
 /**
 Sets the Return flow vector.
 */
-public void setReturnFlow(Vector rivret) {
+public void setReturnFlow(List rivret) {
 	_rivret = rivret;
 }
 
@@ -2529,7 +2525,7 @@ public void setReturnFlow(Vector rivret) {
 set the rights from a vector of rights.  The linked list will be set up, too, 
 according to the order in the vector.
 */
-public void setRightsVector(Vector rights)
+public void setRightsVector(List rights)
 {	_rights = rights;
 }
 
@@ -2561,10 +2557,9 @@ is also maintained by calling this routine.  Daily data fields are written.
 @exception Exception if an error occurs.
 */
 public static void writeStateModFile(String instrfile, String outstrfile,
-Vector theDiversions, String[] new_comments)
+		List theDiversions, String[] new_comments)
 throws Exception {
-	writeStateModFile(instrfile, outstrfile, theDiversions, new_comments,
-		true);
+	writeStateModFile(instrfile, outstrfile, theDiversions, new_comments, true);
 }
 
 /**
@@ -2579,7 +2574,7 @@ are only used if the control file indicates that a daily run is occurring.
 @exception Exception if an error occurs.
 */
 public static void writeStateModFile(String instrfile, String outstrfile,
-Vector theDiversions, String[] new_comments, boolean use_daily_data)
+		List theDiversions, String[] new_comments, boolean use_daily_data)
 throws Exception {
 	String [] comment_str = { "#" };
 	String [] ignore_comment_str = { "#>" };
@@ -2604,8 +2599,8 @@ throws Exception {
 		"                                    %-12.12s%8.2F%8d";
 		StateMod_Diversion div = null;
 		StateMod_ReturnFlow ret = null;
-		Vector v = new Vector(9);	// Reuse for all output lines.
-		Vector v5 = null;		// For return flows.
+		List v = new Vector(9);	// Reuse for all output lines.
+		List v5 = null;		// For return flows.
 
 		out.println(cmnt);
 		out.println(cmnt
@@ -2706,23 +2701,23 @@ throws Exception {
 			num = theDiversions.size();
 		}
 		for (i = 0; i < num; i++) {
-			div = (StateMod_Diversion)theDiversions.elementAt(i);
+			div = (StateMod_Diversion)theDiversions.get(i);
 			if (div == null) {
 				continue;
 			}
 
 			// line 1
-			v.removeAllElements();
-			v.addElement(div.getID());
-			v.addElement(div.getName());
-			v.addElement(div.getCgoto());
-			v.addElement(new Integer(div.getSwitch()));
-			v.addElement(new Double (div.getDivcap()));
-			v.addElement(new Integer(1));	// Old nduser not used
+			v.clear();
+			v.add(div.getID());
+			v.add(div.getName());
+			v.add(div.getCgoto());
+			v.add(new Integer(div.getSwitch()));
+			v.add(new Double (div.getDivcap()));
+			v.add(new Integer(1));	// Old nduser not used
 							// anymore.
-			v.addElement(new Integer(div.getIreptype()));
+			v.add(new Integer(div.getIreptype()));
 			if (use_daily_data) {
-				v.addElement(div.getCdividy());
+				v.add(div.getCdividy());
 				iline = StringUtil.formatString(v, format_1);
 			}
 			else {	
@@ -2731,23 +2726,23 @@ throws Exception {
 			out.println(iline);
 
 			// line 2
-			v.removeAllElements();
-			v.addElement(div.getUsername());
-			v.addElement(new Integer(div.getIdvcom()));
-			v.addElement(new Integer(div.getNrtn()));
-			v.addElement(new Double (div.getDivefc()));
-			v.addElement(new Double (div.getArea()));
-			v.addElement(new Integer(div.getIrturn()));
-			v.addElement(new Integer(div.getDemsrc()));
+			v.clear();
+			v.add(div.getUsername());
+			v.add(new Integer(div.getIdvcom()));
+			v.add(new Integer(div.getNrtn()));
+			v.add(new Double (div.getDivefc()));
+			v.add(new Double (div.getArea()));
+			v.add(new Integer(div.getIrturn()));
+			v.add(new Integer(div.getDemsrc()));
 			iline = StringUtil.formatString(v, format_2);
 			out.println(iline);
 
 			// line 3 - diversion efficiency
 			if ( div.getDivefc() < 0 ) {
 				for (j=0; j<12; j++) {
-					v.removeAllElements();
-					v.addElement("");
-					v.addElement(new Double(
+					v.clear();
+					v.add("");
+					v.add(new Double(
 						div.getDiveff(j)));
 					iline = StringUtil.formatString(
 						v, format_3);
@@ -2761,11 +2756,11 @@ throws Exception {
 			int nrtn = div.getNrtn();
 			v5 = div.getReturnFlows();
 			for (j = 0; j < nrtn; j++) {
-				v.removeAllElements();
-				ret =(StateMod_ReturnFlow)v5.elementAt(j);
-				v.addElement(ret.getCrtnid());
-				v.addElement(new Double(ret.getPcttot()));
-				v.addElement(new Integer(ret.getIrtndl()));
+				v.clear();
+				ret =(StateMod_ReturnFlow)v5.get(j);
+				v.add(ret.getCrtnid());
+				v.add(new Double(ret.getPcttot()));
+				v.add(new Integer(ret.getIrtndl()));
 				iline = StringUtil.formatString(v, format_4);
 				out.println(iline);
 			}
@@ -2806,15 +2801,14 @@ header (true) or to create a new file with a new header.
 @param data the Vector of objects to write.  
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter,
-boolean update, Vector data) 
+public static void writeListFile(String filename, String delimiter, boolean update, List data) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
 		size = data.size();
 	}
 	
-	Vector fields = new Vector();
+	List fields = new Vector();
 	fields.add("ID");
 	fields.add("Name");
 	fields.add("RiverNodeID");
@@ -2847,7 +2841,7 @@ throws Exception {
 	int comp = StateMod_DataSet.COMP_DIVERSION_STATIONS;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.elementAt(i);
+		s = (String)fields.get(i);
 		names[i] = StateMod_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateMod_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -2868,8 +2862,8 @@ throws Exception {
 	StringBuffer buffer = new StringBuffer();
 	StateMod_Diversion div = null;
 	StateMod_ReturnFlow rf = null;
-	Vector returnFlows = new Vector();
-	Vector temp = null;
+	List returnFlows = new Vector();
+	List temp = null;
 	
 	try {	
 		out = IOUtil.processFileHeaders(
@@ -2887,7 +2881,7 @@ throws Exception {
 		out.println(buffer.toString());
 		
 		for (int i = 0; i < size; i++) {
-			div = (StateMod_Diversion)data.elementAt(i);
+			div = (StateMod_Diversion)data.get(i);
 			
 			line[0] = StringUtil.formatString(div.getID(), 
 				formats[0]).trim();
@@ -2957,7 +2951,7 @@ throws Exception {
 			size2 = temp.size();
 			id = div.getID();
 			for (j = 0; j < size2; j++) {
-				rf = (StateMod_ReturnFlow)temp.elementAt(j);
+				rf = (StateMod_ReturnFlow)temp.get(j);
 				rf.setID(id);
 				returnFlows.add(rf);
 			}
@@ -2985,8 +2979,7 @@ throws Exception {
 		StateMod_DataSet.COMP_DIVERSION_STATION_DELAY_TABLES);
 
 	String collectionFilename = front + "_Collections." + end;
-	writeCollectionListFile(collectionFilename, delimiter,
-		update, data);		
+	writeCollectionListFile(collectionFilename, delimiter, update, data);		
 }
 
 /**
@@ -3001,15 +2994,14 @@ header (true) or to create a new file with a new header.
 @param data the Vector of objects to write.  
 @throws Exception if an error occurs.
 */
-public static void writeCollectionListFile(String filename, 
-String delimiter, boolean update, Vector data) 
+public static void writeCollectionListFile(String filename, String delimiter, boolean update, List data) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
 		size = data.size();
 	}
 	
-	Vector fields = new Vector();
+	List fields = new Vector();
 	fields.add("LocationID");
 	fields.add("Year");
 	fields.add("CollectionType");
@@ -3022,7 +3014,7 @@ throws Exception {
 	int comp = StateMod_DataSet.COMP_DIVERSION_STATION_COLLECTIONS;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.elementAt(i);
+		s = (String)fields.get(i);
 		names[i] = StateMod_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateMod_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -3046,7 +3038,7 @@ throws Exception {
 	String id = null;
 	String partType = null;	
 	StringBuffer buffer = new StringBuffer();
-	Vector ids = null;
+	List ids = null;
 
 	try {	
 		out = IOUtil.processFileHeaders(
@@ -3064,7 +3056,7 @@ throws Exception {
 		out.println(buffer.toString());
 		
 		for (int i = 0; i < size; i++) {
-			div = (StateMod_Diversion)data.elementAt(i);
+			div = (StateMod_Diversion)data.get(i);
 			id = div.getID();
 			years = div.getCollectionYears();
 			if (years == null) {
@@ -3087,7 +3079,7 @@ throws Exception {
 				line[3] = StringUtil.formatString(partType,
 					formats[3]).trim();
 				line[4] = StringUtil.formatString(
-					((String)(ids.elementAt(k))),
+					((String)(ids.get(k))),
 					formats[4]).trim();
 
 				buffer = new StringBuffer();	

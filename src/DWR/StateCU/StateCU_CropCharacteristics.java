@@ -42,6 +42,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.IO.IOUtil;
@@ -377,12 +378,12 @@ private static boolean isVersion_10( String filename ) throws IOException
 Read the StateCU CCH file and return as a Vector of StateCU_CropCharacteristics.
 @param filename filename containing CCH records.
 */
-public static Vector readStateCUFile ( String filename )
+public static List readStateCUFile ( String filename )
 throws IOException
 {	String rtn = "StateCU_CropCharacteristics.readCCHFile";
 	String iline = null;
-	Vector v = new Vector ( 18 );
-	Vector cch_Vector = new Vector ( 100 );	// Data to return.
+	List v = new Vector ( 18 );
+	List cch_Vector = new Vector ( 100 );	// Data to return.
 	// Don't read the crop number...
 	int v10_format_0[] = {
 				StringUtil.TYPE_STRING,		// cname
@@ -530,82 +531,82 @@ throws IOException
 		// allocate new StateCU_CropCharacteristics instance...
 		cch = new StateCU_CropCharacteristics();
 		StringUtil.fixedRead ( iline, format_0, format_0w, v );
-		cch.setName ( ((String)v.elementAt(0)).trim() ); 
+		cch.setName ( ((String)v.get(0)).trim() ); 
 		// Set the ID the same as the name for data management purposes.
 		// Maybe later a true name field will be added.
-		cch.setID ( ((String)v.elementAt(0)).trim() );
+		cch.setID ( ((String)v.get(0)).trim() );
 		// Crop key is not even read so continue with index 1...
-		string = ((String)v.elementAt(1)).trim();
+		string = ((String)v.get(1)).trim();
 		if ( (string.length() != 0) && StringUtil.isInteger(string) ) {
 			cch.setGdate1 ( StringUtil.atoi(string) );
 		}
-		string = ((String)v.elementAt(2)).trim();
+		string = ((String)v.get(2)).trim();
 		if ( (string.length() != 0) && StringUtil.isInteger(string) ) {
 			cch.setGdate2 ( StringUtil.atoi(string) );
 		}
-		string = ((String)v.elementAt(3)).trim();
+		string = ((String)v.get(3)).trim();
 		if ( (string.length() != 0) && StringUtil.isInteger(string) ) {
 			cch.setGdate3 ( StringUtil.atoi(string) );
 		}
-		string = ((String)v.elementAt(4)).trim();
+		string = ((String)v.get(4)).trim();
 		if ( (string.length() != 0) && StringUtil.isInteger(string) ) {
 			cch.setGdate4 ( StringUtil.atoi(string) );
 		}
-		string = ((String)v.elementAt(5)).trim();
+		string = ((String)v.get(5)).trim();
 		if ( (string.length() != 0) && StringUtil.isInteger(string) ) {
 			cch.setGdate5 ( StringUtil.atoi(string) );
 		}
-		string = ((String)v.elementAt(6)).trim();
+		string = ((String)v.get(6)).trim();
 		if ( (string.length() != 0) && StringUtil.isInteger(string) ) {
 			cch.setGdates ( StringUtil.atoi(string) );
 		}
-		string = ((String)v.elementAt(7)).trim();
+		string = ((String)v.get(7)).trim();
 		if ( (string.length() != 0) && StringUtil.isDouble(string) ) {
 			cch.setTmois1 ( StringUtil.atod(string) );
 		}
-		string = ((String)v.elementAt(8)).trim();
+		string = ((String)v.get(8)).trim();
 		if ( (string.length() != 0) && StringUtil.isDouble(string) ) {
 			cch.setTmois2 ( StringUtil.atod(string) );
 		}
-		string = ((String)v.elementAt(9)).trim();
+		string = ((String)v.get(9)).trim();
 		if ( (string.length() != 0) && StringUtil.isDouble(string) ) {
 			cch.setMad ( StringUtil.atod(string) );
 		}
-		string = ((String)v.elementAt(10)).trim();
+		string = ((String)v.get(10)).trim();
 		if ( (string.length() != 0) && StringUtil.isDouble(string) ) {
 			cch.setIrx ( StringUtil.atod(string) );
 		}
-		string = ((String)v.elementAt(11)).trim();
+		string = ((String)v.get(11)).trim();
 		if ( (string.length() != 0) && StringUtil.isDouble(string) ) {
 			cch.setFrx ( StringUtil.atod(string) );
 		}
-		string = ((String)v.elementAt(12)).trim();
+		string = ((String)v.get(12)).trim();
 		if ( (string.length() != 0) && StringUtil.isDouble(string) ) {
 			cch.setAwc ( StringUtil.atod(string) );
 		}
-		string = ((String)v.elementAt(13)).trim();
+		string = ((String)v.get(13)).trim();
 		if ( (string.length() != 0) && StringUtil.isDouble(string) ) {
 			cch.setApd ( StringUtil.atod(string) );
 		}
-		string = ((String)v.elementAt(14)).trim();
+		string = ((String)v.get(14)).trim();
 		if ( (string.length() != 0) && StringUtil.isInteger(string) ) {
 			cch.setTflg1 ( StringUtil.atoi(string) );
 		}
-		string = ((String)v.elementAt(15)).trim();
+		string = ((String)v.get(15)).trim();
 		if ( (string.length() != 0) && StringUtil.isInteger(string) ) {
 			cch.setTflg2 ( StringUtil.atoi(string) );
 		}
-		string = ((String)v.elementAt(16)).trim();
+		string = ((String)v.get(16)).trim();
 		if ( (string.length() != 0) && StringUtil.isInteger(string) ) {
 			cch.setCut2 ( StringUtil.atoi(string) );
 		}
-		string = ((String)v.elementAt(17)).trim();
+		string = ((String)v.get(17)).trim();
 		if ( (string.length() != 0) && StringUtil.isInteger(string) ) {
 			cch.setCut3 ( StringUtil.atoi(string) );
 		}
 
 		// add the StateCU_CropCharacteristics to the vector...
-		cch_Vector.addElement ( cch );
+		cch_Vector.add ( cch );
 	}
 	if ( in != null ) {
 		in.close();
@@ -790,7 +791,7 @@ adjusted to the working directory if necessary using IOUtil.getPathUsingWorkingD
 @throws IOException
  */
 public static void writeStateCUFile (	String filename_prev, String filename,
-		Vector data_Vector,
+		List data_Vector,
 		String [] new_comments )
 throws IOException
 {	writeStateCUFile ( filename_prev, filename, data_Vector, new_comments,
@@ -830,9 +831,8 @@ current format.</b>
 </table>
 @exception IOException if there is an error writing the file.
 */
-public static void writeStateCUFile (	String filename_prev, String filename,
-					Vector data_Vector,
-					String [] new_comments, PropList props )
+public static void writeStateCUFile ( String filename_prev, String filename,
+		List data_Vector, String [] new_comments, PropList props )
 throws IOException
 {	String [] comment_str = { "#" };
 	String [] ignore_comment_str = { "#>" };
@@ -859,7 +859,7 @@ Write a Vector of StateCU_CropCharacteristics to an opened file.
 @param props Properties to control output (see writeStateCUFile).
 @exception IOException if an error occurs.
 */
-private static void writeVector ( Vector data_Vector, PrintWriter out, 
+private static void writeVector ( List data_Vector, PrintWriter out, 
 		PropList props )
 throws IOException
 {	int i;
@@ -913,7 +913,7 @@ throws IOException
 		Message.printStatus(2, rtn, "Writing file in Version 10 format.");
 	}
 	
-	Vector v = new Vector(19);	// Reuse for all output lines.
+	List v = new Vector(19);	// Reuse for all output lines.
 	out.println ( cmnt );
 	out.println ( cmnt + "  StateCU Crop Characteristics (CCH) File" );
 	out.println ( cmnt );
@@ -1002,12 +1002,12 @@ throws IOException
 	StateCU_CropCharacteristics cch = null;
 	String name = null;	// Crop name
 	for ( i=0; i<num; i++ ) {
-		cch = (StateCU_CropCharacteristics)data_Vector.elementAt(i);
+		cch = (StateCU_CropCharacteristics)data_Vector.get(i);
 		if ( cch == null ) {
 			continue;
 		}
 
-		v.removeAllElements();
+		v.clear();
 		int pos = 0;	// Position of object
 		name = cch.getName();
 		if ( version_10 && AutoAdjust_boolean ) {
@@ -1148,8 +1148,7 @@ throws IOException
 /**
 Writes a Vector of StateCU_CropCharacteristics objects to a list file.  A header
 is printed to the top of the file, containing the commands used to generate the 
-file.  Any strings in the body of the file that contain the field delimiter 
-will be wrapped in "...".  
+file.  Any strings in the body of the file that contain the field delimiter will be wrapped in "...".  
 @param filename the name of the file to which the data will be written.
 @param delimiter the delimiter to use for separating field values.
 @param update whether to update an existing file, retaining the current 
@@ -1157,15 +1156,14 @@ header (true) or to create a new file with a new header.
 @param data the Vector of objects to write.  
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter,
-boolean update, Vector data) 
+public static void writeListFile(String filename, String delimiter, boolean update, List data) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
 		size = data.size();
 	}
 	
-	Vector fields = new Vector();
+	List fields = new Vector();
 	fields.add("Name");
 	fields.add("PlantingMonth");
 	fields.add("PlantingDay");
@@ -1191,7 +1189,7 @@ throws Exception {
 	int comp = StateCU_DataSet.COMP_CROP_CHARACTERISTICS;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.elementAt(i);
+		s = (String)fields.get(i);
 		names[i] = StateCU_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateCU_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -1226,7 +1224,7 @@ throws Exception {
 		out.println(buffer.toString());
 		
 		for (int i = 0; i < size; i++) {
-			cc = (StateCU_CropCharacteristics)data.elementAt(i);
+			cc = (StateCU_CropCharacteristics)data.get(i);
 			
 			line[0] = StringUtil.formatString(cc.getName(), 
 				formats[0]).trim();

@@ -22,7 +22,7 @@
 
 package DWR.StateMod;
 
-import java.util.Vector;
+import java.util.List;
 
 import RTi.Util.Message.Message;
 
@@ -129,7 +129,7 @@ Checks whether the node is a gage that is to supply proration data.
 @param prfGageData vector of prf gage data 
 @return true if the node is gage that supplies proration data, false if not.
 */
-public static boolean isSetprfSource ( String id, Vector prfGageData)
+public static boolean isSetprfSource ( String id, List prfGageData)
 {	String routine = "StateMod_PrfGageData.isSetprfSource";
 	int dl = 10;
 
@@ -145,7 +145,7 @@ public static boolean isSetprfSource ( String id, Vector prfGageData)
 
 	StateMod_PrfGageData prfGageData_j;
 	for (int j = 0; j < numPrfGageData; j++) {
-		prfGageData_j = (StateMod_PrfGageData)prfGageData.elementAt(j);
+		prfGageData_j = (StateMod_PrfGageData)prfGageData.get(j);
 		if (prfGageData_j.getGageID().equalsIgnoreCase( id ) ) {
 			if (Message.isDebugOn) {
 				Message.printDebug(dl, routine,
@@ -165,7 +165,7 @@ Checks to see if the node is a node that is to receive information.
 @return the number of the node if it is to receive information, or -1 if
 the node wasn't found or is not to receive information.
 */
-public static int isSetprfTarget ( String commonID, Vector prfGageData)
+public static int isSetprfTarget ( String commonID, List prfGageData)
 {	String routine = "StateMod_NodeNetwork.isSetprfTarget";
 	int dl = 10;
 
@@ -181,7 +181,7 @@ public static int isSetprfTarget ( String commonID, Vector prfGageData)
 
 	StateMod_PrfGageData prfGageData_j = null;
 	for (int j = 0; j < numPrfGageData; j++) {
-		prfGageData_j = (StateMod_PrfGageData)prfGageData.elementAt(j);
+		prfGageData_j = (StateMod_PrfGageData)prfGageData.get(j);
 		if (prfGageData_j.getNodeID().equalsIgnoreCase(commonID)) {
 			if (Message.isDebugOn) {
 				Message.printDebug(dl, routine,

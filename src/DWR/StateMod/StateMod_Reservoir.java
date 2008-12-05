@@ -147,6 +147,7 @@ package DWR.StateMod;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Vector;
 
 import RTi.GIS.GeoView.GeoRecord;
@@ -195,7 +196,7 @@ protected double 	_deadst;
 /**
 Vector of owners
 */
-protected Vector	_owners;
+protected List	_owners;
 
 /**
 Daily id
@@ -205,17 +206,17 @@ protected String	_cresdy;
 /**
 Vector of evap/precip stations
 */
-protected Vector	_climate_Vector;
+protected List	_climate_Vector;
 
 /**
 vector of area capacity values
 */
-protected Vector	_areacapvals;
+protected List	_areacapvals;
 
 /**
 Vector of reservoir rights
 */
-protected Vector	_rights;
+protected List	_rights;
 
 /**
 End of month content time series.
@@ -267,7 +268,7 @@ private String __collection_type = StateMod_Util.MISSING_STRING;
 private String __collection_part_type = "Reservoir";
 					// Used by DMI software - currently no
 					// options.
-private Vector __collection_Vector = null;
+private List __collection_Vector = null;
 					// The identifiers for data that are
 					// collected - null if not a collection
 					// location.  This is actually a Vector
@@ -314,7 +315,7 @@ Add owner (account).
 */
 public void addAccount(StateMod_ReservoirAccount owner)
 {	if (owner != null) {
-		_owners.addElement(owner);
+		_owners.add(owner);
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(
@@ -329,7 +330,7 @@ Add AreaCap.
 */
 public void addAreaCap(StateMod_ReservoirAreaCap areacap)
 {	if (areacap != null) {
-		_areacapvals.addElement(areacap);
+		_areacapvals.add(areacap);
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(
@@ -344,7 +345,7 @@ Add climate.
 */
 public void addClimate(StateMod_ReservoirClimate climate) {
 	if (climate != null) {
-		_climate_Vector.addElement(climate);
+		_climate_Vector.add(climate);
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(
@@ -358,7 +359,7 @@ Adds a right to the rights linked list
 */
 public void addRight(StateMod_ReservoirRight right)
 {	if ( right != null ) {
-		_rights.addElement ( right );
+		_rights.add ( right );
 	}
 	// No need to set dirty because right is not stored in station file.
 }
@@ -471,7 +472,7 @@ This set of routines don't actually add an element to an array.  They already
 exist as part of a Vector of StateMod_ReservoirRight.  We are just connecting 
 pointers.
 */
-public static void connectAllRights(Vector reservoirs, Vector rights)
+public static void connectAllRights(List reservoirs, List rights)
 {	if (reservoirs == null) {
 		return;
 	}
@@ -479,7 +480,7 @@ public static void connectAllRights(Vector reservoirs, Vector rights)
 
 	StateMod_Reservoir res = null;
 	for (i = 0; i < num_res; i++) {
-		res = (StateMod_Reservoir)reservoirs.elementAt(i);
+		res = (StateMod_Reservoir)reservoirs.get(i);
 		if (res == null) {
 			continue;
 		}
@@ -498,11 +499,11 @@ series pairs.
 @param target_DayTS Vector of DayTS containing minimum/maximum target time
 series pairs.
 */
-public static void connectAllTS (	Vector reservoirs,
-					Vector content_MonthTS,
-					Vector content_DayTS,
-					Vector target_MonthTS,
-					Vector target_DayTS)
+public static void connectAllTS (	List reservoirs,
+		List content_MonthTS,
+		List content_DayTS,
+		List target_MonthTS,
+		List target_DayTS)
 {	if (reservoirs == null) {
 		return;
 	}
@@ -510,7 +511,7 @@ public static void connectAllTS (	Vector reservoirs,
 
 	StateMod_Reservoir res = null;
 	for (int i = 0; i < numRes; i++) {
-		res = (StateMod_Reservoir)reservoirs.elementAt(i);
+		res = (StateMod_Reservoir)reservoirs.get(i);
 		if (res == null) {
 			continue;
 		}
@@ -528,7 +529,7 @@ time series location and the reservoir identifier to make a match.
 The reservoir name is also set as the time series description.
 @param contentTS Vector of end-of-day content time series to search.
 */
-public void connectContentDayTS ( Vector contentTS )
+public void connectContentDayTS ( List contentTS )
 {	if (contentTS == null) {
 		return;
 	}
@@ -536,7 +537,7 @@ public void connectContentDayTS ( Vector contentTS )
 	DayTS ts = null;
 
 	for (int i = 0; i < numTS; i++) {
-		ts = (DayTS)contentTS.elementAt(i);
+		ts = (DayTS)contentTS.get(i);
 		if (ts == null) {
 			continue;
 		}
@@ -555,7 +556,7 @@ time series location and the reservoir identifier to make a match.
 The reservoir name is also set as the time series description.
 @param contentTS Vector of end-of-month content time series to search.
 */
-public void connectContentMonthTS ( Vector contentTS )
+public void connectContentMonthTS ( List contentTS )
 {	if (contentTS == null) {
 		return;
 	}
@@ -563,7 +564,7 @@ public void connectContentMonthTS ( Vector contentTS )
 	MonthTS ts = null;
 
 	for (int i = 0; i < numTS; i++) {
-		ts = (MonthTS)contentTS.elementAt(i);
+		ts = (MonthTS)contentTS.get(i);
 		if (ts == null) {
 			continue;
 		}
@@ -582,7 +583,7 @@ using the time series location and the reservoir identifier to make the match.
 The time series must be in the order of min, max, min, max, etc.
 @param targetTS The Vector of DayTS containing minimum and maximum targets.
 */
-public void connectTargetDayTS(Vector targetTS) {
+public void connectTargetDayTS(List targetTS) {
 	if (targetTS == null) {
 		return;
 	}
@@ -590,7 +591,7 @@ public void connectTargetDayTS(Vector targetTS) {
 	DayTS ts = null;
 
 	for (int i = 0; i < numTS; i++) {
-		ts = (DayTS)targetTS.elementAt(i);
+		ts = (DayTS)targetTS.get(i);
 		if (ts == null) {
 			continue;
 		}
@@ -598,7 +599,7 @@ public void connectTargetDayTS(Vector targetTS) {
 			setMinTargetDayTS(ts);
 			ts.setDescription(getName());
 			// now set max
-			ts = (DayTS)targetTS.elementAt(i+1);
+			ts = (DayTS)targetTS.get(i+1);
 			if (ts == null) {
 				continue;
 			}
@@ -618,7 +619,7 @@ using the time series location and the reservoir identifier to make the match.
 The time series must be in the order of min, max, min, max, etc.
 @param targetTS The Vector of MonthTS containing minimum and maximum targets.
 */
-public void connectTargetMonthTS(Vector targetTS) {
+public void connectTargetMonthTS(List targetTS) {
 	if (targetTS == null) {
 		return;
 	}
@@ -626,7 +627,7 @@ public void connectTargetMonthTS(Vector targetTS) {
 	MonthTS ts = null, ts1 = null, ts2 = null;
 
 	for (int i = 0; i < numTS; i++) {
-		ts = (MonthTS)targetTS.elementAt(i);
+		ts = (MonthTS)targetTS.get(i);
 		ts1 = null;
 		ts2 = null;
 		if (ts == null) {
@@ -642,7 +643,7 @@ public void connectTargetMonthTS(Vector targetTS) {
 			ts1 = ts;
 			// Now set max, which should be the next time series.
 			if ( (i + 1) < numTS ) {
-				ts2 = (MonthTS)targetTS.elementAt(i+1);
+				ts2 = (MonthTS)targetTS.get(i+1);
 				if (	!_id.equals(ts2.getIdentifier().
 					getLocation())) {
 					// Time series is for a different
@@ -654,13 +655,13 @@ public void connectTargetMonthTS(Vector targetTS) {
 			if ( (ts1 == null) && (ts2 == null) ) {
 				// Nothing to do...
 			}
-			else if ( ts2 == null ) {
-				// Only one time series is specified so it is
-				// the maximum...
+			else if ( (ts2 == null) && (ts1 != null) ) {
+				// Only one time series is specified so it is the maximum...
 				setMaxTargetMonthTS(ts1);
 				ts1.setDescription(getName());
 			}
-			else {	// Have both time series...
+			else {
+				// Have both time series...
 				setMinTargetMonthTS(ts1);
 				ts1.setDescription(getName());
 				setMaxTargetMonthTS(ts2);
@@ -675,7 +676,7 @@ public void connectTargetMonthTS(Vector targetTS) {
 Connect the rights to this instance of a reservoir.
 @param rights Vector of all reservoir rights.
 */
-public void connectRights ( Vector rights )
+public void connectRights ( List rights )
 {	if (rights == null) {
 		return;
 	}
@@ -684,12 +685,12 @@ public void connectRights ( Vector rights )
 
 	StateMod_ReservoirRight right;
 	for (i = 0; i < num_rights; i++) {
-		right = (StateMod_ReservoirRight)rights.elementAt(i);
+		right = (StateMod_ReservoirRight)rights.get(i);
 		if (right == null) {
 			continue;
 		}
 		if (_id.equals(right.getCgoto())) {
-			_rights.addElement ( right );
+			_rights.add ( right );
 		}
 	}
 	right = null;
@@ -710,7 +711,7 @@ Deletes the area capacity at the given index
 @param index of the area capacity to delete.
 */
 public void deleteAreaCapAt(int index) {
-	_areacapvals.removeElementAt(index);
+	_areacapvals.remove(index);
 	setDirty ( true );
 	if ( !_isClone && _dataset != null ) {
 		_dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_STATIONS, true);
@@ -722,7 +723,7 @@ Deletes the climate at the given index
 @param index of the climate to delete
 */
 public void deleteClimateAt(int index) {
-	_climate_Vector.removeElementAt(index);
+	_climate_Vector.remove(index);
 	setDirty ( true );
 	if ( !_isClone && _dataset != null ) {
 		_dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_STATIONS, true);
@@ -734,7 +735,7 @@ Deletes the owner at the given index
 @param index of the owner to delete
 */
 public void deleteAccountAt(int index) {
-	_owners.removeElementAt(index);
+	_owners.remove(index);
 	setDirty ( true );
 	if ( !_isClone && _dataset != null ) {
 		_dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_STATIONS, true);
@@ -758,9 +759,9 @@ public void disconnectRight ( StateMod_ReservoirRight right )
 	// Assume that more than on instance can exist, even though this is
 	// not allowed...
 	for ( int i = 0; i < size; i++ ) {
-		right2 = (StateMod_ReservoirRight)_rights.elementAt(i);
+		right2 = (StateMod_ReservoirRight)_rights.get(i);
 		if ( right2.getID().equalsIgnoreCase(right.getID()) ) {
-			_rights.removeElementAt(i);
+			_rights.remove(i);
 		}
 	}
 }
@@ -769,7 +770,7 @@ public void disconnectRight ( StateMod_ReservoirRight right )
 Disconnect all rights.
 */
 public void disconnectRights ()
-{	_rights.removeAllElements();
+{	_rights.clear();
 }
 
 /**
@@ -796,13 +797,13 @@ throws Throwable {
 Retrieve the owner at a particular index.
 */
 public StateMod_ReservoirAccount getAccount(int index) {
-	return((StateMod_ReservoirAccount)_owners.elementAt(index));
+	return((StateMod_ReservoirAccount)_owners.get(index));
 }
 
 /**
 Get all owners.
 */
-public Vector getAccounts()
+public List getAccounts()
 {	return _owners;
 }
 
@@ -810,13 +811,13 @@ public Vector getAccounts()
 Return the area capacity at a particular index.
 */
 public StateMod_ReservoirAreaCap getAreaCap(int index)
-{	return((StateMod_ReservoirAreaCap)_areacapvals.elementAt(index));
+{	return((StateMod_ReservoirAreaCap)_areacapvals.get(index));
 }
 
 /**
 Return all the area capacity data.
 */
-public Vector getAreaCaps ()
+public List getAreaCaps ()
 {	return _areacapvals;
 }
 
@@ -827,13 +828,13 @@ public StateMod_ReservoirClimate getClimate(int index) {
 	if (_climate_Vector.isEmpty() || index >= _climate_Vector.size()) {
 		return(new StateMod_ReservoirClimate());
 	}
-	return((StateMod_ReservoirClimate)_climate_Vector.elementAt(index));
+	return((StateMod_ReservoirClimate)_climate_Vector.get(index));
 }
 
 /**
 Return the climate station asignments.
 */
-public Vector getClimates() {
+public List getClimates() {
 	return _climate_Vector;
 }
 
@@ -843,13 +844,13 @@ aggregate/system list is currently supported so the same information is returned
 regardless of the year value.
 @return the list of collection part IDS, or null if not defined.
 */
-public Vector getCollectionPartIDs ( int year )
+public List getCollectionPartIDs ( int year )
 {	if ( __collection_Vector.size() == 0 ) {
 			return null;
 	}
 	//if ( __collection_part_type.equalsIgnoreCase("Reservoir") ) {
 		// The list of part IDs will be the first and only list...
-		return (Vector)__collection_Vector.elementAt(0);
+		return (List)__collection_Vector.get(0);
 	//}
 	/* Not supported
 	else if ( __collection_part_type.equalsIgnoreCase("Parcel") ) {
@@ -953,18 +954,18 @@ The options are of the form "0" if include_notes is false and
 @param include_notes Indicate whether notes should be added after the parameter
 values.
 */
-public static Vector getIresswChoices ( boolean include_notes )
-{	Vector v = new Vector(2);
-	v.addElement ( "0 - Off" );	// Possible options are listed here.
-	v.addElement ( "1 - On, do not store above reservoir targets" );
-	v.addElement ( "2 - 1 and adjust volume, etc. by dead storage" );
-	v.addElement ( "3 - On, do store above reservoir targets" );
+public static List getIresswChoices ( boolean include_notes )
+{	List v = new Vector(2);
+	v.add ( "0 - Off" );	// Possible options are listed here.
+	v.add ( "1 - On, do not store above reservoir targets" );
+	v.add ( "2 - 1 and adjust volume, etc. by dead storage" );
+	v.add ( "3 - On, do store above reservoir targets" );
 	if ( !include_notes ) {
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.setElementAt(StringUtil.getToken(
-				(String)v.elementAt(i), " ", 0, 0), i );
+			v.set(i,StringUtil.getToken(
+				(String)v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
@@ -991,7 +992,7 @@ public StateMod_ReservoirRight getLastRight()
 {	if ( (_rights == null) || (_rights.size() == 0) ) {
 		return null;
 	}
-	return (StateMod_ReservoirRight)_rights.elementAt(_rights.size() - 1);
+	return (StateMod_ReservoirRight)_rights.get(_rights.size() - 1);
 }
 
 /**
@@ -1048,7 +1049,7 @@ may reference evaporation station indentifiers but the identifiers may not
 actually exist).
 @return the number of evaporation time series for the reservoir.
 */
-public int getNumEvaporationMonthTS ( Vector tslist, boolean check_ts )
+public int getNumEvaporationMonthTS ( List tslist, boolean check_ts )
 {	// Loop through the evaporation data for this reservoir.  For each
 	// referenced evaporation station, if a matching time series is
 	// found, increment the count.
@@ -1058,7 +1059,7 @@ public int getNumEvaporationMonthTS ( Vector tslist, boolean check_ts )
 	int pos = 0;
 	StateMod_ReservoirClimate sta = null;
 	for ( int i = 0; i < nsta; i++ ) {
-		sta = (StateMod_ReservoirClimate)_climate_Vector.elementAt(i);
+		sta = (StateMod_ReservoirClimate)_climate_Vector.get(i);
 		if ( sta.getType() != StateMod_ReservoirClimate.CLIMATE_EVAP ) {
 			Message.printStatus ( 1, "", "SAMX climate " +
 				sta.getID() + " is not evap" );
@@ -1070,7 +1071,7 @@ public int getNumEvaporationMonthTS ( Vector tslist, boolean check_ts )
 		if ( pos >= 0 ) {
 			if ( check_ts ) {
 				// Make sure that the time series has data...
-				ts = (TS)tslist.elementAt(pos);
+				ts = (TS)tslist.get(pos);
 				if ( (ts != null) && ts.hasData() ) {
 					Message.printStatus ( 1, "",
 					"SAMX ts has data." );
@@ -1096,7 +1097,7 @@ may reference precipitation station indentifiers but the identifiers may not
 actually exist).
 @return the number of precipitation time series for the reservoir.
 */
-public int getNumPrecipitationMonthTS ( Vector tslist, boolean check_ts )
+public int getNumPrecipitationMonthTS ( List tslist, boolean check_ts )
 {	// Loop through the precipitation data for this reservoir.  For each
 	// referenced precipitation station, if a matching time series is
 	// found, then increment the count.
@@ -1106,14 +1107,14 @@ public int getNumPrecipitationMonthTS ( Vector tslist, boolean check_ts )
 	int pos = 0;
 	StateMod_ReservoirClimate sta = null;
 	for ( int i = 0; i < nsta; i++ ) {
-		sta = (StateMod_ReservoirClimate)_climate_Vector.elementAt(i);
+		sta = (StateMod_ReservoirClimate)_climate_Vector.get(i);
 		if ( sta.getType() != StateMod_ReservoirClimate.CLIMATE_PTPX ) {
 			continue;
 		}
 		pos = TSUtil.indexOf ( tslist, sta.getID(), "Location", 1 );
 		if ( pos >= 0 ) {
 			if ( check_ts ) {
-				ts = (TS)tslist.elementAt(pos);
+				ts = (TS)tslist.get(pos);
 				// Make sure that the time series has data...
 				if ( (ts != null) && ts.hasData() ) {
 					++nts;
@@ -1150,27 +1151,27 @@ The options are of the form "-1" if include_notes is false and
 @param include_notes Indicate whether notes should be added after the parameter
 values.
 */
-public static Vector getRdateChoices ( boolean include_notes )
-{	Vector v = new Vector(2);
-	v.addElement ( "-1 - Do not administer the one fill rule" );
-	v.addElement ( "1 - January" );	// Possible options are listed here.
-	v.addElement ( "2 - February" );
-	v.addElement ( "3 - March" );
-	v.addElement ( "4 - April" );
-	v.addElement ( "5 - May" );
-	v.addElement ( "6 - June" );
-	v.addElement ( "7 - July" );
-	v.addElement ( "8 - August" );
-	v.addElement ( "9 - September" );
-	v.addElement ( "10 - October" );
-	v.addElement ( "11 - November" );
-	v.addElement ( "12 - December" );
+public static List getRdateChoices ( boolean include_notes )
+{	List v = new Vector(2);
+	v.add ( "-1 - Do not administer the one fill rule" );
+	v.add ( "1 - January" );	// Possible options are listed here.
+	v.add ( "2 - February" );
+	v.add ( "3 - March" );
+	v.add ( "4 - April" );
+	v.add ( "5 - May" );
+	v.add ( "6 - June" );
+	v.add ( "7 - July" );
+	v.add ( "8 - August" );
+	v.add ( "9 - September" );
+	v.add ( "10 - October" );
+	v.add ( "11 - November" );
+	v.add ( "12 - December" );
 	if ( !include_notes ) {
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.setElementAt(StringUtil.getToken(
-				(String)v.elementAt(i), " ", 0, 0), i );
+			v.set(i, StringUtil.getToken(
+				(String)v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
@@ -1199,13 +1200,13 @@ public StateMod_ReservoirRight getRight(int index)
 {	if ( (index < 0) || (index >= _rights.size()) ) {
 		return null;
 	}
-	else {	return (StateMod_ReservoirRight)_rights.elementAt(index);
+	else {	return (StateMod_ReservoirRight)_rights.get(index);
 	}
 }
 /**
 get the rights
 */
-public Vector getRights()
+public List getRights()
 {	return _rights;
 }
 
@@ -1277,7 +1278,7 @@ Insert AreaCap
 */
 public void insertAreaCapAt(StateMod_ReservoirAreaCap areacap, int i) {
 	if (areacap != null) {
-		_areacapvals.insertElementAt(areacap, i);
+		_areacapvals.add(i,areacap);
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(
@@ -1291,12 +1292,12 @@ Read reservoir information in and store in a Vector.
 @param filename Name of file to read.
 @exception Exception if there is an error reading the file.
 */
-public static Vector readStateModFile(String filename)
+public static List readStateModFile(String filename)
 throws Exception
 {	String routine = "StateMod_Reservoir.readStateModFile";
-	Vector theReservoirs = new Vector();
+	List theReservoirs = new Vector();
 	String iline = null;
-	Vector v = new Vector(9);
+	List v = new Vector(9);
 	int [] format_0 = {	StringUtil.TYPE_STRING,
 				StringUtil.TYPE_STRING,
 				StringUtil.TYPE_STRING,
@@ -1385,12 +1386,12 @@ throws Exception
 					"line 1: " + iline);
 			}
 			StringUtil.fixedRead(iline, format_0, format_0w, v);
-			aReservoir.setID(((String)v.elementAt(0)).trim());
-			aReservoir.setName(((String)v.elementAt(1)).trim());
-			aReservoir.setCgoto(((String)v.elementAt(2)).trim());
-			aReservoir.setSwitch((Integer)v.elementAt(3));
-			aReservoir.setRdate((Double)v.elementAt(4));
-			aReservoir.setCresdy(((String)v.elementAt(5)).trim());
+			aReservoir.setID(((String)v.get(0)).trim());
+			aReservoir.setName(((String)v.get(1)).trim());
+			aReservoir.setCgoto(((String)v.get(2)).trim());
+			aReservoir.setSwitch((Integer)v.get(3));
+			aReservoir.setRdate((Double)v.get(4));
+			aReservoir.setCresdy(((String)v.get(5)).trim());
 
 			// line 2
 			iline = in.readLine();
@@ -1400,14 +1401,14 @@ throws Exception
 					"line 2: " + iline);
 			}
 			StringUtil.fixedRead(iline, format_1, format_1w, v);
-			aReservoir.setVolmin(((Double)v.elementAt(0)));
-			aReservoir.setVolmax(((Double)v.elementAt(1)));
-			aReservoir.setFlomax(((Double)v.elementAt(2)));
-			aReservoir.setDeadst(((Double)v.elementAt(3)));
-			int nowner =((Integer)v.elementAt(4)).intValue();
-			int nevap =((Integer)v.elementAt(5)).intValue();
-			int nptpx =((Integer)v.elementAt(6)).intValue();
-			int nrange =((Integer)v.elementAt(7)).intValue();
+			aReservoir.setVolmin(((Double)v.get(0)));
+			aReservoir.setVolmax(((Double)v.get(1)));
+			aReservoir.setFlomax(((Double)v.get(2)));
+			aReservoir.setDeadst(((Double)v.get(3)));
+			int nowner =((Integer)v.get(4)).intValue();
+			int nevap =((Integer)v.get(5)).intValue();
+			int nptpx =((Integer)v.get(6)).intValue();
+			int nrange =((Integer)v.get(7)).intValue();
 
 			// get the owner's information
 			if (Message.isDebugOn) {
@@ -1422,11 +1423,11 @@ throws Exception
 				anAccount = new StateMod_ReservoirAccount();
 				anAccount.setID ( "" + (i + 1) );
 				anAccount.setName(
-					((String)v.elementAt(0)).trim());
-				anAccount.setOwnmax( ((Double)v.elementAt(1)));
-				anAccount.setCurown( ((Double)v.elementAt(2)));
-				anAccount.setPcteva( ((Double)v.elementAt(3)));
-				anAccount.setN2own( ((Integer)v.elementAt(4)));
+					((String)v.get(0)).trim());
+				anAccount.setOwnmax( ((Double)v.get(1)));
+				anAccount.setCurown( ((Double)v.get(2)));
+				anAccount.setPcteva( ((Double)v.get(3)));
+				anAccount.setN2own( ((Integer)v.get(4)));
 				aReservoir.addAccount(anAccount);
 			}
 
@@ -1437,10 +1438,10 @@ throws Exception
 				StringUtil.fixedRead(iline, format_3,
 					format_3w, v);
 				anEvap = new StateMod_ReservoirClimate();
-				anEvap.setID( ((String)v.elementAt(0)).trim());
+				anEvap.setID( ((String)v.get(0)).trim());
 				anEvap.setType(
 				StateMod_ReservoirClimate.CLIMATE_EVAP);
-				anEvap.setWeight(((Double)v.elementAt(1)));
+				anEvap.setWeight(((Double)v.get(1)));
 				aReservoir.addClimate(anEvap);
 			}
 			
@@ -1451,10 +1452,10 @@ throws Exception
 				StringUtil.fixedRead(iline, format_3,
 					format_3w, v);
 				aPtpx = new StateMod_ReservoirClimate();
-				aPtpx.setID( ((String)v.elementAt(0)).trim());
+				aPtpx.setID( ((String)v.get(0)).trim());
 				aPtpx.setType(
 				StateMod_ReservoirClimate.CLIMATE_PTPX);
-				aPtpx.setWeight(((Double)v.elementAt(1)));
+				aPtpx.setWeight(((Double)v.get(1)));
 				aReservoir.addClimate(aPtpx);
 			}
 			
@@ -1467,16 +1468,16 @@ throws Exception
 				StateMod_ReservoirAreaCap anAreaCap = 
 					new StateMod_ReservoirAreaCap();
 				anAreaCap.setConten(
-					((Double)v.elementAt(0)));
+					((Double)v.get(0)));
 				anAreaCap.setSurarea(
-					((Double)v.elementAt(1)));
+					((Double)v.get(1)));
 				anAreaCap.setSeepage(
-					((Double)v.elementAt(2)));
+					((Double)v.get(2)));
 				aReservoir.addAreaCap(anAreaCap);
 			}
 
 			// add the reservoir to the vector of reservoirs
-			theReservoirs.addElement(aReservoir);
+			theReservoirs.add(aReservoir);
 		}
 	} catch (Exception e) {
 		routine = null;
@@ -1553,7 +1554,7 @@ data are dirty.
 @param owners Vector of StateMod_ReservoirAccount to set.  This should be a
 non-null Vector.
 */
-public void setAccounts ( Vector owners )
+public void setAccounts ( List owners )
 {	// All of the following work id done to make sure the dirty flag on the
 	// component and individual objects is correct.  We could just delete
 	// all existing accounts and re-add, but we don't know for sure that
@@ -1591,7 +1592,7 @@ public void setAccounts ( Vector owners )
 /**
 Set the area capacity vector.
 */
-public void setAreaCaps ( Vector areacapvals )
+public void setAreaCaps ( List areacapvals )
 {	_areacapvals = areacapvals ;
 }
 
@@ -1599,7 +1600,7 @@ public void setAreaCaps ( Vector areacapvals )
 /**
 Sets the climate station vector.
 */
-public void setClimates ( Vector climates ) {
+public void setClimates ( List climates ) {
 	_climate_Vector = climates;
 }
 
@@ -1608,16 +1609,16 @@ Set the collection list for an aggregate/system.  It is assumed that the
 collection applies to all years of data.
 @param ids The identifiers indicating the locations to collection.
 */
-public void setCollectionPartIDs ( Vector ids )
+public void setCollectionPartIDs ( List ids )
 {	if ( __collection_Vector == null ) {
 		__collection_Vector = new Vector ( 1 );
 		__collection_year = new int[1];
 	}
 	else {	// Remove the previous contents...
-		__collection_Vector.removeAllElements();
+		__collection_Vector.clear();
 	}
 	// Now assign...
-	__collection_Vector.addElement ( ids );
+	__collection_Vector.add ( ids );
 	__collection_year[0] = 0;
 }
 
@@ -1799,7 +1800,7 @@ public void setRdate(String rdate) {
 /**
 Set the rights
 */
-public void setRights ( Vector rights )
+public void setRights ( List rights )
 {	_rights = rights;
 }
 
@@ -1874,7 +1875,7 @@ is also maintained by calling this routine.
 */
 
 public static void writeStateModFile(String infile, String outfile, 
-Vector theReservoirs, String[] newComments)
+		List theReservoirs, String[] newComments)
 throws Exception {
 	writeStateModFile(infile, outfile, theReservoirs, newComments, true);
 }
@@ -1890,7 +1891,7 @@ is also maintained by calling this routine.
 @exception Exception if an error occurs.
 */
 public static void writeStateModFile(String infile, String outfile, 
-Vector theReservoirs, String[] newComments, boolean useDailyData)
+		List theReservoirs, String[] newComments, boolean useDailyData)
 throws Exception {
 	String routine = "StateMod_Reservoirs.writeStateModFile";
 	String [] comment_str = { "#" };
@@ -1930,10 +1931,10 @@ throws Exception {
 	StateMod_ReservoirAccount own = null;
 	StateMod_ReservoirClimate clmt = null;
 	String ch1 = null;
-	Vector v = new Vector(6);	
-	Vector ownv = null;
-	Vector climatev = null;
-	Vector areacapv = null;
+	List v = new Vector(6);	
+	List ownv = null;
+	List climatev = null;
+	List areacapv = null;
 
 	int i,j=0;
 	
@@ -2066,19 +2067,19 @@ throws Exception {
 	}
 	int nevap, nptpx, nareacap, nclmt, nowner;
 	for (i = 0; i < num; i++) {
-		res =(StateMod_Reservoir)theReservoirs.elementAt(i);
+		res =(StateMod_Reservoir)theReservoirs.get(i);
 		if (res == null) {
 			continue;
 		}
 
-		v.removeAllElements();
-		v.addElement(res.getID());
-		v.addElement(res.getName());
-		v.addElement(res.getCgoto());
-		v.addElement(new Integer(res.getSwitch()));
-		v.addElement(new Double(res.getRdate()));
+		v.clear();
+		v.add(res.getID());
+		v.add(res.getName());
+		v.add(res.getCgoto());
+		v.add(new Integer(res.getSwitch()));
+		v.add(new Double(res.getRdate()));
 		if (useDailyData) {
-			v.addElement(res.getCresdy());
+			v.add(res.getCresdy());
 		}
 		iline = StringUtil.formatString(v, format_0);
 		out.println(iline);
@@ -2094,15 +2095,15 @@ throws Exception {
 			Message.printDebug(50, routine, "nevap: " + nevap + 
 			" nptpx: " + nptpx);
 		}
-		v.removeAllElements();
-		v.addElement(new Double(res.getVolmin()));
-		v.addElement(new Double(res.getVolmax()));
-		v.addElement(new Double(res.getFlomax()));
-		v.addElement(new Double(res.getDeadst()));
-		v.addElement(new Integer(res.getNowner()));
-		v.addElement(new Integer(nevap));
-		v.addElement(new Integer(nptpx));
-		v.addElement(new Integer(res.getNrange()));
+		v.clear();
+		v.add(new Double(res.getVolmin()));
+		v.add(new Double(res.getVolmax()));
+		v.add(new Double(res.getFlomax()));
+		v.add(new Double(res.getDeadst()));
+		v.add(new Integer(res.getNowner()));
+		v.add(new Integer(nevap));
+		v.add(new Integer(nptpx));
+		v.add(new Integer(res.getNrange()));
 		iline = StringUtil.formatString(v, format_1);
 		out.println(iline);
 
@@ -2110,7 +2111,7 @@ throws Exception {
 		ownv = res.getAccounts();
 		nowner = ownv.size();
 		for (j = 0; j < nowner; j++) {
-			own = (StateMod_ReservoirAccount)ownv.elementAt(j);
+			own = (StateMod_ReservoirAccount)ownv.get(j);
 			if (own == null) {
 				out.println();
 				continue;
@@ -2119,12 +2120,12 @@ throws Exception {
 			if (desc.length()== 0) {
 				desc = "Account " + (j + 1);
 			}
-			v.removeAllElements();
-			v.addElement(desc);
-			v.addElement(new Double(own.getOwnmax()));
-			v.addElement(new Double(own.getCurown()));
-			v.addElement(new Double(own.getPcteva()));
-			v.addElement(new Integer(own.getN2own()));
+			v.clear();
+			v.add(desc);
+			v.add(new Double(own.getOwnmax()));
+			v.add(new Double(own.getCurown()));
+			v.add(new Double(own.getPcteva()));
+			v.add(new Integer(own.getN2own()));
 			iline = StringUtil.formatString(v, format_2);
 			out.println(iline);
 		}
@@ -2133,17 +2134,17 @@ throws Exception {
 		climatev = res.getClimates();
 		nclmt = climatev.size();
 		for (j = 0; j < nclmt; j++) {
-			clmt =(StateMod_ReservoirClimate)climatev.elementAt(j);
+			clmt =(StateMod_ReservoirClimate)climatev.get(j);
 			if (clmt == null) {
 				out.println();
 				continue;
 			}
 			if (	clmt.getType()==
 				StateMod_ReservoirClimate.CLIMATE_EVAP) {
-				v.removeAllElements();
-				v.addElement("Evaporation");
-				v.addElement(clmt.getID());
-				v.addElement(new Double(clmt.getWeight()));
+				v.clear();
+				v.add("Evaporation");
+				v.add(clmt.getID());
+				v.add(new Double(clmt.getWeight()));
 				iline = StringUtil.formatString(v, format_4);
 				out.println(iline);
 			}
@@ -2151,17 +2152,17 @@ throws Exception {
 
 		// Print the precip information
 		for (j = 0; j < nclmt; j++) {
-			clmt =(StateMod_ReservoirClimate)climatev.elementAt(j);
+			clmt =(StateMod_ReservoirClimate)climatev.get(j);
 			if (clmt == null) {
 				out.println();
 				continue;
 			}
 			if (	clmt.getType()==
 				StateMod_ReservoirClimate.CLIMATE_PTPX) {
-				v.removeAllElements();
-				v.addElement("Precipitatn");
-				v.addElement(clmt.getID());
-				v.addElement(new Double(clmt.getWeight()));
+				v.clear();
+				v.add("Precipitatn");
+				v.add(clmt.getID());
+				v.add(new Double(clmt.getWeight()));
 				iline = StringUtil.formatString(v, format_4);
 				out.println(iline);
 			}
@@ -2171,7 +2172,7 @@ throws Exception {
 		areacapv = res.getAreaCaps();
 		nareacap = areacapv.size();
 		for (j = 0; j < nareacap; j++) {
-			ac = (StateMod_ReservoirAreaCap)areacapv.elementAt(j);
+			ac = (StateMod_ReservoirAreaCap)areacapv.get(j);
 			if (ac == null) {
 				out.println();
 				continue;
@@ -2228,8 +2229,7 @@ printed to the top of the file, containing the commands used to generate the
 file.  Any strings in the body of the file that contain the field delimiter 
 will be wrapped in "...".  <p>This method also writes out Reservoir Area Cap,
 Account, Climate Data and Collections data to separate files.  If this method 
-is called with a filename parameter of "reservoirs.txt", six files will be 
-generated:
+is called with a filename parameter of "reservoirs.txt", six files will be generated:
 - reservoirs.txt
 - reservoirs_Accounts.txt
 - reservoirs_ContentAreaSeepage.txt
@@ -2243,15 +2243,14 @@ header (true) or to create a new file with a new header.
 @param data the Vector of objects to write.  
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter,
-boolean update, Vector data) 
+public static void writeListFile(String filename, String delimiter, boolean update, List data) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
 		size = data.size();
 	}
 	
-	Vector fields = new Vector();
+	List fields = new Vector();
 	fields.add("ID");
 	fields.add("Name");
 	fields.add("RiverNodeID");
@@ -2273,7 +2272,7 @@ throws Exception {
 	int comp = StateMod_DataSet.COMP_RESERVOIR_STATIONS;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.elementAt(i);
+		s = (String)fields.get(i);
 		names[i] = StateMod_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateMod_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -2296,11 +2295,11 @@ throws Exception {
 	String[] line = new String[fieldCount];
 	String[] newComments = null;
 	StringBuffer buffer = new StringBuffer();
-	Vector accounts = new Vector();
-	Vector areaCaps = new Vector();
-	Vector evapClimates = new Vector();
-	Vector precipClimates = new Vector();
-	Vector tempV = null;
+	List accounts = new Vector();
+	List areaCaps = new Vector();
+	List evapClimates = new Vector();
+	List precipClimates = new Vector();
+	List tempV = null;
 	
 	try {	
 	
@@ -2320,7 +2319,7 @@ throws Exception {
 		out.println(buffer.toString());
 		
 		for (int i = 0; i < size; i++) {
-			res = (StateMod_Reservoir)data.elementAt(i);
+			res = (StateMod_Reservoir)data.get(i);
 			
 			line[0] = StringUtil.formatString(res.getID(), 
 				formats[0]).trim();
@@ -2378,7 +2377,7 @@ throws Exception {
 			size2 = tempV.size();
 			for (j = 0; j < size2; j++) {
 				account = (StateMod_ReservoirAccount)
-					tempV.elementAt(j);
+					tempV.get(j);
 				account.setCgoto(res.getID());
 				accounts.add(account);
 			}
@@ -2387,7 +2386,7 @@ throws Exception {
 			size2 = tempV.size();
 			for (j = 0; j < size2; j++) {
 				areaCap = (StateMod_ReservoirAreaCap)
-					tempV.elementAt(j);
+					tempV.get(j);
 				areaCap.setCgoto(res.getID());
 				areaCaps.add(areaCap);
 			}
@@ -2396,7 +2395,7 @@ throws Exception {
 			size2 = tempV.size();
 			for (j = 0; j < size2; j++) {
 				climate = (StateMod_ReservoirClimate)
-					tempV.elementAt(j);
+					tempV.get(j);
 				climate.setCgoto(res.getID());
 				if (climate.getType() 
 				    == StateMod_ReservoirClimate.CLIMATE_PTPX) {
@@ -2445,8 +2444,7 @@ throws Exception {
 		StateMod_DataSet.COMP_RESERVOIR_STATION_EVAP_STATIONS);
 
 	String collectionFilename = front + "_Collections." + end;
-	writeCollectionListFile(collectionFilename, delimiter,
-		update, data);
+	writeCollectionListFile(collectionFilename, delimiter, update, data);
 }
 
 /**
@@ -2461,15 +2459,14 @@ header (true) or to create a new file with a new header.
 @param data the Vector of objects to write.  
 @throws Exception if an error occurs.
 */
-public static void writeCollectionListFile(String filename, 
-String delimiter, boolean update, Vector data) 
+public static void writeCollectionListFile(String filename, String delimiter, boolean update, List data) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
 		size = data.size();
 	}
 	
-	Vector fields = new Vector();
+	List fields = new Vector();
 	fields.add("LocationID");
 	fields.add("Year");
 	fields.add("CollectionType");
@@ -2482,7 +2479,7 @@ throws Exception {
 	int comp = StateMod_DataSet.COMP_RESERVOIR_STATION_COLLECTIONS;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.elementAt(i);
+		s = (String)fields.get(i);
 		names[i] = StateMod_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateMod_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -2506,7 +2503,7 @@ throws Exception {
 	String partType = null;
 	StringBuffer buffer = new StringBuffer();
 	PrintWriter out = null;
-	Vector ids = null;
+	List ids = null;
 	
 	try {	
 		out = IOUtil.processFileHeaders(
@@ -2524,7 +2521,7 @@ throws Exception {
 		out.println(buffer.toString());
 		
 		for (int i = 0; i < size; i++) {
-			res = (StateMod_Reservoir)data.elementAt(i);
+			res = (StateMod_Reservoir)data.get(i);
 			id = res.getID();
 			years = res.getCollectionYears();
 			if (years == null) {
@@ -2547,7 +2544,7 @@ throws Exception {
 				line[3] = StringUtil.formatString(partType,
 					formats[3]).trim();
 				line[4] = StringUtil.formatString(
-					((String)(ids.elementAt(k))),
+					((String)(ids.get(k))),
 					formats[4]).trim();
 
 				buffer = new StringBuffer();	

@@ -40,6 +40,7 @@
 package DWR.StateMod;
 
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.IO.IOUtil;
@@ -143,7 +144,7 @@ be null.
 be null.
 @return true if they are the same, false if not.
 */
-public static boolean equals(Vector v1, Vector v2) {
+public static boolean equals(List v1, List v2) {
 	String routine = "StateMod_ReservoirAreaCap.equals(Vector, Vector)";
 	StateMod_ReservoirAreaCap r1;	
 	StateMod_ReservoirAreaCap r2;	
@@ -156,13 +157,13 @@ public static boolean equals(Vector v1, Vector v2) {
 		// and data will need to be saved back into the dataset.
 		int size = v1.size();
 		Message.printStatus(1, routine, "Vectors are of size: " + size);
-		Vector v1Sort = StateMod_Util.sortStateMod_DataVector(v1);
-		Vector v2Sort = StateMod_Util.sortStateMod_DataVector(v2);
+		List v1Sort = StateMod_Util.sortStateMod_DataVector(v1);
+		List v2Sort = StateMod_Util.sortStateMod_DataVector(v2);
 		Message.printStatus(1, routine, "Vectors have been sorted");
 	
 		for (int i = 0; i < size; i++) {			
-			r1 = (StateMod_ReservoirAreaCap)v1Sort.elementAt(i);	
-			r2 = (StateMod_ReservoirAreaCap)v2Sort.elementAt(i);	
+			r1 = (StateMod_ReservoirAreaCap)v1Sort.get(i);	
+			r2 = (StateMod_ReservoirAreaCap)v2Sort.get(i);	
 			Message.printStatus(1, routine, r1.toString());
 			Message.printStatus(1, routine, r2.toString());
 			Message.printStatus(1, routine, "Element " + i 
@@ -369,14 +370,14 @@ header (true) or to create a new file with a new header.
 @throws Exception if an error occurs.
 */
 public static void writeListFile(String filename, String delimiter,
-boolean update, Vector data) 
+boolean update, List data) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
 		size = data.size();
 	}
 	
-	Vector fields = new Vector();
+	List fields = new Vector();
 	fields.add("ReservoirID");
 	fields.add("Content");
 	fields.add("Area");
@@ -388,7 +389,7 @@ throws Exception {
 	int comp = StateMod_Util.COMP_RESERVOIR_AREA_CAP;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.elementAt(i);
+		s = (String)fields.get(i);
 		names[i] = StateMod_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateMod_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -423,7 +424,7 @@ throws Exception {
 		out.println(buffer.toString());
 		
 		for (int i = 0; i < size; i++) {
-			area = (StateMod_ReservoirAreaCap)data.elementAt(i);
+			area = (StateMod_ReservoirAreaCap)data.get(i);
 			
 			line[0] = StringUtil.formatString(area.getCgoto(), 
 				formats[0]).trim();

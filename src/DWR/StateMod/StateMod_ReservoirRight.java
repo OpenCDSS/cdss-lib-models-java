@@ -86,6 +86,7 @@ package DWR.StateMod;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.IO.IOUtil;
@@ -223,7 +224,7 @@ be null.
 be null.
 @return true if they are the same, false if not.
 */
-public static boolean equals(Vector v1, Vector v2) {
+public static boolean equals(List v1, List v2) {
 	String routine = "StateMod_ReservoirRight.equals(Vector, Vector)";
 	StateMod_ReservoirRight r1;	
 	StateMod_ReservoirRight r2;	
@@ -236,13 +237,13 @@ public static boolean equals(Vector v1, Vector v2) {
 		// and data will need to be saved back into the dataset.
 		int size = v1.size();
 		Message.printStatus(1, routine, "Vectors are of size: " + size);
-		Vector v1Sort = StateMod_Util.sortStateMod_DataVector(v1);
-		Vector v2Sort = StateMod_Util.sortStateMod_DataVector(v2);
+		List v1Sort = StateMod_Util.sortStateMod_DataVector(v1);
+		List v2Sort = StateMod_Util.sortStateMod_DataVector(v2);
 		Message.printStatus(1, routine, "Vectors have been sorted");
 	
 		for (int i = 0; i < size; i++) {			
-			r1 = (StateMod_ReservoirRight)v1Sort.elementAt(i);	
-			r2 = (StateMod_ReservoirRight)v2Sort.elementAt(i);	
+			r1 = (StateMod_ReservoirRight)v1Sort.get(i);	
+			r2 = (StateMod_ReservoirRight)v2Sort.get(i);	
 			Message.printStatus(1, routine, r1.toString());
 			Message.printStatus(1, routine, r2.toString());
 			Message.printStatus(1, routine, "Element " + i 
@@ -361,20 +362,20 @@ The options are of the form "1" if include_notes is false and
 @param include_notes Indicate whether notes should be added after the parameter
 values.
 */
-public static Vector getIrescoChoices ( boolean include_notes )
-{	Vector v = new Vector(102);	// Allow for one blank in StateDMI
+public static List getIrescoChoices ( boolean include_notes )
+{	List v = new Vector(102);	// Allow for one blank in StateDMI
 	for ( int i = 1; i <= 50; i++ ) {
-		v.addElement ( "" + i + " - Account served by right" );
+		v.add ( "" + i + " - Account served by right" );
 	}
 	for ( int i = -1; i >= -50; i-- ) {
-		v.addElement ( "" + i + " - Fill first " + (-i) + " accounts" );
+		v.add ( "" + i + " - Fill first " + (-i) + " accounts" );
 	}
 	if ( !include_notes ) {
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.setElementAt(StringUtil.getToken(
-				(String)v.elementAt(i), " ", 0, 0), i );
+			v.set(i,StringUtil.getToken(
+				(String)v.get(i), " ", 0, 0));
 		}
 	}
 	return v;
@@ -402,7 +403,7 @@ The options are of the form "0" if include_notes is false and
 @param include_notes Indicate whether notes should be added after the parameter
 values.
 */
-public static Vector getIrsrswChoices ( boolean include_notes )
+public static List getIrsrswChoices ( boolean include_notes )
 {	return StateMod_DiversionRight.getIdvrswChoices ( include_notes );
 }
 
@@ -430,16 +431,16 @@ The options are of the form "1" if include_notes is false and
 @param include_notes Indicate whether notes should be added after the parameter
 values.
 */
-public static Vector getItyrsrChoices ( boolean include_notes )
-{	Vector v = new Vector(2);
-	v.addElement ( "1 - Standard" ); // Possible options are listed here.
-	v.addElement ( "-1 - Out of priority water right" );
+public static List getItyrsrChoices ( boolean include_notes )
+{	List v = new Vector(2);
+	v.add ( "1 - Standard" ); // Possible options are listed here.
+	v.add ( "-1 - Out of priority water right" );
 	if ( !include_notes ) {
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.setElementAt(StringUtil.getToken(
-				(String)v.elementAt(i), " ", 0, 0), i );
+			v.set(i,StringUtil.getToken(
+				(String)v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
@@ -482,16 +483,16 @@ The options are of the form "1" if include_notes is false and
 @param include_notes Indicate whether notes should be added after the parameter
 values.
 */
-public static Vector getN2fillChoices ( boolean include_notes )
-{	Vector v = new Vector(2);
-	v.addElement ( "1 - First fill" ); // Possible options are listed here.
-	v.addElement ( "2 - Second fill" );
+public static List getN2fillChoices ( boolean include_notes )
+{	List v = new Vector(2);
+	v.add ( "1 - First fill" ); // Possible options are listed here.
+	v.add ( "2 - Second fill" );
 	if ( !include_notes ) {
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.setElementAt(StringUtil.getToken(
-				(String)v.elementAt(i), " ", 0, 0), i );
+			v.set(i,StringUtil.getToken(
+				(String)v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
@@ -551,10 +552,10 @@ Read reservoir right information in and store in a Vector.
 @return Vector of reservoir right data
 @exception Exception if there is an error reading the file.
 */
-public static Vector readStateModFile(String filename)
+public static List readStateModFile(String filename)
 throws Exception {
 	String routine = "StateMod_ReservoirRight.readStateModFile";
-	Vector theRights = new Vector();
+	List theRights = new Vector();
 	int [] format_0 = {	StringUtil.TYPE_STRING,
 				StringUtil.TYPE_STRING,
 				StringUtil.TYPE_STRING,
@@ -576,7 +577,7 @@ throws Exception {
 				8,
 				12 };
 	String iline = null;
-	Vector v = new Vector(10);
+	List v = new Vector(10);
 	BufferedReader in = null;
 	StateMod_ReservoirRight aRight = null;
 
@@ -597,17 +598,17 @@ throws Exception {
 				Message.printDebug(50, routine, 
 				"iline: " + iline);
 			}
-			aRight.setID(((String)v.elementAt(0)).trim());
-			aRight.setName(((String)v.elementAt(1)).trim());
-			aRight.setCgoto(((String)v.elementAt(2)).trim());
-			aRight.setRtem(((String)v.elementAt(3)).trim());
-			aRight.setDcrres((Double)v.elementAt(4));
-			aRight.setSwitch((Integer)v.elementAt(5));
-			aRight.setIresco((Integer)v.elementAt(6));
-			aRight.setItyrstr((Integer)v.elementAt(7));
-			aRight.setN2fill((Integer)v.elementAt(8));
-			aRight.setCopid(((String)v.elementAt(9)).trim());
-			theRights.addElement(aRight);
+			aRight.setID(((String)v.get(0)).trim());
+			aRight.setName(((String)v.get(1)).trim());
+			aRight.setCgoto(((String)v.get(2)).trim());
+			aRight.setRtem(((String)v.get(3)).trim());
+			aRight.setDcrres((Double)v.get(4));
+			aRight.setSwitch((Integer)v.get(5));
+			aRight.setIresco((Integer)v.get(6));
+			aRight.setItyrstr((Integer)v.get(7));
+			aRight.setN2fill((Integer)v.get(8));
+			aRight.setCopid(((String)v.get(9)).trim());
+			theRights.add(aRight);
 		}
 	} 
 	catch (Exception e) {
@@ -806,7 +807,7 @@ is also maintained by calling this routine.
 @exception Exception if an error occurs.
 */
 public static void writeStateModFile(String infile, String outfile,
-Vector theRights, String []newComments)
+		List theRights, String []newComments)
 throws Exception {
 	writeStateModFile(infile, outfile, theRights, newComments,false);
 }
@@ -822,7 +823,7 @@ is also maintained by calling this routine.
 @exception Exception if an error occurs.
 */
 public static void writeStateModFile(String infile, String outfile,
-Vector theRights, String []newComments, boolean oldAdminNumFormat)
+		List theRights, String []newComments, boolean oldAdminNumFormat)
 throws Exception {
 	String [] comment_str = { "#" };	
 	String [] ignore_comment_str = { "#>" };	
@@ -842,7 +843,7 @@ throws Exception {
 	String iline = null;
 	String cmnt = "#>";
 	StateMod_ReservoirRight right = null;
-	Vector v = new Vector(10);
+	List v = new Vector(10);
 	String format_0 = null;
 	String format_1 = null;
 	if (oldAdminNumFormat) {
@@ -928,21 +929,21 @@ throws Exception {
 		num = theRights.size();
 	}
 	for (int i = 0; i < num; i++) {
-		right =(StateMod_ReservoirRight)theRights.elementAt(i);
+		right =(StateMod_ReservoirRight)theRights.get(i);
 		if (right == null) {
 			continue;
 		}
-		v.removeAllElements();
-		v.addElement(right.getID());
-		v.addElement(right.getName());
-		v.addElement(right.getCgoto());
-		v.addElement(right.getRtem());
-		v.addElement(new Double(right.getDcrres()));
-		v.addElement(new Integer(right.getSwitch()));
-		v.addElement(new Integer(right.getIresco()));
-		v.addElement(new Integer(right.getItyrstr()));
-		v.addElement(new Integer(right.getN2fill()));
-		v.addElement(right.getCopid());
+		v.clear();
+		v.add(right.getID());
+		v.add(right.getName());
+		v.add(right.getCgoto());
+		v.add(right.getRtem());
+		v.add(new Double(right.getDcrres()));
+		v.add(new Integer(right.getSwitch()));
+		v.add(new Integer(right.getIresco()));
+		v.add(new Integer(right.getItyrstr()));
+		v.add(new Integer(right.getN2fill()));
+		v.add(right.getCopid());
 		if (right.getDcrres()< 1.0) {
 			// Use the format for a small right(8.2)...
 			iline = StringUtil.formatString(v, format_1);
@@ -977,8 +978,7 @@ throws Exception {
 /**
 Writes a Vector of StateMod_XXX objects to a list file.  A header is 
 printed to the top of the file, containing the commands used to generate the 
-file.  Any strings in the body of the file that contain the field delimiter 
-will be wrapped in "...".  
+file.  Any strings in the body of the file that contain the field delimiter will be wrapped in "...".  
 @param filename the name of the file to which the data will be written.
 @param delimiter the delimiter to use for separating field values.
 @param update whether to update an existing file, retaining the current 
@@ -986,15 +986,14 @@ header (true) or to create a new file with a new header.
 @param data the Vector of objects to write.  
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter,
-boolean update, Vector data) 
+public static void writeListFile(String filename, String delimiter, boolean update, List data) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
 		size = data.size();
 	}
 	
-	Vector fields = new Vector();
+	List fields = new Vector();
 	fields.add("ID");
 	fields.add("Name");
 	fields.add("StructureID");
@@ -1012,7 +1011,7 @@ throws Exception {
 	int comp = StateMod_DataSet.COMP_RESERVOIR_RIGHTS;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.elementAt(i);
+		s = (String)fields.get(i);
 		names[i] = StateMod_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateMod_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -1047,7 +1046,7 @@ throws Exception {
 		out.println(buffer.toString());
 		
 		for (int i = 0; i < size; i++) {
-			right = (StateMod_ReservoirRight)data.elementAt(i);
+			right = (StateMod_ReservoirRight)data.get(i);
 			
 			line[0] = StringUtil.formatString(right.getID(), 
 				formats[0]).trim();

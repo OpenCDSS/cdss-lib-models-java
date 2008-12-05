@@ -28,6 +28,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -164,17 +165,17 @@ private DataSetComponent __locationComponent;
 /**
 Vector of locations data in the DataSetComponent.
 */
-private Vector __locationsVector;
+private List __locationsVector;
 
 private JWorksheet __delayWorksheet;
 private StateCU_Location_TableModel __delayModel;
 private DataSetComponent __delaysComponent;
-private Vector __delaysVector;
+private List __delaysVector;
 
 private JWorksheet __stationWorksheet;
 private StateCU_Location_TableModel __stationModel;
 private DataSetComponent __stationsComponent;
-private Vector __stationsVector;
+private List __stationsVector;
 
 private JWorksheet __rightsWorksheet;
 private StateCU_Location_TableModel __rightsModel;
@@ -197,15 +198,15 @@ public StateCU_Location_JFrame(StateCU_DataSet dataset, boolean editable) {
 	__dataset = dataset;
 	__locationComponent = __dataset.getComponentForComponentType(
 		StateCU_DataSet.COMP_CU_LOCATIONS);
-	__locationsVector = (Vector)__locationComponent.getData();
+	__locationsVector = (List)__locationComponent.getData();
 
 	__delaysComponent = __dataset.getComponentForComponentType(
 		StateCU_DataSet.COMP_DELAY_TABLE_ASSIGNMENT_MONTHLY);
-	__delaysVector = (Vector)__delaysComponent.getData();
+	__delaysVector = (List)__delaysComponent.getData();
 
 	__stationsComponent = __dataset.getComponentForComponentType(
 		StateCU_DataSet.COMP_CLIMATE_STATIONS);
-	__stationsVector = (Vector)__stationsComponent.getData();
+	__stationsVector = (List)__stationsComponent.getData();
 
 	__rightsComponent = __dataset.getComponentForComponentType(
 		StateCU_DataSet.COMP_DIVERSION_RIGHTS);
@@ -227,18 +228,18 @@ StateCU_Location location, boolean editable) {
 
 	__locationComponent = __dataset.getComponentForComponentType(
 		StateCU_DataSet.COMP_CU_LOCATIONS);
-	__locationsVector = (Vector)__locationComponent.getData();	
+	__locationsVector = (List)__locationComponent.getData();	
 
 	String id = location.getID();
 	int index = StateCU_Util.indexOf(__locationsVector, id);
 
 	__delaysComponent = __dataset.getComponentForComponentType(
 		StateCU_DataSet.COMP_DELAY_TABLE_ASSIGNMENT_MONTHLY);
-	__delaysVector = (Vector)__delaysComponent.getData();
+	__delaysVector = (List)__delaysComponent.getData();
 
 	__stationsComponent = __dataset.getComponentForComponentType(
 		StateCU_DataSet.COMP_CLIMATE_STATIONS);
-	__stationsVector = (Vector)__stationsComponent.getData();
+	__stationsVector = (List)__stationsComponent.getData();
 
 	__rightsComponent = __dataset.getComponentForComponentType(
 		StateCU_DataSet.COMP_DIVERSION_RIGHTS);
@@ -298,12 +299,11 @@ public void actionPerformed(ActionEvent e) {
 }
 
 /**
-Checks the text fields for validity before they are saved back into the
-data object.
+Checks the text fields for validity before they are saved back into the data object.
 @return true if the text fields are okay, false if not.
 */
 private boolean checkInput() {
-	Vector errors = new Vector();
+	List errors = new Vector();
 	int errorCount = 0;
 
 	// for each field, check if it contains valid input.  If not,
@@ -322,7 +322,7 @@ private boolean checkInput() {
 	String label = "The following error" + plural + "encountered "
 		+ "trying to save the record:\n";
 	for (int i = 0; i < errorCount; i++) {
-		label += errors.elementAt(i) + "\n";
+		label += errors.get(i) + "\n";
 	}
 	// TODO SAM 2007-03-01 Why not using Message/Logging?
 	new ResponseJDialog(this, 
@@ -333,7 +333,7 @@ private boolean checkInput() {
 private void displayTSViewJFrame(String action) {
 	String routine = "displayTSViewJFrame";
 
-	Vector tslist = new Vector();
+	List tslist = new Vector();
 
 	boolean graphAll = false;
 	if (action.equals(__BUTTON_GRAPH_ALL)) {
@@ -493,7 +493,7 @@ private void processTableSelection(int index) {
 	somethingSelected();
 
 	StateCU_Location location = (StateCU_Location)
-		__locationsVector.elementAt(__currentLocationIndex);
+		__locationsVector.get(__currentLocationIndex);
 
 	__locationIDJTextField.setText(location.getID());
 	__nameJTextField.setText(location.getName());
@@ -509,20 +509,20 @@ private void processTableSelection(int index) {
 	}
 	else {
 		__delayModel.setDelay(location, (StateCU_DelayTableAssignment)
-			__delaysVector.elementAt(dindex));
+			__delaysVector.get(dindex));
 	}
 
 	__stationModel.setStations(location, __stationsVector);
 
-	Vector v = (Vector)__rightsComponent.getData();
+	List v = (List)__rightsComponent.getData();
 	String did = null;
 	String sdid = null;
 	String id = location.getID();
 	int j = 0;
-	Vector rights = new Vector();
+	List rights = new Vector();
 	StateMod_DiversionRight right = null;
 	for (int i = 0; i < v.size(); i++) {
-		right = (StateMod_DiversionRight)v.elementAt(i);
+		right = (StateMod_DiversionRight)v.get(i);
 		did = right.getID();
 		j = did.indexOf(".");
 		if (j == -1) {
@@ -573,7 +573,7 @@ private void saveInformation(int record) {
 	}
 
 	StateCU_Location location = 
-		(StateCU_Location)__locationsVector.elementAt(record);
+		(StateCU_Location)__locationsVector.get(record);
 
 	location.setName(__nameJTextField.getText());
 	location.setID(__locationIDJTextField.getText());

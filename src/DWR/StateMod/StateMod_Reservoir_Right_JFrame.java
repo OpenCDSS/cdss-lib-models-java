@@ -63,6 +63,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -229,7 +230,7 @@ exist.
 */
 private int checkInput() {
 	String routine = "StateMod_Reservoir_Right_JFrame.checkInput";
-	Vector v = __worksheet.getAllData();
+	List v = __worksheet.getAllData();
 
 	int size = v.size();
 	StateMod_ReservoirRight right = null;
@@ -240,7 +241,7 @@ private int checkInput() {
 	String adminNum;
 	int fatalCount = 0;
 	for (int i = 0; i < size; i++) {
-		right = (StateMod_ReservoirRight)(v.elementAt(i));
+		right = (StateMod_ReservoirRight)(v.get(i));
 
 		id = right.getID();
 		name = right.getName();
@@ -354,8 +355,8 @@ private boolean saveData() {
 	boolean needToSave = false;
 
 	// if the Vectors are differently-sized, they're different
-	Vector wv = __worksheet.getAllData();		// w for worksheet
-	Vector rv = __currentRes.getRights();	// i for instream flow
+	List wv = __worksheet.getAllData();		// w for worksheet
+	List rv = __currentRes.getRights();	// i for instream flow
 
 	needToSave = !(StateMod_ReservoirRight.equals(wv, rv));
 
@@ -369,12 +370,12 @@ private boolean saveData() {
 
 	// at this point, remove the old diversion rights from the original
 	// component Vector
-	Vector reservoirRights =(Vector)(__dataset.getComponentForComponentType(
+	List reservoirRights =(List)(__dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_RESERVOIR_RIGHTS)).getData();
 	int size = rv.size();
 	StateMod_ReservoirRight ir;
 	for (int i = 0; i < size; i++) {
-		ir = (StateMod_ReservoirRight)rv.elementAt(i);
+		ir = (StateMod_ReservoirRight)rv.get(i);
 		StateMod_Util.removeFromVector(reservoirRights, ir);
 	}
 
@@ -384,7 +385,7 @@ private boolean saveData() {
 	StateMod_ReservoirRight cdr = null;
 
 	for (int i = 0; i < size; i++) {
-		ir = (StateMod_ReservoirRight)wv.elementAt(i);
+		ir = (StateMod_ReservoirRight)wv.get(i);
 		cdr = (StateMod_ReservoirRight)ir.clone();
 		cdr._isClone = false;
 		reservoirRights.add(cdr);
@@ -394,7 +395,7 @@ private boolean saveData() {
 	// REVISIT (JTS - 2003-10-10)
 	// here we are sorting the full data array -- may be a performance
 	// issue
-	Vector sorted=StateMod_Util.sortStateMod_DataVector(reservoirRights);
+	List sorted=StateMod_Util.sortStateMod_DataVector(reservoirRights);
 	__dataset.getComponentForComponentType(StateMod_DataSet.COMP_RESERVOIR_RIGHTS)
 		.setData(sorted);
 	__currentRes.disconnectRights();
@@ -509,12 +510,12 @@ public void setupGUI() {
 	int widths[] = null;
 	JScrollWorksheet jsw = null;
 	try {	
-		Vector accounts = __currentRes.getAccounts();
-		Vector v3 = new Vector();
+		List accounts = __currentRes.getAccounts();
+		List v3 = new Vector();
 		int size = accounts.size();
 		StateMod_ReservoirAccount ra = null;
 		for (int i = 0; i < size; i++) {
-			ra = (StateMod_ReservoirAccount)accounts.elementAt(i);
+			ra = (StateMod_ReservoirAccount)accounts.get(i);
 			v3.add("" + ra.getID() + " - " + ra.getName());
 		}
 		for (int i = 1; i < size; i++) {
@@ -522,12 +523,12 @@ public void setupGUI() {
 				+ " accounts");
 		}
 
-		Vector v = new Vector();
-		Vector v2 = __currentRes.getRights();
+		List v = new Vector();
+		List v2 = __currentRes.getRights();
 		StateMod_ReservoirRight rr;
 		for (int i = 0; i < v2.size(); i++) {
 			rr = (StateMod_ReservoirRight)
-				((StateMod_ReservoirRight)v2.elementAt(i))
+				((StateMod_ReservoirRight)v2.get(i))
 				.clone();
 			v.add(rr);
 		}		
@@ -540,19 +541,19 @@ public void setupGUI() {
 		jsw = new JScrollWorksheet(crr, tmr, p);
 		__worksheet = jsw.getJWorksheet();
 
-		Vector onOff = StateMod_ReservoirRight.getIrsrswChoices(true);
+		List onOff = StateMod_ReservoirRight.getIrsrswChoices(true);
 		__worksheet.setColumnJComboBoxValues(
 			StateMod_ReservoirRight_TableModel.COL_ON_OFF, onOff,
 			false);
 		__worksheet.setColumnJComboBoxValues(
 			StateMod_ReservoirRight_TableModel.COL_ACCOUNT_DIST,
 			v3, false);		
-		Vector rightTypes =
+		List rightTypes =
 			StateMod_ReservoirRight.getItyrsrChoices(true);
 		__worksheet.setColumnJComboBoxValues(
 			StateMod_ReservoirRight_TableModel.COL_RIGHT_TYPE,
 			rightTypes, false);
-		Vector fillTypes=StateMod_ReservoirRight.getN2fillChoices(true);
+		List fillTypes=StateMod_ReservoirRight.getN2fillChoices(true);
 		__worksheet.setColumnJComboBoxValues(
 			StateMod_ReservoirRight_TableModel.COL_FILL_TYPE,
 			fillTypes, false);

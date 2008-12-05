@@ -73,6 +73,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.PrintWriter;
 import java.util.StringTokenizer;
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.IO.IOUtil;
@@ -87,17 +88,17 @@ implements Cloneable, Comparable, StateMod_Component {
 /**
 Number of return values.
 */
-protected int 		_ndly;
+protected int _ndly;
 
 /**
 Double return values.
 */
-protected Vector	_ret_val;
+protected List _ret_val;
 
 /**
 Units for the data, as determined at read time.
 */
-protected String	_units;
+protected String _units;
 
 /**
 Indicate whether the delay table is for monthly or daily data.
@@ -134,7 +135,7 @@ public void addRet_val(double d) {
 Add a delay
 */
 public void addRet_val(Double D) {
-	_ret_val.addElement(D);
+	_ret_val.add(D);
 	setNdly(_ret_val.size());
 	if ( !_isClone && _dataset != null ) {
 		_dataset.setDirty(StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY, true);
@@ -190,7 +191,11 @@ public Object clone() {
 		d._ret_val = null;
 	}
 	else {
-		d._ret_val = (Vector)_ret_val.clone();
+		d._ret_val = new Vector();
+		int size = _ret_val.size();
+		for ( int i = 0; i < size; i++ ) {
+			d._ret_val.add( new Double(((Double)_ret_val.get(i)).doubleValue()) );
+		}
 	}
 
 	return d;
@@ -282,9 +287,9 @@ public int compareTo(Object o) {
 		}
 
 		for (int i = 0; i < size1; i++) {
-			D1 = (Double)_ret_val.elementAt(i);
+			D1 = (Double)_ret_val.get(i);
 			d1 = D1.doubleValue();
-			D2 = (Double)d._ret_val.elementAt(i);
+			D2 = (Double)d._ret_val.get(i);
 			d2 = D2.doubleValue();
 
 			if (d1 < d2) {
@@ -342,13 +347,13 @@ public int getNdly() {
 Get a delay corresponding to a particular index.
 */
 public double getRet_val(int index) {
-	return(((Double)_ret_val.elementAt(index)).doubleValue());
+	return(((Double)_ret_val.get(index)).doubleValue());
 }
 
 /**
 Get a entire vector of delays.
 */
-public Vector getRet_val() {
+public List getRet_val() {
 	return _ret_val;
 }
 
@@ -390,7 +395,7 @@ public void insertRet_val(double d, int index) {
 Insert a delay - same as add but the index of where to insert can be given
 */
 public void insertRet_val(Double D, int index) {
-	_ret_val.insertElementAt(D, index);
+	_ret_val.add(index, D);
 	setNdly(_ret_val.size());
 	if ( !_isClone && _dataset != null ) {
 		_dataset.setDirty(StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY, true);
@@ -419,7 +424,7 @@ Remove a delay.
 @param index the index of the delay to remove.
 */
 public void removeRet_val(int index) {
-	_ret_val.removeElementAt(index);
+	_ret_val.remove(index);
 	setNdly(_ret_val.size());
 	if ( !_isClone && _dataset != null ) {
 		_dataset.setDirty(StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY, true);
@@ -472,8 +477,8 @@ public void setNdly(String str) {
 	}
 }
 
-public void setRet_val(Vector v) {
-	_ret_val = v;
+public void setRet_val(List v) {
+	_ret_val = new Vector(v);
 	_ndly = _ret_val.size();
 }
 
@@ -488,10 +493,9 @@ public void setRet_val(int index, double d) {
 public void setRet_val(int index, Double d) {
 	if (d != null) {
 		if (getNdly() > index) {
-			_ret_val.setElementAt(d, index);
+			_ret_val.set(index, d);
 			if ( !_isClone && _dataset != null ) {
-				_dataset.setDirty(
-				StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY, true);
+				_dataset.setDirty( StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY, true);
 			}
 		}
 		else {	
@@ -573,12 +577,12 @@ values in each delay pattern.  -1 indicates variable number of values with
 values as percent (0-100).  -100 indicates variable number of values with values
 as fraction (0-1).
 */
-public static Vector readStateModFile (	String filename, boolean is_monthly,
+public static List readStateModFile (	String filename, boolean is_monthly,
 					int interv )
 throws Exception {
 	String routine = "StateMod_DelayTable.readStateModFile";
 	String iline;
-	Vector theDelays = new Vector(1);
+	List theDelays = new Vector(1);
 	StateMod_DelayTable aDelay = new StateMod_DelayTable ( is_monthly );
 	int num_read=0, total_num_to_read=0;
 	boolean reading=false;
@@ -609,7 +613,7 @@ throws Exception {
 				aDelay = new StateMod_DelayTable ( is_monthly );
 				num_read = 0;
 				reading = true;
-				theDelays.addElement(aDelay);
+				theDelays.add(aDelay);
 				aDelay.setTableID(split.nextToken());
 
 				if (interv < 0) {
@@ -681,7 +685,7 @@ routine which now does not mess with headers.
 @throws Exception if an error occurs
 */
 public static void writeStateModFile(String inputFile, String outputFile,
-Vector dly, String []newcomments, int interv)
+		List dly, String []newcomments, int interv)
 throws Exception {
 	PrintWriter	out = null;
 	String [] comment_str = { "#" };
@@ -703,7 +707,7 @@ throws Exception {
 	String m_format = "%8.2f";
 	StringBuffer iline = new StringBuffer();
 	StateMod_DelayTable delay = null;
-	Vector v = new Vector(2);
+	List v = new Vector(2);
 
 	out.println(cmnt);
 	out.println(cmnt
@@ -755,19 +759,19 @@ throws Exception {
 	}
 
 	for (int i = 0; i < ndly; i++) {
-		delay = (StateMod_DelayTable)dly.elementAt(i);
+		delay = (StateMod_DelayTable)dly.get(i);
 		num_printed = 0;
 		printing = true;
 
 		// create one delay entry of input
 		if (interv < 0) {
-			v.removeAllElements();
-			v.addElement(delay.getTableID());
-			v.addElement(new Integer(delay.getNdly()));
+			v.clear();
+			v.add(delay.getTableID());
+			v.add(new Integer(delay.getNdly()));
 		}
 		else {
-			v.removeAllElements();
-			v.addElement(delay.getTableID());
+			v.clear();
+			v.add(delay.getTableID());
 		}
 
 		while (printing) {
@@ -783,8 +787,8 @@ throws Exception {
 			}
 
 			for (int j = 0; j < num_to_print; j++) {
-				v.removeAllElements();
-				v.addElement(new Double(
+				v.clear();
+				v.add(new Double(
 					delay.getRet_val(j + num_printed)));
 				month_del = 
 					StringUtil.formatString(v, m_format);
@@ -817,26 +821,23 @@ throws Exception {
 /**
 Writes a Vector of StateMod_DelayTable objects to a list file.  A header is 
 printed to the top of the file, containing the commands used to generate the 
-file.  Any strings in the body of the file that contain the field delimiter 
-will be wrapped in "...".  
+file.  Any strings in the body of the file that contain the field delimiter will be wrapped in "...".  
 @param filename the name of the file to which the data will be written.
 @param delimiter the delimiter to use for separating field values.
 @param update whether to update an existing file, retaining the current 
 header (true) or to create a new file with a new header.
 @param data the Vector of objects to write.  
-@param comp the component type being written (to distinguish between daily and
-monthly delay tables).
+@param comp the component type being written (to distinguish between daily and monthly delay tables).
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter,
-boolean update, Vector data, int comp) 
+public static void writeListFile(String filename, String delimiter, boolean update, List data, int comp) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
 		size = data.size();
 	}
 	
-	Vector fields = new Vector();
+	List fields = new Vector();
 	fields.add("DelayTableID");
 	fields.add("Date");
 	fields.add("ReturnAmount");
@@ -846,7 +847,7 @@ throws Exception {
 	String[] formats = new String[fieldCount]; 
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.elementAt(i);
+		s = (String)fields.get(i);
 		names[i] = StateMod_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateMod_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -884,7 +885,7 @@ throws Exception {
 		out.println(buffer.toString());
 		
 		for (int i = 0; i < size; i++) {
-			delay = (StateMod_DelayTable)data.elementAt(i);
+			delay = (StateMod_DelayTable)data.get(i);
 			
 			id = delay.getID();
 			num = delay.getNdly();

@@ -21,7 +21,7 @@
 
 package DWR.StateMod;
 
-import java.util.Vector;
+import java.util.List;
 
 import RTi.Util.GUI.JScrollWorksheet;
 
@@ -41,8 +41,7 @@ which case an empty worksheet is shown.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_Reservoir_Data_JFrame(Vector data, String titleString,
-boolean editable)
+public StateMod_Reservoir_Data_JFrame(List data, String titleString, boolean editable)
 throws Exception {
 	super(data, titleString, editable);
 	setSize(795, getHeight());
@@ -51,22 +50,20 @@ throws Exception {
 }
 
 /**
-Called when the Apply button is pressed. This commits any changes to the data
-objects.
+Called when the Apply button is pressed. This commits any changes to the data objects.
 */
 protected void apply() {
 	StateMod_Reservoir res = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		res = (StateMod_Reservoir)_data.elementAt(i);
+		res = (StateMod_Reservoir)_data.get(i);
 		res.createBackup();
 	}
 }
 
 /**
 Creates a JScrollWorksheet for the current data and returns it.
-@return a JScrollWorksheet containing the data Vector passed in to the 
-constructor.
+@return a JScrollWorksheet containing the data Vector passed in to the constructor.
 */
 protected JScrollWorksheet buildJScrollWorksheet() 
 throws Exception {
@@ -80,27 +77,25 @@ throws Exception {
 }
 
 /**
-Called when the cancel button is pressed.  This discards any changes made to 
-the data objects.
+Called when the cancel button is pressed.  This discards any changes made to the data objects.
 */
 protected void cancel() {
 	StateMod_Reservoir res = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		res = (StateMod_Reservoir)_data.elementAt(i);
+		res = (StateMod_Reservoir)_data.get(i);
 		res.restoreOriginal();
 	}
 }
 
 /**
-Creates backups of all the data objects in the Vector so that changes can 
-later be cancelled if necessary.
+Creates backups of all the data objects in the Vector so that changes can later be cancelled if necessary.
 */
 protected void createDataBackup() {
 	StateMod_Reservoir res = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		res = (StateMod_Reservoir)_data.elementAt(i);
+		res = (StateMod_Reservoir)_data.get(i);
 		res.createBackup();
 	}
 }

@@ -77,6 +77,7 @@ package DWR.StateMod;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.IO.IOUtil;
@@ -177,7 +178,7 @@ be null.
 be null.
 @return true if they are the same, false if not.
 */
-public static boolean equals(Vector v1, Vector v2) {
+public static boolean equals(List v1, List v2) {
 	String routine = "StateMod_DiversionRight.equals(Vector, Vector)";
 	StateMod_DiversionRight r1;	
 	StateMod_DiversionRight r2;	
@@ -190,13 +191,13 @@ public static boolean equals(Vector v1, Vector v2) {
 		// and data will need to be saved back into the dataset.
 		int size = v1.size();
 		Message.printStatus(1, routine, "Vectors are of size: " + size);
-		Vector v1Sort = StateMod_Util.sortStateMod_DataVector(v1);
-		Vector v2Sort = StateMod_Util.sortStateMod_DataVector(v2);
+		List v1Sort = StateMod_Util.sortStateMod_DataVector(v1);
+		List v2Sort = StateMod_Util.sortStateMod_DataVector(v2);
 		Message.printStatus(1, routine, "Vectors have been sorted");
 	
 		for (int i = 0; i < size; i++) {			
-			r1 = (StateMod_DiversionRight)v1Sort.elementAt(i);	
-			r2 = (StateMod_DiversionRight)v2Sort.elementAt(i);	
+			r1 = (StateMod_DiversionRight)v1Sort.get(i);	
+			r2 = (StateMod_DiversionRight)v2Sort.get(i);	
 			Message.printStatus(1, routine, r1.toString());
 			Message.printStatus(1, routine, r2.toString());
 			Message.printStatus(1, routine, "Element " + i 
@@ -294,16 +295,15 @@ The options are of the form "0" if include_notes is false and
 @param include_notes Indicate whether notes should be added after the parameter
 values.
 */
-public static Vector getIdvrswChoices ( boolean include_notes )
-{	Vector v = new Vector(2);
-	v.addElement ( "0 - Off" );	// Possible options are listed here.
-	v.addElement ( "1 - On" );
+public static List getIdvrswChoices ( boolean include_notes )
+{	List v = new Vector(2);
+	v.add ( "0 - Off" );	// Possible options are listed here.
+	v.add ( "1 - On" );
 	if ( !include_notes ) {
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.setElementAt(StringUtil.getToken(
-				(String)v.elementAt(i), " ", 0, 0), i );
+			v.set(i, StringUtil.getToken((String)v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
@@ -362,16 +362,16 @@ public static boolean isDiversionRightFile ( String filename )
 }
 
 /**
-Parses the diverion rights file and returns a Vector of StateMod_DiversionRight
+Parses the diversion rights file and returns a Vector of StateMod_DiversionRight
 objects.
 @param filename the diversion rights file to parse.
 @return a Vector of StateMod_DiversionRight objects.
 @throws Exception if an error occurs
 */
-public static Vector readStateModFile(String filename)
+public static List readStateModFile(String filename)
 throws Exception {
 	String routine = "StateMod_DiversionRight.readStateModFile";
-	Vector theDivRights = new Vector();
+	List theDivRights = new Vector();
 
 	int format_0[] = {	StringUtil.TYPE_STRING,
 				StringUtil.TYPE_STRING,
@@ -386,7 +386,7 @@ throws Exception {
 				8,
 				8 };
 	String iline = null;
-	Vector v = new Vector(6);
+	List v = new Vector(6);
 	BufferedReader in = null;
 	StateMod_DiversionRight aRight = null;
 
@@ -410,16 +410,16 @@ throws Exception {
 				"iline: " + iline);
 			}
 			StringUtil.fixedRead(iline, format_0, format_0w, v);
-			aRight.setID(((String)v.elementAt(0)).trim()); 
-			aRight.setName(((String)v.elementAt(1)).trim());
-			aRight.setCgoto(((String)v.elementAt(2)).trim());
-			aRight.setIrtem(((String)v.elementAt(3)).trim());
-			aRight.setDcrdiv((Double)v.elementAt(4));
-			aRight.setSwitch((Integer)v.elementAt(5));
+			aRight.setID(((String)v.get(0)).trim()); 
+			aRight.setName(((String)v.get(1)).trim());
+			aRight.setCgoto(((String)v.get(2)).trim());
+			aRight.setIrtem(((String)v.get(3)).trim());
+			aRight.setDcrdiv((Double)v.get(4));
+			aRight.setSwitch((Integer)v.get(5));
 			// Mark as clean because set methods may have marked
 			// dirty...
 			aRight.setDirty ( false );
-			theDivRights.addElement(aRight);
+			theDivRights.add(aRight);
 		}
 	} 
 	catch (Exception e) {
@@ -519,7 +519,7 @@ Writes a diversion rights file.
 @throws Exception if an error occurs.
 */
 public static void writeStateModFile(String infile, String outfile,
-Vector theRights, String[] newComments)
+		List theRights, String[] newComments)
 throws Exception {
 	writeStateModFile(infile, outfile, theRights, newComments,false);
 }
@@ -534,7 +534,7 @@ Writes a diversion rights file.
 @throws Exception if an error occurs.
 */
 public static void writeStateModFile(String infile, String outfile,
-Vector theRights, String[] newComments, boolean useOldAdminNumFormat)
+		List theRights, String[] newComments, boolean useOldAdminNumFormat)
 throws Exception {
 	String [] comment_str = { "#" };
 	String [] ignore_comment_str = { "#>" };
@@ -559,7 +559,7 @@ throws Exception {
 		format_0 = "%-12.12s%-24.24s%-12.12s%16.16s%8.2F%8d";
 	}
 	StateMod_DiversionRight right = null;
-	Vector v = new Vector(6);
+	List v = new Vector(6);
 
 		// print out the nonpermanent header
 		out.println(cmnt);
@@ -605,17 +605,17 @@ throws Exception {
 			num = theRights.size();
 		}
 		for (int i = 0; i < num; i++) {
-			right = (StateMod_DiversionRight)theRights.elementAt(i);
+			right = (StateMod_DiversionRight)theRights.get(i);
 			if (right == null) {
 				continue;
 			}
-			v.removeAllElements();
-			v.addElement(right.getID());
-			v.addElement(right.getName());
-			v.addElement(right.getCgoto());
-			v.addElement(right.getIrtem());
-			v.addElement(new Double(right.getDcrdiv()));
-			v.addElement(new Integer(right.getSwitch()));
+			v.clear();
+			v.add(right.getID());
+			v.add(right.getName());
+			v.add(right.getCgoto());
+			v.add(right.getIrtem());
+			v.add(new Double(right.getDcrdiv()));
+			v.add(new Integer(right.getSwitch()));
 			iline = StringUtil.formatString(v, format_0);
 			out.println(iline);
 		}
@@ -652,8 +652,7 @@ public String toString() {
 /**
 Writes a Vector of StateMod_Diversion objects to a list file.  A header is 
 printed to the top of the file, containing the commands used to generate the 
-file.  Any strings in the body of the file that contain the field delimiter 
-will be wrapped in "...".  
+file.  Any strings in the body of the file that contain the field delimiter will be wrapped in "...".  
 @param filename the name of the file to which the data will be written.
 @param delimiter the delimiter to use for separating field values.
 @param update whether to update an existing file, retaining the current 
@@ -661,15 +660,14 @@ header (true) or to create a new file with a new header.
 @param data the Vector of objects to write.  
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter,
-boolean update, Vector data) 
+public static void writeListFile(String filename, String delimiter, boolean update, List data) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
 		size = data.size();
 	}
 	
-	Vector fields = new Vector();
+	List fields = new Vector();
 	fields.add("ID");
 	fields.add("Name");
 	fields.add("StationID");
@@ -683,7 +681,7 @@ throws Exception {
 	int comp = StateMod_DataSet.COMP_DIVERSION_RIGHTS;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.elementAt(i);
+		s = (String)fields.get(i);
 		names[i] = StateMod_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateMod_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -719,7 +717,7 @@ throws Exception {
 		out.println(buffer.toString());
 		
 		for (int i = 0; i < size; i++) {
-			right = (StateMod_DiversionRight)data.elementAt(i);
+			right = (StateMod_DiversionRight)data.get(i);
 			
 			line[0] = StringUtil.formatString(right.getID(), 
 				formats[0]).trim();

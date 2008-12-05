@@ -20,6 +20,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.IO.IOUtil;
@@ -168,12 +169,12 @@ Read the StateCU delay table assignment file and return as a Vector of
 StateCU_DelayTableAssignment.
 @param filename filename containing delay table assignment records.
 */
-public static Vector readStateCUFile ( String filename )
+public static List readStateCUFile ( String filename )
 throws IOException
 {	String rtn = "StateCU_DelayTableAssignment.readStateCUFile";
 	String iline = null;
-	Vector v = new Vector ( 8 );
-	Vector data_Vector = new Vector ( 100 );	// Data to return.
+	List v = new Vector ( 8 );
+	List data_Vector = new Vector ( 100 );	// Data to return.
 	int i;
 	int format_0[] = {	StringUtil.TYPE_STRING,	// CU Location
 				StringUtil.TYPE_STRING};// Num delays
@@ -205,9 +206,8 @@ throws IOException
 		data = new StateCU_DelayTableAssignment();
 
 		StringUtil.fixedRead ( iline, format_0, format_0w, v );
-		data.setID ( ((String)v.elementAt(0)).trim() ); 
-		num_delay_tables =
-				((String)v.elementAt(1)).trim();
+		data.setID ( ((String)v.get(0)).trim() ); 
+		num_delay_tables = ((String)v.get(1)).trim();
 		if (	(num_delay_tables.length() != 0) &&
 			StringUtil.isInteger(num_delay_tables)) {
 			data.setNumDelayTables (
@@ -218,18 +218,17 @@ throws IOException
 			StringUtil.fixedRead (
 				iline.substring(14 + i*16), format_1,
 				format_1w, v );
-			percent = ((String)v.elementAt(0)).trim();
+			percent = ((String)v.get(0)).trim();
 			if (	(percent.length() != 0) &&
 				StringUtil.isDouble(percent)) {
 				data.setDelayTablePercent (
 				StringUtil.atod(percent), i );
 			}
-			data.setDelayTableID (
-				((String)v.elementAt(1)).trim(), i ); 
+			data.setDelayTableID ( ((String)v.get(1)).trim(), i ); 
 		}
 
 		// Add the StateCU_DelayTableAssignment to the vector...
-		data_Vector.addElement ( data );
+		data_Vector.add ( data );
 	}
 	if ( in != null ) {
 		in.close();
@@ -293,7 +292,7 @@ if no comments are available.
 @exception IOException if there is an error writing the file.
 */
 public static void writeStateCUFile (	String filename_prev, String filename,
-					Vector data_Vector,
+					List data_Vector,
 					String [] new_comments )
 throws IOException
 {	String [] comment_str = { "#" };
@@ -320,7 +319,7 @@ Write a Vector of StateCU_DelayTableAssignment to an opened file.
 @param out output PrintWriter.
 @exception IOException if an error occurs.
 */
-private static void writeVector ( Vector data_Vector, PrintWriter out )
+private static void writeVector ( List data_Vector, PrintWriter out )
 throws IOException
 {	int i,j;
 	String cmnt = "#>";
@@ -356,7 +355,7 @@ throws IOException
 	int ndt = 0;
 	StringBuffer b = new StringBuffer();
 	for ( i=0; i<num; i++ ) {
-		data = (StateCU_DelayTableAssignment)data_Vector.elementAt(i);
+		data = (StateCU_DelayTableAssignment)data_Vector.get(i);
 		if ( data == null ) {
 			continue;
 		}
@@ -387,15 +386,14 @@ header (true) or to create a new file with a new header.
 @param data the Vector of objects to write.  
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter,
-boolean update, Vector data) 
+public static void writeListFile(String filename, String delimiter, boolean update, List data) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
 		size = data.size();
 	}
 	
-	Vector fields = new Vector();
+	List fields = new Vector();
 	fields.add("ID");
 	fields.add("DelayTableID");
 	fields.add("Percent");
@@ -406,7 +404,7 @@ throws Exception {
 	int comp = StateCU_DataSet.COMP_DELAY_TABLE_ASSIGNMENT_MONTHLY;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.elementAt(i);
+		s = (String)fields.get(i);
 		names[i] = StateCU_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateCU_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -444,7 +442,7 @@ throws Exception {
 		out.println(buffer.toString());
 		
 		for (int i = 0; i < size; i++) {
-			dly = (StateCU_DelayTableAssignment)data.elementAt(i);
+			dly = (StateCU_DelayTableAssignment)data.get(i);
 			
 			num = dly.getNumDelayTables();
 			id = dly.getID();

@@ -94,6 +94,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -265,7 +266,7 @@ private DataSetComponent __instreamFlowComponent;
 /**
 The Vector of instream flows to be displayed.
 */
-private Vector __instreamFlowsVector;
+private List __instreamFlowsVector;
 
 /**
 Constructor.
@@ -286,11 +287,11 @@ public StateMod_InstreamFlow_JFrame (	StateMod_DataSet dataset,
 	__instreamFlowComponent = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_INSTREAM_STATIONS);
 
-	__instreamFlowsVector = (Vector)__instreamFlowComponent.getData();
+	__instreamFlowsVector = (List)__instreamFlowComponent.getData();
 	int size = __instreamFlowsVector.size();
 	StateMod_InstreamFlow isf = null;
 	for (int i = 0; i < size; i++) {
-		isf = (StateMod_InstreamFlow)__instreamFlowsVector.elementAt(i);
+		isf = (StateMod_InstreamFlow)__instreamFlowsVector.get(i);
 		isf.createBackup();
 	}
 
@@ -320,11 +321,11 @@ public StateMod_InstreamFlow_JFrame (	StateMod_DataSet dataset,
 	__instreamFlowComponent = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_INSTREAM_STATIONS);
 
-	__instreamFlowsVector = (Vector)__instreamFlowComponent.getData();
+	__instreamFlowsVector = (List)__instreamFlowComponent.getData();
 	int size = __instreamFlowsVector.size();
 	StateMod_InstreamFlow isf = null;
 	for (int i = 0; i < size; i++) {
-		isf = (StateMod_InstreamFlow)__instreamFlowsVector.elementAt(i);
+		isf = (StateMod_InstreamFlow)__instreamFlowsVector.get(i);
 		isf.createBackup();
 	}
 
@@ -381,7 +382,7 @@ public void actionPerformed(ActionEvent e) {
 		boolean changed = false;
 		for (int i = 0; i < size; i++) {
 			isf = (StateMod_InstreamFlow)
-				__instreamFlowsVector.elementAt(i);
+				__instreamFlowsVector.get(i);
 			if (!changed && isf.changed()) {
 				changed = true;
 			}
@@ -405,7 +406,7 @@ public void actionPerformed(ActionEvent e) {
 		boolean changed = false;
 		for (int i = 0; i < size; i++) {
 			isf = (StateMod_InstreamFlow)
-				__instreamFlowsVector.elementAt(i);
+				__instreamFlowsVector.get(i);
 			if (!changed && isf.changed()) {
 				changed = true;
 			}
@@ -421,7 +422,7 @@ public void actionPerformed(ActionEvent e) {
 		StateMod_InstreamFlow isf = null;
 		for (int i = 0; i < size; i++) {
 			isf = (StateMod_InstreamFlow)
-				__instreamFlowsVector.elementAt(i);
+				__instreamFlowsVector.get(i);
 			isf.restoreOriginal();
 		}			
 		if ( __dataset_wm != null ) {
@@ -441,7 +442,7 @@ public void actionPerformed(ActionEvent e) {
 
 		// set placeholder to current instream flow
 		StateMod_InstreamFlow insf = (StateMod_InstreamFlow)
-			__instreamFlowsVector.elementAt(
+			__instreamFlowsVector.get(
 			__currentInstreamFlowIndex);
 
 		if (e.getSource() == __waterRightsJButton) {
@@ -462,7 +463,7 @@ data object.
 @return true if the text fields are okay, false if not.
 */
 private boolean checkInput() {
-	Vector errors = new Vector();
+	List errors = new Vector();
 	int errorCount = 0;
 
 	// for each field, check if it contains valid input.  If not,
@@ -481,7 +482,7 @@ private boolean checkInput() {
 	String label = "The following error" + plural + "encountered "
 		+ "trying to save the record:\n";
 	for (int i = 0; i < errorCount; i++) {
-		label += errors.elementAt(i) + "\n";
+		label += errors.get(i) + "\n";
 	}
 	new ResponseJDialog(this, 
 		"Errors encountered", label, ResponseJDialog.OK);
@@ -533,7 +534,7 @@ private void displayTSViewJFrame(Object o)
 	}
 
 	StateMod_InstreamFlow insf = (StateMod_InstreamFlow)
-		__instreamFlowsVector.elementAt(__currentInstreamFlowIndex);
+		__instreamFlowsVector.get(__currentInstreamFlowIndex);
 
 	// display_props.set("HelpKey", "TSTool.ExportMenu");
 	display_props.set("TSViewTitleString",
@@ -548,7 +549,7 @@ private void displayTSViewJFrame(Object o)
 	props.set("Product.TotalWidth", "600");
 	props.set("Product.TotalHeight", "400");
 
-	Vector tslist = new Vector();
+	List tslist = new Vector();
 
 	int sub = 0;
 	int its = 0;
@@ -754,13 +755,13 @@ private void populateInstreamDailyID() {
 	__instreamDailyID.add("4 - Daily time series interpolated from "
 		+ "midpoints of monthly data");
 
-	Vector idNameVector = StateMod_Util.createDataList(
+	List idNameVector = StateMod_Util.createDataList(
 		__instreamFlowsVector, true);
 	int size = idNameVector.size();
 
 	String s = null;
 	for (int i = 0; i < size; i++) {
-		s = (String)idNameVector.elementAt(i);
+		s = (String)idNameVector.get(i);
 		__instreamDailyID.add(s.trim());
 	}
 }
@@ -789,7 +790,7 @@ private void processTableSelection(int index) {
 	checkTimeSeriesButtonsStates();
 
 	StateMod_InstreamFlow insf = (StateMod_InstreamFlow)
-		__instreamFlowsVector.elementAt(__currentInstreamFlowIndex);
+		__instreamFlowsVector.get(__currentInstreamFlowIndex);
 		
 	__instreamFlowStationID.setText(insf.getID());
 	__instreamFlowName.setText(insf.getName());
@@ -897,7 +898,7 @@ private void saveInformation(int record) {
 
 	// set placeholder to last instream flow
 	StateMod_InstreamFlow insf = (StateMod_InstreamFlow)
-		__instreamFlowsVector.elementAt(record);
+		__instreamFlowsVector.get(record);
 
 	insf.setID(__instreamFlowStationID.getText().trim());
 	insf.setName(__instreamFlowName.getText().trim());
@@ -1369,7 +1370,7 @@ public void windowClosing(WindowEvent e) {
 	boolean changed = false;
 	for (int i = 0; i < size; i++) {
 		isf = (StateMod_InstreamFlow)
-			__instreamFlowsVector.elementAt(i);
+			__instreamFlowsVector.get(i);
 		if (!changed && isf.changed()) {
 			changed = true;
 		}

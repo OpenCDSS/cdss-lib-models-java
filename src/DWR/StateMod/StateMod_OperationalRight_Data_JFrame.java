@@ -19,7 +19,7 @@
 
 package DWR.StateMod;
 
-import java.util.Vector;
+import java.util.List;
 
 import RTi.Util.GUI.JScrollWorksheet;
 
@@ -39,35 +39,31 @@ which case an empty worksheet is shown.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_OperationalRight_Data_JFrame(Vector data, String titleString,
-boolean editable)
+public StateMod_OperationalRight_Data_JFrame(List data, String titleString, boolean editable)
 throws Exception {
 	super(data, titleString, editable);
 }
 
 /**
-Called when the Apply button is pressed. This commits any changes to the data
-objects.
+Called when the Apply button is pressed. This commits any changes to the data objects.
 */
 protected void apply() {
 	StateMod_OperationalRight op = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		op = (StateMod_OperationalRight)_data.elementAt(i);
+		op = (StateMod_OperationalRight)_data.get(i);
 		op.createBackup();
 	}
 }
 
 /**
 Creates a JScrollWorksheet for the current data and returns it.
-@return a JScrollWorksheet containing the data Vector passed in to the 
-constructor.
+@return a JScrollWorksheet containing the data Vector passed in to the constructor.
 */
 protected JScrollWorksheet buildJScrollWorksheet() 
 throws Exception {
 	StateMod_OperationalRight_Data_TableModel tableModel 
-		= new StateMod_OperationalRight_Data_TableModel(_data, 
-		_editable);
+		= new StateMod_OperationalRight_Data_TableModel(_data, _editable);
 	StateMod_OperationalRight_Data_CellRenderer cellRenderer 
 		= new StateMod_OperationalRight_Data_CellRenderer(tableModel);
 
@@ -76,27 +72,25 @@ throws Exception {
 }
 
 /**
-Called when the cancel button is pressed.  This discards any changes made to 
-the data objects.
+Called when the cancel button is pressed.  This discards any changes made to the data objects.
 */
 protected void cancel() {
 	StateMod_OperationalRight op = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		op = (StateMod_OperationalRight)_data.elementAt(i);
+		op = (StateMod_OperationalRight)_data.get(i);
 		op.restoreOriginal();
 	}
 }
 
 /**
-Creates backups of all the data objects in the Vector so that changes can 
-later be cancelled if necessary.
+Creates backups of all the data objects in the Vector so that changes can later be cancelled if necessary.
 */
 protected void createDataBackup() {
 	StateMod_OperationalRight op = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		op = (StateMod_OperationalRight)_data.elementAt(i);
+		op = (StateMod_OperationalRight)_data.get(i);
 		op.createBackup();
 	}
 }

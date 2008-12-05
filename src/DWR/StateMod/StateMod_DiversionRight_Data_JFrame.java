@@ -21,7 +21,7 @@
 
 package DWR.StateMod;
 
-import java.util.Vector;
+import java.util.List;
 
 import RTi.Util.GUI.JScrollWorksheet;
 
@@ -42,22 +42,20 @@ which case an empty worksheet is shown.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_DiversionRight_Data_JFrame(Vector data, String titleString,
-boolean editable)
+public StateMod_DiversionRight_Data_JFrame(List data, String titleString, boolean editable)
 throws Exception {
 	super(data, titleString, editable);
 	setSize(655, getHeight());
 }
 
 /**
-Called when the Apply button is pressed. This commits any changes to the data
-objects.
+Called when the Apply button is pressed. This commits any changes to the data objects.
 */
 protected void apply() {
 	StateMod_DiversionRight right = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		right = (StateMod_DiversionRight)_data.elementAt(i);
+		right = (StateMod_DiversionRight)_data.get(i);
 		right.createBackup();
 	}
 }
@@ -81,14 +79,13 @@ throws Exception {
 }
 
 /**
-Called when the cancel button is pressed.  This discards any changes made to 
-the data objects.
+Called when the cancel button is pressed.  This discards any changes made to the data objects.
 */
 protected void cancel() {
 	StateMod_DiversionRight right = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		right = (StateMod_DiversionRight)_data.elementAt(i);
+		right = (StateMod_DiversionRight)_data.get(i);
 		right.restoreOriginal();
 	}
 }
@@ -101,7 +98,7 @@ protected void createDataBackup() {
 	StateMod_DiversionRight right = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		right = (StateMod_DiversionRight)_data.elementAt(i);
+		right = (StateMod_DiversionRight)_data.get(i);
 		right.createBackup();
 	}
 }

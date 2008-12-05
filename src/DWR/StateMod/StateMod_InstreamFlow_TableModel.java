@@ -34,7 +34,7 @@
 
 package DWR.StateMod;
 
-import java.util.Vector;
+import java.util.List;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 
@@ -60,8 +60,7 @@ public final static int
 	COL_DEMAND_TYPE = 	4;
 	
 /**
-Whether all the columns are shown (false) or only the ID and name columns are
-shown (true).
+Whether all the columns are shown (false) or only the ID and name columns are shown (true).
 */
 private boolean __compactForm = true;
 	
@@ -76,7 +75,7 @@ Constructor.
 @param editable whether the table data is editable or not
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_InstreamFlow_TableModel(Vector data, boolean editable)
+public StateMod_InstreamFlow_TableModel(List data, boolean editable)
 throws Exception {
 	this(data, editable, true);
 }
@@ -85,11 +84,10 @@ throws Exception {
 Constructor.  
 @param data the data that will be displayed in the table.
 @param editable whether the table data is editable or not
-@param compactForm whether to show only the ID and name column (true) or all
-columns.
+@param compactForm whether to show only the ID and name column (true) or all columns.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_InstreamFlow_TableModel(Vector data, boolean editable,
+public StateMod_InstreamFlow_TableModel(List data, boolean editable,
 boolean compactForm) 
 throws Exception {
 	if (data == null) {
@@ -220,8 +218,7 @@ public int getRowCount() {
 }
 
 /**
-Returns the data that should be placed in the JTable at the given row 
-and column.
+Returns the data that should be placed in the JTable at the given row and column.
 @param row the row for which to return data.
 @param col the column for which to return data.
 @return the data that should be placed in the JTable at the given row and col.
@@ -231,7 +228,7 @@ public Object getValueAt(int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	StateMod_InstreamFlow isf = (StateMod_InstreamFlow)_data.elementAt(row);
+	StateMod_InstreamFlow isf = (StateMod_InstreamFlow)_data.get(row);
 	switch (col) {
 		case COL_ID: 		return isf.getID();
 		case COL_NAME: 		return isf.getName();
@@ -245,8 +242,7 @@ public Object getValueAt(int row, int col) {
 /**
 Returns whether the cell is editable or not.  Currently no cells are editable.
 @param rowIndex unused.
-@param columnIndex the index of the column to check whether it is editable
-or not.
+@param columnIndex the index of the column to check whether it is editable.
 @return whether the cell is editable or not.
 */
 public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -266,7 +262,7 @@ public void setValueAt(Object value, int row, int col)
 {	if (_sortOrder != null) {
 		row = _sortOrder[row];
 	}
-	StateMod_InstreamFlow isf = (StateMod_InstreamFlow)_data.elementAt(row);
+	StateMod_InstreamFlow isf = (StateMod_InstreamFlow)_data.get(row);
 	switch (col) {
 		case COL_ID:
 			isf.setID((String)value);

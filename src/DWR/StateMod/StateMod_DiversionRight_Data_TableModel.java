@@ -14,6 +14,7 @@
 
 package DWR.StateMod;
 
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
@@ -30,8 +31,7 @@ extends JWorksheet_AbstractRowTableModel implements StateMod_Data_TableModel {
 /**
 Number of columns in the table model.  For table models that display rights
 for a single diversion, the tables only have 6 columns.  Table models that
-display rights for 1+ diversions have 7.  The variable is modified in the
-constructor.
+display rights for 1+ diversions have 7.  The variable is modified in the constructor.
 */
 private int __COLUMNS = 6;
 
@@ -52,14 +52,12 @@ Whether the table data can be edited.
 private boolean __editable = true;
 
 /**
-Constructor.  This builds the table model for displaying the diversion right 
-data.
+Constructor.  This builds the table model for displaying the diversion right data.
 @param dataset the dataset for the data being displayed.
 @param data the diversion right data that will be displayed in the table.
 @param editable whether the data can be edited
 */
-public StateMod_DiversionRight_Data_TableModel(StateMod_DataSet dataset, 
-Vector data, boolean editable) {
+public StateMod_DiversionRight_Data_TableModel(StateMod_DataSet dataset, List data, boolean editable) {
 	if (data == null) {
 		_data = new Vector();
 	}
@@ -72,20 +70,18 @@ Vector data, boolean editable) {
 }
 
 /**
-Constructor.  This builds the table model for displaying the diversion right 
-data.
+Constructor.  This builds the table model for displaying the diversion right data.
 @param dataset the dataset for the data being displayed.
 @param data the diversion right data that will be displayed in the table.
 @param editable whether the data can be edited
 */
-public StateMod_DiversionRight_Data_TableModel(Vector data, boolean editable) {
+public StateMod_DiversionRight_Data_TableModel(List data, boolean editable) {
 	this(null, data, editable);
 }
 
 /**
 Returns the class of the data stored in a given column.
-@param col the column for which to return the data class.  This is
-base 0.
+@param col the column for which to return the data class.  This is base 0.
 @return the class of the data stored in a given column.
 */
 public Class getColumnClass (int col) {
@@ -161,8 +157,7 @@ public String getColumnName(int col) {
 Returns the format that the specified column should be displayed in when
 the table is being displayed in the given table format. 
 @param col column for which to return the format.  This is base 0.
-@return the format (as used by StringUtil.formatString() in which to display the
-column.
+@return the format (as used by StringUtil.formatString() in which to display the column.
 */
 public String getFormat(int col) {
 	switch (col) {
@@ -214,8 +209,7 @@ public Object getValueAt(int row, int col) {
 	if (_sortOrder != null) {
 		row = _sortOrder[row];
 	}
-	StateMod_DiversionRight dr 
-		= (StateMod_DiversionRight)_data.elementAt(row);
+	StateMod_DiversionRight dr = (StateMod_DiversionRight)_data.get(row);
 
 	switch (col) {
 		case COL_RIGHT_ID:	return dr.getID();
@@ -276,8 +270,7 @@ public void setValueAt(Object value, int row, int col) {
 	int ival;
 	int index;
 
-	StateMod_DiversionRight dr = 
-		(StateMod_DiversionRight)_data.elementAt(row);
+	StateMod_DiversionRight dr = (StateMod_DiversionRight)_data.get(row);
 	switch (col) {
 		case COL_RIGHT_ID:	
 			dr.setID((String)value);

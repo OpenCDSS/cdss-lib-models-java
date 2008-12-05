@@ -121,6 +121,7 @@ package DWR.StateMod;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Vector;
 
 import DWR.StateCU.StateCU_IrrigationPracticeTS;
@@ -151,8 +152,8 @@ private double		_areaw;		// Irrigated area associated with well
 private int		_irturnw;	// Use type
 private int		_demsrcw;	// Irrig acreage source
 private double		_diveff[];	// 12 efficiency values 
-private Vector		_rivret;	// Return flow data
-private Vector		_depl;		// Depletion data
+private List		_rivret;	// Return flow data
+private List		_depl;		// Depletion data
 private MonthTS		_pumping_MonthTS;// Historical time series (monthly)
 private double []	__weh_monthly = null;	// 12 monthly and annual average
 						// over period, used by StateDMI
@@ -166,7 +167,7 @@ private double []	__cwr_monthly = null;	// 12 monthly and annual average
 						// over period, used by StateDMI
 private DayTS		_cwr_DayTS;	// time series - only used when idvcow2
 					// is "N/A".
-private Vector		_rights;	// Well rights
+private List		_rights;	// Well rights
 private double		_primary;	// priority switch
 private GeoRecord	_georecord;	// Link to spatial data.
 
@@ -174,7 +175,7 @@ private GeoRecord	_georecord;	// Link to spatial data.
 Vector of parcel data, in particular to allow StateDMI to detect when a
 diverion had no data.
 */
-protected Vector _parcel_Vector = new Vector();
+protected List _parcel_Vector = new Vector();
 
 // Collections are set up to be specified by year for wells, using parcels as
 // the parts.
@@ -194,7 +195,7 @@ private String __collection_type = StateMod_Util.MISSING_STRING;
 private String __collection_part_type = COLLECTION_PART_TYPE_PARCEL;
 					// Used by DMI software - currently no
 					// options.
-private Vector __collection_Vector = null;
+private List __collection_Vector = null;
 					// The identifiers for data that are
 					// collected - null if not a collection
 					// location.  This is actually a Vector
@@ -254,7 +255,7 @@ public void addDepletion(StateMod_ReturnFlow depl)
 {	if ( depl == null ) {
 		return;
 	}
-	_depl.addElement(depl);
+	_depl.add(depl);
 	setDirty ( true );
 	if ( !_isClone && _dataset != null ) {
 		_dataset.setDirty(StateMod_DataSet.COMP_WELL_STATIONS, true);
@@ -270,7 +271,7 @@ public void addReturnFlow(StateMod_ReturnFlow rivret)
 {	if ( rivret == null ) {
 		return;
 	}
-	_rivret.addElement(rivret);
+	_rivret.add(rivret);
 	setDirty ( true );
 	if ( !_isClone && _dataset != null ) {
 		_dataset.setDirty(StateMod_DataSet.COMP_WELL_STATIONS, true);
@@ -282,7 +283,7 @@ Adds a right to the rights linked list
 */
 public void addRight(StateMod_WellRight right)
 {	if ( right != null ) {
-		_rights.addElement ( right );
+		_rights.add ( right );
 	}
 	// No need to set dirty because right is not stored in station file.
 }
@@ -355,11 +356,11 @@ PropList props )
 	double wes_well_parcel_area = 0.0;
 					// Area of parcels with wells for well
 					// station.
-	Vector parcel_Vector;		// List of parcels for well station.
+	List parcel_Vector;		// List of parcels for well station.
 								// potential problems.
 	// check proplist for valid values
 	boolean checkRights = false;
-	Vector wer_Vector = null;
+	List wer_Vector = null;
 	if ( props != null ) {
 		// Check if well rights are being evaluated.
 		// Validating Well Station Rights by checking Station data
@@ -369,13 +370,13 @@ PropList props )
 			DataSetComponent wer_comp = 
 				dataset.getComponentForComponentType (
 				StateMod_DataSet.COMP_WELL_RIGHTS );
-			wer_Vector = (Vector)wer_comp.getData();
+			wer_Vector = (List)wer_comp.getData();
 		}
 	}
 	id_i = getID();
 	if ( getAreaw() <= 0.0 ) {
 		if ( checkRights ) {
-			Vector rights = 
+			List rights = 
 				StateMod_Util.getRightsForStation ( id_i, wer_Vector );
 			if ( rights != null  &&  rights.size() != 0 ) {
 				return null;
@@ -392,7 +393,7 @@ PropList props )
 			wes_parcel_count = parcel_Vector.size();
 			for ( int j = 0; j < wes_parcel_count; j++ ) {
 				parcel = (StateMod_Parcel)
-					parcel_Vector.elementAt(j);
+					parcel_Vector.get(j);
 				if ( parcel.getArea() > 0.0 ) {
 					wes_parcel_area +=
 						parcel.getArea();
@@ -428,14 +429,14 @@ Performs data checks for the capacity portion of this component.
 @return String[] - Array of data that has been checked. Returns null if
 there were no problems found.
  */
-public String[] checkComponentData_Capacity( Vector wer_Vector, int count )
+public String[] checkComponentData_Capacity( List wer_Vector, int count )
 {
 	double decree;
 	double decree_sum;
 	int onoff = 0;		// On/off switch for right
 	int size_rights = 0;
 	String id_i = null;
-	Vector rights = null;
+	List rights = null;
 	id_i = getID();
 	StateMod_WellRight wer_i = null;
 	rights = StateMod_Util.getRightsForStation ( id_i, wer_Vector );
@@ -452,7 +453,7 @@ public String[] checkComponentData_Capacity( Vector wer_Vector, int count )
 	// capacity)...
 	decree_sum = 0.0;
 	for ( int iright = 0; iright < size_rights; iright++ ) {
-		wer_i = (StateMod_WellRight)rights.elementAt(iright);
+		wer_i = (StateMod_WellRight)rights.get(iright);
 		decree = wer_i.getDcrdivw();
 		onoff = getSwitch();
 		if ( decree < 0.0 ) {
@@ -634,7 +635,7 @@ already exists. This method just connects next and previous pointers.
 @param wells all wells
 @param rights all rights
 */
-public static void connectAllRights ( Vector wells, Vector rights ) {
+public static void connectAllRights ( List wells, List rights ) {
 	if ( (wells == null) || (rights == null) ) {
 		return;
 	}
@@ -642,7 +643,7 @@ public static void connectAllRights ( Vector wells, Vector rights ) {
 	
 	StateMod_Well well = null;
 	for (int i = 0; i < num_wells; i++) {
-		well = (StateMod_Well)wells.elementAt(i);
+		well = (StateMod_Well)wells.get(i);
 		if (well == null) {
 			continue;
 		}
@@ -658,14 +659,14 @@ or null.
 @param cwr_DayTS Vector of daily consumptive water requirement time series,
 or null.
 */
-public static void connectAllTS (	Vector wells,
-					Vector pumping_MonthTS,
-					Vector pumping_DayTS,
-					Vector demand_MonthTS,
-					Vector demand_DayTS,
-					Vector ipy_YearTS,
-					Vector cwr_MonthTS,
-					Vector cwr_DayTS )
+public static void connectAllTS (	List wells,
+		List pumping_MonthTS,
+		List pumping_DayTS,
+		List demand_MonthTS,
+		List demand_DayTS,
+		List ipy_YearTS,
+		List cwr_MonthTS,
+		List cwr_DayTS )
 {	if (wells == null) {
 		return;
 	}
@@ -674,7 +675,7 @@ public static void connectAllTS (	Vector wells,
 	
 	StateMod_Well well = null;
 	for (int i = 0; i < num_wells; i++) {
-		well = (StateMod_Well)wells.elementAt(i);
+		well = (StateMod_Well)wells.get(i);
 		if (well == null) {
 			continue;
 		}
@@ -707,7 +708,7 @@ Connect daily CWR series pointer.  The connection is made using the
 value of "cdividyw" for the well.
 @param tslist demand time series
 */
-public void connectCWRDayTS ( Vector tslist )
+public void connectCWRDayTS ( List tslist )
 {	if ( tslist == null) {
 		return;
 	}
@@ -716,7 +717,7 @@ public void connectCWRDayTS ( Vector tslist )
 
 	DayTS ts;
 	for (int i = 0; i < num_TS; i++) {
-		ts = (DayTS)tslist.elementAt(i);
+		ts = (DayTS)tslist.get(i);
 		if ( ts == null ) {
 			return;
 		}
@@ -733,7 +734,7 @@ Connect monthly CWR time series pointer.  The time series name is set to
 that of the well.
 @param tslist Time series list.
 */
-public void connectCWRMonthTS ( Vector tslist )
+public void connectCWRMonthTS ( List tslist )
 {	if ( tslist == null ) {
 		return;
 	}
@@ -742,7 +743,7 @@ public void connectCWRMonthTS ( Vector tslist )
 	MonthTS ts;
 	_cwr_MonthTS = null;
 	for ( int i = 0; i < num_TS; i++ ) {
-		ts = (MonthTS)tslist.elementAt(i);
+		ts = (MonthTS)tslist.get(i);
 		if ( ts == null ) {
 			continue;
 		}
@@ -758,7 +759,7 @@ public void connectCWRMonthTS ( Vector tslist )
 Connect daily demand time series pointer to this object.
 @param tslist Daily demand time series.
 */
-public void connectDemandDayTS ( Vector tslist )
+public void connectDemandDayTS ( List tslist )
 {	if ( tslist == null ) {
 		return;
 	}
@@ -768,7 +769,7 @@ public void connectDemandDayTS ( Vector tslist )
 
 	DayTS ts = null;
 	for (int i = 0; i < num_TS; i++) {
-		ts = (DayTS)tslist.elementAt(i);
+		ts = (DayTS)tslist.get(i);
 		if (ts == null) {
 			continue;
 		}
@@ -784,7 +785,7 @@ public void connectDemandDayTS ( Vector tslist )
 Connect monthly demand time series pointer to this object.
 @param tslist demand time series
 */
-public void connectDemandMonthTS ( Vector tslist )
+public void connectDemandMonthTS ( List tslist )
 {	if ( tslist == null) {
 		return;
 	}
@@ -793,7 +794,7 @@ public void connectDemandMonthTS ( Vector tslist )
 
 	MonthTS ts = null;
 	for (int i = 0; i < num_TS; i++) {
-		ts = (MonthTS)tslist.elementAt(i);
+		ts = (MonthTS)tslist.get(i);
 		if (ts == null) {
 			continue;
 		}
@@ -809,7 +810,7 @@ public void connectDemandMonthTS ( Vector tslist )
 Connect the irrigation practice TS object.
 @param tslist Time series list.
 */
-public void connectIrrigationPracticeYearTS ( Vector tslist )
+public void connectIrrigationPracticeYearTS ( List tslist )
 {	if ( tslist == null ) {
 		return;
 	}
@@ -818,7 +819,7 @@ public void connectIrrigationPracticeYearTS ( Vector tslist )
 	_ipy_YearTS = null;
 	StateCU_IrrigationPracticeTS ipy_YearTS;
 	for ( int i = 0; i < num_TS; i++ ) {
-		ipy_YearTS = (StateCU_IrrigationPracticeTS)tslist.elementAt(i);
+		ipy_YearTS = (StateCU_IrrigationPracticeTS)tslist.get(i);
 		if ( ipy_YearTS == null ) {
 			continue;
 		}
@@ -833,7 +834,7 @@ public void connectIrrigationPracticeYearTS ( Vector tslist )
 Connect daily pumping time series pointer to this object.
 @param tslist Daily pumping time series.
 */
-public void connectPumpingDayTS ( Vector tslist )
+public void connectPumpingDayTS ( List tslist )
 {	if ( tslist == null ) {
 		return;
 	}
@@ -843,7 +844,7 @@ public void connectPumpingDayTS ( Vector tslist )
 
 	DayTS ts = null;
 	for (int i = 0; i < num_TS; i++) {
-		ts = (DayTS)tslist.elementAt(i);
+		ts = (DayTS)tslist.get(i);
 		if (ts == null) {
 			continue;
 		}
@@ -859,7 +860,7 @@ public void connectPumpingDayTS ( Vector tslist )
 Connect monthly pumping time series pointer to this object.
 @param tslist monthly pumping time series
 */
-public void connectPumpingMonthTS ( Vector tslist )
+public void connectPumpingMonthTS ( List tslist )
 {	if ( tslist == null) {
 		return;
 	}
@@ -868,7 +869,7 @@ public void connectPumpingMonthTS ( Vector tslist )
 
 	MonthTS ts = null;
 	for (int i = 0; i < num_TS; i++) {
-		ts = (MonthTS)tslist.elementAt(i);
+		ts = (MonthTS)tslist.get(i);
 		if (ts == null) {
 			continue;
 		}
@@ -884,7 +885,7 @@ public void connectPumpingMonthTS ( Vector tslist )
 Create a list of references to rights for this well.
 @param rights all rights
 */
-public void connectRights(Vector rights) {
+public void connectRights(List rights) {
 	if (rights == null) {
 		return;
 	}
@@ -893,12 +894,12 @@ public void connectRights(Vector rights) {
 
 	StateMod_WellRight right = null;
 	for (int i = 0; i < num_rights; i++) {
-		right = (StateMod_WellRight)rights.elementAt(i);
+		right = (StateMod_WellRight)rights.get(i);
 		if (right == null) {
 			continue;
 		} 
 		if (_id.equalsIgnoreCase(right.getCgoto())) {
-			_rights.addElement ( right );
+			_rights.add ( right );
 		}
 	}
 }
@@ -910,7 +911,7 @@ delete depletion table record at a specified index
 specified depletion data object
 */
 public void deleteDepletionAt(int index) {
-	_depl.removeElementAt(index);
+	_depl.remove(index);
 	setDirty ( true );
 	if ( !_isClone && _dataset != null ) {
 		_dataset.setDirty(StateMod_DataSet.COMP_WELL_STATIONS, true);
@@ -923,7 +924,7 @@ return flow nodes variable.
 @param index index of return flow data object to delete
 */
 public void deleteReturnFlowAt(int index) {
-	_rivret.removeElementAt(index);
+	_rivret.remove(index);
 	setDirty ( true );
 	if ( !_isClone && _dataset != null ) {
 		_dataset.setDirty(StateMod_DataSet.COMP_WELL_STATIONS, true);
@@ -946,9 +947,9 @@ public void disconnectRight ( StateMod_WellRight right )
 	// Assume that more than on instance can exist, even though this is
 	// not allowed...
 	for ( int i = 0; i < size; i++ ) {
-		right2 = (StateMod_WellRight)_rights.elementAt(i);
+		right2 = (StateMod_WellRight)_rights.get(i);
 		if ( right2.getID().equalsIgnoreCase(right.getID()) ) {
-			_rights.removeElementAt(i);
+			_rights.remove(i);
 		}
 	}
 }
@@ -957,7 +958,7 @@ public void disconnectRight ( StateMod_WellRight right )
 Disconnect all rights.
 */
 public void disconnectRights ()
-{	_rights.removeAllElements();
+{	_rights.clear();
 }
 
 /**
@@ -1046,7 +1047,7 @@ Return the collection part ID list for the specific year.  For wells,
 collections are by year.
 @return the list of collection part IDS, or null if not defined.
 */
-public Vector getCollectionPartIDs ( int year )
+public List getCollectionPartIDs ( int year )
 {	if ( __collection_Vector.size() == 0 ) {
 			return null;
 	}
@@ -1059,7 +1060,7 @@ public Vector getCollectionPartIDs ( int year )
 		// The list of part IDs needs to match the year.
 		for ( int i = 0; i < __collection_year.length; i++ ) {
 			if ( year == __collection_year[i] ) {
-				return (Vector)__collection_Vector.elementAt(i);
+				return (List)__collection_Vector.get(i);
 			}
 		}
 	//}
@@ -1147,13 +1148,13 @@ public int getDemsrcw() {
 specified depletion node
 */
 public StateMod_ReturnFlow getDepletion(int index) {
-	return (StateMod_ReturnFlow)_depl.elementAt(index);
+	return (StateMod_ReturnFlow)_depl.get(index);
 }
 
 /**
 @return the depletion vector
 */
-public Vector getDepletions() {
+public List getDepletions() {
 	return _depl;
 }
 
@@ -1269,20 +1270,20 @@ The options are of the form "1" if include_notes is false and
 @return a list of monthly demand type option strings, for use in GUIs.
 @param include_notes Indicate whether notes should be included.
 */
-public static Vector getIdvcomwChoices ( boolean include_notes )
-{	Vector v = new Vector(6);
-	v.addElement ( "1 - Monthly total demand" );
-	v.addElement ( "2 - Annual total demand" );
-	v.addElement ( "3 - Monthly irrigation water requirement" );
-	v.addElement ( "4 - Annual irrigation water requirement" );
-	v.addElement ( "5 - Estimate to be zero" );
-	v.addElement ( "6 - Diversion+well demand is with diversion" );
+public static List getIdvcomwChoices ( boolean include_notes )
+{	List v = new Vector(6);
+	v.add ( "1 - Monthly total demand" );
+	v.add ( "2 - Annual total demand" );
+	v.add ( "3 - Monthly irrigation water requirement" );
+	v.add ( "4 - Annual irrigation water requirement" );
+	v.add ( "5 - Estimate to be zero" );
+	v.add ( "6 - Diversion+well demand is with diversion" );
 	if ( !include_notes ) {
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.setElementAt(StringUtil.getToken(
-				(String)v.elementAt(i), " ", 0, 0), i );
+			v.set(i, StringUtil.getToken(
+				(String)v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
@@ -1329,7 +1330,7 @@ public StateMod_WellRight getLastRight()
 {	if ( (_rights == null) || (_rights.size() == 0) ) {
 		return null;
 	}
-	return (StateMod_WellRight)_rights.elementAt(_rights.size() - 1);
+	return (StateMod_WellRight)_rights.get(_rights.size() - 1);
 }
 
 /**
@@ -1354,7 +1355,7 @@ public int getNrtnw2() {
 Return the Vector of parcels.
 @return the Vector of parcels.
 */
-public Vector getParcels()
+public List getParcels()
 {	return _parcel_Vector;
 }
 
@@ -1373,19 +1374,19 @@ The options are of the form "0" if include_notes is false and
 @param include_notes Indicate whether notes should be added after the parameter
 values.
 */
-public static Vector getPrimaryChoices ( boolean include_notes )
-{	Vector v = new Vector(52);
-	v.addElement ( "0 - Use water right priorities" );
+public static List getPrimaryChoices ( boolean include_notes )
+{	List v = new Vector(52);
+	v.add ( "0 - Use water right priorities" );
 	for ( int i = 1000; i < 50000; i += 1000 ) {
-		v.addElement ( "" +
+		v.add ( "" +
 		i + " - Well water rights will be adjusted by " + i );
 	}
 	if ( !include_notes ) {
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.setElementAt(StringUtil.getToken(
-				(String)v.elementAt(i), " ", 0, 0), i );
+			v.set(i,StringUtil.getToken(
+				(String)v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
@@ -1412,13 +1413,13 @@ public static String getPrimaryDefault ( boolean include_notes )
 specified return flow node
 */
 public StateMod_ReturnFlow getReturnFlow(int index) {
-	return (StateMod_ReturnFlow)_rivret.elementAt(index);
+	return (StateMod_ReturnFlow)_rivret.get(index);
 }
 
 /**
 @return the return flow vector
 */
-public Vector getReturnFlows() {
+public List getReturnFlows() {
 	return _rivret;
 }
 
@@ -1431,14 +1432,14 @@ public StateMod_WellRight getRight(int index)
 {	if ( (index < 0) || (index >= _rights.size()) ) {
 		return null;
 	}
-	else {	return (StateMod_WellRight)_rights.elementAt(index);
+	else {	return (StateMod_WellRight)_rights.get(index);
 	}
 }
 
 /** 
 @return rights Vector
 */
-public Vector getRights() {
+public List getRights() {
 	return _rights;
 }
 
@@ -1562,10 +1563,10 @@ Read a well input file.
 @param filename name of file containing well information
 @return status(always 0 since exception handling is now used)
 */
-public static Vector readStateModFile(String filename)
+public static List readStateModFile(String filename)
 throws Exception {
 	String routine = "StateMod_Well.readStateModFile";
-	Vector theWellStations = new Vector();
+	List theWellStations = new Vector();
 	int [] format_1 = {	StringUtil.TYPE_STRING,
 				StringUtil.TYPE_STRING,
 				StringUtil.TYPE_STRING,
@@ -1613,11 +1614,11 @@ throws Exception {
 	String iline = null;
 	int linecount = 0;
 	String s = null;
-	Vector v = new Vector(9);
+	List v = new Vector(9);
 	BufferedReader in = null;
 	StateMod_Well aWell = null;
 	StateMod_ReturnFlow aReturnNode = null;
-	Vector effv = null;
+	List effv = null;
 	int nrtn, ndepl;
 
 	Message.printStatus(1, routine, "Reading well file: " + filename);
@@ -1637,13 +1638,13 @@ throws Exception {
 				Message.printDebug(50, routine, 
 				"iline: " + iline);
 			}
-			aWell.setID(((String)v.elementAt(0)).trim());
-			aWell.setName(((String)v.elementAt(1)).trim());
-			aWell.setCgoto(((String)v.elementAt(2)).trim());
-			aWell.setSwitch((Integer)v.elementAt(3));
-			aWell.setDivcapw((Double)v.elementAt(4));
-			aWell.setCdividyw(((String)v.elementAt(5)).trim());
-			aWell.setPrimary((Double)v.elementAt(6));
+			aWell.setID(((String)v.get(0)).trim());
+			aWell.setName(((String)v.get(1)).trim());
+			aWell.setCgoto(((String)v.get(2)).trim());
+			aWell.setSwitch((Integer)v.get(3));
+			aWell.setDivcapw((Double)v.get(4));
+			aWell.setCdividyw(((String)v.get(5)).trim());
+			aWell.setPrimary((Double)v.get(6));
 
 			// user data
 
@@ -1653,17 +1654,17 @@ throws Exception {
 				Message.printDebug(50, routine, 
 				"iline: " + iline);
 			}
-			aWell.setIdvcow2(((String)v.elementAt(0)).trim());
-			aWell.setIdvcomw((Integer)v.elementAt(1));
-			// don't set the number of return flow data elementAt(2)
-			// or depletion data elementAt(3)
+			aWell.setIdvcow2(((String)v.get(0)).trim());
+			aWell.setIdvcomw((Integer)v.get(1));
+			// don't set the number of return flow data get(2)
+			// or depletion data get(3)
 			// those will be calculated
-			nrtn = ((Integer)v.elementAt(2)).intValue();
-			ndepl = ((Integer)v.elementAt(3)).intValue();
-			aWell.setDivefcw((Double)v.elementAt(4));
-			aWell.setAreaw((Double)v.elementAt(5));
-			aWell.setIrturnw((Integer)v.elementAt(6));
-			aWell.setDemsrcw((Integer)v.elementAt(7));
+			nrtn = ((Integer)v.get(2)).intValue();
+			ndepl = ((Integer)v.get(3)).intValue();
+			aWell.setDivefcw((Double)v.get(4));
+			aWell.setAreaw((Double)v.get(5));
+			aWell.setIrturnw((Integer)v.get(6));
+			aWell.setDemsrcw((Integer)v.get(7));
 			if (aWell.getDivefcw()>= 0) {
 				// efficency line won't be included
 				for (int i = 0; i < 12; i++)
@@ -1675,7 +1676,7 @@ throws Exception {
 					" ", StringUtil.DELIM_SKIP_BLANKS);
 				for (int i = 0; i < 12; i++) {
 					aWell.setDiveff(i, 
-						(String)effv.elementAt(0));
+						(String)effv.get(0));
 				}
 			}
 
@@ -1697,7 +1698,7 @@ throws Exception {
 
 				aReturnNode = new StateMod_ReturnFlow(
 					StateMod_DataSet.COMP_WELL_STATIONS);
-				s = ((String)v.elementAt(0)).trim();
+				s = ((String)v.get(0)).trim();
 				if (s.length()<= 0) {
 					aReturnNode.setCrtnid(s);
 					Message.printWarning(2, routine, 
@@ -1710,9 +1711,9 @@ throws Exception {
 				}
 
 				aReturnNode.setPcttot(
-					((Double)v.elementAt(1)));
+					((Double)v.get(1)));
 				aReturnNode.setIrtndl(
-					((Integer)v.elementAt(2)));
+					((Integer)v.get(2)));
 				aWell.addReturnFlow(aReturnNode);
 			}
 
@@ -1725,7 +1726,7 @@ throws Exception {
 
 				aReturnNode = new StateMod_ReturnFlow(
 					StateMod_DataSet.COMP_WELL_STATIONS);
-				s = ((String)v.elementAt(0)).trim();
+				s = ((String)v.get(0)).trim();
 				if (s.length() <= 0) {
 					aReturnNode.setCrtnid(s);
 					Message.printWarning(2, routine, 
@@ -1738,13 +1739,13 @@ throws Exception {
 				}
 
 				aReturnNode.setPcttot(
-					((Double)v.elementAt(1)));
+					((Double)v.get(1)));
 				aReturnNode.setIrtndl(
-					((Integer)v.elementAt(2)));
+					((Integer)v.get(2)));
 				aWell.addDepletion(aReturnNode);
 			}
 
-			theWellStations.addElement(aWell);
+			theWellStations.add(aWell);
 		}
 	} 
 	catch (Exception e) {
@@ -1915,12 +1916,12 @@ Set the collection list for an aggregate/system for a specific year.
 @param year The year to which the collection applies.
 @param ids The identifiers indicating the locations in the collection.
 */
-public void setCollectionPartIDs ( int year, Vector ids )
+public void setCollectionPartIDs ( int year, List ids )
 {	int pos = -1;	// Position of year in data lists.
 	if ( __collection_Vector == null ) {
 		// No previous data so create memory...
 		__collection_Vector = new Vector ( 1 );
-		__collection_Vector.addElement ( ids );
+		__collection_Vector.add ( ids );
 		__collection_year = new int[1];
 		__collection_year[0] = year;
 	}
@@ -1935,7 +1936,7 @@ public void setCollectionPartIDs ( int year, Vector ids )
 		if ( pos < 0 ) {
 			// Need to add an item...
 			pos = __collection_year.length;
-			__collection_Vector.addElement ( ids );
+			__collection_Vector.add ( ids );
 			int [] temp = new int[__collection_year.length + 1];
 			for ( int i = 0; i < __collection_year.length; i++ ) {
 				temp[i] = __collection_year[i];
@@ -1944,7 +1945,7 @@ public void setCollectionPartIDs ( int year, Vector ids )
 			__collection_year[pos] = year;
 		}
 		else {	// Existing item...
-			__collection_Vector.setElementAt ( ids, pos );
+			__collection_Vector.set ( pos, ids );
 			__collection_year[pos] = year;
 		}
 	}
@@ -2039,7 +2040,7 @@ public void setDemsrcw(String demsrcw) {
 }
 
 // REVISIT - need to handle dirty flag
-public void setDepletions(Vector depl) {
+public void setDepletions(List depl) {
 	_depl = depl;
 }
 
@@ -2329,7 +2330,7 @@ public void setModelEfficiencies ( double [] model_efficiencies )
 Set the parcel Vector.
 @param parcel_Vector the Vector of StateMod_Parcel to set for parcel data.
 */
-void setParcels ( Vector parcel_Vector )
+void setParcels ( List parcel_Vector )
 {	_parcel_Vector = parcel_Vector;
 }
 
@@ -2370,12 +2371,12 @@ public void setPrimary(String primary) {
 }
 
 // REVISIT - need to handle dirty flag
-public void setReturnFlows(Vector rivret) {
+public void setReturnFlows(List rivret) {
 	_rivret = rivret;
 }
 
 // REVISIT - need to handle dirty flag
-public void setRights(Vector rights) {
+public void setRights(List rights) {
 	_rights = rights;
 }
 
@@ -2389,7 +2390,7 @@ is also maintained by calling this routine.
 REVISIT -- Incorrect tag syntax: see RTi.Util.IO#processFileHeaders
 */
 public static void writeStateModFile(String instrfile, String outstrfile,
-Vector theWellStations, String[] new_comments)
+		List theWellStations, String[] new_comments)
 throws Exception {
 	String [] comment_str = { "#" };
 	String [] ignore_comment_str = { "#>" };
@@ -2411,9 +2412,9 @@ throws Exception {
 		"                                    %-12.12s%8.2F%8d";
 	StateMod_Well well = null;
 	StateMod_ReturnFlow ret = null;
-	Vector v = new Vector(8);
-	Vector wellDepletion = null;
-	Vector wellReturnFlow = null;
+	List v = new Vector(8);
+	List wellDepletion = null;
+	List wellReturnFlow = null;
 
 	out.println(cmnt);
 	out.println(cmnt
@@ -2511,41 +2512,41 @@ throws Exception {
 	}
 
 	for (i = 0; i < num; i++) {
-		well = (StateMod_Well)theWellStations.elementAt(i);
+		well = (StateMod_Well)theWellStations.get(i);
 		if (well == null) {
 			continue;
 		}
 
 		// line 1
-		v.removeAllElements();
-		v.addElement(well.getID());
-		v.addElement(well.getName());
-		v.addElement(well.getCgoto());
-		v.addElement(new Integer(well.getSwitch()));
-		v.addElement(new Double (well.getDivcapw()));
-		v.addElement(well.getCdividyw());
-		v.addElement(new Double(well.getPrimary()));
+		v.clear();
+		v.add(well.getID());
+		v.add(well.getName());
+		v.add(well.getCgoto());
+		v.add(new Integer(well.getSwitch()));
+		v.add(new Double (well.getDivcapw()));
+		v.add(well.getCdividyw());
+		v.add(new Double(well.getPrimary()));
 		iline = StringUtil.formatString(v, format_1);
 		out.println(iline);
 
 		// line 2
-		v.removeAllElements();
-		v.addElement(well.getIdvcow2());
-		v.addElement(new Integer(well.getIdvcomw()));
-		v.addElement(new Integer(well.getNrtnw()));
-		v.addElement(new Integer(well.getNrtnw2()));
-		v.addElement(new Double (well.getDivefcw()));
-		v.addElement(new Double (well.getAreaw()));
-		v.addElement(new Integer(well.getIrturnw()));
-		v.addElement(new Integer(well.getDemsrcw()));
+		v.clear();
+		v.add(well.getIdvcow2());
+		v.add(new Integer(well.getIdvcomw()));
+		v.add(new Integer(well.getNrtnw()));
+		v.add(new Integer(well.getNrtnw2()));
+		v.add(new Double (well.getDivefcw()));
+		v.add(new Double (well.getAreaw()));
+		v.add(new Integer(well.getIrturnw()));
+		v.add(new Integer(well.getDemsrcw()));
 		iline = StringUtil.formatString(v, format_2);
 		out.println(iline);
 
 		// line 3 - well efficiency
 		if (well.getDivefcw()< 0) {
 			for (j = 0; j < 12; j++) {
-				v.removeAllElements();
-				v.addElement(new Double(well.getDiveff(j)));
+				v.clear();
+				v.add(new Double(well.getDiveff(j)));
 				iline = StringUtil.formatString(v, " %#5.0F");
 				out.print(iline);
 			}
@@ -2557,11 +2558,11 @@ throws Exception {
 		int nrtn = well.getNrtnw();
 		wellReturnFlow = well.getReturnFlows();
 		for (j = 0; j < nrtn; j++) {
-			v.removeAllElements();
-			ret = (StateMod_ReturnFlow)wellReturnFlow.elementAt(j);
-			v.addElement(ret.getCrtnid());
-			v.addElement(new Double(ret.getPcttot()));
-			v.addElement(new Integer(ret.getIrtndl()));
+			v.clear();
+			ret = (StateMod_ReturnFlow)wellReturnFlow.get(j);
+			v.add(ret.getCrtnid());
+			v.add(new Double(ret.getPcttot()));
+			v.add(new Integer(ret.getIrtndl()));
 			// SAM changed on 2000-02-24 as per Ray Bennett...
 			//iline = StringUtil.formatString(v, format_4);
 			iline = StringUtil.formatString(v, format_4)
@@ -2573,11 +2574,11 @@ throws Exception {
 		nrtn = well.getNrtnw2();
 		wellDepletion = well.getDepletions();
 		for (j = 0; j < nrtn; j++) {
-			v.removeAllElements();
-			ret = (StateMod_ReturnFlow)wellDepletion.elementAt(j);
-			v.addElement(ret.getCrtnid());
-			v.addElement(new Double(ret.getPcttot()));
-			v.addElement(new Integer(ret.getIrtndl()));
+			v.clear();
+			ret = (StateMod_ReturnFlow)wellDepletion.get(j);
+			v.add(ret.getCrtnid());
+			v.add(new Double(ret.getPcttot()));
+			v.add(new Integer(ret.getIrtndl()));
 			// SAM changed on 2000-02-24 as per Ray Bennett...
 			//iline = StringUtil.formatString(v, format_4);
 			iline = StringUtil.formatString(v, format_4)
@@ -2607,8 +2608,7 @@ throws Exception {
 /**
 Writes a Vector of StateMod_Well objects to a list file.  A header is 
 printed to the top of the file, containing the commands used to generate the 
-file.  Any strings in the body of the file that contain the field delimiter 
-will be wrapped in "...".  
+file.  Any strings in the body of the file that contain the field delimiter will be wrapped in "...".  
 This method also writes well Return Flows to
 filename[without extension]_ReturnFlows[extension], so if this method is called
 with a filename parameter of "wells.txt", four files will be generated:
@@ -2623,15 +2623,14 @@ header (true) or to create a new file with a new header.
 @param data the Vector of objects to write.  
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter,
-boolean update, Vector data) 
+public static void writeListFile(String filename, String delimiter, boolean update, List data) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
 		size = data.size();
 	}
 	
-	Vector fields = new Vector();
+	List fields = new Vector();
 	fields.add("ID");
 	fields.add("Name");
 	fields.add("RiverNodeID");
@@ -2664,7 +2663,7 @@ throws Exception {
 	int comp = StateMod_DataSet.COMP_WELL_STATIONS;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.elementAt(i);
+		s = (String)fields.get(i);
 		names[i] = StateMod_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateMod_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -2685,9 +2684,9 @@ throws Exception {
 	String[] newComments = null;
 	String id = null;
 	StringBuffer buffer = new StringBuffer();
-	Vector depletions = new Vector();
-	Vector returnFlows = new Vector();
-	Vector temp = null;
+	List depletions = new Vector();
+	List returnFlows = new Vector();
+	List temp = null;
 	
 	try {	
 		out = IOUtil.processFileHeaders(
@@ -2705,7 +2704,7 @@ throws Exception {
 		out.println(buffer.toString());
 		
 		for (int i = 0; i < size; i++) {
-			well = (StateMod_Well)data.elementAt(i);
+			well = (StateMod_Well)data.get(i);
 			
 			line[0] = StringUtil.formatString(well.getID(), 
 				formats[0]).trim();
@@ -2775,7 +2774,7 @@ throws Exception {
 			size2 = temp.size();
 			id = well.getID();
 			for (j = 0; j < size2; j++) {
-				rf = (StateMod_ReturnFlow)temp.elementAt(j);
+				rf = (StateMod_ReturnFlow)temp.get(j);
 				rf.setID(id);
 				returnFlows.add(rf);
 			}
@@ -2783,7 +2782,7 @@ throws Exception {
 			temp = well.getDepletions();
 			size2 = temp.size();
 			for (j = 0; j < size2; j++) {
-				rf = (StateMod_ReturnFlow)temp.elementAt(j);
+				rf = (StateMod_ReturnFlow)temp.get(j);
 				rf.setID(id);
 				depletions.add(rf);
 			}
@@ -2816,8 +2815,7 @@ throws Exception {
 		StateMod_DataSet.COMP_WELL_STATION_DEPLETION_TABLES);	
 
 	String collectionFilename = front + "_Collections." + end;
-	writeCollectionListFile(collectionFilename, delimiter,
-		update, data);		
+	writeCollectionListFile(collectionFilename, delimiter, update, data);		
 }
 
 /**
@@ -2832,15 +2830,14 @@ header (true) or to create a new file with a new header.
 @param data the Vector of objects to write.  
 @throws Exception if an error occurs.
 */
-public static void writeCollectionListFile(String filename, 
-String delimiter, boolean update, Vector data) 
+public static void writeCollectionListFile(String filename, String delimiter, boolean update, List data) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
 		size = data.size();
 	}
 	
-	Vector fields = new Vector();
+	List fields = new Vector();
 	fields.add("LocationID");
 	fields.add("Year");
 	fields.add("CollectionType");
@@ -2853,7 +2850,7 @@ throws Exception {
 	int comp = StateMod_DataSet.COMP_WELL_STATION_COLLECTIONS;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.elementAt(i);
+		s = (String)fields.get(i);
 		names[i] = StateMod_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateMod_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -2877,7 +2874,7 @@ throws Exception {
 	String id = null;
 	String partType = null;	
 	StringBuffer buffer = new StringBuffer();
-	Vector ids = null;
+	List ids = null;
 
 	try {		
 		out = IOUtil.processFileHeaders(
@@ -2895,7 +2892,7 @@ throws Exception {
 		out.println(buffer.toString());
 		
 		for (int i = 0; i < size; i++) {
-			well = (StateMod_Well)data.elementAt(i);
+			well = (StateMod_Well)data.get(i);
 			id = well.getID();
 			years = well.getCollectionYears();
 			if (years == null) {
@@ -2918,7 +2915,7 @@ throws Exception {
 				line[3] = StringUtil.formatString(partType,
 					formats[3]).trim();
 				line[4] = StringUtil.formatString(
-					((String)(ids.elementAt(k))),
+					((String)(ids.get(k))),
 					formats[4]).trim();
 
 				buffer = new StringBuffer();	

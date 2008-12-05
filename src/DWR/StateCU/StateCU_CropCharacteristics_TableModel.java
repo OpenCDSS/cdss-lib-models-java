@@ -21,7 +21,7 @@
 
 package DWR.StateCU;
 
-import java.util.Vector;
+import java.util.List;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 import RTi.Util.IO.Validator;
@@ -95,7 +95,7 @@ Constructor.  This builds the Model for displaying crop char data
 @param data the data that will be displayed in the table.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateCU_CropCharacteristics_TableModel( Vector data )
+public StateCU_CropCharacteristics_TableModel( List data )
 throws Exception {
 	this(data, true, true);
 }
@@ -108,7 +108,7 @@ Constructor.  This builds the Model for displaying crop char data
 the characteristics for many crops are shown.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateCU_CropCharacteristics_TableModel(Vector data, boolean editable,
+public StateCU_CropCharacteristics_TableModel(List data, boolean editable,
 boolean singleCrop)
 throws Exception {
 	if (data == null) {
@@ -414,8 +414,7 @@ public Object getValueAt(int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	StateCU_CropCharacteristics crop 
-		= (StateCU_CropCharacteristics)_data.elementAt(row);
+	StateCU_CropCharacteristics crop = (StateCU_CropCharacteristics)_data.get(row);
 	
 	if (__singleCrop) {
 		switch (col) {
@@ -425,12 +424,10 @@ public Object getValueAt(int row, int col) {
 					return new Integer( 0 );
 				}
 				if (__dayNotPercent) {
-					return new Integer(
-						__blaneyCriddle.getNckcp(row)); 
+					return new Integer(	__blaneyCriddle.getNckcp(row)); 
 				}
 				else {
-					return new Integer(
-						__blaneyCriddle.getNckca(row)); 
+					return new Integer(	__blaneyCriddle.getNckca(row)); 
 				}
 			case __COL_VALUE:
 				if (__blaneyCriddle == null) {
@@ -438,12 +435,10 @@ public Object getValueAt(int row, int col) {
 				}
 	
 				if (__dayNotPercent) {
-					return new Double(
-						__blaneyCriddle.getCkcp(row));
+					return new Double( __blaneyCriddle.getCkcp(row));
 				}
 				else {
-					return new Double(
-						__blaneyCriddle.getCkca(row));
+					return new Double( __blaneyCriddle.getCkca(row));
 	
 				}
 		}

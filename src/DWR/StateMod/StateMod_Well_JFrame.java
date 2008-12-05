@@ -108,6 +108,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -355,7 +356,7 @@ private DataSetComponent __wellComponent;
 /**
 Vector of wells data in the DataSetComponent.
 */
-private Vector __wellsVector;
+private List __wellsVector;
 
 /**
 Constructor.
@@ -376,12 +377,12 @@ public StateMod_Well_JFrame (	StateMod_DataSet dataset,
 	__dataset_wm = dataset_wm;
 	__wellComponent = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_WELL_STATIONS);
-	__wellsVector = (Vector)__wellComponent.getData();
+	__wellsVector = (List)__wellComponent.getData();
 
 	int size = __wellsVector.size();
 	StateMod_Well well = null;
 	for (int i = 0; i < size; i++) {
-		well = (StateMod_Well)__wellsVector.elementAt(i);
+		well = (StateMod_Well)__wellsVector.get(i);
 		well.createBackup();
 	}
 
@@ -409,12 +410,12 @@ public StateMod_Well_JFrame (	StateMod_DataSet dataset,
 	__dataset_wm = dataset_wm;
 	__wellComponent = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_WELL_STATIONS);
-	__wellsVector = (Vector)__wellComponent.getData();
+	__wellsVector = (List)__wellComponent.getData();
 
 	int size = __wellsVector.size();
 	StateMod_Well w = null;
 	for (int i = 0; i < size; i++) {
-		w = (StateMod_Well)__wellsVector.elementAt(i);
+		w = (StateMod_Well)__wellsVector.get(i);
 		w.createBackup();
 	}
 
@@ -449,7 +450,7 @@ public void actionPerformed(ActionEvent e) {
 		StateMod_Well well = null;
 		boolean changed = false;
 		for (int i = 0; i < size; i++) {
-			well = (StateMod_Well)__wellsVector.elementAt(i);
+			well = (StateMod_Well)__wellsVector.get(i);
 			if (!changed && well.changed()) {
 				Message.printStatus(1, "", "Changed: " + i);
 				changed = true;
@@ -473,7 +474,7 @@ public void actionPerformed(ActionEvent e) {
 		StateMod_Well well = null;
 		boolean changed = false;
 		for (int i = 0; i < size; i++) {
-			well = (StateMod_Well)__wellsVector.elementAt(i);
+			well = (StateMod_Well)__wellsVector.get(i);
 			if (!changed && well.changed()) {
 				changed = true;
 			}
@@ -487,7 +488,7 @@ public void actionPerformed(ActionEvent e) {
 		int size = __wellsVector.size();
 		StateMod_Well well = null;
 		for (int i = 0; i < size; i++) {
-			well = (StateMod_Well)__wellsVector.elementAt(i);
+			well = (StateMod_Well)__wellsVector.get(i);
 			well.restoreOriginal();
 		}
 
@@ -538,7 +539,7 @@ public void actionPerformed(ActionEvent e) {
 		}
 		// set placeholder to current well
 		StateMod_Well well = (StateMod_Well)
-			__wellsVector.elementAt(__currentWellIndex);
+			__wellsVector.get(__currentWellIndex);
 
 		// spreadsheet requests ...
 		if (action.equals(__BUTTON_WATER_RIGHTS)) {
@@ -562,7 +563,7 @@ data object.
 @return true if the text fields are okay, false if not.
 */
 private boolean checkInput() {
-	Vector errors = new Vector();
+	List errors = new Vector();
 	int errorCount = 0;
 
 	// for each field, check if it contains valid input.  If not,
@@ -581,7 +582,7 @@ private boolean checkInput() {
 	String label = "The following error" + plural + "encountered "
 		+ "trying to save the record:\n";
 	for (int i = 0; i < errorCount; i++) {
-		label += errors.elementAt(i) + "\n";
+		label += errors.get(i) + "\n";
 	}
 	new ResponseJDialog(this, 
 		"Errors encountered", label, ResponseJDialog.OK);
@@ -638,7 +639,7 @@ private void displayTSViewJFrame(Object o)
 	}
 
 	StateMod_Well well = (StateMod_Well)
-		__wellsVector.elementAt(__currentWellIndex);
+		__wellsVector.get(__currentWellIndex);
 
 	// display_props.set("HelpKey", "TSTool.ExportMenu");
 	display_props.set("TSViewTitleString",
@@ -653,7 +654,7 @@ private void displayTSViewJFrame(Object o)
 	props.set("Product.TotalWidth", "600");
 	props.set("Product.TotalHeight", "400");
 
-	Vector tslist = new Vector();
+	List tslist = new Vector();
 
 	int sub = 0;
 	int its = 0;
@@ -880,16 +881,16 @@ Populates the well daily id combo box.
 private void populateWellDailyID() {
 	__dailyIDComboBox.removeAllItems();
 
-	Vector idNameVector = StateMod_Util.createDataList(__wellsVector,true);
-	idNameVector.insertElementAt(
-		"0 - Use average daily value from monthly time series", 0);
-	idNameVector.insertElementAt(
-		"3 - Daily time series are supplied", 1);
-	idNameVector.insertElementAt(
+	List idNameVector = StateMod_Util.createDataList(__wellsVector,true);
+	idNameVector.add( 0,
+		"0 - Use average daily value from monthly time series");
+	idNameVector.add( 1,
+		"3 - Daily time series are supplied");
+	idNameVector.add( 2,
 		"4 - Daily time series interpolated from midpoints of "
-		+ "monthly data", 2);
+		+ "monthly data");
 
-	DefaultComboBoxModel dcbm = new DefaultComboBoxModel(idNameVector);
+	DefaultComboBoxModel dcbm = new DefaultComboBoxModel(new Vector(idNameVector));
 	__dailyIDComboBox.setModel(dcbm);
 }
 
@@ -918,7 +919,7 @@ private void processTableSelection(int index) {
 	checkTimeSeriesButtonsStates();
 
 	StateMod_Well well = (StateMod_Well)
-		__wellsVector.elementAt(__currentWellIndex);
+		__wellsVector.get(__currentWellIndex);
 
 	__stationIDJTextField.setText(well.getID());
 	__nameJTextField.setText(well.getName());
@@ -1125,7 +1126,7 @@ private void saveInformation(int record) {
 		return;
 	}
 
-	StateMod_Well well = (StateMod_Well)__wellsVector.elementAt(record);
+	StateMod_Well well = (StateMod_Well)__wellsVector.get(record);
 
 	well.setName(__nameJTextField.getText());
 	well.setCgoto(__locationJTextField.getText());
@@ -1194,8 +1195,8 @@ private void saveInformation(int record) {
 		well.setCdividyw(cdividyw);
 	}
 
-	Vector dailyWellDemandTSVector = 
-		(Vector)(__dataset.getComponentForComponentType(
+	List dailyWellDemandTSVector = 
+		(List)(__dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_WELL_DEMAND_TS_DAILY).getData());
 	well.connectDemandDayTS(dailyWellDemandTSVector);
 
@@ -1270,7 +1271,7 @@ void setMonthlyEff(int record) {
 		return;
 	}
 
-	StateMod_Well well = (StateMod_Well)__wellsVector.elementAt(record);
+	StateMod_Well well = (StateMod_Well)__wellsVector.get(record);
 	__effMonthly.setSelected(true);
 	double efc = well.getDivefcw();
 	if (efc > 0) {
@@ -1296,7 +1297,7 @@ void setConstantEff(int record) {
 		return;
 	}
 
-	StateMod_Well well = (StateMod_Well)__wellsVector.elementAt(record);
+	StateMod_Well well = (StateMod_Well)__wellsVector.get(record);
 	__effConstant.setSelected(true);
 	double efc = well.getDivefcw();
 	if (efc < 0) {
@@ -1380,10 +1381,10 @@ private void setupGUI(int index) {
 	__associatedDiversionsComboBox.add("N/A - Not associated with "
 		+ "diversion");
 	
-	Vector diversions = (Vector)(__dataset.getComponentForComponentType(
+	List diversions = (List)(__dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_DIVERSION_STATIONS).getData());
 	diversions = StateMod_Util.createDataList(diversions, true);
-	DefaultComboBoxModel dcbm = new DefaultComboBoxModel(diversions);
+	DefaultComboBoxModel dcbm = new DefaultComboBoxModel(new Vector(diversions));
 	__associatedDiversionsComboBox.setModel(dcbm);
 	/*
 	for (int i = 0; i < size; i++) {

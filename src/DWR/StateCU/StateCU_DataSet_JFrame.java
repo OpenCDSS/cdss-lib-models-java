@@ -16,7 +16,7 @@ package DWR.StateCU;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.util.Vector;
+import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -116,15 +116,15 @@ private void initialize ( String title, boolean is_visible )
 			insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
 
 	// Now add the contents for each component...
-	Vector components_Vector = __dataset.getComponents();
+	List components_Vector = __dataset.getComponents();
 	int size = components_Vector.size();
 	DataSetComponent component;
 	y = 0;	// Incremented below.  True row 0 is used for headers above.
-	Vector data = null;
+	List data = null;
 	int data_size = 0;
 	for ( int i = 0; i < size; i++ ) {
 		x = 0;
-		component = (DataSetComponent)components_Vector.elementAt(i);
+		component = (DataSetComponent)components_Vector.get(i);
 		JTextField component_JTextField = new JTextField(
 			component.getComponentName(), 20 );
 		component_JTextField.setEditable ( false );
@@ -138,14 +138,14 @@ private void initialize ( String title, boolean is_visible )
 			if ( component.getData() == null ) {
 				continue;
 			}
-			data = (Vector)component.getData();
+			data = (List)component.getData();
 			data_size = 0;
 			if ( data != null ) {
 				data_size = data.size();
 			}
 			for ( int j = 0; j < data_size; j++ ) {
 				x = 0;
-				component = (DataSetComponent)data.elementAt(j);
+				component = (DataSetComponent)data.get(j);
 				component_JTextField =
 					new JTextField( "    " +
 					component.getComponentName(), 20 );
@@ -177,7 +177,7 @@ private void initialize ( String title, boolean is_visible )
 					insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
 
 				int count = 0;
-				try {	count = ((Vector)
+				try {	count = ((List)
 					component.getData()).size();
 				}
 				catch ( Exception e ) {

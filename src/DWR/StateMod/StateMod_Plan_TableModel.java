@@ -12,7 +12,7 @@
 
 package DWR.StateMod;
 
-import java.util.Vector;
+import java.util.List;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 
@@ -54,7 +54,7 @@ Constructor.  This builds the Model for displaying the plan station data.
 @param editable whether the data can be edited or not
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_Plan_TableModel(Vector data, boolean editable)
+public StateMod_Plan_TableModel(List data, boolean editable)
 throws Exception {
 	this(null, data, editable, false);
 }
@@ -64,33 +64,27 @@ Constructor.  This builds the Model for displaying the plan station data.
 @param data the data that will be displayed in the table.
 @param editable whether the data can be edited or not
 @param compactForm if true, then the compact form of the table model will be
-used.  In the compact form, only the name and ID are shown.  If false, all
-fields will be shown.
+used.  In the compact form, only the name and ID are shown.  If false, all fields will be shown.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_Plan_TableModel(Vector data, boolean editable,
-boolean compactForm)
+public StateMod_Plan_TableModel(List data, boolean editable, boolean compactForm)
 throws Exception {
 	this(null, data, editable, compactForm);
 }
 
 /**
 Constructor.  This builds the Model for displaying the plan data.
-@param dataset the dataset for the data being displayed.  Only necessary
-for return flow tables.
+@param dataset the dataset for the data being displayed.  Only necessary for return flow tables.
 @param data the data that will be displayed in the table.
 @param editable whether the data can be edited or not
 @param compactForm if true, then the compact form of the table model will be
-used.  In the compact form, only the name and ID are shown.  If false, all
-fields will be shown.
+used.  In the compact form, only the name and ID are shown.  If false, all fields will be shown.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_Plan_TableModel(StateMod_DataSet dataset, 
-Vector data, boolean editable, boolean compactForm)
+public StateMod_Plan_TableModel(StateMod_DataSet dataset, List data, boolean editable, boolean compactForm)
 throws Exception {
 	if (data == null) {
-		throw new Exception ("Invalid data Vector passed to " 
-			+ "StateMod_Plan_TableModel constructor.");
+		throw new Exception ("Invalid data Vector passed to StateMod_Plan_TableModel constructor.");
 	}
 	_rows = data.size();
 	_data = data;
@@ -187,8 +181,7 @@ public int getRowCount() {
 }
 
 /**
-Returns the data that should be placed in the JTable at the given row and 
-column.
+Returns the data that should be placed in the JTable at the given row and column.
 @param row the row for which to return data.
 @param col the column for which to return data.
 @return the data that should be placed in the JTable at the given row and col.
@@ -198,7 +191,7 @@ public Object getValueAt(int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	StateMod_Plan smp = (StateMod_Plan)_data.elementAt(row);
+	StateMod_Plan smp = (StateMod_Plan)_data.get(row);
 	switch (col) {
 		case COL_ID:		return smp.getID();
 		case COL_NAME:		return smp.getName();
@@ -271,7 +264,7 @@ public void setValueAt(Object value, int row, int col)
 	int ival;
 	int index;
 
-	StateMod_Plan smp = (StateMod_Plan)_data.elementAt(row);
+	StateMod_Plan smp = (StateMod_Plan)_data.get(row);
 
 	switch (col) {
 		case COL_ID:

@@ -12,6 +12,7 @@
 
 package DWR.StateCU;
 
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
@@ -51,13 +52,13 @@ The parent location for which subdata is displayed.
 /**
 The data displayed in the table.
 */
-private Vector[] __data = null;
+private List[] __data = null;
 
 /**
 Constructor.  This builds the Model for displaying location data
 @param data the data that will be displayed in the table.
 */
-public StateCU_Location_ClimateStation_TableModel(Vector data) {
+public StateCU_Location_ClimateStation_TableModel(List data) {
 	this(data, false);
 }
 
@@ -66,8 +67,7 @@ Constructor.  This builds the Model for displaying location data
 @param data the data that will be displayed in the table.
 @param editable whether the data are editable or not.
 */
-public StateCU_Location_ClimateStation_TableModel(Vector data, 
-boolean editable) {
+public StateCU_Location_ClimateStation_TableModel(List data, boolean editable) {
 	if (data == null) {
 		data = new Vector();
 	}
@@ -166,7 +166,7 @@ public Object getValueAt(int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	return __data[col].elementAt(row);
+	return __data[col].get(row);
 }
 
 /**
@@ -211,7 +211,7 @@ private void setupData() {
 	int size = _data.size();
 	StateCU_Location l = null;
 	String id = null;
-	__data = new Vector[__COLUMNS];
+	__data = new List[__COLUMNS];
 	for (int i = 0; i < __COLUMNS; i++) {
 		__data[i] = new Vector();
 	}
@@ -219,17 +219,15 @@ private void setupData() {
 	int rows = 0;
 	
 	for (int i = 0; i < size; i++) {
-		l = (StateCU_Location)_data.elementAt(i);
+		l = (StateCU_Location)_data.get(i);
 		id = l.getID();
 		num = l.getNumClimateStations();
 
 		for (int j = 0; j < num; j++ ) {
 			__data[__COL_ID].add(id);
 			__data[__COL_STA_ID].add(l.getClimateStationID(j));
-			__data[__COL_PRECIP_WT].add(new Double(
-				l.getPrecipitationStationWeight(j)));
-			__data[__COL_TEMP_WT].add(new Double(
-				l.getTemperatureStationWeight(j)));
+			__data[__COL_PRECIP_WT].add(new Double(l.getPrecipitationStationWeight(j)));
+			__data[__COL_TEMP_WT].add(new Double(l.getTemperatureStationWeight(j)));
 			rows++;
 		}
 	}

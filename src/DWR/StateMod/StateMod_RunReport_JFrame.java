@@ -73,7 +73,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.util.Vector;
+import java.util.List;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -570,66 +570,66 @@ Sets up the GUI.
 private void setupGUI() {
 	__xdgSimpleJComboBox = new SimpleJComboBox();
 
-	Vector diversionsVector = (Vector)
+	List diversionsVector = (List)
 		__dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_DIVERSION_STATIONS).getData();
-	Vector list_names = StateMod_Util.createDataList (
+	List list_names = StateMod_Util.createDataList (
 		diversionsVector, true );
 	int size = list_names.size();
 	for (int i = 0; i < size; i++) {
-		__xdgSimpleJComboBox.add ( list_names.elementAt(i) +
+		__xdgSimpleJComboBox.add ( list_names.get(i) +
 		" - Diversion");
 	}
 
-	Vector instreamFlowsVector = (Vector)
+	List instreamFlowsVector = (List)
 		__dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_INSTREAM_STATIONS).getData();
 	list_names = StateMod_Util.createDataList ( instreamFlowsVector, true );
 	size = list_names.size();
 	for (int i = 0; i < size; i++) {
-		__xdgSimpleJComboBox.add ( list_names.elementAt(i) +
+		__xdgSimpleJComboBox.add ( list_names.get(i) +
 		" - Instream Flow");
 	}
 
-	Vector gageVector = (Vector)
+	List gageVector = (List)
 		__dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_STREAMGAGE_STATIONS).getData();
 	list_names = StateMod_Util.createDataList ( gageVector, true );
 	size = list_names.size();
 	for (int i = 0; i < size; i++) {
-		__xdgSimpleJComboBox.add ( list_names.elementAt(i) +
+		__xdgSimpleJComboBox.add ( list_names.get(i) +
 		" - Stream Gage");
 	}
 
-	Vector estimateVector = (Vector)
+	List estimateVector = (List)
 		__dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS).getData();
 	list_names = StateMod_Util.createDataList ( estimateVector, true );
 	size = list_names.size();
 	for (int i = 0; i < size; i++) {
-		__xdgSimpleJComboBox.add ( list_names.elementAt(i) +
+		__xdgSimpleJComboBox.add ( list_names.get(i) +
 		" - Stream Estimate");
 	}
 
-	Vector reservoirsVector = (Vector)
+	List reservoirsVector = (List)
 		__dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_RESERVOIR_STATIONS).getData();
 	list_names = StateMod_Util.createDataList ( reservoirsVector, true );
 	size = list_names.size();
 	__xrgSimpleJComboBox = new SimpleJComboBox();
 	for (int i = 0; i < size; i++) {
-		__xrgSimpleJComboBox.add ( list_names.elementAt(i) +
+		__xrgSimpleJComboBox.add ( list_names.get(i) +
 		" - Reservoir");
 	}
 
-	Vector wellsVector = (Vector)
+	List wellsVector = (List)
 		__dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_WELL_STATIONS).getData();
 	list_names = StateMod_Util.createDataList ( wellsVector, true );
 	size = list_names.size();
 	__xwgSimpleJComboBox = new SimpleJComboBox();
 	for (int i = 0; i < size; i++) {
-		__xwgSimpleJComboBox.add ( list_names.elementAt(i) +
+		__xwgSimpleJComboBox.add ( list_names.get(i) +
 		" - Well");
 	}
 

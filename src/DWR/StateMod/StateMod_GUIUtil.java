@@ -35,6 +35,7 @@
 
 package DWR.StateMod;
 
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JComponent;
@@ -113,8 +114,8 @@ Displays a graph for a time series.
 public static void displayGraphForTS (TS ts, String title, 
 StateMod_DataSet dataset)
 throws Exception {
-	Vector v = new Vector();
-	v.addElement(ts);
+	List v = new Vector();
+	v.add(ts);
 
 	// add title to proplist
 	PropList props = new PropList("displayGraphForTSProps");
@@ -132,8 +133,8 @@ Displays a graph for a time series.
 public static void displayGraphForTS ( TS ts, PropList props,
 StateMod_DataSet dataset)
 throws Exception {
-	Vector v = new Vector();
-	v.addElement(ts);
+	List v = new Vector();
+	v.add(ts);
 	displayGraphForTS(v, props, dataset);
 }
 
@@ -143,7 +144,7 @@ Displays a graph for a time series.
 @param title the title of the graph
 @param dataset the dataset in which the ts data exists
 */
-public static void displayGraphForTS ( Vector tslist, String title,
+public static void displayGraphForTS ( List tslist, String title,
 StateMod_DataSet dataset)
 throws Exception {
 	// add title to proplist
@@ -162,7 +163,7 @@ may not, in which case defaults will be used.
 If some important properties are not set, they are set using the same
 PropList.
 */
-public static void displayGraphForTS(Vector tslist, PropList props,
+public static void displayGraphForTS(List tslist, PropList props,
 StateMod_DataSet dataset) {
 	PropList proplist = null;
 	if (props == null) {

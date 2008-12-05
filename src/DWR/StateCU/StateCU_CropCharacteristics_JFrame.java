@@ -27,6 +27,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -170,9 +171,9 @@ private DataSetComponent __blaneyComponent;
 /**
 Vector of crops data in the DataSetComponent.
 */
-private Vector __cropsVector;
+private List __cropsVector;
 
-private Vector __blaneyVector;
+private List __blaneyVector;
 
 private StateCU_CropCharacteristics_TableModel __blaneyModel;
 
@@ -195,11 +196,11 @@ boolean editable) {
 	__dataset = dataset;
 	__cropComponent = __dataset.getComponentForComponentType(
 		StateCU_DataSet.COMP_CROP_CHARACTERISTICS);
-	__cropsVector = (Vector)__cropComponent.getData();
+	__cropsVector = (List)__cropComponent.getData();
 
 	__blaneyComponent = __dataset.getComponentForComponentType(
 		StateCU_DataSet.COMP_BLANEY_CRIDDLE);
-	__blaneyVector = (Vector)__blaneyComponent.getData();
+	__blaneyVector = (List)__blaneyComponent.getData();
 
 	setupGUI(0);
 }
@@ -218,11 +219,11 @@ StateCU_CropCharacteristics crop, boolean editable) {
 	__dataset = dataset;
 	__cropComponent = __dataset.getComponentForComponentType(
 		StateCU_DataSet.COMP_CROP_CHARACTERISTICS);
-	__cropsVector = (Vector)__cropComponent.getData();
+	__cropsVector = (List)__cropComponent.getData();
 
 	__blaneyComponent = __dataset.getComponentForComponentType(
 		StateCU_DataSet.COMP_BLANEY_CRIDDLE);
-	__blaneyVector = (Vector)__blaneyComponent.getData();
+	__blaneyVector = (List)__blaneyComponent.getData();
 
 	String id = crop.getID();
 	int index = StateCU_Util.indexOf(__cropsVector, id);
@@ -280,7 +281,7 @@ data object.
 @return true if the text fields are okay, false if not.
 */
 private boolean checkInput() {
-	Vector errors = new Vector();
+	List errors = new Vector();
 	int errorCount = 0;
 
 	// for each field, check if it contains valid input.  If not,
@@ -299,7 +300,7 @@ private boolean checkInput() {
 	String label = "The following error" + plural + "encountered "
 		+ "trying to save the record:\n";
 	for (int i = 0; i < errorCount; i++) {
-		label += errors.elementAt(i) + "\n";
+		label += errors.get(i) + "\n";
 	}
 	// TODO SAM 2007-03-01 Why is message/logging not used?
 	new ResponseJDialog(this, 
@@ -388,7 +389,7 @@ private void processTableSelection(int index) {
 	somethingSelected();
 
 	StateCU_CropCharacteristics crop = (StateCU_CropCharacteristics)
-		__cropsVector.elementAt(__currentCropIndex);
+		__cropsVector.get(__currentCropIndex);
 
 	__cropIDJTextField.setText(crop.getID());
 	__nameJTextField.setText(crop.getName());
@@ -420,7 +421,7 @@ private void processTableSelection(int index) {
 	int bcindex = StateCU_Util.indexOfName(__blaneyVector, crop.getID());
 	StateCU_BlaneyCriddle bc = null;	
 	if (bcindex != -1) {
-		bc = (StateCU_BlaneyCriddle)__blaneyVector.elementAt(bcindex);
+		bc = (StateCU_BlaneyCriddle)__blaneyVector.get(bcindex);
 		if (bc.getFlag().equalsIgnoreCase("Percent")) {
 			__coeffWorksheet.setColumnName(3, "PERCENT");
 		}
@@ -463,7 +464,7 @@ private void saveInformation(int record) {
 	}
 
 	StateCU_CropCharacteristics crop = 
-		(StateCU_CropCharacteristics)__cropsVector.elementAt(record);
+		(StateCU_CropCharacteristics)__cropsVector.get(record);
 
 	crop.setName(__nameJTextField.getText());
 	crop.setID(__cropIDJTextField.getText());
@@ -554,7 +555,7 @@ private void setupGUI(int index) {
 	__firstDaysBetweenJTextField = new JTextField(6);
 	__secondDaysBetweenJTextField = new JTextField(6);
 
-	Vector v = new Vector();
+	List v = new Vector();
 	v.add(__0_MEAN_TEMP);
 	v.add(__1_28_DEG_FROST);
 	v.add(__2_32_DEG_FROST);

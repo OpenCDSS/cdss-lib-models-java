@@ -20,7 +20,7 @@
 
 package DWR.StateMod;
 
-import java.util.Vector;
+import java.util.List;
 
 import RTi.Util.GUI.JScrollWorksheet;
 
@@ -41,7 +41,7 @@ which case an empty worksheet is shown.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_StreamEstimateCoefficients_Data_JFrame(Vector data, 
+public StateMod_StreamEstimateCoefficients_Data_JFrame(List data, 
 String titleString, boolean editable)
 throws Exception {
 	super(data, titleString, editable);
@@ -56,7 +56,7 @@ protected void apply() {
 	StateMod_StreamEstimate_Coefficients coeff = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		coeff= (StateMod_StreamEstimate_Coefficients)_data.elementAt(i);
+		coeff= (StateMod_StreamEstimate_Coefficients)_data.get(i);
 		coeff.createBackup();
 	}
 }
@@ -69,8 +69,7 @@ constructor.
 protected JScrollWorksheet buildJScrollWorksheet() 
 throws Exception {
 	StateMod_StreamEstimateCoefficients_Data_TableModel tableModel 
-		= new StateMod_StreamEstimateCoefficients_Data_TableModel(
-		_data, _editable);
+		= new StateMod_StreamEstimateCoefficients_Data_TableModel( _data, _editable);
 	StateMod_StreamEstimateCoefficients_Data_CellRenderer cellRenderer 
 		= new StateMod_StreamEstimateCoefficients_Data_CellRenderer(
 		tableModel);
@@ -80,27 +79,25 @@ throws Exception {
 }
 
 /**
-Called when the cancel button is pressed.  This discards any changes made to 
-the data objects.
+Called when the cancel button is pressed.  This discards any changes made to the data objects.
 */
 protected void cancel() {
 	StateMod_StreamEstimate_Coefficients coeff = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		coeff= (StateMod_StreamEstimate_Coefficients)_data.elementAt(i);
+		coeff= (StateMod_StreamEstimate_Coefficients)_data.get(i);
 		coeff.restoreOriginal();
 	}
 }
 
 /**
-Creates backups of all the data objects in the Vector so that changes can 
-later be cancelled if necessary.
+Creates backups of all the data objects in the Vector so that changes can later be cancelled if necessary.
 */
 protected void createDataBackup() {
 	StateMod_StreamEstimate_Coefficients coeff = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		coeff= (StateMod_StreamEstimate_Coefficients)_data.elementAt(i);
+		coeff= (StateMod_StreamEstimate_Coefficients)_data.get(i);
 		coeff.createBackup();
 	}
 }

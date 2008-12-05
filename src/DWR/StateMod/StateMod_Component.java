@@ -22,6 +22,5 @@ public interface StateMod_Component {
 	// data checks on a specific component.
 	// Each component should implement this method by adding
 	// specific and dependency data checks.
-    String[] checkComponentData( int count, StateMod_DataSet dataset,
-    		PropList props );
+    String[] checkComponentData( int count, StateMod_DataSet dataset, PropList props );
 }

@@ -26,7 +26,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.util.Vector;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -199,7 +199,7 @@ private DataSetComponent __plansComponent;
 /**
 The vector of plans to fill the worksheet with.
 */
-private Vector __plansVector;
+private List __plansVector;
 
 /**
 Constructor.
@@ -219,11 +219,11 @@ public StateMod_Plan_JFrame (	StateMod_DataSet dataset,
 	__plansComponent = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_PLANS);
 
-	__plansVector = (Vector)__plansComponent.getData();	
+	__plansVector = (List)__plansComponent.getData();	
 	int size = __plansVector.size();
 	StateMod_Plan plan = null;
 	for (int i = 0; i < size; i++) {
-		plan = (StateMod_Plan)__plansVector.elementAt(i);
+		plan = (StateMod_Plan)__plansVector.get(i);
 		plan.createBackup();
 	}
 
@@ -253,11 +253,11 @@ public StateMod_Plan_JFrame (	StateMod_DataSet dataset,
 	__plansComponent = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_PLANS);
 
-	__plansVector = (Vector)__plansComponent.getData();	
+	__plansVector = (List)__plansComponent.getData();	
 	int size = __plansVector.size();
 	StateMod_Plan plan = null;
 	for (int i = 0; i < size; i++) {
-		plan = (StateMod_Plan)__plansVector.elementAt(i);
+		plan = (StateMod_Plan)__plansVector.get(i);
 		plan.createBackup();
 	}
 
@@ -289,7 +289,7 @@ public void actionPerformed(ActionEvent e) {
 		StateMod_Plan plan = null;
 		boolean changed = false;
 		for (int i = 0; i < size; i++) {
-			plan = (StateMod_Plan)__plansVector.elementAt( i);
+			plan = (StateMod_Plan)__plansVector.get( i);
 			if (!changed && plan.changed()) {
 				changed = true;
 			}
@@ -311,7 +311,7 @@ public void actionPerformed(ActionEvent e) {
 		StateMod_Plan plan = null;
 		boolean changed = false;
 		for (int i = 0; i < size; i++) {
-			plan = (StateMod_Plan)__plansVector.elementAt( i);
+			plan = (StateMod_Plan)__plansVector.get( i);
 			if (!changed && plan.changed()) {
 				changed = true;
 			}
@@ -325,7 +325,7 @@ public void actionPerformed(ActionEvent e) {
 		int size = __plansVector.size();
 		StateMod_Plan plan = null;
 		for (int i = 0; i < size; i++) {
-			plan = (StateMod_Plan)__plansVector.elementAt( i);
+			plan = (StateMod_Plan)__plansVector.get( i);
 			plan.restoreOriginal();
 		}
 
@@ -400,7 +400,7 @@ private int checkInput()
 	if ( __dataset != null ) {
 		DataSetComponent comp = __dataset.getComponentForComponentType (
 			StateMod_DataSet.COMP_RIVER_NETWORK );
-		Vector data = (Vector)comp.getData();
+		List data = (List)comp.getData();
 		if (	!rivernode.equals("") &&
 			(StateMod_Util.indexOf(data,rivernode) < 0) ) {
 			warning += "\nRiver node ID (" + rivernode +
@@ -411,7 +411,7 @@ private int checkInput()
 	if ( warning.length() > 0 ) {
 		StateMod_Plan plan = 
 			(StateMod_Plan)__plansVector
-			.elementAt(__currentPlanIndex);
+			.get(__currentPlanIndex);
 		warning = "\nPlan:  " +
 		StateMod_Util.formatDataLabel ( plan.getID(), plan.getName() ) +
 		warning + "\nCorrect or Cancel.";
@@ -619,7 +619,7 @@ private void processTableSelection(int index, boolean try_to_save )
 	// List these in the order of the GUI...
 
 	StateMod_Plan plan = (StateMod_Plan)
-		__plansVector.elementAt(__currentPlanIndex);
+		__plansVector.get(__currentPlanIndex);
 
 	// Plan identifier...
 
@@ -735,7 +735,7 @@ private boolean saveData(int record) {
 		return false;
 	}
 
-	StateMod_Plan plan = (StateMod_Plan)__plansVector.elementAt(record);
+	StateMod_Plan plan = (StateMod_Plan)__plansVector.get(record);
 
 	// Save in the order of the GUI.  Save all the items, even if not
 	// currently editable/enabled (like ID and river node ID) because later
@@ -1244,7 +1244,7 @@ public void windowClosing(WindowEvent e) {
 	StateMod_Plan plan = null;
 	boolean changed = false;
 	for (int i = 0; i < size; i++) {
-		plan = (StateMod_Plan)__plansVector.elementAt(i);
+		plan = (StateMod_Plan)__plansVector.get(i);
 		if (!changed && plan.changed()) {
 			changed = true;
 		}

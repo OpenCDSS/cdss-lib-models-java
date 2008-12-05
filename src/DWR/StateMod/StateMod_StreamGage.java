@@ -143,6 +143,7 @@ package DWR.StateMod;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Vector;
 
 import RTi.GIS.GeoView.GeoRecord;
@@ -313,18 +314,18 @@ for all the elements in the Vector of StateMod_StreamGage objects.
 @param rivs Vector of StateMod_StreamGage (e.g., as read from StateMod 
 .ris file).
 */
-public static void connectAllTS (	Vector rivs,
-					Vector historical_MonthTS,
-					Vector historical_DayTS,
-					Vector baseflow_MonthTS,
-					Vector baseflow_DayTS )
+public static void connectAllTS (	List rivs,
+		List historical_MonthTS,
+		List historical_DayTS,
+		List baseflow_MonthTS,
+		List baseflow_DayTS )
 {	if ( rivs == null ) {
 		return;
 	}
 	StateMod_StreamGage riv;
 	int size = rivs.size();
 	for ( int i=0; i < size; i++ ) {
-		riv = (StateMod_StreamGage)rivs.elementAt(i);
+		riv = (StateMod_StreamGage)rivs.get(i);
 		if ( historical_MonthTS != null ) {
 			riv.connectHistoricalMonthTS ( historical_MonthTS );
 		}
@@ -346,7 +347,7 @@ Vector.
 A connection is made if the node identifier matches the time series location.
 @param tslist Vector of DayTS.
 */
-private void connectBaseflowDayTS ( Vector tslist )
+private void connectBaseflowDayTS ( List tslist )
 {	if ( tslist == null ) {
 		return;
 	}
@@ -354,7 +355,7 @@ private void connectBaseflowDayTS ( Vector tslist )
 	int size = tslist.size();
 	_baseflow_DayTS = null;
 	for ( int i=0; i < size; i++ ) {
-		ts = (DayTS)tslist.elementAt(i);
+		ts = (DayTS)tslist.get(i);
 		if ( ts == null ) {
 			continue;
 		}
@@ -371,7 +372,7 @@ private void connectBaseflowDayTS ( Vector tslist )
 Connect monthly baseflow time series.  
 @param tslist baseflow time series. 
 */
-public void connectBaseflowMonthTS ( Vector tslist )
+public void connectBaseflowMonthTS ( List tslist )
 {	if ( tslist == null ) {
 		return;
 	}
@@ -380,7 +381,7 @@ public void connectBaseflowMonthTS ( Vector tslist )
 	_baseflow_MonthTS = null;
 	MonthTS ts = null;
 	for (int i=0; i<num_TS; i++) {
-		ts = (MonthTS)tslist.elementAt(i);
+		ts = (MonthTS)tslist.get(i);
 		if ( ts == null ) {
 			continue;
 		}
@@ -398,7 +399,7 @@ Connect the historical daily TS pointer to the appropriate TS in the Vector.
 A connection is made if the node identifier matches the time series location.
 @param tslist Vector of DayTS.
 */
-private void connectHistoricalDayTS ( Vector tslist )
+private void connectHistoricalDayTS ( List tslist )
 {	if ( tslist == null ) {
 		return;
 	}
@@ -406,7 +407,7 @@ private void connectHistoricalDayTS ( Vector tslist )
 	_historical_DayTS = null;
 	int size = tslist.size();
 	for ( int i=0; i < size; i++ ) {
-		ts = (DayTS)tslist.elementAt(i);
+		ts = (DayTS)tslist.get(i);
 		if ( ts == null ) {
 			continue;
 		}
@@ -424,7 +425,7 @@ Connect the historical monthly TS pointer to the appropriate TS.
 A connection is made if the node identifier matches the time series location.
 @param tslist Vector of MonthTS.
 */
-public void connectHistoricalMonthTS ( Vector tslist )
+public void connectHistoricalMonthTS ( List tslist )
 {	if ( tslist == null ) {
 		return;
 	}
@@ -432,7 +433,7 @@ public void connectHistoricalMonthTS ( Vector tslist )
 	_historical_MonthTS = null;
 	int size = tslist.size();
 	for ( int i=0; i < size; i++ ) {
-		ts = (MonthTS)tslist.elementAt(i);
+		ts = (MonthTS)tslist.get(i);
 		if ( ts == null ) {
 			continue;
 		}
@@ -592,12 +593,12 @@ StateMod_StreamGage.
 @param filename Name of file to read.
 @exception Exception if there is an error reading the file.
 */
-public static Vector readStateModFile ( String filename )
+public static List readStateModFile ( String filename )
 throws Exception
 {	String rtn = "StateMod_StreamGage.readStateModFile";
-	Vector theRivs = new Vector();
+	List theRivs = new Vector();
 	String iline;
-	Vector v = new Vector ( 5 );
+	List v = new Vector ( 5 );
 	int [] format_0;
 	int [] format_0w;
 	format_0 = new int[5];
@@ -643,14 +644,14 @@ throws Exception
 				"Fixed read returned " 
 				+ v.size() + " elements");
 			}
-			aRiverNode.setID ( ((String)v.elementAt(0)).trim() );
-			aRiverNode.setName ( ((String)v.elementAt(1)).trim() );
-			aRiverNode.setCgoto ( ((String)v.elementAt(2)).trim() );
+			aRiverNode.setID ( ((String)v.get(0)).trim() );
+			aRiverNode.setName ( ((String)v.get(1)).trim() );
+			aRiverNode.setCgoto ( ((String)v.get(2)).trim() );
 			// Space
-			aRiverNode.setCrunidy (((String)v.elementAt(4)).trim());
+			aRiverNode.setCrunidy (((String)v.get(4)).trim());
 
 			// add the node to the vector of river nodes
-			theRivs.addElement ( aRiverNode );
+			theRivs.add ( aRiverNode );
 		}
 	} catch (Exception e) {
 		// Clean up...
@@ -783,7 +784,7 @@ specified, then the original header is carried into the new file.
 @param do_daily Indicates whether daily modeling fields should be written.
 */
 public static void writeStateModFile( String infile, String outfile,
-			Vector theRivs, String[] newcomments,
+		List theRivs, String[] newcomments,
 			boolean do_daily )
 throws Exception
 {	PrintWriter	out;
@@ -844,15 +845,15 @@ throws Exception
 		if ( theRivs != null ) {
 			num = theRivs.size();
 		}
-		Vector v = new Vector ( 5 );
+		List v = new Vector ( 5 );
 		for ( int i=0; i< num; i++ ) {
-			riv = (StateMod_StreamGage) theRivs.elementAt(i);
-			v.removeAllElements ();
-			v.addElement ( riv.getID() );
-			v.addElement ( riv.getName() );
-			v.addElement ( riv.getCgoto() );
+			riv = (StateMod_StreamGage) theRivs.get(i);
+			v.clear ();
+			v.add ( riv.getID() );
+			v.add ( riv.getName() );
+			v.add ( riv.getCgoto() );
 			if ( do_daily ) {
-				v.addElement ( riv.getCrunidy() );
+				v.add ( riv.getCrunidy() );
 			}
 			iline = StringUtil.formatString ( v, format );
 			out.println ( iline );
@@ -884,15 +885,14 @@ header (true) or to create a new file with a new header.
 @param data the Vector of objects to write.  
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter,
-boolean update, Vector data) 
+public static void writeListFile(String filename, String delimiter, boolean update, List data) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
 		size = data.size();
 	}
 	
-	Vector fields = new Vector();
+	List fields = new Vector();
 	fields.add("ID");
 	fields.add("Name");
 	fields.add("NodeID");
@@ -904,7 +904,7 @@ throws Exception {
 	int comp = StateMod_DataSet.COMP_STREAMGAGE_STATIONS;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.elementAt(i);
+		s = (String)fields.get(i);
 		names[i] = StateMod_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateMod_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -939,7 +939,7 @@ throws Exception {
 		out.println(buffer.toString());
 		
 		for (int i = 0; i < size; i++) {
-			gage = (StateMod_StreamGage)data.elementAt(i);
+			gage = (StateMod_StreamGage)data.get(i);
 			
 			line[0] = StringUtil.formatString(gage.getID(), 
 				formats[0]).trim();

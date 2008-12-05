@@ -13,6 +13,7 @@
 
 package DWR.StateMod;
 
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
@@ -31,8 +32,7 @@ extends JWorksheet_AbstractRowTableModel implements StateMod_Data_TableModel
 /**
 Number of columns in the table model.  For table models that display rights for
 a single well, the worksheets only have have 6 columns.  Table models that 
-display rights for 1+ wells have 7.  The variable is modified in the 
-constructor.
+display rights for 1+ wells have 7.  The variable is modified in the constructor.
 */
 private int __COLUMNS = 6;
 
@@ -57,7 +57,7 @@ Constructor.
 @param data the data that will be displayed in the table.
 @param editable whether the table data is editable or not
 */
-public StateMod_WellRight_Data_TableModel(Vector data, boolean editable) {
+public StateMod_WellRight_Data_TableModel(List data, boolean editable) {
 	if (data == null) {
 		_data = new Vector();
 	}
@@ -67,19 +67,6 @@ public StateMod_WellRight_Data_TableModel(Vector data, boolean editable) {
 	_rows = _data.size();
 
 	__editable = editable;
-}
-
-/**
-Constructor.  
-@param dataset the dataset in which the data are displayed
-@param data the data that will be displayed in the table.
-@param editable whether the table data is editable or not
-@deprecated use the other constructor.  This will be phased out soon 
-(2005-01-25)
-*/
-public StateMod_WellRight_Data_TableModel(StateMod_DataSet dataset, 
-Vector data, boolean editable) {
-	this(data, editable);
 }
 
 /**
@@ -233,7 +220,7 @@ public Object getValueAt(int row, int col)
 		row = _sortOrder[row];
 	}
 
-	StateMod_WellRight wellr = (StateMod_WellRight)_data.elementAt(row);
+	StateMod_WellRight wellr = (StateMod_WellRight)_data.get(row);
 
 	switch (col) {
 		case COL_RIGHT_ID:	return wellr.getID();
@@ -276,7 +263,7 @@ public void setValueAt(Object value, int row, int col) {
 	double dval;
 	int ival;
 
-	StateMod_WellRight wellr = (StateMod_WellRight)_data.elementAt(row);
+	StateMod_WellRight wellr = (StateMod_WellRight)_data.get(row);
 
 	switch (col) {
 		case COL_RIGHT_ID:	
@@ -293,15 +280,16 @@ public void setValueAt(Object value, int row, int col) {
 			break;
 		case COL_DCR_AMT:
 			if (value instanceof String) {
-				try {	dval = (new Double(
-						(String)value)).doubleValue();
+				try {
+					dval = (new Double(	(String)value)).doubleValue();
 				}
 				catch (Exception e) {
 					Message.printWarning(2, "setValue", e);
 					return;
 				}
 			}
-			else {	dval = ((Double)value).doubleValue();
+			else {
+				dval = ((Double)value).doubleValue();
 			}
 			wellr.setDcrdivw(dval);
 			break;
@@ -313,8 +301,7 @@ public void setValueAt(Object value, int row, int col) {
 			else if (value instanceof String) {
 				String onOff = (String)value;
 				int index = onOff.indexOf(" -");
-				ival = new Integer(
-					onOff.substring(0, index)).intValue();
+				ival = new Integer( onOff.substring(0, index)).intValue();
 				wellr.setSwitch(ival);
 			}
 			break;				

@@ -70,6 +70,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.IO.IOUtil;
@@ -111,7 +112,7 @@ location.  This is actually a Vector of Vector's where the
 __collection_year is the first dimension.  This is ugly but need to
 use the code to see if it can be made cleaner.
 */
-private Vector __collection_Vector = null;
+private List __collection_Vector = null;
 
 /**
 An array of years that correspond to the aggregate/system.  Parcel
@@ -253,19 +254,19 @@ year.
 @param year The year of interest, only used for well identifiers.
 @return the list of collection part IDS, or null if not defined.
 */
-public Vector getCollectionPartIDs ( int year )
+public List getCollectionPartIDs ( int year )
 {	if ( __collection_Vector.size() == 0 ) {
 		return null;
 	}
 	if ( __collection_part_type.equalsIgnoreCase(COLLECTION_PART_TYPE_DITCH) ) {
 		// The list of part IDs will be the first and only list...
-		return (Vector)__collection_Vector.elementAt(0);
+		return (List)__collection_Vector.get(0);
 	}
 	else if ( __collection_part_type.equalsIgnoreCase(COLLECTION_PART_TYPE_PARCEL) ) {
 		// The list of part IDs needs to match the year.
 		for ( int i = 0; i < __collection_year.length; i++ ) {
 			if ( year == __collection_year[i] ) {
-				return (Vector)__collection_Vector.elementAt(i);
+				return (List)__collection_Vector.get(i);
 			}
 		}
 	}
@@ -468,12 +469,12 @@ public boolean isCollection()
 Read the StateCU STR file and return as a Vector of StateCU_Location.
 @param filename filename containing STR records.
 */
-public static Vector readStateCUFile ( String filename )
+public static List readStateCUFile ( String filename )
 throws IOException
 {	String rtn = "StateCU_Location.readStateCUFile";
 	String iline = null;
-	Vector v = new Vector ( 8 );
-	Vector culoc_Vector = new Vector ( 100 );	// Data to return.
+	List v = new Vector ( 8 );
+	List culoc_Vector = new Vector ( 100 );	// Data to return.
 	int i;
 	int format_0[] = {
 				StringUtil.TYPE_STRING,	// CU Location
@@ -530,26 +531,26 @@ throws IOException
 		culoc = new StateCU_Location();
 
 		StringUtil.fixedRead ( iline, format_0, format_0w, v );
-		culoc.setID ( ((String)v.elementAt(0)).trim() ); 
-		latitude = ((String)v.elementAt(1)).trim();
+		culoc.setID ( ((String)v.get(0)).trim() ); 
+		latitude = ((String)v.get(1)).trim();
 		if ((latitude.length() != 0) && StringUtil.isDouble(latitude)) {
 			culoc.setLatitude ( StringUtil.atod(latitude) );
 		}
-		elevation = ((String)v.elementAt(2)).trim();
+		elevation = ((String)v.get(2)).trim();
 		if (	(elevation.length() != 0) &&
 			StringUtil.isDouble(elevation)) {
 			culoc.setElevation ( StringUtil.atod(elevation) );
 		}
-		culoc.setRegion1 ( ((String)v.elementAt(3)).trim() ); 
-		culoc.setRegion2 ( ((String)v.elementAt(4)).trim() ); 
-		culoc.setName ( ((String)v.elementAt(5)).trim() ); 
-		num_climate_stations = ((String)v.elementAt(6)).trim();
+		culoc.setRegion1 ( ((String)v.get(3)).trim() ); 
+		culoc.setRegion2 ( ((String)v.get(4)).trim() ); 
+		culoc.setName ( ((String)v.get(5)).trim() ); 
+		num_climate_stations = ((String)v.get(6)).trim();
 		if (	(num_climate_stations.length() != 0) &&
 			StringUtil.isInteger(num_climate_stations)) {
 			culoc.setNumClimateStations (
 				StringUtil.atoi(num_climate_stations) );
 		}
-		awc = ((String)v.elementAt(6)).trim();
+		awc = ((String)v.get(6)).trim();
 		if (	(awc.length() != 0) &&
 			StringUtil.isDouble(awc)) {
 			culoc.setAwc ( StringUtil.atod(awc) );
@@ -563,28 +564,28 @@ throws IOException
 			StringUtil.fixedRead ( iline, format_1, format_1w, v );
 			vsize = v.size();
 			culoc.setClimateStationID (
-				((String)v.elementAt(0)).trim(), i ); 
-			weight = ((String)v.elementAt(1)).trim();
+				((String)v.get(0)).trim(), i ); 
+			weight = ((String)v.get(1)).trim();
 			if (	(weight.length() != 0) &&
 				StringUtil.isDouble(weight)) {
 				culoc.setTemperatureStationWeight (
 				StringUtil.atod(weight), i );
 			}
-			weight = ((String)v.elementAt(2)).trim();
+			weight = ((String)v.get(2)).trim();
 			if (	(weight.length() != 0) &&
 				StringUtil.isDouble(weight)) {
 				culoc.setPrecipitationStationWeight (
 				StringUtil.atod(weight), i );
 			}
 			if ( vsize > 3 ) {
-				ota = ((String)v.elementAt(3)).trim();
+				ota = ((String)v.get(3)).trim();
 				if ( (ota.length() != 0) && StringUtil.isDouble(ota)) {
 					culoc.setOrographicTemperatureAdjustment (
 							StringUtil.atod(ota), i );
 				}
 			}
 			if ( vsize > 4 ) {
-				opa = ((String)v.elementAt(4)).trim();
+				opa = ((String)v.get(4)).trim();
 				if ( (opa.length() != 0) &&	StringUtil.isDouble(opa)) {
 					culoc.setOrographicPrecipitationAdjustment (
 							StringUtil.atod(opa), i );
@@ -593,7 +594,7 @@ throws IOException
 		}
 
 		// Add the StateCU_Location to the vector...
-		culoc_Vector.addElement ( culoc );
+		culoc_Vector.add ( culoc );
 	}
 	if ( in != null ) {
 		in.close();
@@ -664,16 +665,16 @@ Set the collection list for an aggregate/system.  It is assumed that the
 collection applies to all years of data.
 @param ids The identifiers indicating the locations to collection.
 */
-public void setCollectionPartIDs ( Vector ids )
+public void setCollectionPartIDs ( List ids )
 {	if ( __collection_Vector == null ) {
 		__collection_Vector = new Vector ( 1 );
 		__collection_year = new int[1];
 	}
 	else {	// Remove the previous contents...
-		__collection_Vector.removeAllElements();
+		__collection_Vector.clear();
 	}
 	// Now assign...
-	__collection_Vector.addElement ( ids );
+	__collection_Vector.add ( ids );
 	__collection_year[0] = 0;
 }
 
@@ -683,12 +684,12 @@ assumed that the collection applies to all years of data.
 @param year The year to which the collection applies.
 @param ids The identifiers indicating the locations in the collection.
 */
-public void setCollectionPartIDs ( int year, Vector ids )
+public void setCollectionPartIDs ( int year, List ids )
 {	int pos = -1;	// Position of year in data lists.
 	if ( __collection_Vector == null ) {
 		// No previous data so create memory...
 		__collection_Vector = new Vector ( 1 );
-		__collection_Vector.addElement ( ids );
+		__collection_Vector.add ( ids );
 		__collection_year = new int[1];
 		__collection_year[0] = year;
 	}
@@ -703,7 +704,7 @@ public void setCollectionPartIDs ( int year, Vector ids )
 		if ( pos < 0 ) {
 			// Need to add an item...
 			pos = __collection_year.length;
-			__collection_Vector.addElement ( ids );
+			__collection_Vector.add ( ids );
 			int [] temp = new int[__collection_year.length + 1];
 			for ( int i = 0; i < __collection_year.length; i++ ) {
 				temp[i] = __collection_year[i];
@@ -712,7 +713,7 @@ public void setCollectionPartIDs ( int year, Vector ids )
 			__collection_year[pos] = year;
 		}
 		else {	// Existing item...
-			__collection_Vector.setElementAt ( ids, pos );
+			__collection_Vector.set ( pos, ids );
 			__collection_year[pos] = year;
 		}
 	}
@@ -885,12 +886,10 @@ processing headers).  Specify as null if no previous file is available.
 if no comments are available.
 @exception IOException if there is an error writing the file.
 */
-public static void writeStateCUFile (	String filename_prev, String filename,
-					Vector data_Vector,
-					String [] new_comments )
+public static void writeStateCUFile ( String filename_prev, String filename,
+					List data_Vector,String [] new_comments )
 throws IOException
-{	writeStateCUFile ( filename_prev, filename, data_Vector, new_comments,
-				null );
+{	writeStateCUFile ( filename_prev, filename, data_Vector, new_comments, null );
 }
 
 /**
@@ -908,10 +907,8 @@ file format will match that for version 10.  Otherwise, the newest format is
 used.  This is useful for comparing with or regenerating old data sets.
 @exception IOException if there is an error writing the file.
 */
-public static void writeStateCUFile (	String filename_prev, String filename,
-					Vector data_Vector,
-					String [] new_comments,
-					PropList props )
+public static void writeStateCUFile ( String filename_prev, String filename,
+					List data_Vector, String [] new_comments, PropList props )
 throws IOException
 {	String [] comment_str = { "#" };
 	String [] ignore_comment_str = { "#>" };
@@ -939,8 +936,7 @@ Write a Vector of StateCU_Location to an opened file.
 method for a description.
 @exception IOException if an error occurs.
 */
-private static void writeVector ( Vector data_Vector, PrintWriter out,
-				PropList props )
+private static void writeVector ( List data_Vector, PrintWriter out, PropList props )
 throws IOException
 {	int i,j;
 	String cmnt = "#>";
@@ -956,7 +952,7 @@ throws IOException
 	//String format2_version10 =
 	//	"%-12.12s%6.6s%9.9s";
 	StateCU_Location cu_loc = null;
-	Vector v = new Vector(8);	// Reuse for all output lines.
+	List v = new Vector(8);	// Reuse for all output lines.
 
 	if ( props == null ) {
 		props = new PropList ( "StateCU_Location" );
@@ -1040,12 +1036,12 @@ throws IOException
 	int numclimate = 0;
 	double val;	// Generic value
 	for ( i=0; i<num; i++ ) {
-		cu_loc = (StateCU_Location)data_Vector.elementAt(i);
+		cu_loc = (StateCU_Location)data_Vector.get(i);
 		if ( cu_loc == null ) {
 			continue;
 		}
 
-		v.removeAllElements();
+		v.clear();
 		v.add(cu_loc._id);
 		if ( StateCU_Util.isMissing(cu_loc.__latitude) ) {
 			v.add("");
@@ -1082,7 +1078,7 @@ throws IOException
 			// Print the climate station weights.
 			// If values are missing, assign reasonable defaults.
 			for ( j = 0; j < numclimate; j++ ) {
-				v.removeAllElements();
+				v.clear();
 				v.add(StringUtil.formatString(cu_loc.getClimateStationID(j),"%-12.12s"));
 				val = cu_loc.getTemperatureStationWeight(j);
 				if ( StateCU_Util.isMissing(val) ) {
@@ -1110,7 +1106,7 @@ throws IOException
 	}
 }
 
-public Vector getTemp() {
+public List getTemp() {
 	return __collection_Vector;
 }
 
@@ -1132,15 +1128,14 @@ header (true) or to create a new file with a new header.
 @param data the Vector of objects to write.  
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter,
-boolean update, Vector data) 
+public static void writeListFile(String filename, String delimiter, boolean update, List data) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
 		size = data.size();
 	}
 	
-	Vector fields = new Vector();
+	List fields = new Vector();
 	fields.add("ID");
 	fields.add("Name");
 	fields.add("Latitude");
@@ -1156,7 +1151,7 @@ throws Exception {
 	int comp = StateCU_DataSet.COMP_CU_LOCATIONS;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.elementAt(i);
+		s = (String)fields.get(i);
 		names[i] = StateCU_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateCU_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -1191,7 +1186,7 @@ throws Exception {
 		out.println(buffer.toString());
 		
 		for (int i = 0; i < size; i++) {
-			loc = (StateCU_Location)data.elementAt(i);
+			loc = (StateCU_Location)data.get(i);
 			
 			line[0] = StringUtil.formatString(loc.getID(), 
 				formats[0]).trim();
@@ -1242,12 +1237,10 @@ throws Exception {
 	String end = filename.substring((lastIndex + 1), filename.length());
 	
 	String climateFilename = front + "_ClimateStations." + end;
-	writeClimateStationListFile(climateFilename, delimiter, update, 
-		data);
+	writeClimateStationListFile(climateFilename, delimiter, update, data);
 
 	String collectionFilename = front + "_Collections." + end;
-	writeCollectionListFile(collectionFilename, delimiter, update, 
-		data);
+	writeCollectionListFile(collectionFilename, delimiter, update, data);
 }
 
 /**
@@ -1262,15 +1255,14 @@ header (true) or to create a new file with a new header.
 @param data the Vector of objects to write.  
 @throws Exception if an error occurs.
 */
-public static void writeClimateStationListFile(String filename, 
-String delimiter, boolean update, Vector data) 
+public static void writeClimateStationListFile(String filename, String delimiter, boolean update, List data) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
 		size = data.size();
 	}
 	
-	Vector fields = new Vector();
+	List fields = new Vector();
 	fields.add("LocationID");
 	fields.add("StationID");
 	fields.add("PrecipWeight");
@@ -1282,7 +1274,7 @@ throws Exception {
 	int comp = StateCU_DataSet.COMP_CU_LOCATION_CLIMATE_STATIONS;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.elementAt(i);
+		s = (String)fields.get(i);
 		names[i] = StateCU_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateCU_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -1320,7 +1312,7 @@ throws Exception {
 		out.println(buffer.toString());
 		
 		for (int i = 0; i < size; i++) {
-			loc = (StateCU_Location)data.elementAt(i);
+			loc = (StateCU_Location)data.get(i);
 			id = loc.getID();
 			num = loc.getNumClimateStations();
 			
@@ -1377,15 +1369,14 @@ header (true) or to create a new file with a new header.
 @param data the Vector of objects to write.  
 @throws Exception if an error occurs.
 */
-public static void writeCollectionListFile(String filename, 
-String delimiter, boolean update, Vector data) 
+public static void writeCollectionListFile(String filename, String delimiter, boolean update, List data) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
 		size = data.size();
 	}
 	
-	Vector fields = new Vector();
+	List fields = new Vector();
 	fields.add("LocationID");
 	fields.add("Division");
 	fields.add("Year");
@@ -1400,7 +1391,7 @@ throws Exception {
 	
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.elementAt(i);
+		s = (String)fields.get(i);
 		names[i] = StateCU_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateCU_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -1425,7 +1416,7 @@ throws Exception {
 	String id = null;
 	String partType = null;	
 	StringBuffer buffer = new StringBuffer();
-	Vector ids = null;
+	List ids = null;
 
 	try {	
 		out = IOUtil.processFileHeaders(
@@ -1443,7 +1434,7 @@ throws Exception {
 		out.println(buffer.toString());
 		
 		for (int i = 0; i < size; i++) {
-			loc = (StateCU_Location)data.elementAt(i);
+			loc = (StateCU_Location)data.get(i);
 			id = loc.getID();
 			div = loc.getCollectionDiv();
 			years = loc.getCollectionYears();
@@ -1469,7 +1460,7 @@ throws Exception {
 				line[4] = StringUtil.formatString(partType,
 					formats[4]).trim();
 				line[5] = StringUtil.formatString(
-					((String)(ids.elementAt(k))),
+					((String)(ids.get(k))),
 					formats[5]).trim();
 
 				buffer = new StringBuffer();	

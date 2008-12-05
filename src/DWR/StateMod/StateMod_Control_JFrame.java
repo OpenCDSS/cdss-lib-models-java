@@ -104,6 +104,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -280,7 +281,7 @@ data object.
 @return true if the text fields are okay, false if not.
 */
 private boolean checkInput() {
-	Vector errors = new Vector();
+	List errors = new Vector();
 	int errorCount = 0;
 
 	// for each field, check if it contains valid input.  If not,
@@ -299,7 +300,7 @@ private boolean checkInput() {
 	String label = "The following error" + plural + "encountered "
 		+ "trying to save the record:\n";
 	for (int i = 0; i < errorCount; i++) {
-		label += errors.elementAt(i) + "\n";
+		label += errors.get(i) + "\n";
 	}
 	new ResponseJDialog(this, 
 		"Errors encountered", label, ResponseJDialog.OK);

@@ -12,6 +12,7 @@
 
 package DWR.StateMod;
 
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
@@ -51,7 +52,7 @@ Constructor.
 @param data the data that will be displayed in the table.
 @param editable whether the table data can be modified.
 */
-public StateMod_ReservoirAccount_Data_TableModel(Vector data, boolean editable){
+public StateMod_ReservoirAccount_Data_TableModel(List data, boolean editable){
 	if (data == null) {
 		_data = new Vector();
 	}
@@ -133,8 +134,7 @@ public String[] getColumnToolTips() {
 Returns the format that the specified column should be displayed in when
 the table is being displayed in the given table format. 
 @param col column for which to return the format.
-@return the format (as used by StringUtil.formatString() in which to display the
-column.
+@return the format (as used by StringUtil.formatString() in which to display the column.
 */
 public String getFormat(int col) {
 	switch (col) {
@@ -158,8 +158,7 @@ public int getRowCount() {
 }
 
 /**
-Returns the data that should be placed in the JTable at the given 
-row and column.
+Returns the data that should be placed in the JTable at the given row and column.
 @param row the row for which to return data.
 @param col the column for which to return data.
 @return the data that should be placed in the JTable at the given row and col.
@@ -169,8 +168,7 @@ public Object getValueAt(int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	StateMod_ReservoirAccount rac 
-		= (StateMod_ReservoirAccount)_data.elementAt(row);
+	StateMod_ReservoirAccount rac = (StateMod_ReservoirAccount)_data.get(row);
 
 	switch (col) {
 		case COL_RESERVOIR_ID:	return rac.getCgoto();
@@ -231,8 +229,7 @@ public void setValueAt(Object value, int row, int col)
 	}
 	double dval;
 	int ival;
-	StateMod_ReservoirAccount rac = 
-		(StateMod_ReservoirAccount)_data.elementAt(row);
+	StateMod_ReservoirAccount rac = (StateMod_ReservoirAccount)_data.get(row);
 
 	switch (col) {
 		case COL_RESERVOIR_ID:
@@ -259,8 +256,7 @@ public void setValueAt(Object value, int row, int col)
 			}
 			else if (value instanceof String) {
 				int index=((String)value).indexOf(" -");
-				String s = ((String)value).substring(
-					0, index);
+				String s = ((String)value).substring( 0, index);
 				dval = (new Double(s)).doubleValue();
 				rac.setPcteva(dval);
 			}
@@ -273,9 +269,7 @@ public void setValueAt(Object value, int row, int col)
 			else if (value instanceof String) {
 				String n2owns = (String)value;
 				int index = n2owns.indexOf(" -");
-				ival = new Integer(
-					n2owns.substring(0,
-					index)).intValue();
+				ival = new Integer( n2owns.substring(0, index)).intValue();
 				rac.setN2own(ival);
 			}
 			break;

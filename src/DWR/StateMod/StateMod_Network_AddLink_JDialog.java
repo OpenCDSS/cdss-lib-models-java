@@ -18,6 +18,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -132,7 +133,7 @@ private void setupGUI() {
 
 	int y = 0;
 
-	Vector nodes = new Vector(__nodes.length);
+	List nodes = new Vector(__nodes.length);
 	for (int i = 0; i < __nodes.length; i++) {	
 		nodes.add(__nodes[i].getCommonID());
 	}

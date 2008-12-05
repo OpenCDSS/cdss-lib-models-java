@@ -19,7 +19,7 @@
 
 package DWR.StateCU;
 
-import java.util.Vector;
+import java.util.List;
 
 import DWR.StateMod.StateMod_Data_JFrame;
 import RTi.Util.GUI.JScrollWorksheet;
@@ -39,7 +39,7 @@ Constructor.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateCU_CropCharacteristics_Data_JFrame(Vector data, String titleString,
+public StateCU_CropCharacteristics_Data_JFrame(List data, String titleString,
 boolean editable)
 throws Exception {
 	super(data, titleString, editable);
@@ -56,7 +56,7 @@ protected void apply() {
 	StateCU_CropCharacteristics station = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		station = (StateCU_CropCharacteristics)_data.elementAt(i);
+		station = (StateCU_CropCharacteristics)_data.get(i);
 		station.createBackup();
 	}
 }
@@ -69,8 +69,7 @@ constructor.
 protected JScrollWorksheet buildJScrollWorksheet() 
 throws Exception {
 	StateCU_CropCharacteristics_TableModel tableModel 
-		= new StateCU_CropCharacteristics_TableModel(_data, _editable, 
-		false);
+		= new StateCU_CropCharacteristics_TableModel(_data, _editable, false);
 	StateCU_CropCharacteristics_CellRenderer cellRenderer 
 		= new StateCU_CropCharacteristics_CellRenderer(tableModel);
 
@@ -86,7 +85,7 @@ protected void cancel() {
 	StateCU_CropCharacteristics station = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		station = (StateCU_CropCharacteristics)_data.elementAt(i);
+		station = (StateCU_CropCharacteristics)_data.get(i);
 		station.restoreOriginal();
 	}
 }
@@ -99,7 +98,7 @@ protected void createDataBackup() {
 	StateCU_CropCharacteristics station = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		station = (StateCU_CropCharacteristics)_data.elementAt(i);
+		station = (StateCU_CropCharacteristics)_data.get(i);
 		station.createBackup();
 	}
 }

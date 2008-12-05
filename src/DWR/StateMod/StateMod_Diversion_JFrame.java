@@ -208,6 +208,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -427,7 +428,7 @@ private DataSetComponent __diversionsComponent;
 /**
 The vector of diversions to fill the worksheet with.
 */
-private Vector __diversionsVector;
+private List __diversionsVector;
 
 /**
 Constructor.
@@ -447,11 +448,11 @@ public StateMod_Diversion_JFrame (	StateMod_DataSet dataset,
 	__diversionsComponent = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_DIVERSION_STATIONS);
 
-	__diversionsVector = (Vector)__diversionsComponent.getData();	
+	__diversionsVector = (List)__diversionsComponent.getData();	
 	int size = __diversionsVector.size();
 	StateMod_Diversion div = null;
 	for (int i = 0; i < size; i++) {
-		div = (StateMod_Diversion)__diversionsVector.elementAt(i);
+		div = (StateMod_Diversion)__diversionsVector.get(i);
 		div.createBackup();
 	}
 
@@ -481,11 +482,11 @@ public StateMod_Diversion_JFrame (	StateMod_DataSet dataset,
 	__diversionsComponent = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_DIVERSION_STATIONS);
 
-	__diversionsVector = (Vector)__diversionsComponent.getData();	
+	__diversionsVector = (List)__diversionsComponent.getData();	
 	int size = __diversionsVector.size();
 	StateMod_Diversion div = null;
 	for (int i = 0; i < size; i++) {
-		div = (StateMod_Diversion)__diversionsVector.elementAt(i);
+		div = (StateMod_Diversion)__diversionsVector.get(i);
 		div.createBackup();
 	}
 
@@ -530,7 +531,7 @@ public void actionPerformed(ActionEvent e) {
 		StateMod_Diversion div = null;
 		boolean changed = false;
 		for (int i = 0; i < size; i++) {
-			div = (StateMod_Diversion)__diversionsVector.elementAt(
+			div = (StateMod_Diversion)__diversionsVector.get(
 				i);
 			if (!changed && div.changed()) {
 				changed = true;
@@ -554,7 +555,7 @@ public void actionPerformed(ActionEvent e) {
 		StateMod_Diversion div = null;
 		boolean changed = false;
 		for (int i = 0; i < size; i++) {
-			div = (StateMod_Diversion)__diversionsVector.elementAt(
+			div = (StateMod_Diversion)__diversionsVector.get(
 				i);
 			if (!changed && div.changed()) {
 				changed = true;
@@ -570,7 +571,7 @@ public void actionPerformed(ActionEvent e) {
 		int size = __diversionsVector.size();
 		StateMod_Diversion div = null;
 		for (int i = 0; i < size; i++) {
-			div = (StateMod_Diversion)__diversionsVector.elementAt(
+			div = (StateMod_Diversion)__diversionsVector.get(
 				i);
 			div.restoreOriginal();
 		}
@@ -608,7 +609,7 @@ public void actionPerformed(ActionEvent e) {
 		// set placeholder to current diversion
 		StateMod_Diversion div = 
 			(StateMod_Diversion)__diversionsVector
-			.elementAt(__currentDiversionIndex);
+			.get(__currentDiversionIndex);
 	
 		new StateMod_Diversion_Right_JFrame(
 			__dataset, div, __editable);
@@ -623,7 +624,7 @@ public void actionPerformed(ActionEvent e) {
 
 		// set placeholder to current diversion
 		StateMod_Diversion div = 
-			(StateMod_Diversion)__diversionsVector.elementAt(
+			(StateMod_Diversion)__diversionsVector.get(
 			__currentDiversionIndex);
 	
 		new StateMod_Diversion_ReturnFlow_JFrame(
@@ -679,7 +680,7 @@ private int checkInput()
 	if ( __dataset != null ) {
 		DataSetComponent comp = __dataset.getComponentForComponentType (
 			StateMod_DataSet.COMP_RIVER_NETWORK );
-		Vector data = (Vector)comp.getData();
+		List data = (List)comp.getData();
 		if (	!rivernode.equals("") &&
 			(StateMod_Util.indexOf(data,rivernode) < 0) ) {
 			warning += "\nRiver node ID (" + rivernode +
@@ -707,7 +708,7 @@ private int checkInput()
 	if ( warning.length() > 0 ) {
 		StateMod_Diversion div = 
 			(StateMod_Diversion)__diversionsVector
-			.elementAt(__currentDiversionIndex);
+			.get(__currentDiversionIndex);
 		warning = "\nDiversion:  " +
 		StateMod_Util.formatDataLabel ( div.getID(), div.getName() ) +
 		warning + "\nCorrect or Cancel.";
@@ -793,7 +794,7 @@ private void displayEff ( boolean monthly_data, boolean reset_data )
 	}
 	
 	StateMod_Diversion div = (StateMod_Diversion)
-		__diversionsVector.elementAt(__currentDiversionIndex);
+		__diversionsVector.get(__currentDiversionIndex);
 	// Set this because setting 
 	__ignoreNextStateChange = true;
 	// This is only really needed when needed when the data are initially
@@ -843,7 +844,7 @@ public void displayTSViewJFrame(String type)
 		return;
 	}
 	StateMod_Diversion div = (StateMod_Diversion)__diversionsVector
-		.elementAt(__currentDiversionIndex);
+		.get(__currentDiversionIndex);
 
 	PropList display_props = new PropList("TSView");
 
@@ -860,7 +861,7 @@ public void displayTSViewJFrame(String type)
 	props.set("Product.TotalWidth", "600");
 	props.set("Product.TotalHeight", "400");
 
-	Vector tslist = new Vector();
+	List tslist = new Vector();
 
 	int sub = 0;
 	int its = 0;
@@ -1044,7 +1045,7 @@ public void displayTSViewJFrame(String type)
 	DayTS dayts = null;
 	int pos;
 	DataSetComponent comp;
-	Vector data;
+	List data;
 	if (	(__ts_diversion_daily_JCheckBox.isSelected() &&
 		__ts_diversion_daily_JCheckBox.isEnabled()) ||
 		(__ts_diversion_est_daily_JCheckBox.isSelected() &&
@@ -1091,11 +1092,11 @@ public void displayTSViewJFrame(String type)
 				comp = __dataset.getComponentForComponentType(
 					StateMod_DataSet.
 					COMP_DIVERSION_TS_DAILY );
-				data = (Vector)comp.getData();
-				pos = TSUtil.indexOf ((Vector)comp.getData(),
+				data = (List)comp.getData();
+				pos = TSUtil.indexOf ((List)comp.getData(),
 					cdividy, "Location", 0 );
 				if ( pos >= 0 ) {
-					dayts = (DayTS)data.elementAt(pos);
+					dayts = (DayTS)data.get(pos);
 				}
 			}
 			ts = StateMod_Util.createDailyEstimateTS (
@@ -1130,11 +1131,11 @@ public void displayTSViewJFrame(String type)
 				// diversion...
 				comp = __dataset.getComponentForComponentType(
 					StateMod_DataSet.COMP_DEMAND_TS_DAILY );
-				data = (Vector)comp.getData();
-				pos = TSUtil.indexOf ((Vector)comp.getData(),
+				data = (List)comp.getData();
+				pos = TSUtil.indexOf ((List)comp.getData(),
 					cdividy, "Location", 0 );
 				if ( pos >= 0 ) {
-					dayts = (DayTS)data.elementAt(pos);
+					dayts = (DayTS)data.get(pos);
 				}
 			}
 			ts = StateMod_Util.createDailyEstimateTS (
@@ -1170,11 +1171,11 @@ public void displayTSViewJFrame(String type)
 				comp = __dataset.getComponentForComponentType(
 					StateMod_DataSet.
 				COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_DAILY );
-				data = (Vector)comp.getData();
-				pos = TSUtil.indexOf ((Vector)comp.getData(),
+				data = (List)comp.getData();
+				pos = TSUtil.indexOf ((List)comp.getData(),
 					cdividy, "Location", 0 );
 				if ( pos >= 0 ) {
-					dayts = (DayTS)data.elementAt(pos);
+					dayts = (DayTS)data.get(pos);
 				}
 			}
 			ts = StateMod_Util.createDailyEstimateTS (
@@ -1416,20 +1417,18 @@ private void populateDiversionDailyID()
 {	__diversionDailyID_JComboBox.removeAllItems();
 
 	// Get a list of all the diversions with "ID - Name"...
-	Vector idNameVector = StateMod_Util.createDataList(__diversionsVector, 
+	List idNameVector = StateMod_Util.createDataList(__diversionsVector, 
 		true);
-	Vector static_choices = StateMod_Diversion.getCdividyChoices ( true );
+	List static_choices = StateMod_Diversion.getCdividyChoices ( true );
 	// Take special care if no diversions are in the list...
 	if ( idNameVector.size() == 0 ) {
-		idNameVector.addElement( (String)static_choices.elementAt(0) );
+		idNameVector.add( (String)static_choices.get(0) );
 	}
-	else {	idNameVector.insertElementAt(
-			(String)static_choices.elementAt(0), 0 );
+	else {	idNameVector.add(0,(String)static_choices.get(0) );
 	}
 	int size = static_choices.size();
 	for ( int i = 1; i < size; i++ ) {
-		idNameVector.insertElementAt(
-			(String)static_choices.elementAt(0), i );
+		idNameVector.add(i, (String)static_choices.get(0) );
 	}
 	// Add at once to increase performance...
 	__diversionDailyID_JComboBox.setData ( idNameVector );
@@ -1481,7 +1480,7 @@ private void processTableSelection(int index, boolean try_to_save )
 	// List these in the order of the GUI...
 
 	StateMod_Diversion div = (StateMod_Diversion)
-		__diversionsVector.elementAt(__currentDiversionIndex);
+		__diversionsVector.get(__currentDiversionIndex);
 
 	// Diversion identifier...
 
@@ -1696,14 +1695,14 @@ private void processTableSelection(int index, boolean try_to_save )
 		// available (and daily if an identifier is specified)...
 		comp_m = __dataset.getComponentForComponentType (
 			StateMod_DataSet.COMP_DIVERSION_TS_MONTHLY );
-		pos_m = TSUtil.indexOf ( (Vector)comp_m.getData(), monthid,
+		pos_m = TSUtil.indexOf ( (List)comp_m.getData(), monthid,
 				"Location", 0 );
 		if ( cdividy.equalsIgnoreCase(div.getID()) ) {
 			// The daily time series for this diversion must also
 			// be available...
 			comp_d = __dataset.getComponentForComponentType (
 				StateMod_DataSet.COMP_DIVERSION_TS_DAILY );
-			pos_d = TSUtil.indexOf ((Vector)comp_d.getData(),
+			pos_d = TSUtil.indexOf ((List)comp_d.getData(),
 				cdividy, "Location", 0 );
 		}
 		else {	// Set so the following logic will pass...
@@ -1755,14 +1754,14 @@ private void processTableSelection(int index, boolean try_to_save )
 		// available (and daily if an identifier is specified)...
 		comp_m = __dataset.getComponentForComponentType (
 			StateMod_DataSet.COMP_DEMAND_TS_MONTHLY );
-		pos_m = TSUtil.indexOf ( (Vector)comp_m.getData(), monthid,
+		pos_m = TSUtil.indexOf ( (List)comp_m.getData(), monthid,
 				"Location", 0 );
 		if ( cdividy.equalsIgnoreCase(div.getID()) ) {
 			// The daily time series for this diversion must also
 			// be available...
 			comp_d = __dataset.getComponentForComponentType (
 				StateMod_DataSet.COMP_DEMAND_TS_DAILY );
-			pos_d = TSUtil.indexOf ((Vector)comp_d.getData(),
+			pos_d = TSUtil.indexOf ((List)comp_d.getData(),
 				cdividy, "Location", 0 );
 		}
 		else {	// Set so the following logic will pass...
@@ -1809,7 +1808,7 @@ private void processTableSelection(int index, boolean try_to_save )
 		comp_m = __dataset.getComponentForComponentType (
 			StateMod_DataSet.
 			COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_MONTHLY );
-		pos_m = TSUtil.indexOf ( (Vector)comp_m.getData(), monthid,
+		pos_m = TSUtil.indexOf ( (List)comp_m.getData(), monthid,
 				"Location", 0 );
 		if ( cdividy.equalsIgnoreCase(div.getID()) ) {
 			// The daily time series for this diversion must also
@@ -1817,7 +1816,7 @@ private void processTableSelection(int index, boolean try_to_save )
 			comp_d = __dataset.getComponentForComponentType (
 				StateMod_DataSet.
 				COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_DAILY );
-			pos_d = TSUtil.indexOf ((Vector)comp_d.getData(),
+			pos_d = TSUtil.indexOf ((List)comp_d.getData(),
 				cdividy, "Location", 0 );
 		}
 		else {	// Set so the following logic will pass...
@@ -1864,7 +1863,7 @@ private boolean saveData(int record) {
 	}
 
 	StateMod_Diversion div = (StateMod_Diversion)
-		__diversionsVector.elementAt(record);
+		__diversionsVector.get(record);
 
 	// Save in the order of the GUI.  Save all the items, even if not
 	// currently editable/enabled (like ID and river node ID) because later
@@ -2880,7 +2879,7 @@ public void windowClosing(WindowEvent e) {
 	StateMod_Diversion div = null;
 	boolean changed = false;
 	for (int i = 0; i < size; i++) {
-		div = (StateMod_Diversion)__diversionsVector.elementAt(i);
+		div = (StateMod_Diversion)__diversionsVector.get(i);
 		if (!changed && div.changed()) {
 			changed = true;
 		}

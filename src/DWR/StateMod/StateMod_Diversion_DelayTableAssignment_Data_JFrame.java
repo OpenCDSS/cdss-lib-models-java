@@ -16,7 +16,7 @@ package DWR.StateMod;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
-import java.util.Vector;
+import java.util.List;
 
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -40,8 +40,7 @@ private JCheckBox __checkBox = null;
 /**
 The table model for the worksheet in the GUI.
 */
-private StateMod_Diversion_DelayTableAssignment_Data_TableModel __tableModel 
-	= null;
+private StateMod_Diversion_DelayTableAssignment_Data_TableModel __tableModel = null;
 
 /**
 Constructor. 
@@ -51,9 +50,7 @@ Constructor.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_Diversion_DelayTableAssignment_Data_JFrame(Vector data, 
-String titleString,
-boolean editable)
+public StateMod_Diversion_DelayTableAssignment_Data_JFrame(List data, String titleString, boolean editable)
 throws Exception {
 	super(data, titleString, editable);
 
@@ -98,8 +95,7 @@ protected void apply() {
 	StateMod_Diversion diversion = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		diversion = (StateMod_Diversion)
-			_data.elementAt(i);
+		diversion = (StateMod_Diversion)_data.get(i);
 		diversion.createBackup();
 	}
 }
@@ -112,11 +108,9 @@ constructor.
 protected JScrollWorksheet buildJScrollWorksheet() 
 throws Exception {
 	StateMod_Diversion_DelayTableAssignment_Data_TableModel tableModel 
-		= new StateMod_Diversion_DelayTableAssignment_Data_TableModel(
-		_data, _editable);
+		= new StateMod_Diversion_DelayTableAssignment_Data_TableModel( _data, _editable);
 	StateMod_Diversion_DelayTableAssignment_Data_CellRenderer cellRenderer 
-		= new StateMod_Diversion_DelayTableAssignment_Data_CellRenderer(
-		tableModel);
+		= new StateMod_Diversion_DelayTableAssignment_Data_CellRenderer( tableModel);
 
 	// Note (JTS - 2005-03-31)
 	// while it would seem the right thing to do would be to here assign
@@ -131,27 +125,25 @@ throws Exception {
 }
 
 /**
-Called when the cancel button is pressed.  This discards any changes made to 
-the data objects.
+Called when the cancel button is pressed.  This discards any changes made to the data objects.
 */
 protected void cancel() {
 	StateMod_Diversion diversion = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		diversion = (StateMod_Diversion)_data.elementAt(i);
+		diversion = (StateMod_Diversion)_data.get(i);
 		diversion.restoreOriginal();
 	}
 }
 
 /**
-Creates backups of all the data objects in the Vector so that changes can 
-later be cancelled if necessary.
+Creates backups of all the data objects in the Vector so that changes can later be cancelled if necessary.
 */
 protected void createDataBackup() {
 	StateMod_Diversion diversion = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		diversion = (StateMod_Diversion)_data.elementAt(i);
+		diversion = (StateMod_Diversion)_data.get(i);
 		diversion.createBackup();
 	}
 }

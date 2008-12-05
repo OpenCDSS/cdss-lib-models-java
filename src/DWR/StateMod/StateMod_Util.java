@@ -124,6 +124,7 @@
 package DWR.StateMod;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JFrame;
@@ -593,8 +594,8 @@ private static String __smdeltaExecutable = "SmDelta";
 /**
 Turns an array of Strings into a Vector of Strings.
 */
-public static Vector arrayToVector(String[] array) {
-	Vector v = new Vector();
+public static List arrayToList(String[] array) {
+	List v = new Vector();
 	
 	if (array == null) {
 		return v;
@@ -608,8 +609,7 @@ public static Vector arrayToVector(String[] array) {
 }
 
 // TODO SAM 2004-09-07 JTS needs to javadoc.
-public static double calculateTimeSeriesDifference(TS ts1, TS ts2,
-boolean percent) 
+public static double calculateTimeSeriesDifference(TS ts1, TS ts2, boolean percent) 
 throws Exception
 {	// Loop through the time series and convert to yearly...  Do it the brute force way right now...
 
@@ -748,10 +748,10 @@ Compare similar StateMod files and generate a summary of the files, with differe
 @param comp_type Component type.
 @exception Exception if an error is generated.
 */
-public static Vector compareFiles ( String path1, String path2, int comp_type )
+public static List compareFiles ( String path1, String path2, int comp_type )
 throws Exception
-{	Vector v = new Vector(50);
-	Vector data1_Vector, data2_Vector;	// Data to compare
+{	List v = new Vector(50);
+	List data1_Vector, data2_Vector;	// Data to compare
 	String full_path1 = IOUtil.getPathUsingWorkingDir ( path1 );
 	String full_path2 = IOUtil.getPathUsingWorkingDir ( path2 );
 	int n1, n2;				// Size of data vectors
@@ -763,24 +763,24 @@ throws Exception
 		n1 = data1_Vector.size();
 		data2_Vector = StateMod_WellRight.readStateModFile(full_path2 );
 		n2 = data2_Vector.size();
-		Vector allids_Vector = new Vector(n1*3/2);	// guess at size
+		List allids_Vector = new Vector(n1*3/2);	// guess at size
 		double decree;
 		double decree1_alltotal = 0.0;	// All decrees in file
 		double decree2_alltotal = 0.0;
 		int missing_n1 = 0;
 		int missing_n2 = 0;
-		Vector onlyin1_Vector = new Vector();
-		Vector onlyin2_Vector = new Vector();
+		List onlyin1_Vector = new Vector();
+		List onlyin2_Vector = new Vector();
 		// Get a list of all identifiers.  This is used to summarize results by location...
 		for ( i = 0; i < n1; i++ ) {
 			// Add to list of all identifiers...
-			wer1 = (StateMod_WellRight)data1_Vector.elementAt(i);
-			allids_Vector.addElement ( wer1.getCgoto() );
+			wer1 = (StateMod_WellRight)data1_Vector.get(i);
+			allids_Vector.add ( wer1.getCgoto() );
 		}
 		for ( i = 0; i < n2; i++ ) {
 			// Add to list of all identifiers...
-			wer2 = (StateMod_WellRight)data2_Vector.elementAt(i);
-			allids_Vector.addElement ( wer2.getCgoto() );
+			wer2 = (StateMod_WellRight)data2_Vector.get(i);
+			allids_Vector.add ( wer2.getCgoto() );
 		}
 		// Sort all the identifiers...
 		allids_Vector = StringUtil.sortStringList ( allids_Vector, StringUtil.SORT_ASCENDING, null, false, true );
@@ -800,7 +800,7 @@ throws Exception
 		// Now process each list...
 
 		for ( i = 0; i < n1; i++ ) {
-			wer1 = (StateMod_WellRight)data1_Vector.elementAt(i);
+			wer1 = (StateMod_WellRight)data1_Vector.get(i);
 			decree = wer1.getDcrdivw();
 			if ( StateMod_Util.isMissing( decree ) ) {
 				++missing_n1;
@@ -822,11 +822,11 @@ throws Exception
 			// Search other list...
 			pos = StateMod_Util.indexOf ( data2_Vector, wer1.getID() );
 			if ( pos < 0 ) {
-				onlyin1_Vector.addElement ( wer1 );
+				onlyin1_Vector.add ( wer1 );
 			}
 		}
 		for ( i = 0; i < n2; i++ ) {
-			wer2 = (StateMod_WellRight)data2_Vector.elementAt(i);
+			wer2 = (StateMod_WellRight)data2_Vector.get(i);
 			decree = wer2.getDcrdivw();
 			if ( StateMod_Util.isMissing( decree ) ) {
 				++missing_n2;
@@ -848,25 +848,25 @@ throws Exception
 			// Search other list...
 			pos = StateMod_Util.indexOf ( data1_Vector, wer2.getID() );
 			if ( pos < 0 ) {
-				onlyin2_Vector.addElement ( wer2 );
+				onlyin2_Vector.add ( wer2 );
 			}
 		}
 
 		// Now print the results...
 
-		v.addElement ( "First file:            " + full_path1 );
-		v.addElement ( "Number of rights:      " + n1 );
-		v.addElement ( "Total decrees (CFS):   " + StringUtil.formatString(decree1_alltotal,"%.2f") );
-		v.addElement ( "Second file:           " + full_path2 );
-		v.addElement ( "Number of rights:      " + n2 );
-		v.addElement ( "Total decrees (CFS):   " + StringUtil.formatString(decree2_alltotal,"%.2f") );
-		v.addElement ( "" );
-		v.addElement ( "Summary of decree differences, by location:" );
-		v.addElement ( "" );
-		v.addElement ( "Well ID      | File2 Total | File1 Total | File2-File1" );
+		v.add ( "First file:            " + full_path1 );
+		v.add ( "Number of rights:      " + n1 );
+		v.add ( "Total decrees (CFS):   " + StringUtil.formatString(decree1_alltotal,"%.2f") );
+		v.add ( "Second file:           " + full_path2 );
+		v.add ( "Number of rights:      " + n2 );
+		v.add ( "Total decrees (CFS):   " + StringUtil.formatString(decree2_alltotal,"%.2f") );
+		v.add ( "" );
+		v.add ( "Summary of decree differences, by location:" );
+		v.add ( "" );
+		v.add ( "Well ID      | File2 Total | File1 Total | File2-File1" );
 		for ( i = 0; i < nall; i++ ) {
 			b.setLength(0);
-			b.append ( StringUtil.formatString( allids_Vector.elementAt(i),"%-12.12s") + " | ");
+			b.append ( StringUtil.formatString( allids_Vector.get(i),"%-12.12s") + " | ");
 			if ( decree2_total[i] >= 0.0 ) {
 				b.append ( StringUtil.formatString( decree2_total[i],"%11.2f") + " | " );
 			}
@@ -885,44 +885,44 @@ throws Exception
 			else {
 			    b.append ( "           " );
 			}
-			v.addElement ( b.toString() );
+			v.add ( b.toString() );
 		}
-		v.addElement ( "Total        | " + StringUtil.formatString (decree2_alltotal,"%11.2f") +
+		v.add ( "Total        | " + StringUtil.formatString (decree2_alltotal,"%11.2f") +
 			" | " + StringUtil.formatString (decree1_alltotal,"%11.2f") +
 			" | " + StringUtil.formatString ( (decree2_alltotal-decree1_alltotal),"%11.2f") );
-		v.addElement ( "" );
-		v.addElement ( "First file:" );
-		v.addElement ( "" );
-		v.addElement ( "Rights with no decree: " + missing_n1 );
+		v.add ( "" );
+		v.add ( "First file:" );
+		v.add ( "" );
+		v.add ( "Rights with no decree: " + missing_n1 );
 		size = onlyin1_Vector.size();
 		if ( size == 0 ) {
-			v.addElement ( "Rights only in first file:" );
-			v.addElement ( "All are found in 2nd file." );
+			v.add ( "Rights only in first file:" );
+			v.add ( "All are found in 2nd file." );
 		}
 		else {
-		    v.addElement ( "Rights only in first file (" + size + " total):" );
-			v.addElement ("    ID           Decree    AdminNumber");
+		    v.add ( "Rights only in first file (" + size + " total):" );
+			v.add ("    ID           Decree    AdminNumber");
 			for ( i = 0; i < size; i++ ) {
-				wer1 = (StateMod_WellRight)onlyin1_Vector.elementAt(i);
-				v.addElement ( StringUtil.formatString(wer1.getID(),"%-12.12s") +
+				wer1 = (StateMod_WellRight)onlyin1_Vector.get(i);
+				v.add ( StringUtil.formatString(wer1.getID(),"%-12.12s") +
 					" " + StringUtil.formatString( wer1.getDcrdivw(),"%11.2f") + " " + wer1.getIrtem() );
 			}
 		}
-		v.addElement ( "" );
-		v.addElement ( "Second file:" );
-		v.addElement ( "" );
-		v.addElement ( "Rights with no decree: " + missing_n2 );
+		v.add ( "" );
+		v.add ( "Second file:" );
+		v.add ( "" );
+		v.add ( "Rights with no decree: " + missing_n2 );
 		size = onlyin2_Vector.size();
 		if ( size == 0 ) {
-			v.addElement ( "Rights only in second file:" );
-			v.addElement ( "All are found in 1st file." );
+			v.add ( "Rights only in second file:" );
+			v.add ( "All are found in 1st file." );
 		}
 		else {
-		    v.addElement ( "Rights only in second file (" + size + " total):" );
-			v.addElement ("    ID           Decree    AdminNumber");
+		    v.add ( "Rights only in second file (" + size + " total):" );
+			v.add ("    ID           Decree    AdminNumber");
 			for ( i = 0; i < size; i++ ) {
-				wer2 = (StateMod_WellRight)onlyin2_Vector.elementAt(i);
-				v.addElement (StringUtil.formatString(wer2.getID(),"%-12.12s") +
+				wer2 = (StateMod_WellRight)onlyin2_Vector.get(i);
+				v.add (StringUtil.formatString(wer2.getID(),"%-12.12s") +
 					" " + StringUtil.formatString( wer2.getDcrdivw(),"%11.2f") + " " + wer2.getIrtem() );
 			}
 		}
@@ -966,10 +966,11 @@ non-null list is guaranteed; however, the list may have zero items.
 returned from StateMod_Data.getID().  If true the string will contain the ID,
 followed by " - xxxx", where xxxx is the value returned from StateMod_Data.getName().
 */
-public static Vector createCgotoDataList ( Vector smdata_Vector, boolean include_name )
-{	Vector v = null;
+public static List createCgotoDataList ( List smdata_Vector, boolean include_name )
+{	List v = null;
 	if ( smdata_Vector == null ) {
-		return new Vector();
+		v = new Vector();
+		return v;
 	}
 	else {
 	    // This optimizes memory management...
@@ -981,7 +982,7 @@ public static Vector createCgotoDataList ( Vector smdata_Vector, boolean include
 	TS ts;
 	Object o;
 	for ( int i = 0; i < size; i++ ) {
-		o = smdata_Vector.elementAt(i);
+		o = smdata_Vector.get(i);
 		if ( o == null ) {
 			continue;
 		}
@@ -999,13 +1000,13 @@ public static Vector createCgotoDataList ( Vector smdata_Vector, boolean include
 		    Message.printWarning ( 2,"StateMod_Util.createDataList", "Unrecognized StateMod data." );
 		}
 		if ( cgoto.equalsIgnoreCase(name) ) {
-			v.addElement ( cgoto );
+			v.add ( cgoto );
 		}
 		else if ( include_name ) {
-			v.addElement ( cgoto + " - " + name );
+			v.add ( cgoto + " - " + name );
 		}
 		else {
-		    v.addElement ( cgoto );
+		    v.add ( cgoto );
 		}
 	}
 	return v;
@@ -1162,7 +1163,7 @@ The period of the time series is the maximum of the time series in the list.
 The total value will be set if one or more values in the parts is available.  If
 no value is available, the total will be missing.
 @return a time series that is the sum of all the time series in the input Vector.
-@param tslist a Vector of time series to process.
+@param tslist a list of time series to process.
 @param dataset_location the location to use for the total time series.
 @param dataset_datasource the data source to use for the total time series.
 @param dataset_location the description to use for the total time series.
@@ -1170,7 +1171,7 @@ no value is available, the total will be missing.
 information for the new time series.
 @exception Exception if there is an error creating the time series.
 */
-public static TS createTotalTS ( Vector tslist, String dataset_location,
+public static TS createTotalTS ( List tslist, String dataset_location,
 					String dataset_datasource, String dataset_description, int comp_type )
 throws Exception
 {	String routine = "StateMod_Util.createTotalTS";
@@ -1400,8 +1401,7 @@ water right and will be handled as per FreeWaterMethod.  Specify a number larger
 than 99999.99999 to avoid adjusting for free water rights.
 @param FreeWaterMethod If null, handle the right as any other right, generally
 meaning that the decree in the time series will take effect in the future.
-If UseSeniorRightApropriationDate, use the appropriation date of the
-senior right for the location.
+If UseSeniorRightApropriationDate, use the appropriation date of the senior right for the location.
 If AlwaysOn, use the earliest available date specified by
 "start" or that of data for the free water right appropriation date.
 @param FreeWaterAppropriationDate_DateTime A DateTime that is used for the appropriation
@@ -1411,7 +1411,7 @@ create the time series header information.
 @return a list of time series created from a list of water rights.
 @exception Exception if there is an error
 */
-public static Vector createWaterRightTimeSeriesList ( Vector smrights,
+public static List createWaterRightTimeSeriesList ( List smrights,
 		int interval_base, int spatial_aggregation, int parcel_year,
 		boolean include_dataset_totals,
 		DateTime OutputStart_DateTime, DateTime OutputEnd_DateTime,
@@ -1443,7 +1443,7 @@ throws Exception
 		FreeWaterMethod_int = UseSeniorRightAppropriationDate_int;
 	}
 
-	Vector tslist = new Vector();
+	List tslist = new Vector();
 	TS ts = null;	// Time series to add.
 	StateMod_Right smright;
 	StateMod_WellRight smwellright; // Only for parcel processing.
@@ -1457,7 +1457,7 @@ throws Exception
 						// Administration number corresponding to date for right.
 	DateTime decree_DateTime = null; // Right appropriation date, to day.
 	// Get the locations that have water rights.
-	Vector loc_Vector = null;
+	List loc_Vector = null;
 	if ( spatial_aggregation == BYPARCEL ) {
 		loc_Vector = getWaterRightParcelList ( smrights, parcel_year );
 	}
@@ -1483,7 +1483,7 @@ throws Exception
 	    Message.printStatus ( 2, routine, "Found " + loc_size + " rights from " + smrights_size + " rights.");
 	}
 	String loc_id = null;	// Identifier for a location or parcel
-	Vector loc_rights = null; // Vector of StateMod_Right
+	List loc_rights = null; // Vector of StateMod_Right
 	DateTime min_DateTime = null;
 	DateTime max_DateTime = null;
 	double decree = 0;	// Decree for water right
@@ -1494,7 +1494,7 @@ throws Exception
 	int free_right_count; // count of free water rights at location
 	// Process the list of locations.
 	for ( int iloc = 0; iloc < loc_size; iloc++ ) {
-		loc_id = (String)loc_Vector.elementAt(iloc);
+		loc_id = (String)loc_Vector.get(iloc);
 		Message.printStatus ( 2, routine, "Processing location \"" + loc_id + "\"");
 		if ( spatial_aggregation == BYPARCEL ) {
 			loc_rights = getWaterRightsForParcel ( smrights, loc_id, parcel_year );
@@ -1513,7 +1513,7 @@ throws Exception
 		free_right_count = 0;
 		if ( (spatial_aggregation == BYLOC) || (spatial_aggregation == BYPARCEL) ) {
 			for ( int i = 0; i < size; i++ ) {
-				smright = (StateMod_Right)loc_rights.elementAt(i);
+				smright = (StateMod_Right)loc_rights.get(i);
 				if ( smright == null ) {
 					continue;
 				}
@@ -1535,7 +1535,7 @@ throws Exception
 		}
 		// Now process each right for the location...
 		for ( int i = 0; i < size; i++ ) {
-			smright = (StateMod_Right)loc_rights.elementAt(i);
+			smright = (StateMod_Right)loc_rights.get(i);
 			if ( smright == null ) {
 				continue;
 			}
@@ -1583,7 +1583,7 @@ throws Exception
 				pos = TSUtil.indexOf ( tslist, smright.getLocationIdentifier(), "Location", 1 );
 				if ( pos >= 0 ) {
 					// Will add to the matched right
-					ts = (TS)tslist.elementAt(pos);
+					ts = (TS)tslist.get(pos);
 				}
 				else {
 				    // Need to create a new total right.
@@ -1598,7 +1598,7 @@ throws Exception
 				pos = TSUtil.indexOf ( tslist, smwellright.getParcelID(), "Location", 1 );
 				if ( pos >= 0 ) {
 					// Will add to the matched right
-					ts = (TS)tslist.elementAt(pos);
+					ts = (TS)tslist.get(pos);
 				}
 				else {
 				    // Need to create a new total right.
@@ -1715,7 +1715,7 @@ throws Exception
 					}
 				}
 				// No need to allocate space for irregular.  Add the time series to the list...
-				tslist.addElement ( ts );
+				tslist.add ( ts );
 			}
 			// Now add to the right.  If daily, add to each time step.
 			if ( process_data ) {
@@ -1793,7 +1793,7 @@ throws Exception
 		DateTime date = null;
 		double value;
 		for ( int i = 0; i < size; i++ ) {
-			ts = (TS)tslist.elementAt(i);
+			ts = (TS)tslist.get(i);
 			if ( !units_set && (ts.getDataUnits().length() > 0) ) {
 				totalts.setDataUnits ( ts.getDataUnits() );
 				totalts.setDataUnitsOriginal ( ts.getDataUnits() );
@@ -1819,7 +1819,7 @@ throws Exception
 			}
 		}
 		totalts.setDescription ( "Total " + nodetype + " water right time series." );
-		tslist.addElement ( totalts );
+		tslist.add ( totalts );
 	}
 	return tslist;
 }
@@ -1832,10 +1832,11 @@ non-null list is guaranteed; however, the list may have zero items.
 returned from StateMod_Data.getID().  If true the string will contain the ID,
 followed by " - xxxx", where xxxx is the value returned from StateMod_Data.getName().
 */
-public static Vector createDataList ( Vector smdata_Vector, boolean include_name )
-{	Vector v = null;
+public static List createDataList ( List smdata_Vector, boolean include_name )
+{	List v = null;
 	if ( smdata_Vector == null ) {
-		return new Vector();
+		v = new Vector();
+		return v;
 	}
 	else {
 	    // This optimizes memory management...
@@ -1847,7 +1848,7 @@ public static Vector createDataList ( Vector smdata_Vector, boolean include_name
 	TS ts;
 	Object o;
 	for ( int i = 0; i < size; i++ ) {
-		o = smdata_Vector.elementAt(i);
+		o = smdata_Vector.get(i);
 		if ( o == null ) {
 			continue;
 		}
@@ -1865,13 +1866,13 @@ public static Vector createDataList ( Vector smdata_Vector, boolean include_name
 		    Message.printWarning ( 2,"StateMod_Util.createDataList", "Unrecognized StateMod data." );
 		}
 		if ( id.equalsIgnoreCase(name) ) {
-			v.addElement ( id );
+			v.add ( id );
 		}
 		else if ( include_name ) {
-			v.addElement ( id + " - " + name );
+			v.add ( id + " - " + name );
 		}
 		else {
-		    v.addElement ( id );
+		    v.add ( id );
 		}
 	}
 	return v;
@@ -1937,7 +1938,7 @@ dataset.  Note that this is always a calendar date.  The time series that are ch
 */
 public static DateTime findEarliestDateInPOR(StateMod_DataSet dataset)
 {	DateTime newDate = null;
-	Vector tsVector = null;
+	List tsVector = null;
 	DateTime tempDate = null;
 
 	int numFiles = 8;
@@ -1956,7 +1957,7 @@ public static DateTime findEarliestDateInPOR(StateMod_DataSet dataset)
 
 	for (int i = 0; i < numFiles; i++) {
 		if (dataset.getComponentForComponentType(files[i]).hasData()) {
-			tsVector = (Vector)((dataset.getComponentForComponentType(files[i])).getData());
+			tsVector = (List)((dataset.getComponentForComponentType(files[i])).getData());
 			if ( newDate == null ) {
 				tempDate = findEarliestDateInPORHelper(tsVector,seedDate);
 			}
@@ -1982,11 +1983,10 @@ non-zero date (no need to check all time series after that).
 @return first date of the time series or null if the first date of the time
 series is not earlier than newDate
 */
-private static DateTime findEarliestDateInPORHelper(Vector tsVector, 
-DateTime newDate) {
+private static DateTime findEarliestDateInPORHelper(List tsVector, DateTime newDate) {
 	DateTime date = null;
 	if (tsVector.size() > 0) {
-		date = ((TS)tsVector.elementAt(0)).getDate1();
+		date = ((TS)tsVector.get(0)).getDate1();
 		if (date.getYear() > 0 && date.lessThan(newDate)) {
 			return date;
 		}
@@ -2013,7 +2013,7 @@ data are available.
 */
 public static DateTime findLatestDateInPOR(StateMod_DataSet dataset)
 {	DateTime newDate = null;
-	Vector tsVector = null;
+	List tsVector = null;
 	DateTime tempDate = null;
 
 	int numFiles = 8;
@@ -2032,7 +2032,7 @@ public static DateTime findLatestDateInPOR(StateMod_DataSet dataset)
 	
 	for (int i = 0; i < numFiles; i++) {
 		if (dataset.getComponentForComponentType(files[i]).hasData()) {
-			tsVector = (Vector)((dataset.getComponentForComponentType(files[i])).getData());
+			tsVector = (List)((dataset.getComponentForComponentType(files[i])).getData());
 			if ( newDate == null ) {
 				tempDate = findLatestDateInPORHelper(tsVector,seedDate);
 			}
@@ -2055,17 +2055,15 @@ single file, just check the first time series with a non-zero date (no need
 to check all time series after that).
 @param tsVector a vector of time series.
 @param newDate the data against which to check the last date in the time series
-@return last date of the time series or null if the last date of the time
-series is not later than newDate
+@return last date of the time series or null if the last date of the time series is not later than newDate
 */
-private static DateTime findLatestDateInPORHelper (	Vector tsVector,
-							DateTime newDate )
+private static DateTime findLatestDateInPORHelper (	List tsVector, DateTime newDate )
 {	DateTime date = null;
 	if (tsVector == null) {
 		return null;
 	}
 	if (tsVector.size() > 0) {
-		date = ((TS)tsVector.elementAt(0)).getDate2();
+		date = ((TS)tsVector.get(0)).getDate2();
 		if (date.getYear() > 0 && date.greaterThan(newDate) ) {
 			return date;
 		}
@@ -2074,12 +2072,12 @@ private static DateTime findLatestDateInPORHelper (	Vector tsVector,
 }
 
 // TODO SAM 2004-09-07 JTS needs to javadoc?
-public static String findNameInVector(String id, Vector v, boolean includeDash)
+public static String findNameInVector(String id, List v, boolean includeDash)
 {	int size = v.size();
 
 	StateMod_Data data;
 	for (int i = 0; i < size; i++) {
-		data = (StateMod_Data)v.elementAt(i);
+		data = (StateMod_Data)v.get(i);
 		if (data.getID().equals(id)) {
 			if (includeDash) {
 				return " - " + data.getName();
@@ -2106,8 +2104,7 @@ or -1 if the right should be inserted at the end (no other option).
 @param data_Vector a Vector of StateMod_*Right, with data members populated.
 @param item A single StateMod_*Right to insert.
 */
-public static int findWaterRightInsertPosition ( Vector data_Vector,
-						StateMod_Data item )
+public static int findWaterRightInsertPosition ( List data_Vector, StateMod_Data item )
 {	if ( (data_Vector == null) || (data_Vector.size() == 0) ) {
 		// Add at the end...
 		return -1;
@@ -2118,7 +2115,7 @@ public static int findWaterRightInsertPosition ( Vector data_Vector,
 	}
 	StateMod_Data data = null;	// StateMod data object to evaluate
 	for ( int i = 0; i < size; i++ ) {
-		data = (StateMod_Data)data_Vector.elementAt(i);
+		data = (StateMod_Data)data_Vector.get(i);
 		if (data.getID().compareTo(item.getID()) > 0 ) {
 			// Vector item is greater than the new item
 			// to insert so insert at this position...
@@ -2462,9 +2459,8 @@ rights is compared with the supplied station identifier.
 @return the list of water rights that match the station identifer.  A non-null
 list is guaranteed (but may have zero length).
 */
-public static Vector getRightsForStation (	String station_id,
-						Vector rights_Vector )
-{	Vector matches = new Vector();
+public static List getRightsForStation ( String station_id, List rights_Vector )
+{	List matches = new Vector();
 	int size = 0;
 	if ( rights_Vector != null ) {
 		size = rights_Vector.size();
@@ -2475,29 +2471,29 @@ public static Vector getRightsForStation (	String station_id,
 	StateMod_ReservoirRight rer;
 	StateMod_WellRight wer;
 	for ( int i = 0; i < size; i++ ) {
-		o = (Object)rights_Vector.elementAt(i);
+		o = (Object)rights_Vector.get(i);
 		if ( o instanceof StateMod_DiversionRight ) {
 			ddr = (StateMod_DiversionRight)o;
 			if ( ddr.getCgoto().equalsIgnoreCase(station_id) ) {
-				matches.addElement ( ddr );
+				matches.add ( ddr );
 			}
 		}
 		else if ( o instanceof StateMod_InstreamFlowRight ) {
 			ifr = (StateMod_InstreamFlowRight)o;
 			if ( ifr.getCgoto().equalsIgnoreCase(station_id) ) {
-				matches.addElement ( ifr );
+				matches.add ( ifr );
 			}
 		}
 		else if ( o instanceof StateMod_ReservoirRight ) {
 			rer = (StateMod_ReservoirRight)o;
 			if ( rer.getCgoto().equalsIgnoreCase(station_id) ) {
-				matches.addElement ( rer );
+				matches.add ( rer );
 			}
 		}
 		else if ( o instanceof StateMod_WellRight ) {
 			wer = (StateMod_WellRight)o;
 			if ( wer.getCgoto().equalsIgnoreCase(station_id) ) {
-				matches.addElement ( wer );
+				matches.add ( wer );
 			}
 		}
 	}
@@ -2622,8 +2618,8 @@ public static String getStateModVersionLatest()
 Return a list of station types for use in the GUI.
 @return a list of station types for use in the GUI.
 */
-public static Vector getStationTypes ()
-{	return StringUtil.toVector(__station_types);
+public static List getStationTypes ()
+{	return StringUtil.toList(__station_types);
 }
 
 /**
@@ -2665,7 +2661,7 @@ useful when retrieving time series.
 @return a non-null list of data types.  The list will have zero size if no
 data types are requested or are valid.
 */
-public static Vector getTimeSeriesDataTypes ( int comp_type, String id,
+public static List getTimeSeriesDataTypes ( int comp_type, String id,
 						StateMod_DataSet dataset,
 						String statemodVersion,
 						int interval,
@@ -2733,7 +2729,7 @@ useful when retrieving time series.
 @return a non-null list of data types.  The list will have zero size if no
 data types are requested or are valid.
 */
-public static Vector getTimeSeriesDataTypes ( String binary_filename,
+public static List getTimeSeriesDataTypes ( String binary_filename,
 						int comp_type, String id,
 						StateMod_DataSet dataset,
 						String statemodVersion,
@@ -2745,7 +2741,7 @@ public static Vector getTimeSeriesDataTypes ( String binary_filename,
 						boolean add_group,
 						boolean add_note )
 {	String routine = "StateMod_Util.getTimeSeriesDataTypes";
-	Vector data_types = new Vector();
+	List data_types = new Vector();
 	String [] diversion_types0 = null;
 	String [] instream_types0 = null;
 	String [] reservoir_types0 = null;
@@ -2972,164 +2968,164 @@ public static Vector getTimeSeriesDataTypes ( String binary_filename,
 		// Include input time series if reqeusted...
 		// Input baseflow...
 		if ( include_input && (interval == TimeInterval.MONTH) ) {
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 			StateMod_DataSet.COMP_STREAMGAGE_BASEFLOW_TS_MONTHLY) + input );
 		}
 		else if(include_input && (interval == TimeInterval.DAY) ) {
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 			StateMod_DataSet.COMP_STREAMGAGE_BASEFLOW_TS_DAILY) + input );
 		}
 		// Input historical time series if requested...
 		if ( include_input && (interval == TimeInterval.MONTH) &&
 			(comp_type==StateMod_DataSet.COMP_STREAMGAGE_STATIONS)){
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 				StateMod_DataSet.COMP_STREAMGAGE_HISTORICAL_TS_MONTHLY) + input);
 		}
 		else if (include_input && (interval == TimeInterval.DAY) &&
 			(comp_type==StateMod_DataSet.COMP_STREAMGAGE_STATIONS)){
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 				StateMod_DataSet.COMP_STREAMGAGE_HISTORICAL_TS_DAILY) + input);
 		}
 		// Include the estimated input time series if requested...
 		// Add the estimated input...
 		if ( include_input_estimated && (interval == TimeInterval.DAY) ) {
 			// TODO - need to check daily ID on station...
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 			StateMod_DataSet.COMP_STREAMGAGE_BASEFLOW_TS_DAILY) + "Estimated" + input);
 		}
 		// Input historical time series if requested...
 		if ( include_input_estimated && (interval == TimeInterval.DAY) &&
 			(comp_type==StateMod_DataSet.COMP_STREAMGAGE_STATIONS)){
 			// TODO - need to check daily ID on station...
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 				StateMod_DataSet.COMP_STREAMGAGE_HISTORICAL_TS_DAILY) + "Estimated" + input);
 		}
 		// Include the output time series if requested...
 		if ( include_output ) {
-			data_types = StringUtil.addListToStringList (data_types, StringUtil.toVector ( stream_types ) );
+			data_types = StringUtil.addListToStringList (data_types, StringUtil.toList ( stream_types ) );
 		}
 	}
 	else if ( comp_type == StateMod_DataSet.COMP_DIVERSION_STATIONS ) {
 		if ( include_input && (interval == TimeInterval.MONTH) ) {
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 				StateMod_DataSet.COMP_DIVERSION_TS_MONTHLY) + input);
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 				StateMod_DataSet.COMP_DEMAND_TS_MONTHLY) + input);
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 				StateMod_DataSet.COMP_DEMAND_TS_OVERRIDE_MONTHLY) + input);
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 				StateMod_DataSet.COMP_DEMAND_TS_AVERAGE_MONTHLY) + input);
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 				StateMod_DataSet.COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_MONTHLY) + input);
 		}
 		else if ( include_input && (interval == TimeInterval.DAY) ) {
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 				StateMod_DataSet.COMP_DIVERSION_TS_DAILY) + input);
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 				StateMod_DataSet.COMP_DEMAND_TS_DAILY) + input);
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 				StateMod_DataSet.COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_DAILY) + input);
 		}
 		if ( include_input ) {
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 				StateMod_DataSet.COMP_DIVERSION_RIGHTS) + input);
 		}
 		if ( include_input_estimated && (interval == TimeInterval.DAY) ) {
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 				StateMod_DataSet.COMP_DIVERSION_TS_DAILY) + "Estimated" + input);
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 				StateMod_DataSet.COMP_DEMAND_TS_DAILY) + "Estimated" + input);
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 				StateMod_DataSet.COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_DAILY) + "Estimate" + input);
 		}
 		if ( include_output ) {
-			data_types = StringUtil.addListToStringList (data_types, StringUtil.toVector ( diversion_types ) );
+			data_types = StringUtil.addListToStringList (data_types, StringUtil.toList ( diversion_types ) );
 		}
 	}
 	else if ( comp_type == StateMod_DataSet.COMP_RESERVOIR_STATIONS ) {
 		// Include input time series if requested...
 		if ( include_input && (interval == TimeInterval.MONTH) ) {
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 				StateMod_DataSet.COMP_RESERVOIR_CONTENT_TS_MONTHLY) + input);
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 				StateMod_DataSet.COMP_RESERVOIR_TARGET_TS_MONTHLY) + "Min" + input);
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 				StateMod_DataSet.COMP_RESERVOIR_TARGET_TS_MONTHLY) + "Max" + input);
 		}
 		else if ( include_input && (interval == TimeInterval.DAY) ) {
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 				StateMod_DataSet.COMP_RESERVOIR_CONTENT_TS_DAILY) + input );
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 				StateMod_DataSet.COMP_RESERVOIR_TARGET_TS_DAILY) +"Min" + input);
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 				StateMod_DataSet.COMP_RESERVOIR_TARGET_TS_DAILY) +"Max" + input);
 		}
 		if ( include_input ) {
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 				StateMod_DataSet.COMP_RESERVOIR_RIGHTS) + input);
 		}
 		// Include estimated input if requested...
 		if ( include_input_estimated && (interval == TimeInterval.DAY) ) {
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 				StateMod_DataSet.COMP_RESERVOIR_CONTENT_TS_DAILY) + "Estimated" + input);
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 				StateMod_DataSet.COMP_RESERVOIR_TARGET_TS_DAILY)+"MinEstimated" + input);
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 				StateMod_DataSet.COMP_RESERVOIR_TARGET_TS_DAILY)+"MaxEstimated" + input);
 		}
 		// Include output if requested...
 		if ( include_output ) {
-			data_types = StringUtil.addListToStringList (data_types, StringUtil.toVector ( reservoir_types ) );
+			data_types = StringUtil.addListToStringList (data_types, StringUtil.toList ( reservoir_types ) );
 		}
 	}
 	else if ( comp_type == StateMod_DataSet.COMP_INSTREAM_STATIONS ) {
 		if ( include_input && (interval == TimeInterval.MONTH) ) {
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 				StateMod_DataSet.COMP_INSTREAM_DEMAND_TS_MONTHLY) + input);
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 				StateMod_DataSet.COMP_INSTREAM_DEMAND_TS_AVERAGE_MONTHLY) + input);
 		}
 		else if ( include_input && (interval == TimeInterval.DAY) ) {
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 			StateMod_DataSet.COMP_INSTREAM_DEMAND_TS_DAILY) +input);
 		}
 		if ( include_input ) {
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 				StateMod_DataSet.COMP_INSTREAM_RIGHTS) + input);
 		}
 		if ( include_input_estimated && (interval == TimeInterval.DAY) ) {
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 				StateMod_DataSet.COMP_INSTREAM_DEMAND_TS_DAILY)+ "Estimated" + input);
 		}
 		if ( include_output ) {
-			data_types = StringUtil.addListToStringList (data_types, StringUtil.toVector ( instream_types ) );
+			data_types = StringUtil.addListToStringList (data_types, StringUtil.toList ( instream_types ) );
 		}
 	}
 	else if ( comp_type == StateMod_DataSet.COMP_WELL_STATIONS ) {
 		if ( include_input && (interval == TimeInterval.MONTH) ) {
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 				StateMod_DataSet.COMP_WELL_PUMPING_TS_MONTHLY) + input);
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 				StateMod_DataSet.COMP_WELL_DEMAND_TS_MONTHLY) + input);
 		}
 		else if ( include_input && (interval == TimeInterval.DAY) ) {
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 				StateMod_DataSet.COMP_WELL_PUMPING_TS_DAILY) + input);
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 				StateMod_DataSet.COMP_WELL_DEMAND_TS_DAILY) + input);
 		}
 		if ( include_input ) {
-			data_types.addElement (
+			data_types.add (
 				StateMod_DataSet.lookupTimeSeriesDataType ( StateMod_DataSet.COMP_WELL_RIGHTS) + input);
 		}
 		if ( include_input_estimated && (interval == TimeInterval.DAY) ) {
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 				StateMod_DataSet.COMP_WELL_PUMPING_TS_DAILY) + "Estimated" + input);
-			data_types.addElement ( StateMod_DataSet.lookupTimeSeriesDataType (
+			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
 				StateMod_DataSet.COMP_WELL_DEMAND_TS_DAILY) + "Estimated" + input);
 		}
 		if ( include_output ) {
-			data_types = StringUtil.addListToStringList (data_types, StringUtil.toVector ( well_types ) );
+			data_types = StringUtil.addListToStringList (data_types, StringUtil.toList ( well_types ) );
 		}
 	}
 
@@ -3141,11 +3137,11 @@ Determine the output precision for a list of time series (e.g., for use with the
 time series write methods or to display data in a table).  The default is to get
 the precision from the units of the first time series.
 */
-public static int getTimeSeriesOutputPrecision ( Vector tslist )
+public static int getTimeSeriesOutputPrecision ( List tslist )
 {	int	list_size = 0, precision = -2;	// Default
-	TS	tspt = null;
+	TS tspt = null;
 	if ( (tslist != null) && (tslist.size() > 0) ) {
-		tspt = (TS)tslist.elementAt(0);
+		tspt = (TS)tslist.get(0);
 		list_size = tslist.size();
 	}
 	if ( tspt != null ) {
@@ -3166,7 +3162,7 @@ public static int getTimeSeriesOutputPrecision ( Vector tslist )
 	// In year of CRDSS 2, we changed the precision to 0 for RSTO.
 	// See if any of the TS in the list are RSTO...
 	for ( int ilist = 0; ilist < list_size; ilist++ ) {
-		tspt = (TS)tslist.elementAt(ilist);
+		tspt = (TS)tslist.get(ilist);
 		if ( tspt == null ) {
 			continue;
 		}
@@ -3186,24 +3182,24 @@ the given identifier.  If none are found, an empty non-null Vector is returned.
 @param node_Vector Vector of StateMod_RiverNetworkNode.
 @param downstream_id Downstream identifier of interest.
 */
-public static Vector getUpstreamNetworkNodes ( Vector node_Vector, String downstream_id )
+public static List getUpstreamNetworkNodes ( List node_Vector, String downstream_id )
 {	String rtn = "StateMod_Util.getUpstreamNetworkNodes";
 	if ( Message.isDebugOn ) {
 		Message.printDebug ( 1, rtn, "Trying to find upstream nodes for " + downstream_id );
 	}
-	Vector v = new Vector ();
+	List v = new Vector ();
 	if ( node_Vector == null ) {
 		return v;
 	}
 	int num = node_Vector.size();
 	StateMod_RiverNetworkNode riv;
 	for ( int i=0; i<num; i++ ) {
-		riv = (StateMod_RiverNetworkNode)node_Vector.elementAt(i);	
+		riv = (StateMod_RiverNetworkNode)node_Vector.get(i);	
 		if ( riv.getCstadn().equalsIgnoreCase ( downstream_id )) {
 			if ( Message.isDebugOn ) {
 				Message.printDebug ( 1, rtn, "Adding upstream node " + riv.getID() );
 			}
-			v.addElement ( riv );
+			v.add ( riv );
 		}
 	}
 	return v;
@@ -3217,8 +3213,8 @@ nodes at which the rights apply.  One or more water right can exist with the sam
 @param req_parcel_year Parcel year for data or -1 to use all (only used with well rights).
 @return a list of locations for water rights, in the order found in the original list.
 */
-public static Vector getWaterRightIdentifiersForLocation ( Vector smrights, String loc_id, int req_parcel_year )
-{	Vector matchlist = new Vector();	// Returned data, identifiers (not full right)
+public static List getWaterRightIdentifiersForLocation ( List smrights, String loc_id, int req_parcel_year )
+{	List matchlist = new Vector();	// Returned data, identifiers (not full right)
 	int size = 0;
 	if ( smrights != null ) {
 		size = smrights.size();
@@ -3229,7 +3225,7 @@ public static Vector getWaterRightIdentifiersForLocation ( Vector smrights, Stri
 	int matchlist_size = 0;
 	boolean found = false; // used to indicate matching ID found
 	for ( int i = 0; i < size; i++ ) {
-		right = (StateMod_Right)smrights.elementAt(i);
+		right = (StateMod_Right)smrights.get(i);
 		if ( (req_parcel_year != -1) && right instanceof StateMod_WellRight ) {
 			// Allow the year to filter.
 			parcel_year = ((StateMod_WellRight)right).getParcelYear();
@@ -3246,14 +3242,14 @@ public static Vector getWaterRightIdentifiersForLocation ( Vector smrights, Stri
 		right_id = right.getIdentifier();
 		found = false;
 		for ( int j = 0; j < matchlist_size; j++ ) {
-			if ( right_id.equalsIgnoreCase((String)matchlist.elementAt(j)) ) {
+			if ( right_id.equalsIgnoreCase((String)matchlist.get(j)) ) {
 				found = true;
 				break;
 			}
 		}
 		if ( !found ) {
 			// Add to the list
-			matchlist.addElement ( right_id );
+			matchlist.add ( right_id );
 			matchlist_size = matchlist.size();
 		}
 	}
@@ -3267,8 +3263,8 @@ Get a list of water rights for a location.  The locations are the nodes at which
 @param req_parcel_year Parcel year for data or -1 to use all (only used with well rights).
 @return a list of locations for water rights, in the order found in the original list.
 */
-public static Vector getWaterRightsForLocation ( Vector smrights, String loc_id, int req_parcel_year )
-{	Vector matchlist = new Vector();	// Returned data
+public static List getWaterRightsForLocation ( List smrights, String loc_id, int req_parcel_year )
+{	List matchlist = new Vector();	// Returned data
 	int size = 0;
 	if ( smrights != null ) {
 		size = smrights.size();
@@ -3276,7 +3272,7 @@ public static Vector getWaterRightsForLocation ( Vector smrights, String loc_id,
 	StateMod_Right right = null;
 	int parcel_year;
 	for ( int i = 0; i < size; i++ ) {
-		right = (StateMod_Right)smrights.elementAt(i);
+		right = (StateMod_Right)smrights.get(i);
 		if ( (req_parcel_year != -1) && right instanceof StateMod_WellRight ) {
 			// Allow the year to filter.
 			parcel_year = ((StateMod_WellRight)right).getParcelYear();
@@ -3286,7 +3282,7 @@ public static Vector getWaterRightsForLocation ( Vector smrights, String loc_id,
 			}
 		}
 		if ( loc_id.equalsIgnoreCase(right.getLocationIdentifier()) ) {
-			matchlist.addElement ( right );
+			matchlist.add ( right );
 		}
 	}
 	return matchlist;
@@ -3301,9 +3297,9 @@ nodes at which the rights apply.
 @param req_parcel_year Parcel year for data or -1 to use all (only used with well rights).
 @return a list of locations for water rights, in the order found in the original list.
 */
-public static Vector getWaterRightsForLocationAndRightIdentifier (
-		Vector smrights, String loc_id, String right_id, int req_parcel_year )
-{	Vector matchlist = new Vector();	// Returned data
+public static List getWaterRightsForLocationAndRightIdentifier (
+		List smrights, String loc_id, String right_id, int req_parcel_year )
+{	List matchlist = new Vector();	// Returned data
 	int size = 0;
 	if ( smrights != null ) {
 		size = smrights.size();
@@ -3311,7 +3307,7 @@ public static Vector getWaterRightsForLocationAndRightIdentifier (
 	StateMod_Right right = null;
 	int parcel_year;
 	for ( int i = 0; i < size; i++ ) {
-		right = (StateMod_Right)smrights.elementAt(i);
+		right = (StateMod_Right)smrights.get(i);
 		if ( (req_parcel_year != -1) && right instanceof StateMod_WellRight ) {
 			// Allow the year to filter.
 			parcel_year = ((StateMod_WellRight)right).getParcelYear();
@@ -3327,7 +3323,7 @@ public static Vector getWaterRightsForLocationAndRightIdentifier (
 			continue;
 		}
 		// If here it is a match...
-		matchlist.addElement ( right );
+		matchlist.add ( right );
 	}
 	return matchlist;
 }
@@ -3339,26 +3335,25 @@ Get a list of water rights for a parcel.
 @param req_parcel_year Parcel year for data or -1 to use all.
 @return a list of water rights for the parcel, in the order found in the original list.
 */
-public static Vector getWaterRightsForParcel ( Vector smrights, String parcel_id, int req_parcel_year )
-{	Vector matchlist = new Vector();	// Returned data
+public static List getWaterRightsForParcel ( List smrights, String parcel_id, int req_parcel_year )
+{	List matchlist = new Vector();	// Returned data
 	int size = 0;
 	if ( smrights != null ) {
 		size = smrights.size();
 	}
 	StateMod_WellRight right = null;
 	for ( int i = 0; i < size; i++ ) {
-		right = (StateMod_WellRight)smrights.elementAt(i);
+		right = (StateMod_WellRight)smrights.get(i);
 		if ( (req_parcel_year != -1) && (right.getParcelYear() != req_parcel_year) ) {
 			// No need to process right.
 			continue;
 		}
 		if ( parcel_id.equalsIgnoreCase(right.getParcelID()) ) {
-			matchlist.addElement ( right );
+			matchlist.add ( right );
 		}
 	}
 	return matchlist;
 }
-
 
 /**
 Get a list of locations from a list of water rights.  The locations are the
@@ -3368,8 +3363,8 @@ nodes at which the rights apply.
 Vector of StateMod_WellRight.
 @return a list of locations for water rights, in the order found in the original list.
 */
-public static Vector getWaterRightLocationList ( Vector smrights, int req_parcel_year )
-{	Vector loclist = new Vector();	// Returned data
+public static List getWaterRightLocationList ( List smrights, int req_parcel_year )
+{	List loclist = new Vector();	// Returned data
 	int size = 0;
 	if ( smrights != null ) {
 		size = smrights.size();
@@ -3381,7 +3376,7 @@ public static Vector getWaterRightLocationList ( Vector smrights, int req_parcel
 	int parcel_year = 0;	// Parcel year to process.
 	int j = 0; // Loop index for found locations.
 	for ( int i = 0; i < size; i++ ) {
-		right = (StateMod_Right)smrights.elementAt(i);
+		right = (StateMod_Right)smrights.get(i);
 		if ( req_parcel_year != -1 ) {
 			// Check the parcel year and skip if necessary.
 			if ( right instanceof StateMod_WellRight ) {
@@ -3396,14 +3391,14 @@ public static Vector getWaterRightLocationList ( Vector smrights, int req_parcel
 		// Search the list to see if it is a new item...
 		found = false;
 		for ( j = 0; j < size_loc; j++ ) {
-			if ( right_loc_id.equalsIgnoreCase((String)loclist.elementAt(j)) ) {
+			if ( right_loc_id.equalsIgnoreCase((String)loclist.get(j)) ) {
 				found = true;
 				break;
 			}
 		}
 		if ( !found ) {
 			// Add to the list
-			loclist.addElement ( right_loc_id );
+			loclist.add ( right_loc_id );
 			size_loc = loclist.size();
 		}
 	}
@@ -3413,12 +3408,12 @@ public static Vector getWaterRightLocationList ( Vector smrights, int req_parcel
 /**
 Get a list of parcels from a list of well water rights.  The parcels are the
 locations at which well rights have been matched.
-@param smrights a Vector of StateMod_WellRight to process.
+@param smrights a list of StateMod_WellRight to process.
 @param req_parcel_year a requested year to constrain the parcel list (or -1 to return all).
 @return a list of parcels for water rights, in the order found in the original list.
 */
-public static Vector getWaterRightParcelList ( Vector smrights, int req_parcel_year )
-{	Vector loclist = new Vector();	// Returned data
+public static List getWaterRightParcelList ( List smrights, int req_parcel_year )
+{	List loclist = new Vector();	// Returned data
 	int size = 0;
 	if ( smrights != null ) {
 		size = smrights.size();
@@ -3430,7 +3425,7 @@ public static Vector getWaterRightParcelList ( Vector smrights, int req_parcel_y
 	int parcel_year = 0;	// Year for parcels.
 	int j = 0; // Loop index for found locations.
 	for ( int i = 0; i < size; i++ ) {
-		right = (StateMod_WellRight)smrights.elementAt(i);
+		right = (StateMod_WellRight)smrights.get(i);
 		parcel_id = right.getParcelID();
 		parcel_year = right.getParcelYear();
 		if ( (req_parcel_year != -1) && (parcel_year != req_parcel_year) ) {
@@ -3440,14 +3435,14 @@ public static Vector getWaterRightParcelList ( Vector smrights, int req_parcel_y
 		// Search the list to see if it is a new item...
 		found = false;
 		for ( j = 0; j < size_loc; j++ ) {
-			if ( parcel_id.equalsIgnoreCase((String)loclist.elementAt(j)) ) {
+			if ( parcel_id.equalsIgnoreCase((String)loclist.get(j)) ) {
 				found = true;
 				break;
 			}
 		}
 		if ( !found ) {
 			// Add to the list
-			loclist.addElement ( parcel_id );
+			loclist.add ( parcel_id );
 			size_loc = loclist.size();
 		}
 	}
@@ -3456,11 +3451,11 @@ public static Vector getWaterRightParcelList ( Vector smrights, int req_parcel_y
 
 /**
 Get a list of parcel years from a list of well water rights.
-@param smrights a Vector of StateMod_WellRight to process.
+@param smrights a list of StateMod_WellRight to process.
 @return a list of parcel years for water rights, in ascending order.
 */
-public static int [] getWaterRightParcelYearList ( Vector smrights )
-{	Vector yearlist = new Vector();	// Returned data
+public static int [] getWaterRightParcelYearList ( List smrights )
+{	List yearlist = new Vector();	// Returned data
 	int size = 0;
 	if ( smrights != null ) {
 		size = smrights.size();
@@ -3471,29 +3466,28 @@ public static int [] getWaterRightParcelYearList ( Vector smrights )
 	int parcel_year = 0;	// Year for parcels.
 	int j = 0; // Loop index for found years.
 	for ( int i = 0; i < size; i++ ) {
-		right = (StateMod_WellRight)smrights.elementAt(i);
+		right = (StateMod_WellRight)smrights.get(i);
 		parcel_year = right.getParcelYear();
 		// Search the list to see if it is a new item...
 		found = false;
 		for ( j = 0; j < size_years; j++ ) {
-			if ( parcel_year == ((Integer)yearlist.elementAt(j)).intValue()) {
+			if ( parcel_year == ((Integer)yearlist.get(j)).intValue()) {
 				found = true;
 				break;
 			}
 		}
 		if ( !found ) {
 			// Add to the list
-			yearlist.addElement ( new Integer(parcel_year) );
+			yearlist.add ( new Integer(parcel_year) );
 			size_years = yearlist.size();
 		}
 	}
 	int [] parcel_years = new int[yearlist.size()];
 	for ( int i = 0; i < size_years; i++ ) {
-		parcel_years[i] = ((Integer)yearlist.elementAt(i)).intValue();
+		parcel_years[i] = ((Integer)yearlist.get(i)).intValue();
 	}
 	// Sort the array...
-	MathUtil.sort ( parcel_years, MathUtil.SORT_QUICK, MathUtil.SORT_ASCENDING,
-			null, false );
+	MathUtil.sort ( parcel_years, MathUtil.SORT_QUICK, MathUtil.SORT_ASCENDING,	null, false );
 	return parcel_years;
 }
 
@@ -3587,14 +3581,14 @@ identifier.  The position for the first match is returned.
 @return the position, or -1 if not found.
 @param id StateMod_Data identifier.
 */
-public static int indexOf ( Vector data, String id )
+public static int indexOf ( List data, String id )
 {	int size = 0;
 	if ( data != null ) {
 		size = data.size();
 	}
 	StateMod_Data d = null;
 	for (int i = 0; i < size; i++) {
-		d = (StateMod_Data)data.elementAt(i);
+		d = (StateMod_Data)data.get(i);
 		if ( id.equalsIgnoreCase ( d._id ) ) {
 			return i;
 		}
@@ -3608,14 +3602,14 @@ The position for the first match is returned.
 @return the position, or -1 if not found.
 @param name StateMod_Data name.
 */
-public static int indexOfName ( Vector data, String name )
+public static int indexOfName ( List data, String name )
 {	int size = 0;
 	if ( data != null ) {
 		size = data.size();
 	}
 	StateMod_Data d = null;
 	for (int i = 0; i < size; i++) {
-		d = (StateMod_Data)data.elementAt(i);
+		d = (StateMod_Data)data.get(i);
 		if ( name.equalsIgnoreCase ( d._name ) ) {
 			return i;
 		}
@@ -3626,12 +3620,11 @@ public static int indexOfName ( Vector data, String name )
 /**
 Find the position of a StateMod_Data object in the data Vector, using the
 river node identifier.  The position for the first match is returned.
-This method can only be used for station data objects that have a river node
-identifier.
+This method can only be used for station data objects that have a river node identifier.
 @return the position, or -1 if not found.
 @param id StateMod_Data identifier.
 */
-public static int indexOfRiverNodeID ( Vector data, String id )
+public static int indexOfRiverNodeID ( List data, String id )
 {	int size = 0;
 	if ( data != null ) {
 		size = data.size();
@@ -3639,9 +3632,8 @@ public static int indexOfRiverNodeID ( Vector data, String id )
 	StateMod_Data d = null;
 	for (int i = 0; i < size; i++) {
 		// Stream gage and stream estimate have their own CGOTO
-		// data members.  All other use the data in the StateMod_Data
-		// base class.
-		d = (StateMod_Data)data.elementAt(i);
+		// data members.  All other use the data in the StateMod_Data base class.
+		d = (StateMod_Data)data.get(i);
 		if ( d instanceof StateMod_StreamGage ) {
 			if ( id.equalsIgnoreCase ( ((StateMod_StreamGage)d).getCgoto() ) ) {
 				return i;
@@ -3740,14 +3732,14 @@ from the specified CGoto.
 @param ID CGoto ID to search for
 @param theData vector of StateMod_Data objects
 */
-public static int locateIndexFromCGOTO(String ID, Vector theData) {
+public static int locateIndexFromCGOTO(String ID, List theData) {
 	int num = 0;
 	if (theData != null) {
 		num = theData.size();
 	}
 	
 	for (int i = 0; i<num; i++) {
-		if (ID.equalsIgnoreCase( ((StateMod_Data)theData.elementAt(i)).getCgoto())) {
+		if (ID.equalsIgnoreCase( ((StateMod_Data)theData.get(i)).getCgoto())) {
 			return i;
 		}
 	}
@@ -3760,14 +3752,14 @@ Locates the index of a data object derived from StateMod_Data in a Vector.
 @param theData vector of StateMod_Data objects
 @return index or -999 when not found
 */
-public static int locateIndexFromID(String ID, Vector theData) {
+public static int locateIndexFromID(String ID, List theData) {
 	int num = 0;
 	if (theData != null) {
 		num = theData.size();
 	}
 	
 	for (int i = 0; i < num; i++) {
-		if (ID.equalsIgnoreCase( ((StateMod_Data)theData.elementAt(i)).getID())) {
+		if (ID.equalsIgnoreCase( ((StateMod_Data)theData.get(i)).getID())) {
 			return i;
 		}
 	}
@@ -5720,7 +5712,7 @@ compared with the location part of the time series identifier.
 1 but for some time series (e.g., reservoir targets) the second match may be requested.
 @return matching time series or null if no match is found.
 */
-public static TS lookupTimeSeries (	String id, Vector tslist, int match_count )
+public static TS lookupTimeSeries (	String id, List tslist, int match_count )
 {	if ( (id == null) || id.equals("") ) {
 		return null;
 	}
@@ -5732,7 +5724,7 @@ public static TS lookupTimeSeries (	String id, Vector tslist, int match_count )
 	Object o = null;
 	int match_count2 = 0;
 	for ( int i = 0; i < size; i++ ) {
-		o = tslist.elementAt(i);
+		o = tslist.get(i);
 		if ( o == null ) {
 			continue;
 		}
@@ -6385,14 +6377,14 @@ Removes all the objects that match the specified object (with a compareTo() call
 @param v the Vector from which to remove the element.
 @param data the object to match and remove.
 */
-public static void removeFromVector(Vector v, StateMod_Data data) {
+public static void removeFromVector(List v, StateMod_Data data) {
 	if (v == null || v.size() == 0) {
 		return;
 	}
 	int size = v.size();
 	StateMod_Data element = null;
 	for (int i = size - 1; i >= 0; i--) {
-		element = (StateMod_Data)v.elementAt(i);
+		element = (StateMod_Data)v.get(i);
 		if (element.compareTo(data) == 0) {
 			v.remove(i);
 		}
@@ -6494,14 +6486,14 @@ throws Exception
 		ProcessManager sp = new ProcessManager(command_array);
 		sp.saveOutput(true);
 		sp.run();
-		Vector output = sp.getOutputVector();
+		List output = sp.getOutputList();
 		int size = 0;
 		if (output != null){
 			size = output.size();	
 		}
 		boolean	versionFound = false;
 		for (int i = 0; i < size; i++){
-			str = (String)output.elementAt(i);
+			str = (String)output.get(i);
 			if (str.indexOf("Version:") >= 0) {
 				String version = StringUtil.getToken( str.trim(),":", StringUtil.DELIM_SKIP_BLANKS,1).trim();
 				// For now treat as a floating point number...
@@ -6531,7 +6523,7 @@ throws Exception
 			Message.printWarning(2, routine, "Error running \"" + command + "\"");
 			throw new Exception("Error running \"" + command + "\"");
 		}
-		Vector output = sp.getOutputVector();
+		List output = sp.getOutputList();
 		int size = 0;
 		if (output != null) {
 			size = output.size();	
@@ -6539,7 +6531,7 @@ throws Exception
 		for (int i = 0; i < size; i++) {
 			// Print the output as status messages since no GUI is
 			// being shown but we may want to see what is going on in the log and console...
-			str = (String)output.elementAt(i);
+			str = (String)output.get(i);
 			if (str != null) {
 				Message.printStatus(1, routine, str);
 			}
@@ -6598,12 +6590,12 @@ private static void setStateModVersion ( String statemodVersion )
 }
 
 /**
-Sorts a Vector of StateMod_Data objects, depending on the compareTo() method for the specific object.
-@param data a Vector of StateMod_Data objects.  Can be null.
+Sorts a list of StateMod_Data objects, depending on the compareTo() method for the specific object.
+@param data a list of StateMod_Data objects.  Can be null.
 @return a new sorted Vector with references to the same data objects in the
 passed-in Vector.  If a null Vector is passed in, an empty Vector will be returned.
 */
-public static Vector sortStateMod_DataVector ( Vector data )
+public static List sortStateMod_DataVector ( List data )
 {	return sortStateMod_DataVector ( data, true );
 }
 
@@ -6615,11 +6607,11 @@ If false, return the original Vector, with sorted contents.
 @return a sorted Vector with references to the same data objects in the
 passed-in Vector.  If a null Vector is passed in, an empty Vector will be returned.
 */
-public static Vector sortStateMod_DataVector ( Vector data, boolean return_new )
+public static List sortStateMod_DataVector ( List data, boolean return_new )
 {	if (data == null) {
 		return new Vector();
 	}
-	Vector v = data;
+	List v = data;
 	int size = data.size();
 	if ( return_new ) {
 		if (size == 0) {
@@ -6627,7 +6619,7 @@ public static Vector sortStateMod_DataVector ( Vector data, boolean return_new )
 		}
 		v = new Vector(size);
 		for (int i = 0; i < size; i++) {
-			v.add(data.elementAt(i));
+			v.add(data.get(i));
 		}
 	}
 
@@ -6651,7 +6643,7 @@ to fill in the description field in the time series
 example, the reservoir min/max vector has two time series for each node in
 theData (min and max) whereas most have a one-to-one correlation.
 */
-public static void setTSDescriptions (Vector theData, Vector theTS, int mult) {
+public static void setTSDescriptions (List theData, List theTS, int mult) {
 	if ((theData == null) || (theTS == null)) {
 		return;
 	}
@@ -6664,10 +6656,10 @@ public static void setTSDescriptions (Vector theData, Vector theTS, int mult) {
 	StateMod_Data smdata = null;
 	TS ts = null;
 	for (int i=0; i<size; i++) {
-		smdata = (StateMod_Data)theData.elementAt(i);
+		smdata = (StateMod_Data)theData.get(i);
 		for (int j=0; j<mult; j++) {
 			try {
-				ts = (TS)theTS.elementAt(i*mult + j);
+				ts = (TS)theTS.get(i*mult + j);
 
 				if (smdata.getID().equalsIgnoreCase	(ts.getIdentifier().getLocation())) {
 					ts.setDescription(smdata.getName());

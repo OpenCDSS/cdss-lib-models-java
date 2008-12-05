@@ -10,6 +10,7 @@
 
 package DWR.StateMod;
 
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.GUI.InputFilter;
@@ -30,21 +31,21 @@ queries.
 */
 public StateMod_Diversion_InputFilter_JPanel ( StateMod_DataSet dataset )
 throws Exception
-{	Vector input_filters = new Vector(15);
+{	List input_filters = new Vector(15);
 	InputFilter filter = null;
-	input_filters.addElement ( new InputFilter (
+	input_filters.add ( new InputFilter (
 		"", "",
 		StringUtil.TYPE_STRING,
 		null, null, true ) );	// Blank to disable filter
-	input_filters.addElement ( new InputFilter (
+	input_filters.add ( new InputFilter (
 		"ID", "ID",
 		StringUtil.TYPE_STRING,
 		null, null, true ) );
-	input_filters.addElement ( new InputFilter (
+	input_filters.add ( new InputFilter (
 		"Name", "Name",
 		StringUtil.TYPE_STRING,
 		null, null, true ) );
-	input_filters.addElement ( new InputFilter (
+	input_filters.add ( new InputFilter (
 		"River Node ID", "RiverNodeID",
 		StringUtil.TYPE_STRING,
 		null, null, true ) );
@@ -54,8 +55,8 @@ throws Exception
 		StateMod_Diversion.getIdivswChoices(true),
 		StateMod_Diversion.getIdivswChoices(false), true );
 	filter.setTokenInfo ( " ", 0 );
-	input_filters.addElement ( filter );
-	input_filters.addElement ( new InputFilter (
+	input_filters.add ( filter );
+	input_filters.add ( new InputFilter (
 		"Capacity", "Capacity",
 		StringUtil.TYPE_DOUBLE,
 		null, null, true ) );
@@ -65,12 +66,12 @@ throws Exception
 		StateMod_Diversion.getIreptypeChoices(true),
 		StateMod_Diversion.getIreptypeChoices(false), true );
 	filter.setTokenInfo ( " ", 0 );
-	input_filters.addElement ( filter );
-	input_filters.addElement ( new InputFilter (
+	input_filters.add ( filter );
+	input_filters.add ( new InputFilter (
 		"Daily ID", "DailyID",
 		StringUtil.TYPE_STRING,
 		null, null, true ) );
-	input_filters.addElement ( new InputFilter (
+	input_filters.add ( new InputFilter (
 		"User Name", "UserName",
 		StringUtil.TYPE_STRING,
 		null, null, true ) );
@@ -80,18 +81,18 @@ throws Exception
 		StateMod_Diversion.getIdvcomChoices(true),
 		StateMod_Diversion.getIdvcomChoices(false), true );
 	filter.setTokenInfo ( " ", 0 );
-	input_filters.addElement ( filter );
+	input_filters.add ( filter );
 	/*
 	input_filters.addElement ( new InputFilter (
 		"Number of Returns", "NumReturns",
 		StringUtil.TYPE_INTEGER,
 		null, null, true ) );
 	*/
-	input_filters.addElement ( new InputFilter (
+	input_filters.add ( new InputFilter (
 		"Efficiency (Annual)", "EffAnnual",
 		StringUtil.TYPE_DOUBLE,
 		null, null, true ) );
-	input_filters.addElement ( new InputFilter (
+	input_filters.add ( new InputFilter (
 		"Area (ACRE)", "Area",
 		StringUtil.TYPE_DOUBLE,
 		null, null, true ) );
@@ -101,14 +102,14 @@ throws Exception
 		StateMod_Diversion.getIrturnChoices(true),
 		StateMod_Diversion.getIrturnChoices(false), true );
 	filter.setTokenInfo ( " ", 0 );
-	input_filters.addElement ( filter );
+	input_filters.add ( filter );
 	filter = new InputFilter (
 		"Demand Source", "DemandSource",
 		StringUtil.TYPE_INTEGER,
 		StateMod_Diversion.getDemsrcChoices(true),
 		StateMod_Diversion.getDemsrcChoices(false), true );
 	filter.setTokenInfo ( " ", 0 );
-	input_filters.addElement ( filter );
+	input_filters.add ( filter );
 	/* REVISIT SAM 2004-10-25 monthly efficiencies?
 		Returns?
 	*/

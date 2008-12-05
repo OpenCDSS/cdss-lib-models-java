@@ -55,6 +55,7 @@
 package DWR.StateMod;
 
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.IO.IOUtil;
@@ -161,7 +162,7 @@ be null.
 be null.
 @return true if they are the same, false if not.
 */
-public static boolean equals(Vector v1, Vector v2) {
+public static boolean equals(List v1, List v2) {
 	String routine = "StateMod_ReservoirClimate.equals(Vector, Vector)";
 	StateMod_ReservoirClimate r1;	
 	StateMod_ReservoirClimate r2;	
@@ -174,13 +175,13 @@ public static boolean equals(Vector v1, Vector v2) {
 		// and data will need to be saved back into the dataset.
 		int size = v1.size();
 		Message.printStatus(1, routine, "Vectors are of size: " + size);
-		Vector v1Sort = StateMod_Util.sortStateMod_DataVector(v1);
-		Vector v2Sort = StateMod_Util.sortStateMod_DataVector(v2);
+		List v1Sort = StateMod_Util.sortStateMod_DataVector(v1);
+		List v2Sort = StateMod_Util.sortStateMod_DataVector(v2);
 		Message.printStatus(1, routine, "Vectors have been sorted");
 	
 		for (int i = 0; i < size; i++) {			
-			r1 = (StateMod_ReservoirClimate)v1Sort.elementAt(i);	
-			r2 = (StateMod_ReservoirClimate)v2Sort.elementAt(i);	
+			r1 = (StateMod_ReservoirClimate)v1Sort.get(i);	
+			r2 = (StateMod_ReservoirClimate)v2Sort.get(i);	
 			Message.printStatus(1, routine, r1.toString());
 			Message.printStatus(1, routine, r2.toString());
 			Message.printStatus(1, routine, "Element " + i 
@@ -309,7 +310,7 @@ stations.
 @return the number of StateMod_ReservoirClimate objects that are evaporation
 stations.
 */
-public static int getNumEvap(Vector climates)
+public static int getNumEvap(List climates)
 {	if (climates == null) {
 		return 0;
 	}
@@ -319,7 +320,7 @@ public static int getNumEvap(Vector climates)
 	
 	for (int i=0; i<num; i++) {
 		if (((StateMod_ReservoirClimate)
-			climates.elementAt(i)).getType() == CLIMATE_EVAP) {
+			climates.get(i)).getType() == CLIMATE_EVAP) {
 			nevap++;
 		}
 	} 
@@ -332,7 +333,7 @@ precipitation stations.
 @return the number of StateMod_ReservoirClimate objects that are precipitation
 stations.
 */
-public static int getNumPrecip(Vector climates)
+public static int getNumPrecip(List climates)
 {	if (climates == null) {
 		return 0;
 	}
@@ -342,7 +343,7 @@ public static int getNumPrecip(Vector climates)
 	
 	for (int i=0; i<num; i++) {
 		if (((StateMod_ReservoirClimate)
-			climates.elementAt(i)).getType() == CLIMATE_PTPX) {
+			climates.get(i)).getType() == CLIMATE_PTPX) {
 			nptpx++;
 		}
 	}
@@ -373,14 +374,14 @@ StateMod_DataSet.COMP_RESERVOIR_EVAP_STATIONS.
 @throws Exception if an error occurs.
 */
 public static void writeListFile(String filename, String delimiter,
-boolean update, Vector data, int componentType) 
+boolean update, List data, int componentType) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
 		size = data.size();
 	}
 	
-	Vector fields = new Vector();
+	List fields = new Vector();
 	fields.add("ReservoirID");
 	fields.add("StationID");
 	fields.add("PercentWeight");
@@ -391,7 +392,7 @@ throws Exception {
 	int comp = componentType;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.elementAt(i);
+		s = (String)fields.get(i);
 		names[i] = StateMod_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateMod_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -426,7 +427,7 @@ throws Exception {
 		out.println(buffer.toString());
 		
 		for (int i = 0; i < size; i++) {
-			cli = (StateMod_ReservoirClimate)data.elementAt(i);
+			cli = (StateMod_ReservoirClimate)data.get(i);
 			
 			line[0] = StringUtil.formatString(cli.getCgoto(), 
 				formats[0]).trim();

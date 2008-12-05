@@ -92,6 +92,7 @@ import java.awt.print.PageFormat;
 import java.awt.print.Printable;
 import java.awt.print.PrinterJob;
 import java.io.File;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JCheckBoxMenuItem;
@@ -687,17 +688,17 @@ private String
 Vector of all the annotations displayed on the network.  Note that internally
 annotations are managed as a list of HydrologyNode.
 */
-private Vector __annotations = new Vector();
+private List __annotations = new Vector();
 
 /**
 Vector of all the links drawn on the network.
 */
-private Vector __links;
+private List __links;
 
 /**
 Vector to hold change operations.
 */
-private Vector __undoOperations;
+private List __undoOperations;
 
 /**
 A private class to hold undo data.
@@ -782,7 +783,7 @@ public void actionPerformed(ActionEvent event) {
 		__networkChanged = true;
 	}
 	else if (action.equals(__MENU_DELETE_ANNOTATION)) {
-		__annotations.removeElementAt(__popupNodeNum);
+		__annotations.remove(__popupNodeNum);
 		__networkChanged = true;
 		forceRepaint();
 	}
@@ -797,7 +798,7 @@ public void actionPerformed(ActionEvent event) {
 			return;
 		}
 		if (__isLastSelectedAnAnnotation) {
-			__annotations.removeElementAt(__clickedNodeNum);
+			__annotations.remove(__clickedNodeNum);
 		}
 		else {
 			String id = __nodes[__popupNodeNum].getCommonID();
@@ -871,7 +872,7 @@ public void actionPerformed(ActionEvent event) {
 	else if (action.equals(__MENU_PROPERTIES)) {
 		if (__isLastSelectedAnAnnotation) {
 			HydrologyNode node = (HydrologyNode)
-				__annotations.elementAt(__popupNodeNum);
+				__annotations.get(__popupNodeNum);
 
 			new StateMod_Network_AnnotationProperties_JDialog(
 				this, __editable, node, __popupNodeNum);
@@ -1081,7 +1082,7 @@ private void addNodeChangeOperation(int nodeNum, double x, double y)
 /**
 Adds a change operation to the undo data.  This is called when a node is dragged
 so that the operation can be undone.
-@param data the UndoData detailing what happened in the oeperation.
+@param data the UndoData detailing what happened in the operation.
 */
 private void addNodeChangeOperation(UndoData data) {
 	// undoPos tracks the current position within the undo Vector and
@@ -1091,7 +1092,7 @@ private void addNodeChangeOperation(UndoData data) {
 	// rid of undos that cannot be undone
 	if (__undoPos < __undoOperations.size()) {
 		while (__undoPos < __undoOperations.size()) {
-			__undoOperations.removeElementAt(__undoPos);
+			__undoOperations.remove(__undoPos);
 		}
 	}
 	__undoOperations.add(data);
@@ -1118,7 +1119,7 @@ private void adjustLinksForNodeRename(String idPre, String idPost) {
 	String id1 = null;
 	String id2 = null;
 	for (int i = 0; i < size; i++) {
-		p = (PropList)__links.elementAt(i);
+		p = (PropList)__links.get(i);
 		id1 = p.getValue("FromNodeID");
 		id2 = p.getValue("ToNodeID");
 
@@ -1153,7 +1154,7 @@ private void buildNodeArray() {
 	boolean done = false;
 	HydrologyNode node = __network.getMostUpstreamNode();
 	HydrologyNode holdNode = null;
-	Vector nodes = new Vector();
+	List nodes = new Vector();
 
 	while (!done) {
 		if (node == null) {
@@ -1183,7 +1184,7 @@ private void buildNodeArray() {
 	__nodes = new HydrologyNode[size];
 
 	for (int i = 0; i < size; i++) {
-		__nodes[i] = (HydrologyNode)nodes.elementAt(i);
+		__nodes[i] = (HydrologyNode)nodes.get(i);
 		// FIXME SAM 2008-03-16 Need to remove WIS code
 		//__nodes[i].setInWis(false);
 		__nodes[i].setBoundsCalculated(false);
@@ -1319,7 +1320,7 @@ Builds limits and sets up the starting position for a drag for multiple nodes.
 This is done prior to dragging starting.
 */
 private void buildSelectedNodesLimits() {
-	Vector v = new Vector();
+	List v = new Vector();
 
 	// first get a Vector comprising the indices of the nodes in the
 	// __nodes array that are being dragged.  This method is only called
@@ -1352,7 +1353,7 @@ private void buildSelectedNodesLimits() {
 	// Y positions.  
 	
 	for (int i = 0; i < size; i++) {
-		I = (Integer)v.elementAt(i);
+		I = (Integer)v.get(i);
 		num = I.intValue();
 
 		__dragNodesLimits[i] = __nodes[num].getLimits();
@@ -1635,13 +1636,13 @@ private void deleteLink() {
 	String from = null;
 	String id = __nodes[__popupNodeNum].getCommonID();
 	String to = null;
-	Vector links = new Vector();
-	Vector nums = new Vector();	
+	List links = new Vector();
+	List nums = new Vector();	
 
 	// gather all the links in the network that reference the node
 	// that the popup menu was opened in
 	for (int i = 0; i < size; i++) {
-		p = (PropList)__links.elementAt(i);
+		p = (PropList)__links.get(i);
 		from = p.getValue("FromNodeID");
 		to = p.getValue("ToNodeID");
 		if (from.equals(id) || to.equals(id)) {
@@ -1654,8 +1655,8 @@ private void deleteLink() {
 	if (size == 1) {
 		// If there is only one link involving the clicked-on
 		// node, then delete it outright.
-		int i = ((Integer)nums.elementAt(0)).intValue();
-		__links.removeElementAt(i);
+		int i = ((Integer)nums.get(0)).intValue();
+		__links.remove(i);
 		__networkChanged = true;
 		forceRepaint();
 		return;
@@ -1676,10 +1677,10 @@ private void deleteLink() {
 	// Find the node to delete and delete it
 	String link = null;
 	for (int i = 0; i < size; i++) {
-		link = (String)links.elementAt(i);
+		link = (String)links.get(i);
 		if (link.equals(s)) {
-			int j = ((Integer)nums.elementAt(i)).intValue();
-			__links.removeElementAt(j);
+			int j = ((Integer)nums.get(i)).intValue();
+			__links.remove(j);
 			forceRepaint();
 			__networkChanged = true;
 			return;
@@ -1744,7 +1745,7 @@ private void drawAnnotations() {
 			// drag
 			continue;
 		}
-		node = (HydrologyNode)__annotations.elementAt(i);
+		node = (HydrologyNode)__annotations.get(i);
 		p = (PropList)node.getAssociatedObject();
 		String fname = p.getValue("FontName");
 		String style = p.getValue("FontStyle");
@@ -2190,7 +2191,7 @@ private void drawLinks() {
 	String id1 = null;
 	String id2 = null;
 	for (int i = 0; i < size; i++) {
-		p = (PropList)__links.elementAt(i);
+		p = (PropList)__links.get(i);
 		id1 = p.getValue("FromNodeID");
 		id2 = p.getValue("ToNodeID");
 		node1 = null;
@@ -2590,7 +2591,7 @@ select one and the node will be highlighted and zoomed to.
 private void findNode() {
 	// compile a list of all the node IDs in the network
 	int size = __nodes.length;
-	Vector v = new Vector(size);
+	List v = new Vector(size);
 	for (int i = 0; i < size; i++) {
 		v.add(__nodes[i].getCommonID());
 	}
@@ -2674,7 +2675,7 @@ private int findNodeOrAnnotationAtXY(double x, double y)
 	HydrologyNode node = null;
 	int size = __annotations.size();
 	for (int i = 0; i < size; i++) {	
-		node = (HydrologyNode)__annotations.elementAt(i);
+		node = (HydrologyNode)__annotations.get(i);
 		limits = new GRLimits(node.getX(), node.getY(), 
 			node.getX() + node.getWidth(),
 			node.getY() + node.getHeight());
@@ -2704,7 +2705,7 @@ position.
 position.
 */
 protected HydrologyNode getAnnotationNode(int nodeNum) {
-	return (HydrologyNode)__annotations.elementAt(nodeNum);
+	return (HydrologyNode)__annotations.get(nodeNum);
 }
 
 /**
@@ -2788,8 +2789,8 @@ Returns a Vector of all the nodes in the node array that are a given type.
 @return a Vector of all the nodes that are the specified type.  The Vector is
 guaranteed to be non-null.
 */
-public Vector getNodesForType(int type) {
-	Vector v = new Vector();
+public List getNodesForType(int type) {
+	List v = new Vector();
 
 	for (int i = 0; i < __nodes.length; i++) {
 		if (__nodes[i].getType() == type) {
@@ -2877,7 +2878,7 @@ public boolean isDirty() {
 	int size = __annotations.size();
 	HydrologyNode node = null;
 	for (int i = 0; i < size; i++) {
-		node = (HydrologyNode)__annotations.elementAt(i);
+		node = (HydrologyNode)__annotations.get(i);
 		if (node.isDirty()) {
 //			Message.printStatus(1, "", 
 //				"isDirty: Annotation[" + i + "]: dirty");
@@ -2903,7 +2904,7 @@ public void keyPressed(KeyEvent event) {
 			else if (__nodeDrag) {
 				if (__isLastSelectedAnAnnotation) {
 					HydrologyNode node = (HydrologyNode)
-						__annotations.elementAt(
+						__annotations.get(
 						__clickedNodeNum);
 					node.setVisible(true);
 				}
@@ -3160,7 +3161,7 @@ public void mousePressed(MouseEvent event) {
 
 		if (__isLastSelectedAnAnnotation) {
 			HydrologyNode node = (HydrologyNode)
-				__annotations.elementAt(__clickedNodeNum);
+				__annotations.get(__clickedNodeNum);
 			__draggedNodeLimits = new GRLimits(node.getX(), 
 				node.getY(), 
 				node.getX() + node.getWidth(),
@@ -3354,7 +3355,7 @@ public void mouseReleased(MouseEvent event) {
 			__mouseDataY -= __yAdjust;
 
 			HydrologyNode node = (HydrologyNode)
-				__annotations.elementAt(__clickedNodeNum);
+				__annotations.get(__clickedNodeNum);
 			GRLimits data = __drawingArea.getDataLimits();
 			if (__mouseDataX < data.getLeftX()) {
 				__mouseDataX = data.getLeftX() 
@@ -3559,7 +3560,7 @@ private boolean nodeHasLinks() {
 	String s = null;
 	String id = __nodes[__popupNodeNum].getCommonID();
 	for (int i = 0; i < size; i++) {
-		p = (PropList)__links.elementAt(i);
+		p = (PropList)__links.get(i);
 		s = p.getValue("FromNodeID");
 		if (s.equals(id)) {
 			return true;
@@ -4179,10 +4180,10 @@ private void printNetworkInfo() {
 	if (__network == null) {
 		return;
 	}
-	Vector v = __network.getNodeCountsVector();
+	List v = __network.getNodeCountsVector();
 	Message.printStatus(2, "StateMod_Network_JComponent.printNetworkInfo", "--- Network Node Summary ---");
 	for (int i = 0; i < v.size(); i++) {	
-		Message.printStatus(2, "StateMod_Network_JComponent.printNetworkInfo", "" + v.elementAt(i));
+		Message.printStatus(2, "StateMod_Network_JComponent.printNetworkInfo", "" + v.get(i));
 	}
 }
 
@@ -4226,7 +4227,7 @@ private void processAnnotations() {
 	int size = __annotations.size();
 
 	for (int i = 0; i < size; i++) {
-		node = (HydrologyNode)__annotations.elementAt(i);
+		node = (HydrologyNode)__annotations.get(i);
 		p = (PropList)node.getAssociatedObject();
 
 		String text = p.getValue("Text");
@@ -4314,7 +4315,7 @@ protected void redo() {
 		return;
 	}
 
-	UndoData data = (UndoData)__undoOperations.elementAt(__undoPos);
+	UndoData data = (UndoData)__undoOperations.get(__undoPos);
 	__undoPos++;
 	__nodes[data.nodeNum].setX(data.newX);
 	__nodes[data.nodeNum].setY(data.newY);
@@ -4358,7 +4359,7 @@ private void removeIDFromLinks(String id) {
 	String id2 = null;
 	for (int i = size - 1; i >= 0; i--) {
 		found = false;
-		p = (PropList)__links.elementAt(i);
+		p = (PropList)__links.get(i);
 		id1 = p.getValue("FromNodeID");
 		id2 = p.getValue("ToNodeID");
 
@@ -4370,7 +4371,7 @@ private void removeIDFromLinks(String id) {
 		}
 
 		if (found) {
-			__links.removeElementAt(i);
+			__links.remove(i);
 			Message.printWarning(2, routine, 
 				"ID '" + id + "' found in a link.  The link "
 				+ "will no longer be drawn.");
@@ -4876,7 +4877,7 @@ protected void undo() {
 	}
 
 	__undoPos--;
-	UndoData data = (UndoData)__undoOperations.elementAt(__undoPos);
+	UndoData data = (UndoData)__undoOperations.get(__undoPos);
 	__nodes[data.nodeNum].setX(data.oldX);
 	__nodes[data.nodeNum].setY(data.oldY);
 
@@ -4905,7 +4906,7 @@ to have the proplist updated.
 */
 private void updateAnnotationLocation(int annotation) {
 	HydrologyNode node = 
-		(HydrologyNode)__annotations.elementAt(annotation);
+		(HydrologyNode)__annotations.get(annotation);
 
 	double x = node.getX();
 	double y = node.getY();
@@ -4957,7 +4958,7 @@ be updated.
 protected void updateAnnotation(int nodeNum, HydrologyNode node) {
 	PropList p = (PropList)node.getAssociatedObject();
 
-	HydrologyNode vNode = (HydrologyNode)__annotations.elementAt(
+	HydrologyNode vNode = (HydrologyNode)__annotations.get(
 		nodeNum);
 	PropList vp = (PropList)vNode.getAssociatedObject();
 	vNode.setAssociatedObject(p);
@@ -5181,7 +5182,7 @@ private void writeListFiles()
 	String end = filename.substring((lastIndex + 1), filename.length());
 
 	String outputFilename = null;
-	Vector v = null;
+	List v = null;
 
 	String warning = "";
 	String [] comments = null;

@@ -68,6 +68,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -165,11 +166,11 @@ StateMod_Reservoir res, boolean editable) {
 	setupGUI();
 }
 
-private Vector getPrecipitationStations(Vector stations) {
-	Vector v = new Vector();
+private List getPrecipitationStations(List stations) {
+	List v = new Vector();
 	StateMod_ReservoirClimate s = null;
 	for (int i = 0; i < stations.size(); i++) {
-		s = (StateMod_ReservoirClimate)stations.elementAt(i);
+		s = (StateMod_ReservoirClimate)stations.get(i);
 		if (s.getType() == StateMod_ReservoirClimate.CLIMATE_PTPX) {
 			v.add(s);
 		}
@@ -177,11 +178,11 @@ private Vector getPrecipitationStations(Vector stations) {
 	return v;
 }
 
-private Vector getEvaporationStations(Vector stations) {
-	Vector v = new Vector();
+private List getEvaporationStations(List stations) {
+	List v = new Vector();
 	StateMod_ReservoirClimate s = null;
 	for (int i = 0; i < stations.size(); i++) {
-		s = (StateMod_ReservoirClimate)stations.elementAt(i);
+		s = (StateMod_ReservoirClimate)stations.get(i);
 		if (s.getType() == StateMod_ReservoirClimate.CLIMATE_EVAP) {
 			v.add(s);
 		}
@@ -276,7 +277,7 @@ exist.
 */
 private int checkInput(JWorksheet worksheet, String name) {
 	String routine = "StateMod_Reservoir_Climate_JFrame.checkInput";
-	Vector v = worksheet.getAllData();
+	List v = worksheet.getAllData();
 
 	int size = v.size();
 	StateMod_ReservoirClimate acct = null;
@@ -285,7 +286,7 @@ private int checkInput(JWorksheet worksheet, String name) {
 	int fatalCount = 0;
 
 	for (int i = 0; i < size; i++) {
-		acct = (StateMod_ReservoirClimate)(v.elementAt(i));
+		acct = (StateMod_ReservoirClimate)(v.get(i));
 
 		id = acct.getID();
 	
@@ -360,10 +361,10 @@ private boolean saveData() {
 	}
 
 	// if the Vectors are differently-sized, they're different
-	Vector wv1 = __worksheetP.getAllData();		// w for worksheet
-	Vector rv1 = getPrecipitationStations(__currentRes.getClimates());
-	Vector wv2 = __worksheetE.getAllData();		// w for worksheet
-	Vector rv2 = getEvaporationStations(__currentRes.getClimates());
+	List wv1 = __worksheetP.getAllData();		// w for worksheet
+	List rv1 = getPrecipitationStations(__currentRes.getClimates());
+	List wv2 = __worksheetE.getAllData();		// w for worksheet
+	List rv2 = getEvaporationStations(__currentRes.getClimates());
 
 	boolean needToSave1 = !(StateMod_ReservoirClimate.equals(wv1, rv1));
 	boolean needToSave2 = !(StateMod_ReservoirClimate.equals(wv2, rv2));
@@ -380,11 +381,11 @@ private boolean saveData() {
 	}
 
 	int size = wv1.size();
-	Vector clone = new Vector();
+	List clone = new Vector();
 	StateMod_ReservoirClimate r = null;
 	StateMod_ReservoirClimate cr = null;
 	for (int i = 0; i < size; i++) {
-		r = (StateMod_ReservoirClimate)wv1.elementAt(i);
+		r = (StateMod_ReservoirClimate)wv1.get(i);
 		cr = (StateMod_ReservoirClimate)r.clone();
 		cr._isClone = false;
 		clone.add(cr);
@@ -392,7 +393,7 @@ private boolean saveData() {
 
 	size = wv2.size();
 	for (int i = 0; i < size; i++) {
-		r = (StateMod_ReservoirClimate)wv2.elementAt(i);
+		r = (StateMod_ReservoirClimate)wv2.get(i);
 		cr = (StateMod_ReservoirClimate)r.clone();
 		cr._isClone = false;
 		clone.add(cr);
@@ -542,21 +543,21 @@ public void setupGUI() {
 
 	int widthsP[] = null;
 	JScrollWorksheet jswP = null;
-	Vector stations = StateMod_Util.createDataList(
+	List stations = StateMod_Util.createDataList(
 		combineData(
-		(Vector)__dataset.getComponentForComponentType(
+		(List)__dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_PRECIPITATION_TS_MONTHLY).getData(),
-		(Vector)__dataset.getComponentForComponentType(
+		(List)__dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_EVAPORATION_TS_MONTHLY).getData()), true);
 
 	try {			
-		Vector temp = 
+		List temp = 
 			getPrecipitationStations(__currentRes.getClimates());
-		Vector clones = new Vector();
+		List clones = new Vector();
 		StateMod_ReservoirClimate r = null;
 		int size = temp.size();
 		for (int i = 0; i < size; i++) {
-			r = (StateMod_ReservoirClimate)temp.elementAt(i);
+			r = (StateMod_ReservoirClimate)temp.get(i);
 			clones.add(r.clone());
 		}
 		
@@ -590,13 +591,13 @@ public void setupGUI() {
 	int widthsE[] = null;
 	JScrollWorksheet jswE = null;
 	try {	
-		Vector temp = 
+		List temp = 
 			getEvaporationStations(__currentRes.getClimates());
-		Vector clones = new Vector();
+		List clones = new Vector();
 		StateMod_ReservoirClimate r = null;
 		int size = temp.size();
 		for (int i = 0; i < size; i++) {
-			r = (StateMod_ReservoirClimate)temp.elementAt(i);
+			r = (StateMod_ReservoirClimate)temp.get(i);
 			clones.add(r.clone());
 		}
 	
@@ -761,13 +762,13 @@ Combines the values in two Vectors into a single Vector.
 @param data2 the second non-null Vector from which to add values.
 @return a Vector containing all the values of data1 and data2
 */
-public static Vector combineData(Vector data1, Vector data2) {
-	Vector v = new Vector();
+public static List combineData(List data1, List data2) {
+	List v = new Vector();
 	for (int i = 0; i < data1.size(); i++) {
-		v.add(data1.elementAt(i));
+		v.add(data1.get(i));
 	}
 	for (int i = 0; i < data2.size(); i++) {
-		v.add(data2.elementAt(i));
+		v.add(data2.get(i));
 	}
 	return v;
 }

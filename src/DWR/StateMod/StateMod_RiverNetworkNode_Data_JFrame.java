@@ -15,7 +15,7 @@
 
 package DWR.StateMod;
 
-import java.util.Vector;
+import java.util.List;
 
 import RTi.Util.GUI.JScrollWorksheet;
 
@@ -33,7 +33,7 @@ which case an empty worksheet is shown.
 @param titleString the String to display as the GUI title.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_RiverNetworkNode_Data_JFrame(Vector data, String titleString)
+public StateMod_RiverNetworkNode_Data_JFrame(List data, String titleString)
 throws Exception {
 	super(data, titleString, false);
 	setSize(720, getHeight());
@@ -47,7 +47,7 @@ protected void apply() {
 	StateMod_RiverNetworkNode rnn = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		rnn = (StateMod_RiverNetworkNode)_data.elementAt(i);
+		rnn = (StateMod_RiverNetworkNode)_data.get(i);
 		rnn.createBackup();
 	}
 }
@@ -76,7 +76,7 @@ protected void cancel() {
 	StateMod_RiverNetworkNode rnn = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		rnn = (StateMod_RiverNetworkNode)_data.elementAt(i);
+		rnn = (StateMod_RiverNetworkNode)_data.get(i);
 		rnn.restoreOriginal();
 	}
 }
@@ -89,7 +89,7 @@ protected void createDataBackup() {
 	StateMod_RiverNetworkNode rnn = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		rnn = (StateMod_RiverNetworkNode)_data.elementAt(i);
+		rnn = (StateMod_RiverNetworkNode)_data.get(i);
 		rnn.createBackup();
 	}
 }

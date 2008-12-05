@@ -59,6 +59,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -222,8 +223,8 @@ private boolean saveData() {
 	boolean needToSave = false;
 
 	// if the Vectors are differently-sized, they're different
-	Vector wv = __worksheet.getAllData();		// w for worksheet
-	Vector lv = __currentWell.getDepletions();	// l for welL
+	List wv = __worksheet.getAllData();		// w for worksheet
+	List lv = __currentWell.getDepletions();	// l for welL
 
 	needToSave = !(StateMod_ReturnFlow.equals(wv, lv));
 
@@ -238,12 +239,12 @@ private boolean saveData() {
 	// clone the objects from the worksheet vector and assign them
 	// to the diversion object as its new return flows.
 	int size = wv.size();
-	Vector clone = new Vector();
+	List clone = new Vector();
 	StateMod_ReturnFlow rf;
 	StateMod_ReturnFlow crf;
 	for (int i = 0; i < size; i++) {
 		rf = (StateMod_ReturnFlow)
-			((StateMod_ReturnFlow)(wv.elementAt(i))).clone();
+			((StateMod_ReturnFlow)(wv.get(i))).clone();
 		crf = (StateMod_ReturnFlow)rf.clone();
 		crf.setCrtnid(StringUtil.getToken(rf.getCrtnid(), " ",
 			StringUtil.DELIM_SKIP_BLANKS, 0));
@@ -264,7 +265,7 @@ exist.
 */
 private int checkInput() {
 	String routine = "StateMod_Well_ReturnFlow_JFrame.checkInput";
-	Vector v = __worksheet.getAllData();
+	List v = __worksheet.getAllData();
 
 	int size = v.size();
 	StateMod_ReturnFlow rf = null;
@@ -272,7 +273,7 @@ private int checkInput() {
 	String riverNode;
 	int fatalCount = 0;
 	for (int i = 0; i < size; i++) {
-		rf = (StateMod_ReturnFlow)(v.elementAt(i));
+		rf = (StateMod_ReturnFlow)(v.get(i));
 		riverNode = rf.getCrtnid();
 		riverNode = StringUtil.getToken(riverNode, " ", 
 			StringUtil.DELIM_SKIP_BLANKS, 0);
@@ -453,14 +454,14 @@ public void setupGUI() {
 	int widths[] = null;
 	JScrollWorksheet jsw = null;
 	try {	
-		Vector nodes = (Vector)(__dataset.getComponentForComponentType(
+		List nodes = (List)(__dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_RIVER_NETWORK).getData());	
-		Vector v = new Vector();
-		Vector v2 = __currentWell.getDepletions();
+		List v = new Vector();
+		List v2 = __currentWell.getDepletions();
 		StateMod_ReturnFlow rf;
 		for (int i = 0; i < v2.size(); i++) {
 			rf = (StateMod_ReturnFlow)
-				((StateMod_ReturnFlow)v2.elementAt(i)).clone();
+				((StateMod_ReturnFlow)v2.get(i)).clone();
 			rf.setCrtnid(rf.getCrtnid()
 				+ StateMod_Util.findNameInVector(rf.getCrtnid(),
 				nodes, true));
@@ -480,14 +481,14 @@ public void setupGUI() {
 		__worksheet.setColumnJComboBoxValues(
 		StateMod_ReturnFlow_TableModel.COL_RIVER_NODE, v, false);
 
-		Vector delayIDs = null;
+		List delayIDs = null;
 		if (__dataset.getIday() == 1) {
-			delayIDs = (Vector)(__dataset
+			delayIDs = (List)(__dataset
 				.getComponentForComponentType(
 				StateMod_DataSet.COMP_DELAY_TABLES_DAILY).getData());
 		}
 		else {
-			delayIDs = (Vector)(__dataset
+			delayIDs = (List)(__dataset
 				.getComponentForComponentType(
 				StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY).getData());
 		}

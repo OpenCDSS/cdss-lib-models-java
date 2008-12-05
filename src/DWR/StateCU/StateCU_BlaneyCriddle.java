@@ -48,6 +48,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.IO.IOUtil;
@@ -314,8 +315,7 @@ private static boolean isVersion_10( String filename ) throws IOException
 		// Version 10 has 3 columns in the third row
 		// the newest version has 4 columns
 		if( count == 2) {
-			Vector tmp = StringUtil.breakStringList(line, " \t", 
-				StringUtil.DELIM_SKIP_BLANKS);
+			List tmp = StringUtil.breakStringList(line, " \t", StringUtil.DELIM_SKIP_BLANKS);
 			if(tmp.size() == 3) {
 				rVal = true;
 			}
@@ -332,12 +332,12 @@ private static boolean isVersion_10( String filename ) throws IOException
 Read the StateCU KBC file and return as a Vector of StateCU_BlaneyCriddle.
 @param filename filename containing KBC records.
 */
-public static Vector readStateCUFile ( String filename )
+public static List readStateCUFile ( String filename )
 throws IOException
 {	String rtn = "StateCU_BlaneyCriddle.readKBCFile";
 	String iline = null;
 	StateCU_BlaneyCriddle kbc = null;
-	Vector kbc_Vector = new Vector(25);
+	List kbc_Vector = new Vector(25);
 	BufferedReader in = null;
 	boolean version10 = isVersion_10( filename );	// Is version 10 (old)
 							// format?
@@ -373,7 +373,7 @@ throws IOException
 	int [] nckcp = null;
 	double [] ckc = null;
 	String ktsw = null;
-	Vector tokens;
+	List tokens;
 	int j = 0;
 	for ( int i = 0; i < nc; i++ ) {
 		nckca = null;	// use to check whether annual or perennial
@@ -382,18 +382,17 @@ throws IOException
 
 		iline = in.readLine();
 
-		tokens = StringUtil.breakStringList ( iline.trim(), " \t",
-				StringUtil.DELIM_SKIP_BLANKS );
+		tokens = StringUtil.breakStringList ( iline.trim(), " \t", StringUtil.DELIM_SKIP_BLANKS );
 		// TODO SAM 2007-02-18 Evaluate if needed
 		//id = (String)tokens.elementAt(0);
-		cropn = (String)tokens.elementAt(1);
-		flag = (String)tokens.elementAt(2);
+		cropn = (String)tokens.get(1);
+		flag = (String)tokens.get(2);
 		
 		if ( version10 ) {
 			ktsw = "";
 		}
 		else {
-			ktsw = (String)tokens.elementAt(3);
+			ktsw = (String)tokens.get(3);
 		}
 		// Allocate new StateCU_BlaneyCriddle instance...
 
@@ -426,21 +425,17 @@ throws IOException
 				" \t", StringUtil.DELIM_SKIP_BLANKS );
 			if ( nckca == null ) {
 				// Processing perennial crop...
-				nckcp[j] = StringUtil.atoi(
-						(String)tokens.elementAt(0) );
-				ckc[j] = StringUtil.atod(
-						(String)tokens.elementAt(1) );
+				nckcp[j] = StringUtil.atoi((String)tokens.get(0) );
+				ckc[j] = StringUtil.atod((String)tokens.get(1) );
 			}
 			else {	// Processing annual crop...
-				nckca[j] = StringUtil.atoi(
-						(String)tokens.elementAt(0) );
-				ckc[j] = StringUtil.atod(
-						(String)tokens.elementAt(1) );
+				nckca[j] = StringUtil.atoi((String)tokens.get(0) );
+				ckc[j] = StringUtil.atod((String)tokens.get(1) );
 			}
 		}
 
 		// add the StateCU_BlaneyCriddle to the vector...
-		kbc_Vector.addElement ( kbc );
+		kbc_Vector.add ( kbc );
 	}
 	if ( in != null ) {
 		in.close();
@@ -550,11 +545,10 @@ if no comments are available.
 @exception IOException if there is an error writing the file.
 */
 public static void writeStateCUFile (	String filename_prev, String filename,
-					Vector data_Vector,
+					List data_Vector,
 					String [] new_comments )
 throws IOException
-{	writeStateCUFile ( filename_prev, filename, data_Vector,
-				new_comments, null );
+{	writeStateCUFile ( filename_prev, filename, data_Vector, new_comments, null );
 }
 
 /**
@@ -572,7 +566,7 @@ decimal should be printed (default is 3).
 @exception IOException if there is an error writing the file.
 */
 public static void writeStateCUFile (	String filename_prev, String filename,
-					Vector data_Vector,
+					List data_Vector,
 					String [] new_comments,
 					PropList props )
 throws IOException
@@ -603,8 +597,7 @@ optional Precision property can be set, indicating how many digits after the
 decimal should be printed (default is 3).
 @exception IOException if an error occurs.
 */
-private static void writeVector ( Vector data_Vector, PrintWriter out,
-					PropList props )
+private static void writeVector ( List data_Vector, PrintWriter out, PropList props )
 throws IOException
 {	int i,j;
 	String cmnt = "#>";
@@ -715,7 +708,7 @@ throws IOException
 	int size = 0;
 	String value_format = "%9." + Precision_int + "f";
 	for ( i=0; i<num; i++ ) {
-		kbc = (StateCU_BlaneyCriddle)data_Vector.elementAt(i);
+		kbc = (StateCU_BlaneyCriddle)data_Vector.get(i);
 		if ( kbc == null ) {
 			continue;
 		}
@@ -786,15 +779,14 @@ header (true) or to create a new file with a new header.
 @param data the Vector of objects to write.  
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter,
-boolean update, Vector data) 
+public static void writeListFile(String filename, String delimiter, boolean update, List data) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
 		size = data.size();
 	}
 	
-	Vector fields = new Vector();
+	List fields = new Vector();
 	fields.add("Name");
 	fields.add("DayPercent");
 	fields.add("Coefficient");
@@ -805,7 +797,7 @@ throws Exception {
 	int comp = StateCU_DataSet.COMP_BLANEY_CRIDDLE;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.elementAt(i);
+		s = (String)fields.get(i);
 		names[i] = StateCU_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateCU_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -842,7 +834,7 @@ throws Exception {
 		out.println(buffer.toString());
 		
 		for (int i = 0; i < size; i++) {
-			bc = (StateCU_BlaneyCriddle)data.elementAt(i);
+			bc = (StateCU_BlaneyCriddle)data.get(i);
 
 			flag = bc.getFlag();
 

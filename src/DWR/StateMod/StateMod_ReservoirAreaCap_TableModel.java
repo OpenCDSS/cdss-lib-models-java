@@ -55,7 +55,7 @@
 
 package DWR.StateMod;
 
-import java.util.Vector;
+import java.util.List;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 
@@ -98,15 +98,14 @@ private boolean __singleReservoir = true;
 
 /**
 Constructor.  
-@param data the reservoir area/cap/seepage data that will be displayed in the
-table.
+@param data the reservoir area/cap/seepage data that will be displayed in the table.
 @param editable whether the table data can be modified.
 @param singleReservoir if true, then the table model is set up to only display
 a single reservoir's right data.  This means that the reservoir ID field will
 not be shown.  If false then the reservoir right field will be included.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_ReservoirAreaCap_TableModel(Vector data, boolean editable,
+public StateMod_ReservoirAreaCap_TableModel(List data, boolean editable,
 boolean singleReservoir)
 throws Exception {
 	if (data == null) {
@@ -254,8 +253,7 @@ public Object getValueAt(int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	StateMod_ReservoirAreaCap ra 
-		= (StateMod_ReservoirAreaCap)_data.elementAt(row);
+	StateMod_ReservoirAreaCap ra = (StateMod_ReservoirAreaCap)_data.get(row);
 
 	// necessary for worksheets that display area capacities for 1+ 
 	// reservoirs, so that the -1st column (ID) can also be displayed.  By
@@ -333,8 +331,7 @@ public void setValueAt(Object value, int row, int col) {
 		row = _sortOrder[row];
 	}
 	double dval;
-	StateMod_ReservoirAreaCap ra 
-		= (StateMod_ReservoirAreaCap)_data.elementAt(row);
+	StateMod_ReservoirAreaCap ra = (StateMod_ReservoirAreaCap)_data.get(row);
 
 	// necessary for worksheets that display area capacities for 1+ 
 	// reservoirs, so that the -1st column (ID) can also be displayed.  By

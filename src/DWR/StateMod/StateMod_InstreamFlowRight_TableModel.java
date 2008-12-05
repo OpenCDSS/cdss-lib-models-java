@@ -32,7 +32,7 @@
 
 package DWR.StateMod;
 
-import java.util.Vector;
+import java.util.List;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 
@@ -78,8 +78,7 @@ Constructor.
 shown in the table (true) or if multiple instream flows' rights are being shown.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_InstreamFlowRight_TableModel(Vector data, boolean editable,
-boolean singleInstreamFlow)
+public StateMod_InstreamFlowRight_TableModel(List data, boolean editable, boolean singleInstreamFlow)
 throws Exception {
 	if (data == null) {
 		throw new Exception ("Invalid data Vector passed to " 
@@ -95,7 +94,6 @@ throws Exception {
 		__COLUMNS++;
 	}
 }
-
 
 /**
 Returns the class of the data stored in a given column.
@@ -182,8 +180,7 @@ public int getRowCount() {
 }
 
 /**
-Returns the data that should be placed in the JTable at the given row 
-and column.
+Returns the data that should be placed in the JTable at the given row and column.
 @param row the row for which to return data.
 @param col the column for which to return data.
 @return the data that should be placed in the JTable at the given row and col.
@@ -197,8 +194,7 @@ public Object getValueAt(int row, int col) {
 		col--;
 	}
 
-	StateMod_InstreamFlowRight infr = 
-		       (StateMod_InstreamFlowRight)_data.elementAt(row);
+	StateMod_InstreamFlowRight infr = (StateMod_InstreamFlowRight)_data.get(row);
 	switch (col) {
 		case COL_ISF_ID:	return infr.getCgoto();
 		case COL_RIGHT_ID:	return infr.getID();
@@ -270,8 +266,7 @@ public void setValueAt(Object value, int row, int col)
 	}
 	double dval;
 	int ival;
-	StateMod_InstreamFlowRight ifr =
-		(StateMod_InstreamFlowRight)_data.elementAt(row);
+	StateMod_InstreamFlowRight ifr = (StateMod_InstreamFlowRight)_data.get(row);
 
 	if (!__singleInstreamFlow) {
 		col--;

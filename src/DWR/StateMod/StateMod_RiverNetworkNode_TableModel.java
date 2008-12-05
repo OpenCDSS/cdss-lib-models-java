@@ -14,7 +14,7 @@
 
 package DWR.StateMod;
 
-import java.util.Vector;
+import java.util.List;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 
@@ -42,7 +42,7 @@ Constructor.
 @param data the data that will be displayed in the table.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_RiverNetworkNode_TableModel(Vector data)
+public StateMod_RiverNetworkNode_TableModel(List data)
 throws Exception {
 	if (data == null) {
 		throw new Exception ("Invalid data Vector passed to " 
@@ -113,8 +113,7 @@ public int getRowCount() {
 }
 
 /**
-Returns the data that should be placed in the JTable
-at the given row and column.
+Returns the data that should be placed in the JTable at the given row and column.
 @param row the row for which to return data.
 @param col the column for which to return data.
 @return the data that should be placed in the JTable at the given row and col.
@@ -124,8 +123,7 @@ public Object getValueAt(int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	StateMod_RiverNetworkNode r = (StateMod_RiverNetworkNode)
-		_data.elementAt(row);
+	StateMod_RiverNetworkNode r = (StateMod_RiverNetworkNode)_data.get(row);
 
 	switch (col) {
 		case COL_ID:	return r.getID();

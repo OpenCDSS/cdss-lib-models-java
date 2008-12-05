@@ -81,6 +81,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -230,12 +231,12 @@ private StateMod_StreamEstimate_Coefficients_TableModel __tableModelR;
 /**
 The stream estimate stations data.
 */
-private Vector __stationsVector;
+private List __stationsVector;
 
 /**
 The coefficients data.
 */
-private Vector __coefficientsVector;
+private List __coefficientsVector;
 
 /**
 Constructor.
@@ -254,21 +255,21 @@ public StateMod_StreamEstimate_JFrame (	StateMod_DataSet dataset,
 	__dataset = dataset;
 	__dataset_wm = dataset_wm;
 	__stationsComp = __dataset.getComponentForComponentType( StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS);
-	__stationsVector = (Vector)__stationsComp.getData();
+	__stationsVector = (List)__stationsComp.getData();
 	int size = __stationsVector.size();
 	StateMod_StreamEstimate s = null;
 	for (int i = 0; i < size; i++) {
-		s = (StateMod_StreamEstimate)__stationsVector.elementAt(i);
+		s = (StateMod_StreamEstimate)__stationsVector.get(i);
 		s.createBackup();
 	}
 
 	__coefficientsComp = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS);
-	__coefficientsVector = (Vector)__coefficientsComp.getData();	
+	__coefficientsVector = (List)__coefficientsComp.getData();	
 	size = __coefficientsVector.size();
 	StateMod_StreamEstimate_Coefficients c = null;
 	for (int i = 0; i < size; i++) {
-		c = (StateMod_StreamEstimate_Coefficients)__coefficientsVector.elementAt(i);
+		c = (StateMod_StreamEstimate_Coefficients)__coefficientsVector.get(i);
 		c.createBackup();
 	}
 		
@@ -298,21 +299,21 @@ public StateMod_StreamEstimate_JFrame (	StateMod_DataSet dataset,
 	__dataset_wm = dataset_wm;
 	__stationsComp = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS);
-	__stationsVector = (Vector)__stationsComp.getData();
+	__stationsVector = (List)__stationsComp.getData();
 	int size = __stationsVector.size();
 	StateMod_StreamEstimate s = null;
 	for (int i = 0; i < size; i++) {
-		s = (StateMod_StreamEstimate)__stationsVector.elementAt(i);
+		s = (StateMod_StreamEstimate)__stationsVector.get(i);
 		s.createBackup();
 	}
 
 	__coefficientsComp = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS);
-	__coefficientsVector = (Vector)__coefficientsComp.getData();
+	__coefficientsVector = (List)__coefficientsComp.getData();
 	size = __coefficientsVector.size();
 	StateMod_StreamEstimate_Coefficients c = null;
 	for (int i = 0; i < size; i++) {
-		c = (StateMod_StreamEstimate_Coefficients)__coefficientsVector.elementAt(i);
+		c = (StateMod_StreamEstimate_Coefficients)__coefficientsVector.get(i);
 		c.createBackup();
 	}
 
@@ -346,7 +347,7 @@ public void actionPerformed(ActionEvent e) {
 		StateMod_StreamEstimate s = null;
 		boolean changed = false;
 		for (int i = 0; i < size; i++) {
-			s = (StateMod_StreamEstimate)__stationsVector.elementAt(i);
+			s = (StateMod_StreamEstimate)__stationsVector.get(i);
 			if (!changed && s.changed()) {
 				changed = true;
 			}
@@ -359,7 +360,7 @@ public void actionPerformed(ActionEvent e) {
 		StateMod_StreamEstimate_Coefficients c = null;
 		changed = false;
 		for (int i = 0; i < size; i++) {
-			c = (StateMod_StreamEstimate_Coefficients)__coefficientsVector.elementAt(i);
+			c = (StateMod_StreamEstimate_Coefficients)__coefficientsVector.get(i);
 			if (!changed && c.changed()) {
 				changed = true;
 			}
@@ -373,13 +374,13 @@ public void actionPerformed(ActionEvent e) {
 		int size = __stationsVector.size();
 		StateMod_StreamEstimate s = null;
 		for (int i = 0; i < size; i++) {
-			s = (StateMod_StreamEstimate)__stationsVector.elementAt(i);
+			s = (StateMod_StreamEstimate)__stationsVector.get(i);
 			s.restoreOriginal();
 		}		
 		size = __coefficientsVector.size();
 		StateMod_StreamEstimate_Coefficients c = null;
 		for (int i = 0; i < size; i++) {
-			c = (StateMod_StreamEstimate_Coefficients)__coefficientsVector.elementAt(i);
+			c = (StateMod_StreamEstimate_Coefficients)__coefficientsVector.get(i);
 			c.restoreOriginal();
 		}		
 		if ( __dataset_wm != null ) {
@@ -395,7 +396,7 @@ public void actionPerformed(ActionEvent e) {
 		StateMod_StreamEstimate s = null;
 		boolean changed = false;
 		for (int i = 0; i < size; i++) {
-			s = (StateMod_StreamEstimate)__stationsVector.elementAt(i);
+			s = (StateMod_StreamEstimate)__stationsVector.get(i);
 			if (!changed && s.changed()) {
 				changed = true;
 			}
@@ -408,7 +409,7 @@ public void actionPerformed(ActionEvent e) {
 		StateMod_StreamEstimate_Coefficients c = null;
 		changed = false;
 		for (int i = 0; i < size; i++) {
-			c = (StateMod_StreamEstimate_Coefficients)__coefficientsVector.elementAt(i);
+			c = (StateMod_StreamEstimate_Coefficients)__coefficientsVector.get(i);
 			if (!changed && c.changed()) {
 				changed = true;
 			}
@@ -445,7 +446,7 @@ data object.
 @return true if the text fields are okay, false if not.
 */
 private boolean checkInput() {
-	Vector errors = new Vector();
+	List errors = new Vector();
 	int errorCount = 0;
 
 	// for each field, check if it contains valid input.  If not,
@@ -463,7 +464,7 @@ private boolean checkInput() {
 	}
 	String label = "The following error" + plural + "encountered trying to save the record:\n";
 	for (int i = 0; i < errorCount; i++) {
-		label += errors.elementAt(i) + "\n";
+		label += errors.get(i) + "\n";
 	}
 	new ResponseJDialog(this, "Errors encountered", label, ResponseJDialog.OK);
 	return false;
@@ -510,7 +511,7 @@ private void displayTSViewJFrame(Object o)
 		display_props.set("InitialView", "Summary");
 	}
 
-	StateMod_StreamEstimate sta = (StateMod_StreamEstimate)__stationsVector.elementAt(__currentStationIndex);
+	StateMod_StreamEstimate sta = (StateMod_StreamEstimate)__stationsVector.get(__currentStationIndex);
 
 	// display_props.set("HelpKey", "TSTool.ExportMenu");
 	display_props.set("TSViewTitleString", StateMod_Util.createDataLabel(sta,true) + " Time Series");
@@ -524,7 +525,7 @@ private void displayTSViewJFrame(Object o)
 	props.set("Product.TotalWidth", "600");
 	props.set("Product.TotalHeight", "400");
 
-	Vector tslist = new Vector();
+	List tslist = new Vector();
 
 	int sub = 0;
 	int its = 0;
@@ -610,7 +611,7 @@ private StateMod_StreamEstimate_Coefficients findCoefficients(String id) {
 	StateMod_StreamEstimate_Coefficients coef = null;
 	int pos = StateMod_Util.indexOf ( __coefficientsVector, id );
 	if ( pos >= 0 ) {;
-		coef = (StateMod_StreamEstimate_Coefficients)__coefficientsVector.elementAt(pos);
+		coef = (StateMod_StreamEstimate_Coefficients)__coefficientsVector.get(pos);
 	}
 	return coef;
 }
@@ -717,7 +718,7 @@ private void processLTableSelection(int index) {
 	}
 
 	StateMod_StreamEstimate sta = (StateMod_StreamEstimate)
-		__stationsVector.elementAt(__currentStationIndex);
+		__stationsVector.get(__currentStationIndex);
 
 	JGUIUtil.enableComponents(__disables, __textUneditables, __editable);
 	checkTimeSeriesButtonsStates();
@@ -790,7 +791,7 @@ private void saveInformation(int record) {
 		return;
 	}
 
-	StateMod_StreamEstimate sta = (StateMod_StreamEstimate)__stationsVector.elementAt(record);
+	StateMod_StreamEstimate sta = (StateMod_StreamEstimate)__stationsVector.get(record);
 
 	sta.setName(__nameJTextField.getText());	
 	sta.setID(__idJTextField.getText());	
@@ -991,7 +992,7 @@ private void setupGUI(int index) {
 	int[] widthsR = null;
 	JScrollWorksheet jswR = null;
 	try {
-		Vector v = new Vector();
+		List v = new Vector();
 		/*
 		for (int i = 0; i < StateMod_RiverBaseFlow.MAX_BASEFLOWS;
 			i++) {
@@ -1199,7 +1200,7 @@ public void windowClosing(WindowEvent e) {
 	StateMod_StreamEstimate s = null;
 	boolean changed = false;
 	for (int i = 0; i < size; i++) {
-		s = (StateMod_StreamEstimate)__stationsVector.elementAt(i);
+		s = (StateMod_StreamEstimate)__stationsVector.get(i);
 		if (!changed && s.changed()) {
 			changed = true;
 		}
@@ -1213,7 +1214,7 @@ public void windowClosing(WindowEvent e) {
 	StateMod_StreamEstimate_Coefficients c = null;
 	changed = false;
 	for (int i = 0; i < size; i++) {
-		c = (StateMod_StreamEstimate_Coefficients)__coefficientsVector.elementAt(i);
+		c = (StateMod_StreamEstimate_Coefficients)__coefficientsVector.get(i);
 		if (!changed && c.changed()) {	
 			changed = true;
 		}

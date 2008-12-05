@@ -61,6 +61,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -218,7 +219,7 @@ Check the GUI state.  In particular, indicate whether the graph buttons should
 be enabled.
 */
 private void checkGUIState ()
-{	Vector rv = __currentRes.getAreaCaps();	
+{	List rv = __currentRes.getAreaCaps();	
 	if ( (rv != null) && (rv.size() > 0) ) {
 		boolean area_ok = true, seepage_ok = true;
 		// Check for data all one value...
@@ -233,7 +234,7 @@ private void checkGUIState ()
 		double area0 = 0.0, seepage0 = 0.0;
 		boolean area_all_same = true, seepage_all_same = true;
 		for ( int i = 0; i < size; i++ ) {
-			ac = (StateMod_ReservoirAreaCap)rv.elementAt(i);
+			ac = (StateMod_ReservoirAreaCap)rv.get(i);
 			value = ac.getSurarea();
 			/*
 			if ( value == value_prev ) {
@@ -250,7 +251,7 @@ private void checkGUIState ()
 			}
 		}
 		for ( int i = 0; i < size; i++ ) {
-			ac = (StateMod_ReservoirAreaCap)rv.elementAt(i);
+			ac = (StateMod_ReservoirAreaCap)rv.get(i);
 			value = ac.getSeepage();
 			/*
 			if ( value == value_prev ) {
@@ -320,8 +321,8 @@ private boolean saveData() {
 	boolean needToSave = false;
 
 	// if the Vectors are differently-sized, they're different
-	Vector wv = __worksheet.getAllData();		// w for worksheet
-	Vector rv = __currentRes.getAreaCaps();	
+	List wv = __worksheet.getAllData();		// w for worksheet
+	List rv = __currentRes.getAreaCaps();	
 
 	needToSave = !(StateMod_ReservoirAreaCap.equals(wv, rv));
 
@@ -336,10 +337,10 @@ private boolean saveData() {
 	// now add the elements from the new Vector to the reservoirRights 
 	// Vector.
 	int size = wv.size();
-	Vector clone = new Vector();
+	List clone = new Vector();
 	for (int i = 0; i < size; i++) {
 		clone.add(((StateMod_ReservoirAreaCap)
-			(wv.elementAt(i))).clone());
+			(wv.get(i))).clone());
 	}
 
 	__currentRes.setAreaCaps(clone);
@@ -521,11 +522,11 @@ private void setupGUI() {
 	int widths[] = null;
 	JScrollWorksheet jsw = null;
 	try {	
-		Vector v = new Vector();
-		Vector v2 = __currentRes.getAreaCaps();
+		List v = new Vector();
+		List v2 = __currentRes.getAreaCaps();
 		for (int i = 0; i < v2.size(); i++) {
 			v.add(((StateMod_ReservoirAreaCap)
-				(v2.elementAt(i))).clone());
+				(v2.get(i))).clone());
 		}				
 		StateMod_ReservoirAreaCap_TableModel tmr = new
 			StateMod_ReservoirAreaCap_TableModel(

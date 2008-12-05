@@ -13,6 +13,7 @@
 
 package DWR.StateMod;
 
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
@@ -48,7 +49,7 @@ Constructor.
 @param data the data that will be displayed in the table.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_StreamGage_Data_TableModel(Vector data)
+public StateMod_StreamGage_Data_TableModel(List data)
 throws Exception {
 	this(data, true);
 }
@@ -57,7 +58,7 @@ throws Exception {
 Constructor.  
 @param data the data that will be displayed in the table.
 */
-public StateMod_StreamGage_Data_TableModel(Vector data, boolean editable) {
+public StateMod_StreamGage_Data_TableModel(List data, boolean editable) {
 	if (data == null) {
 		_data = new Vector();
 	}
@@ -178,7 +179,7 @@ public Object getValueAt(int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	StateMod_StreamGage sg = (StateMod_StreamGage)_data.elementAt(row);
+	StateMod_StreamGage sg = (StateMod_StreamGage)_data.get(row);
 
 	switch (col) {
 		case COL_ID:		return sg.getID();
@@ -215,7 +216,7 @@ public void setValueAt(Object value, int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	StateMod_StreamGage sg = (StateMod_StreamGage)_data.elementAt(row);
+	StateMod_StreamGage sg = (StateMod_StreamGage)_data.get(row);
 
 	switch (col) {
 		case COL_ID:	

@@ -32,6 +32,7 @@
 
 package DWR.StateMod;
 
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.GUI.JWorksheet;
@@ -83,9 +84,9 @@ throws Exception {
 	// the data set.
 	int[] groups = __dataset.getComponentGroupNumbers();
 
-	Vector ints = new Vector();
+	List ints = new Vector();
 	DataSetComponent dsc = null;
-	Vector v = null;
+	List v = null;
 
 	// Go through each of the groups and get their data out.  Group data
 	// consists of the DataSetComponents the group contains.  For each
@@ -93,12 +94,12 @@ throws Exception {
 	// component type to the accumulation vector.
 	for (int i = 0; i < groups.length; i++) {
 		dsc = __dataset.getComponentForComponentType(groups[i]);
-		v = (Vector)dsc.getData();
+		v = (List)dsc.getData();
 		if (v == null) {
 			v = new Vector();
 		}
 		for (int j = 0; j < v.size(); j++) {
-			dsc = (DataSetComponent)v.elementAt(j);
+			dsc = (DataSetComponent)v.get(j);
 			// the following makes sure that the response file 
 			// is not added here ... the response file is added
 			// below because it must always be in the GUI.
@@ -114,7 +115,7 @@ throws Exception {
 	__data = new int[ints.size() + 1];
 	__data[0] = StateMod_DataSet.COMP_RESPONSE;
 	for (int i = 0; i < ints.size(); i++) {
-		__data[i + 1] = ((Integer)ints.elementAt(i)).intValue();
+		__data[i + 1] = ((Integer)ints.get(i)).intValue();
 	}
 	
 	_rows = __data.length;

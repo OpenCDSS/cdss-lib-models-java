@@ -16,6 +16,7 @@
 
 package DWR.StateMod;
 
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.GUI.JWorksheet;
@@ -58,12 +59,12 @@ A Vector that maps rows in the display when totals are NOT being shown to rows
 in the overall data Vectors.  Used to make switching between displays with and
 without totals relatively efficient.  See getValueAt() and setupData().
 */
-private Vector __rowMap = null;
+private List __rowMap = null;
 
 /**
 The Vectors of data that will actually be shown in the table.
 */
-private Vector[] __data = null;
+private List[] __data = null;
 
 /**
 References to columns.
@@ -79,12 +80,10 @@ Constructor.
 @param monthlyData If true the data are for monthly delay tables.  If false,
 the delay tables are daily.
 @param editable whether the table data is editable or not
-@param returnIsPercent whether the return amounts are in percents (true) or
-fractions (false).
+@param returnIsPercent whether the return amounts are in percents (true) or fractions (false).
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_DelayTable_Data_TableModel (Vector data, boolean monthlyData,
-boolean editable)
+public StateMod_DelayTable_Data_TableModel (List data, boolean monthlyData, boolean editable)
 throws Exception {
 	if (data == null) {
 		throw new Exception ("Invalid data Vector passed to " 
@@ -124,9 +123,8 @@ Returns the name of the column at the given position.
 */
 public String getColumnName(int columnIndex) {
 	switch (columnIndex) {
-		// REVISIT (SAM - 2005-01-20)
-		// how is this class being used with Well Depletion displays
-		// in the StateMod GUI?  We might needa  flag for the header.
+		// TODO (SAM - 2005-01-20) how is this class being used with Well Depletion displays
+		// in the StateMod GUI?  We might need a flag for the header.
 		case COL_ID:		
 			return "DELAY\nTABLE ID";
 		case COL_DATE:	
@@ -164,8 +162,7 @@ public int[] getColumnWidths() {
 Returns the format that the specified column should be displayed in when
 the table is being displayed in the given table format. 
 @param column column for which to return the format.
-@return the format (as used by StringUtil.formatString() in which to display the
-column.
+@return the format (as used by StringUtil.formatString() in which to display the column.
 */
 public String getFormat(int column) {
 	switch (column) {
@@ -198,8 +195,7 @@ public Validator[] getValidators( int col )
 }
 
 /**
-Returns the data that should be placed in the JTable at the given row 
-and column.
+Returns the data that should be placed in the JTable at the given row and column.
 @param row the row for which to return data.
 @param col the column for which to return data.
 @return the data that should be placed in the JTable at the given row and col.
@@ -210,9 +206,9 @@ public Object getValueAt(int row, int col) {
 	}
 
 	if (!__showTotals) {
-		row = ((Integer)__rowMap.elementAt(row)).intValue();
+		row = ((Integer)__rowMap.get(row)).intValue();
 	}
-	return __data[col].elementAt(row);		
+	return __data[col].get(row);		
 }
 
 /**
@@ -237,12 +233,12 @@ Sets up the data to be displayed in the table.
 @param data a Vector of StateMod_DelayTable objects from which the data to b
 be displayed in the table will be gathered.
 */
-private void setupData(Vector data) {
+private void setupData(List data) {
 	int num = 0;
 	int size = data.size();
 	StateMod_DelayTable dt = null;
 	String id = null;
-	__data = new Vector[__COLUMNS];
+	__data = new List[__COLUMNS];
 	for (int i = 0; i < __COLUMNS; i++) {
 		__data[i] = new Vector();
 	}
@@ -253,14 +249,13 @@ private void setupData(Vector data) {
 	int rowCount = 0;
 	for (int i = 0; i < size; i++) {
 		total = 0;
-		dt = (StateMod_DelayTable)data.elementAt(i);
+		dt = (StateMod_DelayTable)data.get(i);
 		id = dt.getID();
 		num = dt.getNdly();
 		for (int j = 0; j < num; j++) {
 			__data[COL_ID].add(id);
 			__data[COL_DATE].add(new Integer(j + 1));
-			__data[COL_RETURN_AMT].add(
-				new Double(dt.getRet_val(j)));
+			__data[COL_RETURN_AMT].add( new Double(dt.getRet_val(j)));
 			total += dt.getRet_val(j);
 			__rowMap.add(new Integer(rowCount));
 			rowCount++;
@@ -300,8 +295,7 @@ public void setValueAt(Object value, int row, int col) {
 
 /**
 Sets whether to show lines with totals.  setJWorksheet() must have been called
-with a non-null worksheet prior to this method.  The worksheet will be updated
-instantly.
+with a non-null worksheet prior to this method.  The worksheet will be updated instantly.
 @param showTotals whether to show lines with totals in the worksheet.
 */
 public void setShowTotals(boolean showTotals) {

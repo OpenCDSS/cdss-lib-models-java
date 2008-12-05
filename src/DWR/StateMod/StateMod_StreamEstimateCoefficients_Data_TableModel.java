@@ -14,6 +14,7 @@
 
 package DWR.StateMod;
 
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
@@ -49,15 +50,14 @@ private boolean __editable = true;
 /**
 The data displayed in the table (calculated by setupData()).
 */
-private Vector[] __data = null;
+private List[] __data = null;
 
 /**
 Constructor.  
 @param data the data that will be displayed in the table.
 @param editable whether the data are editable or not.
 */
-public StateMod_StreamEstimateCoefficients_Data_TableModel(Vector data,
-boolean editable) {
+public StateMod_StreamEstimateCoefficients_Data_TableModel(List data, boolean editable) {
 	if (data == null) {
 		_data = new Vector();
 	}
@@ -168,9 +168,7 @@ Returns general validators based on column of data being checked.
 public Validator[] getValidators( int col ) {
 	Validator[] no_checks = new Validator[] {};
 	
-	// TODO KAT 2007-04-16
-	// need to find out which general validators are
-	// needed here ...
+	// TODO KAT 2007-04-16 need to find out which general validators are needed here ...
 	
 	return no_checks;
 }
@@ -187,7 +185,7 @@ public Object getValueAt(int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	return __data[col].elementAt(row);
+	return __data[col].get(row);
 }
 
 /**
@@ -231,11 +229,11 @@ Sets up the data to be displayed in the table.
 @param data a Vector of StateMod_StreamEstimate_Coefficients objects from 
 which the data to be be displayed in the table will be gathered.
 */
-private void setupData(Vector data) {
+private void setupData(List data) {
 	int num = 0;
 	int size = data.size();
 	StateMod_StreamEstimate_Coefficients coeff = null;
-	__data = new Vector[__COLUMNS];
+	__data = new List[__COLUMNS];
 	for (int i = 0; i < __COLUMNS; i++) {
 		__data[i] = new Vector();
 	}
@@ -245,7 +243,7 @@ private void setupData(Vector data) {
 	int M = 0;
 	int N = 0;
 	for (int i = 0; i < size; i++) {
-		coeff = (StateMod_StreamEstimate_Coefficients)data.elementAt(i);
+		coeff = (StateMod_StreamEstimate_Coefficients)data.get(i);
 		id = coeff.getID();
 		M = coeff.getM();
 		N = coeff.getN();
@@ -254,10 +252,8 @@ private void setupData(Vector data) {
 			__data[COL_ID].add(id);
 	
 			if (j < N) {
-				__data[COL_STREAM_NAME].add(new Double(
-					coeff.getCoefn(j)));
-				__data[COL_UPSTREAM_GAGE].add(coeff.getUpper(
-					j));
+				__data[COL_STREAM_NAME].add(new Double(coeff.getCoefn(j)));
+				__data[COL_UPSTREAM_GAGE].add(coeff.getUpper(j));
 			}
 			else {
 				__data[COL_STREAM_NAME].add(new Double(-999));
@@ -265,12 +261,9 @@ private void setupData(Vector data) {
 			}
 
 			if (j < M) {
-				__data[COL_GAIN_TERM_PRO].add(new Double(
-					coeff.getProratnf()));
-				__data[COL_GAIN_TERM_WT].add(new Double(
-					coeff.getCoefm(j)));
-				__data[COL_GAIN_TERM_GAGE_ID].add(
-					coeff.getFlowm(j));
+				__data[COL_GAIN_TERM_PRO].add(new Double(coeff.getProratnf()));
+				__data[COL_GAIN_TERM_WT].add(new Double(coeff.getCoefm(j)));
+				__data[COL_GAIN_TERM_GAGE_ID].add(coeff.getFlowm(j));
 			}
 			else {
 				__data[COL_GAIN_TERM_PRO].add(new Double(-999));

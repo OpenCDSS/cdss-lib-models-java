@@ -117,6 +117,7 @@ package DWR.StateMod;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Vector;
 
 import RTi.TS.DayTS;
@@ -1726,7 +1727,7 @@ throws Exception
 	// Call the fully-loaded method...
 	// Pass the file pointer and an empty time series, which
 	// will be used to locate the time series in the file.
-	Vector tslist = in.readTimeSeriesList ( tsident_string, date1, date2, units, read_data );
+	List tslist = in.readTimeSeriesList ( tsident_string, date1, date2, units, read_data );
 
 	if (closeFile) {
 		in.close();
@@ -1737,7 +1738,7 @@ throws Exception
 		"Unable to read time series for \"" + tsident_string + "\"" );
 		return ts;
 	}
-	return (TS)tslist.elementAt(0);
+	return (TS)tslist.get(0);
 }
 
 /**
@@ -1757,7 +1758,7 @@ main location part is first matched and the the reservoir account is checked if 
 @exception IOException if the interval for the time series does not match that
 for the file or if a write error occurs.
 */
-public Vector readTimeSeriesList (	String tsident_pattern, DateTime date1,
+public List readTimeSeriesList (	String tsident_pattern, DateTime date1,
 					DateTime date2, String req_units, boolean read_data )
 throws Exception
 {	String routine = "StateMod_BTS.readTimeSeriesList";
@@ -1770,7 +1771,7 @@ throws Exception
 	// reading the header.  This needs to be considered.
 
 	int iparam = 0;
-	Vector tslist = new Vector();
+	List tslist = new Vector();
 	if ( (tsident_pattern == null) || (tsident_pattern.length() == 0) ) {
 		tsident_pattern = "*.*.*.*.*";
 	}
@@ -2124,7 +2125,7 @@ throws Exception
 					    ts.setDate2 ( new DateTime( date2) );
 					}
 					ts.addToGenesis ( "Read from \"" + __tsfile + " for " + date1 +	" to " + date2 );
-					tslist.addElement ( ts );
+					tslist.add ( ts );
 					if ( read_data ) {
 						if ( Message.isDebugOn ) {
 							Message.printDebug ( 2, routine, "Reading " + date1 + " to " + date2 );

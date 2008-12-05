@@ -31,6 +31,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -173,7 +174,7 @@ private StateCU_DataSet __dataset;
 /**
 Vector of stations data in the DataSetComponent.
 */
-private Vector __stationsVector;
+private List __stationsVector;
 
 /**
 Constructor.
@@ -194,7 +195,7 @@ public StateCU_ClimateStation_JFrame (	String title, StateCU_DataSet dataset,
 	__dataset = dataset;
 	__stationComponent = __dataset.getComponentForComponentType(
 		StateCU_DataSet.COMP_CLIMATE_STATIONS);
-	__stationsVector = (Vector)__stationComponent.getData();
+	__stationsVector = (List)__stationComponent.getData();
 
 	setupGUI(0);
 }
@@ -220,7 +221,7 @@ public StateCU_ClimateStation_JFrame (	String title, StateCU_DataSet dataset,
 
 	__stationComponent = __dataset.getComponentForComponentType(
 		StateCU_DataSet.COMP_CLIMATE_STATIONS);
-	__stationsVector = (Vector)__stationComponent.getData();	
+	__stationsVector = (List)__stationComponent.getData();	
 
 	String id = station.getID();
 	int index = StateCU_Util.indexOf(__stationsVector, id);
@@ -283,7 +284,7 @@ data object.
 @return true if the text fields are okay, false if not.
 */
 private boolean checkInput() {
-	Vector errors = new Vector();
+	List errors = new Vector();
 	int errorCount = 0;
 	// validate __nameJTextField == string
 	// validate __stationIDJTextField == string
@@ -303,7 +304,7 @@ private boolean checkInput() {
 	String label = "The following error" + plural + "encountered "
 		+ "trying to save the record:\n";
 	for (int i = 0; i < errorCount; i++) {
-		label += errors.elementAt(i) + "\n";
+		label += errors.get(i) + "\n";
 	}
 	// TODO SAM 2007-03-01 Why not using Message/Logging
 	new ResponseJDialog(this, 
@@ -342,24 +343,24 @@ private void displayTSViewJFrame(String action)
 
 	PropList props = new PropList("ClimateStation");
 
-	Vector tslist = new Vector();
+	List tslist = new Vector();
 
 	// Get the time series to display and set plot properties if graphing.
 	// For now need to find in the lists because references to time series
 	// are not implemented...
 
-	Vector v = null;
+	List v = null;
 	TS ts = null;
 	int sub = 0;
 	int pos;
 	StateCU_ClimateStation station = (StateCU_ClimateStation)
-		__stationsVector.elementAt(__currentStationIndex);
+		__stationsVector.get(__currentStationIndex);
 	if (__precipitationCheckBox.isSelected()) {
-		v = (Vector)__dataset.getComponentForComponentType(
+		v = (List)__dataset.getComponentForComponentType(
 			StateCU_DataSet.COMP_PRECIPITATION_TS_MONTHLY).getData();
 		pos = TSUtil.indexOf ( v, station.getID(), "Location", 1 );
 		if ( pos >= 0 ) {
-			ts = (TS)v.elementAt(pos);
+			ts = (TS)v.get(pos);
 		}
 		if ( ts != null ) {
 			// Add a graph for precipitation...
@@ -374,11 +375,11 @@ private void displayTSViewJFrame(String action)
 		}
 	}
 	if (__temperatureCheckBox.isSelected()) {
-		v = (Vector)__dataset.getComponentForComponentType(
+		v = (List)__dataset.getComponentForComponentType(
 		StateCU_DataSet.COMP_TEMPERATURE_TS_MONTHLY_AVERAGE).getData();
 		pos = TSUtil.indexOf ( v, station.getID(), "Location", 1 );
 		if ( pos >= 0 ) {
-			ts = (TS)v.elementAt(pos);
+			ts = (TS)v.get(pos);
 		}
 		if ( ts != null ) {
 			// Add a graph for temperature...
@@ -543,7 +544,7 @@ private void processTableSelection(int index) {
 	somethingSelected();
 
 	StateCU_ClimateStation station = (StateCU_ClimateStation)
-		__stationsVector.elementAt(__currentStationIndex);
+		__stationsVector.get(__currentStationIndex);
 
 	__stationIDJTextField.setText(station.getID());
 	__nameJTextField.setText(station.getName());
@@ -582,7 +583,7 @@ private void saveInformation(int record) {
 	}
 
 	StateCU_ClimateStation station = 
-		(StateCU_ClimateStation)__stationsVector.elementAt(record);
+		(StateCU_ClimateStation)__stationsVector.get(record);
 
 	if(!checkInput()) {
 		return;

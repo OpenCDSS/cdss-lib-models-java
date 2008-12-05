@@ -195,7 +195,7 @@ protected String 	_intern[];	// Intervening structure IDs (up to 10
 					// in StateMod doc but no limit here) -
 					// used by some rights.
 protected int		_imonsw[];	// Monthly switch, for some rights
-protected Vector	_comments;	// Comments provided by user - # comments before each right
+protected List	_comments;	// Comments provided by user - # comments before each right
 
 protected double	_qdebt;		// used with operational right 17, 18
 protected double	_qdebtx;	// used with operational right 17, 18
@@ -227,7 +227,7 @@ private int __ioBeg;
  */
 private int __ioEnd;
 
-private Vector __rightStringsVector = null;
+private List __rightStringsVector = null;
 
 // cidvri = ID is in base class identifier
 // nameo = Name is in base class name
@@ -583,7 +583,7 @@ public String getCiopso5() {
 	return _ciopso5;
 }
 
-public Vector getComments() {
+public List getComments() {
 	return _comments;
 }
 
@@ -614,8 +614,8 @@ public String getIntern(int index) {
 Get the interns as a vector.
 @return the intervening structure identifiers or an empty Vector.
 */
-public Vector getInternsVector() {
-	Vector v = new Vector();
+public List getInternsVector() {
+	List v = new Vector();
 	if ( _intern != null ) {
 		for ( int i = 0; i < _intern.length; i++) {
 			v.add(getIntern(i));
@@ -761,13 +761,13 @@ Read operational right information in and store in a Vector.
 @param filename Name of file to read.
 @exception Exception if there is an error reading the file.
 */
-public static Vector readStateModFile(String filename)
+public static List readStateModFile(String filename)
 throws Exception {
 	String routine = "StateMod_OperationalRight.readStateModFile";
 	String iline = null;
-	Vector v = null;
-	Vector theOprits = new Vector();
-	Vector comment_vector = new Vector(1);	// Will be used prior to finding an operational right
+	List v = null;
+	List theOprits = new Vector();
+	List comment_vector = new Vector(1);	// Will be used prior to finding an operational right
 	// Formats use strings for many variables because files may have extra
 	// whitespace or be used for numeric and character data...
 	// Consistent among all operational rights...
@@ -791,7 +791,7 @@ throws Exception {
 	Message.printStatus(2, routine, "Reading operational rights file : " + filename);
 	try {
 		boolean reading_unknown_right = false;
-		Vector right_strings_Vector = null;	// Operating rule as a list of strings
+		List right_strings_Vector = null;	// Operating rule as a list of strings
 		in = new BufferedReader(new FileReader(filename));
 		while ((iline = in.readLine()) != null) {
 			++linecount;
@@ -805,13 +805,13 @@ throws Exception {
 					// Add to the end of the list
 					Message.printStatus ( 2, routine, "Adding unrecognized operational right \"" +
 							anOprit.getID() + "\" as text");
-					theOprits.addElement(anOprit);
+					theOprits.add(anOprit);
 					// Don't continue because the line that was just read needs to be handled.
 				}
 				else {
 					// Blank at front of line so assume still reading the unknown right.
 					// Add a string to the unknown right
-					right_strings_Vector.addElement ( iline );
+					right_strings_Vector.add ( iline );
 					continue;
 				}
 			}
@@ -831,7 +831,7 @@ throws Exception {
 				if (Message.isDebugOn) {
 					Message.printDebug(10, routine, "Opright comments: " + iline);
 				}
-				comment_vector.addElement(iline.substring(1).trim());
+				comment_vector.add(iline.substring(1).trim());
 				continue;
 			}
 
@@ -855,39 +855,39 @@ throws Exception {
 			if ( Message.isDebugOn ) {
 				Message.printDebug ( 1, routine, v.toString() );
 			}
-			anOprit.setID(((String)v.elementAt(0)).trim()); 
-			anOprit.setName(((String)v.elementAt(1)).trim()); 
-			anOprit.setRtem(((String)v.elementAt(2)).trim()); 
-			anOprit.setDumx(((String)v.elementAt(3)).trim());
+			anOprit.setID(((String)v.get(0)).trim()); 
+			anOprit.setName(((String)v.get(1)).trim()); 
+			anOprit.setRtem(((String)v.get(2)).trim()); 
+			anOprit.setDumx(((String)v.get(3)).trim());
 			dumx = anOprit.getDumx();
-			anOprit.setSwitch( (Integer)v.elementAt(4) );
+			anOprit.setSwitch( (Integer)v.get(4) );
 			// Should always be in file but may be zero...
-			anOprit.setCiopde(((String)v.elementAt(5)).trim());
-			anOprit.setIopdes(((String)v.elementAt(6)).trim());
+			anOprit.setCiopde(((String)v.get(5)).trim());
+			anOprit.setIopdes(((String)v.get(6)).trim());
 			// Should always be in file but may be zero...
-			anOprit.setCiopso1(((String)v.elementAt(7)).trim());
-			anOprit.setIopsou1(((String)v.elementAt(8)).trim());
+			anOprit.setCiopso1(((String)v.get(7)).trim());
+			anOprit.setIopsou1(((String)v.get(8)).trim());
 			// Should always be in file but may be zero...
-			anOprit.setCiopso2(((String)v.elementAt(9)).trim());
-			anOprit.setIopsou2(((String)v.elementAt(10)).trim());
+			anOprit.setCiopso2(((String)v.get(9)).trim());
+			anOprit.setIopsou2(((String)v.get(10)).trim());
 			// Type is used to make additional decisions below...
-			type = StringUtil.atoi(((String)v.elementAt(11)).trim());
+			type = StringUtil.atoi(((String)v.get(11)).trim());
 			anOprit.setItyopr(type);
 			// Plan ID
-			anOprit.setCreuse(((String)v.elementAt(12)).trim());
+			anOprit.setCreuse(((String)v.get(12)).trim());
 			// Diversion type
-			anOprit.setCdivtyp(((String)v.elementAt(13)).trim());
+			anOprit.setCdivtyp(((String)v.get(13)).trim());
 			// Conveyance loss...
-			double oprLoss = StringUtil.atod(((String)v.elementAt(14)).trim());
+			double oprLoss = StringUtil.atod(((String)v.get(14)).trim());
 			anOprit.setOprLoss ( oprLoss );
 			// Miscellaneous limits...
-			double oprLimit = StringUtil.atod(((String)v.elementAt(15)).trim());
+			double oprLimit = StringUtil.atod(((String)v.get(15)).trim());
 			anOprit.setOprLimit ( oprLimit );
 			// Beginning year...
-			int ioBeg = StringUtil.atoi(((String)v.elementAt(16)).trim());
+			int ioBeg = StringUtil.atoi(((String)v.get(16)).trim());
 			anOprit.setIoBeg ( ioBeg );
 			// Ending year...
-			int ioEnd = StringUtil.atoi(((String)v.elementAt(17)).trim());
+			int ioEnd = StringUtil.atoi(((String)v.get(17)).trim());
 			anOprit.setIoEnd ( ioEnd );
 			Message.printStatus( 2, routine, "Reading operating rule type " + type +
 					" starting at line " + linecount );
@@ -897,7 +897,7 @@ throws Exception {
 				// Most of the reading will occur at the top of the loop.
 				reading_unknown_right = true;
 				right_strings_Vector = new Vector();
-				right_strings_Vector.addElement ( iline );
+				right_strings_Vector.add ( iline );
 				// Add Vector and continue to add if more lines are read.  Since using a reference
 				// this will ensure that all lines are set for the right.
 				anOprit.setRightStrings ( right_strings_Vector );
@@ -948,14 +948,14 @@ throws Exception {
 				++linecount;
 				Message.printStatus ( 2, routine, "Processing operating rule line " + linecount + ": " + iline );
 				v = StringUtil.fixedRead(iline, format_rg);
-				anOprit.setQdebt( ((String)v.elementAt(0)).trim() );
-				anOprit.setQdebtx( ((String)v.elementAt(1)).trim() );
-				anOprit.setCiopso3(	((String)v.elementAt(2)).trim());
-				anOprit.setIopsou3(	((String)v.elementAt(3)).trim());
-				anOprit.setCiopso4(	((String)v.elementAt(4)).trim());
-				anOprit.setIopsou4(	((String)v.elementAt(5)).trim());
-				anOprit.setCiopso5(	((String)v.elementAt(6)).trim());
-				anOprit.setIopsou5(	((String)v.elementAt(7)).trim());
+				anOprit.setQdebt( ((String)v.get(0)).trim() );
+				anOprit.setQdebtx( ((String)v.get(1)).trim() );
+				anOprit.setCiopso3(	((String)v.get(2)).trim());
+				anOprit.setIopsou3(	((String)v.get(3)).trim());
+				anOprit.setCiopso4(	((String)v.get(4)).trim());
+				anOprit.setIopsou4(	((String)v.get(5)).trim());
+				anOprit.setCiopso5(	((String)v.get(6)).trim());
+				anOprit.setIopsou5(	((String)v.get(7)).trim());
 			}
 			else if ( type == 18 ) {
 				// Rio Grande Compact - Conejos River
@@ -963,20 +963,20 @@ throws Exception {
 				++linecount;
 				Message.printStatus ( 2, routine, "Processing operating rule line " + linecount + ": " + iline );
 				v = StringUtil.fixedRead(iline, format_rg);
-				anOprit.setQdebt( ((String)v.elementAt(0)).trim() );
-				anOprit.setQdebtx( ((String)v.elementAt(1)).trim() );
-				anOprit.setCiopso3(	((String)v.elementAt(2)).trim());
-				anOprit.setIopsou3(	((String)v.elementAt(3)).trim());
-				anOprit.setCiopso4(	((String)v.elementAt(4)).trim());
-				anOprit.setIopsou4(	((String)v.elementAt(5)).trim());
-				anOprit.setCiopso5(	((String)v.elementAt(6)).trim());
-				anOprit.setIopsou5(	((String)v.elementAt(7)).trim());
+				anOprit.setQdebt( ((String)v.get(0)).trim() );
+				anOprit.setQdebtx( ((String)v.get(1)).trim() );
+				anOprit.setCiopso3(	((String)v.get(2)).trim());
+				anOprit.setIopsou3(	((String)v.get(3)).trim());
+				anOprit.setCiopso4(	((String)v.get(4)).trim());
+				anOprit.setIopsou4(	((String)v.get(5)).trim());
+				anOprit.setCiopso5(	((String)v.get(6)).trim());
+				anOprit.setIopsou5(	((String)v.get(7)).trim());
 			}
 			else if ( type == 20 ) {
 				// San Juan RIP...
 				v = StringUtil.fixedRead(iline, format_sj);
-				anOprit.setSjmina( ((String)v.elementAt(0)).trim());
-				anOprit.setSjrela( ((String)v.elementAt(1)).trim());
+				anOprit.setSjmina( ((String)v.get(0)).trim());
+				anOprit.setSjrela( ((String)v.get(1)).trim());
 			}
 			
 			// ...end reading additional data before monthly and intervening structure data
@@ -1003,14 +1003,14 @@ throws Exception {
 			// add the operational right to the vector of oprits
 			Message.printStatus ( 2, routine, "Adding recognized operational right \"" +
 					anOprit.getID() + "\" from full read.");
-			theOprits.addElement(anOprit);
+			theOprits.add(anOprit);
 		}
 		// All lines have been read.
 		if ( reading_unknown_right ) {
 			// Last line was part of the unknown right so need to add what there was.
 			Message.printStatus ( 2, routine, "Adding unrecognized operational right \"" +
 					anOprit.getID() + "\" as text.");
-			theOprits.addElement(anOprit);
+			theOprits.add(anOprit);
 		}
 	}
 	catch (Exception e) {
@@ -1058,7 +1058,7 @@ throws IOException
 {
 	String iline = in.readLine().trim();
 	Message.printStatus ( 2, routine, "Processing operating rule line " + (linecount + 1) + ": " + iline );
-	Vector tokens = StringUtil.breakStringList( iline, " \t", StringUtil.DELIM_SKIP_BLANKS );
+	List tokens = StringUtil.breakStringList( iline, " \t", StringUtil.DELIM_SKIP_BLANKS );
 	int ntokens = 0;
 	if ( tokens != null ) {
 		ntokens = tokens.size();
@@ -1067,7 +1067,7 @@ throws IOException
 		anOprit._intern = new String[ninterv];
 	}
 	for ( int i=0; i<ntokens; i++) {
-		anOprit.setIntern(i, ((String)tokens.elementAt(i)).trim());
+		anOprit.setIntern(i, ((String)tokens.get(i)).trim());
 	}
 	return 1;
 }
@@ -1088,7 +1088,7 @@ throws IOException
 {
 	String iline = in.readLine().trim();
 	Message.printStatus ( 2, routine, "Processing operating rule line " + (linecount + 1) + ": " + iline );
-	Vector tokens = StringUtil.breakStringList( iline, " \t", StringUtil.DELIM_SKIP_BLANKS );
+	List tokens = StringUtil.breakStringList( iline, " \t", StringUtil.DELIM_SKIP_BLANKS );
 	int ntokens = 0;
 	if ( tokens != null ) {
 		ntokens = tokens.size();
@@ -1097,7 +1097,7 @@ throws IOException
 		anOprit._imonsw = new int[nmonsw];
 	}
 	for ( int i=0; i<ntokens; i++) {
-		anOprit.setImonsw(i, ((String)tokens.elementAt(i)).trim());
+		anOprit.setImonsw(i, ((String)tokens.get(i)).trim());
 	}
 	return 1;
 }
@@ -1236,7 +1236,7 @@ public void setCiopso5(String ciopso5) {
 /**
 Set the comments
 */
-public void setComments(Vector comments) {
+public void setComments(List comments) {
 	_comments = comments;
 }
 
@@ -1402,9 +1402,9 @@ public void setIntern(int index, String intern) {
 /**
 Sets the interns from a vector.
 */
-public void setInterns(Vector v) {
+public void setInterns(List v) {
 	for (int i = 0; i < 10; i++) {
-		setIntern(i, (String)v.elementAt(i));
+		setIntern(i, (String)v.get(i));
 	}
 }
 
@@ -1602,7 +1602,7 @@ public void setQdebtx(String qdebtx) {
 /**
 Set the operating rule strings, when read as text because an unknown right type.
 */
-private void setRightStrings ( Vector right_strings_Vector )
+private void setRightStrings ( List right_strings_Vector )
 {
 	__rightStringsVector = right_strings_Vector;
 }
@@ -1687,7 +1687,7 @@ is also maintained by calling this routine.
 @param newComments addition comments which should be included in history
 @exception Exception if an error occurs.
 */
-public static void writeStateModFile(String infile, String outfile, Vector theOpr, String[] newComments)
+public static void writeStateModFile(String infile, String outfile, List theOpr, String[] newComments)
 throws Exception {
 	PrintWriter	out = null;
 	String [] comment_str = { "#" };
@@ -1709,11 +1709,11 @@ throws Exception {
 	String formatsp = "%36.36s";
 	String formatI = "%-12.12s";
 	StateMod_OperationalRight opr = null;
-	Vector v = new Vector(12);
-	Vector vS = new Vector(12);
-	Vector vsp = new Vector(1);
-	Vector vI = new Vector(1);
-	Vector comments_vector = null;
+	List v = new Vector(12);
+	List vS = new Vector(12);
+	List vsp = new Vector(1);
+	List vI = new Vector(1);
+	List comments_vector = null;
 
 		out.println(cmnt);
 		out.println(cmnt + " *************************************"
@@ -1814,7 +1814,7 @@ throws Exception {
 		int num_comments;
 		int dumx;
 		for (int i = 0; i < num ; i++) {
-			opr = (StateMod_OperationalRight)theOpr.elementAt(i);
+			opr = (StateMod_OperationalRight)theOpr.get(i);
 			if (opr == null) {
 				continue;
 			}
@@ -1823,7 +1823,7 @@ throws Exception {
 			num_comments = comments_vector.size();
 			// Print the comments in front of the operational right
 			for (int j = 0; j < num_comments; j++) {
-				out.println("# " + (String)comments_vector.elementAt(j));
+				out.println("# " + (String)comments_vector.get(j));
 			}
 			// If the operational right was not understood at read, print the original contents
 			// and go to the next right.
@@ -1835,19 +1835,19 @@ throws Exception {
 				continue;
 			}
 
-			v.removeAllElements();
-			v.addElement(opr.getID());
-			v.addElement(opr.getName());
-			v.addElement(opr.getCgoto());
-			v.addElement(new Integer(opr.getDumx()));
-			v.addElement(new Integer(opr.getSwitch()));
-			v.addElement(opr.getCiopde());
-			v.addElement(new Integer(opr.getIopdes()));
-			v.addElement(opr.getCiopso1());
-			v.addElement(new Integer(opr.getIopsou1()));
-			v.addElement(opr.getCiopso2());
-			v.addElement(new Integer(opr.getIopsou2()));
-			v.addElement(new Integer(opr.getItyopr()));
+			v.clear();
+			v.add(opr.getID());
+			v.add(opr.getName());
+			v.add(opr.getCgoto());
+			v.add(new Integer(opr.getDumx()));
+			v.add(new Integer(opr.getSwitch()));
+			v.add(opr.getCiopde());
+			v.add(new Integer(opr.getIopdes()));
+			v.add(opr.getCiopso1());
+			v.add(new Integer(opr.getIopsou1()));
+			v.add(opr.getCiopso2());
+			v.add(new Integer(opr.getIopsou2()));
+			v.add(new Integer(opr.getItyopr()));
 			iline = StringUtil.formatString(v, format);
 			out.println(iline);
 			dumx = opr.getDumx();
@@ -1857,9 +1857,9 @@ throws Exception {
 					Message.printDebug(50, routine, 
 						"in area 1: getDumx = " + opr.getDumx()+ "getItyopr = " + opr.getItyopr());
 				}
-				vS.removeAllElements();
+				vS.clear();
 				for (int j = 0; j < 12; j++) {
-					vS.addElement(new Integer( opr.getImonsw(j)));
+					vS.add(new Integer( opr.getImonsw(j)));
 				}
 				iline = StringUtil.formatString(vS, formatS);
 				out.println(iline);
@@ -1875,8 +1875,8 @@ throws Exception {
 					Message.printDebug(50, routine,
 						"in area 2: getDumx = " + opr.getDumx() + "getItyopr = " + opr.getItyopr());
 				}
-				vsp.removeAllElements();
-				vsp.addElement(" ");
+				vsp.clear();
+				vsp.add(" ");
 				iline = StringUtil.formatString(vsp, formatsp);
 				out.print(iline);
 
@@ -1888,8 +1888,8 @@ throws Exception {
 					if (Message.isDebugOn) {
 						Message.printDebug(50, routine, "in area 3: " + num_intern);
 					}
-					vI.removeAllElements();
-					vI.addElement(opr.getIntern(j));
+					vI.clear();
+					vI.add(opr.getIntern(j));
 					iline = StringUtil.formatString( vI, formatI);
 					out.print(iline);
 				}

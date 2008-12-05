@@ -12,6 +12,7 @@
 
 package DWR.StateCU;
 
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.GUI.JWorksheet;
@@ -57,20 +58,20 @@ A Vector that maps rows in the display when totals are NOT being shown to rows
 in the overall data Vectors.  Used to make switching between displays with and
 without totals relatively efficient.  See getValueAt() and setupData().
 */
-private Vector __rowMap = null;
+private List __rowMap = null;
 
 /**
 Array of Vectors, each of which holds the data for one of the columns in the
 table.  Since the data cannot be pulled out from the data objects directly, 
 this is done to make display efficient.
 */
-private Vector[] __data = null;
+private List[] __data = null;
 
 /**
 Constructor.  This builds the Model for displaying delay table data
 @param data the data that will be displayed in the table.
 */
-public StateCU_DelayTableAssignment_Data_TableModel(Vector data) {
+public StateCU_DelayTableAssignment_Data_TableModel(List data) {
 	this(data, true);
 }
 
@@ -79,8 +80,7 @@ Constructor.  This builds the Model for displaying delay table data
 @param data the data that will be displayed in the table.
 @param editable whether the data are editable or not.
 */
-public StateCU_DelayTableAssignment_Data_TableModel(Vector data, 
-boolean editable) {
+public StateCU_DelayTableAssignment_Data_TableModel(List data, boolean editable) {
 	if (data == null) {
 		data = new Vector();
 		_rows = 0;
@@ -194,9 +194,9 @@ public Object getValueAt(int row, int col) {
 	}
 	
 	if (!__showTotals) {
-		row = ((Integer)__rowMap.elementAt(row)).intValue();
+		row = ((Integer)__rowMap.get(row)).intValue();
 	}
-	return __data[col].elementAt(row);		
+	return __data[col].get(row);		
 }
 
 /**
@@ -222,7 +222,7 @@ private void setupData() {
 	int size = _data.size();
 	StateCU_DelayTableAssignment dt = null;
 	String id = null;
-	__data = new Vector[__COLUMNS];
+	__data = new List[__COLUMNS];
 	for (int i = 0; i < __COLUMNS; i++) {
 		__data[i] = new Vector();
 	}
@@ -233,14 +233,13 @@ private void setupData() {
 	int rowCount = 0;
 	for (int i = 0; i < size; i++) {
 		total = 0;
-		dt = (StateCU_DelayTableAssignment)_data.elementAt(i);
+		dt = (StateCU_DelayTableAssignment)_data.get(i);
 		id = dt.getID();
 		num = dt.getNumDelayTables();
 		for (int j = 0; j < num; j++) {
 			__data[__COL_ID].add(id);
 			__data[__COL_DELAY_ID].add(dt.getDelayTableID(j));
-			__data[__COL_PERCENT].add(new Double(
-				dt.getDelayTablePercent(j)));
+			__data[__COL_PERCENT].add(new Double(dt.getDelayTablePercent(j)));
 			total += dt.getDelayTablePercent(j);
 			__rowMap.add(new Integer(rowCount));
 			rowCount++;

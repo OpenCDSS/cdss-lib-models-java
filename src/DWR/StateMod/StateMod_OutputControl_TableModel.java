@@ -17,6 +17,7 @@
 
 package DWR.StateMod;
 
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.GUI.JWorksheet;
@@ -65,12 +66,12 @@ private JWorksheet __worksheet;
 /**
 Vectors of data for filling ID lists.
 */
-private Vector __riverNetwork;
+private List __riverNetwork;
 
 /**
 ID lists to be displayed in the combo boxes.
 */
-private Vector
+private List
 	__reservoirIDs = null,
 	__diversionIDs = null,
 	__instreamFlowIDs = null,
@@ -85,8 +86,7 @@ Constructor.
 @param riverNetwork the data that will be used to fill in the table IDS.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_OutputControl_TableModel(StateMod_OutputControl_JFrame parent,
-Vector data, Vector riverNetwork) 
+public StateMod_OutputControl_TableModel(StateMod_OutputControl_JFrame parent, List data, List riverNetwork) 
 throws Exception {
 	__riverNetwork = riverNetwork;
 	
@@ -136,14 +136,13 @@ public boolean canAddNewRow() {
 }
 
 /**
-Creates a list of the available IDs for a Vector of StateMod_Data-extending
-objects.
+Creates a list of the available IDs for a Vector of StateMod_Data-extending objects.
 @param nodes the nodes for which to create a list of IDs.
 @return a Vector of Strings, each of which contains an ID followed by the 
 name of Structure in parentheses
 */
-private Vector createAvailableIDsList(Vector nodes) {
-	Vector v = new Vector();
+private List createAvailableIDsList(List nodes) {
+	List v = new Vector();
 
 	int num = 0;
 	if (nodes != null) {
@@ -152,10 +151,10 @@ private Vector createAvailableIDsList(Vector nodes) {
 
 	String name = null;
 	for (int i = 0; i < (num - 1); i++) {
-		name = ((StateMod_Data)nodes.elementAt(i)).getName();
+		name = ((StateMod_Data)nodes.get(i)).getName();
 		name = name.substring (0, name.length() - 4).trim();
 		v.add(
-			((StateMod_Data)nodes.elementAt(i)).getID() + " (" 
+			((StateMod_Data)nodes.get(i)).getID() + " (" 
 			+ name + ")");
 	}
 	return v;
@@ -167,7 +166,7 @@ Fills the ID column based on the kind of structure selected.
 @param type the type of structure selected (column 1)
 */
 public void fillIDColumn(int row, String type) {
-	Vector ids = new Vector();
+	List ids = new Vector();
 	if (type.equalsIgnoreCase("Diversion")) {
 		ids = __diversionIDs;
 	}
@@ -218,7 +217,7 @@ Finds the ID of the appropriate type that starts with the given ID.
 @return the matching ID.
 */
 private String findIDMatch(String type, String ID) {
-	Vector search = null;
+	List search = null;
 	
 	if (type.equalsIgnoreCase("INS")) {
 		search = __instreamFlowIDs;
@@ -247,7 +246,7 @@ private String findIDMatch(String type, String ID) {
 	int size = search.size();
 	String val = null;
 	for (int i = 0; i < size; i++) {	
-		val = (String)search.elementAt(i);
+		val = (String)search.get(i);
 		if (val.startsWith(ID)) {
 			return val;
 		}
@@ -311,16 +310,15 @@ Returns the appropriate ID Vector for the given structure type.
 @param type the structure type for which to return the ID Vector.
 @return the ID Vector for the structure type.
 */
-private Vector getTypeIDVector(String type) {
+private List getTypeIDVector(String type) {
 	int size = __riverNetwork.size();
 
 	StateMod_Data node = null;
 	String name = null;
-	Vector v = new Vector();
-	// loops through to (num - 1) because the last element of the 
-	// network Vector is "END"
+	List v = new Vector();
+	// loops through to (num - 1) because the last element of the network Vector is "END"
 	for (int i = 0; i < size; i++) {
-		node = (StateMod_Data)__riverNetwork.elementAt(i);
+		node = (StateMod_Data)__riverNetwork.get(i);
 
 		name = node.getName();
 		if (type.equals(__OTHtype) || name.endsWith(type)) {
@@ -338,8 +336,7 @@ public int getRowCount() {
 }
 
 /**
-Returns the data that should be placed in the JTable
-at the given row and column.
+Returns the data that should be placed in the JTable at the given row and column.
 @param row the row for which to return data.
 @param col the column for which to return data.
 @return the data that should be placed in the JTable at the given row and col.
@@ -349,7 +346,7 @@ public Object getValueAt(int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	StateMod_GraphNode gn = (StateMod_GraphNode)_data.elementAt(row);
+	StateMod_GraphNode gn = (StateMod_GraphNode)_data.get(row);
 
 	String ID = gn.getID();
 	switch (col) {
@@ -481,7 +478,7 @@ public void setValueAt(Object value, int row, int col)
 		row = _sortOrder[row];
 	}
 	setDirty(true);
-	StateMod_GraphNode gn = (StateMod_GraphNode)_data.elementAt(row);
+	StateMod_GraphNode gn = (StateMod_GraphNode)_data.get(row);
 
 	switch (col) {
 		case COL_TYPE:	

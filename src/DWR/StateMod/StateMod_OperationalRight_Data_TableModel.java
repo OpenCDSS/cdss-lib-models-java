@@ -12,6 +12,7 @@
 
 package DWR.StateMod;
 
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
@@ -48,14 +49,14 @@ private StateMod_OperationalRight __parentOperationalRight = null;
 /**
 A 10-element Vector of an Operational Right's intern data.
 */
-private Vector __interns = null;
+private List __interns = null;
 
 /**
 Constructor.  This builds the Model for displaying the diversion data.
 @param data the data that will be displayed in the table.
 @param editable whether the gui data is editable or not.
 */
-public StateMod_OperationalRight_Data_TableModel(Vector data, boolean editable){
+public StateMod_OperationalRight_Data_TableModel(List data, boolean editable){
 	if (data == null) {
 		_data = new Vector();
 	}
@@ -105,8 +106,7 @@ public String getColumnName(int columnIndex) {
 Returns the format that the specified column should be displayed in when
 the table is being displayed in the given table format. 
 @param column column for which to return the format.
-@return the format (as used by StringUtil.formatString() in which to display the
-column.
+@return the format (as used by StringUtil.formatString() in which to display the column.
 */
 public String getFormat(int column) {
 	switch (column) {
@@ -125,8 +125,7 @@ public int getRowCount() {
 }
 
 /**
-Returns the data that should be placed in the JTable at the given row 
-and column.
+Returns the data that should be placed in the JTable at the given row and column.
 @param row the row for which to return data.
 @param col the column for which to return data.
 @return the data that should be placed in the JTable at the given row and col.
@@ -139,8 +138,7 @@ public Object getValueAt(int row, int col) {
 	switch (col) {
 		case COL_ID:	
 		case COL_NAME:
-			StateMod_OperationalRight smo = 
-				(StateMod_OperationalRight)_data.elementAt(row);
+			StateMod_OperationalRight smo = (StateMod_OperationalRight)_data.get(row);
 			switch (col) {
 				case COL_ID:	return smo.getID();
 				case COL_NAME: 	return smo.getName();
@@ -221,7 +219,7 @@ The Vector of intern data associated with a specific Operational Right.
 @param interns a Vector of 10 elements containing an Operational Right's intern
 data.
 */
-public void setInterns(Vector interns) {
+public void setInterns(List interns) {
 	_rows = 10;
 	__interns = interns;
 }

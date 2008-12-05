@@ -64,6 +64,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.awt.print.PageFormat;
 import java.net.URL;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -298,7 +299,7 @@ private String __id = "";
 /**
 Vector to manage all the different pre-defined layouts for the network.
 */
-private Vector __layouts = null;
+private List __layouts = null;
 
 /**
 Constructor.  
@@ -394,7 +395,7 @@ public void actionPerformed(ActionEvent event) {
 	else if (command.equals(__BUTTON_DELETE)) {
 		int index = __layoutComboBox.getSelectedIndex();
 		int count = __layoutComboBox.getItemCount();
-		__layouts.removeElementAt(index);
+		__layouts.remove(index);
 		__ignoreEvents = true;
 		__layoutComboBox.removeAt(index);
 		__layoutComboBox.select(null);
@@ -421,7 +422,7 @@ public void actionPerformed(ActionEvent event) {
 		}
 
 		int index = __layoutComboBox.getSelectedIndex();
-		PropList p = (PropList)__layouts.elementAt(index);		
+		PropList p = (PropList)__layouts.get(index);		
 		p.set("ID=\"" + name + "\"");
 		__ignoreEvents = true;
 		__layoutComboBox.removeAt(index);
@@ -879,7 +880,7 @@ public String getFilename() {
 Returns a Vector of all the layouts used in the current network.
 @return a Vector of all the layouts used in the current network.
 */
-public Vector getLayouts() {
+public List getLayouts() {
 	return __layouts;
 }
 
@@ -991,11 +992,11 @@ throws Exception {
 
 	StateMod_NodeNetwork network = new StateMod_NodeNetwork(true);
 	__device.setNetwork(network, false, true);
-	Vector v = network.getNodesForType(HydrologyNode.NODE_TYPE_END);
+	List v = network.getNodesForType(HydrologyNode.NODE_TYPE_END);
 	// change the "5" to something better if a different default paper
 	// size than "C" is used.
-	((HydrologyNode)v.elementAt(0)).setX(__rx / 4.3);
-	((HydrologyNode)v.elementAt(0)).setY(__ty / 5);
+	((HydrologyNode)v.get(0)).setX(__rx / 4.3);
+	((HydrologyNode)v.get(0)).setY(__ty / 5);
 
 	__device.setXMLDataLimits(__lx, __by, __rx - __lx, __ty - __by);
 	__reference.setNewDataLimits(new GRLimits(__lx, __by, __rx, __ty));
@@ -1058,13 +1059,13 @@ public void itemStateChanged(ItemEvent event) {
 		String value = __paperSizeComboBox.getSelected();
 		__device.setPaperSize(
 			shorten(__paperSizeComboBox.getSelected()));
-		PropList p = (PropList)__layouts.elementAt(index);
+		PropList p = (PropList)__layouts.get(index);
 		p.set("PaperSize=\"" + value + "\"");
 	}
 	else if (event.getSource() == __textSizeComboBox) {	
 		int index = __layoutComboBox.getSelectedIndex();
 		String value = __textSizeComboBox.getSelected();
-		PropList p = (PropList)__layouts.elementAt(index);
+		PropList p = (PropList)__layouts.get(index);
 		try {
 			int i = Integer.decode(
 				__textSizeComboBox.getSelected()).intValue();
@@ -1076,7 +1077,7 @@ public void itemStateChanged(ItemEvent event) {
 	else if (event.getSource() == __nodeSizeComboBox) {
 		int index = __layoutComboBox.getSelectedIndex();
 		String value = __nodeSizeComboBox.getSelected();
-		PropList p = (PropList)__layouts.elementAt(index);
+		PropList p = (PropList)__layouts.get(index);
 		try {
 			int i = Integer.decode(
 				__nodeSizeComboBox.getSelected()).intValue();
@@ -1090,7 +1091,7 @@ public void itemStateChanged(ItemEvent event) {
 	}
 	else if (event.getSource() == __layoutComboBox) {
 		int index = __layoutComboBox.getSelectedIndex();	
-		PropList p = (PropList)__layouts.elementAt(index);
+		PropList p = (PropList)__layouts.get(index);
 		String paperFormat = p.getValue("PaperSize");
 		__paperSizeComboBox.setSelectedPrefixItem(paperFormat + " -");
 		String orient = p.getValue("PageOrientation");
@@ -1132,12 +1133,12 @@ public void itemStateChanged(ItemEvent event) {
 		if (set) {
 			int size = __layouts.size();
 			for (int i = 0; i < size; i++) {
-				p = (PropList)__layouts.elementAt(i);
+				p = (PropList)__layouts.get(i);
 				p.set("IsDefault=\"False\"");
 			}
 		}
 
-		p = (PropList)__layouts.elementAt(index);
+		p = (PropList)__layouts.get(index);
 		p.set("IsDefault=\"" + set + "\"");
 	}
 }
@@ -1342,9 +1343,9 @@ throws Exception {
 	
 	PropList p = null;
 	String s = null;
-	Vector ids = new Vector();
+	List ids = new Vector();
 	for (int i = 0; i < size; i++) {
-		p = (PropList)__layouts.elementAt(i);
+		p = (PropList)__layouts.get(i);
 		s = p.getValue("IsDefault");
 		if (main == null && s != null && s.equalsIgnoreCase("true")) {
 			main = p;
@@ -1357,7 +1358,7 @@ throws Exception {
 		Message.printWarning(2, routine,
 			"No layout was marked as the main layout.  Values "
 			+ "from the first layout will be used, instead.");
-		main = (PropList)__layouts.elementAt(0);
+		main = (PropList)__layouts.get(0);
 	}
 
 	String id = main.getValue("ID");
@@ -1897,9 +1898,9 @@ private void setupPaper() {
 	PropList main = null;
 	PropList p = null;
 	String s = null;
-	Vector ids = new Vector();
+	List ids = new Vector();
 	for (int i = 0; i < size; i++) {
-		p = (PropList)__layouts.elementAt(i);
+		p = (PropList)__layouts.get(i);
 		s = p.getValue("IsDefault");
 		if (main == null && s != null && s.equalsIgnoreCase("true")) {
 			main = p;
@@ -1912,7 +1913,7 @@ private void setupPaper() {
 		Message.printWarning(2, routine,
 			"No layout was marked as the main layout.  Values "
 			+ "from the first layout will be used, instead.");
-		main = (PropList)__layouts.elementAt(0);
+		main = (PropList)__layouts.get(0);
 	}
 
 	String id = main.getValue("ID");
@@ -2071,7 +2072,7 @@ System.out.println("TW/TH: " + __device.getTotalWidth() + "  "
 */
 	__reference.setNewDataLimits(__device.getTotalDataLimits());
 	__reference.forceRepaint();
-	PropList p = (PropList)__layouts.elementAt(index);
+	PropList p = (PropList)__layouts.get(index);
 	p.set("PageOrientation=\"" + value + "\"");
 }
 

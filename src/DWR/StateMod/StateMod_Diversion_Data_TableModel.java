@@ -14,6 +14,7 @@
 
 package DWR.StateMod;
 
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
@@ -72,7 +73,7 @@ Constructor.  This builds the Model for displaying the diversion data.
 @param data the data that will be displayed in the table.
 @param editable whether the data can be edited or not
 */
-public StateMod_Diversion_Data_TableModel(Vector data, boolean editable) {
+public StateMod_Diversion_Data_TableModel(List data, boolean editable) {
 	if (data == null) {
 		_data = new Vector();
 	}
@@ -335,7 +336,7 @@ public Object getValueAt(int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	StateMod_Diversion smd = (StateMod_Diversion)_data.elementAt(row);
+	StateMod_Diversion smd = (StateMod_Diversion)_data.get(row);
 	switch (col) {
 		case COL_ID:		return smd.getID();
 		case COL_NAME:		return smd.getName();
@@ -394,7 +395,7 @@ public void setValueAt(Object value, int row, int col)
 	int ival;
 	int index;
 
-	StateMod_Diversion smd = (StateMod_Diversion)_data.elementAt(row);
+	StateMod_Diversion smd = (StateMod_Diversion)_data.get(row);
 
 	switch (col) {
 		case COL_ID:

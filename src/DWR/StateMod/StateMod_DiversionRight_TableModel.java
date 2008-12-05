@@ -28,7 +28,7 @@
 
 package DWR.StateMod;
 
-import java.util.Vector;
+import java.util.List;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 
@@ -72,25 +72,7 @@ are shown (false).
 private boolean __singleDiversion = true;
 
 /**
-Constructor.  This builds the table model for displaying the diversion right 
-data.
-@param dataset the dataset for the data being displayed.
-@param data the diversion right data that will be displayed in the table.
-@param editable whether the data can be edited
-@param singleDiversion whether data for a single diversion is shown (true)
-or data for multiple diversions is shown (false).
-@throws Exception if an invalid data or dmi was passed in.
-@deprecated use the other method.  This will be phased out soon (2005-01-24)
-*/
-public StateMod_DiversionRight_TableModel(StateMod_DataSet dataset, 
-Vector data, boolean editable, boolean singleDiversion)
-throws Exception {
-	this(data, editable, singleDiversion);
-}
-
-/**
-Constructor.  This builds the table model for displaying the diversion right 
-data.
+Constructor.  This builds the table model for displaying the diversion right data.
 @param dataset the dataset for the data being displayed.
 @param data the diversion right data that will be displayed in the table.
 @param editable whether the data can be edited
@@ -98,8 +80,7 @@ data.
 or data for multiple diversions is shown (false).
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_DiversionRight_TableModel(Vector data, boolean editable, 
-boolean singleDiversion)
+public StateMod_DiversionRight_TableModel(List data, boolean editable, boolean singleDiversion)
 throws Exception {
 	if (data == null) {
 		throw new Exception ("Invalid data Vector passed to " 
@@ -230,8 +211,7 @@ public Object getValueAt(int row, int col) {
 	if (_sortOrder != null) {
 		row = _sortOrder[row];
 	}
-	StateMod_DiversionRight dr 
-		= (StateMod_DiversionRight)_data.elementAt(row);
+	StateMod_DiversionRight dr = (StateMod_DiversionRight)_data.get(row);
 
 	// necessary for table models that display rights for 1+ diversions,
 	// so that the -1st column (ID) can also be displayed.  By doing it
@@ -328,8 +308,7 @@ public void setValueAt(Object value, int row, int col) {
 		col--;
 	}
 
-	StateMod_DiversionRight dr = 
-		(StateMod_DiversionRight)_data.elementAt(row);
+	StateMod_DiversionRight dr = (StateMod_DiversionRight)_data.get(row);
 	switch (col) {
 		case COL_DIVERSION_ID:
 			dr.setCgoto((String)value);

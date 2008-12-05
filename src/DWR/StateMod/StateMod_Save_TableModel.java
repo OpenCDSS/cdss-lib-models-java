@@ -12,6 +12,7 @@
 
 package DWR.StateMod;
 
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
@@ -58,9 +59,9 @@ throws Exception {
 	// the data set.
 	int[] groups = __dataset.getComponentGroupNumbers();
 
-	Vector ints = new Vector();
+	List ints = new Vector();
 	DataSetComponent dsc = null;
-	Vector v = null;
+	List v = null;
 
 	// Go through each of the groups and get their data out.  Group data
 	// consists of the DataSetComponents the group contains.  For each
@@ -69,12 +70,12 @@ throws Exception {
 	for (int i = 0; i < groups.length; i++) {
 	
 		dsc = __dataset.getComponentForComponentType(groups[i]);
-		v = (Vector)dsc.getData();
+		v = (List)dsc.getData();
 		if (v == null) {
 			v = new Vector();
 		}
 		for (int j = 0; j < v.size(); j++) {
-			dsc = (DataSetComponent)v.elementAt(j);
+			dsc = (DataSetComponent)v.get(j);
 			// get the dirty components -- they can be saved 
 			// (or not).
 			if (dsc.isDirty()) {
@@ -87,7 +88,7 @@ throws Exception {
 	// an int array from the Vector.
 	__data = new int[ints.size()];
 	for (int i = 0; i < ints.size(); i++) {
-		__data[i] = ((Integer)ints.elementAt(i)).intValue();
+		__data[i] = ((Integer)ints.get(i)).intValue();
 	}
 	
 	_rows = __data.length;

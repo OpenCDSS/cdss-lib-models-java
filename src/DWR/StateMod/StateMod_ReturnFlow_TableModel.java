@@ -24,7 +24,7 @@
 
 package DWR.StateMod;
 
-import java.util.Vector;
+import java.util.List;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 
@@ -71,8 +71,7 @@ Constructor.  This builds the Model for displaying the return flow data.
 @param is_return Specify true for return flows and false for depletions.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_ReturnFlow_TableModel (	Vector data, boolean editable,
-					boolean is_return )
+public StateMod_ReturnFlow_TableModel (	List data, boolean editable, boolean is_return )
 throws Exception {
 	this(null, data, editable, is_return );
 }
@@ -86,8 +85,7 @@ information is used to determine whether return flows for daily or monthly.
 @param is_return Specify true for return flows and false for depletions.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_ReturnFlow_TableModel(StateMod_DataSet dataset, 
-Vector data, boolean editable, boolean is_return )
+public StateMod_ReturnFlow_TableModel(StateMod_DataSet dataset, List data, boolean editable, boolean is_return )
 throws Exception {
 	__dataset = dataset;
 	if (data == null) {
@@ -218,8 +216,7 @@ public int getRowCount() {
 }
 
 /**
-Returns the data that should be placed in the JTable
-at the given row and column.
+Returns the data that should be placed in the JTable at the given row and column.
 @param row the row for which to return data.
 @param col the column for which to return data.
 @return the data that should be placed in the JTable at the given row and col.
@@ -229,7 +226,7 @@ public Object getValueAt(int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	StateMod_ReturnFlow rf = (StateMod_ReturnFlow)_data.elementAt(row);
+	StateMod_ReturnFlow rf = (StateMod_ReturnFlow)_data.get(row);
 	switch (col) {
 		case COL_RIVER_NODE:	return rf.getCrtnid();
 		case COL_RETURN_PCT:	return new Double(rf.getPcttot());
@@ -268,7 +265,7 @@ public void setValueAt(Object value, int row, int col)
 	int index;
 	String s;
 
-	StateMod_ReturnFlow rf = (StateMod_ReturnFlow)_data.elementAt(row);
+	StateMod_ReturnFlow rf = (StateMod_ReturnFlow)_data.get(row);
 	switch (col) {
 		case COL_RIVER_NODE:	
 			/*

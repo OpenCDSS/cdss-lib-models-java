@@ -64,6 +64,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -230,7 +231,7 @@ exist.
 */
 private int checkInput() {
 	String routine = "StateMod_InstreamFlow_Right_JFrame.checkInput";
-	Vector v = __worksheet.getAllData();
+	List v = __worksheet.getAllData();
 
 	int size = v.size();
 	StateMod_InstreamFlowRight right = null;
@@ -241,7 +242,7 @@ private int checkInput() {
 	String adminNum;
 	int fatalCount = 0;
 	for (int i = 0; i < size; i++) {
-		right = (StateMod_InstreamFlowRight)(v.elementAt(i));
+		right = (StateMod_InstreamFlowRight)(v.get(i));
 
 		id = right.getID();
 		name = right.getName();
@@ -331,8 +332,8 @@ private boolean saveData() {
 	boolean needToSave = false;
 
 	// if the Vectors are differently-sized, they're different
-	Vector wv = __worksheet.getAllData();		// w for worksheet
-	Vector iv = __currentInstreamFlow.getRights();	// i for instream flow
+	List wv = __worksheet.getAllData();		// w for worksheet
+	List iv = __currentInstreamFlow.getRights();	// i for instream flow
 
 	needToSave = !(StateMod_InstreamFlowRight.equals(wv, iv));
 
@@ -346,13 +347,13 @@ private boolean saveData() {
 
 	// at this point, remove the old diversion rights from the original
 	// component Vector
-	Vector instreamFlowRights =
-		(Vector)(__dataset.getComponentForComponentType(
+	List instreamFlowRights =
+		(List)(__dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_INSTREAM_RIGHTS)).getData();
 	int size = iv.size();
 	StateMod_InstreamFlowRight ir;
 	for (int i = 0; i < size; i++) {
-		ir = (StateMod_InstreamFlowRight)iv.elementAt(i);
+		ir = (StateMod_InstreamFlowRight)iv.get(i);
 		StateMod_Util.removeFromVector(instreamFlowRights, ir);
 	}
 
@@ -361,7 +362,7 @@ private boolean saveData() {
 	size = wv.size();
 	StateMod_InstreamFlowRight cir = null;
 	for (int i = 0; i < size; i++) {
-		ir = (StateMod_InstreamFlowRight)wv.elementAt(i);
+		ir = (StateMod_InstreamFlowRight)wv.get(i);
 		cir = (StateMod_InstreamFlowRight)(ir.clone());
 		cir._isClone = false;
 		instreamFlowRights.add(cir);
@@ -371,7 +372,7 @@ private boolean saveData() {
 	// REVISIT (JTS - 2003-10-10)
 	// here we are sorting the full data array -- may be a performance
 	// issue
-	Vector sorted=StateMod_Util.sortStateMod_DataVector(instreamFlowRights);
+	List sorted=StateMod_Util.sortStateMod_DataVector(instreamFlowRights);
 	__dataset.getComponentForComponentType(StateMod_DataSet.COMP_INSTREAM_RIGHTS)
 		.setData(sorted);
 	__currentInstreamFlow.disconnectRights();
@@ -516,11 +517,11 @@ private void setupGUI() {
 	int[] widths = null;
 	JScrollWorksheet jsw = null;
 	try {
-		Vector v = new Vector();
-		Vector v2 = __currentInstreamFlow.getRights();
+		List v = new Vector();
+		List v2 = __currentInstreamFlow.getRights();
 		for (int i = 0; i < v2.size(); i++) {
 			v.add(((StateMod_InstreamFlowRight)
-				(v2.elementAt(i))).clone());
+				(v2.get(i))).clone());
 		}	
 		StateMod_InstreamFlowRight_TableModel tmi = new
 			StateMod_InstreamFlowRight_TableModel(
@@ -542,7 +543,7 @@ private void setupGUI() {
 	__worksheet.addMouseListener(this);	
 	__worksheet.addKeyListener(this);
 
-	Vector v = new Vector();
+	List v = new Vector();
 	v.add("0 - Off");
 	v.add("1 - On");
 	__worksheet.setColumnJComboBoxValues(

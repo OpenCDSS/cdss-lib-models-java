@@ -61,6 +61,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -150,7 +151,7 @@ Data set window manager.
 private StateMod_DataSet_WindowManager __dataset_wm;
 
 private DataSetComponent __riverNetworkNodeComponent;
-private Vector __riverNetworkNodesVector;
+private List __riverNetworkNodesVector;
 
 private JTextField __idJTextField;
 private JTextField __nameJTextField;
@@ -193,13 +194,13 @@ public StateMod_RiverNetworkNode_JFrame (
 	__dataset_wm = dataset_wm;
 	__riverNetworkNodeComponent = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_RIVER_NETWORK);
-	__riverNetworkNodesVector=(Vector)__riverNetworkNodeComponent.getData();
+	__riverNetworkNodesVector=(List)__riverNetworkNodeComponent.getData();
 
 	int size = __riverNetworkNodesVector.size();
 	StateMod_RiverNetworkNode r = null;
 	for (int i = 0; i < size; i++) {
 		r = (StateMod_RiverNetworkNode)
-			__riverNetworkNodesVector.elementAt(i);
+			__riverNetworkNodesVector.get(i);
 		r.createBackup();
 	}
 
@@ -222,13 +223,13 @@ StateMod_RiverNetworkNode node, boolean editable) {
 	__dataset = dataset;
 	__riverNetworkNodeComponent = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_RIVER_NETWORK);
-	__riverNetworkNodesVector=(Vector)__riverNetworkNodeComponent.getData();
+	__riverNetworkNodesVector=(List)__riverNetworkNodeComponent.getData();
 
 	int size = __riverNetworkNodesVector.size();
 	StateMod_RiverNetworkNode r = null;
 	for (int i = 0; i < size; i++) {
 		r = (StateMod_RiverNetworkNode)
-			__riverNetworkNodesVector.elementAt(i);
+			__riverNetworkNodesVector.get(i);
 		r.createBackup();
 	}
 
@@ -259,7 +260,7 @@ public void actionPerformed(ActionEvent e) {
 		boolean changed = false;
 		for (int i = 0; i < size; i++) {
 			r = (StateMod_RiverNetworkNode)
-				__riverNetworkNodesVector.elementAt(i);
+				__riverNetworkNodesVector.get(i);
 			if (!changed && r.changed()) {
 				changed = true;
 			}
@@ -282,7 +283,7 @@ public void actionPerformed(ActionEvent e) {
 		boolean changed = false;
 		for (int i = 0; i < size; i++) {
 			r = (StateMod_RiverNetworkNode)
-				__riverNetworkNodesVector.elementAt(i);
+				__riverNetworkNodesVector.get(i);
 			if (!changed && r.changed()) {
 				changed = true;
 			}
@@ -297,7 +298,7 @@ public void actionPerformed(ActionEvent e) {
 		StateMod_RiverNetworkNode r = null;
 		for (int i = 0; i < size; i++) {
 			r = (StateMod_RiverNetworkNode)
-				__riverNetworkNodesVector.elementAt(i);
+				__riverNetworkNodesVector.get(i);
 			r.restoreOriginal();
 		}			
 		if ( __dataset_wm != null ) {
@@ -332,7 +333,7 @@ data object.
 @return true if the text fields are okay, false if not.
 */
 private boolean checkInput() {
-	Vector errors = new Vector();
+	List errors = new Vector();
 	int errorCount = 0;
 
 	// for each field, check if it contains valid input.  If not,
@@ -351,7 +352,7 @@ private boolean checkInput() {
 	String label = "The following error" + plural + "encountered "
 		+ "trying to save the record:\n";
 	for (int i = 0; i < errorCount; i++) {
-		label += errors.elementAt(i) + "\n";
+		label += errors.get(i) + "\n";
 	}
 	new ResponseJDialog(this, 
 		"Errors encountered", label, ResponseJDialog.OK);
@@ -497,7 +498,7 @@ Message.printStatus(1, "", "Index: " + index);
 		__editable);	
 
 	StateMod_RiverNetworkNode rnn = (StateMod_RiverNetworkNode) 
-		__riverNetworkNodesVector.elementAt(__currentStationIndex);
+		__riverNetworkNodesVector.get(__currentStationIndex);
 
 	__idJTextField.setText(rnn.getID());
 	__nameJTextField.setText(rnn.getName());
@@ -537,7 +538,7 @@ private void saveInformation(int record) {
 	}
 
 	StateMod_RiverNetworkNode rnn = (StateMod_RiverNetworkNode) 
-		__riverNetworkNodesVector.elementAt(record);
+		__riverNetworkNodesVector.get(record);
 
 Message.printStatus(1, "", "Setting " + record + " cstadn: " 
 	+ __nodeJTextField.getText());
@@ -827,7 +828,7 @@ public void windowClosing(WindowEvent e) {
 	boolean changed = false;
 	for (int i = 0; i < size; i++) {
 		r = (StateMod_RiverNetworkNode)
-			__riverNetworkNodesVector.elementAt(i);
+			__riverNetworkNodesVector.get(i);
 		if (!changed && r.changed()) {
 			changed = true;
 		}

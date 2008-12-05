@@ -20,7 +20,7 @@
 
 package DWR.StateCU;
 
-import java.util.Vector;
+import java.util.List;
 
 import DWR.StateMod.StateMod_Data_JFrame;
 import RTi.Util.GUI.JScrollWorksheet;
@@ -40,8 +40,7 @@ Constructor.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateCU_Location_Data_JFrame(Vector data, String titleString,
-boolean editable)
+public StateCU_Location_Data_JFrame(List data, String titleString, boolean editable)
 throws Exception {
 	super(data, titleString, editable);
 	setSize(774, getHeight());
@@ -50,44 +49,39 @@ throws Exception {
 }
 
 /**
-Called when the Apply button is pressed. This commits any changes to the data
-objects.
+Called when the Apply button is pressed. This commits any changes to the data objects.
 */
 protected void apply() {
 	StateCU_Location station = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		station = (StateCU_Location)_data.elementAt(i);
+		station = (StateCU_Location)_data.get(i);
 		station.createBackup();
 	}
 }
 
 /**
 Creates a JScrollWorksheet for the current data and returns it.
-@return a JScrollWorksheet containing the data Vector passed in to the 
-constructor.
+@return a JScrollWorksheet containing the data Vector passed in to the constructor.
 */
 protected JScrollWorksheet buildJScrollWorksheet() 
 throws Exception {
 
-	StateCU_Location_TableModel tableModel 
-		= new StateCU_Location_TableModel(_data, _editable, false);
-	StateCU_Location_CellRenderer cellRenderer 
-		= new StateCU_Location_CellRenderer(tableModel);
+	StateCU_Location_TableModel tableModel = new StateCU_Location_TableModel(_data, _editable, false);
+	StateCU_Location_CellRenderer cellRenderer = new StateCU_Location_CellRenderer(tableModel);
 
 	// _props is defined in the super class
 	return new JScrollWorksheet(cellRenderer, tableModel, _props);
 }
 
 /**
-Called when the cancel button is pressed.  This discards any changes made to 
-the data objects.
+Called when the cancel button is pressed.  This discards any changes made to the data objects.
 */
 protected void cancel() {
 	StateCU_Location station = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		station = (StateCU_Location)_data.elementAt(i);
+		station = (StateCU_Location)_data.get(i);
 		station.restoreOriginal();
 	}
 }
@@ -100,7 +94,7 @@ protected void createDataBackup() {
 	StateCU_Location station = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		station = (StateCU_Location)_data.elementAt(i);
+		station = (StateCU_Location)_data.get(i);
 		station.createBackup();
 	}
 }

@@ -96,6 +96,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -234,7 +235,7 @@ private StateMod_DataSet_WindowManager __dataset_wm;
 /**
 Vector of stream gage station data to display in the form.
 */
-private Vector __streamGageStationsVector;
+private List __streamGageStationsVector;
 
 /**
 The index in __disables[] of textfields and other components that should NEVER
@@ -268,11 +269,11 @@ public StateMod_StreamGage_JFrame (	StateMod_DataSet dataset,
 	__streamGageStationComponent = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_STREAMGAGE_STATIONS);
 	__streamGageStationsVector =
-		(Vector)__streamGageStationComponent.getData();
+		(List)__streamGageStationComponent.getData();
 	int size = __streamGageStationsVector.size();
 	StateMod_StreamGage s = null;
 	for (int i = 0; i < size; i++) {
-		s =(StateMod_StreamGage)__streamGageStationsVector.elementAt(i);
+		s =(StateMod_StreamGage)__streamGageStationsVector.get(i);
 		s.createBackup();
 	}
 	__editable = editable;
@@ -295,11 +296,11 @@ StateMod_StreamGage station, boolean editable) {
 	__streamGageStationComponent = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_STREAMGAGE_STATIONS);
 	__streamGageStationsVector =
-		(Vector)__streamGageStationComponent.getData();
+		(List)__streamGageStationComponent.getData();
 	int size = __streamGageStationsVector.size();
 	StateMod_StreamGage s = null;
 	for (int i = 0; i < size; i++) {
-		s =(StateMod_StreamGage)__streamGageStationsVector.elementAt(i);
+		s =(StateMod_StreamGage)__streamGageStationsVector.get(i);
 		s.createBackup();
 	}
 
@@ -337,7 +338,7 @@ public void actionPerformed(ActionEvent e) {
 		boolean changed = false;
 		for (int i = 0; i < size; i++) {
 			s = (StateMod_StreamGage)
-				__streamGageStationsVector.elementAt(i);
+				__streamGageStationsVector.get(i);
 			if (!changed && s.changed()) {
 				changed = true;
 			}
@@ -354,7 +355,7 @@ public void actionPerformed(ActionEvent e) {
 		StateMod_StreamGage s = null;
 		for (int i = 0; i < size; i++) {
 			s = (StateMod_StreamGage)
-				__streamGageStationsVector.elementAt(i);
+				__streamGageStationsVector.get(i);
 			s.restoreOriginal();
 		}			
 		if (__dataset_wm != null) {
@@ -372,7 +373,7 @@ public void actionPerformed(ActionEvent e) {
 		boolean changed = false;
 		for (int i = 0; i < size; i++) {
 			s = (StateMod_StreamGage)
-				__streamGageStationsVector.elementAt(i);
+				__streamGageStationsVector.get(i);
 			if (!changed && s.changed()) {
 				changed = true;
 			}
@@ -415,7 +416,7 @@ data object.
 @return true if the text fields are okay, false if not.
 */
 private boolean checkInput() {
-	Vector errors = new Vector();
+	List errors = new Vector();
 	int errorCount = 0;
 
 	// for each field, check if it contains valid input.  If not,
@@ -434,7 +435,7 @@ private boolean checkInput() {
 	String label = "The following error" + plural + "encountered "
 		+ "trying to save the record:\n";
 	for (int i = 0; i < errorCount; i++) {
-		label += errors.elementAt(i) + "\n";
+		label += errors.get(i) + "\n";
 	}
 	new ResponseJDialog(this, 
 		"Errors encountered", label, ResponseJDialog.OK);
@@ -492,7 +493,7 @@ private void displayTSViewJFrame(Object o)
 	}
 
 	StateMod_StreamGage sta = (StateMod_StreamGage)
-		__streamGageStationsVector.elementAt(__currentStationIndex);
+		__streamGageStationsVector.get(__currentStationIndex);
 
 	// display_props.set("HelpKey", "TSTool.ExportMenu");
 	display_props.set("TSViewTitleString",
@@ -507,7 +508,7 @@ private void displayTSViewJFrame(Object o)
 	props.set("Product.TotalWidth", "600");
 	props.set("Product.TotalHeight", "400");
 
-	Vector tslist = new Vector();
+	List tslist = new Vector();
 
 	int sub = 0;
 	int its = 0;
@@ -710,13 +711,13 @@ private void populateCrunidyComboBox() {
 	__crunidyComboBox.add("4 - Daily time series interpolated from "
 		+ "midpoints of monthly data");
 
-	Vector idNameVector = StateMod_Util.createDataList(
+	List idNameVector = StateMod_Util.createDataList(
 		__streamGageStationsVector, true);
 	int size = idNameVector.size();
 
 	String s = null;
 	for (int i = 0; i < size; i++) {
-		s = (String)idNameVector.elementAt(i);
+		s = (String)idNameVector.get(i);
 		__crunidyComboBox.add(s.trim());
 	}
 }
@@ -742,7 +743,7 @@ private void processTableSelection(int index) {
 	saveLastRecord();
 
 	StateMod_StreamGage r = (StateMod_StreamGage)
-		__streamGageStationsVector.elementAt(__currentStationIndex);
+		__streamGageStationsVector.get(__currentStationIndex);
 
 	JGUIUtil.enableComponents(__disables, __textUneditables,
 		__editable);	
@@ -845,7 +846,7 @@ private void saveInformation(int record) {
 	}
 
 	StateMod_StreamGage r = (StateMod_StreamGage)
-		__streamGageStationsVector.elementAt(record);
+		__streamGageStationsVector.get(record);
 
 	r.setName(__nameJTextField.getText());
 	r.setCgoto(__cgotoJTextField.getText());
@@ -1271,7 +1272,7 @@ public void windowClosing(WindowEvent e)
 	boolean changed = false;
 	for (int i = 0; i < size; i++) {
 		s = (StateMod_StreamGage)
-			__streamGageStationsVector.elementAt(i);
+			__streamGageStationsVector.get(i);
 		if (!changed && s.changed()) {
 			changed = true;
 		}

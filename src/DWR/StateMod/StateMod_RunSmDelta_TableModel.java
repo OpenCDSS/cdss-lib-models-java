@@ -28,6 +28,7 @@ package DWR.StateMod;
 
 import java.awt.Color;
 import java.io.File;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JFileChooser;
@@ -62,7 +63,7 @@ private JWorksheet __worksheet;
 /**
 Vectors of data for filling ID lists.
 */
-private Vector 
+private List 
 	__reservoirs,
 	__diversions,
 	__instreamFlows,
@@ -72,7 +73,7 @@ private Vector
 /**
 ID lists to be displayed in the combo boxes.
 */
-private Vector
+private List
 	__reservoirIDs = null,
 	__diversionIDs = null,
 	__instreamFlowIDs = null,
@@ -103,8 +104,8 @@ Constructor.
 @throws Exception if an invalid data or dmi was passed in.
 */
 public StateMod_RunSmDelta_TableModel(StateMod_RunSmDelta_JFrame parent,
-Vector data, Vector reservoirs, Vector diversions, Vector instreamFlows,
-Vector streamGages, Vector wells)
+List data, List reservoirs, List diversions, List instreamFlows,
+List streamGages, List wells)
 throws Exception {
 	__parent = parent;
 
@@ -172,9 +173,9 @@ private String browseForFile() {
 }
 
 /**
-Checks to see if a row can be added to the table.  Rows cannot be added if the
-first row is not fully filled out.  
-REVISIT (JTS - 2006-03-06)
+Checks to see if a row can be added to the table.  Rows cannot be added if the first row is not fully
+filled out.  
+TODO (JTS - 2006-03-06)
 I think this is bad code.  I think the elementAt() call should return the 
 last data value -- as it is, it is only checking that the first row is 
 set up properly.
@@ -184,7 +185,7 @@ public boolean canAddRow() {
 	if (_rows == 0) {
 		return true;
 	}
-	StateMod_GraphNode gn = (StateMod_GraphNode)_data.elementAt(0);
+	StateMod_GraphNode gn = (StateMod_GraphNode)_data.get(0);
 	if (gn.getFileName().trim().equals("")) {
 		return false;
 	}
@@ -232,14 +233,13 @@ public void copyDownComboBoxes() {
 }
 
 /**
-Creates a list of the available IDs for a Vector of StateMod_Data-extending
-objects.
+Creates a list of the available IDs for a Vector of StateMod_Data-extending objects.
 @param nodes the nodes for which to create a list of IDs.
 @return a Vector of Strings, each of which contains an ID followed by the 
 name of Structure in parentheses
 */
-private Vector createAvailableIDsList(Vector nodes) {
-	Vector v = new Vector();
+private List createAvailableIDsList(List nodes) {
+	List v = new Vector();
 
 	int num = 0;
 	if (nodes != null) {
@@ -249,8 +249,8 @@ private Vector createAvailableIDsList(Vector nodes) {
 	v.add("0 (All)");
 
 	for (int i = 0; i < num; i++) {
-		v.add(((StateMod_Data)nodes.elementAt(i)).getID() + " (" 
-			+ ((StateMod_Data)nodes.elementAt(i)).getName() + ")");
+		v.add(((StateMod_Data)nodes.get(i)).getID() + " (" 
+			+ ((StateMod_Data)nodes.get(i)).getName() + ")");
 	}
 	return v;
 }
@@ -287,7 +287,7 @@ Fills the parameter column in the given row based on the station type selected f
 @param type the type of the station in the given row.
 */
 public void fillParameterColumn(int row, String type) {
-	Vector datatypes = new Vector();
+	List datatypes = new Vector();
 
 	// Get the model output data types (no input since SmDelta deals with output).
 	if (type.equalsIgnoreCase("Diversion")) {
@@ -309,14 +309,14 @@ public void fillParameterColumn(int row, String type) {
 		datatypes = StateMod_GraphNode.getGraphDataType(StateMod_GraphNode.STREAM_TYPE, false);
 	}
 
-	Vector finalTypes = new Vector();
+	List finalTypes = new Vector();
 	finalTypes.add("");
 
 	for (int i = 0; i < datatypes.size(); i++) {
 		// FIXME SAM 2008-03-20 No need to remove underscores for newer versions of StateMod, right?.
 		// Use data types from binary file.
 		//finalTypes.add(((String)datatypes.elementAt(i)).replace('_', ' '));
-		finalTypes.add(datatypes.elementAt(i));
+		finalTypes.add(datatypes.get(i));
 	}
 
 	if (__worksheet != null) {
@@ -331,7 +331,7 @@ Fills the ID column based on the kind of structure selected.
 @param type the type of structure selected (column 1)
 */
 public void fillIDColumn(int row, String type) {
-	Vector ids = new Vector();
+	List ids = new Vector();
 	if (type.equalsIgnoreCase("Diversion")) {
 		if (__diversionIDs == null) {
 			__diversionIDs = createAvailableIDsList(__diversions);
@@ -364,11 +364,11 @@ public void fillIDColumn(int row, String type) {
 	}
 	else if (type.equalsIgnoreCase("Stream ID (0* Gages)")) {
 		if (__streamflow0IDs == null) {
-			Vector v = createAvailableIDsList(__streamGages);
+			List v = createAvailableIDsList(__streamGages);
 			String s = null;
 			__streamflow0IDs = new Vector();
 			for (int i = 0; i < v.size(); i++) {
-				s = (String)v.elementAt(i);
+				s = (String)v.get(i);
 				if (s.startsWith("0")) {
 					__streamflow0IDs.add(s);
 				}
@@ -388,7 +388,7 @@ read from a delta plot file.
 @param fileData the fileData to process.
 @return a Vector of objects suitable for use within a form.
 */
-public Vector formLoadData(Vector fileData) {
+public List formLoadData(List fileData) {
 	int rows = fileData.size();
 
 	if (rows == 0 ) {
@@ -396,7 +396,7 @@ public Vector formLoadData(Vector fileData) {
 	}
 
 	// gnf will be a node used to read data FROM the _F_ile nodes
-	StateMod_GraphNode gnf = (StateMod_GraphNode)fileData.elementAt(0);
+	StateMod_GraphNode gnf = (StateMod_GraphNode)fileData.get(0);
 
 	String pfile = "";
 	String ptype = "";
@@ -410,12 +410,12 @@ public Vector formLoadData(Vector fileData) {
 	// gnw will be a node used for creating the _W_orksheet nodes
 	StateMod_GraphNode gnw = null;
 
-	Vector v = new Vector();
+	List v = new Vector();
 
 	int ids = 0;
 
 	for (int i = 0; i < rows; i++) {
-		gnf = (StateMod_GraphNode)fileData.elementAt(i);
+		gnf = (StateMod_GraphNode)fileData.get(i);
 		ids = gnf.getIDVectorSize();
 
 		file = gnf.getFileName().trim();
@@ -476,7 +476,7 @@ Saves form data to the data set.
 @param worksheetData the data in the worksheet to save.
 @return a Vector of data objects created from the data in the worksheet.
 */
-public Vector formSaveData(Vector worksheetData) {
+public List formSaveData(List worksheetData) {
 	int rows = worksheetData.size();
 	
 	if (rows == 0) {
@@ -484,7 +484,7 @@ public Vector formSaveData(Vector worksheetData) {
 	}
 
 	// gnw will be a node used to read data FROM the _W_orksheet nodes
-	StateMod_GraphNode gnw = (StateMod_GraphNode)worksheetData.elementAt(0);
+	StateMod_GraphNode gnw = (StateMod_GraphNode)worksheetData.get(0);
 
 	String pfile = gnw.getFileName().trim();
 	String ptype = gnw.getType().trim();
@@ -512,10 +512,10 @@ public Vector formSaveData(Vector worksheetData) {
 		gno.addID(pid);
 	}
 
-	Vector v = new Vector();
+	List v = new Vector();
 
 	for (int i = 1; i < rows; i++) {
-		gnw = (StateMod_GraphNode)worksheetData.elementAt(i);
+		gnw = (StateMod_GraphNode)worksheetData.get(i);
 
 		file = gnw.getFileName().trim();
 		if (file.equals("")) {
@@ -582,8 +582,7 @@ public Vector formSaveData(Vector worksheetData) {
 }
 
 /**
-From AbstractTableModel.  Returns the class of the data stored in a given
-column.
+From AbstractTableModel.  Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 */
 public Class getColumnClass (int columnIndex) {
@@ -676,7 +675,7 @@ public Object getValueAt(int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	StateMod_GraphNode gn = (StateMod_GraphNode)_data.elementAt(row);
+	StateMod_GraphNode gn = (StateMod_GraphNode)_data.get(row);
 
 	switch (col) {
 		case COL_FILE:	return gn.getFileName();
@@ -860,13 +859,11 @@ public void setValueAt(Object value, int row, int col) {
 	}
 
 	if (row >= _data.size()) {
-		// this is probably happening as a result of an edit that
-		// did not end in time.
+		// this is probably happening as a result of an edit that did not end in time.
 	}
 	
-	StateMod_GraphNode gn = (StateMod_GraphNode)_data.elementAt(row);
-//Message.printStatus(1, "", 
-//	"Set value at: " + row + ", " + col + " '" + value + "'");
+	StateMod_GraphNode gn = (StateMod_GraphNode)_data.get(row);
+//Message.printStatus(1, "", "Set value at: " + row + ", " + col + " '" + value + "'");
 	switch (col) {
 		case COL_FILE:	
 			String filename = (String)value;

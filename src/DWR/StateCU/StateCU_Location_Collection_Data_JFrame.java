@@ -13,15 +13,14 @@
 
 package DWR.StateCU;
 
-import java.util.Vector;
+import java.util.List;
 
 import DWR.StateMod.StateMod_Data_JFrame;
 import RTi.Util.GUI.JScrollWorksheet;
 
 /**
 This class is a JFrame for displaying a Vector of StateCU_Location 
-collection data in a worksheet.  The worksheet data can be exported to 
-a file or printed.
+collection data in a worksheet.  The worksheet data can be exported to a file or printed.
 */
 public class StateCU_Location_Collection_Data_JFrame 
 extends StateMod_Data_JFrame {
@@ -34,8 +33,7 @@ Constructor.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateCU_Location_Collection_Data_JFrame(Vector data, 
-String titleString, boolean editable)
+public StateCU_Location_Collection_Data_JFrame(List data, String titleString, boolean editable)
 throws Exception {
 	super(data, titleString, editable);
 	setSize(486, getHeight());
@@ -49,7 +47,7 @@ protected void apply() {
 	StateCU_Location station = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		station = (StateCU_Location)_data.elementAt(i);
+		station = (StateCU_Location)_data.get(i);
 		station.createBackup();
 	}
 }
@@ -61,9 +59,7 @@ constructor.
 */
 protected JScrollWorksheet buildJScrollWorksheet() 
 throws Exception {
-	StateCU_Location_Collection_TableModel tableModel 
-		= new StateCU_Location_Collection_TableModel(_data, 
-		_editable);
+	StateCU_Location_Collection_TableModel tableModel = new StateCU_Location_Collection_TableModel(_data, _editable);
 	StateCU_Location_Collection_CellRenderer cellRenderer 
 		= new StateCU_Location_Collection_CellRenderer(tableModel);
 
@@ -72,27 +68,25 @@ throws Exception {
 }
 
 /**
-Called when the cancel button is pressed.  This discards any changes made to 
-the data objects.
+Called when the cancel button is pressed.  This discards any changes made to the data objects.
 */
 protected void cancel() {
 	StateCU_Location station = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		station = (StateCU_Location)_data.elementAt(i);
+		station = (StateCU_Location)_data.get(i);
 		station.restoreOriginal();
 	}
 }
 
 /**
-Creates backups of all the data objects in the Vector so that changes can 
-later be cancelled if necessary.
+Creates backups of all the data objects in the Vector so that changes can later be cancelled if necessary.
 */
 protected void createDataBackup() {
 	StateCU_Location station = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		station = (StateCU_Location)_data.elementAt(i);
+		station = (StateCU_Location)_data.get(i);
 		station.createBackup();
 	}
 }

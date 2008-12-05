@@ -17,7 +17,7 @@
 
 package DWR.StateCU;
 
-import java.util.Vector;
+import java.util.List;
 
 import DWR.StateMod.StateMod_Data;
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
@@ -57,10 +57,9 @@ component, the group component will be determined.
 @param comp the DataSetComponent to be displayed.
 @throws Exception an invalid component is passed in.
 */
-public StateCU_DataSetComponent_TableModel (	StateCU_DataSet dataset,
-						DataSetComponent comp )
+public StateCU_DataSetComponent_TableModel ( StateCU_DataSet dataset, DataSetComponent comp )
 throws Exception
-{	Vector data = null;
+{	List data = null;
 	String routine = "StateCU_DataSetComponent_TableModel";
 	// Make sure that the list is for a group component...
 	if ( (comp != null) && !comp.isGroup() ) {
@@ -68,7 +67,8 @@ throws Exception
 		Message.printStatus ( 1, routine,
 		"Component is not a group.  Parent is:  "  + __component_group);
 	}
-	else {	__component_group = comp;
+	else {
+		__component_group = comp;
 	}
 	if ( __component_group == null ) {
 		_rows = 0;
@@ -77,39 +77,38 @@ throws Exception
 	}
 	// Figure out the data component that is actually used to get the list
 	// of data objects.  For example, if working on climate stations, there
-	// is no list with the group so we need to use the climate stations
-	// component list...
+	// is no list with the group so we need to use the climate stations component list...
 	int comptype = dataset.lookupPrimaryComponentTypeForComponentGroup
 		( __component_group.getComponentType() );
 	if ( comptype >= 0 ) {
 		__component = dataset.getComponentForComponentType ( comptype );
 	}
-	else {	comp = null;
+	else {
+		comp = null;
 		Message.printWarning ( 2, routine,
-		"Unable to find primary component for group:  " +
-		__component_group.getComponentName() );
+		"Unable to find primary component for group:  " + __component_group.getComponentName() );
 	}
 	if ( __component == null ) {
 		_rows = 0;
 	}
-	else {	data = ((Vector)__component.getData());
+	else {
+		data = ((List)__component.getData());
 		if ( data == null ) {
 			_rows = 0;
 		}
-		else {	_rows = data.size();
+		else {
+			_rows = data.size();
 		}
 	}
 	_data = data;
 }
 
 /**
-From AbstractTableModel.  Returns the class of the data stored in a given
-column.
+From AbstractTableModel.  Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 */
 public Class getColumnClass (int columnIndex)
-{	// REVISIT - expand this to handle data set component properties for the
-	// ID, name, etc. columns
+{	// TODO - expand this to handle data set component properties for the ID, name, etc. columns
 	switch (columnIndex) {
 		case __COL_ID:		return String.class;	// ID
 		case __COL_NAME:	return String.class;	// Name
@@ -165,8 +164,7 @@ public int getRowCount() {
 }
 
 /**
-From AbstractTableMode.  Returns the data that should be placed in the JTable
-at the given row and column.
+From AbstractTableMode.  Returns the data that should be placed in the JTable at the given row and column.
 @param row the row for which to return data.
 @param col the column for which to return data.
 @return the data that should be placed in the JTable at the given row and col.
@@ -178,10 +176,9 @@ public Object getValueAt(int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	if (	__component.getComponentType() ==
-		StateCU_DataSet.COMP_DELAY_TABLES_MONTHLY ) {
+	if ( __component.getComponentType() == StateCU_DataSet.COMP_DELAY_TABLES_MONTHLY ) {
 		// StateMod_Data...
-		StateMod_Data data = (StateMod_Data)_data.elementAt(row);
+		StateMod_Data data = (StateMod_Data)_data.get(row);
 		switch (col) {
 			// case 0 handled above.
 			case __COL_ID:		return data.getID();
@@ -189,8 +186,9 @@ public Object getValueAt(int row, int col) {
 			default:	return "";
 		}
 	}
-	else {	// StateCU_Data...
-		StateCU_Data data = (StateCU_Data)_data.elementAt(row);
+	else {
+		// StateCU_Data...
+		StateCU_Data data = (StateCU_Data)_data.get(row);
 		switch (col) {
 			case __COL_ID:		return data.getID();
 			case __COL_NAME: 	return data.getName();
@@ -210,4 +208,4 @@ public int[] getColumnWidths() {
 	return widths;
 }
 
-} // End StateCU_DataSetComponent_TableModel
+}

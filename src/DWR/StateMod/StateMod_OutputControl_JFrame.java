@@ -110,6 +110,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JCheckBox;
@@ -326,7 +327,7 @@ public void actionPerformed(ActionEvent ae) {
 		__dirty = false;
 		__tableModel.setDirty(false);
 		
-		Vector theGraphNodes = __worksheet.getAllData();	
+		List theGraphNodes = __worksheet.getAllData();	
 
 		try {	
 			StateMod_GraphNode.writeStateModOutputControlFile(null, 
@@ -385,7 +386,7 @@ public void actionPerformed(ActionEvent ae) {
 
 		__dirty = false;
 
-		Vector theGraphNodes = new Vector(20, 1);
+		List theGraphNodes = new Vector(20, 1);
 		
 		try {	
 			__worksheet.clear();
@@ -400,7 +401,7 @@ public void actionPerformed(ActionEvent ae) {
 			for (int i = 0; i < size; i++) {
 				row = __worksheet.getRowCount();
 				g = (StateMod_GraphNode)theGraphNodes
-					.elementAt(i);
+					.get(i);
 				if (i == 0) {
 					if (g.getID().equals("All")) {
 						__useAllJCheckBox.setSelected(
@@ -450,12 +451,11 @@ public void actionPerformed(ActionEvent ae) {
 		else {
 			__addRowButton.setEnabled(true);
 			__deleteRowButton.setEnabled(true);
-			Vector v = StateMod_Util.arrayToVector(
-				StateMod_GraphNode.node_types);
+			List v = StateMod_Util.arrayToList ( StateMod_GraphNode.node_types);
 			v.add("Other");
 			__worksheet.setColumnJComboBoxValues(0, v);
 			__worksheet.clear();
-			Vector offOn = new Vector();
+			List offOn = new Vector();
 			offOn.add("Off");
 			offOn.add("On");
 			__worksheet.setCellEditable(0, 0, true);
@@ -602,7 +602,7 @@ private void setupGUI() {
 	try {
 		__tableModel = new
 			StateMod_OutputControl_TableModel(this, new Vector(),
-			(Vector)__riverNetworkComp.getData());
+			(List)__riverNetworkComp.getData());
 			
 		StateMod_OutputControl_CellRenderer cro = new
 			StateMod_OutputControl_CellRenderer(__tableModel);
@@ -610,14 +610,13 @@ private void setupGUI() {
 		jsw = new JScrollWorksheet(cro, __tableModel, p);		
 		__worksheet = jsw.getJWorksheet();
 
-		Vector v = StateMod_Util.arrayToVector(
-			StateMod_GraphNode.node_types);
+		List v = StateMod_Util.arrayToList(StateMod_GraphNode.node_types);
 		v.add("Other");
 		__worksheet.setColumnJComboBoxValues(0, v);
 
 		__worksheet.setCellSpecificJComboBoxColumn(1, false);
 
-		Vector offOn = new Vector();
+		List offOn = new Vector();
 		offOn.add("Off");
 		offOn.add("On");
 		__worksheet.setColumnJComboBoxValues(2, offOn);

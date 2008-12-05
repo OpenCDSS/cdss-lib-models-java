@@ -3,6 +3,7 @@ package DWR.StateMod;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.List;
 import java.util.Vector;
 
 import org.apache.xerces.parsers.DOMParser;
@@ -58,24 +59,24 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 	/**
 	Used in reading in an XML file.
 	*/
-	private static Vector __aggregateAnnotations = null;
+	private static List __aggregateAnnotations = null;
 
 	/**
 	Vector for aggregating layout information when reading statically from the
 	XML files.
 	*/
-	private static Vector __aggregateLayouts = null;
+	private static List __aggregateLayouts = null;
 
 	/**
 	Used in reading in an XML file.
 	*/
-	private static Vector __aggregateLinks = null;
+	private static List __aggregateLinks = null;
 
 	/**
 	Contains the nodes read from an XML file.  This is a static data member because
 	the method used to read in an XML file and create a network is static.
 	*/
-	private static Vector __aggregateNodes;
+	private static List __aggregateNodes;
 	
 	// End XML data
 	
@@ -155,7 +156,7 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 		// performance will be impacted by all the casts.  
 		HydrologyNode[] nodes = new HydrologyNode[size];
 		for (int i = 0; i < size; i++) {
-			nodes[i] = (HydrologyNode)__aggregateNodes.elementAt(i);
+			nodes[i] = (HydrologyNode)__aggregateNodes.get(i);
 			// FIXME 2008-03-15 Need to remove WIS code
 			//nodes[i].setInWIS(false);
 		}
@@ -194,7 +195,7 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 
 		// put the nodes back in a Vector for placement back into the 
 		// node network.
-		Vector v = new Vector();
+		List v = new Vector();
 		for (int i = 0; i < size; i++) {
 			v.add(nodes[i]);
 		}
@@ -211,13 +212,13 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 	REVISIT (JTS - 2004-07-03)<br>
 	Should not be a static returning a method, I think ...
 	*/
-	public static StateMod_NodeNetwork createFromStateModVector(Vector nodes) {
+	public static StateMod_NodeNetwork createFromStateModVector(List nodes) {
 		int size = nodes.size();
 		
 		HydrologyNode[] nodeArray = new HydrologyNode[size];
 		StateMod_RiverNetworkNode rnn = null;
 		for (int i = size - 1; i >= 0; i--) {
-			rnn = (StateMod_RiverNetworkNode)nodes.elementAt(i);
+			rnn = (StateMod_RiverNetworkNode)nodes.get(i);
 			nodeArray[i] = new HydrologyNode();
 			// FIXME 2008-03-15 Need to remove WIS code
 			//nodeArray[i].setInWIS(false);
@@ -240,7 +241,7 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 			}
 		}
 
-		Vector v = new Vector();
+		List v = new Vector();
 		for (int i = 0; i < size; i++) {
 			v.add(nodeArray[i]);
 		}
@@ -256,13 +257,13 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 	skipped.
 	@return the Vector of StateMod_RiverNodeNetwork nodes.
 	*/
-	public Vector createStateModRiverNetwork() {
+	public List createStateModRiverNetwork() {
 		boolean done = false;
 		HydrologyNode holdNode = null;
 		HydrologyNode node = getMostUpstreamNode();	
 		HydrologyNode dsNode = null;
 		StateMod_RiverNetworkNode rnn = null;
-		Vector v = new Vector();
+		List v = new Vector();
 		int node_type;		// Type for current node.
 		int dsNode_type;	// Type for downstream node.
 		HydrologyNode node_downstream = null;		// Used to find a real
@@ -852,7 +853,7 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 		String	message, 
 			nodeID, 
 			token0;
-		Vector	list, 
+		List	list, 
 			tokens;
 
 		__closeCount = 0;	// Number of closing curly-braces.
@@ -909,7 +910,7 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 			// ------------------------------------------------------------
 			// Now evaluate node-level commands...
 			// ------------------------------------------------------------
-			token0 = new String((String)tokens.elementAt(0));
+			token0 = new String((String)tokens.get(0));
 			if (Message.isDebugOn) {
 				Message.printDebug(dl, routine,
 					"token[0]=\"" + token0 + "\"");
@@ -919,7 +920,7 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 				continue;
 			}
 			if (token0.equalsIgnoreCase("DISTRICT")) {
-				wd = new String((String)tokens.elementAt(1));
+				wd = new String((String)tokens.get(1));
 				Message.printStatus(2, routine,
 					"Water district specified as " + wd);
 				//HMPrintWarning(1, routine,
@@ -928,8 +929,8 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 				continue;
 			}
 			else if (token0.equalsIgnoreCase("FONT")) {
-				setFont((String)tokens.elementAt(1),
-					StringUtil.atod((String)tokens.elementAt(2)));
+				setFont((String)tokens.get(1),
+					StringUtil.atod((String)tokens.get(2)));
 				continue;
 			}
 			else if (token0.equalsIgnoreCase("TEXT")) {
@@ -944,12 +945,12 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 				Message.printWarning(1, routine, message);
 				printCheck(routine, 'W', message);
 				setNodeDiam(StringUtil.atod(
-					(String)tokens.elementAt(1)));
+					(String)tokens.get(1)));
 				continue;
 			}
 			else if (token0.equalsIgnoreCase("NODEDIAM")) {
 				setNodeDiam(StringUtil.atod(
-					(String)tokens.elementAt(1)));
+					(String)tokens.get(1)));
 				continue;
 			}
 			else if (token0.equalsIgnoreCase("{")) {
@@ -1014,13 +1015,13 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 				// be called when recursing).
 
 				// with graphing
-				river.id = new String((String)tokens.elementAt(1));
+				river.id = new String((String)tokens.get(1));
 				Message.printStatus(2, routine, "Starting stream \"" 
 					+ river.id 
 					+ "\".  Building network upstream...");
-				numRiverNodes = StringUtil.atoi((String)tokens.elementAt(2));
-				river_dx = StringUtil.atod((String)tokens.elementAt(3));
-				river_dy = StringUtil.atod((String)tokens.elementAt(4));
+				numRiverNodes = StringUtil.atoi((String)tokens.get(2));
+				river_dx = StringUtil.atod((String)tokens.get(3));
+				river_dy = StringUtil.atod((String)tokens.get(4));
 				river.strx = x;
 				river.stry = y;
 				river.endx = x + river_dx;
@@ -1042,7 +1043,7 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 						"Resetting dx,dy to " + dx + "," + dy);
 				}
 				// Save the reach label...
-				storeLabel((String)tokens.elementAt(1), x, y,
+				storeLabel((String)tokens.get(1), x, y,
 					(x + river_dx),(y + river_dy));
 				// Plot the line for the river reach in the old plot
 				// file.  The nodes will plot on top and clear the line
@@ -1168,7 +1169,7 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 				else {	
 					if (Message.isDebugOn) {
 						Message.printDebug(1, routine,
-							"Added node \"" + (String)tokens.elementAt(0)
+							"Added node \"" + (String)tokens.get(0)
 							+ "\" nodeInReach=" + node.getNodeInReachNumber() 
 							+ " reachnum=" + node.getTributaryNumber() 
 							+ " reachCounter=" + node.getReachCounter() 
@@ -1210,7 +1211,7 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 					node.setNetID(token0);
 					Message.printStatus(2, routine,	"Processing node " + (getNodeCount() - 1) + ": " + token0);
 					// Get the node type. 
-					String token1 = (String)tokens.elementAt(1);
+					String token1 = (String)tokens.get(1);
 					if (token1.equalsIgnoreCase("BLANK")) {
 						node.setType(HydrologyNode.NODE_TYPE_BLANK);
 					}
@@ -1281,7 +1282,7 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 					}
 					// Now process the area*precip information...
 					if (!node.parseAreaPrecip(
-	  				    (String)tokens.elementAt(2))) {
+	  				    (String)tokens.get(2))) {
 						message = "Error processing area*"
 							+ "precip info for \""
 							+ node.getNetID() + "\"";
@@ -1291,7 +1292,7 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 					}
 					if (numTokens >= 4) {
 						dir = StringUtil.atoi(
-							(String)tokens.elementAt(3));
+							(String)tokens.get(3));
 					}
 					else {	
 						Message.printWarning(1, routine,
@@ -1304,9 +1305,9 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 					// (it is optional)...
 					if (numTokens >= 5) {
 						node.setDescription(
-							(String)tokens.elementAt(4));
+							(String)tokens.get(4));
 						node.setUserDescription(
-							(String)tokens.elementAt(4));
+							(String)tokens.get(4));
 					}
 					// Else defaults are empty descriptions.
 				}
@@ -1367,7 +1368,7 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 						node.getNetID(), ".", 0);
 					nlist = list.size();
 					if (nlist >= 1) {
-						nodeID = (String)list.elementAt(0);
+						nodeID = (String)list.get(0);
 					}
 					else {	
 						nodeID = new String(node.getNetID());
@@ -1687,13 +1688,13 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 	@return the tokens from the line
 	@throws IOException if there is an error reading the line from the file.
 	*/
-	public Vector readMakenetLineTokens(BufferedReader netfp) throws IOException {
+	public List readMakenetLineTokens(BufferedReader netfp) throws IOException {
 		String routine = "HydroBase_NodeNetwork.readMakenetLineTokens";
 		int	commentIndex = 0,
 			dl = 50, 
 			numTokens;
 		String lineString;
-		Vector tokens;
+		List tokens;
 
 		while (true) {
 			try {	
@@ -1819,7 +1820,7 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 			numnodes, 
 			reachLevel = 0;		
 		String token0;
-		Vector tokens;
+		List tokens;
 
 		// Create a blank node used for disappearing streams.  The identifiers
 		// will be empty strings...
@@ -1851,7 +1852,7 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 				// Blank line...
 				continue;
 			}
-			token0 = (String)tokens.elementAt(0);
+			token0 = (String)tokens.get(0);
 			if (Message.isDebugOn) {
 				Message.printDebug(10, routine,	"token[0]=\"" + token0 + "\"");
 			}
@@ -1896,11 +1897,11 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 					Message.printDebug(dl, routine,
 					"Found RIVER command");
 				}
-				numnodes = StringUtil.atoi((String)tokens.elementAt(2));
-				x0 = StringUtil.atod((String)tokens.elementAt(3));
-				y0 = StringUtil.atod((String)tokens.elementAt(4));
-				x1 = StringUtil.atod((String)tokens.elementAt(5));
-				y1 = StringUtil.atod((String)tokens.elementAt(6));
+				numnodes = StringUtil.atoi((String)tokens.get(2));
+				x0 = StringUtil.atod((String)tokens.get(3));
+				y0 = StringUtil.atod((String)tokens.get(4));
+				x1 = StringUtil.atod((String)tokens.get(5));
+				y1 = StringUtil.atod((String)tokens.get(6));
 
 				// Calculate the spacing of nodes on the main stem...
 				dx = (x1 - x0)/(double)(numnodes - 1);
@@ -1913,13 +1914,13 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 				if (Message.isDebugOn) {
 					Message.printDebug(dl, routine,	"Found TITLE command");
 				}
-				double fontSize = StringUtil.atod((String)tokens.elementAt(1));
-				double titleX = StringUtil.atod((String)tokens.elementAt(2));
-				double titleY = StringUtil.atod((String)tokens.elementAt(3));
-				String title = (String)tokens.elementAt(4);
+				double fontSize = StringUtil.atod((String)tokens.get(1));
+				double titleX = StringUtil.atod((String)tokens.get(2));
+				double titleY = StringUtil.atod((String)tokens.get(3));
+				String title = (String)tokens.get(4);
 				for (int i = 5; i < numTokens; i++) {
 					title = title + " ";
-					title = title + (String)tokens.elementAt(i);
+					title = title + (String)tokens.get(i);
 				}
 				setFont ( null, fontSize );
 				setTitle ( title );
@@ -2045,7 +2046,7 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 				+ unset);
 		}
 
-		HydrologyNode node = (HydrologyNode)__aggregateNodes.elementAt(0);
+		HydrologyNode node = (HydrologyNode)__aggregateNodes.get(0);
 		StateMod_NodeNetwork network = null;
 		if (node.getComputationalOrder() == -1) {
 			network = new StateMod_NodeNetwork();

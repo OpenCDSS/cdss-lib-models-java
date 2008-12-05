@@ -24,7 +24,7 @@
 
 package DWR.StateMod;
 
-import java.util.Vector;
+import java.util.List;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 
@@ -47,7 +47,7 @@ private boolean __editable = false;
 /**
 Return values under a delay table.
 */
-private Vector __subDelays = null;
+private List __subDelays = null;
 
 /**
 Indicate whether the delay table is for monthly (true) or daily (false) data.
@@ -55,8 +55,7 @@ Indicate whether the delay table is for monthly (true) or daily (false) data.
 private boolean __monthlyData = true;
 
 /**
-Indicates whether the return amounts are in percents (true) or fractions 
-(false).
+Indicates whether the return amounts are in percents (true) or fractions (false).
 */
 private boolean __returnIsPercent = true;
 
@@ -71,16 +70,13 @@ public final static int
 /**
 Constructor.  
 @param data the data that will be displayed in the table.
-@param monthlyData If true the data are for monthly delay tables.  If false,
-the delay tables are daily.
+@param monthlyData If true the data are for monthly delay tables.  If false, the delay tables are daily.
 @param editable whether the table data is editable or not
-@param returnIsPercent whether the return amounts are in percents (true) or
-fractions (false).
+@param returnIsPercent whether the return amounts are in percents (true) or fractions (false).
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_DelayTable_TableModel (	Vector data, boolean monthlyData,
-					boolean editable, 
-					boolean returnIsPercent)
+public StateMod_DelayTable_TableModel (	List data, boolean monthlyData,
+					boolean editable, boolean returnIsPercent)
 throws Exception {
 	if (data == null) {
 		throw new Exception ("Invalid data Vector passed to " 
@@ -169,8 +165,7 @@ public int getRowCount() {
 }
 
 /**
-Returns the data that should be placed in the JTable at the given row 
-and column.
+Returns the data that should be placed in the JTable at the given row and column.
 @param row the row for which to return data.
 @param col the column for which to return data.
 @return the data that should be placed in the JTable at the given row and col.
@@ -182,14 +177,13 @@ public Object getValueAt(int row, int col) {
 
 	switch (col) {
 		case COL_ID:		
-			StateMod_DelayTable dt = (StateMod_DelayTable)
-				_data.elementAt(row);
+			StateMod_DelayTable dt = (StateMod_DelayTable)_data.get(row);
 			return dt.getTableID();
 		case COL_DATE:	
 			return new Integer(row + 1);	
 		case COL_RETURN_AMT:	
 			if (__subDelays != null) {
-				return __subDelays.elementAt(row);
+				return __subDelays.get(row);
 			}
 			else {
 				return new Double(0.0);
@@ -219,7 +213,7 @@ public int[] getColumnWidths() {
 Sets the delay table data that will be displayed for a particular delay.
 @param subDelays Vector of subDelay information (month/day, pct)
 */
-public void setSubDelays(Vector subDelays) {
+public void setSubDelays(List subDelays) {
 	__subDelays = subDelays;
 	_data = subDelays;
 	if (__subDelays == null) {
@@ -265,7 +259,7 @@ public void setValueAt(Object value, int row, int col) {
 		case COL_DATE:
 			break;
 		case  COL_RETURN_AMT:	
-			__subDelays.setElementAt((Double)value, row);
+			__subDelays.set(row, (Double)value);
 	}
 	super.setValueAt(value, row, col);
 }

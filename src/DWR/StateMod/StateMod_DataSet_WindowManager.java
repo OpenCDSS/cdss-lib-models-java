@@ -40,7 +40,7 @@ import java.awt.Component;
 import java.awt.Frame;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.util.Vector;
+import java.util.List;
 
 import javax.swing.JFrame;
 
@@ -320,7 +320,7 @@ public JFrame displayWindow ( int window_type, boolean editable )
 		props.set ( "PrintSize", "7" );
 		props.set ( "PageLength", "100" );
 		try {	win = new TSViewJFrame (
-			(Vector)(__dataset.getComponentForComponentType(
+			(List)(__dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_PRECIPITATION_TS_MONTHLY)).
 			getData(), props );
 			setWindowOpen ( WINDOW_PRECIPITATION, win );
@@ -353,7 +353,7 @@ public JFrame displayWindow ( int window_type, boolean editable )
 		props.set ( "PrintSize", "7" );
 		props.set ( "PageLength", "100" );
 		try {	win = new TSViewJFrame (
-			(Vector)(__dataset.getComponentForComponentType(
+			(List)(__dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_EVAPORATION_TS_MONTHLY)).
 			getData(), props );
 			setWindowOpen ( WINDOW_EVAPORATION, win );

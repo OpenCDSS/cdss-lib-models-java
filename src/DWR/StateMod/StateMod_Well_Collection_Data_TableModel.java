@@ -12,6 +12,7 @@
 
 package DWR.StateMod;
 
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
@@ -45,13 +46,13 @@ private boolean __editable = false;
 /**
 The data displayed in the table.
 */
-private Vector[] __data = null;
+private List[] __data = null;
 
 /**
 Constructor.  This builds the Model for displaying reservoir data
 @param data the data that will be displayed in the table.
 */
-public StateMod_Well_Collection_Data_TableModel(Vector data) {
+public StateMod_Well_Collection_Data_TableModel(List data) {
 	this(data, false);
 }
 
@@ -60,8 +61,7 @@ Constructor.  This builds the Model for displaying reservoir data
 @param data the data that will be displayed in the table.
 @param editable whether the data are editable or not.
 */
-public StateMod_Well_Collection_Data_TableModel(Vector data, 
-boolean editable) {
+public StateMod_Well_Collection_Data_TableModel(List data, boolean editable) {
 	if (data == null) {
 		data = new Vector();
 	}
@@ -72,8 +72,7 @@ boolean editable) {
 }
 
 /**
-From AbstractTableModel.  Returns the class of the data stored in a given
-column.
+From AbstractTableModel.  Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 */
 public Class getColumnClass (int columnIndex) {
@@ -111,13 +110,11 @@ public String getColumnName(int columnIndex) {
 	return " ";
 }
 
-
 /**
 Returns the format that the specified column should be displayed in when
 the table is being displayed in the given table format. 
 @param column column for which to return the format.
-@return the format (as used by StringUtil.formatString() in which to display the
-column.
+@return the format (as used by StringUtil.formatString() in which to display the column.
 */
 public String getFormat(int column) {
 	switch (column) {
@@ -138,8 +135,7 @@ public int getRowCount() {
 }
 
 /**
-From AbstractTableMode.  Returns the data that should be placed in the JTable
-at the given row and column.
+From AbstractTableMode.  Returns the data that should be placed in the JTable at the given row and column.
 @param row the row for which to return data.
 @param col the column for which to return data.
 @return the data that should be placed in the JTable at the given row and col.
@@ -149,7 +145,7 @@ public Object getValueAt(int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	return __data[col].elementAt(row);
+	return __data[col].get(row);
 }
 
 /**
@@ -174,8 +170,7 @@ public int[] getColumnWidths() {
 Returns whether the cell is editable or not.  In this model, all the cells in
 columns 3 and greater are editable.
 @param rowIndex unused.
-@param columnIndex the index of the column to check whether it is editable
-or not.
+@param columnIndex the index of the column to check whether it is editable.
 @return whether the cell is editable or not.
 */
 public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -187,8 +182,7 @@ public boolean isCellEditable(int rowIndex, int columnIndex) {
 }
 
 /**
-Sets up the data Vectors to display the reservoir collection data in the
-GUI.
+Sets up the data Vectors to display the reservoir collection data in the GUI.
 */
 private void setupData() {
 	int[] years = null;
@@ -199,8 +193,8 @@ private void setupData() {
 	String colType = null;
 	String id = null;
 	String partType = null;
-	Vector ids = null;
-	__data = new Vector[__COLUMNS];
+	List ids = null;
+	__data = new List[__COLUMNS];
 	for (int i = 0; i < __COLUMNS; i++) {
 		__data[i] = new Vector();
 	}
@@ -208,7 +202,7 @@ private void setupData() {
 	int rows = 0;
 	
 	for (int i = 0; i < size; i++) {
-		well = (StateMod_Well)_data.elementAt(i);
+		well = (StateMod_Well)_data.get(i);
 		id = well.getID();
 
 		years = well.getCollectionYears();
@@ -236,7 +230,7 @@ private void setupData() {
 				__data[__COL_YEAR].add(new Integer(years[j]));
 				__data[__COL_COL_TYPE].add(colType);
 				__data[__COL_PART_TYPE].add(partType);
-				__data[__COL_PART_ID].add(ids.elementAt(k));
+				__data[__COL_PART_ID].add(ids.get(k));
 				rows++;
 			}
 		}

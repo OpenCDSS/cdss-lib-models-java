@@ -38,7 +38,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.util.Vector;
+import java.util.List;
 
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
@@ -529,51 +529,51 @@ throws Exception {
 			break;
 		case StateMod_DataSet.COMP_DELAY_TABLES_DAILY:
 			StateMod_DelayTable.writeStateModFile(oldFilename,
-				newFilename, (Vector)data, comments,
+				newFilename, (List)data, comments,
 				__dataset.getInterv());
 			name = "Delay Tables Daily";
 			break;
 		case StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY:
 			StateMod_DelayTable.writeStateModFile(oldFilename,
-				newFilename, (Vector)data, comments,
+				newFilename, (List)data, comments,
 				__dataset.getInterv());
 			name = "Delay Tables Monthly";
 			break;
 		case StateMod_DataSet.COMP_DIVERSION_STATIONS:
 			StateMod_Diversion.writeStateModFile(oldFilename,
-				newFilename, (Vector)data, comments, daily);
+				newFilename, (List)data, comments, daily);
 			name = "Diversion";
 			break;
 		case StateMod_DataSet.COMP_DIVERSION_RIGHTS:
 			StateMod_DiversionRight.writeStateModFile(oldFilename,
-				newFilename, (Vector)data, comments, daily);
+				newFilename, (List)data, comments, daily);
 			name = "Diversion Rights";
 			break;
 		case StateMod_DataSet.COMP_INSTREAM_STATIONS:
 			StateMod_InstreamFlow.writeStateModFile(oldFilename,
-				newFilename, (Vector)data, comments, daily);
+				newFilename, (List)data, comments, daily);
 			name = "Instream";
 			break;
 		case StateMod_DataSet.COMP_INSTREAM_RIGHTS:
 			StateMod_InstreamFlowRight.writeStateModFile(
-				oldFilename, newFilename, (Vector)data, 
+				oldFilename, newFilename, (List)data, 
 				comments);
 			name = "Instream Rights";
 			break;
 		case StateMod_DataSet.COMP_OPERATION_RIGHTS:
 			StateMod_OperationalRight.writeStateModFile(
-				oldFilename, newFilename, (Vector)data, 
+				oldFilename, newFilename, (List)data, 
 				comments);
 			name = "Operational Rights";
 			break;
 		case StateMod_DataSet.COMP_RESERVOIR_STATIONS:
 			StateMod_Reservoir.writeStateModFile(oldFilename, 
-				newFilename, (Vector)data, comments, daily);
+				newFilename, (List)data, comments, daily);
 			name = "Reservoir";
 			break;
 		case StateMod_DataSet.COMP_RESERVOIR_RIGHTS:
 			StateMod_ReservoirRight.writeStateModFile(oldFilename,
-				newFilename, (Vector)data, comments);
+				newFilename, (List)data, comments);
 			name = "Reservoir Rights";
 			break;
 		case StateMod_DataSet.COMP_RESPONSE:
@@ -583,38 +583,38 @@ throws Exception {
 			break;
 		case StateMod_DataSet.COMP_RIVER_NETWORK:
 			StateMod_RiverNetworkNode.writeStateModFile(oldFilename,
-				newFilename, (Vector)data, comments, true);
+				newFilename, (List)data, comments, true);
 			name = "River Network";
 			break;
 		case StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS:
 			StateMod_StreamEstimate.writeStateModFile(oldFilename,
-				newFilename, (Vector)data, comments, daily);
+				newFilename, (List)data, comments, daily);
 			name = "Stream Estimate";
 			break;
 		case StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS:
 			StateMod_StreamEstimate_Coefficients.writeStateModFile(
-				oldFilename, newFilename, (Vector)data, 
+				oldFilename, newFilename, (List)data, 
 				comments);
 			name = "Stream Estimate Coefficients";
 			break;
 		case StateMod_DataSet.COMP_STREAMGAGE_STATIONS:
 			StateMod_StreamGage.writeStateModFile(oldFilename,
-				newFilename, (Vector)data, comments, daily);
+				newFilename, (List)data, comments, daily);
 			name = "Streamgage Stations";
 			break;
 		case StateMod_DataSet.COMP_WELL_STATIONS:
 			StateMod_Well.writeStateModFile(oldFilename,
-				newFilename, (Vector)data, comments);
+				newFilename, (List)data, comments);
 			name = "Well";
 			break;
 		case StateMod_DataSet.COMP_PLANS:
 			StateMod_Plan.writeStateModFile(oldFilename,
-				newFilename, (Vector)data, comments);
+				newFilename, (List)data, comments);
 			name = "Plan";
 			break;
 		case StateMod_DataSet.COMP_WELL_RIGHTS:
 			StateMod_WellRight.writeStateModFile(oldFilename,
-				newFilename, (Vector)data, comments);
+				newFilename, (List)data, comments, (PropList)null);
 			name = "Well Rights";
 			break;
 
@@ -662,13 +662,13 @@ throws Exception {
 			}
 			int precision = 2;
 
-			if (data != null && ((Vector)data).size() > 0) {
-				TS ts = (TS)((Vector)data).elementAt(0);
+			if (data != null && ((List)data).size() > 0) {
+				TS ts = (TS)((List)data).get(0);
 				missing = ts.getMissing();
 			}
 			
 			StateMod_TS.writeTimeSeriesList(oldFilename,
-				newFilename, comments, (Vector)data, null, null,
+				newFilename, comments, (List)data, null, null,
 				year, missing, precision);
 			name = "TS (" + type + ")";
 			break;

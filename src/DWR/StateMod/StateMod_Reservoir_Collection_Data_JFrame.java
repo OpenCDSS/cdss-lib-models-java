@@ -13,14 +13,13 @@
 
 package DWR.StateMod;
 
-import java.util.Vector;
+import java.util.List;
 
 import RTi.Util.GUI.JScrollWorksheet;
 
 /**
 This class is a JFrame for displaying a Vector of StateMod_Reservoir 
-collection data in a worksheet.  The worksheet data can be exported to 
-a file or printed.
+collection data in a worksheet.  The worksheet data can be exported to a file or printed.
 */
 public class StateMod_Reservoir_Collection_Data_JFrame 
 extends StateMod_Data_JFrame {
@@ -33,22 +32,20 @@ Constructor.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_Reservoir_Collection_Data_JFrame(Vector data, 
-String titleString, boolean editable)
+public StateMod_Reservoir_Collection_Data_JFrame(List data, String titleString, boolean editable)
 throws Exception {
 	super(data, titleString, editable);
 	setSize(423, getHeight());
 }
 
 /**
-Called when the Apply button is pressed. This commits any changes to the data
-objects.
+Called when the Apply button is pressed. This commits any changes to the data objects.
 */
 protected void apply() {
 	StateMod_Reservoir res = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		res = (StateMod_Reservoir)_data.elementAt(i);
+		res = (StateMod_Reservoir)_data.get(i);
 		res.createBackup();
 	}
 }
@@ -61,11 +58,9 @@ constructor.
 protected JScrollWorksheet buildJScrollWorksheet() 
 throws Exception {
 	StateMod_Reservoir_Collection_Data_TableModel tableModel 
-		= new StateMod_Reservoir_Collection_Data_TableModel(_data, 
-		_editable);
+		= new StateMod_Reservoir_Collection_Data_TableModel(_data, _editable);
 	StateMod_Reservoir_Collection_Data_CellRenderer cellRenderer 
-		= new StateMod_Reservoir_Collection_Data_CellRenderer(
-		tableModel);
+		= new StateMod_Reservoir_Collection_Data_CellRenderer(tableModel);
 
 	// _props is defined in the super class
 	return new JScrollWorksheet(cellRenderer, tableModel, _props);
@@ -79,7 +74,7 @@ protected void cancel() {
 	StateMod_Reservoir res = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		res = (StateMod_Reservoir)_data.elementAt(i);
+		res = (StateMod_Reservoir)_data.get(i);
 		res.restoreOriginal();
 	}
 }
@@ -92,7 +87,7 @@ protected void createDataBackup() {
 	StateMod_Reservoir res = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		res = (StateMod_Reservoir)_data.elementAt(i);
+		res = (StateMod_Reservoir)_data.get(i);
 		res.createBackup();
 	}
 }

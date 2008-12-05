@@ -19,6 +19,7 @@
 
 package DWR.StateMod;
 
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
@@ -48,7 +49,7 @@ public final static int
 Constructor.  
 @param data the data that will be displayed in the table.
 */
-public StateMod_RiverNetworkNode_Data_TableModel(Vector data) {
+public StateMod_RiverNetworkNode_Data_TableModel(List data) {
 	if (data == null) {
 		_data = new Vector();
 	}
@@ -173,8 +174,7 @@ public Object getValueAt(int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	StateMod_RiverNetworkNode r = (StateMod_RiverNetworkNode)
-		_data.elementAt(row);
+	StateMod_RiverNetworkNode r = (StateMod_RiverNetworkNode)_data.get(row);
 	
 	switch (col) {
 		case COL_ID:	return r.getID();

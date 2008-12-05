@@ -50,6 +50,7 @@
 package DWR.StateMod;
 
 import java.io.File;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JFileChooser;
@@ -96,9 +97,9 @@ The StateMod data set that is being processed.
 private StateMod_DataSet __dataset = null;
 
 /**
-Vectors of data for filling ID lists.
+Lists of data for filling ID lists.
 */
-private Vector 
+private List 
 	__diversions,
 	__instreamFlows,
 	__reservoirs,
@@ -109,7 +110,7 @@ private Vector
 /**
 ID lists to be displayed in the combo boxes.
 */
-private Vector
+private List
 	__diversionIDs = null,
 	__instreamFlowIDs = null,
 	__reservoirIDs = null,
@@ -124,22 +125,22 @@ Constructor.
 @param data the data to display in the worksheet.
 @throws Exception if an invalid data was passed in.
 */
-public StateMod_GraphingTool_TableModel ( StateMod_GraphingTool_JFrame parent, StateMod_DataSet dataset, Vector data )
+public StateMod_GraphingTool_TableModel ( StateMod_GraphingTool_JFrame parent, StateMod_DataSet dataset, List data )
 throws Exception {
 	__parent = parent;
 
 	__dataset = dataset;
-	__reservoirs = (Vector)__dataset.getComponentForComponentType(
+	__reservoirs = (List)__dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_RESERVOIR_STATIONS).getData();
-	__diversions = (Vector)__dataset.getComponentForComponentType(
+	__diversions = (List)__dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_DIVERSION_STATIONS).getData();
-	__instreamFlows = (Vector)__dataset.getComponentForComponentType(
+	__instreamFlows = (List)__dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_INSTREAM_STATIONS).getData();
-	__wells = (Vector)__dataset.getComponentForComponentType(
+	__wells = (List)__dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_WELL_STATIONS).getData();
-	__streamGageStations = (Vector)__dataset.getComponentForComponentType(
+	__streamGageStations = (List)__dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_STREAMGAGE_STATIONS).getData();
-	__streamEstimateStations=(Vector)__dataset.getComponentForComponentType(
+	__streamEstimateStations=(List)__dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS).getData();
 	
 	if (data == null) {
@@ -182,14 +183,14 @@ objects.  Reservoirs will include an identifier for each reservoir total and eac
 @param include_accounts If true, the 
 @return a Vector of Strings, each of which contains an ID followed by the name of Structure in parentheses
 */
-private Vector createAvailableIDsList ( Vector nodes ) {
-	Vector v = new Vector();
+private List createAvailableIDsList ( List nodes ) {
+	List v = new Vector();
 
 	int num = 0;
 	boolean is_reservoir = false;	// To allow check below
 	if (nodes != null) {
 		num = nodes.size();
-		if ( (num > 0) && ((StateMod_Data)nodes.elementAt(0))instanceof StateMod_Reservoir ) {
+		if ( (num > 0) && ((StateMod_Data)nodes.get(0))instanceof StateMod_Reservoir ) {
 			is_reservoir = true;
 		}
 	}
@@ -200,11 +201,11 @@ private Vector createAvailableIDsList ( Vector nodes ) {
 	for (int i = 0; i < num; i++) {
 		// Add the normal item...
 		v.add( StateMod_Util.formatDataLabel(
-			((StateMod_Data)nodes.elementAt(i)).getID(),
-			((StateMod_Data)nodes.elementAt(i)).getName() ) );
+			((StateMod_Data)nodes.get(i)).getID(),
+			((StateMod_Data)nodes.get(i)).getName() ) );
 		if ( is_reservoir ) {
 			// Also add reservoir owner/accounts...
-			res = (StateMod_Reservoir)nodes.elementAt(i);
+			res = (StateMod_Reservoir)nodes.get(i);
 			nowner = res.getAccounts().size();
 			for ( ia = 0; ia < nowner; ia++ ) {
 				v.add( StateMod_Util.formatDataLabel(
@@ -228,7 +229,7 @@ the ID of that structure, and the interval that is selected.
 */
 public void fillDataTypeColumn ( int row, boolean outputOnly,
 					String station_type, String id, String interval_string )
-{	Vector dataTypes = new Vector();
+{	List dataTypes = new Vector();
 	int interval = TimeInterval.MONTH;
 	if ( interval_string.equalsIgnoreCase("Day") ) {
 		interval = TimeInterval.DAY;
@@ -302,13 +303,13 @@ public void fillDataTypeColumn ( int row, boolean outputOnly,
 
 	if (__worksheet != null) {
 		__worksheet.setCellSpecificJComboBoxValues(	row, _COL_DATA_TYPE, dataTypes);
-		Vector v = __worksheet.getCellSpecificJComboBoxValues(row, _COL_DATA_TYPE);
+		List v = __worksheet.getCellSpecificJComboBoxValues(row, _COL_DATA_TYPE);
 		String s = null;
 		if (v == null || v.size() == 0) {
 			s = "";
 		}
 		else {
-			s = (String)v.elementAt(0);
+			s = (String)v.get(0);
 		}
 		setInternalValueAt(s, row,_COL_DATA_TYPE);
 	}	
@@ -320,7 +321,7 @@ Fills the ID column based on the kind of station selected.
 @param type the type of structure selected (column 1)
 */
 public void fillIDColumn(int row, String type)
-{	Vector ids = new Vector();
+{	List ids = new Vector();
 	if (type.equalsIgnoreCase(StateMod_Util.STATION_TYPE_DIVERSION)) {
 		if (__diversionIDs == null) {
 			__diversionIDs = createAvailableIDsList(__diversions);
@@ -365,13 +366,13 @@ public void fillIDColumn(int row, String type)
 
 	if (__worksheet != null) {
 		__worksheet.setCellSpecificJComboBoxValues(row, _COL_ID, ids);
-		Vector v = __worksheet.getCellSpecificJComboBoxValues( row, _COL_ID);
+		List v = __worksheet.getCellSpecificJComboBoxValues( row, _COL_ID);
 		String s = null;
 		if (v == null || v.size() == 0) {
 			s = "";
 		}
 		else {
-			s = (String)v.elementAt(0);
+			s = (String)v.get(0);
 		}
 		setInternalValueAt(s, row, _COL_ID);
 	}
@@ -389,7 +390,7 @@ interval, data type, and input type that is selected.
 */
 public void fillInputNameColumn ( int row, String station_type, String id,
 					String interval_string, String data_type, String input_type )
-{	Vector input_names = new Vector();
+{	List input_names = new Vector();
 	int interval = TimeInterval.MONTH;
 	if ( interval_string.equalsIgnoreCase("Day") ) {
 		interval = TimeInterval.DAY;
@@ -402,43 +403,43 @@ public void fillInputNameColumn ( int row, String station_type, String id,
 			station_type.equalsIgnoreCase ( StateMod_Util.STATION_TYPE_INSTREAM_FLOW) ) {
 			if ( interval == TimeInterval.MONTH ) {
 				// Substitute base name later...
-				input_names.addElement ( "*.b43" );
+				input_names.add ( "*.b43" );
 				// Explicitly specify base name...
-				input_names.addElement ( __dataset.getBaseName() + ".b43" );
+				input_names.add ( __dataset.getBaseName() + ".b43" );
 			}
 			else {
 			    // Daily...
-				input_names.addElement ( "*.b49" );
+				input_names.add ( "*.b49" );
 				// Explicitly specify base name...
-				input_names.addElement ( __dataset.getBaseName() + ".b49" );
+				input_names.add ( __dataset.getBaseName() + ".b49" );
 			}
 		}
 		else if(station_type.equalsIgnoreCase ( StateMod_Util.STATION_TYPE_RESERVOIR) ) {
 			if ( interval == TimeInterval.MONTH ) {
 				// Substitute base name later...
-				input_names.addElement ( "*.b44" );
+				input_names.add ( "*.b44" );
 				// Explicitly specify base name...
-				input_names.addElement ( __dataset.getBaseName() + ".b44" );
+				input_names.add ( __dataset.getBaseName() + ".b44" );
 			}
 			else {
 			    // Daily...
-				input_names.addElement ( "*.b50" );
+				input_names.add ( "*.b50" );
 				// Explicitly specify base name...
-				input_names.addElement ( __dataset.getBaseName() + ".b50" );
+				input_names.add ( __dataset.getBaseName() + ".b50" );
 			}
 		}
 		else if(station_type.equalsIgnoreCase ( StateMod_Util.STATION_TYPE_WELL) ) {
 			if ( interval == TimeInterval.MONTH ) {
 				// Substitute base name later...
-				input_names.addElement ( "*.b42" );
+				input_names.add ( "*.b42" );
 				// Explicitly specify base name...
-				input_names.addElement ( __dataset.getBaseName() + ".b42" );
+				input_names.add ( __dataset.getBaseName() + ".b42" );
 			}
 			else {
 			    // Daily...
-				input_names.addElement ( "*.b65" );
+				input_names.add ( "*.b65" );
 				// Explicitly specify base name...
-				input_names.addElement ( __dataset.getBaseName() + ".b65" );
+				input_names.add ( __dataset.getBaseName() + ".b65" );
 			}
 		}
 	}
@@ -448,28 +449,28 @@ public void fillInputNameColumn ( int row, String station_type, String id,
 		String ext = StateMod_DataSet.lookupTimeSeriesDataFileExtension (
 			StringUtil.getToken(data_type," ",0,0), interval );
 		if ( !ext.equals("") ) {
-			input_names.addElement ( "*." + ext );
+			input_names.add ( "*." + ext );
 		}
 		String filename = __dataset.getComponentDataFileNameFromTimeSeriesDataType (
 			StringUtil.getToken(data_type," ",0,0), interval );
 		if ( !filename.equals("") ) {
-			input_names.addElement ( filename );
+			input_names.add ( filename );
 		}
 	}
 
 	// Always add a Browse...
-	input_names.addElement ( __BROWSE_INPUT_NAME_ABSOLUTE );
-	input_names.addElement ( __BROWSE_INPUT_NAME_RELATIVE );
+	input_names.add ( __BROWSE_INPUT_NAME_ABSOLUTE );
+	input_names.add ( __BROWSE_INPUT_NAME_RELATIVE );
 
 	if (__worksheet != null) {
 		__worksheet.setCellSpecificJComboBoxValues( row, _COL_INPUT_NAME, input_names);
-		Vector v = __worksheet.getCellSpecificJComboBoxValues( row,_COL_INPUT_NAME);
+		List v = __worksheet.getCellSpecificJComboBoxValues( row,_COL_INPUT_NAME);
 		String s = null;
 		if (v == null || v.size() == 0) {
 			s = "";
 		}
 		else {	
-			s = (String)v.elementAt(0);
+			s = (String)v.get(0);
 		}
 		setInternalValueAt(s, row, _COL_INPUT_NAME);
 	}
@@ -486,25 +487,25 @@ interval, and data type that is selected.
 */
 public void fillInputTypeColumn ( int row, String station_type, String id,
 					String interval_string, String data_type )
-{	Vector input_types = new Vector();
+{	List input_types = new Vector();
 
 	if ( StringUtil.indexOfIgnoreCase(data_type, "Output", 0) > 0 ) {
 		// Have an output time series...
-		input_types.addElement ( "StateModB" );
+		input_types.add ( "StateModB" );
 	}
 	else {
-	    input_types.addElement ( "StateMod" );
+	    input_types.add ( "StateMod" );
 	}
 
 	if (__worksheet != null) {
 		__worksheet.setCellSpecificJComboBoxValues( row, _COL_INPUT_TYPE, input_types);
-		Vector v = __worksheet.getCellSpecificJComboBoxValues( row,_COL_INPUT_TYPE);
+		List v = __worksheet.getCellSpecificJComboBoxValues( row,_COL_INPUT_TYPE);
 		String s = null;
 		if (v == null || v.size() == 0) {
 			s = "";
 		}
 		else {
-			s = (String)v.elementAt(0);
+			s = (String)v.get(0);
 		}
 		// NOTE: this doesn't call setIntervalValueAt in order that
 		// the input name will be populated properly.
@@ -520,19 +521,19 @@ Fills the interval column combo box according to the type of station selected an
 @param id the ID of the structure (column _COL_ID)
 */
 public void fillIntervalColumn ( int row, String station_type, String id )
-{	Vector intervals = new Vector();
+{	List intervals = new Vector();
 	intervals.add ( "Month" );
 	intervals.add ( "Day" );
 
 	if (__worksheet != null) {
 		__worksheet.setCellSpecificJComboBoxValues( row, _COL_INTERVAL, intervals);
-		Vector v = __worksheet.getCellSpecificJComboBoxValues( row, _COL_INTERVAL);
+		List v = __worksheet.getCellSpecificJComboBoxValues( row, _COL_INTERVAL);
 		String s = null;
 		if (v == null || v.size() == 0) {
 			s = "";
 		}
 		else {
-			s = (String)v.elementAt(0);
+			s = (String)v.get(0);
 		}
 		setInternalValueAt(s, row, _COL_INTERVAL);
 	}
@@ -660,7 +661,7 @@ public Object getValueAt(int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	TSIdent tsident = (TSIdent)_data.elementAt(row);
+	TSIdent tsident = (TSIdent)_data.get(row);
 
 	switch (col) {
 		case _COL_STATION_TYPE:	return tsident.getAlias();
@@ -717,7 +718,7 @@ public void setValueAt(Object value, int row, int col)
 	Message.printStatus(1, "", "---------------------------------------");
 	*/
 
-	TSIdent tsident = (TSIdent)_data.elementAt(row);
+	TSIdent tsident = (TSIdent)_data.get(row);
 
 	switch (col) {
 		case _COL_STATION_TYPE:
@@ -736,9 +737,9 @@ public void setValueAt(Object value, int row, int col)
 			// Since the ID is filled, select the first item by
 			// default to force something to be displayed...
 			if ( __worksheet != null ) {
-				Vector ids = __worksheet.getCellSpecificJComboBoxValues(row, _COL_ID);
+				List ids = __worksheet.getCellSpecificJComboBoxValues(row, _COL_ID);
 				if ( ids.size() > 0 ) {
-					setValueAt(ids.elementAt(0), row, _COL_ID);
+					setValueAt(ids.get(0), row, _COL_ID);
 				}
 				else {
 					setValueAt("", row, _COL_ID);
@@ -872,7 +873,7 @@ public void setInternalValueAt(Object value, int row, int col) {
 	Message.printStatus(1, "", "---------------------------------------");
 	*/
 
-	TSIdent tsident = (TSIdent)_data.elementAt(row);
+	TSIdent tsident = (TSIdent)_data.get(row);
 
 	switch (col) {
 		case _COL_STATION_TYPE:

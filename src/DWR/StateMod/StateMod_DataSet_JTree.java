@@ -62,6 +62,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.Icon;
@@ -380,8 +381,8 @@ public void actionPerformed(ActionEvent event)
 			}
 			props.set ( "InitialView=Graph" );
 			props.set ( "GraphType=Bar" );
-			Vector tslist = new Vector(1);
-			tslist.addElement ( ts );
+			List tslist = new Vector(1);
+			tslist.add ( ts );
 			try {	new TSViewJFrame ( tslist, props );
 			}
 			catch ( Exception e ) {
@@ -461,14 +462,14 @@ Clear all data from the tree.
 public void clear() {
 	String routine = "StateMod_DataSet_JTree.clear";
 	SimpleJTree_Node node = getRoot();
-	Vector v = getChildrenVector(node);
+	List v = getChildrenList(node);
 	int size = 0;
 	if (v != null) {
 		size = v.size();
 	}
 
 	for (int i = 0; i < size; i++) {
-		try {	removeNode((SimpleJTree_Node)v.elementAt(i), false);
+		try {	removeNode((SimpleJTree_Node)v.get(i), false);
 		}
 		catch (Exception e) {
 			Message.printWarning(2, routine,
@@ -484,7 +485,7 @@ after a data set has been read.
 */
 public void displayDataSet()
 {	String routine = "StateMod_DataSet_JTree.displayDataSet";
-	Vector v = __dataset.getComponentGroups();
+	List v = __dataset.getComponentGroups();
 	int size = 0;
 	if (v != null) {
 		size = v.size();
@@ -500,7 +501,7 @@ public void displayDataSet()
 	for (int i = 0; i < size; i++) {
 		hadData = false;
 		isGroup = false;
-		comp = (DataSetComponent)v.elementAt(i);
+		comp = (DataSetComponent)v.get(i);
 		if ( (comp == null) || !comp.isVisible()) {
 			continue;
 		}
@@ -534,13 +535,13 @@ public void displayDataSet()
 			hadData = displayDataSetComponent ( comp, node );
 		}
 		else {	// Add the components in the group...
-			Vector v2 = (Vector)comp.getData();
+			List v2 = (List)comp.getData();
 			int size2 = 0;
 			if (v2 != null) {
 				size2 = v2.size();
 			}
 			for (int j = 0; j < size2; j++) {
-				comp = (DataSetComponent)v2.elementAt(j);
+				comp = (DataSetComponent)v2.get(j);
 				if ( (comp == null) || !comp.isVisible()) {
 					continue;
 				}
@@ -593,9 +594,9 @@ private boolean displayDataSetComponent (	DataSetComponent comp,
 	if ( data_Object == null ) {
 		return hadData;
 	}
-	Vector data = null;
-	if (data_Object instanceof Vector) {
-		data = (Vector)comp.getData();
+	List data = null;
+	if (data_Object instanceof List) {
+		data = (List)comp.getData();
 	}
 	else {	// Continue (REVISIT - what components would
 		// this happen for?)...
@@ -612,23 +613,23 @@ private boolean displayDataSetComponent (	DataSetComponent comp,
 		dsize = data.size();
 	}
 	for (int idata = 0; idata < dsize; idata++) {
-		data_Object = data.elementAt(idata);
+		data_Object = data.get(idata);
 		if ( data_Object instanceof StateMod_Data ) {
-			smdata = (StateMod_Data)data.elementAt(idata);
+			smdata = (StateMod_Data)data.get(idata);
 			label = StateMod_Util.formatDataLabel ( smdata.getID(),
 				smdata.getName() );
 			node2 = new SimpleJTree_Node( label );
 			node2.setData(smdata);
 		}
 		else if ( data_Object instanceof StateCU_Data ){
-			cudata = (StateCU_Data)data.elementAt(idata);
+			cudata = (StateCU_Data)data.get(idata);
 			label = StateMod_Util.formatDataLabel ( cudata.getID(),
 				cudata.getName() );
 			node2 = new SimpleJTree_Node( label );
 			node2.setData(cudata);
 		}
 		else if ( data_Object instanceof TS ) {
-			tsdata = (TS)data.elementAt(idata);
+			tsdata = (TS)data.get(idata);
 			label = StateMod_Util.formatDataLabel (
 				tsdata.getLocation(),
 				tsdata.getDescription() );

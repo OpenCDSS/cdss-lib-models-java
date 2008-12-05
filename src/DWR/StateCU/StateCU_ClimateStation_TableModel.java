@@ -19,7 +19,7 @@
 
 package DWR.StateCU;
 
-import java.util.Vector;
+import java.util.List;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 import RTi.Util.IO.Validator;
@@ -62,7 +62,7 @@ Constructor.  This builds the Model for displaying climate station data
 @param data the data that will be displayed in the table.
 @throws Exception if invalid data or dmi was passed in.
 */
-public StateCU_ClimateStation_TableModel(Vector data)
+public StateCU_ClimateStation_TableModel(List data)
 throws Exception {
 	this(data, true);
 }
@@ -73,7 +73,7 @@ Constructor.  This builds the Model for displaying climate station data
 @param editable whether the data are editable or not.
 @throws Exception if invalid data or dmi was passed in.
 */
-public StateCU_ClimateStation_TableModel(Vector data, boolean editable)
+public StateCU_ClimateStation_TableModel(List data, boolean editable)
 throws Exception {
 	if (data == null) {
 		throw new Exception ("Invalid data Vector passed to " 
@@ -184,7 +184,7 @@ public Object getValueAt(int row, int col) {
 	}
 
 	StateCU_ClimateStation station = 
-		(StateCU_ClimateStation)_data.elementAt(row);
+		(StateCU_ClimateStation)_data.get(row);
 	switch (col) {
 		case __COL_ID:		return station.getID();
 		case __COL_NAME: 	return station.getName();
@@ -241,8 +241,7 @@ Inserts the specified value into the table at the given position.
 @param col the column of the cell in which to place the object.
 */
 public void setValueAt(Object value, int row, int col) {
-	StateCU_ClimateStation station = 
-		(StateCU_ClimateStation)_data.elementAt(row);
+	StateCU_ClimateStation station = (StateCU_ClimateStation)_data.get(row);
 	switch (col) {
 		case __COL_ID:			
 			station.setID((String)value);

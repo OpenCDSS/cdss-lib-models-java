@@ -17,7 +17,7 @@ package DWR.StateCU;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
-import java.util.Vector;
+import java.util.List;
 
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -52,7 +52,7 @@ Constructor.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateCU_DelayTableAssignment_Data_JFrame(Vector data, String titleString,
+public StateCU_DelayTableAssignment_Data_JFrame(List data, String titleString,
 boolean editable)
 throws Exception {
 	super(data, titleString, editable);
@@ -92,28 +92,25 @@ public void actionPerformed(ActionEvent event) {
 }
 
 /**
-Called when the Apply button is pressed. This commits any changes to the data
-objects.
+Called when the Apply button is pressed. This commits any changes to the data objects.
 */
 protected void apply() {
 	StateCU_DelayTableAssignment station = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		station = (StateCU_DelayTableAssignment)_data.elementAt(i);
+		station = (StateCU_DelayTableAssignment)_data.get(i);
 		station.createBackup();
 	}
 }
 
 /**
 Creates a JScrollWorksheet for the current data and returns it.
-@return a JScrollWorksheet containing the data Vector passed in to the 
-constructor.
+@return a JScrollWorksheet containing the data Vector passed in to the constructor.
 */
 protected JScrollWorksheet buildJScrollWorksheet() 
 throws Exception {
 	StateCU_DelayTableAssignment_Data_TableModel tableModel 
-		= new StateCU_DelayTableAssignment_Data_TableModel(_data, 
-		_editable);
+		= new StateCU_DelayTableAssignment_Data_TableModel(_data, _editable);
 	StateCU_DelayTableAssignment_Data_CellRenderer cellRenderer 
 		= new StateCU_DelayTableAssignment_Data_CellRenderer(
 		tableModel);
@@ -129,7 +126,7 @@ protected void cancel() {
 	StateCU_DelayTableAssignment station = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		station = (StateCU_DelayTableAssignment)_data.elementAt(i);
+		station = (StateCU_DelayTableAssignment)_data.get(i);
 		station.restoreOriginal();
 	}
 }
@@ -142,7 +139,7 @@ protected void createDataBackup() {
 	StateCU_DelayTableAssignment station = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		station = (StateCU_DelayTableAssignment)_data.elementAt(i);
+		station = (StateCU_DelayTableAssignment)_data.get(i);
 		station.createBackup();
 	}
 }

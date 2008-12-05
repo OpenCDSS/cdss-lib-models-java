@@ -21,7 +21,7 @@
 
 package DWR.StateMod;
 
-import java.util.Vector;
+import java.util.List;
 
 import RTi.Util.GUI.JScrollWorksheet;
 
@@ -42,37 +42,33 @@ which case an empty worksheet is shown.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_WellRight_Data_JFrame(Vector data, String titleString,
-boolean editable)
+public StateMod_WellRight_Data_JFrame(List data, String titleString, boolean editable)
 throws Exception {
 	super(data, titleString, editable);
 	setSize(748, getHeight());
 }
 
 /**
-Called when the Apply button is pressed. This commits any changes to the data
-objects.
+Called when the Apply button is pressed. This commits any changes to the data objects.
 */
 protected void apply() {
 	StateMod_WellRight right = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		right = (StateMod_WellRight)_data.elementAt(i);
+		right = (StateMod_WellRight)_data.get(i);
 		right.createBackup();
 	}
 }
 
 /**
 Creates a JScrollWorksheet for the current data and returns it.
-@return a JScrollWorksheet containing the data Vector passed in to the 
-constructor.
+@return a JScrollWorksheet containing the data Vector passed in to the constructor.
 */
 protected JScrollWorksheet buildJScrollWorksheet() 
 throws Exception {
 	StateMod_WellRight_Data_TableModel tableModel 
 		= new StateMod_WellRight_Data_TableModel(_data, _editable);
-		// false means to set up the table model to allow 1+ 
-		// wells' rights to be in the same worksheet.
+		// false means to set up the table model to allow 1+ wells' rights to be in the same worksheet.
 	StateMod_WellRight_Data_CellRenderer cellRenderer 
 		= new StateMod_WellRight_Data_CellRenderer(tableModel);
 
@@ -88,7 +84,7 @@ protected void cancel() {
 	StateMod_WellRight right = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		right = (StateMod_WellRight)_data.elementAt(i);
+		right = (StateMod_WellRight)_data.get(i);
 		right.restoreOriginal();
 	}
 }
@@ -101,7 +97,7 @@ protected void createDataBackup() {
 	StateMod_WellRight right = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		right = (StateMod_WellRight)_data.elementAt(i);
+		right = (StateMod_WellRight)_data.get(i);
 		right.createBackup();
 	}
 }

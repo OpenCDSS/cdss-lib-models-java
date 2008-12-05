@@ -15,6 +15,7 @@
 
 package DWR.StateMod;
 
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
@@ -47,7 +48,7 @@ Constructor.
 @param data the data that will be displayed in the table.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_StreamEstimate_TableModel(Vector data) 
+public StateMod_StreamEstimate_TableModel(List data) 
 throws Exception {
 	this(data, true);
 }
@@ -58,7 +59,7 @@ Constructor.
 @param editable whether the data are editable or not.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_StreamEstimate_TableModel(Vector data, boolean editable) 
+public StateMod_StreamEstimate_TableModel(List data, boolean editable) 
 throws Exception {
 	if (data == null) {
 		_data = new Vector();
@@ -138,8 +139,7 @@ public Object getValueAt(int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	StateMod_StreamEstimate bfs = 
-		(StateMod_StreamEstimate)_data.elementAt(row);
+	StateMod_StreamEstimate bfs = (StateMod_StreamEstimate)_data.get(row);
 
 	switch (col) {
 		case  COL_ID:	return bfs.getID();

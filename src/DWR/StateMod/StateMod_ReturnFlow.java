@@ -42,6 +42,7 @@
 package DWR.StateMod;
 
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.IO.IOUtil;
@@ -164,7 +165,7 @@ Compare two return flow Vectors and see if they are the same.
 @param v2 the second Vector of StateMod_ReturnFlows to check.  Can not be null.
 @return true if they are the same, false if not.
 */
-public static boolean equals(Vector v1, Vector v2) {
+public static boolean equals(List v1, List v2) {
 	String routine = "StateMod_ReturnFlow.equals(Vector, Vector)";
 	StateMod_ReturnFlow rf1;	
 	StateMod_ReturnFlow rf2;	
@@ -177,13 +178,13 @@ public static boolean equals(Vector v1, Vector v2) {
 		// and data will need to be saved back into the dataset.
 		int size = v1.size();
 		Message.printStatus(1, routine, "Vectors are of size: " + size);
-		Vector v1Sort = StateMod_Util.sortStateMod_DataVector(v1);
-		Vector v2Sort = StateMod_Util.sortStateMod_DataVector(v2);
+		List v1Sort = StateMod_Util.sortStateMod_DataVector(v1);
+		List v2Sort = StateMod_Util.sortStateMod_DataVector(v2);
 		Message.printStatus(1, routine, "Vectors have been sorted");
 	
 		for (int i = 0; i < size; i++) {			
-			rf1 = (StateMod_ReturnFlow)v1Sort.elementAt(i);	
-			rf2 = (StateMod_ReturnFlow)v2Sort.elementAt(i);	
+			rf1 = (StateMod_ReturnFlow)v1Sort.get(i);	
+			rf2 = (StateMod_ReturnFlow)v2Sort.get(i);	
 			Message.printStatus(1, routine, rf1.toString());
 			Message.printStatus(1, routine, rf2.toString());
 			Message.printStatus(1, routine, "Element " + i 
@@ -353,14 +354,14 @@ header (true) or to create a new file with a new header.
 @throws Exception if an error occurs.
 */
 public static void writeListFile(String filename, String delimiter,
-boolean update, Vector data, int componentType) 
+boolean update, List data, int componentType) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
 		size = data.size();
 	}
 	
-	Vector fields = new Vector();
+	List fields = new Vector();
 	fields.add("ID");
 	fields.add("RiverNodeID");
 	if (componentType 
@@ -378,7 +379,7 @@ throws Exception {
 	int comp = componentType;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.elementAt(i);
+		s = (String)fields.get(i);
 		names[i] = StateMod_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateMod_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -413,7 +414,7 @@ throws Exception {
 		out.println(buffer.toString());
 		
 		for (int i = 0; i < size; i++) {
-			rf = (StateMod_ReturnFlow)data.elementAt(i);
+			rf = (StateMod_ReturnFlow)data.get(i);
 			
 			line[0] = StringUtil.formatString(rf.getID(), 
 				formats[0]).trim();

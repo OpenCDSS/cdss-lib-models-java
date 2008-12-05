@@ -123,6 +123,7 @@ package DWR.StateMod;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.IO.IOUtil;
@@ -357,12 +358,12 @@ StateMod_RiverNetworkNode.
 @param filename Name of file to read.
 @exception Exception if there is an error reading the file.
 */
-public static Vector readStateModFile ( String filename )
+public static List readStateModFile ( String filename )
 throws Exception
 {	String rtn = "StateMod_RiverNetworkNode.readStateModFile";
-	Vector theRivs = new Vector();
+	List theRivs = new Vector();
 	String iline, s;
-	Vector v = new Vector ( 7 );
+	List v = new Vector ( 7 );
 	int [] format_0;
 	int [] format_0w;
 	format_0 = new int[7];
@@ -411,21 +412,21 @@ throws Exception
 				"Fixed read returned " 
 				+ v.size() + " elements");
 			}
-			aRiverNode.setID ( ((String)v.elementAt(0)).trim() );
-			aRiverNode.setName ( ((String)v.elementAt(1)).trim() );
-			aRiverNode.setCstadn ( ((String)v.elementAt(2)).trim());
+			aRiverNode.setID ( ((String)v.get(0)).trim() );
+			aRiverNode.setName ( ((String)v.get(1)).trim() );
+			aRiverNode.setCstadn ( ((String)v.get(2)).trim());
 
 			// Expect that we also may have the comment and
 			// possibly the gwmaxr value...
 			aRiverNode.setComment (
-				((String)v.elementAt(3)).trim() );
-			s = ((String)v.elementAt(4)).trim();
+				((String)v.get(3)).trim() );
+			s = ((String)v.get(4)).trim();
 			if ( s.length() > 0 ) { 
 				aRiverNode.setGwmaxr ( StringUtil.atod(s) );
 			}
 			
 			// add the node to the vector of river nodes
-			theRivs.addElement ( aRiverNode );
+			theRivs.add ( aRiverNode );
 		}
 	} catch (Exception e) {
 		// Clean up...
@@ -547,7 +548,7 @@ into the new file.
 @param do_well Indicates whether well modeling fields should be written.
 */
 public static void writeStateModFile( String infile, String outfile,
-			Vector theRivs, String[] newcomments, boolean do_well )
+		List theRivs, String[] newcomments, boolean do_well )
 throws Exception
 {	PrintWriter	out;
 	String [] comment_str = { "#" };
@@ -615,16 +616,16 @@ throws Exception
 		if ( theRivs != null ) {
 			num = theRivs.size();
 		}
-		Vector v = new Vector ( 5 );
+		List v = new Vector ( 5 );
 		for ( int i=0; i< num; i++ ) {
-			riv = (StateMod_RiverNetworkNode) theRivs.elementAt(i);
-			v.removeAllElements ();
-			v.addElement ( riv.getID() );
-			v.addElement ( riv.getName() );
-			v.addElement ( riv.getCstadn() );
-			v.addElement ( riv.getComment() );
+			riv = (StateMod_RiverNetworkNode) theRivs.get(i);
+			v.clear ();
+			v.add ( riv.getID() );
+			v.add ( riv.getName() );
+			v.add ( riv.getCstadn() );
+			v.add ( riv.getComment() );
 			if ( do_well ) {
-				v.addElement (
+				v.add (
 				StringUtil.formatString(riv.getGwmaxr(),
 				"%8.0f") );
 			}
@@ -649,8 +650,7 @@ throws Exception
 /**
 Writes a Vector of StateMod_RiverNetworkNode objects to a list file.  A header 
 is printed to the top of the file, containing the commands used to generate the
-file.  Any strings in the body of the file that contain the field delimiter 
-will be wrapped in "...".  
+file.  Any strings in the body of the file that contain the field delimiter will be wrapped in "...".  
 @param filename the name of the file to which the data will be written.
 @param delimiter the delimiter to use for separating field values.
 @param update whether to update an existing file, retaining the current 
@@ -658,15 +658,14 @@ header (true) or to create a new file with a new header.
 @param data the Vector of objects to write.  
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter,
-boolean update, Vector data) 
+public static void writeListFile(String filename, String delimiter, boolean update, List data) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
 		size = data.size();
 	}
 	
-	Vector fields = new Vector();
+	List fields = new Vector();
 	fields.add("ID");
 	fields.add("Name");
 	fields.add("DownstreamID");
@@ -678,7 +677,7 @@ throws Exception {
 	int comp = StateMod_DataSet.COMP_RIVER_NETWORK;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.elementAt(i);
+		s = (String)fields.get(i);
 		names[i] = StateMod_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateMod_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -713,16 +712,12 @@ throws Exception {
 		out.println(buffer.toString());
 		
 		for (int i = 0; i < size; i++) {
-			rnn = (StateMod_RiverNetworkNode)data.elementAt(i);
+			rnn = (StateMod_RiverNetworkNode)data.get(i);
 			
-			line[0] = StringUtil.formatString(rnn.getID(),
-				formats[0]).trim();
-			line[1] = StringUtil.formatString(rnn.getName(),
-				formats[1]).trim();
-			line[2] = StringUtil.formatString(rnn.getCstadn(),
-				formats[2]).trim();
-			line[3] = StringUtil.formatString(rnn.getComment(),
-				formats[3]).trim();
+			line[0] = StringUtil.formatString(rnn.getID(), formats[0]).trim();
+			line[1] = StringUtil.formatString(rnn.getName(), formats[1]).trim();
+			line[2] = StringUtil.formatString(rnn.getCstadn(), formats[2]).trim();
+			line[3] = StringUtil.formatString(rnn.getComment(), formats[3]).trim();
 
 			buffer = new StringBuffer();	
 			for (j = 0; j < fieldCount; j++) {

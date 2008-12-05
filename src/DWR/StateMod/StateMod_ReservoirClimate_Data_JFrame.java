@@ -21,6 +21,7 @@
 
 package DWR.StateMod;
 
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.GUI.JScrollWorksheet;
@@ -45,7 +46,7 @@ the data can be edited, if false they can not.
 If false, they are evap stations.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_ReservoirClimate_Data_JFrame(Vector data, String titleString,
+public StateMod_ReservoirClimate_Data_JFrame(List data, String titleString,
 boolean editable, boolean precip)
 throws Exception {
 	super();
@@ -55,15 +56,15 @@ throws Exception {
 	int size2 = 0;
 	StateMod_Reservoir r = null;
 	StateMod_ReservoirClimate c = null;
-	Vector climates = null;
-	Vector v = new Vector();
+	List climates = null;
+	List v = new Vector();
 	
 	if (data != null) {
 		size = data.size();
 	}
 	
 	for (int i = 0; i < size; i++) {
-		r = (StateMod_Reservoir)data.elementAt(i);
+		r = (StateMod_Reservoir)data.get(i);
 		climates = r.getClimates();
 		if (climates == null) {
 			continue;
@@ -72,17 +73,15 @@ throws Exception {
 		size2 = climates.size();
 
 		for (j = 0; j < size2; j++) {
-			c = (StateMod_ReservoirClimate)climates.elementAt(j);
+			c = (StateMod_ReservoirClimate)climates.get(j);
 			if (c == null) {
 				// skip
 			}
-			else if (!precip && c.getType() 
-			    == StateMod_ReservoirClimate.CLIMATE_EVAP) {
+			else if (!precip && c.getType() == StateMod_ReservoirClimate.CLIMATE_EVAP) {
 			    	c.setCgoto(r.getID());
 			    	v.add(c);
 			}
-			else if (precip && c.getType() 
-			    == StateMod_ReservoirClimate.CLIMATE_PTPX) {
+			else if (precip && c.getType() == StateMod_ReservoirClimate.CLIMATE_PTPX) {
 			    	c.setCgoto(r.getID());
 			    	v.add(c);
 			}			
@@ -94,28 +93,25 @@ throws Exception {
 }
 
 /**
-Called when the Apply button is pressed. This commits any changes to the data
-objects.
+Called when the Apply button is pressed. This commits any changes to the data objects.
 */
 protected void apply() {
 	StateMod_ReservoirClimate clim = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		clim = (StateMod_ReservoirClimate)_data.elementAt(i);
+		clim = (StateMod_ReservoirClimate)_data.get(i);
 		clim.createBackup();
 	}
 }
 
 /**
 Creates a JScrollWorksheet for the current data and returns it.
-@return a JScrollWorksheet containing the data Vector passed in to the 
-constructor.
+@return a JScrollWorksheet containing the data Vector passed in to the constructor.
 */
 protected JScrollWorksheet buildJScrollWorksheet() 
 throws Exception {
 	StateMod_ReservoirClimate_Data_TableModel tableModel 
-		= new StateMod_ReservoirClimate_Data_TableModel(_data, 
-		_editable);
+		= new StateMod_ReservoirClimate_Data_TableModel(_data, _editable);
 	StateMod_ReservoirClimate_Data_CellRenderer cellRenderer 
 		= new StateMod_ReservoirClimate_Data_CellRenderer(tableModel);
 
@@ -124,30 +120,27 @@ throws Exception {
 }
 
 /**
-Called when the cancel button is pressed.  This discards any changes made to 
-the data objects.
+Called when the cancel button is pressed.  This discards any changes made to the data objects.
 */
 protected void cancel() {
 	StateMod_ReservoirClimate clim = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		clim = (StateMod_ReservoirClimate)_data.elementAt(i);
+		clim = (StateMod_ReservoirClimate)_data.get(i);
 		clim.restoreOriginal();
 	}
 }
 
 /**
-Creates backups of all the data objects in the Vector so that changes can 
-later be cancelled if necessary.
+Creates backups of all the data objects in the Vector so that changes can later be cancelled if necessary.
 */
 protected void createDataBackup() {
 	StateMod_ReservoirClimate clim = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		Message.printStatus(1, "", "climate1: " + _data.elementAt(i));
-		Message.printStatus(1, "", "climate2: " 
-			+ _data.elementAt(i).getClass());	
-		clim = (StateMod_ReservoirClimate)_data.elementAt(i);
+		Message.printStatus(1, "", "climate1: " + _data.get(i));
+		Message.printStatus(1, "", "climate2: " + _data.get(i).getClass());	
+		clim = (StateMod_ReservoirClimate)_data.get(i);
 		clim.createBackup();
 	}
 }

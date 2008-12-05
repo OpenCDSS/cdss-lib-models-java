@@ -148,6 +148,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JCheckBox;
@@ -250,7 +251,7 @@ private SimpleJComboBox __graphType_JComboBox;
 /**
 Vector of time series to graph.
 */
-private Vector __tsVector = null;
+private List __tsVector = null;
 
 /**
 The dataset for the statemod run containing all the data.
@@ -512,7 +513,7 @@ public void checkGUIState ()
 		boolean enabled = false;
 		int size = __tsVector.size();
 		for ( int i = 0; i < size; i++ ) {
-			if ( ((TS)__tsVector.elementAt(i)) != null ) {
+			if ( ((TS)__tsVector.get(i)) != null ) {
 				enabled = true;
 				break;
 			}
@@ -600,7 +601,7 @@ protected void getTimeSeries ()
 	//	use StateMod_TS.readTimeSeries() to read the time seris from
 	//	the text input file.
 
-	Vector tsident_Vector = __worksheet.getAllData();
+	List tsident_Vector = __worksheet.getAllData();
 
 	// tsident_Vector will contain vector of TSIdent objects.
 	int numTS = tsident_Vector.size();
@@ -612,7 +613,7 @@ protected void getTimeSeries ()
 
 	__tsVector = new Vector(numTS);
 	for ( int i = 0; i < numTS; i++ ) {
-		__tsVector.addElement(null);
+		__tsVector.add(null);
 	}
 
 	// Fill out the run period dates so that we can optimize the read
@@ -658,13 +659,13 @@ protected void getTimeSeries ()
 		setMessages("Retrieving time series "
 			+ (i + 1) + " of " + numTS, "Wait");
 		try {	tsident = new TSIdent (
-				(TSIdent)tsident_Vector.elementAt(i) );
+				(TSIdent)tsident_Vector.get(i) );
 		}
 		catch ( Exception e ) {
 			// Should not happen because it is a copy...
 			Message.printWarning ( 2, routine,
 			"Error creating TSIdent copy for \"" +
-				(TSIdent)tsident_Vector.elementAt(i) );
+				(TSIdent)tsident_Vector.get(i) );
 			continue;	// TS will be null in the Vector of TS
 		}
 		// Reset the ID to the first token because the ID from the
@@ -728,7 +729,7 @@ protected void getTimeSeries ()
 				(i + 1), this );
 		}
 
-		__tsVector.setElementAt(ts,i);
+		__tsVector.set(i,ts);
 	}
 
 	if (__tsVector.size() > 0) {
@@ -821,7 +822,7 @@ private void loadTSProduct ()
 	TSIdent new_tsident;	// New TSIdent to add to worksheet table model
 	StateMod_Data smdata;	// StateMod data matching the TSID.
 	DataSetComponent comp = null;
-	Vector comp_data = null;
+	List comp_data = null;
 	String station_type = null;	// Station type for row.
 	int pos = 0;
 	String loc_main;	// Main part of the location in the TSID
@@ -869,7 +870,7 @@ private void loadTSProduct ()
 			// stations in the data set.
 			comp = __dataset.getComponentForComponentType(
 				StateMod_DataSet.COMP_DIVERSION_STATIONS );
-			comp_data = (Vector)comp.getData();
+			comp_data = (List)comp.getData();
 			loc_main = new_tsident.getLocation();
 			res_account = null;
 			if ( loc_main.indexOf("-") > 0 ) {
@@ -891,7 +892,7 @@ private void loadTSProduct ()
 				comp = __dataset.getComponentForComponentType(
 					StateMod_DataSet.
 					COMP_RESERVOIR_STATIONS );
-				comp_data = (Vector)comp.getData();
+				comp_data = (List)comp.getData();
 				pos = StateMod_Util.indexOf(comp_data,loc_main);
 				if ( pos >= 0 ) {
 					// TSID is for a reservoir...
@@ -904,7 +905,7 @@ private void loadTSProduct ()
 				comp = __dataset.getComponentForComponentType(
 					StateMod_DataSet.
 					COMP_INSTREAM_STATIONS );
-				comp_data = (Vector)comp.getData();
+				comp_data = (List)comp.getData();
 				pos = StateMod_Util.indexOf(comp_data,loc_main);
 				if ( pos >= 0 ) {
 					// TSID is for an instream flow...
@@ -917,7 +918,7 @@ private void loadTSProduct ()
 				comp = __dataset.getComponentForComponentType(
 					StateMod_DataSet.
 					COMP_STREAMGAGE_STATIONS );
-				comp_data = (Vector)comp.getData();
+				comp_data = (List)comp.getData();
 				pos = StateMod_Util.indexOf(comp_data,loc_main);
 				if ( pos >= 0 ) {
 					// TSID is for a stream gage...
@@ -930,7 +931,7 @@ private void loadTSProduct ()
 				comp = __dataset.getComponentForComponentType(
 					StateMod_DataSet.
 					COMP_STREAMESTIMATE_STATIONS );
-				comp_data = (Vector)comp.getData();
+				comp_data = (List)comp.getData();
 				pos = StateMod_Util.indexOf(comp_data,loc_main);
 				if ( pos >= 0 ) {
 					// TSID is for a stream estimate...
@@ -942,7 +943,7 @@ private void loadTSProduct ()
 				// Check well...
 				comp = __dataset.getComponentForComponentType(
 					StateMod_DataSet.COMP_WELL_STATIONS );
-				comp_data = (Vector)comp.getData();
+				comp_data = (List)comp.getData();
 				pos = StateMod_Util.indexOf(comp_data,loc_main);
 				if ( pos >= 0 ) {
 					// TSID is for a well...
@@ -964,7 +965,7 @@ private void loadTSProduct ()
 			new_tsident.setAlias ( station_type );
 			// Replace the location with the ID - name combination
 			// for the matched station.
-			smdata = (StateMod_Data)comp_data.elementAt(pos);
+			smdata = (StateMod_Data)comp_data.get(pos);
 			if ( res_account != null ) {
 				// Need to handle the account in the ID and
 				// also the name...
@@ -1141,7 +1142,7 @@ public TS readTimeSeries (	TS req_ts, String fname,
 Method needed for TSSupplier interface, to supply the time series for the graph.
 This method is not used.
 */
-public Vector readTimeSeriesList (	String tsident,
+public List readTimeSeriesList (	String tsident,
 					DateTime req_date1, DateTime req_date2,
 					String req_units, boolean read_data )
 {	return null;
@@ -1150,7 +1151,7 @@ public Vector readTimeSeriesList (	String tsident,
 /**
 Method needed for TSSupplier interface - not used.
 */
-public Vector readTimeSeriesList (	TSIdent tsident, String fname,
+public List readTimeSeriesList (	TSIdent tsident, String fname,
 					DateTime req_date1,
 					DateTime req_date2,
 					String req_units,
@@ -1200,14 +1201,14 @@ private void saveTSProduct ()
 	int sub = 1;
 	int its = 0;
 	props.set ( "Product.GraphType="+ __graphType_JComboBox.getSelected() );
-	Vector tsident_Vector = __worksheet.getAllData();
+	List tsident_Vector = __worksheet.getAllData();
 	int nrows = tsident_Vector.size();
 	TSIdent tsident = null;
 	String id;			// Location for reset.
 	String data_type = null;	// Data type for reset.
 	for ( int i = 0; i < nrows; i++ ) {
 		try {	tsident = new TSIdent (
-				(TSIdent)tsident_Vector.elementAt(i) );
+				(TSIdent)tsident_Vector.get(i) );
 		}
 		catch ( Exception e ) {
 			// Should not happen.
@@ -1381,7 +1382,7 @@ private void setupGUI() {
 		jsw = new JScrollWorksheet(crg, __tableModel, p);		
 		__worksheet = jsw.getJWorksheet();
 
-		Vector v = StateMod_Util.getStationTypes();
+		List v = StateMod_Util.getStationTypes();
 		__worksheet.setColumnJComboBoxValues(
 			__tableModel._COL_STATION_TYPE, v);
 

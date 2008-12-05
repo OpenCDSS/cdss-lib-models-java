@@ -52,6 +52,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
 import java.util.StringTokenizer;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -291,18 +292,18 @@ public void fillFileJListContents(){
 	int i = 0;
 	int length = filelist.length;
 
-	Vector overall = new Vector();
+	List overall = new Vector();
 
-	Vector v1 = new Vector(3);
-	v1.addElement("File");
-	v1.addElement("Contents");
-	v1.addElement("Description");
+	List v1 = new Vector(3);
+	v1.add("File");
+	v1.add("Contents");
+	v1.add("Description");
 	iline = StringUtil.formatString(v1, format);
 	overall.add(iline);
-	Vector v2 = new Vector(3);
-	v2.addElement("----");
-	v2.addElement("--------");
-	v2.addElement("-----------");
+	List v2 = new Vector(3);
+	v2.add("----");
+	v2.add("--------");
+	v2.add("-----------");
 	iline = StringUtil.formatString(v2, format);
 	overall.add(iline);
 
@@ -313,10 +314,10 @@ public void fillFileJListContents(){
 		filename = __path + filelist[i];
 		if (IOUtil.fileReadable(filename)) {
 			Message.printStatus(10, rtn, "Adding " + filename);
-			Vector v = new Vector(3);
-			v.addElement(filelist[i++]);
-			v.addElement(filelist[i++]);
-			v.addElement(filelist[i++]);
+			List v = new Vector(3);
+			v.add(filelist[i++]);
+			v.add(filelist[i++]);
+			v.add(filelist[i++]);
 			iline = StringUtil.formatString(v, format);
 			overall.add(iline);
 		}
@@ -328,7 +329,7 @@ public void fillFileJListContents(){
 			i += 3;
 		}
 	}
-	__fileJList.setListData(overall);
+	__fileJList.setListData(new Vector(overall));
 }
 
 /**

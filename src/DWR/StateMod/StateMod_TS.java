@@ -69,6 +69,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Vector;
 
 import RTi.TS.DayTS;
@@ -339,161 +340,161 @@ programmer knows what sample is supported.  Perhaps they could be stored in
 sample files in the future.  
 @return Sample file contents.
 */
-public static Vector getSample ()
-{	Vector	s = new Vector ( 50 );
-	s.addElement (
+public static List getSample ()
+{	List	s = new Vector ( 50 );
+	s.add (
 "#StateMod_TS" );
-	s.addElement (
+	s.add (
 "#" );
-	s.addElement (
+	s.add (
 "# StateMod time series files can have 3 forms (monthly, average monthly," );
-	s.addElement (
+	s.add (
 "# daily) as described below.  The order of time series is important for" );
-	s.addElement (
+	s.add (
 "# some files (e.g., order of diversion time series should match order of" );
-	s.addElement (
+	s.add (
 "# diversion stations in .dds file); however, StateMod is being updated over" );
-	s.addElement (
+	s.add (
 "# time to remove this requirement).  Different StateMod input files have" );
-	s.addElement (
+	s.add (
 "# slight variations on the general format (e.g., the reservoir target file" );
-	s.addElement (
+	s.add (
 "# has two time series for each reservoir for minimum and maximum targets)." );
-	s.addElement (
+	s.add (
 "# Missing data are typically indicated by -999." );
-	s.addElement (
+	s.add (
 "# The generic extension for StateMod time series files is .stm, although." );
-	s.addElement (
+	s.add (
 "# specific extensions are used in a StateMod data set." );
-	s.addElement (
+	s.add (
 "#" );
-	s.addElement (
+	s.add (
 "# 1) This is an example of a StateMod monthly time series for water year data:");
-	s.addElement (
+	s.add (
 "#" );
-	s.addElement (
+	s.add (
 "# Comments are lines at the top of the file starting with the # character." );
-	s.addElement (
+	s.add (
 "# The header may contain software-generated comments about the time series." );
-	s.addElement (
+	s.add (
 "# The remainder of the file is fixed format, with the first non-comment" );
-	s.addElement (
+	s.add (
 "# line being a header with the following elements (i5,1x,i4,5x,i5,1x,i4,a5,a5):" );
-	s.addElement (
+	s.add (
 "#" );
-	s.addElement (
+	s.add (
 "# Beginning month (1=Jan)" );
-	s.addElement (
+	s.add (
 "# Beginning year (4-digit)" );
-	s.addElement (
+	s.add (
 "# Ending month" );
-	s.addElement (
+	s.add (
 "# Ending year" );
-	s.addElement (
+	s.add (
 "# Data units (AF/M, ACFT, CFS or \"\"), where rates are for diversions and" );
-	s.addElement (
+	s.add (
 "#   flow, and volume is for reservoir contents.  Units are not used for" );
-	s.addElement (
+	s.add (
 "#   dimensionless data (like weight or percent).  Units are ignored by" );
-	s.addElement (
+	s.add (
 "#   StateMod (it refers to the control file) but may be checked by other" );
-	s.addElement (
+	s.add (
 "#   software when analyzing data." );
-	s.addElement (
+	s.add (
 "# Year type (CYR=calendar, WYR=water, IYR=irrigation)" );
-	s.addElement (
+	s.add (
 "#" );
-	s.addElement (
+	s.add (
 "# Data lines then follow with:" );
-	s.addElement (
+	s.add (
 "# Year Station 12-monthly-values year-total/average (i4, 1x, a12, 12f8, f10)");
-	s.addElement (
+	s.add (
 "# The year value is optional and is generally not read as input but is " );
-	s.addElement (
+	s.add (
 "# computed for output.  For monthly and average monthly data files, the year");
-	s.addElement (
+	s.add (
 "# in data lines corresponds to the calendar type.  An example follows:" );
-	s.addElement (
+	s.add (
 "   10/1926  -      9/1998 ACFT  WYR" );
-	s.addElement (
+	s.add (
 "1927 08236000      1229.8   892.6   922.3   737.9   555.4   922.3  7049.4 32263.6 31000.1 14541.0  5662.9  8326.7  104104.0" );
-	s.addElement (
+	s.add (
 "1927 08235250      -999.0  -999.0  -999.0  -999.0  -999.0  -999.0  -999.0  -999.0  -999.0  -999.0  -999.0  -999.0       0.0" );
-	s.addElement (
+	s.add (
 "1927 08235700      -999.0  -999.0  -999.0  -999.0  -999.0  -999.0  -999.0  -999.0  -999.0  -999.0  -999.0  -999.0       0.0" );
-	s.addElement (
+	s.add (
 "1927 08236500      1047.3   595.1   614.9   614.9   555.4  1900.2  6769.7 31226.2 20338.8 14777.1  9465.3  4476.8   92381.5" );
-	s.addElement (
+	s.add (
 "..." );
-	s.addElement (
+	s.add (
 "#" );
-	s.addElement (
+	s.add (
 "# 2) This is an example of a StateMod average monthly time series for water");
-	s.addElement (
+	s.add (
 "#    year data:");
-	s.addElement (
+	s.add (
 "#" );
-	s.addElement (
+	s.add (
 "# The average monthly time series is a pattern of twelve monthly values" );
-	s.addElement (
+	s.add (
 "# that are applied for each year in the period." );
-	s.addElement (
+	s.add (
 "# The format is exactly the same as a monthly time series; however, the" );
-	s.addElement (
+	s.add (
 "# years in the header should be set to zero and year and month are ignored");
-	s.addElement (
+	s.add (
 "# in data rows." );
-	s.addElement (
+	s.add (
 "#" );
-	s.addElement (
+	s.add (
 "# An example follows:" );
-	s.addElement (
+	s.add (
 "   10/   0  -      9/   0 ACFT  WYR" );
-	s.addElement (
+	s.add (
 "     08236000      1229.8   892.6   922.3   737.9   555.4   922.3  7049.4 32263.6 31000.1 14541.0  5662.9  8326.7  104104.0" );
-	s.addElement (
+	s.add (
 "     08235250      -999.0  -999.0  -999.0  -999.0  -999.0  -999.0  -999.0  -999.0  -999.0  -999.0  -999.0  -999.0       0.0" );
-	s.addElement (
+	s.add (
 "     08235700      -999.0  -999.0  -999.0  -999.0  -999.0  -999.0  -999.0  -999.0  -999.0  -999.0  -999.0  -999.0       0.0" );
-	s.addElement (
+	s.add (
 "     08236500      1047.3   595.1   614.9   614.9   555.4  1900.2  6769.7 31226.2 20338.8 14777.1  9465.3  4476.8   92381.5" );
-	s.addElement (
+	s.add (
 "..." );
-	s.addElement (
+	s.add (
 "#" );
-	s.addElement (
+	s.add (
 "# 3) This is an example of a StateMod daily time series for water year data:");
-	s.addElement (
+	s.add (
 "#" );
-	s.addElement (
+	s.add (
 "# The daily time series is similar to the monthly time series except that" );
-	s.addElement (
+	s.add (
 "# a year and month are included on the data lines and 28, 30, or 31 daily" );
-	s.addElement (
+	s.add (
 "# Regardless of the calendar type in the header, the year and month in data" );
-	s.addElement (
+	s.add (
 "# records use calendar year and month (month 1 = January)." );
-	s.addElement (
+	s.add (
 "# data values can occur on each line (depending on month)." );
-	s.addElement (
+	s.add (
 "# The data format is (i4, i4, 1x, a12, 31f8, f8).  The month total/average" );
-	s.addElement (
+	s.add (
 "# is optional and is generally read as input but is computed for output.");
-	s.addElement (
+	s.add (
 "#" );
-	s.addElement (
+	s.add (
 "# An example follows:" );
-	s.addElement (
+	s.add (
 "   10/1926  -      9/1998 ACFT  WYR" );
-	s.addElement (
+	s.add (
 "1926  10 08236000     -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00    0.00      0.00" );
-	s.addElement (
+	s.add (
 "..." );
-	s.addElement (
+	s.add (
 "1998   9 08236000       38.00   42.00   42.00   67.00   90.00   90.00  100.00  118.00   93.00   80.00   93.00   80.00   80.00   80.00   80.00   80.00   68.00   80.00   68.00   68.00   80.00   80.00  106.00  136.00  170.00  229.00  250.00  296.00  322.00  348.00    0.00    114.65" );
-	s.addElement (
+	s.add (
 "1998   9 08235250     -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00 -999.00    0.00      0.00" );
-	s.addElement (
+	s.add (
 "..." );
 	return s;
 }
@@ -509,7 +510,7 @@ The IOUtil.getPathUsingWorkingDir() method is applied to the filename.
 @param filename Name of pattern file to read.
 @param read_data true if all the data should be read, false if only the header should be read.
 */
-public static Vector readPatternTimeSeriesList ( String filename, boolean read_data )
+public static List readPatternTimeSeriesList ( String filename, boolean read_data )
 {	int	dl = 1, i, m1, m2, y1, y2, num_years, year = 0, len,
 		currentTSindex, current_year=0, init_year, numts = 0;
 	String	chval, iline, message, rtn="StateMod_TS.readPatternTimeSeriesList", value;
@@ -517,8 +518,8 @@ public static Vector readPatternTimeSeriesList ( String filename, boolean read_d
 	DateTime date1 = new DateTime (DateTime.PRECISION_MONTH);
 	DateTime date2 = new DateTime (DateTime.PRECISION_MONTH);
 
-	Vector v;
-	Vector tslist = new Vector ( 10, 5 );
+	List v;
+	List tslist = new Vector ( 10, 5 );
 
 	String full_filename = IOUtil.getPathUsingWorkingDir(filename);
 	try {
@@ -582,11 +583,11 @@ public static Vector readPatternTimeSeriesList ( String filename, boolean read_d
 		Message.printDebug ( dl, rtn, "Parsing line for calperiod: \"" + iline + "\"" );
 	}
 	v = StringUtil.fixedRead ( iline, format_0 );
-	m1 = ((Integer)v.elementAt(0)).intValue();
-	y1 = ((Integer)v.elementAt(1)).intValue();
-	m2 = ((Integer)v.elementAt(2)).intValue();
-	y2 = ((Integer)v.elementAt(3)).intValue();
-	String units = ((String)v.elementAt(4)).trim();
+	m1 = ((Integer)v.get(0)).intValue();
+	y1 = ((Integer)v.get(1)).intValue();
+	m2 = ((Integer)v.get(2)).intValue();
+	y2 = ((Integer)v.get(3)).intValue();
+	String units = ((String)v.get(4)).trim();
 	if ( Message.isDebugOn ) {
 		Message.printDebug ( dl, rtn, "Retrieved: \"" + 
 		m1 + " " + y1 + " " + m2 + " " + y2 + " " + units + "\"");	
@@ -677,7 +678,7 @@ public static Vector readPatternTimeSeriesList ( String filename, boolean read_d
 			Message.printDebug ( dl, rtn, "Found monthly time series" );	
 		}
 		StringUtil.fixedRead ( iline, format_month, format_month_w, v );
-		current_year = ((Integer)v.elementAt(0)).intValue();
+		current_year = ((Integer)v.get(0)).intValue();
 		if ( Message.isDebugOn ) {
 			Message.printDebug ( dl, rtn, "current year set to: " +	current_year );
 		}
@@ -711,7 +712,7 @@ public static Vector readPatternTimeSeriesList ( String filename, boolean read_d
 				if (y1 != 0) {
 					// this is monthly and includes year
 					StringUtil.fixedRead ( iline, format_month, format_month_w, v);
-					current_year = ( (Integer)v.elementAt(0)).intValue();
+					current_year = ( (Integer)v.get(0)).intValue();
 				}
 				else {
 				    StringUtil.fixedRead ( iline,format_annual,format_annual_w,v);	
@@ -723,7 +724,7 @@ public static Vector readPatternTimeSeriesList ( String filename, boolean read_d
 		// The first thing that we do is get the time series
 		// identifier so we can check against a requested identifier...
 
-		chval = (String)v.elementAt(1);
+		chval = (String)v.get(1);
 		String id = chval.trim();
 
 		// We are still establishing the list of stations in file
@@ -758,7 +759,7 @@ public static Vector readPatternTimeSeriesList ( String filename, boolean read_d
 			        date2.toString() + " from \"" + full_filename + "\"" );
 
 			// Attach new time series to list.
-			tslist.addElement ( month_ts );
+			tslist.add ( month_ts );
 			numts++;
 		}
 		else {
@@ -779,13 +780,13 @@ public static Vector readPatternTimeSeriesList ( String filename, boolean read_d
 		}
 
 		// Filling a vector of TS...
-		currentTS = (StringMonthTS)tslist.elementAt(currentTSindex);
+		currentTS = (StringMonthTS)tslist.get(currentTSindex);
 
 		date.setYear (y1 + year );
 		date.setMonth (m1);
 
 		for ( i=0; i<12; i++ ) {
-			value =	((String)v.elementAt(i+2)).trim();
+			value =	((String)v.get(i+2)).trim();
 			if ( Message.isDebugOn ) {
 				Message.printDebug ( dl, rtn, "Setting data value for " + date.toString() + " to " + value );
 			}
@@ -800,7 +801,7 @@ public static Vector readPatternTimeSeriesList ( String filename, boolean read_d
 		if ( iline != null && iline.length()>0) {
 			if (y1 != 0) { // this is monthly and includes year
 				StringUtil.fixedRead ( iline, format_month, format_month_w, v );
-				current_year = ( (Integer)v.elementAt(0)).intValue();
+				current_year = ( (Integer)v.get(0)).intValue();
 			}
 			else {
 			    StringUtil.fixedRead ( iline, format_annual, format_annual_w, v );	
@@ -876,8 +877,7 @@ throws Exception
 	ts.setIdentifier ( tsident_string );
 	// The specific time series is modified...
 	// TODO SAM 2007-03-01 Evaluate logic
-	readTimeSeriesList (	ts, in, full_fname,
-			data_interval, date1, date2, units, read_data );
+	readTimeSeriesList ( ts, in, full_fname, data_interval, date1, date2, units, read_data );
 	ts.getIdentifier().setInputType("StateMod");
 	ts.setInputName ( full_fname );
 	// Already in the low-level code
@@ -897,9 +897,9 @@ The IOUtil.getPathUsingWorkingDir() method is applied to the filename.
 @param units Units to convert to.
 @param read_data Indicates whether data should be read.
 */
-public static Vector readTimeSeriesList ( String fname,	DateTime date1, DateTime date2, String units, boolean read_data)
+public static List readTimeSeriesList ( String fname, DateTime date1, DateTime date2, String units, boolean read_data)
 throws Exception
-{	Vector	tslist = null;
+{	List	tslist = null;
     String routine = "StateMod_TS.readTimeSeriesList";
 
 	String input_name = fname;
@@ -915,15 +915,14 @@ throws Exception
     data_interval = getFileDataInterval ( full_fname );
     // Let the following thrown FileNotFoundException, etc.
 	in = new BufferedReader ( new InputStreamReader( IOUtil.getInputStream ( full_fname )) );
-	tslist = readTimeSeriesList (	null, in, full_fname, data_interval,
-					date1, date2, units, read_data );
+	tslist = readTimeSeriesList ( null, in, full_fname, data_interval, date1, date2, units, read_data );
 	TS ts;
 	int nts = 0;
 	if ( tslist != null ) {
 		nts = tslist.size();
 	}
 	for ( int i = 0; i < nts; i++ ) {
-		ts = (TS)tslist.elementAt(i);
+		ts = (TS)tslist.get(i);
 		if ( ts != null ) {
 			ts.setInputName ( full_fname );
 			// TODO SAM 2008-05-11 is this needed?
@@ -951,7 +950,7 @@ identifier, which is assumed to have been set in the calling code.
 @param read_data Indicates whether data should be read.
 @exception Exception if there is an error reading the time series.
 */
-private static Vector readTimeSeriesList (	TS req_ts, BufferedReader in,
+private static List readTimeSeriesList (	TS req_ts, BufferedReader in,
 						String full_filename,
 						int file_interval,
 						DateTime req_date1,
@@ -964,7 +963,7 @@ throws Exception
 		doffset = 2, init_month = 1, init_year, ndata_per_line = 12,
 		numts = 0;
 	String	chval, iline, routine="StateMod_TS.readTimeSeriesList";
-	Vector	v = new Vector (15);
+	List v = new Vector (15);
 	DateTime date = null;
 	if ( file_interval == TimeInterval.DAY ) {
 		date = new DateTime ( DateTime.PRECISION_DAY );
@@ -976,7 +975,7 @@ throws Exception
 	boolean	req_id_found = false; // Indicates if we have found the requested TS in the file.
 	boolean standard_ts = true; // Non-standard indicates 12 monthly averages in file.
 
-	Vector tslist = null; // List of time series to return.
+	List tslist = null; // List of time series to return.
 	String req_id = null;
 	if ( req_ts != null ) {
 		req_id = req_ts.getLocation();
@@ -1029,10 +1028,10 @@ throws Exception
 			"Parsing line for calperiod: \"" + iline + "\""  );
 	}
 	v = StringUtil.fixedRead ( iline, format_fileContents );
-	m1 = ((Integer)v.elementAt(0)).intValue();
-	y1 = ((Integer)v.elementAt(1)).intValue();
-	m2 = ((Integer)v.elementAt(2)).intValue();
-	y2 = ((Integer)v.elementAt(3)).intValue();
+	m1 = ((Integer)v.get(0)).intValue();
+	y1 = ((Integer)v.get(1)).intValue();
+	m2 = ((Integer)v.get(2)).intValue();
+	y2 = ((Integer)v.get(3)).intValue();
 	DateTime date1_header;
 	if ( file_interval == TimeInterval.DAY ) {
 		date1_header = new DateTime ( DateTime.PRECISION_DAY );
@@ -1055,8 +1054,8 @@ throws Exception
 		date2_header.setYear ( y2 );
 		date2_header.setMonth ( m2 );
 	}
-	String units = ((String)v.elementAt(4)).trim();
-	String yeartypes = ((String)v.elementAt(5)).trim();
+	String units = ((String)v.get(4)).trim();
+	String yeartypes = ((String)v.get(5)).trim();
 	int yeartype = StateMod_DataSet.SM_CYR;
 	// Year type is used in one place to initialize the year when
 	// transferring data.  However, it is assumed that m1 is always correct
@@ -1360,10 +1359,10 @@ throws Exception
 		StringUtil.fixedRead ( iline, format, format_w, v );
 		if ( standard_ts ) {
 			// This is monthly and includes year
-			current_year = ( (Integer)v.elementAt(0)).intValue();
+			current_year = ( (Integer)v.get(0)).intValue();
 			if ( file_interval == TimeInterval.DAY ) {
 				current_month = (
-				(Integer)v.elementAt(1)).intValue();
+				(Integer)v.get(1)).intValue();
 				if ( Message.isDebugOn ) {
 					Message.printDebug ( dl, routine,
 					"Found id!  Current date is " +
@@ -1387,10 +1386,10 @@ throws Exception
 		if ( req_id == null ) {
 			if ( file_interval == TimeInterval.DAY ) {
 				// Have year, month, and then ID...
-				id = ((String)v.elementAt(2)).trim();
+				id = ((String)v.get(2)).trim();
 			}
 			else {	// Have year, and then ID...
-				id = ((String)v.elementAt(1)).trim();
+				id = ((String)v.get(1)).trim();
 			}
 		}
 
@@ -1509,7 +1508,7 @@ throws Exception
 				if ( tslist == null ) {
 					tslist = new Vector(100);
 				}
-				tslist.addElement ( ts );
+				tslist.add ( ts );
 				numts++;
 			}
 		}
@@ -1532,7 +1531,7 @@ throws Exception
 
 		if ( !req_id_found ) {
 			// Filling a vector of TS...
-			currentTS = (TS)tslist.elementAt(currentTSindex);
+			currentTS = (TS)tslist.get(currentTSindex);
 		}
 		else {	// Filling a single time series...
 			currentTS = (TS)req_ts;
@@ -1578,10 +1577,10 @@ throws Exception
 					Message.printDebug ( dl, routine, 
 					"Setting data value for " +
 					date.toString() + " to " +
-					((Double)v.elementAt(i + doffset)));
+					((Double)v.get(i + doffset)));
 				}
 				currentTS.setDataValue ( date,
-				((Double)v.elementAt(i+doffset)).doubleValue());
+				((Double)v.get(i+doffset)).doubleValue());
 				if ( file_interval == TimeInterval.DAY ) {
 					date.addDay ( 1 );
 				}
@@ -1662,7 +1661,7 @@ future).</td>
 </table>
 @exception Exception if there is an error writing the file.
 */
-public static void writePatternTimeSeriesList ( String filename, Vector tslist,
+public static void writePatternTimeSeriesList ( String filename, List tslist,
 	DateTime date1, DateTime date2, PropList props )
 throws Exception
 {	String rtn = "StateMod_TS.writePatternTimeSeriesList";
@@ -1670,7 +1669,7 @@ throws Exception
 	String iline;	// string for use with StringUtil.formatString
 	int year = 0;
 	String value;	// Used when printing each data item
-	Vector v = new Vector(20,10);	// Used while formatting
+	List v = new Vector(20,10);	// Used while formatting
 	StringMonthTS tsptr = null;	// Reference to current time series
 
 	// Verify that the ts vector is not null.  Then count the number of
@@ -1720,7 +1719,7 @@ throws Exception
 	// interval found will be written later in the code...
 
 	for ( int i = 0; i < nseries; i++ ) {
-		if ( tslist.elementAt(i) == null ) {
+		if ( tslist.get(i) == null ) {
 			continue;
 		}
 		/* TODO SAM 2005-05-06 Support daily or yearly later?
@@ -1728,7 +1727,7 @@ throws Exception
 			req_interval_base = TimeInterval.DAY;
 		}
 		*/
-		else if ( tslist.elementAt(i) instanceof StringMonthTS ) {
+		else if ( tslist.get(i) instanceof StringMonthTS ) {
 			req_interval_base = TimeInterval.MONTH;
 		}
 		else {	iline = "StateMod time series list has time series " +
@@ -1750,11 +1749,11 @@ throws Exception
 	boolean [] include_ts = new boolean[nseries];
 	for ( int i=0; i<nseries; i++ ) {
 		include_ts[i] = true;
-		if ( tslist.elementAt(i) == null ) {
+		if ( tslist.get(i) == null ) {
 			include_ts[i] = false;
 			continue;
 		}
-		tsptr = (StringMonthTS)tslist.elementAt(i);
+		tsptr = (StringMonthTS)tslist.get(i);
 		interval_base = tsptr.getDataIntervalBase();
 		if ( interval_base != req_interval_base ) {
 			include_ts[i] = false;
@@ -1817,11 +1816,11 @@ throws Exception
 		tmptype, tmpunits;
 	String	format= "%s %3d %-24.24s %-6.6s %-8.8s %-6.6s %3.3s/%d - "
 			+ "%3.3s/%d %-12.12s%-24.24s";
-	Vector	genesis = null;
+	List genesis = null;
 
 	for ( int i=0; i < nseries; i++ ) {
 
-		tsptr = (StringMonthTS)tslist.elementAt(i);
+		tsptr = (StringMonthTS)tslist.get(i);
 
 		tmpid = tsptr.getIdentifierString();
 
@@ -1855,21 +1854,19 @@ throws Exception
 			tmplocation = empty_string;
 		}
 
-		v.removeAllElements();
-		v.addElement ( cmnt );
-		v.addElement ( new Integer ( i+1 ));
-		v.addElement ( tmpid );
-		v.addElement ( tmptype );
-		v.addElement ( tmpsource );
-		v.addElement ( tmpunits );
-		v.addElement ( TimeUtil.monthAbbreviation(
-					tsptr.getDate1().getMonth()));
-		v.addElement ( new Integer ( tsptr.getDate1().getYear()));
-		v.addElement ( TimeUtil.monthAbbreviation(
-					tsptr.getDate2().getMonth()));
-		v.addElement ( new Integer ( tsptr.getDate2().getYear()));
-		v.addElement ( tmplocation );
-		v.addElement ( tmpdesc );
+		v.clear();
+		v.add ( cmnt );
+		v.add ( new Integer ( i+1 ));
+		v.add ( tmpid );
+		v.add ( tmptype );
+		v.add ( tmpsource );
+		v.add ( tmpunits );
+		v.add ( TimeUtil.monthAbbreviation(tsptr.getDate1().getMonth()));
+		v.add ( new Integer ( tsptr.getDate1().getYear()));
+		v.add ( TimeUtil.monthAbbreviation(tsptr.getDate2().getMonth()));
+		v.add ( new Integer ( tsptr.getDate2().getYear()));
+		v.add ( tmplocation );
+		v.add ( tmpdesc );
 
 		iline = StringUtil.formatString ( v, format );
 		out.println ( iline );
@@ -1886,7 +1883,7 @@ throws Exception
 					for(int igen = 0; igen < size; igen++){
 						out.println(
 						cmnt + "      " + (String)
-						genesis.elementAt(igen) );
+						genesis.get(igen) );
 					}
 				}
 			}
@@ -2042,12 +2039,12 @@ throws Exception
 
 	// Write the header line with the period of record...
 
-	v.removeAllElements();
-	v.addElement ( new Integer ( req_date1.getMonth()));
-	v.addElement(new Integer (req_date1.getYear()));
-	v.addElement ( new Integer ( req_date2.getMonth()));
-	v.addElement(new Integer (req_date2.getYear()));
-	v.addElement ( "" );
+	v.clear();
+	v.add ( new Integer ( req_date1.getMonth()));
+	v.add(new Integer (req_date1.getYear()));
+	v.add ( new Integer ( req_date2.getMonth()));
+	v.add(new Integer (req_date2.getYear()));
+	v.add ( "" );
 	iline = StringUtil.formatString ( v, format );
 	out.println ( iline );
 
@@ -2063,7 +2060,7 @@ throws Exception
 	DateTime cdate = new DateTime ( DateTime.PRECISION_MONTH );
 	date.setMonth ( req_date1.getMonth());
 	date.setYear ( req_date1.getYear());
-	Vector	iline_v = null;	// Vector for output lines.
+	List	iline_v = null;	// Vector for output lines.
 	int	mon, j;	// counters
 
 	if ( req_interval_base == TimeInterval.MONTH ) {
@@ -2099,18 +2096,17 @@ throws Exception
 				if ( !include_ts[j] ) {
 					continue;
 				}
-				tsptr = (StringMonthTS)tslist.elementAt(j);
+				tsptr = (StringMonthTS)tslist.get(j);
 				if (	tsptr.getDataIntervalBase() !=
 					req_interval_base ) {
 					// We've already warned user above.
 					continue;
 				}
-				iline_v.removeAllElements();
+				iline_v.clear();
 				iline_format_buffer.setLength(0);
 				iline_format_buffer.append ( initial_format );
-				iline_v.addElement( new Integer (year));
-				iline_v.addElement(
-					tsptr.getIdentifier().getLocation());
+				iline_v.add( new Integer (year));
+				iline_v.add( tsptr.getIdentifier().getLocation());
 	
 				for (mon=0; mon <12; mon++) {
 					value = tsptr.getDataValueAsString (
@@ -2121,8 +2117,7 @@ throws Exception
 						// the annual value.  Print
 						// using the same format as
 						// for other data...
-						iline_v.addElement (
-							MissingDV );
+						iline_v.add ( MissingDV );
 						if ( Message.isDebugOn ) {
 							// Wrap to increase
 							// performance...
@@ -2136,7 +2131,7 @@ throws Exception
 						}
 					}
 					else
-					{	iline_v.addElement ( value );
+					{	iline_v.add ( value );
 					}
 					cdate.addMonth(1);
 				}
@@ -2289,7 +2284,7 @@ for time series values is 8 characters and 10 for the total.
 in the file header, or false to omit from the header.
 @exception Exception if there is an error writing the file.
 */
-private static void writeTimeSeriesList ( PrintWriter out, Vector tslist, 
+private static void writeTimeSeriesList ( PrintWriter out, List tslist, 
 	DateTime date1, DateTime date2, String output_format, double MissingDV,
 	int req_precision, boolean print_genesis )
 throws Exception
@@ -2300,7 +2295,7 @@ throws Exception
 	String iline;		// string for use with StringUtil.formatString
 	double value=0, annual_sum;	// Used when printing each data item
 	int annual_count = 0, year = 0; // A "counter" for the year
-	Vector v = new Vector(20,10);	// Used while formatting
+	List v = new Vector(20,10);	// Used while formatting
 	TS tsptr = null;		// Reference to current time series
 	boolean standard_ts = true;	// Non-standard indicates 12 monthly
 					// average values
@@ -2323,13 +2318,13 @@ throws Exception
 	// interval found will be written later in the code...
 
 	for ( int i = 0; i < nseries; i++ ) {
-		if ( tslist.elementAt(i) == null ) {
+		if ( tslist.get(i) == null ) {
 			continue;
 		}
-		if ( tslist.elementAt(i) instanceof DayTS ) {
+		if ( tslist.get(i) instanceof DayTS ) {
 			req_interval_base = TimeInterval.DAY;
 		}
-		else if ( tslist.elementAt(i) instanceof MonthTS ) {
+		else if ( tslist.get(i) instanceof MonthTS ) {
 			req_interval_base = TimeInterval.MONTH;
 		}
 		else {	iline = "StateMod time series list has time series " +
@@ -2356,11 +2351,11 @@ throws Exception
 	boolean [] include_ts = new boolean[nseries];
 	for (int i=0; i<nseries; i++ ) {
 		include_ts[i] = true;
-		if ( tslist.elementAt(i) == null ) {
+		if ( tslist.get(i) == null ) {
 			include_ts[i] = false;
 			continue;
 		}
-		tsptr = (TS)tslist.elementAt(i);
+		tsptr = (TS)tslist.get(i);
 		// Get the units for output...
 		if ( !unitsfound ) {
 			output_units = tsptr.getDataUnits();
@@ -2436,11 +2431,11 @@ throws Exception
 		tmptype, tmpunits;
 	String	format= "%s %3d %-24.24s %-6.6s %-8.8s %-6.6s %3.3s/%d - "
 			+ "%3.3s/%d %-12.12s%-24.24s";
-	Vector	genesis = null;
+	List genesis = null;
 
 	for ( int i=0; i < nseries; i++ ) {
 
-		tsptr = (TS)tslist.elementAt(i);
+		tsptr = (TS)tslist.get(i);
 
 		tmpid = tsptr.getIdentifierString();
 
@@ -2477,21 +2472,19 @@ throws Exception
 			tmplocation = empty_string;
 		}
 
-		v.removeAllElements();
-		v.addElement ( cmnt );
-		v.addElement ( new Integer ( i+1 ));
-		v.addElement ( tmpid );
-		v.addElement ( tmptype );
-		v.addElement ( tmpsource );
-		v.addElement ( tmpunits );
-		v.addElement ( TimeUtil.monthAbbreviation(
-					tsptr.getDate1().getMonth()));
-		v.addElement ( new Integer ( tsptr.getDate1().getYear()));
-		v.addElement ( TimeUtil.monthAbbreviation(
-					tsptr.getDate2().getMonth()));
-		v.addElement ( new Integer ( tsptr.getDate2().getYear()));
-		v.addElement ( tmplocation );
-		v.addElement ( tmpdesc );
+		v.clear();
+		v.add ( cmnt );
+		v.add ( new Integer ( i+1 ));
+		v.add ( tmpid );
+		v.add ( tmptype );
+		v.add ( tmpsource );
+		v.add ( tmpunits );
+		v.add ( TimeUtil.monthAbbreviation(	tsptr.getDate1().getMonth()));
+		v.add ( new Integer ( tsptr.getDate1().getYear()));
+		v.add ( TimeUtil.monthAbbreviation(	tsptr.getDate2().getMonth()));
+		v.add ( new Integer ( tsptr.getDate2().getYear()));
+		v.add ( tmplocation );
+		v.add ( tmpdesc );
 
 		iline = StringUtil.formatString ( v, format );
 		out.println ( iline );
@@ -2508,7 +2501,7 @@ throws Exception
 					for(int igen = 0; igen < size; igen++){
 						out.println(
 						cmnt + "      " + (String)
-						genesis.elementAt(igen) );
+						genesis.get(igen) );
 					}
 				}
 			}
@@ -2680,16 +2673,16 @@ throws Exception
 
 	// Write the header line with the period of record...
 
-	v.removeAllElements();
-	v.addElement ( new Integer ( req_date1.getMonth()));
+	v.clear();
+	v.add ( new Integer ( req_date1.getMonth()));
 	if ( standard_ts ) {
-		v.addElement(new Integer (req_date1.getYear()));
+		v.add(new Integer (req_date1.getYear()));
 	}
-	v.addElement ( new Integer ( req_date2.getMonth()));
+	v.add ( new Integer ( req_date2.getMonth()));
 	if ( standard_ts ) {
-		v.addElement(new Integer (req_date2.getYear()));
+		v.add(new Integer (req_date2.getYear()));
 	}
-	v.addElement ( output_units );
+	v.add ( output_units );
 	iline = StringUtil.formatString ( v, format );
 	out.println ( iline );
 
@@ -2706,7 +2699,7 @@ throws Exception
 	date.setMonth ( req_date1.getMonth());
 	date.setYear ( req_date1.getYear());
 	int 	precision = PRECISION_DEFAULT;
-	Vector	iline_v = null;	// Vector for output lines.
+	List	iline_v = null;	// Vector for output lines.
 	int	ndays;		// Number of days in a month.
 	int	mon, day, j;	// counters
 	Double	DoubleMissingDV = new Double ( MissingDV );
@@ -2772,7 +2765,7 @@ throws Exception
 				if ( !include_ts[j] ) {
 					continue;
 				}
-				tsptr = (TS)tslist.elementAt(j);
+				tsptr = (TS)tslist.get(j);
 				if (	tsptr.getDataIntervalBase() !=
 					req_interval_base ) {
 					// We've already warned user above.
@@ -2785,14 +2778,13 @@ throws Exception
 				}
 				annual_sum = 0;
 				annual_count = 0;
-				iline_v.removeAllElements();
+				iline_v.clear();
 				iline_format_buffer.setLength(0);
 				iline_format_buffer.append ( initial_format );
 				if ( standard_ts ) {
-					iline_v.addElement( new Integer (year));
+					iline_v.add( new Integer (year));
 				}
-				iline_v.addElement(
-					tsptr.getIdentifier().getLocation());
+				iline_v.add(tsptr.getIdentifier().getLocation());
 	
 				for (mon=0; mon <12; mon++) {
 					value = tsptr.getDataValue (cdate);
@@ -2814,7 +2806,7 @@ throws Exception
 						// the annual value.  Print
 						// using the same format as
 						// for other data...
-						iline_v.addElement (
+						iline_v.add (
 							DoubleMissingDV );
 						if ( Message.isDebugOn ) {
 							// Wrap to increase
@@ -2831,7 +2823,7 @@ throws Exception
 					else
 					{	annual_sum += value;
 						++annual_count;
-						iline_v.addElement (
+						iline_v.add (
 						new Double(value));
 					}
 					cdate.addMonth(1);
@@ -2849,10 +2841,10 @@ throws Exception
 				iline_format_buffer.append (
 					format10_for_precision[precision] );
 				if ( do_total || (annual_count == 0) ) {
-					iline_v.addElement (new Double(
+					iline_v.add (new Double(
 						annual_sum));
 				}
-				else {	iline_v.addElement (
+				else {	iline_v.add (
 					new Double(annual_sum/annual_count));
 				}
 				iline = StringUtil.formatString (iline_v,
@@ -2894,7 +2886,7 @@ throws Exception
 				if ( !include_ts[j] ) {
 					continue;
 				}
-				tsptr = (TS)tslist.elementAt(j);
+				tsptr = (TS)tslist.get(j);
 				if (	tsptr.getDataIntervalBase() !=
 					req_interval_base ) {
 					// Only output the requested, matching
@@ -2903,14 +2895,14 @@ throws Exception
 				}
 				monthly_sum = 0;
 				monthly_count = 0;
-				iline_v.removeAllElements();
+				iline_v.clear();
 				iline_format_buffer.setLength(0);
 				iline_format_buffer.append ( initial_format );
-				iline_v.addElement ( new Integer (
+				iline_v.add ( new Integer (
 					cdate.getYear()));
-				iline_v.addElement( new Integer(
+				iline_v.add( new Integer(
 					cdate.getMonth()));
-				iline_v.addElement(
+				iline_v.add(
 					tsptr.getIdentifier().getLocation());
 	
 				// StateMod daily time series contain 31 values
@@ -2936,7 +2928,7 @@ throws Exception
 						// the annual value.  Print
 						// using the same format as
 						// for other data...
-						iline_v.addElement (
+						iline_v.add (
 							DoubleMissingDV );
 						if ( Message.isDebugOn ) {
 							// Wrap to increase
@@ -2953,7 +2945,7 @@ throws Exception
 					else
 					{	monthly_sum += value;
 						++monthly_count;
-						iline_v.addElement (
+						iline_v.add (
 						new Double(value));
 					}
 				}
@@ -2964,10 +2956,10 @@ throws Exception
 				iline_format_buffer.append (
 					format10_for_precision[precision] );
 				if ( do_total || (monthly_count == 0) ) {
-					iline_v.addElement (
+					iline_v.add (
 					new Double(monthly_sum));
 				}
-				else {	iline_v.addElement (
+				else {	iline_v.add (
 					new Double(monthly_sum/monthly_count));
 				}
 				iline = StringUtil.formatString ( iline_v,
@@ -2999,7 +2991,7 @@ series is 8 characters.
 @exception Exception if there is an error writing the file.
 */
 public static void writeTimeSeriesList ( String infile, String outfile,
-			String []newcomments, Vector tslist, 
+			String []newcomments, List tslist, 
 			DateTime date1, DateTime date2,
 			String output_format, double MissingDV, int precision )
 throws Exception
@@ -3133,7 +3125,7 @@ not (false).
 </table>
 @throws Exception if there is an error writing the file.
 */
-public static void writeTimeSeriesList ( Vector tslist, PropList props )
+public static void writeTimeSeriesList ( List tslist, PropList props )
 throws Exception
 {	String prop_value = null;
 	String routine = "StateMod_TS.writeTimeSeriesList";

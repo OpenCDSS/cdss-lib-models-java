@@ -11,13 +11,13 @@
 
 package DWR.StateMod;
 
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 
 /**
-This table model display data in return flow tables for use with return flows
-and depletions.
+This table model display data in return flow tables for use with return flows and depletions.
 */
 public class StateMod_ReturnFlow_Data_TableModel 
 extends JWorksheet_AbstractRowTableModel {
@@ -52,8 +52,7 @@ Constructor.  This builds the Model for displaying the return flow data.
 @param editable whether the data can be edited or not.
 @param is_return Specify true for return flows and false for depletions.
 */
-public StateMod_ReturnFlow_Data_TableModel(Vector data, boolean editable,
-boolean is_return) {
+public StateMod_ReturnFlow_Data_TableModel(List data, boolean editable, boolean is_return) {
 	if (data == null) {
 		_data = new Vector();
 	}
@@ -187,7 +186,7 @@ public Object getValueAt(int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	StateMod_ReturnFlow rf = (StateMod_ReturnFlow)_data.elementAt(row);
+	StateMod_ReturnFlow rf = (StateMod_ReturnFlow)_data.get(row);
 	switch (col) {
 		case COL_RIVER_NODE:	return rf.getCrtnid();
 		case COL_RETURN_PCT:	return new Double(rf.getPcttot());
@@ -197,11 +196,9 @@ public Object getValueAt(int row, int col) {
 }
 
 /**
-Returns whether the cell is editable or not.  All cells are editable, unless
-the worksheet is not editable.
+Returns whether the cell is editable or not.  All cells are editable, unless the worksheet is not editable.
 @param rowIndex unused.
-@param columnIndex the index of the column to check whether it is editable
-or not.
+@param columnIndex the index of the column to check whether it is editable.
 @return whether the cell is editable or not.
 */
 public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -226,7 +223,7 @@ public void setValueAt(Object value, int row, int col)
 	int index;
 	String s;
 
-	StateMod_ReturnFlow rf = (StateMod_ReturnFlow)_data.elementAt(row);
+	StateMod_ReturnFlow rf = (StateMod_ReturnFlow)_data.get(row);
 	switch (col) {
 		case COL_RIVER_NODE:	
 			rf.setCrtnid((String)value);
@@ -240,17 +237,16 @@ public void setValueAt(Object value, int row, int col)
 				index = ((String)value).indexOf(" -");
 				s = null;
 				if (index > -1) {
-					s = ((String)value).substring(0,
-						index);
+					s = ((String)value).substring(0,index);
 				}
-				else {	s = (String)value;
+				else {
+					s = (String)value;
 				}
 				rf.setIrtndl(s);
 			}
-			else {	if (value == null) {
-					// user input a blank value --
-					// just keep what was originally
-					// in the table
+			else {
+				if (value == null) {
+					// user input a blank value -- just keep what was originally in the table
 					return;
 				}
 				ival = ((Integer)value).intValue();

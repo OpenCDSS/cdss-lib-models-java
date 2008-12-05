@@ -90,6 +90,7 @@ package DWR.StateMod;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Vector;
 
 import RTi.GIS.GeoView.GeoRecord;
@@ -117,7 +118,7 @@ protected String 	_ifrrdn;
 /**
 Instream flow rights
 */
-protected Vector	_rights;
+protected List	_rights;
 
 /**
 Annual demand time series
@@ -180,7 +181,7 @@ public void addRight ( StateMod_InstreamFlowRight right )
 {	if (right == null) {
 		return;
 	}
-	_rights.addElement ( right );
+	_rights.add ( right );
 }
 
 /**
@@ -266,7 +267,7 @@ Connect instream flow rights to stations.
 @param isfs Vector of instream flow stations
 @param rights Vector of instream flow rights
 */
-public static void connectAllRights ( Vector isfs, Vector rights )
+public static void connectAllRights ( List isfs, List rights )
 {	if ((isfs == null) || (rights == null)) {
 		return;
 	}
@@ -274,7 +275,7 @@ public static void connectAllRights ( Vector isfs, Vector rights )
 
 	StateMod_InstreamFlow insf;
 	for (int i = 0; i < num_insf; i++) {
-		insf = (StateMod_InstreamFlow)isfs.elementAt(i);
+		insf = (StateMod_InstreamFlow)isfs.get(i);
 		if (insf == null) {
 			continue;
 		}
@@ -286,10 +287,10 @@ public static void connectAllRights ( Vector isfs, Vector rights )
 /**
 Connect all instream flow time series to the instream flow objects.
 */
-public static void connectAllTS (	Vector theIns,
-					Vector demand_MonthTS,
-					Vector demand_average_MonthTS,
-					Vector demand_DayTS )
+public static void connectAllTS (	List theIns,
+		List demand_MonthTS,
+		List demand_average_MonthTS,
+		List demand_DayTS )
 {	if ( theIns == null ) {
 		return;
 	}
@@ -297,7 +298,7 @@ public static void connectAllTS (	Vector theIns,
 	StateMod_InstreamFlow insflow;
 
 	for (int i = 0; i < numInsf; i++) {
-		insflow = (StateMod_InstreamFlow)theIns.elementAt(i);
+		insflow = (StateMod_InstreamFlow)theIns.get(i);
 		if (insflow == null) {
 			continue;
 		}
@@ -319,7 +320,7 @@ Connect daily demand time series to the instream flow.
 The daily id "cifridy" must match the time series.
 The time series description is set to the station name.
 */
-public void connectDemandDayTS ( Vector tslist )
+public void connectDemandDayTS ( List tslist )
 {	if ( tslist == null) {
 		return;
 	}
@@ -328,7 +329,7 @@ public void connectDemandDayTS ( Vector tslist )
 	DayTS ts;
 
 	for (int i = 0; i < numTS; i++) {
-		ts = (DayTS)tslist.elementAt(i);
+		ts = (DayTS)tslist.get(i);
 		if (ts == null) {
 			continue;
 		}
@@ -345,7 +346,7 @@ public void connectDemandDayTS ( Vector tslist )
 Connect average monthly demand time series to the instream flow.
 The time series description is set to the station name.
 */
-public void connectDemandAverageMonthTS(Vector tslist) {
+public void connectDemandAverageMonthTS(List tslist) {
 	if (tslist == null) {
 		return;
 	}
@@ -354,7 +355,7 @@ public void connectDemandAverageMonthTS(Vector tslist) {
 
 	_demand_average_MonthTS = null;
 	for (int i = 0; i < numTS; i++) {
-		ts = (MonthTS)tslist.elementAt(i);
+		ts = (MonthTS)tslist.get(i);
 		if (ts == null) {
 			continue;
 		}
@@ -370,7 +371,7 @@ public void connectDemandAverageMonthTS(Vector tslist) {
 Connect monthly demand time series to the instream flow.
 The time series description is set to the station name.
 */
-public void connectDemandMonthTS(Vector tslist) {
+public void connectDemandMonthTS(List tslist) {
 	if (tslist == null) {
 		return;
 	}
@@ -379,7 +380,7 @@ public void connectDemandMonthTS(Vector tslist) {
 
 	_demand_MonthTS = null;
 	for (int i = 0; i < numTS; i++) {
-		ts = (MonthTS)tslist.elementAt(i);
+		ts = (MonthTS)tslist.get(i);
 		if (ts == null) {
 			continue;
 		}
@@ -395,7 +396,7 @@ public void connectDemandMonthTS(Vector tslist) {
 Connect the rights in the main rights file to this instream flow, using the
 instream flow ID.
 */
-public void connectRights(Vector rights) {
+public void connectRights(List rights) {
 	if (rights == null) {
 		return;
 	}
@@ -403,12 +404,12 @@ public void connectRights(Vector rights) {
 
 	StateMod_InstreamFlowRight right;
 	for (int i = 0; i < num_rights; i++) {
-		right = (StateMod_InstreamFlowRight)rights.elementAt(i);
+		right = (StateMod_InstreamFlowRight)rights.get(i);
 		if (right == null) {
 			continue;
 		}
 		if ( _id.equalsIgnoreCase(right.getCgoto()) ) {
-			_rights.addElement ( right );
+			_rights.add ( right );
 		}
 	}
 }
@@ -440,9 +441,9 @@ public void disconnectRight ( StateMod_InstreamFlowRight right )
 	// Assume that more than on instance can exist, even though this is
 	// not allowed...
 	for ( int i = 0; i < size; i++ ) {
-		right2 = (StateMod_InstreamFlowRight)_rights.elementAt(i);
+		right2 = (StateMod_InstreamFlowRight)_rights.get(i);
 		if ( right2.getID().equalsIgnoreCase(right.getID()) ) {
-			_rights.removeElementAt(i);
+			_rights.remove(i);
 		}
 	}
 }
@@ -451,7 +452,7 @@ public void disconnectRight ( StateMod_InstreamFlowRight right )
 Disconnect all rights.
 */
 public void disconnectRights ()
-{	_rights.removeAllElements();
+{	_rights.clear();
 }
 
 /**
@@ -531,16 +532,16 @@ The options are of the form "1" if include_notes is false and
 @return a list of demand type option strings, for use in GUIs.
 @param include_notes Indicate whether notes should be included.
 */
-public static Vector getIifcomChoices ( boolean include_notes )
-{	Vector v = new Vector(5);
-	v.addElement ( "1 - Monthly demand" );
-	v.addElement ( "2 - Average monthly demand" );
+public static List getIifcomChoices ( boolean include_notes )
+{	List v = new Vector(5);
+	v.add ( "1 - Monthly demand" );
+	v.add ( "2 - Average monthly demand" );
 	if ( !include_notes ) {
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.setElementAt(StringUtil.getToken(
-				(String)v.elementAt(i), " ", 0, 0), i );
+			v.set(i, StringUtil.getToken(
+				(String)v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
@@ -573,7 +574,7 @@ public StateMod_InstreamFlowRight getLastRight()
 {	if ( (_rights == null) || (_rights.size() == 0) ) {
 		return null;
 	}
-	return (StateMod_InstreamFlowRight)_rights.elementAt(_rights.size() -1);
+	return (StateMod_InstreamFlowRight)_rights.get(_rights.size() -1);
 }
 
 /**
@@ -592,14 +593,14 @@ public StateMod_InstreamFlowRight getRight(int index)
 {	if ( (index < 0) || (index >= _rights.size()) ) {
 		return null;
 	}
-	else {	return (StateMod_InstreamFlowRight)_rights.elementAt(index);
+	else {	return (StateMod_InstreamFlowRight)_rights.get(index);
 	}
 }
 
 /**
 Returns Vector of rights.
 */
-public Vector getRights() {
+public List getRights() {
 	return _rights;
 }
 
@@ -633,12 +634,12 @@ flows are added to the end of the previously stored instream flows.
 @param filename Name of file to read.
 @exception Exception if there is an error reading the file.
 */
-public static Vector readStateModFile(String filename)
+public static List readStateModFile(String filename)
 throws Exception {
 	String routine = "StateMod_InstreamFlow.readStateModFile";
 	String iline, s;
-	Vector theIns = new Vector();
-	Vector v = new Vector(9);
+	List theIns = new Vector();
+	List v = new Vector(9);
 	int format_0[] = {	StringUtil.TYPE_STRING,
 				StringUtil.TYPE_STRING,
 				StringUtil.TYPE_STRING,
@@ -683,32 +684,32 @@ throws Exception {
 				Message.printDebug(50, routine, 
 				"Fixed read returned " 
 				+ v.size()+ " elements");
-			s = StringUtil.unpad((String)v.elementAt(0), 
+			s = StringUtil.unpad((String)v.get(0), 
 				" ", StringUtil.PAD_FRONT_BACK);
 			anIns.setID(s);
-			s = StringUtil.unpad((String)v.elementAt(1), 
+			s = StringUtil.unpad((String)v.get(1), 
 				" ", StringUtil.PAD_FRONT_BACK);
 			anIns.setName(s);
-			s = StringUtil.unpad((String)v.elementAt(2), 
+			s = StringUtil.unpad((String)v.get(2), 
 				" ", StringUtil.PAD_FRONT_BACK);
 			anIns.setCgoto(s);
-			anIns.setSwitch((Integer)v.elementAt(3));
-			s = StringUtil.unpad((String)v.elementAt(5), 
+			anIns.setSwitch((Integer)v.get(3));
+			s = StringUtil.unpad((String)v.get(5), 
 				" ", StringUtil.PAD_FRONT_BACK);
 			if (Message.isDebugOn)
 				Message.printDebug(50, routine, "Ifrrdn: " + s);
 			anIns.setIfrrdn(s);
 			// daily id
-			s = StringUtil.unpad((String)v.elementAt(7), 
+			s = StringUtil.unpad((String)v.get(7), 
 				" ", StringUtil.PAD_FRONT_BACK);
 			anIns.setCifridy(s);
 			// Data type(read as string and convert to integer)...
-			s = StringUtil.unpad((String)v.elementAt(8), 
+			s = StringUtil.unpad((String)v.get(8), 
 				" ", StringUtil.PAD_FRONT_BACK);
 			anIns.setIifcom(s);
 
 			// add the instream flow to the vector of instream flows
-			theIns.addElement(anIns);
+			theIns.add(anIns);
 		}
 	} 
 	catch (Exception e) {
@@ -825,7 +826,7 @@ public void setIfrrdn(String ifrrdn) {
 Set the rights vector.
 @param rights Vector of rights to set - this should not be null.
 */
-public void setRights ( Vector rights )
+public void setRights ( List rights )
 {	_rights = rights;
 }
 
@@ -839,7 +840,7 @@ is also maintained by calling this routine.
 @exception Exception if an error occurs.
 */
 public static void writeStateModFile(String infile, String outfile,
-Vector theInsf, String[] newcomments)
+		List theInsf, String[] newcomments)
 throws Exception {
 	writeStateModFile(infile, outfile, theInsf, newcomments, true);
 }
@@ -855,7 +856,7 @@ iifcom)should be used.
 @throws Exception if an error occurs
 */
 public static void writeStateModFile(String infile, String outfile,
-Vector theInsf, String[] newcomments, boolean use_daily_data)
+		List theInsf, String[] newcomments, boolean use_daily_data)
 throws Exception {
 	String routine = "StateMod_InstreamFlow.writeStateModFile";
 	String [] comment_str = { "#" };
@@ -876,7 +877,7 @@ throws Exception {
 	int i;
 	String iline;
 	String cmnt = "#>";
-	Vector v = new Vector(7);
+	List v = new Vector(7);
 	StateMod_InstreamFlow insf = null;
 	String format_0 = "%-12.12s%-24.24s%-12.12s%8d %-12.12s %-12.12s%8d";
 	String format_1 = "%-12.12s%-24.24s%-12.12s%8d %-12.12s";
@@ -926,19 +927,19 @@ throws Exception {
 		num = theInsf.size();
 	}
 	for (i = 0; i < num; i++) {
-		insf = (StateMod_InstreamFlow)theInsf.elementAt(i);
+		insf = (StateMod_InstreamFlow)theInsf.get(i);
 		if (insf == null) {
 			continue;
 		}
-		v.removeAllElements();
-		v.addElement(insf.getID());
-		v.addElement(insf.getName());
-		v.addElement(insf.getCgoto());
-		v.addElement(new Integer(insf.getSwitch()));
-		v.addElement(insf.getIfrrdn());
+		v.clear();
+		v.add(insf.getID());
+		v.add(insf.getName());
+		v.add(insf.getCgoto());
+		v.add(new Integer(insf.getSwitch()));
+		v.add(insf.getIfrrdn());
 		if (use_daily_data) {
-			v.addElement(insf.getCifridy());
-			v.addElement(new Integer(insf.getIifcom()));
+			v.add(insf.getCifridy());
+			v.add(new Integer(insf.getIifcom()));
 			iline = StringUtil.formatString(v, format_0);
 		}
 		else {	
@@ -967,8 +968,7 @@ throws Exception {
 /**
 Writes a Vector of StateMod_InstreamFlow objects to a list file.  A header is 
 printed to the top of the file, containing the commands used to generate the 
-file.  Any strings in the body of the file that contain the field delimiter 
-will be wrapped in "...".  
+file.  Any strings in the body of the file that contain the field delimiter will be wrapped in "...".  
 @param filename the name of the file to which the data will be written.
 @param delimiter the delimiter to use for separating field values.
 @param update whether to update an existing file, retaining the current 
@@ -976,15 +976,14 @@ header (true) or to create a new file with a new header.
 @param data the Vector of objects to write.  
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter,
-boolean update, Vector data) 
+public static void writeListFile(String filename, String delimiter, boolean update, List data) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
 		size = data.size();
 	}
 	
-	Vector fields = new Vector();
+	List fields = new Vector();
 	fields.add("ID");
 	fields.add("Name");
 	fields.add("UpstreamRiverNodeID");
@@ -999,7 +998,7 @@ throws Exception {
 	int comp = StateMod_DataSet.COMP_INSTREAM_STATIONS;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.elementAt(i);
+		s = (String)fields.get(i);
 		names[i] = StateMod_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateMod_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -1035,7 +1034,7 @@ throws Exception {
 		out.println(buffer.toString());
 		
 		for (int i = 0; i < size; i++) {
-			flo = (StateMod_InstreamFlow)data.elementAt(i);
+			flo = (StateMod_InstreamFlow)data.get(i);
 			
 			line[0] = StringUtil.formatString(flo.getID(), 
 				formats[0]).trim();

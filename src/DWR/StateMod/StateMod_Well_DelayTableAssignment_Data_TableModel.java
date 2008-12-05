@@ -12,10 +12,12 @@
 
 package DWR.StateMod;
 
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.GUI.JWorksheet;
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
+
 /**
 This class is a table model for displaying delay table data.
 */
@@ -61,14 +63,14 @@ A Vector that maps rows in the display when totals are NOT being shown to rows
 in the overall data Vectors.  Used to make switching between displays with and
 without totals relatively efficient.  See getValueAt() and setupData().
 */
-private Vector __rowMap = null;
+private List __rowMap = null;
 
 /**
 Array of Vectors, each of which holds the data for one of the columns in the
 table.  Since the data cannot be pulled out from the data objects directly, 
 this is done to make display efficient.
 */
-private Vector[] __data = null;
+private List[] __data = null;
 
 /**
 Constructor.  This builds the Model for displaying delay table data
@@ -76,8 +78,7 @@ Constructor.  This builds the Model for displaying delay table data
 @param editable whether the data are editable or not.
 @param isDepletion whether the data shown are return flows or depletions.
 */
-public StateMod_Well_DelayTableAssignment_Data_TableModel(Vector data, 
-boolean editable, boolean isDepletion) {
+public StateMod_Well_DelayTableAssignment_Data_TableModel(List data, boolean editable, boolean isDepletion) {
 	if (data == null) {
 		data = new Vector();
 		_rows = 0;
@@ -126,8 +127,7 @@ public String getColumnName(int columnIndex) {
 				return "\nRIVER\nNODE ID\nBEING\nDEPLETED";
 			}
 			else {
-				return "RIVER\nNODE ID\nRECEIVING\nRETURN"
-					+ "\nFLOW";
+				return "RIVER\nNODE ID\nRECEIVING\nRETURN" + "\nFLOW";
 			}
 		case __COL_PERCENT:	
 			return "\n\n\n\nPERCENT";
@@ -142,8 +142,7 @@ public String getColumnName(int columnIndex) {
 Returns the format that the specified column should be displayed in when
 the table is being displayed in the given table format. 
 @param column column for which to return the format.
-@return the format (as used by StringUtil.formatString() in which to display the
-column.
+@return the format (as used by StringUtil.formatString() in which to display the column.
 */
 public String getFormat(int column) {
 	switch (column) {
@@ -177,9 +176,9 @@ public Object getValueAt(int row, int col) {
 	}
 	
 	if (!__showTotals) {
-		row = ((Integer)__rowMap.elementAt(row)).intValue();
+		row = ((Integer)__rowMap.get(row)).intValue();
 	}
-	return __data[col].elementAt(row);		
+	return __data[col].get(row);		
 }
 
 /**
@@ -224,7 +223,7 @@ private void setupData() {
 	String id = null;
 	double total = 0;
 	int rowCount = 0;	
-	__data = new Vector[__COLUMNS];
+	__data = new List[__COLUMNS];
 	for (int i = 0; i < __COLUMNS; i++) {
 		__data[i] = new Vector();
 	}
@@ -232,10 +231,10 @@ private void setupData() {
 	__rowMap = new Vector();
 
 	StateMod_ReturnFlow rf = null;
-	Vector returnFlows = null;
+	List returnFlows = null;
 	for (int i = 0; i < size; i++) {
 		total = 0;
-		well = (StateMod_Well)_data.elementAt(i);
+		well = (StateMod_Well)_data.get(i);
 		id = well.getID();
 
 		if (__isDepletion) {
@@ -247,7 +246,7 @@ private void setupData() {
 			returnFlows = well.getReturnFlows();
 		}
 		for (int j = 0; j < num; j++) {
-			rf = (StateMod_ReturnFlow)returnFlows.elementAt(j);
+			rf = (StateMod_ReturnFlow)returnFlows.get(j);
 			__data[__COL_ID].add(id);
 			__data[__COL_NODE_ID].add(rf.getCrtnid());
 			__data[__COL_PERCENT].add(new Double(rf.getPcttot()));
@@ -269,8 +268,7 @@ private void setupData() {
 
 /**
 Sets whether to show lines with totals.  setJWorksheet() must have been called
-with a non-null worksheet prior to this method.  The worksheet will be updated
-instantly.
+with a non-null worksheet prior to this method.  The worksheet will be updated instantly.
 @param showTotals whether to show lines with totals in the worksheet.
 */
 public void setShowTotals(boolean showTotals) {

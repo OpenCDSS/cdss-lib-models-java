@@ -17,6 +17,7 @@ package DWR.StateMod;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Vector;
 
 import RTi.GIS.GeoView.GeoRecord;
@@ -303,16 +304,15 @@ The options are of the form "0" if include_notes is false and
 @param include_notes Indicate whether notes should be added after the parameter
 values.
 */
-public static Vector getIPfailChoices ( boolean include_notes )
-{	Vector v = new Vector(2);
-	v.addElement ( "0 - Do not turn plan off if it fails" );
-	v.addElement ( "1 - Turn plan off if it fails" );
+public static List getIPfailChoices ( boolean include_notes )
+{	List v = new Vector(2);
+	v.add ( "0 - Do not turn plan off if it fails" );
+	v.add ( "1 - Turn plan off if it fails" );
 	if ( !include_notes ) {
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.setElementAt(StringUtil.getToken(
-				(String)v.elementAt(i), " ", 0, 0), i );
+			v.set(i,StringUtil.getToken((String)v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
@@ -347,23 +347,23 @@ The options are of the form "1" if include_notes is false and
 @param include_notes Indicate whether notes should be added after the parameter
 values.
 */
-public static Vector getIPlnTypChoices ( boolean include_notes )
-{	Vector v = new Vector(9);
-	v.addElement ( "1 - Terms and Conditions (T&C)" );
-	v.addElement ( "2 - Well Augmentation" );
-	v.addElement ( "3 - Reuse to a Reservoir" );
-	v.addElement ( "4 - Reuse to a Diversion" );
-	v.addElement ( "5 - Reuse to a Reservoir from Trasnmountain" );
-	v.addElement ( "6 - Reuse to a Diversion from Trasnmountain" );
-	v.addElement ( "7 - Transmountain import" );
-	v.addElement ( "8 - Recharge Plan" );
-	v.addElement ( "9 - Out of Priority Diversion or Storage" );
+public static List getIPlnTypChoices ( boolean include_notes )
+{	List v = new Vector(9);
+	v.add ( "1 - Terms and Conditions (T&C)" );
+	v.add ( "2 - Well Augmentation" );
+	v.add ( "3 - Reuse to a Reservoir" );
+	v.add ( "4 - Reuse to a Diversion" );
+	v.add ( "5 - Reuse to a Reservoir from Trasnmountain" );
+	v.add ( "6 - Reuse to a Diversion from Trasnmountain" );
+	v.add ( "7 - Transmountain import" );
+	v.add ( "8 - Recharge Plan" );
+	v.add ( "9 - Out of Priority Diversion or Storage" );
 	if ( !include_notes ) {
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.setElementAt(StringUtil.getToken(
-				(String)v.elementAt(i), " ", 0, 0), i );
+			v.set(i,StringUtil.getToken(
+				(String)v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
@@ -391,16 +391,16 @@ The options are of the form "0" if include_notes is false and
 @param include_notes Indicate whether notes should be added after the parameter
 values.
 */
-public static Vector getPonChoices ( boolean include_notes )
-{	Vector v = new Vector(2);
-	v.addElement ( "0 - Off" );	// Possible options are listed here.
-	v.addElement ( "1 - On" );
+public static List getPonChoices ( boolean include_notes )
+{	List v = new Vector(2);
+	v.add ( "0 - Off" );	// Possible options are listed here.
+	v.add ( "1 - On" );
 	if ( !include_notes ) {
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.setElementAt(StringUtil.getToken(
-				(String)v.elementAt(i), " ", 0, 0), i );
+			v.set(i,StringUtil.getToken(
+				(String)v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
@@ -487,12 +487,12 @@ The new plans are added to the end of the previously stored plans.
 @param filename filename containing plan information
 @throws Exception if an error occurs
 */
-public static Vector readStateModFile(String filename)
+public static List readStateModFile(String filename)
 throws Exception
 {	String routine = "StateMod_Plan.readStateModFile";
 	String iline = null;
-	Vector v = new Vector(9);
-	Vector thePlans = new Vector();
+	List v = new Vector(9);
+	List thePlans = new Vector();
 	int linecount = 0;
 	
 	StateMod_Plan aPlan = null;
@@ -534,16 +534,16 @@ throws Exception
 			}
 			// Uncomment if testing...
 			//Message.printStatus ( 2, routine, "" + v );
-			aPlan.setID(((String)v.elementAt(0)).trim()); 
-			aPlan.setName(((String)v.elementAt(1)).trim()); 
-			aPlan.setCgoto(((String)v.elementAt(2)).trim());
-			aPlan.setSwitch(((String)v.elementAt(3)).trim());
-			aPlan.setIPlnTyp(((String)v.elementAt(4)).trim());
-			aPlan.setPeff(((String)v.elementAt(5)).trim());
-			aPlan.setIPrf(((String)v.elementAt(6)).trim());
-			aPlan.setIPfail(((String)v.elementAt(7)).trim());
-			aPlan.setPsto1(((String)v.elementAt(8)).trim());
-			aPlan.setPsource(((String)v.elementAt(9)).trim());
+			aPlan.setID(((String)v.get(0)).trim()); 
+			aPlan.setName(((String)v.get(1)).trim()); 
+			aPlan.setCgoto(((String)v.get(2)).trim());
+			aPlan.setSwitch(((String)v.get(3)).trim());
+			aPlan.setIPlnTyp(((String)v.get(4)).trim());
+			aPlan.setPeff(((String)v.get(5)).trim());
+			aPlan.setIPrf(((String)v.get(6)).trim());
+			aPlan.setIPfail(((String)v.get(7)).trim());
+			aPlan.setPsto1(((String)v.get(8)).trim());
+			aPlan.setPsource(((String)v.get(9)).trim());
 
 			// Set the diversion to not dirty because it was just
 			// initialized...
@@ -551,7 +551,7 @@ throws Exception
 			aPlan.setDirty ( false );
 
 			// add the diversion to the vector of diversions
-			thePlans.addElement(aPlan);
+			thePlans.add(aPlan);
 		}
 	} 
 	catch (Exception e) {
@@ -808,7 +808,7 @@ is also maintained by calling this routine.
 @exception Exception if an error occurs.
 */
 public static void writeStateModFile(String instrfile, String outstrfile,
-Vector thePlans, String[] new_comments )
+		List thePlans, String[] new_comments )
 throws Exception {
 	String [] comment_str = { "#" };
 	String [] ignore_comment_str = { "#>" };
@@ -824,7 +824,7 @@ throws Exception {
 		String format =
 		"%-12.12s %-24.24s %-12.12s %8d %8d% #8.2F %8d %8d %8.2F %-12.12s";
 		StateMod_Plan plan = null;
-		Vector v = new Vector(10);	// Reuse for all output lines.
+		List v = new Vector(10);	// Reuse for all output lines.
 
 		out.println(cmnt);
 		out.println(cmnt
@@ -899,23 +899,23 @@ throws Exception {
 			num = thePlans.size();
 		}
 		for (i = 0; i < num; i++) {
-			plan = (StateMod_Plan)thePlans.elementAt(i);
+			plan = (StateMod_Plan)thePlans.get(i);
 			if (plan == null) {
 				continue;
 			}
 
 			// line 1
-			v.removeAllElements();
-			v.addElement(plan.getID());
-			v.addElement(plan.getName());
-			v.addElement(plan.getCgoto());
-			v.addElement(new Integer(plan.getSwitch()));
-			v.addElement(new Integer(plan.getIPlnTyp()));
-			v.addElement(new Double(plan.getPeff()));
-			v.addElement(new Integer(plan.getIPrf()));
-			v.addElement(new Integer(plan.getIPfail()));
-			v.addElement(new Double(plan.getPsto1()));
-			v.addElement(plan.getPsource());
+			v.clear();
+			v.add(plan.getID());
+			v.add(plan.getName());
+			v.add(plan.getCgoto());
+			v.add(new Integer(plan.getSwitch()));
+			v.add(new Integer(plan.getIPlnTyp()));
+			v.add(new Double(plan.getPeff()));
+			v.add(new Integer(plan.getIPrf()));
+			v.add(new Integer(plan.getIPfail()));
+			v.add(new Double(plan.getPsto1()));
+			v.add(plan.getPsource());
 			iline = StringUtil.formatString(v, format);
 			out.println(iline);
 		}

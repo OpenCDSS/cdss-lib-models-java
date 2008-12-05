@@ -20,7 +20,7 @@
 
 package DWR.StateMod;
 
-import java.util.Vector;
+import java.util.List;
 
 import RTi.Util.GUI.JScrollWorksheet;
 
@@ -40,8 +40,7 @@ which case an empty worksheet is shown.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_StreamEstimate_Data_JFrame(Vector data, String titleString,
-boolean editable)
+public StateMod_StreamEstimate_Data_JFrame(List data, String titleString, boolean editable)
 throws Exception {
 	super(data, titleString, editable);
 	setSize(546, getHeight());
@@ -55,7 +54,7 @@ protected void apply() {
 	StateMod_StreamEstimate est = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		est = (StateMod_StreamEstimate)_data.elementAt(i);
+		est = (StateMod_StreamEstimate)_data.get(i);
 		est.createBackup();
 	}
 }
@@ -84,7 +83,7 @@ protected void cancel() {
 	StateMod_StreamEstimate est = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		est = (StateMod_StreamEstimate)_data.elementAt(i);
+		est = (StateMod_StreamEstimate)_data.get(i);
 		est.restoreOriginal();
 	}
 }
@@ -97,7 +96,7 @@ protected void createDataBackup() {
 	StateMod_StreamEstimate est = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		est = (StateMod_StreamEstimate)_data.elementAt(i);
+		est = (StateMod_StreamEstimate)_data.get(i);
 		est.createBackup();
 	}
 }

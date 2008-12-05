@@ -17,7 +17,7 @@ package DWR.StateMod;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.util.Vector;
+import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -77,7 +77,7 @@ private DefaultTableXYDataset createDataset()
 {	String routine ="StateMod_Reservoir_AreaCap_Graph_JFrame.createDataSet";
 	DefaultTableXYDataset dataset = new DefaultTableXYDataset();
 
-	Vector v = __res.getAreaCaps();
+	List v = __res.getAreaCaps();
 	int size = 0;
 	if ( v != null ) {
 		size = v.size();
@@ -95,7 +95,7 @@ private DefaultTableXYDataset createDataset()
 	double content = 0.0;
 	int match_count = 0;
 	for ( int i = 0; i < size; i++ ) {
-		ac = (StateMod_ReservoirAreaCap)v.elementAt(i);
+		ac = (StateMod_ReservoirAreaCap)v.get(i);
 		// Curves will often have a very large content to protect
 		// against out of bounds for interpolation.  However, if this
 		// point is graphed, it causes the other values to appear

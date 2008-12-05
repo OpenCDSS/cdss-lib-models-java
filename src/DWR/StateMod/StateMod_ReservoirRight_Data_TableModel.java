@@ -16,6 +16,7 @@
 
 package DWR.StateMod;
 
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
@@ -33,8 +34,7 @@ extends JWorksheet_AbstractRowTableModel implements StateMod_Data_TableModel {
 /**
 Number of columns in the table model.  For table models that display rights 
 for a single reservoir, the tables only have 10 columns.  Table models that
-display rights for 1+ reservoirs have 11.  The variable is modified in the
-constructor.
+display rights for 1+ reservoirs have 11.  The variable is modified in the constructor.
 */
 private int __COLUMNS = 10;
 
@@ -63,7 +63,7 @@ Constructor.
 @param data the data that will be displayed in the table.
 @param editable whether the table data can be modified or not.
 */
-public StateMod_ReservoirRight_Data_TableModel(Vector data, boolean editable) {
+public StateMod_ReservoirRight_Data_TableModel(List data, boolean editable) {
 	if (data == null) {
 		_data = new Vector();
 	}
@@ -263,8 +263,7 @@ public Object getValueAt(int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	StateMod_ReservoirRight rr 
-		= (StateMod_ReservoirRight)_data.elementAt(row);
+	StateMod_ReservoirRight rr = (StateMod_ReservoirRight)_data.get(row);
 
 	switch (col) {
 		case COL_RIGHT_ID:	return rr.getID();
@@ -307,8 +306,7 @@ public void setValueAt(Object value, int row, int col) {
 	}
 	double dval;
 	int ival;
-	StateMod_ReservoirRight rr 
-		= (StateMod_ReservoirRight)_data.elementAt(row);
+	StateMod_ReservoirRight rr = (StateMod_ReservoirRight)_data.get(row);
 
 	switch (col) {
 		case COL_RIGHT_ID:	

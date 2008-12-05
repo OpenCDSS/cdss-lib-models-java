@@ -194,7 +194,7 @@ public Object clone() {
 	}
 
 	// dataset is not cloned -- the same reference is used.
-	StateMod_Data._dataset = _dataset;
+	//StateMod_Data._dataset = _dataset;
 	data._isClone = true;
 
 	return data;

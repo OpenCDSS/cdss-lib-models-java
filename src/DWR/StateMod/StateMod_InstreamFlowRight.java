@@ -69,6 +69,7 @@ package DWR.StateMod;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.IO.IOUtil;
@@ -190,7 +191,7 @@ be null.
 be null.
 @return true if they are the same, false if not.
 */
-public static boolean equals(Vector v1, Vector v2) {
+public static boolean equals(List v1, List v2) {
 	String routine = "StateMod_InstreamFlowRight.equals(Vector, Vector)";
 	StateMod_InstreamFlowRight r1;	
 	StateMod_InstreamFlowRight r2;	
@@ -203,13 +204,13 @@ public static boolean equals(Vector v1, Vector v2) {
 		// and data will need to be saved back into the dataset.
 		int size = v1.size();
 		Message.printStatus(1, routine, "Vectors are of size: " + size);
-		Vector v1Sort = StateMod_Util.sortStateMod_DataVector(v1);
-		Vector v2Sort = StateMod_Util.sortStateMod_DataVector(v2);
+		List v1Sort = StateMod_Util.sortStateMod_DataVector(v1);
+		List v2Sort = StateMod_Util.sortStateMod_DataVector(v2);
 		Message.printStatus(1, routine, "Vectors have been sorted");
 	
 		for (int i = 0; i < size; i++) {			
-			r1 = (StateMod_InstreamFlowRight)v1Sort.elementAt(i);	
-			r2 = (StateMod_InstreamFlowRight)v2Sort.elementAt(i);	
+			r1 = (StateMod_InstreamFlowRight)v1Sort.get(i);	
+			r2 = (StateMod_InstreamFlowRight)v2Sort.get(i);	
 			Message.printStatus(1, routine, r1.toString());
 			Message.printStatus(1, routine, r2.toString());
 			Message.printStatus(1, routine, "Element " + i 
@@ -349,10 +350,10 @@ Read instream flow rights information in and store in a Vector.
 @param filename Name of file to read.
 @exception Exception if there is an error reading the file.
 */
-public static Vector readStateModFile(String filename)
+public static List readStateModFile(String filename)
 throws Exception {
 	String routine ="StateMod_InstreamFlowRight.readStateModFile";
-	Vector theInsfRights = new Vector();
+	List theInsfRights = new Vector();
 	int format_0[] = {	StringUtil.TYPE_STRING,
 				StringUtil.TYPE_STRING,
 				StringUtil.TYPE_STRING,
@@ -367,7 +368,7 @@ throws Exception {
 				8 };
 	String iline;
 	StateMod_InstreamFlowRight aRight = null;
-	Vector v = new Vector(6);
+	List v = new Vector(6);
 
 	Message.printStatus(1, routine, "Reading Instream Flow Rights File: " +
 		filename);
@@ -383,14 +384,14 @@ throws Exception {
 			aRight = new StateMod_InstreamFlowRight();
 
 			StringUtil.fixedRead(iline, format_0, format_0w, v);
-			aRight.setID(((String)v.elementAt(0)).trim()); 
-			aRight.setName(((String)v.elementAt(1)).trim()); 
-			aRight.setCgoto(((String)v.elementAt(2)).trim()); 
-			aRight.setIrtem(((String)v.elementAt(3)).trim()); 
-			aRight.setDcrifr((Double)v.elementAt(4));
-			aRight.setSwitch((Integer)v.elementAt(5));
+			aRight.setID(((String)v.get(0)).trim()); 
+			aRight.setName(((String)v.get(1)).trim()); 
+			aRight.setCgoto(((String)v.get(2)).trim()); 
+			aRight.setIrtem(((String)v.get(3)).trim()); 
+			aRight.setDcrifr((Double)v.get(4));
+			aRight.setSwitch((Integer)v.get(5));
 
-			theInsfRights.addElement(aRight);
+			theInsfRights.add(aRight);
 		}
 	} 
 	catch (Exception e) {
@@ -468,7 +469,7 @@ is also maintained by calling this routine.
 @exception Exception if an error occurs.
 */
 public static void writeStateModFile(String infile, String outfile,
-Vector theInsfRights, String [] newcomments)
+		List theInsfRights, String [] newcomments)
 throws Exception {
 	writeStateModFile(infile, outfile, theInsfRights, 
 		newcomments, false);
@@ -485,7 +486,7 @@ is also maintained by calling this routine.
 @exception Exception if an error occurs.
 */
 public static void writeStateModFile(String infile, String outfile,
-			Vector theInsfRights, String [] newcomments,
+		List theInsfRights, String [] newcomments,
 			boolean oldAdminNumFormat)
 throws Exception {
 	String[] comment_str = { "#" };
@@ -506,7 +507,7 @@ throws Exception {
 	String iline;
 	String cmnt = "#>";
 	StateMod_InstreamFlowRight right;
-	Vector v = new Vector(6);
+	List v = new Vector(6);
 	String format_0 = null;
 	if (oldAdminNumFormat) {
 		format_0 = "%-12.12s%-24.24s%-12.12s    %-12.12s%8.2F%8d";
@@ -558,17 +559,17 @@ throws Exception {
 		num = theInsfRights.size();
 	}
 	for (int i = 0; i < num; i++) {
-		right =(StateMod_InstreamFlowRight)theInsfRights.elementAt(i);
+		right =(StateMod_InstreamFlowRight)theInsfRights.get(i);
 		if (right == null) {
 			continue;
 		}
-		v.removeAllElements();
-		v.addElement(right.getID());
-		v.addElement(right.getName());
-		v.addElement(right.getCgoto());
-		v.addElement(right.getIrtem());
-		v.addElement(new Double(right.getDcrifr()));
-		v.addElement(new Integer(right.getSwitch()));
+		v.clear();
+		v.add(right.getID());
+		v.add(right.getName());
+		v.add(right.getCgoto());
+		v.add(right.getIrtem());
+		v.add(new Double(right.getDcrifr()));
+		v.add(new Integer(right.getSwitch()));
 		iline = StringUtil.formatString(v, format_0);
 		out.println(iline);
 	}
@@ -601,8 +602,7 @@ public String toString() {
 /**
 Writes a Vector of StateMod_InstreamFlowRight objects to a list file.  A header 
 is printed to the top of the file, containing the commands used to generate the 
-file.  Any strings in the body of the file that contain the field delimiter 
-will be wrapped in "...".  
+file.  Any strings in the body of the file that contain the field delimiter will be wrapped in "...".  
 @param filename the name of the file to which the data will be written.
 @param delimiter the delimiter to use for separating field values.
 @param update whether to update an existing file, retaining the current 
@@ -610,15 +610,14 @@ header (true) or to create a new file with a new header.
 @param data the Vector of objects to write.  
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter,
-boolean update, Vector data) 
+public static void writeListFile(String filename, String delimiter, boolean update, List data) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
 		size = data.size();
 	}
 	
-	Vector fields = new Vector();
+	List fields = new Vector();
 	fields.add("ID");
 	fields.add("Name");
 	fields.add("StationID");
@@ -632,7 +631,7 @@ throws Exception {
 	int comp = StateMod_DataSet.COMP_INSTREAM_RIGHTS;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.elementAt(i);
+		s = (String)fields.get(i);
 		names[i] = StateMod_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateMod_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -667,7 +666,7 @@ throws Exception {
 		out.println(buffer.toString());
 		
 		for (int i = 0; i < size; i++) {
-			right = (StateMod_InstreamFlowRight)data.elementAt(i);
+			right = (StateMod_InstreamFlowRight)data.get(i);
 			
 			line[0] = StringUtil.formatString(right.getID(), 
 				formats[0]).trim();

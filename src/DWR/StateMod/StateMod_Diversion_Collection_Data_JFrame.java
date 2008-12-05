@@ -13,7 +13,7 @@
 
 package DWR.StateMod;
 
-import java.util.Vector;
+import java.util.List;
 
 import RTi.Util.GUI.JScrollWorksheet;
 
@@ -33,8 +33,7 @@ Constructor.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_Diversion_Collection_Data_JFrame(Vector data, 
-String titleString, boolean editable)
+public StateMod_Diversion_Collection_Data_JFrame(List data, String titleString, boolean editable)
 throws Exception {
 	super(data, titleString, editable);
 	setSize(423, getHeight());
@@ -48,7 +47,7 @@ protected void apply() {
 	StateMod_Diversion div = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		div = (StateMod_Diversion)_data.elementAt(i);
+		div = (StateMod_Diversion)_data.get(i);
 		div.createBackup();
 	}
 }
@@ -61,11 +60,9 @@ constructor.
 protected JScrollWorksheet buildJScrollWorksheet() 
 throws Exception {
 	StateMod_Diversion_Collection_Data_TableModel tableModel 
-		= new StateMod_Diversion_Collection_Data_TableModel(_data, 
-		_editable);
+		= new StateMod_Diversion_Collection_Data_TableModel(_data, _editable);
 	StateMod_Diversion_Collection_Data_CellRenderer cellRenderer 
-		= new StateMod_Diversion_Collection_Data_CellRenderer(
-		tableModel);
+		= new StateMod_Diversion_Collection_Data_CellRenderer(tableModel);
 
 	// _props is defined in the super class
 	return new JScrollWorksheet(cellRenderer, tableModel, _props);
@@ -79,7 +76,7 @@ protected void cancel() {
 	StateMod_Diversion div = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		div = (StateMod_Diversion)_data.elementAt(i);
+		div = (StateMod_Diversion)_data.get(i);
 		div.restoreOriginal();
 	}
 }
@@ -92,7 +89,7 @@ protected void createDataBackup() {
 	StateMod_Diversion div = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		div = (StateMod_Diversion)_data.elementAt(i);
+		div = (StateMod_Diversion)_data.get(i);
 		div.createBackup();
 	}
 }

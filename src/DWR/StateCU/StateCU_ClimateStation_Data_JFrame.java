@@ -19,7 +19,7 @@
 
 package DWR.StateCU;
 
-import java.util.Vector;
+import java.util.List;
 
 import DWR.StateMod.StateMod_Data_JFrame;
 import RTi.Util.GUI.JScrollWorksheet;
@@ -39,8 +39,7 @@ Constructor.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateCU_ClimateStation_Data_JFrame(Vector data, String titleString,
-boolean editable)
+public StateCU_ClimateStation_Data_JFrame(List data, String titleString, boolean editable)
 throws Exception {
 	super(data, titleString, editable);
 	setSize(640, getHeight());
@@ -54,7 +53,7 @@ protected void apply() {
 	StateCU_ClimateStation station = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		station = (StateCU_ClimateStation)_data.elementAt(i);
+		station = (StateCU_ClimateStation)_data.get(i);
 		station.createBackup();
 	}
 }
@@ -66,10 +65,8 @@ constructor.
 */
 protected JScrollWorksheet buildJScrollWorksheet() 
 throws Exception {
-	StateCU_ClimateStation_TableModel tableModel 
-		= new StateCU_ClimateStation_TableModel(_data, _editable);
-	StateCU_ClimateStation_CellRenderer cellRenderer 
-		= new StateCU_ClimateStation_CellRenderer(tableModel);
+	StateCU_ClimateStation_TableModel tableModel = new StateCU_ClimateStation_TableModel(_data, _editable);
+	StateCU_ClimateStation_CellRenderer cellRenderer = new StateCU_ClimateStation_CellRenderer(tableModel);
 	// _props is defined in the super class
 	return new JScrollWorksheet(cellRenderer, tableModel, _props);
 }
@@ -82,7 +79,7 @@ protected void cancel() {
 	StateCU_ClimateStation station = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		station = (StateCU_ClimateStation)_data.elementAt(i);
+		station = (StateCU_ClimateStation)_data.get(i);
 		station.restoreOriginal();
 	}
 }
@@ -95,7 +92,7 @@ protected void createDataBackup() {
 	StateCU_ClimateStation station = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		station = (StateCU_ClimateStation)_data.elementAt(i);
+		station = (StateCU_ClimateStation)_data.get(i);
 		station.createBackup();
 	}
 }

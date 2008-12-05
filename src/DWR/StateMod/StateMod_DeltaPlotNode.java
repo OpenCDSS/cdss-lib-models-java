@@ -19,6 +19,7 @@
 
 package DWR.StateMod;
 
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.String.StringUtil;
@@ -29,7 +30,7 @@ protected String	_id;
 protected String	_name;
 protected double 	_x;	// 
 protected double	_y;	// 
-protected Vector	_z;	// double vector, z components
+protected List	_z;	// double vector, z components
 
 /**
 Constructor.
@@ -44,7 +45,7 @@ public void addZ ( double d ) {
 }
 
 public void addZ ( Double d ) {
-	_z.addElement (d);
+	_z.add (d);
 }
 
 public void addZ ( String str )
@@ -96,7 +97,7 @@ public double getY() {
 }
 
 public double getZ ( int i ) {
-	Double d = (Double)_z.elementAt(i);
+	Double d = (Double)_z.get(i);
 	return d.doubleValue();
 }
 

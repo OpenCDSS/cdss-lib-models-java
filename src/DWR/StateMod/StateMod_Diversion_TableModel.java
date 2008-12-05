@@ -38,7 +38,7 @@
 
 package DWR.StateMod;
 
-import java.util.Vector;
+import java.util.List;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 
@@ -95,7 +95,7 @@ Constructor.  This builds the Model for displaying the diversion station data.
 @param editable whether the data can be edited or not
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_Diversion_TableModel(Vector data, boolean editable)
+public StateMod_Diversion_TableModel(List data, boolean editable)
 throws Exception {
 	this(null, data, editable, false);
 }
@@ -105,29 +105,24 @@ Constructor.  This builds the Model for displaying the diversion station data.
 @param data the data that will be displayed in the table.
 @param editable whether the data can be edited or not
 @param compactForm if true, then the compact form of the table model will be
-used.  In the compact form, only the name and ID are shown.  If false, all
-fields will be shown.
+used.  In the compact form, only the name and ID are shown.  If false, all fields will be shown.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_Diversion_TableModel(Vector data, boolean editable,
-boolean compactForm)
+public StateMod_Diversion_TableModel(List data, boolean editable, boolean compactForm)
 throws Exception {
 	this(null, data, editable, compactForm);
 }
 
 /**
 Constructor.  This builds the Model for displaying the diversion data.
-@param dataset the dataset for the data being displayed.  Only necessary
-for return flow tables.
+@param dataset the dataset for the data being displayed.  Only necessary for return flow tables.
 @param data the data that will be displayed in the table.
 @param editable whether the data can be edited or not
 @param compactForm if true, then the compact form of the table model will be
-used.  In the compact form, only the name and ID are shown.  If false, all
-fields will be shown.
+used.  In the compact form, only the name and ID are shown.  If false, all fields will be shown.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_Diversion_TableModel(StateMod_DataSet dataset, 
-Vector data, boolean editable, boolean compactForm)
+public StateMod_Diversion_TableModel(StateMod_DataSet dataset, List data, boolean editable, boolean compactForm)
 throws Exception {
 	if (data == null) {
 		throw new Exception ("Invalid data Vector passed to " 
@@ -284,7 +279,7 @@ public Object getValueAt(int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	StateMod_Diversion smd = (StateMod_Diversion)_data.elementAt(row);
+	StateMod_Diversion smd = (StateMod_Diversion)_data.get(row);
 	switch (col) {
 		case COL_ID:		return smd.getID();
 		case COL_NAME:		return smd.getName();
@@ -387,7 +382,7 @@ public void setValueAt(Object value, int row, int col)
 	int ival;
 	int index;
 
-	StateMod_Diversion smd = (StateMod_Diversion)_data.elementAt(row);
+	StateMod_Diversion smd = (StateMod_Diversion)_data.get(row);
 
 	switch (col) {
 		case COL_ID:

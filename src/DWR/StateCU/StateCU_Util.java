@@ -18,18 +18,16 @@
 package DWR.StateCU;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JTextField;
 
-import DWR.StateMod.StateMod_BTS;
-import DWR.StateMod.StateMod_DataSet;
 import RTi.Util.IO.Validator;
 import RTi.Util.IO.Validators;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 import RTi.Util.Time.DateTime;
-import RTi.Util.Time.TimeInterval;
 
 /**
 This StateCU_Util class contains static data and methods used in the StateCU
@@ -84,13 +82,13 @@ collection information is assumed to have been defined for the locations.
 @return the matching StateCU_Location, or null if a match cannot be found.
 */
 public static StateCU_Location getLocationForPartID (
-		Vector CULocation_Vector, String part_id )
+		List CULocation_Vector, String part_id )
 {
 	// First try to match the main location.
 	
 	int pos = indexOf ( CULocation_Vector, part_id );
 	if ( pos >= 0 ) {
-		return ( (StateCU_Location)CULocation_Vector.elementAt(pos) );
+		return ( (StateCU_Location)CULocation_Vector.get(pos) );
 	}
 	// If here, search the location collections...
 	int size = 0;
@@ -98,9 +96,9 @@ public static StateCU_Location getLocationForPartID (
 		size = CULocation_Vector.size();
 	}
 	StateCU_Location culoc;
-	Vector part_ids;
+	List part_ids;
 	for ( int i = 0; i < size; i++ ) {
-		culoc = (StateCU_Location)CULocation_Vector.elementAt(i);
+		culoc = (StateCU_Location)CULocation_Vector.get(i);
 		// Only check aggregates/collections that are composed of ditches.
 		if ( !culoc.getCollectionPartType().equalsIgnoreCase(StateCU_Location.COLLECTION_PART_TYPE_DITCH) ) {
 			continue;
@@ -109,7 +107,7 @@ public static StateCU_Location getLocationForPartID (
 		part_ids = culoc.getCollectionPartIDs(-1);	// Since ditches, year is irrelevant
 		int size2 = part_ids.size();
 		for ( int j = 0; j < size2; j++ ) {
-			if ( part_id.equalsIgnoreCase((String)part_ids.elementAt(j))) {
+			if ( part_id.equalsIgnoreCase((String)part_ids.get(j))) {
 				return culoc;
 			}
 		}
@@ -183,7 +181,7 @@ useful when retrieving time series.
 @return a non-null list of data types.  The list will have zero size if no
 data types are requested or are valid.
 */
-public static Vector getTimeSeriesDataTypes (   String binary_filename,
+public static List getTimeSeriesDataTypes (   String binary_filename,
                         int comp_type, String id,
                         StateCU_DataSet dataset,
                         double statecu_version,
@@ -195,8 +193,8 @@ public static Vector getTimeSeriesDataTypes (   String binary_filename,
                         boolean add_group,
                         boolean add_note )
 {   String routine = "StateCU_Util.getTimeSeriesDataTypes";
-    Vector data_types = new Vector();
-    /* FIXME SAM 2008-08-26 Need to clean up - tet rid of StateMod code
+	List data_types = new Vector();
+    /* FIXME SAM 2008-08-26 Need to clean up - get rid of StateMod code
     String [] diversion_types0 = null;
     String [] instream_types0 = null;
     String [] reservoir_types0 = null;
@@ -249,7 +247,7 @@ public static Vector getTimeSeriesDataTypes (   String binary_filename,
             parameters = bts.getTimeSeriesParameters();
             // TODO SAM 2006-01-15
             // Remove when tested in production.
-            Message.printStatus ( 2, routine, "Parameters from file:  " + StringUtil.toVector(parameters) );
+            Message.printStatus ( 2, routine, "Parameters from file:  " + StringUtil.toList(parameters) );
             try {
                 bts.close();
             }
@@ -577,14 +575,14 @@ identifer.  The position for the first match is returned.
 @return the position, or -1 if not found.
 @param id StateCU_Data identifier.
 */
-public static int indexOf ( Vector data, String id )
+public static int indexOf ( List data, String id )
 {	int size = 0;
 	if ( data != null ) {
 		size = data.size();
 	}
 	StateCU_Data d = null;
 	for (int i = 0; i < size; i++) {
-		d = (StateCU_Data)data.elementAt(i);
+		d = (StateCU_Data)data.get(i);
 		if ( id.equalsIgnoreCase ( d._id ) ) {
 			return i;
 		}
@@ -598,14 +596,14 @@ The position for the first match is returned.
 @return the position, or -1 if not found.
 @param name StateCU_Data name.
 */
-public static int indexOfName ( Vector data, String name )
+public static int indexOfName ( List data, String name )
 {	int size = 0;
 	if ( data != null ) {
 		size = data.size();
 	}
 	StateCU_Data d = null;
 	for (int i = 0; i < size; i++) {
-		d = (StateCU_Data)data.elementAt(i);
+		d = (StateCU_Data)data.get(i);
 		if ( name.equalsIgnoreCase ( d._name ) ) {
 			return i;
 		}
@@ -679,13 +677,13 @@ identifiers.
 identifier that matches the requested pattern.  A non-null Vector will be
 returned but it may have zero elements.
 */
-public static Vector match ( Vector data_Vector, String pattern )
+public static List match ( List data_Vector, String pattern )
 {	int size = 0;
 	if ( data_Vector != null ) {
 		size = data_Vector.size();
 	}
 	StateCU_Data data = null;
-	Vector matches_Vector = new Vector ( size/10 + 1 );	// Guess size
+	List matches_Vector = new Vector ( size/10 + 1 );	// Guess size
 	// Apparently if the pattern is "*", Java complains so do a specific
 	// check...
 	boolean return_all = false;
@@ -694,9 +692,9 @@ public static Vector match ( Vector data_Vector, String pattern )
 	}
 	// Loop regardless (always return a new Vector).
 	for ( int i = 0; i < size; i++ ) {
-		data = (StateCU_Data)data_Vector.elementAt(i);
+		data = (StateCU_Data)data_Vector.get(i);
 		if ( return_all || data.getID().matches(pattern) ) {
-			matches_Vector.addElement ( data );
+			matches_Vector.add ( data );
 		}
 	}
 	return matches_Vector;
@@ -710,7 +708,7 @@ for the specific object.
 passed-in Vector.  If a null Vector is passed in, an empty Vector will be
 returned.
 */
-public static Vector sortStateCU_DataVector ( Vector data )
+public static List sortStateCU_DataVector ( List data )
 {	return sortStateCU_DataVector ( data, true );
 }
 
@@ -724,11 +722,11 @@ If false, return the original Vector, with sorted contents.
 passed-in Vector.  If a null Vector is passed in, an empty Vector will be
 returned.
 */
-public static Vector sortStateCU_DataVector ( Vector data, boolean return_new )
+public static List sortStateCU_DataVector ( List data, boolean return_new )
 {	if (data == null) {
 		return new Vector();
 	}
-	Vector v = data;
+	List v = data;
 	int size = data.size();
 	if ( return_new ) {
 		if (size == 0) {
@@ -736,7 +734,7 @@ public static Vector sortStateCU_DataVector ( Vector data, boolean return_new )
 		}
 		v = new Vector();
 		for (int i = 0; i < size; i++) {
-			v.add(data.elementAt(i));
+			v.add(data.get(i));
 		}
 	}
 

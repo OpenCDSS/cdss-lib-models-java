@@ -17,7 +17,7 @@
 
 package DWR.StateCU;
 
-import java.util.Vector;
+import java.util.List;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 import RTi.Util.IO.Validator;
@@ -66,7 +66,7 @@ Constructor.  This builds the Model for displaying crop char data
 @param data the data that will be displayed in the table.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateCU_BlaneyCriddle_TableModel(Vector data) {
+public StateCU_BlaneyCriddle_TableModel(List data) {
 	this(data, true);
 }
 
@@ -76,7 +76,7 @@ Constructor.  This builds the Model for displaying crop char data
 @param editable whether the data are editable or not.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateCU_BlaneyCriddle_TableModel(Vector data, boolean editable) {
+public StateCU_BlaneyCriddle_TableModel(List data, boolean editable) {
 	if (data == null) {
 		_rows = 0;
 	}
@@ -213,8 +213,7 @@ public Object getValueAt(int row, int col) {
 
 	int dataPos = lookupVectorPositionForRow(row);
 
-	StateCU_BlaneyCriddle bc = (StateCU_BlaneyCriddle)_data.elementAt(
-		dataPos);
+	StateCU_BlaneyCriddle bc = (StateCU_BlaneyCriddle)_data.get(dataPos);
 	
 	int num = row - __firstRows[dataPos];
 
@@ -259,10 +258,9 @@ public int[] getColumnWidths() {
 
 /**
 Sets up internal arrays.
-@param data the Vector of data (non-null) that will be displayed in the 
-table model.
+@param data the Vector of data (non-null) that will be displayed in the table model.
 */
-private void initialize(Vector data) {
+private void initialize(List data) {
 	int size = data.size();
 	__firstRows = new int[size];
 	__day = new boolean[size];
@@ -271,7 +269,7 @@ private void initialize(Vector data) {
 	StateCU_BlaneyCriddle bc = null;
 	
 	for (int i = 0; i < size; i++) {
-		bc = (StateCU_BlaneyCriddle)data.elementAt(i);
+		bc = (StateCU_BlaneyCriddle)data.get(i);
 
 		__firstRows[i] = row;
 
@@ -292,8 +290,7 @@ private void initialize(Vector data) {
 Returns whether the cell is editable or not.  In this model, all the cells in
 columns 3 and greater are editable.
 @param rowIndex unused.
-@param columnIndex the index of the column to check whether it is editable
-or not.
+@param columnIndex the index of the column to check whether it is editable.
 @return whether the cell is editable or not.
 */
 public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -332,8 +329,7 @@ public void setValueAt(Object value, int row, int col) {
 
 	int dataPos = lookupVectorPositionForRow(row);
 
-	StateCU_BlaneyCriddle bc = (StateCU_BlaneyCriddle)_data.elementAt(
-		dataPos);
+	StateCU_BlaneyCriddle bc = (StateCU_BlaneyCriddle)_data.get(dataPos);
 	
 	int num = row - __firstRows[dataPos];
 

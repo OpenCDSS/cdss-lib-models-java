@@ -112,6 +112,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -284,7 +285,7 @@ private DataSetComponent __reservoirComponent = null;
 /**
 The Vector of data in the __reservoirComponent.
 */
-private Vector __reservoirsVector = null;
+private List __reservoirsVector = null;
 
 /**
 Constructor.
@@ -304,12 +305,12 @@ public StateMod_Reservoir_JFrame (	StateMod_DataSet dataset,
 	__reservoirComponent = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_RESERVOIR_STATIONS);
 
-	__reservoirsVector = (Vector)__reservoirComponent.getData();
+	__reservoirsVector = (List)__reservoirComponent.getData();
 
 	int size = __reservoirsVector.size();
 	for (int i = 0; i < size; i++) {
 		StateMod_Reservoir r = 
-			(StateMod_Reservoir)__reservoirsVector.elementAt(i);
+			(StateMod_Reservoir)__reservoirsVector.get(i);
 		r.createBackup();
 	}
 
@@ -339,12 +340,12 @@ public StateMod_Reservoir_JFrame (	StateMod_DataSet dataset,
 	__reservoirComponent = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_RESERVOIR_STATIONS);
 
-	__reservoirsVector = (Vector)__reservoirComponent.getData();
+	__reservoirsVector = (List)__reservoirComponent.getData();
 
 	int size = __reservoirsVector.size();
 	for (int i = 0; i < size; i++) {
 		StateMod_Reservoir r = 
-			(StateMod_Reservoir)__reservoirsVector.elementAt(i);
+			(StateMod_Reservoir)__reservoirsVector.get(i);
 		r.createBackup();
 	}
 
@@ -390,7 +391,7 @@ public void actionPerformed(ActionEvent e) {
 		for (int i = 0; i < size; i++) {
 			StateMod_Reservoir r = 
 				(StateMod_Reservoir)
-				__reservoirsVector.elementAt(i);
+				__reservoirsVector.get(i);
 			if (!changed && r.changed()) {
 				changed = true;
 			}
@@ -414,7 +415,7 @@ public void actionPerformed(ActionEvent e) {
 		for (int i = 0; i < size; i++) {
 			StateMod_Reservoir r = 
 				(StateMod_Reservoir)
-				__reservoirsVector.elementAt(i);
+				__reservoirsVector.get(i);
 			if (!changed && r.changed()) {
 				changed = true;
 			}
@@ -430,7 +431,7 @@ public void actionPerformed(ActionEvent e) {
 		for (int i = 0; i < size; i++) {
 			StateMod_Reservoir r = 
 				(StateMod_Reservoir)
-				__reservoirsVector.elementAt(i);
+				__reservoirsVector.get(i);
 			r.restoreOriginal();
 		}				
 		if ( __dataset_wm != null ) {
@@ -455,7 +456,7 @@ public void actionPerformed(ActionEvent e) {
 
 		// set placeholder for current reservoir
 		StateMod_Reservoir res =((StateMod_Reservoir)__reservoirsVector
-			.elementAt(__currentReservoirIndex));
+			.get(__currentReservoirIndex));
 
 		if (e.getSource() == __ownerAccounts) {
 			new StateMod_Reservoir_Owner_JFrame(
@@ -487,7 +488,7 @@ data object.
 @return true if the text fields are okay, false if not.
 */
 private boolean checkInput() {
-	Vector errors = new Vector();
+	List errors = new Vector();
 	int errorCount = 0;
 
 	// for each field, check if it contains valid input.  If not,
@@ -506,7 +507,7 @@ private boolean checkInput() {
 	String label = "The following error" + plural + "encountered "
 		+ "trying to save the record:\n";
 	for (int i = 0; i < errorCount; i++) {
-		label += errors.elementAt(i) + "\n";
+		label += errors.get(i) + "\n";
 	}
 	new ResponseJDialog(this, 
 		"Errors encountered", label, ResponseJDialog.OK);
@@ -583,7 +584,7 @@ private void displayTSViewJFrame(Object o)
 
 	PropList props = new PropList("Reservoir");
 
-	Vector tslist = new Vector();
+	List tslist = new Vector();
 
 	// Get the time series to display and set plot properties if graphing.
 
@@ -591,11 +592,11 @@ private void displayTSViewJFrame(Object o)
 	int its = 0;
 	TS ts = null;
 	StateMod_Reservoir res =((StateMod_Reservoir)
-			__reservoirsVector.elementAt(__currentReservoirIndex));
-	Vector precip_tslist = (Vector)(__dataset.getComponentForComponentType(
+			__reservoirsVector.get(__currentReservoirIndex));
+	List precip_tslist = (List)(__dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_PRECIPITATION_TS_MONTHLY)).
 			getData();
-	Vector evap_tslist = (Vector)(__dataset.getComponentForComponentType(
+	List evap_tslist = (List)(__dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_EVAPORATION_TS_MONTHLY)).
 			getData();
 	Message.printStatus ( 1, "",
@@ -891,7 +892,7 @@ private void processTableSelection(int index) {
 	}
 
 	StateMod_Reservoir res = (StateMod_Reservoir)
-		__reservoirsVector.elementAt(__currentReservoirIndex);
+		__reservoirsVector.get(__currentReservoirIndex);
 
 	JGUIUtil.enableComponents(__disables, __textUneditables,
 		__editable);
@@ -1024,10 +1025,10 @@ private void rebuildResDailyID() {
 
 	// then add the IDs of all the other reservoirs in the dataset,
 	// making sure not to re-add the above ID again.
-	Vector ids = StateMod_Util.createDataList(__reservoirsVector, false);
+	List ids = StateMod_Util.createDataList(__reservoirsVector, false);
 	
 	for (int i = 0; i < ids.size(); i++) {
-		String currID = (String)ids.elementAt(i);
+		String currID = (String)ids.get(i);
 		if (!currID.trim().equals(id)) {
 			__resDailyID.add(currID + " - Daily TS pattern of "
 				+ "other reservoir used with monthly TS from "
@@ -1068,7 +1069,7 @@ private void saveInformation(int record) {
 	}
 
 	StateMod_Reservoir res = (StateMod_Reservoir)
-		__reservoirsVector.elementAt(record);
+		__reservoirsVector.get(record);
 //Message.printStatus(1, "", "Name: '" + res.getName() + "'");
 //Message.printStatus(1, "", "Name: '" + __reservoirName.getText() + "'");
 //Message.printStatus(1, "", "\t\t(" + res.isDirty() + ")");
@@ -1122,7 +1123,7 @@ private void saveDailyID(int record) {
 	}
 
 	StateMod_Reservoir res = (StateMod_Reservoir)
-		__reservoirsVector.elementAt(record);
+		__reservoirsVector.get(record);
 
 	if (!__resDailyID.getSelected().equalsIgnoreCase(res.getCresdy())) {
 		String id = __resDailyID.getSelected();
@@ -1761,7 +1762,7 @@ public void windowClosing(WindowEvent e) {
 	for (int i = 0; i < size; i++) {
 		StateMod_Reservoir r = 
 			(StateMod_Reservoir)
-			__reservoirsVector.elementAt(i);
+			__reservoirsVector.get(i);
 		if (!changed && r.changed()) {
 			changed = true;
 		}

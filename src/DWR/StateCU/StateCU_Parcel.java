@@ -12,6 +12,7 @@
 
 package DWR.StateCU;
 
+import java.util.List;
 import java.util.Vector;
 
 /**
@@ -52,7 +53,7 @@ private String	__irrigation_method;
 /**
 Water supply sources - initialize so non-null.
 */
-private Vector __supply_Vector = new Vector();
+private List __supply_Vector = new Vector();
 
 /**
 Constructor.
@@ -66,7 +67,7 @@ public StateCU_Parcel() {
 Add a supply object.
 */
 public void addSupply ( StateCU_Supply supply )
-{	__supply_Vector.addElement ( supply );
+{	__supply_Vector.add ( supply );
 }
 
 /**
@@ -243,7 +244,7 @@ public String getIrrigationMethod() {
 Return the list of StateCU_Supply for the parcel.
 @return the list of StateCU_Supply for the parcel.
 */
-public Vector getSupplyList() {
+public List getSupplyList() {
 	return __supply_Vector;
 }
 
@@ -274,7 +275,7 @@ public boolean hasGroundWaterSupply ()
 {	int size = __supply_Vector.size();
 	StateCU_Supply supply = null;
 	for ( int i = 0; i < size; i++ ) {
-		supply = (StateCU_Supply)__supply_Vector.elementAt(i);
+		supply = (StateCU_Supply)__supply_Vector.get(i);
 		if ( supply.isGroundWater() ) {
 			return true;
 		}

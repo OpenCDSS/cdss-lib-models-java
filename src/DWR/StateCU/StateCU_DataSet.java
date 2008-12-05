@@ -53,6 +53,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.List;
 import java.util.Vector;
 
 import DWR.StateMod.StateMod_DelayTable;
@@ -1026,18 +1027,17 @@ file.ext, type
 public static DataSetComponent parseDataSetComponent (	StateCU_DataSet dataset,
 							String line )
 throws Exception
-{	Vector v = StringUtil.breakStringList ( line, ", \t",
-					StringUtil.DELIM_SKIP_BLANKS );
+{	List v = StringUtil.breakStringList ( line, ", \t", StringUtil.DELIM_SKIP_BLANKS );
 	if ( (v == null) || (v.size() < 2) ) {
 		throw new Exception ( "Bad StateCU data (\"" + line +"\"");
 	}
-	String type_string = (String)v.elementAt(1);
+	String type_string = (String)v.get(1);
 	int comptype = lookupComponentTypeFromTag ( type_string );
 	if ( comptype < 0 ) {
 		throw new Exception ( "Unrecognized type in (\"" + line +"\"");
 	}
 	DataSetComponent comp = new DataSetComponent ( dataset, comptype );
-	comp.setDataFileName ( (String)v.elementAt(0) );
+	comp.setDataFileName ( (String)v.get(0) );
 	return comp;
 }
 
@@ -1190,7 +1190,7 @@ throws IOException
 	String string;
 	String token1;		// First token on a line
 	int datarec = -1;	// Counter for data records (not comments).
-	Vector v = null;
+	List v = null;
 	// Use a while to check for comments.
 	while ( (iline = in.readLine()) != null ) {
 		// check for comments
@@ -1210,15 +1210,15 @@ throws IOException
 			if ( v != null ) {
 				if (	(v.size() >= 1) &&
 					StringUtil.isInteger(
-					(String)v.elementAt(0)) ) {
+					(String)v.get(0)) ) {
 					setNyr1 ( StringUtil.atoi (
-					(String)v.elementAt(0)) );
+					(String)v.get(0)) );
 				}
 				if (	(v.size() >= 2) &&
 					StringUtil.isInteger(
-					(String)v.elementAt(1)) ) {
+					(String)v.get(1)) ) {
 					setNyr2 ( StringUtil.atoi (
-					(String)v.elementAt(1)) );
+					(String)v.get(1)) );
 				}
 			}
 		}
@@ -1245,21 +1245,21 @@ throws IOException
 			if ( v != null ) {
 				if (	(v.size() >= 1) &&
 					StringUtil.isDouble(
-					((String)v.elementAt(0)).trim()) ) {
+					((String)v.get(0)).trim()) ) {
 					setPsenmo ( StringUtil.atod (
-					((String)v.elementAt(0)).trim()) );
+					((String)v.get(0)).trim()) );
 				}
 				if (	(v.size() >= 2) &&
 					StringUtil.isDouble(
-					((String)v.elementAt(1)).trim()) ) {
+					((String)v.get(1)).trim()) ) {
 					setPjunmo ( StringUtil.atod (
-					((String)v.elementAt(1)).trim()) );
+					((String)v.get(1)).trim()) );
 				}
 				if (	(v.size() >= 3) &&
 					StringUtil.isDouble(
-					((String)v.elementAt(2)).trim()) ) {
+					((String)v.get(2)).trim()) ) {
 					setPothmo ( StringUtil.atod (
-					((String)v.elementAt(2)).trim()) );
+					((String)v.get(2)).trim()) );
 				}
 			}
 		}
@@ -1338,14 +1338,14 @@ throws Exception
 	// because the control file is not guaranteed to be the first file
 	// specified.
 
-	Vector rcu_strings = new Vector();
+	List rcu_strings = new Vector();
 	while ( (iline = in.readLine()) != null ) {
 		// check for comments
 		iline = iline.trim();
 		if (iline.startsWith("#") || (iline.length() == 0) ) {
 			continue;
 		}
-		rcu_strings.addElement ( iline );
+		rcu_strings.add ( iline );
 	}
 
 	// Read the control file...
@@ -1355,7 +1355,7 @@ throws Exception
 	DataSetComponent control_comp = null;
 	for ( int i = 0; i < size; i++ ) {
 		try {	comp = parseDataSetComponent ( dataset,
-				(String)rcu_strings.elementAt(i) );
+				(String)rcu_strings.get(i) );
 			// The following are set in the above parse method...
 			comptype = comp.getComponentType ();
 			compfile = comp.getDataFileName();
@@ -1460,7 +1460,7 @@ throws Exception
 	// Now loop through the remaining components...
 
 	for ( int i = 0; i < size; i++ ) {
-		iline = (String)rcu_strings.elementAt(i);
+		iline = (String)rcu_strings.get(i);
 		// Allocate new DataSetComponent instance...
 		try {	try {	comp = parseDataSetComponent(dataset,iline);
 			}

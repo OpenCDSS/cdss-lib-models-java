@@ -91,6 +91,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.Collections;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -209,7 +210,7 @@ private DataSetComponent __delayComponent;
 /**
 The Vector of delay data in the DataSetComponent.
 */
-private Vector __delaysVector;
+private List __delaysVector;
 
 /**
 Constructor.
@@ -246,12 +247,12 @@ public StateMod_DelayTable_JFrame (	StateMod_DataSet dataset,
 	StateMod_GUIUtil.setTitle(this, dataset, "Delay Tables" + interval, 
 		null);	
 
-	__delaysVector = (Vector)__delayComponent.getData();
+	__delaysVector = (List)__delayComponent.getData();
 
 	int size = __delaysVector.size();
 	StateMod_DelayTable dt = null;
 	for (int i = 0; i < size; i++) {
-		dt = (StateMod_DelayTable)__delaysVector.elementAt(i);
+		dt = (StateMod_DelayTable)__delaysVector.get(i);
 		dt.createBackup();
 	}
 
@@ -296,12 +297,12 @@ public StateMod_DelayTable_JFrame (	StateMod_DataSet dataset,
 	StateMod_GUIUtil.setTitle(this, dataset, "Delay Tables" + interval, 
 		null);		
 
-	__delaysVector = (Vector)__delayComponent.getData();
+	__delaysVector = (List)__delayComponent.getData();
 
 	int size = __delaysVector.size();
 	StateMod_DelayTable dt = null;
 	for (int i = 0; i < size; i++) {
-		dt = (StateMod_DelayTable)__delaysVector.elementAt(i);
+		dt = (StateMod_DelayTable)__delaysVector.get(i);
 		dt.createBackup();
 	}
 
@@ -320,7 +321,7 @@ Constructor.
 display the daily delay tables.
 @param editable whether the data is editable or not
 */
-public StateMod_DelayTable_JFrame (	Vector delaysVector,
+public StateMod_DelayTable_JFrame (	List delaysVector,
 					StateMod_DelayTable delayTable,
 					boolean monthly_data, boolean editable )
 {	__monthly_data = monthly_data;
@@ -344,7 +345,7 @@ public StateMod_DelayTable_JFrame (	Vector delaysVector,
 	int size = __delaysVector.size();
 	StateMod_DelayTable dt = null;
 	for (int i = 0; i < size; i++) {
-		dt = (StateMod_DelayTable)__delaysVector.elementAt(i);
+		dt = (StateMod_DelayTable)__delaysVector.get(i);
 		dt.createBackup();
 	}
 
@@ -363,7 +364,7 @@ StateDMI when used with a StateCU_DataSet.
 display the daily delay tables.
 @param editable whether the data is editable or not
 */
-public StateMod_DelayTable_JFrame (	Vector delaysVector,
+public StateMod_DelayTable_JFrame (	List delaysVector,
 					boolean monthly_data, boolean editable)
 {	__monthly_data = monthly_data;
 	String interval = " (Monthly)";
@@ -386,7 +387,7 @@ public StateMod_DelayTable_JFrame (	Vector delaysVector,
 	int size = __delaysVector.size();
 	StateMod_DelayTable dt = null;
 	for (int i = 0; i < size; i++) {
-		dt = (StateMod_DelayTable)__delaysVector.elementAt(i);
+		dt = (StateMod_DelayTable)__delaysVector.get(i);
 		dt.createBackup();
 	}
 
@@ -426,7 +427,7 @@ public StateMod_DelayTable_JFrame (	StateMod_DelayTable delay,
 	int size = __delaysVector.size();
 	StateMod_DelayTable dt = null;
 	for (int i = 0; i < size; i++) {
-		dt = (StateMod_DelayTable)__delaysVector.elementAt(i);
+		dt = (StateMod_DelayTable)__delaysVector.get(i);
 		dt.createBackup();
 	}
 
@@ -461,7 +462,7 @@ public void actionPerformed(ActionEvent e) {
 		StateMod_DelayTable dt = null;
 		boolean changed = false;
 		for (int i = 0; i < size; i++) {
-			dt = (StateMod_DelayTable)__delaysVector.elementAt(i);
+			dt = (StateMod_DelayTable)__delaysVector.get(i);
 			if (!changed && dt.changed()) {
 				changed = true;
 			}
@@ -477,7 +478,7 @@ public void actionPerformed(ActionEvent e) {
 		StateMod_DelayTable dt = null;
 		boolean changed = false;
 		for (int i = 0; i < size; i++) {
-			dt = (StateMod_DelayTable)__delaysVector.elementAt(i);
+			dt = (StateMod_DelayTable)__delaysVector.get(i);
 			if (!changed && dt.changed()) {
 				changed = true;
 			}
@@ -572,7 +573,7 @@ public void actionPerformed(ActionEvent e) {
 
 				StateMod_DelayTable currentDelay = 
 					((StateMod_DelayTable)
-					__delaysVector.elementAt( index));
+					__delaysVector.get( index));
 
 				int j;
 
@@ -643,7 +644,7 @@ public void actionPerformed(ActionEvent e) {
 						currentDelay.getRet_val(j);
 					}
 				}
-				Vector tslist = new Vector();
+				List tslist = new Vector();
 				tslist.add(ts);
 
 				PropList graphProps = new PropList("TSView");
@@ -719,7 +720,7 @@ private void closeWindow() {
 	StateMod_DelayTable dt = null;
 	boolean changed = false;
 	for (int i = 0; i < size; i++) {
-		dt = (StateMod_DelayTable)__delaysVector.elementAt(i);
+		dt = (StateMod_DelayTable)__delaysVector.get(i);
 		if (!changed && dt.changed()) {
 			changed = true;
 		}
@@ -872,10 +873,9 @@ private void saveDelayTable() {
 		return;
 	}
 
-	Vector wv = __worksheetR.getAllData();
+	List v = __worksheetR.getAllData();
 	/*
-	StateMod_DelayTable dt = (StateMod_DelayTable)
-		__worksheetL.getRowData(index);
+	StateMod_DelayTable dt = (StateMod_DelayTable)__worksheetL.getRowData(index);
 
 	Vector dv = dt.getRet_val();
 
@@ -910,7 +910,7 @@ private void saveDelayTable() {
 	}
 	dt.setRet_val(clone);
 	*/
-	((StateMod_DelayTable)__delaysVector.elementAt(index)).setRet_val(wv);	
+	((StateMod_DelayTable)__delaysVector.get(index)).setRet_val(v);	
 }
 
 /**
@@ -1191,7 +1191,7 @@ Sorts a Vector of objects.
 @param data the Vector to be a sorted.
 @return a new Vector of the objects in the other Vector, sorted.
 */
-public static Vector sortVector(Vector data) {
+public static List sortVector(List data) {
 	if (data == null) {
 		return new Vector();
 	}
@@ -1200,14 +1200,14 @@ public static Vector sortVector(Vector data) {
 		return new Vector();
 	}
 	if (size == 1) {
-		Vector v = new Vector();
-		v.add(data.elementAt(0));
+		List v = new Vector();
+		v.add(data.get(0));
 		return v;
 	}
 
-	Vector v = new Vector();
+	List v = new Vector();
 	for (int i = 0; i < size; i++) {
-		v.add(data.elementAt(i));
+		v.add(data.get(i));
 	}
 
 	Collections.sort(v);
@@ -1220,10 +1220,10 @@ or if rows were added or deleted to the right table.
 @param dt the StateMod_DelayTable object selected in the left table.
 */
 private void updateRightTable(StateMod_DelayTable dt) {
-	Vector v = dt.getRet_val();
-	Vector v2 = new Vector();
+	List v = dt.getRet_val();
+	List v2 = new Vector();
 	for (int i = 0; i < v.size(); i++) {
-		v2.add(new Double(((Double)v.elementAt(i)).doubleValue()));
+		v2.add(new Double(((Double)v.get(i)).doubleValue()));
 	}
 
 	((StateMod_DelayTable_TableModel)__worksheetR.getModel())

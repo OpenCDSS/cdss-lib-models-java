@@ -55,6 +55,7 @@
 
 package DWR.StateMod;
 
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
@@ -70,8 +71,7 @@ extends JWorksheet_AbstractRowTableModel {
 /**
 Number of columns in the table model.  For table models that display area
 capacity for a single reservoir the tables only have 3 columns.  Table models
-that display area capacities for 1+ reservoirs have 4.  The variable is 
-modified in the constructor.
+that display area capacities for 1+ reservoirs have 4.  The variable is modified in the constructor.
 */
 private int __COLUMNS = 4;
 
@@ -91,11 +91,10 @@ private boolean __editable = true;
 
 /**
 Constructor.  
-@param data the reservoir area/cap/seepage data that will be displayed in the
-table.
+@param data the reservoir area/cap/seepage data that will be displayed in the table.
 @param editable whether the table data can be modified.
 */
-public StateMod_ReservoirAreaCap_Data_TableModel(Vector data, boolean editable){
+public StateMod_ReservoirAreaCap_Data_TableModel(List data, boolean editable){
 	if (data == null) {
 		_data = new Vector();
 	}
@@ -166,8 +165,7 @@ public String[] getColumnToolTips() {
 Returns the format that the specified column should be displayed in when
 the table is being displayed in the given table format. 
 @param col column for which to return the format.
-@return the format (as used by StringUtil.formatString() in which to display the
-column.
+@return the format (as used by StringUtil.formatString() in which to display the column.
 */
 public String getFormat(int col) {
 	switch (col) {
@@ -188,8 +186,7 @@ public int getRowCount() {
 }
 
 /**
-Returns the data that should be placed in the JTable at the 
-given row and column.
+Returns the data that should be placed in the JTable at the given row and column.
 @param row the row for which to return data.
 @param col the column for which to return data.
 @return the data that should be placed in the JTable at the given row and col.
@@ -199,8 +196,7 @@ public Object getValueAt(int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	StateMod_ReservoirAreaCap ra 
-		= (StateMod_ReservoirAreaCap)_data.elementAt(row);
+	StateMod_ReservoirAreaCap ra = (StateMod_ReservoirAreaCap)_data.get(row);
 
 	switch (col) {
 		case COL_RESERVOIR_ID:	return ra.getCgoto();
@@ -253,7 +249,7 @@ public void setValueAt(Object value, int row, int col) {
 	}
 	double dval;
 	StateMod_ReservoirAreaCap ra 
-		= (StateMod_ReservoirAreaCap)_data.elementAt(row);
+		= (StateMod_ReservoirAreaCap)_data.get(row);
 
 	switch (col) {
 		case COL_RESERVOIR_ID:

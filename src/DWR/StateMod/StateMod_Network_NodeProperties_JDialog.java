@@ -51,7 +51,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.util.Vector;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -299,7 +299,7 @@ Adds the IDs of the upstream nodes to the main JPanel.
 @param y the y coordinate at which to start adding them.
 */
 private int addUpstreamNodesToPanel(JPanel panel, int y) {
-	Vector upstreams = __nodes[__nodeNum].getUpstreamNodes();
+	List upstreams = __nodes[__nodeNum].getUpstreamNodes();
 	if (upstreams == null || upstreams.size() == 0) {
 		return y;
 	}
@@ -319,7 +319,7 @@ private int addUpstreamNodesToPanel(JPanel panel, int y) {
 				GridBagConstraints.EAST);
 		}
 		JGUIUtil.addComponent(panel,
-			new JLabel("" + ((HydrologyNode)upstreams.elementAt(i))
+			new JLabel("" + ((HydrologyNode)upstreams.get(i))
 				.getCommonID()),
 			1, y, 1, 1, 0, 0, 
 			GridBagConstraints.NONE, GridBagConstraints.WEST);

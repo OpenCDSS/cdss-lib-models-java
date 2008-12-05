@@ -62,7 +62,7 @@
 
 package DWR.StateMod;
 
-import java.util.Vector;
+import java.util.List;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 
@@ -113,7 +113,7 @@ Constructor.
 @param editable whether the table data can be modified or not.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_Reservoir_TableModel(Vector data, boolean editable)
+public StateMod_Reservoir_TableModel(List data, boolean editable)
 throws Exception {
 	this(data, editable, true);
 }
@@ -122,11 +122,10 @@ throws Exception {
 Constructor.  
 @param data the data that will be displayed in the table.
 @param editable whether the table data can be modified or not.
-@param compactForm whether to only show the ID and name columns (true) or all
-data columns.
+@param compactForm whether to only show the ID and name columns (true) or all data columns.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_Reservoir_TableModel(Vector data, boolean editable,
+public StateMod_Reservoir_TableModel(List data, boolean editable,
 boolean compactForm)
 throws Exception {
 	if (data == null) {
@@ -312,8 +311,7 @@ public int getRowCount() {
 }
 
 /**
-Returns the data that should be placed in the JTable
-at the given row and column.
+Returns the data that should be placed in the JTable at the given row and column.
 @param row the row for which to return data.
 @param col the column for which to return data.
 @return the data that should be placed in the JTable at the given row and col.
@@ -323,7 +321,7 @@ public Object getValueAt(int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	StateMod_Reservoir r = (StateMod_Reservoir)_data.elementAt(row);
+	StateMod_Reservoir r = (StateMod_Reservoir)_data.get(row);
 	switch (col) {
 		case COL_ID:		return r.getID();
 		case COL_NAME:		return r.getName();
@@ -345,7 +343,7 @@ public Object getValueAt(int row, int col) {
 				r.getClimates());
 			return new Integer(nevap);
 		case COL_NUM_CURVE_ROWS:
-			Vector v = r.getAreaCaps();
+			List v = r.getAreaCaps();
 			if (v == null) {
 				return new Integer(0);
 			}
@@ -357,8 +355,7 @@ public Object getValueAt(int row, int col) {
 }
 
 /**
-Returns whether the cell at the given position is editable or not.  Currently
-no columns are editable.
+Returns whether the cell at the given position is editable or not.  Currently no columns are editable.
 @param rowIndex unused
 @param columnIndex the index of the column to check for whether it is editable.
 @return whether the cell at the given position is editable.
@@ -381,7 +378,7 @@ public void setValueAt(Object value, int row, int col)
 		row = _sortOrder[row];
 	}
 	int ival;
-	StateMod_Reservoir smr = (StateMod_Reservoir)_data.elementAt(row);
+	StateMod_Reservoir smr = (StateMod_Reservoir)_data.get(row);
 	switch (col) {
 		case COL_ID:
 			smr.setID((String)value);
@@ -395,14 +392,12 @@ public void setValueAt(Object value, int row, int col)
 		case COL_SWITCH:
 			if (value instanceof Integer) {
 				ival = ((Integer)value).intValue();
-					smr.setSwitch(ival);
+				smr.setSwitch(ival);
 			}
 			else if (value instanceof String) {
 				String onOff = (String)value;
 				int index = onOff.indexOf(" -");
-				ival = new Integer(
-					onOff.substring(0,
-					index)).intValue();
+				ival = new Integer(	onOff.substring(0, index)).intValue();
 				smr.setSwitch(ival);
 			}
 			break;

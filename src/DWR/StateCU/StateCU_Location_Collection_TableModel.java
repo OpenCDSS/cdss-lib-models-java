@@ -12,6 +12,7 @@
 
 package DWR.StateCU;
 
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
@@ -46,13 +47,13 @@ private boolean __editable = false;
 /**
 The data displayed in the table.
 */
-private Vector[] __data = null;
+private List[] __data = null;
 
 /**
 Constructor.  This builds the Model for displaying location data
 @param data the data that will be displayed in the table.
 */
-public StateCU_Location_Collection_TableModel(Vector data) {
+public StateCU_Location_Collection_TableModel(List data) {
 	this(data, false);
 }
 
@@ -61,8 +62,7 @@ Constructor.  This builds the Model for displaying location data
 @param data the data that will be displayed in the table.
 @param editable whether the data are editable or not.
 */
-public StateCU_Location_Collection_TableModel(Vector data, 
-boolean editable) {
+public StateCU_Location_Collection_TableModel(List data, boolean editable) {
 	if (data == null) {
 		data = new Vector();
 	}
@@ -153,7 +153,7 @@ public Object getValueAt(int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	return __data[col].elementAt(row);
+	return __data[col].get(row);
 }
 
 /**
@@ -205,8 +205,8 @@ private void setupData() {
 	String colType = null;
 	String id = null;
 	String partType = null;
-	Vector ids = null;
-	__data = new Vector[__COLUMNS];
+	List ids = null;
+	__data = new List[__COLUMNS];
 	for (int i = 0; i < __COLUMNS; i++) {
 		__data[i] = new Vector();
 	}
@@ -214,7 +214,7 @@ private void setupData() {
 	int rows = 0;
 	
 	for (int i = 0; i < size; i++) {
-		l = (StateCU_Location)_data.elementAt(i);
+		l = (StateCU_Location)_data.get(i);
 		id = l.getID();
 		div = new Integer(l.getCollectionDiv());
 
@@ -244,7 +244,7 @@ private void setupData() {
 				__data[__COL_YEAR].add(new Integer(years[j]));
 				__data[__COL_COL_TYPE].add(colType);
 				__data[__COL_PART_TYPE].add(partType);
-				__data[__COL_PART_ID].add(ids.elementAt(k));
+				__data[__COL_PART_ID].add(ids.get(k));
 				rows++;
 			}
 		}

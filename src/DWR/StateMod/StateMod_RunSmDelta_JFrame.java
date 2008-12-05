@@ -117,6 +117,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JCheckBox;
@@ -361,7 +362,7 @@ public void actionPerformed(ActionEvent event) {
 		setMessages(__SmDelta + " input has changed.", "Ready");
 	}
 	else if (action.equals(__BUTTON_HELP)) {
-		Vector helpVector = fillBPPrelimHelpGUIVector();
+		List helpVector = fillBPPrelimHelpGUIVector();
 		PropList proplist = new PropList("HelpProps");
 		proplist.setValue("HelpKey", "SMGUI.BigPicture");
 		new HelpJDialog(this, helpVector, proplist);
@@ -410,14 +411,14 @@ public void actionPerformed(ActionEvent event) {
 
 		JGUIUtil.setWaitCursor(this, true);
 
-		Vector theGraphNodes = new Vector();
+		List theGraphNodes = new Vector();
 		try {
 			StateMod_GraphNode.readStateModDelPltFile(theGraphNodes, currDir + File.separator + filename);
-			Vector nodes = __tableModel.formLoadData(theGraphNodes);
+			List nodes = __tableModel.formLoadData(theGraphNodes);
 			StateMod_GraphNode gn = null;
 			__worksheet.clear();
 			for (int i = 0; i < nodes.size(); i++) {
-				gn = (StateMod_GraphNode)nodes.elementAt(i);
+				gn = (StateMod_GraphNode)nodes.get(i);
 				__worksheet.addRow(new StateMod_GraphNode());
 				__worksheet.setValueAt(gn.getFileName(), i, 0);
 				__worksheet.setValueAt(gn.getType(), i, 1);
@@ -436,7 +437,7 @@ public void actionPerformed(ActionEvent event) {
 		}
 
 		if (theGraphNodes.size() > 0) {
-			StateMod_GraphNode gn = (StateMod_GraphNode)theGraphNodes.elementAt(0);
+			StateMod_GraphNode gn = (StateMod_GraphNode)theGraphNodes.get(0);
 			setRunType(gn.getSwitch());
 		}
 	
@@ -510,48 +511,48 @@ protected void closeWindow() {
 /**
 Create help information for the help dialog.
 */
-private Vector fillBPPrelimHelpGUIVector() {
-	Vector helpVector = new Vector(2);
-	helpVector.addElement( "This tool helps you create an input file for the " + __SmDelta);
-	helpVector.addElement( "program, which allows comparisons of different scenarios, years, ");
-	helpVector.addElement( "data types, etc.  Each section in the input file (file, data type, ");
-	helpVector.addElement( "parameters, ID list and year) is constructed in this tool.  Each ");
-	helpVector.addElement( "time you specify a new file name, the entire row must be filled.");
-	helpVector.addElement( "This is a new section in the input file.  If you wish to ");
-	helpVector.addElement( "perform the analysis on every station, set the identifier to \"0\".");
-	helpVector.addElement( "If you wish to specify a list of identifiers, fill in every column ");
-	helpVector.addElement( "on the first row and only the identifier on subsequent rows.");
-	helpVector.addElement("");
+private List fillBPPrelimHelpGUIVector() {
+	List helpVector = new Vector(2);
+	helpVector.add( "This tool helps you create an input file for the " + __SmDelta);
+	helpVector.add( "program, which allows comparisons of different scenarios, years, ");
+	helpVector.add( "data types, etc.  Each section in the input file (file, data type, ");
+	helpVector.add( "parameters, ID list and year) is constructed in this tool.  Each ");
+	helpVector.add( "time you specify a new file name, the entire row must be filled.");
+	helpVector.add( "This is a new section in the input file.  If you wish to ");
+	helpVector.add( "perform the analysis on every station, set the identifier to \"0\".");
+	helpVector.add( "If you wish to specify a list of identifiers, fill in every column ");
+	helpVector.add( "on the first row and only the identifier on subsequent rows.");
+	helpVector.add("");
 
-	helpVector.addElement( "The file name should either be one of the binary files (.b43 or .b44");
-	helpVector.addElement( "for example)or the .xdd file for diversions or .xre for ");
-	helpVector.addElement( "reservoirs if full reports have been created.");
+	helpVector.add( "The file name should either be one of the binary files (.b43 or .b44");
+	helpVector.add( "for example)or the .xdd file for diversions or .xre for ");
+	helpVector.add( "reservoirs if full reports have been created.");
 
-	helpVector.addElement( "StateMod determines which stations to include in the reports based");
-	helpVector.addElement( "on the output control contents.  Therefore, if your results don't");
-	helpVector.addElement( "include stations you wish to compare, look at your output control");
-	helpVector.addElement( "file.  Remember that changes to that file will not be reflected in ");
-	helpVector.addElement( "the BigPicture plot until another StateMod simulation has been run.");
-	helpVector.addElement("");
+	helpVector.add( "StateMod determines which stations to include in the reports based");
+	helpVector.add( "on the output control contents.  Therefore, if your results don't");
+	helpVector.add( "include stations you wish to compare, look at your output control");
+	helpVector.add( "file.  Remember that changes to that file will not be reflected in ");
+	helpVector.add( "the BigPicture plot until another StateMod simulation has been run.");
+	helpVector.add("");
 
-	helpVector.addElement( "For example, to perform difference comparisons between average");
-	helpVector.addElement( "River_Outflow and River_Outflow in 1995 of 4 different stations, ");
-	helpVector.addElement( "the table would look like the following:");
-	helpVector.addElement( "");
-	helpVector.addElement( "Stream       River_Outflow   09152500      Ave     whiteH.xdd");
-	helpVector.addElement( "                             09144250");
-	helpVector.addElement( "                             09128000");
-	helpVector.addElement( "                             09149500");
-	helpVector.addElement( "Stream       River_Outflow   09152500      1995    whiteH.xdd");
-	helpVector.addElement( "                             09144250");
-	helpVector.addElement( "                             09128000");
-	helpVector.addElement( "                             09149500");
-	helpVector.addElement( "");
-	helpVector.addElement( "The result is a single value (the difference) for each station");
+	helpVector.add( "For example, to perform difference comparisons between average");
+	helpVector.add( "River_Outflow and River_Outflow in 1995 of 4 different stations, ");
+	helpVector.add( "the table would look like the following:");
+	helpVector.add( "");
+	helpVector.add( "Stream       River_Outflow   09152500      Ave     whiteH.xdd");
+	helpVector.add( "                             09144250");
+	helpVector.add( "                             09128000");
+	helpVector.add( "                             09149500");
+	helpVector.add( "Stream       River_Outflow   09152500      1995    whiteH.xdd");
+	helpVector.add( "                             09144250");
+	helpVector.add( "                             09128000");
+	helpVector.add( "                             09149500");
+	helpVector.add( "");
+	helpVector.add( "The result is a single value (the difference) for each station");
 
-	helpVector.addElement( "");
-	helpVector.addElement( "See additional help through the \"More help\" button below.");
-	helpVector.addElement( "Note that the additional help may take some time to display.");
+	helpVector.add( "");
+	helpVector.add( "See additional help through the \"More help\" button below.");
+	helpVector.add( "Note that the additional help may take some time to display.");
 	return helpVector;
 }
 
@@ -942,12 +943,12 @@ private boolean saveSmDeltaFile() {
 
 	JGUIUtil.setWaitCursor(this, true);
 
-	Vector theGraphNodes = __tableModel.formSaveData(__worksheet.getAllData());
+	List theGraphNodes = __tableModel.formSaveData(__worksheet.getAllData());
 
 	StateMod_GraphNode gn = null;
 	int runtype = getRunType();
 	for (int i = 0; i < theGraphNodes.size(); i++) {
-		gn = (StateMod_GraphNode)theGraphNodes.elementAt(i);
+		gn = (StateMod_GraphNode)theGraphNodes.get(i);
 		gn.setSwitch(runtype);
 	}
 	try {	
@@ -1129,7 +1130,7 @@ private void setupGUI() {
 	File file = new File(__dataset.getDataSetDirectory());
 	__smdeltaFolder = __dataset.getDataSetDirectory();
 	JGUIUtil.setLastFileDialogDirectory(__dataset.getDataSetDirectory());
-	Vector filters = new Vector();
+	List filters = new Vector();
 	filters.add("xre");
 	filters.add("b44");
 	filters.add("xdd");
@@ -1137,7 +1138,7 @@ private void setupGUI() {
 	SimpleFileFilter sff = new SimpleFileFilter(filters, "etc");
 	File[] files = file.listFiles(sff);
 
-	Vector filenames = new Vector();
+	List filenames = new Vector();
 	filenames.add("");
 	filenames.add(OPTION_BROWSE);
 	for (int i = 0; i < files.length; i++) {
@@ -1150,11 +1151,11 @@ private void setupGUI() {
 	try {
 		__tableModel = new
 			StateMod_RunSmDelta_TableModel(this, new Vector(),
-			(Vector)__reservoirComp.getData(), 
-			(Vector)__diversionComp.getData(),
-			(Vector)__instreamFlowComp.getData(),
-			(Vector)__wellComp.getData(),
-			(Vector)__streamGageComp.getData());
+			(List)__reservoirComp.getData(), 
+			(List)__diversionComp.getData(),
+			(List)__instreamFlowComp.getData(),
+			(List)__wellComp.getData(),
+			(List)__streamGageComp.getData());
 			
 		StateMod_RunSmDelta_CellRenderer crg = new StateMod_RunSmDelta_CellRenderer(__tableModel);
 	
@@ -1163,7 +1164,7 @@ private void setupGUI() {
 
 		__worksheet.setColumnJComboBoxValues(0, filenames, true);
 
-		Vector vn = StateMod_Util.arrayToVector( StateMod_GraphNode.node_types);
+		List vn = StateMod_Util.arrayToList( StateMod_GraphNode.node_types);
 		
 		int index = vn.indexOf("Streamflow");
 		vn.add(index + 1, "Stream ID (0* Gages)");

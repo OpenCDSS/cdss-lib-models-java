@@ -21,7 +21,7 @@
 
 package DWR.StateCU;
 
-import java.util.Vector;
+import java.util.List;
 
 import DWR.StateMod.StateMod_DiversionRight;
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
@@ -69,16 +69,16 @@ private StateCU_Location __parentLocation;
 
 private StateCU_DelayTableAssignment __delays;
 
-private Vector __stations;
+private List __stations;
 
-private Vector __rights;
+private List __rights;
 
 /**
 Constructor.  This builds the Model for displaying location data
 @param data the data that will be displayed in the table.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateCU_Location_TableModel(Vector data)
+public StateCU_Location_TableModel(List data)
 throws Exception {
 	this(data, true, true);
 }
@@ -91,12 +91,10 @@ Constructor.  This builds the Model for displaying location data
 are being shown in the table model.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateCU_Location_TableModel(Vector data, boolean editable,
-boolean singleLocation)
+public StateCU_Location_TableModel(List data, boolean editable, boolean singleLocation)
 throws Exception {
 	if (data == null) {
-		throw new Exception ("Invalid data Vector passed to " 
-			+ "StateCU_Location_TableModel constructor.");
+		throw new Exception ("Invalid data list passed to StateCU_Location_TableModel constructor.");
 	}
 	_rows = data.size();
 	_data = data;
@@ -112,8 +110,7 @@ throws Exception {
 }
 
 /**
-From AbstractTableModel.  Returns the class of the data stored in a given
-column.
+From AbstractTableModel.  Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 */
 public Class getColumnClass (int columnIndex) {
@@ -201,13 +198,11 @@ public String getColumnName(int columnIndex) {
 	return " ";
 }
 
-
 /**
 Returns the format that the specified column should be displayed in when
 the table is being displayed in the given table format. 
 @param column column for which to return the format.
-@return the format (as used by StringUtil.formatString() in which to display the
-column.
+@return the format (as used by StringUtil.formatString() in which to display the column.
 */
 public String getFormat(int column) {
 	if (__singleLocation) {
@@ -289,8 +284,7 @@ public Validator[] getValidators( int col ) {
 }
 
 /**
-From AbstractTableMode.  Returns the data that should be placed in the JTable
-at the given row and column.
+From AbstractTableMode.  Returns the data that should be placed in the JTable at the given row and column.
 @param row the row for which to return data.
 @param col the column for which to return data.
 @return the data that should be placed in the JTable at the given row and col.
@@ -304,46 +298,33 @@ public Object getValueAt(int row, int col) {
 		switch (col) {
 			case 1:
 			case 2:
-				StateCU_Location location = 
-					(StateCU_Location)_data.elementAt(row);
+				StateCU_Location location = (StateCU_Location)_data.get(row);
 				switch (col) {
 					case 1:	return location.getID();
 					case 2: return location.getName();
 				}	
 			case 3:	
-				return new Double(__delays.getDelayTablePercent(
-					row));
+				return new Double(__delays.getDelayTablePercent(row));
 			case 4:	
-				return new String(__delays.getDelayTableID(
-					row));
+				return new String(__delays.getDelayTableID(	row));
 			case 5: 
-				return __parentLocation.getClimateStationID(
-					row);
+				return __parentLocation.getClimateStationID(row);
 			case 6:	
-				int index = StateCU_Util.indexOf(__stations, 
-					__parentLocation.getClimateStationID(
-					row));
+				int index = StateCU_Util.indexOf(__stations, __parentLocation.getClimateStationID(row));
 				if (index == -1) {
 					return "N/A";
 				}
-				return ((StateCU_ClimateStation)
-					__stations.elementAt(row)).getName();
+				return ((StateCU_ClimateStation)__stations.get(row)).getName();
 			case 7:	
-				return new Double(
-				__parentLocation.getPrecipitationStationWeight(
-					row));
+				return new Double(__parentLocation.getPrecipitationStationWeight(	row));
 			case 8:	
-				return new Double(
-				__parentLocation.getTemperatureStationWeight(
-					row));	
+				return new Double(__parentLocation.getTemperatureStationWeight(row));	
 			case 9:
 			case 10:
 			case 11:
 			case 12:
 			case 13:
-				StateMod_DiversionRight right = 
-					(StateMod_DiversionRight)
-					__rights.elementAt(row);
+				StateMod_DiversionRight right = (StateMod_DiversionRight)__rights.get(row);
 				switch (col) {
 					case 9:	return right.getID();
 					case 10:return right.getName();
@@ -358,8 +339,7 @@ public Object getValueAt(int row, int col) {
 		}
 	}
 	else {
-		StateCU_Location location 
-			= (StateCU_Location)_data.elementAt(row);	
+		StateCU_Location location = (StateCU_Location)_data.get(row);	
 		switch (col) {
 			case __COL_ID:		
 				return location.getID();
@@ -427,8 +407,7 @@ public int[] getColumnWidths() {
 Returns whether the cell is editable or not.  In this model, all the cells in
 columns 3 and greater are editable.
 @param rowIndex unused.
-@param columnIndex the index of the column to check whether it is editable
-or not.
+@param columnIndex the index of the column to check whether it is editable.
 @return whether the cell is editable or not.
 */
 public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -469,7 +448,7 @@ StateCU_DelayTableAssignment dta) {
 	fireTableDataChanged();
 }
 
-public void setStations(StateCU_Location location, Vector stations) {
+public void setStations(StateCU_Location location, List stations) {
 	__parentLocation = location;
 	__stations = stations;
 
@@ -477,7 +456,7 @@ public void setStations(StateCU_Location location, Vector stations) {
 	fireTableDataChanged();
 }
 
-public void setRights(StateCU_Location location, Vector rights) {
+public void setRights(StateCU_Location location, List rights) {
 	__parentLocation = location;
 	__rights = rights;
 

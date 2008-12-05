@@ -55,6 +55,7 @@
 
 package DWR.StateMod;
 
+import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
@@ -62,8 +63,7 @@ import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 /**
 This table model displays reservoir climate station assignment data.  The model 
 can display climate data for a single reservoir or for 1+ reservoirs.  The
-difference is specified in the constructor and affects how many columns of 
-data are shown.
+difference is specified in the constructor and affects how many columns of data are shown.
 */
 public class StateMod_ReservoirClimate_Data_TableModel 
 extends JWorksheet_AbstractRowTableModel {
@@ -71,8 +71,7 @@ extends JWorksheet_AbstractRowTableModel {
 /**
 Number of columns in the table model.  For table models that display climate
 data for a single reservoir, the tables only have 2 columns.  Table models that
-display climate data for 1+ reservoirs have 3.  The variable is modified in the
-constructor.
+display climate data for 1+ reservoirs have 3.  The variable is modified in the constructor.
 */
 private int __COLUMNS = 3;
 
@@ -93,19 +92,17 @@ private boolean __editable = true;
 For the reservoir climate gui, the other table model of data that is displaying
 station information.  Two table models are shown, one for precipitation
 stations and one for evaporation stations.
-REVISIT (JTS - 2005-01-25)
-is this even needed anymore by stuff that uses this table model??
+TODO (JTS - 2005-01-25) is this even needed anymore by stuff that uses this table model??
 */
 // TODO SAM 2007-03-01 Evaluate use
 //private StateMod_ReservoirClimate_Data_TableModel __partnerModel;
 
 /**
 Constructor.  
-@param data the StateMod_ReservoirClimate data that will be displayed in the
-table.
+@param data the StateMod_ReservoirClimate data that will be displayed in the table.
 @param editable whether the table data can be modified.
 */
-public StateMod_ReservoirClimate_Data_TableModel(Vector data, boolean editable){
+public StateMod_ReservoirClimate_Data_TableModel(List data, boolean editable){
 	if (data == null) {
 		_data = new Vector();
 	}
@@ -172,8 +169,7 @@ public String[] getColumnToolTips() {
 Returns the format that the specified column should be displayed in when
 the table is being displayed in the given table format. 
 @param column column for which to return the format.
-@return the format (as used by StringUtil.formatString() in which to display the
-column.
+@return the format (as used by StringUtil.formatString() in which to display the column.
 */
 public String getFormat(int column) {
 	switch (column) {
@@ -205,7 +201,7 @@ public Object getValueAt(int row, int col) {
 	}
 
 	StateMod_ReservoirClimate cl 
-		= (StateMod_ReservoirClimate)_data.elementAt(row);
+		= (StateMod_ReservoirClimate)_data.get(row);
 
 	switch (col) {
 		case COL_RESERVOIR_ID:	return cl.getCgoto();
@@ -256,8 +252,7 @@ public void setValueAt(Object value, int row, int col) {
 		row = _sortOrder[row];
 	}
 	double dval;
-	StateMod_ReservoirClimate cl 
-		= (StateMod_ReservoirClimate)_data.elementAt(row);
+	StateMod_ReservoirClimate cl = (StateMod_ReservoirClimate)_data.get(row);
 
 	switch (col) {
 		case COL_RESERVOIR_ID:

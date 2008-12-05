@@ -63,6 +63,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -240,8 +241,8 @@ private boolean saveData() {
 	boolean needToSave = false;
 
 	// if the Vectors are differently-sized, they're different
-	Vector wv = __worksheet.getAllData();		// w for worksheet
-	Vector dv = __currentDiv.getRights();		// d for diversion
+	List wv = __worksheet.getAllData();		// w for worksheet
+	List dv = __currentDiv.getRights();		// d for diversion
 
 	needToSave = !(StateMod_DiversionRight.equals(wv, dv));
 
@@ -255,12 +256,12 @@ private boolean saveData() {
 
 	// at this point, remove the old diversion rights from the original
 	// component Vector
-	Vector diversionRights =(Vector)(__dataset.getComponentForComponentType(
+	List diversionRights =(List)(__dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_DIVERSION_RIGHTS)).getData();
 	int size = dv.size();
 	StateMod_DiversionRight dr;	
 	for (int i = 0; i < size; i++) {
-		dr = (StateMod_DiversionRight)dv.elementAt(i);
+		dr = (StateMod_DiversionRight)dv.get(i);
 		StateMod_Util.removeFromVector(diversionRights, dr);
 	}
 
@@ -269,7 +270,7 @@ private boolean saveData() {
 	size = wv.size();
 	StateMod_DiversionRight cdr = null;
 	for (int i = 0; i < size; i++) {
-		dr = (StateMod_DiversionRight)wv.elementAt(i);
+		dr = (StateMod_DiversionRight)wv.get(i);
 		cdr = (StateMod_DiversionRight)dr.clone();
 		cdr._isClone = false;
 		diversionRights.add(cdr);
@@ -279,7 +280,7 @@ private boolean saveData() {
 	// REVISIT (JTS - 2003-10-10)
 	// here we are sorting the full data array -- may be a performance
 	// issue
-	Vector sorted = StateMod_Util.sortStateMod_DataVector(diversionRights);
+	List sorted = StateMod_Util.sortStateMod_DataVector(diversionRights);
 	__dataset.getComponentForComponentType(StateMod_DataSet.COMP_DIVERSION_RIGHTS)
 		.setData(sorted);
 	__currentDiv.disconnectRights();
@@ -295,7 +296,7 @@ exist.
 */
 private int checkInput() {
 	String routine = "StateMod_Diversion_Right_JFrame.checkInput";
-	Vector v = __worksheet.getAllData();
+	List v = __worksheet.getAllData();
 
 	int size = v.size();
 	StateMod_DiversionRight right = null;
@@ -306,7 +307,7 @@ private int checkInput() {
 	String adminNum;
 	int fatalCount = 0;
 	for (int i = 0; i < size; i++) {
-		right = (StateMod_DiversionRight)(v.elementAt(i));
+		right = (StateMod_DiversionRight)(v.get(i));
 
 		id = right.getID();
 		name = right.getName();
@@ -506,11 +507,11 @@ private void setupGUI() {
 	
 	int widths[] = null;
 	JScrollWorksheet jsw = null;
-	try {	Vector v = new Vector();
-		Vector v2 = __currentDiv.getRights();
+	try {	List v = new Vector();
+	List v2 = __currentDiv.getRights();
 		for (int i = 0; i < v2.size(); i++) {
 			v.add(((StateMod_DiversionRight)
-				(v2.elementAt(i))).clone());
+				(v2.get(i))).clone());
 		}
 		StateMod_DiversionRight_TableModel tmd = new
 			StateMod_DiversionRight_TableModel( v, 
@@ -536,7 +537,7 @@ private void setupGUI() {
 	__worksheet.addMouseListener(this);	
 	__worksheet.addKeyListener(this);
 
-	Vector v = new Vector();
+	List v = new Vector();
 	v.add("0 - Off");
 	v.add("1 - On");
 

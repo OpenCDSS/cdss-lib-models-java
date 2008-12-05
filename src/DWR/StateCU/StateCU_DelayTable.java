@@ -20,6 +20,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.PrintWriter;
 import java.util.StringTokenizer;
+import java.util.List;
 import java.util.Vector;
 
 import DWR.StateMod.StateMod_DelayTable;
@@ -47,13 +48,13 @@ values in each delay pattern.  -1 indicates variable number of values with
 values as percent (0-100).  -100 indicates variable number of values with values
 as fraction (0-1).
 */
-public static Vector readStateCUFile (	String filename, int interv )
+public static List readStateCUFile (	String filename, int interv )
 throws Exception
 {
 	boolean is_monthly = true;
 	String routine = "StateCU_DelayTable.readStateCUFile";
 	String iline;
-	Vector theDelays = new Vector(1);
+	List theDelays = new Vector(1);
 	StateMod_DelayTable aDelay = new StateMod_DelayTable ( is_monthly );
 	int num_read=0, total_num_to_read=0;
 	boolean reading=false; 
@@ -84,7 +85,7 @@ throws Exception
 				aDelay = new StateMod_DelayTable ( is_monthly );
 				num_read = 0;
 				reading = true;
-				theDelays.addElement(aDelay);
+				theDelays.add(aDelay);
 				aDelay.setTableID(split.nextToken());
 
 				if (interv < 0) {
@@ -145,7 +146,7 @@ routine which now does not mess with headers.
 @throws Exception if an error occurs
 */
 public static void writeStateCUFile(String inputFile, String outputFile,
-Vector dly, String []newcomments )
+List dly, String []newcomments )
 throws Exception
 {	PrintWriter	out = null;
 	String [] comment_str = { "#" };
@@ -208,7 +209,7 @@ throws Exception
 	boolean printed;	// Indicates if a line of output was printed,
 				// to help handle 12 values or less per line
 	for (int i = 0; i < ndly; i++) {
-		delay = (StateMod_DelayTable)dly.elementAt(i);
+		delay = (StateMod_DelayTable)dly.get(i);
 		b.setLength(0);
 		b.append ( StringUtil.formatString(delay.getTableID(), "%8d"));
 		b.append ( StringUtil.formatString(delay.getNdly(), "%4d") );
