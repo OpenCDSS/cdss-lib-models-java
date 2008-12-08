@@ -250,88 +250,72 @@ public void setRegion2(String region2) {
 }
 
 /**
-Write a Vector of StateCU_ClimateStation to a file.  The filename is adjusted
+Write a list of StateCU_ClimateStation to a file.  The filename is adjusted
 to the working directory if necessary using IOUtil.getPathUsingWorkingDir().
-@param filename_prev The name of the previous version of the file (for
-processing headers).  Specify as null if no previous file is available.
+@param filenamePrev The name of the previous version of the file (for processing headers).
+Specify as null if no previous file is available.
 @param filename The name of the file to write.
-@param data_Vector A Vector of StateCU_ClimateStation to write.
-@param new_comments Comments to add to the top of the file.  Specify as null 
-if no comments are available.
+@param dataList A list of StateCU_ClimateStation to write.
+@param newComments Comments to add to the top of the file.  Specify as null if no comments are available.
 @exception IOException if there is an error writing the file.
 */
-public static void writeStateCUFile (	String filename_prev, String filename,
-		List data_Vector,
-					String [] new_comments )
+public static void writeStateCUFile ( String filenamePrev, String filename, List dataList,
+		String [] newComments )
 throws IOException
 {	String [] comment_str = { "#" };
 	String [] ignore_comment_str = { "#>" };
 	PrintWriter out = null;
-	String full_filename_prev = IOUtil.getPathUsingWorkingDir (
-		filename_prev );
+	String full_filename_prev = IOUtil.getPathUsingWorkingDir ( filenamePrev );
 	String full_filename = IOUtil.getPathUsingWorkingDir ( filename );
 	out = IOUtil.processFileHeaders ( full_filename_prev, full_filename, 
-		new_comments, comment_str, ignore_comment_str, 0 );
+		newComments, comment_str, ignore_comment_str, 0 );
 	if ( out == null ) {
-		throw new IOException ( "Error writing to \"" +
-			full_filename + "\"" );
+		throw new IOException ( "Error writing to \"" + full_filename + "\"" );
 	}
-	writeVector ( data_Vector, out );
+	writeVector ( dataList, out );
 	out.flush();
 	out.close();
 	out = null;
 }
 
 /**
-Write a Vector of StateCU_ClimateStation to an opened file.
-@param data_Vector A Vector of StateCU_ClimateStation to write.
+Write a list of StateCU_ClimateStation to an opened file.
+@param dataList A list of StateCU_ClimateStation to write.
 @param out output PrintWriter.
 @exception IOException if an error occurs.
 */
-private static void writeVector ( List data_Vector, PrintWriter out )
+private static void writeVector ( List dataList, PrintWriter out )
 throws IOException
 {	int i;
 	String iline;
 	String cmnt = "#>";
 	// Missing data handled by formatting all as strings...
-	String format =
-	"%-12.12s%6.6s%9.9s  %-20.20s%-8.8s  %-24.24s";
+	String format =	"%-12.12s%6.6s%9.9s  %-20.20s%-8.8s  %-24.24s";
 	List v = new Vector(6);	// Reuse for all output lines.
 
 	out.println ( cmnt );
 	out.println ( cmnt + "  StateCU Climate Stations File" );
 	out.println ( cmnt );
-	out.println ( cmnt +
-		"  Record format (a12,f6.2,f9.2,2x,a20,a8,2x,a24)" );
+	out.println ( cmnt + "  Record format (a12,f6.2,f9.2,2x,a20,a8,2x,a24)" );
 	out.println ( cmnt );
-	out.println ( cmnt +
-		"  StationID:  Station identifier (e.g., 3951)" );
-	out.println ( cmnt +
-		"        Lat:  Latitude (decimal degrees)" );
-	out.println ( cmnt +
-		"       Elev:  Elevation (feet)" );
-	out.println ( cmnt +
-		"    Region1:  Region1 (e.g., County)" );
-	out.println ( cmnt +
-		"    Region2:  Region2 (e.g., Hydrologic Unit Code, HUC)" );
-	out.println ( cmnt +
-		"StationName:  Station name" );
+	out.println ( cmnt + "  StationID:  Station identifier (e.g., 3951)" );
+	out.println ( cmnt + "        Lat:  Latitude (decimal degrees)" );
+	out.println ( cmnt + "       Elev:  Elevation (feet)" );
+	out.println ( cmnt + "    Region1:  Region1 (e.g., County)" );
+	out.println ( cmnt + "    Region2:  Region2 (e.g., Hydrologic Unit Code, HUC)" );
+	out.println ( cmnt + "StationName:  Station name" );
 	out.println ( cmnt );
-	out.println ( cmnt +	
-	" StationID  Lat   Elev            Region1      Region2  " +
-	"      StationName" );
-	out.println ( cmnt +	
-	"---------eb----eb-------exxb------------------eb------exx" +
-	"b----------------------e" );
+	out.println ( cmnt + " StationID  Lat   Elev            Region1      Region2        StationName" );
+	out.println ( cmnt + "---------eb----eb-------exxb------------------eb------exxb----------------------e" );
 	out.println ( cmnt + "EndHeader" );
 
 	int num = 0;
-	if ( data_Vector != null ) {
-		num = data_Vector.size();
+	if ( dataList != null ) {
+		num = dataList.size();
 	}
 	StateCU_ClimateStation sta = null;
 	for ( i=0; i<num; i++ ) {
-		sta = (StateCU_ClimateStation)data_Vector.get(i);
+		sta = (StateCU_ClimateStation)dataList.get(i);
 		if ( sta == null ) {
 			continue;
 		}
@@ -342,13 +326,15 @@ throws IOException
 		if ( StateCU_Util.isMissing(sta.__latitude) ) {
 			v.add("");
 		}
-		else {	v.add( StringUtil.formatString(sta.__latitude,"%6.2f"));
+		else {
+			v.add( StringUtil.formatString(sta.__latitude,"%6.2f"));
 		}
 		// Elevation...
 		if ( StateCU_Util.isMissing(sta.__elevation) ) {
 			v.add("");
 		}
-		else {	v.add(StringUtil.formatString(sta.__elevation,"%9.2f"));
+		else {
+			v.add(StringUtil.formatString(sta.__elevation,"%9.2f"));
 		}
 		v.add(sta.__region1);
 		v.add(sta.__region2);
@@ -360,7 +346,7 @@ throws IOException
 }
 
 /**
-Writes a Vector of StateCU_ClimateStation objects to a list file.  A header is 
+Writes a list of StateCU_ClimateStation objects to a list file.  A header is 
 printed to the top of the file, containing the commands used to generate the 
 file.  Any strings in the body of the file that contain the field delimiter will be wrapped in "...".  
 @param filename the name of the file to which the data will be written.
