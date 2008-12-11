@@ -32,8 +32,7 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 	 */
 	
 	/**
-	Counter for the number of reaches closed for processing (to count matches for
-	__openCount).
+	Counter for the number of reaches closed for processing (to count matches for __openCount).
 	*/
 	private int __closeCount;
 	
@@ -62,8 +61,7 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 	private static List __aggregateAnnotations = null;
 
 	/**
-	Vector for aggregating layout information when reading statically from the
-	XML files.
+	Vector for aggregating layout information when reading statically from the XML files.
 	*/
 	private static List __aggregateLayouts = null;
 
@@ -193,8 +191,7 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 			}
 		}
 
-		// put the nodes back in a Vector for placement back into the 
-		// node network.
+		// put the nodes back in a Vector for placement back into the node network.
 		List v = new Vector();
 		for (int i = 0; i < size; i++) {
 			v.add(nodes[i]);
@@ -307,6 +304,9 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 			}
 			else if ( node.getType() == HydrologyNode.NODE_TYPE_ISF ) {
 				rnn.setRelatedSMDataType ( StateMod_DataSet.COMP_INSTREAM_STATIONS );
+			}
+			else if ( node.getType() == HydrologyNode.NODE_TYPE_PLAN ) {
+				rnn.setRelatedSMDataType ( StateMod_DataSet.COMP_PLANS );
 			}
 			else if ( node.getType() == HydrologyNode.NODE_TYPE_RES ) {
 				rnn.setRelatedSMDataType ( StateMod_DataSet.COMP_RESERVOIR_STATIONS );
@@ -453,8 +453,7 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 		rx = limits.getRightX();
 		ty = limits.getTopY();
 
-		// REVISIT -- eliminate the need for hold nodes -- they signify an
-		// error in the network.
+		// TODO -- eliminate the need for hold nodes -- they signify an error in the network.
 		HydrologyNode holdNode = null;
 		HydrologyNode node = getMostUpstreamNode();	
 		boolean done = false;
@@ -812,7 +811,6 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 			skipBlankNodes);
 	}
 
-	
 	/**
 	Processes node information from a makenet file. This version is called 
 	recursively.  A main program should call the other version.
@@ -1257,6 +1255,9 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 					else if (token1.equalsIgnoreCase("OTH")) {
 						node.setType(HydrologyNode.NODE_TYPE_OTHER);
 					}
+					else if (token1.equalsIgnoreCase("PLN")) {
+						node.setType(HydrologyNode.NODE_TYPE_PLAN);
+					}
 					else if (token1.equalsIgnoreCase("RES")) {
 						node.setType(HydrologyNode.NODE_TYPE_RES);
 					}
@@ -1332,23 +1333,23 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 				}
 				else if (node.getType() == HydrologyNode.NODE_TYPE_CONFLUENCE) {
 					// Confluences...
-			    		node.setCommonID("CONFL");
+			    	node.setCommonID("CONFL");
 				}
 				else if (node.getType() == HydrologyNode.NODE_TYPE_XCONFLUENCE) {
 					// Confluences...
-			    		node.setCommonID("XCONFL");
+			    	node.setCommonID("XCONFL");
 				}
 				else if (node.getType() == HydrologyNode.NODE_TYPE_BLANK) {
 					// Blank nodes...
-			    		node.setCommonID("BLANK");
+			    	node.setCommonID("BLANK");
 				}
 				else if (node.getType() == HydrologyNode.NODE_TYPE_END) {
 					// End node...
-			    		node.setCommonID(node.getNetID());
+			    	node.setCommonID(node.getNetID());
 				}
 				else if (node.getType() == HydrologyNode.NODE_TYPE_BASEFLOW) {
 					// Special baseflow node...
-			    		node.setCommonID(node.getNetID());
+			    	node.setCommonID(node.getNetID());
 				}
 				else if (node.getType() == HydrologyNode.NODE_TYPE_RES) {
 					// Reservoirs...
@@ -1383,14 +1384,17 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 					// abbreviation...
 					node.setCommonID(node.getNetID());
 				}
+				else if (node.getType() == HydrologyNode.NODE_TYPE_PLAN) {
+					// Plans...
+					node.setCommonID(node.getNetID());
+				}
 				else {	
 					// Diversions, imports, and D&W.  For
 					// these we are allowed to abbreviate the
 					// identifier on the network.  For the
 					// common ID we need to prepend the
 					// water district...
-					String wdid = formatWDID(wd, node.getNetID(),
-						node.getType());
+					String wdid = formatWDID(wd, node.getNetID(), node.getType());
 					node.setCommonID(wdid);
 
 				}
@@ -1470,12 +1474,14 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 			else if (name.equalsIgnoreCase("ID")) {
 				hnode.setCommonID(value);
 			}
-			else if (name.equalsIgnoreCase("IsBaseflow")) {
+			// FIXME SAM 2008-12-10 Support both in the code: legacy "IsBaseflow" and new
+			// "IsNaturalFlow"
+			else if (name.equalsIgnoreCase("IsBaseflow") || name.equalsIgnoreCase("IsNaturalFlow")) {
 				if (value.equalsIgnoreCase("true")) {
-					hnode.setIsBaseflow(true);
+					hnode.setIsNaturalFlow(true);
 				}
 				else {
-					hnode.setIsBaseflow(false);
+					hnode.setIsNaturalFlow(false);
 				}
 			}
 			else if (name.equalsIgnoreCase("IsImport")) {
@@ -1781,6 +1787,8 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 			printCheck(routine, 'W', message);
 			return false;
 		}
+		// Set the filename so that it can be selected by default, for example in save dialogs
+		setInputName ( filename );
 		return readMakenetNetworkFile( nodeDataProvider, in, filename, skipBlankNodes);
 	}
 
@@ -2013,8 +2021,7 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 			throw new Exception("Error reading XML Network file \"" + filename + "\"");
 		}
 
-		// Now get information from the document.  For now don't hold the
-		// document as a data member...
+		// Now get information from the document.  For now don't hold the document as a data member...
 		Document doc = parser.getDocument();
 
 		// Loop through and process the document nodes, starting with the root node...
@@ -2055,6 +2062,9 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 		else {
 			network = buildNetworkFromXMLNodes();
 		}
+		// Set the filename so that it can be selected by default, for example in save dialogs
+		// This is in the base class
+		network.setInputName ( filename );
 		network.setAnnotations(__aggregateAnnotations);
 		__aggregateAnnotations = null;
 		network.setLayouts(__aggregateLayouts);
@@ -2069,8 +2079,7 @@ public class StateMod_NodeNetwork extends HydrologyNodeNetwork
 
 		if (network != null) {
 			network.convertNodeTypes();
-			network.finalCheck(__staticLX, __staticBY, __staticRX, 
-				__staticTY, false);
+			network.finalCheck(__staticLX, __staticBY, __staticRX, __staticTY, false);
 		}	
 
 		return network;

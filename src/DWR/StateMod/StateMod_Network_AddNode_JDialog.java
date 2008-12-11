@@ -52,16 +52,17 @@ private final String
 Node types for display in a combo box.
 */
 private final String 
-	__NODE_CONFLUENCE = 		"CONFL - Confluence",
-	__NODE_DIVERSION = 		"DIV - Diversion",
-	__NODE_DIVERSION_AND_WELL = 	"D&W - Diversion and Well",
-	__NODE_END = 			"END - End Node",
-	__NODE_INSTREAM_FLOW = 		"ISF - Instream Flow",
-	__NODE_OTHER = 			"OTH - Other",
-	__NODE_RESERVOIR = 		"RES - Reservoir",
-	__NODE_STREAMFLOW = 		"FLOW - Streamflow",
-	__NODE_WELL = 			"WELL - Well",
-	__NODE_XCONFLUENCE = 		"XCONFL - XConfluence";
+	__NODE_CONFLUENCE = "CONFL - Confluence",
+	__NODE_DIVERSION = "DIV - Diversion",
+	__NODE_DIVERSION_AND_WELL = "D&W - Diversion and Well",
+	__NODE_END = "END - End Node",
+	__NODE_INSTREAM_FLOW = "ISF - Instream Flow",
+	__NODE_OTHER = "OTH - Other",
+	__NODE_RESERVOIR = "RES - Reservoir",
+	__NODE_STREAMFLOW = "FLOW - Streamflow",
+	__NODE_WELL = "WELL - Well",
+	__NODE_XCONFLUENCE = "XCONFL - XConfluence",
+	__NODE_PLAN = "PLAN - Plan";
 
 /**
 The node downstream of the node to be added.
@@ -69,12 +70,12 @@ The node downstream of the node to be added.
 private HydrologyNode __ds = null;
 
 /**
-Checkbox to mark whether the node is a baseflow node or not.
+Checkbox to mark whether the node is a natural flow node.
 */
-private JCheckBox __baseflowJCheckBox;
+private JCheckBox __naturalFlowJCheckBox;
 
 /**
-Checkbox to mark whether the node is a baseflow node or not.
+Checkbox to mark whether the node is an import node.
 */
 private JCheckBox __importJCheckBox;
 
@@ -147,6 +148,9 @@ public void actionPerformed(ActionEvent event) {
 		else if (s.equals(__NODE_OTHER)) {
 			type = HydrologyNode.NODE_TYPE_OTHER;
 		}
+		else if (s.equals(__NODE_PLAN)) {
+			type = HydrologyNode.NODE_TYPE_PLAN;
+		}
 		else if (s.equals(__NODE_RESERVOIR)) {
 			type = HydrologyNode.NODE_TYPE_RES;
 		}
@@ -169,7 +173,7 @@ public void actionPerformed(ActionEvent event) {
 		network.addNode(__nodeNameJTextField.getText().trim(),
 			type, up,
 			__downstreamIDJTextField.getText().trim(),
-			__baseflowJCheckBox.isSelected(),
+			__naturalFlowJCheckBox.isSelected(),
 			__importJCheckBox.isSelected());
 		__parent.setNetwork(network, true, true);
 //		__parent.resetNodeSize();
@@ -180,7 +184,7 @@ public void actionPerformed(ActionEvent event) {
 		String selected = __nodeTypeComboBox.getSelected();
 		
 		if (!selected.equals(__NODE_END)) {
-			__baseflowJCheckBox.setEnabled(true);
+			__naturalFlowJCheckBox.setEnabled(true);
 			__importJCheckBox.setEnabled(true);
 		}
 	}
@@ -240,8 +244,7 @@ private void setupGUI() {
 	__downstreamIDJTextField.setEditable(false);
 	__downstreamIDJTextField.setText(__ds.getCommonID());
 	__upstreamIDComboBox = new SimpleJComboBox(false);
-	__upstreamIDComboBox.setPrototypeDisplayValue(
-		"[none] - Start a new TributaryXX");
+	__upstreamIDComboBox.setPrototypeDisplayValue("[none] - Start a new TributaryXX");
 	__nodeNameJTextField = new JTextField(10);
 	__nodeNameJTextField.addKeyListener(this);
 
@@ -258,30 +261,28 @@ private void setupGUI() {
 	__nodeTypeComboBox.add(__NODE_DIVERSION_AND_WELL);
 	__nodeTypeComboBox.add(__NODE_INSTREAM_FLOW);
 	__nodeTypeComboBox.add(__NODE_OTHER);
+	__nodeTypeComboBox.add(__NODE_PLAN);
 	__nodeTypeComboBox.add(__NODE_RESERVOIR);
 	__nodeTypeComboBox.add(__NODE_STREAMFLOW);
 	__nodeTypeComboBox.add(__NODE_WELL);
 	__nodeTypeComboBox.add(__NODE_XCONFLUENCE);
 	__nodeTypeComboBox.select(__NODE_STREAMFLOW);
-	__nodeTypeComboBox.setMaximumRowCount(
-		__nodeTypeComboBox.getItemCount());
+	__nodeTypeComboBox.setMaximumRowCount(__nodeTypeComboBox.getItemCount());
 	__nodeTypeComboBox.addActionListener(this);
 
-	__baseflowJCheckBox = new JCheckBox();
-	__baseflowJCheckBox.addActionListener(this);
+	__naturalFlowJCheckBox = new JCheckBox();
+	__naturalFlowJCheckBox.addActionListener(this);
 
 	__importJCheckBox = new JCheckBox();
 	__importJCheckBox.addActionListener(this);
 
 	JPanel top = new JPanel();
 	top.setLayout(new GridBagLayout());
-	top.setBorder(BorderFactory.createTitledBorder(
-		"Existing Nodes"));
+	top.setBorder(BorderFactory.createTitledBorder("Existing nodes"));
 
 	JPanel bottom = new JPanel();
 	bottom.setLayout(new GridBagLayout());
-	bottom.setBorder(BorderFactory.createTitledBorder(
-		"New Node Data"));
+	bottom.setBorder(BorderFactory.createTitledBorder("New Node Data"));
 
 	JGUIUtil.addComponent(panel, top,
 		0, 0, 1, 1, 1, 1,
@@ -291,7 +292,7 @@ private void setupGUI() {
 		GridBagConstraints.BOTH, GridBagConstraints.WEST);
 
 	y = 0;
-	JGUIUtil.addComponent(top, new JLabel("Downstream Node: "),
+	JGUIUtil.addComponent(top, new JLabel("Downstream node: "),
 		0, y, 1, 1, 1, 1,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(top, __downstreamIDJTextField,
@@ -299,7 +300,7 @@ private void setupGUI() {
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	y++;
 
-	JGUIUtil.addComponent(top, new JLabel("Upstream Node: "),
+	JGUIUtil.addComponent(top, new JLabel("Upstream node: "),
 		0, y, 1, 1, 1, 1,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(top, __upstreamIDComboBox,
@@ -316,7 +317,7 @@ private void setupGUI() {
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	y++;
 
-	JGUIUtil.addComponent(bottom, new JLabel("Node Type: "),
+	JGUIUtil.addComponent(bottom, new JLabel("Node type: "),
 		0, y, 1, 1, 1, 1,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(bottom, __nodeTypeComboBox,
@@ -324,15 +325,15 @@ private void setupGUI() {
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	y++;
 
-	JGUIUtil.addComponent(bottom, new JLabel("Is Baseflow: "),
+	JGUIUtil.addComponent(bottom, new JLabel("Is natural flow?: "),
 		0, y, 1, 1, 1, 1,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
-	JGUIUtil.addComponent(bottom, __baseflowJCheckBox,
+	JGUIUtil.addComponent(bottom, __naturalFlowJCheckBox,
 		1, y, 1, 1, 1, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	y++;
 
-	JGUIUtil.addComponent(bottom, new JLabel("Is Import: "),
+	JGUIUtil.addComponent(bottom, new JLabel("Is import?: "),
 		0, y, 1, 1, 1, 1,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(bottom, __importJCheckBox,

@@ -69,51 +69,51 @@ import RTi.Util.String.StringUtil;
 /**
 This class draws the network that can be printed, viewed and altered.
 */
-public class StateMod_Network_NodeProperties_JDialog
-extends JDialog
+public class StateMod_Network_NodeProperties_JDialog extends JDialog
 implements ActionListener, KeyListener, WindowListener {
 
 /**
 Possible node types to appear in the type combo box.
 */
 private final String 
-	__NODE_CONFLUENCE = 		"CONFL - Confluence",
-	__NODE_DIVERSION = 		"DIV - Diversion",
-	__NODE_DIVERSION_AND_WELL = 	"D&W - Diversion and Well",
-	__NODE_END = 			"END - End Node",
-	__NODE_INSTREAM_FLOW = 		"ISF - Instream Flow",
-	__NODE_OTHER = 			"OTH - Other",
-	__NODE_RESERVOIR = 		"RES - Reservoir",
-	__NODE_STREAMFLOW = 		"FLOW - Streamflow",
-	__NODE_WELL = 			"WELL - Well",
-	__NODE_XCONFLUENCE = 		"XCONFL - XConfluence";
+	__NODE_CONFLUENCE = "CONFL - Confluence",
+	__NODE_DIVERSION = "DIV - Diversion",
+	__NODE_DIVERSION_AND_WELL = "D&W - Diversion and Well",
+	__NODE_END = "END - End Node",
+	__NODE_INSTREAM_FLOW = "ISF - Instream Flow",
+	__NODE_OTHER = "OTH - Other",
+	__NODE_PLAN = "PLN - Plan",
+	__NODE_RESERVOIR = "RES - Reservoir",
+	__NODE_STREAMFLOW = "FLOW - Streamflow",
+	__NODE_WELL = "WELL - Well",
+	__NODE_XCONFLUENCE = "XCONFL - XConfluence";
 
 /**
 Reservoir directions.
 */
 private final String
-	__ABOVE_CENTER = 	"AboveCenter",
-	__UPPER_RIGHT = 	"UpperRight",
-	__RIGHT = 		"Right",
-	__LOWER_RIGHT = 	"LowerRight",
-	__BELOW_CENTER = 	"BelowCenter",
-	__BOTTOM = 		"Bottom",
-	__LOWER_LEFT = 		"LowerLeft",
-	__LEFT = 		"Left",
-	__UPPER_LEFT = 		"UpperLeft",
-	__CENTER = 		"Center",
-	__TOP = 		"Top";
+	__ABOVE_CENTER = "AboveCenter",
+	__UPPER_RIGHT = "UpperRight",
+	__RIGHT = "Right",
+	__LOWER_RIGHT = "LowerRight",
+	__BELOW_CENTER = "BelowCenter",
+	__BOTTOM = "Bottom",
+	__LOWER_LEFT = "LowerLeft",
+	__LEFT = "Left",
+	__UPPER_LEFT = "UpperLeft",
+	__CENTER = "Center",
+	__TOP = "Top";
 
 /**
 Button labels.
 */
 private final String
-	__BUTTON_APPLY = 	"Apply",
-	__BUTTON_CANCEL = 	"Cancel",
-	__BUTTON_OK = 		"OK";
+	__BUTTON_APPLY = "Apply",
+	__BUTTON_CANCEL = "Cancel",
+	__BUTTON_OK = "OK";
 
 private boolean __ignoreEvents;
-private boolean __origBaseflow;
+private boolean __origNaturalFlow;
 private boolean __origDirty = false;
 private boolean __origImport;
 
@@ -143,12 +143,12 @@ private JButton
 	__okButton = null;
 
 /**
-Checkbox for specifying if the node is a baseflow node or not.
+Check box for specifying if the node is a natural flow node.
 */
-private JCheckBox __isBaseflowCheckBox;
+private JCheckBox __isNaturalFlowCheckBox;
 
 /**
-Checkbox for specifying if the node is an import node or not.
+Check box for specifying if the node is an import node or not.
 */
 private JCheckBox __isImportCheckBox;
 
@@ -158,7 +158,7 @@ Reservoir direction JLabel.
 private JLabel __reservoirDirectionLabel;
 
 /**
-Textfields for holding node values.
+Text fields for holding node values.
 */
 private JTextField
 	__descriptionTextField,
@@ -203,8 +203,7 @@ Constructor.
 */
 public StateMod_Network_NodeProperties_JDialog(StateMod_Network_JFrame parent, 
 HydrologyNode[] nodes, int nodeNum) {
-	super(parent, "Node Properties - " + nodes[nodeNum].getCommonID(), 
-		true);
+	super(parent, "Node Properties - " + nodes[nodeNum].getCommonID(), true);
 	__parent = parent;
 	__nodes = nodes;
 	__nodeNum = nodeNum;
@@ -244,8 +243,8 @@ public void actionPerformed(ActionEvent event) {
 			__reservoirDirectionComboBox.setVisible(false);
 		}
 	}
-	else if (source == __isBaseflowCheckBox) {
-		if (__isBaseflowCheckBox.isSelected()) {
+	else if (source == __isNaturalFlowCheckBox) {
+		if (__isNaturalFlowCheckBox.isSelected()) {
 			__areaTextField.setEnabled(true);
 			__precipitationTextField.setEnabled(true);
 		}
@@ -339,7 +338,7 @@ private void applyClicked() {
 	String x = __xTextField.getText();
 	String y = __yTextField.getText();
 	String desc = __descriptionTextField.getText();
-	boolean baseflow = __isBaseflowCheckBox.isSelected();
+	boolean isNaturalFlow = __isNaturalFlowCheckBox.isSelected();
 	boolean mport = __isImportCheckBox.isSelected();
 	String type = __typeComboBox.getSelected();
 	String dir = __labelPositionComboBox.getSelected();
@@ -367,8 +366,8 @@ private void applyClicked() {
 		dirty = true;
 	}
 
-	__nodes[__nodeNum].setIsBaseflow(baseflow);
-	if (baseflow != __origBaseflow) {
+	__nodes[__nodeNum].setIsNaturalFlow(isNaturalFlow);
+	if (isNaturalFlow != __origNaturalFlow) {
 		dirty = true;
 	}
 
@@ -407,6 +406,9 @@ private void applyClicked() {
 	}
 	else if (type.equals(__NODE_OTHER)) {
 		itype = HydrologyNode.NODE_TYPE_OTHER;
+	}
+	else if (type.equals(__NODE_PLAN)) {
+		itype = HydrologyNode.NODE_TYPE_PLAN;
 	}
 	else if (type.equals(__NODE_RESERVOIR)) {
 		itype = HydrologyNode.NODE_TYPE_RES;
@@ -490,7 +492,11 @@ private void applyClicked() {
 		dirty = true;
 	}
 
-	__nodes[__nodeNum].setDirty(true);
+	// Only set the dirty flag if it was false previously because a previous edit may have marked
+	// dirty and this edit may not have introduced additional changes.
+	if ( !__nodes[__nodeNum].isDirty() ) {
+		__nodes[__nodeNum].setDirty(dirty);
+	}
 	__nodes[__nodeNum].setBoundsCalculated(false);
 		
 	__parent.nodePropertiesChanged();
@@ -504,10 +510,9 @@ private void cancelClicked() {
 	__nodes[__nodeNum].setX((new Double(__origX)).doubleValue());
 	__nodes[__nodeNum].setY((new Double(__origY)).doubleValue());
 	__nodes[__nodeNum].setDescription(__origDesc);
-	__nodes[__nodeNum].setIsBaseflow(__origBaseflow);
+	__nodes[__nodeNum].setIsNaturalFlow(__origNaturalFlow);
 	__nodes[__nodeNum].setType(__origIType);
-	__nodes[__nodeNum].setLabelDirection(
-		__origResIDir * 10 + __origIDir);
+	__nodes[__nodeNum].setLabelDirection( __origResIDir * 10 + __origIDir);
 	__nodes[__nodeNum].setDirty(__origDirty);
 	__parent.nodePropertiesChanged();	
 	setVisible(false);
@@ -609,12 +614,10 @@ private void checkValidity() {
 		}
 		else {
 			try {
-				__precipitationTextField.setBackground(
-					Color.white);
+				__precipitationTextField.setBackground( Color.white);
 			}
 			catch (Exception e) {
-				__precipitationTextField.setBackground(
-					Color.red);
+				__precipitationTextField.setBackground( Color.red);
 				valid = false;
 			}
 		}
@@ -640,7 +643,7 @@ throws Throwable {
 	// That will result in the array being nulled in the calling code.
 	__applyButton = null;
 	__okButton = null;
-	__isBaseflowCheckBox = null;
+	__isNaturalFlowCheckBox = null;
 	__isImportCheckBox = null;
 	__reservoirDirectionLabel = null;
 	__descriptionTextField = null;
@@ -703,23 +706,19 @@ private void setupGUI() {
 	__idTextField.setText(__origID);
 	__idTextField.addKeyListener(this);
 	__xTextField = new JTextField(10);
-	__origX = StringUtil.formatString(__nodes[__nodeNum].getX(), 
-		"%13.6f").trim();
+	__origX = StringUtil.formatString(__nodes[__nodeNum].getX(), "%13.6f").trim();
 	__xTextField.setText(__origX);
 	__xTextField.addKeyListener(this);
 	__yTextField = new JTextField(10);
-	__origY = StringUtil.formatString(__nodes[__nodeNum].getY(), 
-		"%13.6f").trim();
+	__origY = StringUtil.formatString(__nodes[__nodeNum].getY(), "%13.6f").trim();
 	__yTextField.setText(__origY);
 	__yTextField.addKeyListener(this);
 	__areaTextField = new JTextField(10);
-	__origArea = StringUtil.formatString(__nodes[__nodeNum].getArea(), 
-		"%13.6f").trim();
+	__origArea = StringUtil.formatString(__nodes[__nodeNum].getArea(), "%13.6f").trim();
 	__areaTextField.setText(__origArea);
 	__areaTextField.addKeyListener(this);
 	__precipitationTextField = new JTextField(10);
-	__origPrecipitation = StringUtil.formatString(
-		__nodes[__nodeNum].getPrecip(), "%13.6f").trim();
+	__origPrecipitation = StringUtil.formatString( __nodes[__nodeNum].getPrecip(), "%13.6f").trim();
 	__precipitationTextField.setText(__origPrecipitation);
 	__precipitationTextField.addKeyListener(this);
 
@@ -728,6 +727,7 @@ private void setupGUI() {
 	__typeComboBox.add(__NODE_DIVERSION_AND_WELL);
 	__typeComboBox.add(__NODE_INSTREAM_FLOW);
 	__typeComboBox.add(__NODE_OTHER);
+	__typeComboBox.add(__NODE_PLAN);
 	__typeComboBox.add(__NODE_RESERVOIR);
 	__typeComboBox.add(__NODE_STREAMFLOW);
 	__typeComboBox.add(__NODE_WELL);	
@@ -751,6 +751,9 @@ private void setupGUI() {
 	}
 	else if (type == HydrologyNode.NODE_TYPE_OTHER) {
 		__typeComboBox.select(__NODE_OTHER);
+	}
+	else if (type == HydrologyNode.NODE_TYPE_PLAN) {
+		__typeComboBox.select(__NODE_PLAN);
 	}
 	else if (type == HydrologyNode.NODE_TYPE_RES) {
 		__typeComboBox.select(__NODE_RESERVOIR);
@@ -784,8 +787,7 @@ private void setupGUI() {
 	__labelPositionComboBox.add(__LEFT);
 	__labelPositionComboBox.add(__UPPER_LEFT);
 	__labelPositionComboBox.add(__CENTER);
-	__labelPositionComboBox.setMaximumRowCount(
-		__labelPositionComboBox.getItemCount());
+	__labelPositionComboBox.setMaximumRowCount( __labelPositionComboBox.getItemCount());
 
 	int dir = __nodes[__nodeNum].getLabelDirection() % 10;
 	if (dir == 2) {
@@ -823,13 +825,15 @@ private void setupGUI() {
 	__origIDir = dir;
 	__origDir = __labelPositionComboBox.getSelected();
 
-	__isBaseflowCheckBox = new JCheckBox();
+	__isNaturalFlowCheckBox = new JCheckBox();
 	__isImportCheckBox = new JCheckBox();
 
 	__origDirty = __nodes[__nodeNum].isDirty();
 	
 	__reservoirDirectionLabel = new JLabel("Reservoir Direction: ");
 	__reservoirDirectionComboBox = new SimpleJComboBox(false);
+	__reservoirDirectionComboBox.setToolTipText("Reservoir body is to the indicated direction " +
+		"(downstream follows the arrow).");
 	__reservoirDirectionComboBox.add(__TOP);
 	__reservoirDirectionComboBox.add(__BOTTOM);
 	__reservoirDirectionComboBox.add(__LEFT);
@@ -851,7 +855,7 @@ private void setupGUI() {
 	else if (resDir == 0) {}
 	else {
 		__reservoirDirectionComboBox.removeAll();
-		__reservoirDirectionComboBox.add("Unknown Direction: "+ resDir);
+		__reservoirDirectionComboBox.add("Unknown direction: "+ resDir);
 	}
 
 	__origResIDir = resDir;
@@ -901,15 +905,15 @@ private void setupGUI() {
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
 	y++;
-	JGUIUtil.addComponent(panel, new JLabel("Is Baseflow: "),
+	JGUIUtil.addComponent(panel, new JLabel("Is natural flow?: "),
 		0, y, 1, 1, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
-	JGUIUtil.addComponent(panel, __isBaseflowCheckBox,
+	JGUIUtil.addComponent(panel, __isNaturalFlowCheckBox,
 		1, y, 1, 1, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
 	y++;
-	JGUIUtil.addComponent(panel, new JLabel("Is Import: "),
+	JGUIUtil.addComponent(panel, new JLabel("Is import?: "),
 		0, y, 1, 1, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(panel, __isImportCheckBox,
@@ -930,17 +934,17 @@ private void setupGUI() {
 	JGUIUtil.addComponent(panel, __precipitationTextField,
 		1, y, 1, 1, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
-	if (__nodes[__nodeNum].isBaseflow()) {
-		__isBaseflowCheckBox.setSelected(true);
+	if (__nodes[__nodeNum].getIsNaturalFlow()) {
+		__isNaturalFlowCheckBox.setSelected(true);
 	}
 	else {
-		__isBaseflowCheckBox.setSelected(false);
+		__isNaturalFlowCheckBox.setSelected(false);
 		__areaTextField.setEnabled(false);
 		__precipitationTextField.setEnabled(false);
 	}
-	__isBaseflowCheckBox.addActionListener(this);
+	__isNaturalFlowCheckBox.addActionListener(this);
 
-	if (__nodes[__nodeNum].isImport()) {
+	if (__nodes[__nodeNum].getIsImport()) {
 		__isImportCheckBox.setSelected(true);
 	}
 	else {
@@ -948,7 +952,7 @@ private void setupGUI() {
 	}
 	__isImportCheckBox.addActionListener(this);
 
-	__origBaseflow = __isBaseflowCheckBox.isSelected();
+	__origNaturalFlow = __isNaturalFlowCheckBox.isSelected();
 	__origImport = __isImportCheckBox.isSelected();
 
 	y++;
@@ -1015,7 +1019,7 @@ private void setupGUI() {
 		__areaTextField.setEditable(false);
 		__idTextField.removeKeyListener(this);
 		__idTextField.setEditable(false);
-		__isBaseflowCheckBox.setEnabled(false);
+		__isNaturalFlowCheckBox.setEnabled(false);
 		__isImportCheckBox.setEnabled(false);
 	}
 

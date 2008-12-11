@@ -105,14 +105,18 @@ import RTi.Util.String.StringUtil;
 /**
 This class is a class for displaying the network editor.
 */
-public class StateMod_Network_JFrame 
-extends JFrame
+public class StateMod_Network_JFrame extends JFrame
 implements ActionListener, ItemListener, WindowListener {
 
 /**
 The name of the class.
 */
 public final static String CLASS = "StateMod_Network_JFrame";
+
+/**
+The path to icon files, etc. used in this package.
+*/
+private final String __RESOURCE_PATH = "/DWR/StateMod";
 
 /**
 Strings defining the modes the GUI can be put into.
@@ -155,13 +159,7 @@ Whether the network that is read is in an XML file or not.
 private boolean __isXML = false;
 
 /**
-Whether the network is a new one or not.
-*/
-private boolean __newNetwork = false;
-
-/**
-Variables used when reading in an XML file that make sure that everything
-is set properly.
+Variables used when reading in an XML file that make sure that everything is set properly.
 */
 private boolean 
 	__lxSet = false, 
@@ -308,7 +306,6 @@ Constructor.
 public StateMod_Network_JFrame(StateMod_NodeNetwork network) 
 throws Exception {
 	super();
-	__newNetwork = false;
 	double scale = .5;
 	__device = new StateMod_Network_JComponent(this, scale);
 	__device.setNetwork(network, false, false);
@@ -489,11 +486,11 @@ Adds a node to the network.
 @param type the type of node to add to the network.
 @param upID the ID of the upstream node from the node to be added.
 @param downID the ID of the node downstream from the node to be added.
-@param isBaseflow whether the node to be added is a baseflow node or not.
+@param isNaturalFlow whether the node to be added is a natural flow node.
 */
 public void addNode(String name, int type, String upID, String downID, 
-boolean isBaseflow, boolean isImport) {
-	__device.addNode(name, type, upID, downID, isBaseflow, isImport);
+boolean isNaturalFlow, boolean isImport) {
+	__device.addNode(name, type, upID, downID, isNaturalFlow, isImport);
 }
 
 /**
@@ -503,143 +500,93 @@ public void buildToolBar() {
 	String routine = "buildToolBar";
 	__toolBar = new JToolBar("Network Control Buttons");
 	Insets none = new Insets(0, 0, 0, 0);
-	URL url = null;
-	url = this.getClass().getResource(
-		"/RTi/graphics/GIS/GeoView/icon_print.gif");
+	URL url = this.getClass().getResource( __RESOURCE_PATH + "/icon_print.gif" );
+	String buttonLabel = "Print Network";
 	if (url != null) {
-		__printJButton = new SimpleJButton(new ImageIcon(url),
-			"Print Network", "Print Network", none, false, this);	
-		Message.printDebug(10, routine,
-			"Print Network icon loaded from Jar file.");
+		__printJButton = new SimpleJButton(
+			new ImageIcon(url), buttonLabel, buttonLabel, none, false, this);
 	}
 	else {
-		__printJButton = new SimpleJButton("Print", "Print Network", 
-			"Print Network", none, false, this);		
-		Message.printDebug(10, routine, 
-			"Print Network icon defaulted to text (release).");
+		__printJButton = new SimpleJButton("Print", buttonLabel, buttonLabel, none, false, this);		
 	}
 	__toolBar.add(__printJButton);
 
-	url = this.getClass().getResource(
-		"/RTi/graphics/DWR/StateMod/icon_printScreen.gif");
+	url = this.getClass().getResource( __RESOURCE_PATH + "/icon_printScreen.gif");
+	buttonLabel = "Print Screen";
 	if (url != null) {
-		__printScreenJButton = new SimpleJButton(new ImageIcon(url),
-			"Print Screen", "Print Screen", none, false, this);	
-		Message.printDebug(10, routine,
-			"Print Screen icon loaded from Jar file.");
+		__printScreenJButton = new SimpleJButton(
+			new ImageIcon(url), buttonLabel, buttonLabel, none, false, this);
 	}
 	else {
-		__printScreenJButton = new SimpleJButton( "Print",
-			"Print Screen", "Print Screen", none, false, this);	
-		Message.printDebug(10, routine, 
-			"Print Screen icon defaulted to text (release).");
+		__printScreenJButton = new SimpleJButton( "Print", buttonLabel, buttonLabel, none, false, this);
 	}	
 	__toolBar.add(__printScreenJButton);
 
-	url = this.getClass().getResource( "/RTi/graphics/GIS/GeoView/icon_saveAsJpeg.gif");
+	url = this.getClass().getResource( __RESOURCE_PATH + "/icon_saveAsImage.gif");
 	if (url != null) {
 		__saveAsImageJButton = new SimpleJButton(new ImageIcon(url),
 			"Save Image", "Save as Image", none, false, this);	
-		Message.printDebug(10, routine,
-			"Save Image icon loaded from Jar file.");
 	}
 	else {
-		__saveAsImageJButton = new SimpleJButton("Save",
-			"Save Image", "Save as Image", none, false, this);	
-		Message.printDebug(10, routine, 
-			"Save Image icon defaulted to text (release).");
+		__saveAsImageJButton = new SimpleJButton("Save", "Save Image", "Save as Image", none, false, this);	
 	}
 	__toolBar.add(__saveAsImageJButton);
 	
-	url = this.getClass().getResource(
-		"/RTi/graphics/DWR/StateMod/icon_saveScreen.gif");
+	url = this.getClass().getResource( __RESOURCE_PATH + "/icon_saveScreenAsImage.gif");
 	if (url != null) {
 		__saveScreenAsImageJButton = new SimpleJButton(
-			new ImageIcon(url), "Save Screen", 
-			"Save Screen as Image", none, false, this);	
-		Message.printDebug(10, routine,
-			"Save Screen icon loaded from Jar file.");
+			new ImageIcon(url), "Save Screen", "Save Screen as Image", none, false, this);	
 	}
 	else {
 		__saveScreenAsImageJButton = new SimpleJButton("Save",
-			"Save Screen", "Save Screen as Image", none, 
-			false, this);	
-		Message.printDebug(10, routine, 
-			"Save Screen icon defaulted to text (release).");
+			"Save Screen", "Save Screen as Image", none, false, this);
 	}	
 	__toolBar.add(__saveScreenAsImageJButton);	
 
 	__toolBar.addSeparator();
 
-	url = this.getClass().getResource(
-		"/RTi/graphics/DWR/StateMod/icon_saveXML.gif");
+	url = this.getClass().getResource( __RESOURCE_PATH + "/icon_saveXML.gif");
 	if (url != null) {
 		__saveXMLJButton = new SimpleJButton(new ImageIcon(url),
 			"Save XML", "Save XML Network File", none, false, this);
-		Message.printDebug(10, routine,
-			"Save XML icon loaded from Jar file.");
 	}
 	else {
 		__saveXMLJButton = new SimpleJButton("Save", "Save XML", 
-			"Save XML Network File", none, false, this);	
-		Message.printDebug(10, routine, 
-			"Save XML icon defaulted to text (release).");
+			"Save XML Network File", none, false, this);
 	}	
 	__toolBar.add(__saveXMLJButton);	
 
 	__toolBar.addSeparator();
 
-	url = this.getClass().getResource(
-		"/RTi/graphics/GIS/GeoView/icon_refresh.gif");
+	url = this.getClass().getResource( __RESOURCE_PATH + "/icon_refresh.gif");
 	if (url != null) {
-		__refreshJButton = new SimpleJButton(new ImageIcon(url),
-			"Refresh", "Refresh", none, false, this);		
-		Message.printDebug(10, routine,
-			"Refresh icon loaded from Jar file.");
+		__refreshJButton = new SimpleJButton(new ImageIcon(url),"Refresh", "Refresh", none, false, this);
 	}
 	else {
-		__refreshJButton = new SimpleJButton("Refresh",
-			"Refresh", "Refresh", none, false, this);
-		Message.printDebug(10, routine, 
-			"Refresh icon defaulted to text (release).");
+		__refreshJButton = new SimpleJButton("Refresh", "Refresh", "Refresh", none, false, this);
 	}	
 	__refreshJButton.setActionCommand("Refresh");
 	__toolBar.add(__refreshJButton);
 	
-	url = this.getClass().getResource(
-		"/RTi/graphics/GIS/GeoView/icon_zoomOut.gif");
+	url = this.getClass().getResource( __RESOURCE_PATH + "/icon_zoomOut.gif");
 	if (url != null) {
-		__zoomOutJButton = new SimpleJButton(new ImageIcon(url),
-			"Zoom Out", "Zoom Out", none, false, this);
-		Message.printDebug(10, routine,
-			"Zoom Out icon loaded from Jar file.");
+		__zoomOutJButton = new SimpleJButton(new ImageIcon(url),"Zoom Out", "Zoom Out", none, false, this);
 	}
 	else {
-		__zoomOutJButton = new SimpleJButton("Zoom Out",
-			"Zoom Out", "Zoom Out", none, false, this);
-		Message.printDebug(10, routine, 
-			"Zoom Out icon defaulted to text (release).");
+		__zoomOutJButton = new SimpleJButton("Zoom Out", "Zoom Out", "Zoom Out", none, false, this);
 	}	
 	__zoomOutJButton.setActionCommand("Zoom Out");	
 
-	__zoom1JButton = new SimpleJButton(
-		"1:1", "1:1", "Draw at 1:1 scale for page layout", 
+	__zoom1JButton = new SimpleJButton( "1:1", "1:1", "Draw at 1:1 scale for page layout", 
 		none, false, this);
 	__zoom1JButton.setActionCommand("1:1");
 
-	url = this.getClass().getResource(
-		"/RTi/graphics/GIS/GeoView/icon_zoomMode.gif");
+	url = this.getClass().getResource( __RESOURCE_PATH + "/icon_zoomMode.gif");
 	if (url != null) {
-		__zoomInJButton = new SimpleJButton(new ImageIcon(url),
-			"Zoom In", "Zoom In", none, false, this);
-		Message.printDebug(10, routine,
-			"Zoom In icon loaded from Jar file.");
+		__zoomInJButton = new SimpleJButton(new ImageIcon(url), "Zoom In", "Zoom In", none, false, this);
 	}
 	else {
-		__zoomInJButton = new SimpleJButton("Zoom In",
-			"Zoom In", "Zoom In", none, false, this);
-		Message.printDebug(10, routine, 
-			"Zoom In icon defaulted to text (release).");
+		__zoomInJButton = new SimpleJButton("Zoom In", "Zoom In", "Zoom In", none, false, this);
 	}	
 	__zoomInJButton.setActionCommand("Zoom In");
 	__toolBar.add(__zoomOutJButton);	
@@ -647,20 +594,17 @@ public void buildToolBar() {
 	__toolBar.add(__zoomInJButton);	
 	__toolBar.addSeparator();
 
-	__undoJButton = new SimpleJButton(
-		"Undo", "Undo", "Undo", none, false, this);
+	__undoJButton = new SimpleJButton( "Undo", "Undo", "Undo", none, false, this);
 	__undoJButton.setActionCommand("Undo");
 	__undoJButton.setEnabled(false);
 	__toolBar.add(__undoJButton);
 
-	__redoJButton = new SimpleJButton(
-		"Redo", "Redo", "Redo", none, false, this);
+	__redoJButton = new SimpleJButton( "Redo", "Redo", "Redo", none, false, this);
 	__redoJButton.setActionCommand("Redo");
 	__redoJButton.setEnabled(false);
 	__toolBar.add(__redoJButton);
 	
-	url = this.getClass().getResource(
-		"/RTi/graphics/DWR/StateMod/icon_hand.gif");
+	url = this.getClass().getResource( __RESOURCE_PATH + "/icon_hand.gif");
 	if (url != null) {
 		__panJButton = new SimpleJToggleButton(new ImageIcon(url),
 			MODE_PAN, "Enter Pan Mode", none, false, this, true);
@@ -670,45 +614,31 @@ public void buildToolBar() {
 	else {
 		__panJButton = new SimpleJToggleButton("Pan Mode",
 			MODE_PAN, "Enter Pan Mode", none, false, this, true);
-		Message.printDebug(10, routine, 
-			"Enter Pan Mode icon defaulted to text (release).");
 	}	
 	__panJButton.setActionCommand(MODE_PAN);
 	__toolBar.add(__panJButton);	
 	
-	url = this.getClass().getResource(
-		"/RTi/graphics/GIS/GeoView/icon_infoMode.gif");
+	url = this.getClass().getResource( __RESOURCE_PATH + "/icon_infoMode.gif");
 	if (url != null) {
 		__infoJButton = new SimpleJToggleButton(new ImageIcon(url),
 			MODE_INFO, "Enter Info Mode", none, false, this, false);
-		Message.printDebug(10, routine,
-			"Enter Info Mode icon loaded from Jar file.");
 	}
 	else {
 		__infoJButton = new SimpleJToggleButton("Info Mode",
 			MODE_INFO, "Enter Info Mode", none, false, this, false);
-		Message.printDebug(10, routine, 
-			"Enter Info Mode icon defaulted to text (release).");
 	}	
 	__infoJButton.setActionCommand(MODE_INFO);
 	__infoJButton.setEnabled(false);
 	__toolBar.add(__infoJButton);	
 	
-	url = this.getClass().getResource(
-		"/RTi/graphics/GIS/GeoView/icon_selectMode.gif");
+	url = this.getClass().getResource( __RESOURCE_PATH + "/icon_selectMode.gif");
 	if (url != null) {
 		__selectJButton = new SimpleJToggleButton(new ImageIcon(url),
-			MODE_SELECT, "Enter Select Mode", none, false, this, 
-			false);
-		Message.printDebug(10, routine,
-			"Enter Select Mode icon loaded from Jar file.");
+			MODE_SELECT, "Enter Select Mode", none, false, this, false);
 	}
 	else {
 		__selectJButton = new SimpleJToggleButton("Select Mode",
-			MODE_SELECT, "Enter Select Mode", none, false, this, 
-			false);
-		Message.printDebug(10, routine, 
-			"Enter Select Mode icon defaulted to text (release).");
+			MODE_SELECT, "Enter Select Mode", none, false, this, false);
 	}	
 	__selectJButton.setActionCommand(MODE_SELECT);
 	__toolBar.add(__selectJButton);	
@@ -868,12 +798,20 @@ protected void forceRepaint() {
 
 /**
 Returns the name of the file passed into the constructor and from which the
-network was read.  If the class was instantiated with a pre-existing network,
-this will return null.
+network was read.  If the class was instantiated with a pre-existing network, this will return null.
 @return the name of the file from which the network was read.
 */
 public String getFilename() {
 	return __filename;
+}
+
+/**
+Indicate whether the network has unsaved changes.
+*/
+public boolean getIsDirty()
+{	// Loop through the network nodes.  If any of them are dirty then the network is dirty.
+	
+	return false;
 }
 
 /**
@@ -901,7 +839,6 @@ Initializes class settings for a network in a net file.
 private void initializeExistingNetwork( StateMod_NodeDataProvider nodeDataProvider, String filename )
 throws Exception {
 	//__nodeDataProvider = nodeDataProvider;
-	__newNetwork = false;
 	__filename = filename;
 	__device = new StateMod_Network_JComponent(this, .5);
 	addKeyListener(__device);
@@ -961,15 +898,13 @@ throws Exception {
 /**
 Initializes class settings for a network to be built by the user.
 @param nodeDataProvider the data provider to use for communicating with the database.
-@param filename the file to which the network will be saved when the user
-saves.
+@param filename the file to which the network will be saved when the user saves.
 @throws Exception if an error occurs when initializing.
 */
 private void initializeNewNetwork ( StateMod_NodeDataProvider nodeDataProvider, String filename )
 throws Exception {
 	//__nodeDataProvider = nodeDataProvider;
 	__isXML = true;
-	__newNetwork = true;
 	__filename = filename;
 	__device = new StateMod_Network_JComponent(this, .5);
 	addKeyListener(__device);
@@ -993,8 +928,7 @@ throws Exception {
 	StateMod_NodeNetwork network = new StateMod_NodeNetwork(true);
 	__device.setNetwork(network, false, true);
 	List v = network.getNodesForType(HydrologyNode.NODE_TYPE_END);
-	// change the "5" to something better if a different default paper
-	// size than "C" is used.
+	// change the "5" to something better if a different default paper size than "C" is used.
 	((HydrologyNode)v.get(0)).setX(__rx / 4.3);
 	((HydrologyNode)v.get(0)).setY(__ty / 5);
 
@@ -1034,7 +968,7 @@ public boolean inStateModGUI() {
 }
 
 /**
-Checks whether the network is dirty.
+Checks whether the network is dirty, meaning that edits have occurred.
 @return true if the network is dirty, otherwise false.
 */
 public boolean isDirty() {
@@ -1042,8 +976,7 @@ public boolean isDirty() {
 }
 
 /**
-Responds to item state change events, such as those that change page layout
-information.
+Responds to item state change events, such as those that change page layout information.
 @param event the ItemEvent that happened.
 */
 public void itemStateChanged(ItemEvent event) {
@@ -1057,8 +990,7 @@ public void itemStateChanged(ItemEvent event) {
 	if (event.getSource() == __paperSizeComboBox) {
 		int index = __layoutComboBox.getSelectedIndex();
 		String value = __paperSizeComboBox.getSelected();
-		__device.setPaperSize(
-			shorten(__paperSizeComboBox.getSelected()));
+		__device.setPaperSize( shorten(__paperSizeComboBox.getSelected()));
 		PropList p = (PropList)__layouts.get(index);
 		p.set("PaperSize=\"" + value + "\"");
 	}
@@ -1067,8 +999,7 @@ public void itemStateChanged(ItemEvent event) {
 		String value = __textSizeComboBox.getSelected();
 		PropList p = (PropList)__layouts.get(index);
 		try {
-			int i = Integer.decode(
-				__textSizeComboBox.getSelected()).intValue();
+			int i = Integer.decode(	__textSizeComboBox.getSelected()).intValue();
 			__device.setPrintFontSize(i);
 			p.set("NodeLabelFontSize=\"" + value + "\"");
 		}
@@ -1079,8 +1010,7 @@ public void itemStateChanged(ItemEvent event) {
 		String value = __nodeSizeComboBox.getSelected();
 		PropList p = (PropList)__layouts.get(index);
 		try {
-			int i = Integer.decode(
-				__nodeSizeComboBox.getSelected()).intValue();
+			int i = Integer.decode(	__nodeSizeComboBox.getSelected()).intValue();
 			__device.setNodeSize((double)i);
 			p.set("NodeSize=\"" + value + "\"");
 		}
@@ -1144,8 +1074,7 @@ public void itemStateChanged(ItemEvent event) {
 }
 
 /**
-Called when properties were changed in the node properties dialog.  Forces
-the network to repaint.
+Called when properties were changed in the node properties dialog.  Forces the network to repaint.
 */
 protected void nodePropertiesChanged() {
 	__device.forceRepaint();
@@ -1172,10 +1101,8 @@ throws Exception {
 				for (int i = 0; i < len; i++) {
 					node = children.item(i);
 					elementName = node.getNodeName();
-					// Evaluate the nodes 
-					// attributes...
-					if (elementName.equalsIgnoreCase(
-						"PageLayout")) {
+					// Evaluate the nodes attributes...
+					if (elementName.equalsIgnoreCase("PageLayout")) {
 						processLayoutNode(node);
 					}
 				}
@@ -1269,13 +1196,15 @@ throws Exception {
 
 }
 
+// FIXME SAM 2008-12-11 Why is this here - see the StateMod_NodeNetwork read method!
+// is it reading only the metadata here?  Need comments.
 /**
 Reads a network from an XML file.
 @param filename the name of the XML file to read.
 */
 public void readXML(String filename) 
 throws Exception {
-	String routine = "StateCU_DataSet.readXMLFile";
+	String routine = "StateMod_Network_JFRame.readXML";
 
 	DOMParser parser = null;
 	try {	
@@ -1283,31 +1212,25 @@ throws Exception {
 		parser.parse(filename);
 	}
 	catch (Exception e) {
-		Message.printWarning(2, routine, 
-			"Error reading StateCU Data set \"" + filename + "\"");
+		Message.printWarning(2, routine, "Error reading StateCU Data set \"" + filename + "\"");
 		Message.printWarning(2, routine, e);
-		throw new Exception("Error reading StateCU Data set \"" +
-			filename + "\"");
+		throw new Exception("Error reading StateCU Data set \"" + filename + "\"");
 	}
 
-	// Now get information from the document.  For now don't hold the
-	// document as a data member...
+	// Now get information from the document.  For now don't hold the document as a data member...
 	Document doc = parser.getDocument();
 
-	// Loop through and process the document nodes, starting with the root
-	// node...
+	// Loop through and process the document nodes, starting with the root node...
 
 	__layouts = new Vector();
 	processDocumentNodeForRead(doc);
 
-	StateMod_NodeNetwork network = 
-		StateMod_NodeNetwork.readXMLNetworkFile(filename);
+	StateMod_NodeNetwork network = StateMod_NodeNetwork.readXMLNetworkFile(filename);
 	__device.setNetwork(network, false, true);
 
 	if (__lxSet && __bySet && __wSet && __hSet) {
 		__device.setXMLDataLimits(__lx, __by, __rx - __lx, __ty - __by);
-		__reference.setNewDataLimits(new GRLimits(__lx, __by, __rx, 
-			__ty));
+		__reference.setNewDataLimits(new GRLimits(__lx, __by, __rx, __ty));
 	}
 	else {
 		String unset = "";
@@ -1400,7 +1323,7 @@ throws Exception {
 
 /**
 Sets the bounds for the paper based on the network.  This is only done for 
-pre-existing networks (ie, not those read from a net file).
+pre-existing networks (i.e., not those read from a net file).
 @param network the network to use for determining paper bounds.
 */
 private void setBoundsFromNetwork(StateMod_NodeNetwork network) {
@@ -1418,8 +1341,7 @@ private void setBoundsFromNetwork(StateMod_NodeNetwork network) {
 
 /**
 Sets whether the network is running within StateModGUI.
-@param inStateModGUI if true, then the network is being displayed within 
-StateModGUI.
+@param inStateModGUI if true, then the network is being displayed within StateModGUI.
 */
 public void setInStateModGUI(boolean inStateModGUI) {
 	__inStateModGUI = inStateModGUI;
@@ -1438,7 +1360,7 @@ public void setLocation(double x, double y) {
 /**
 Sets the network to draw.
 @param dirty whether the network should be marked dirty or not.
-@param doAll whether the drawing component should do a reinitialization of
+@param doAll whether the drawing component should do a re-initialization of
 other data members when the dirty is set or not.  This should only be true
 if setting the network for the first time.
 */
@@ -1522,8 +1444,7 @@ private void setupGUI() {
 		aspect, refLimits, GRUnits.DEVICE, 
 		GRLimits.DEVICE, refLimits);	
 
-	// Find the maximum and minimum coordinates to be plotted, considering
-	// the nodes...
+	// Find the maximum and minimum coordinates to be plotted, considering the nodes...
 	double 	xmax,
 		xmin,
 		ymax, 
@@ -1556,8 +1477,7 @@ private void setupGUI() {
 				ymax = MathUtil.max(ymax, node.getY());
 			}
 			catch (Exception e) {
-				Message.printWarning(2, routine, 
-					"Unknown error:");
+				Message.printWarning(2, routine, "Unknown error:");
 				Message.printWarning(2, routine, e);
 			}
 			
@@ -1582,8 +1502,7 @@ private void setupGUI() {
 		// Now set the data limits for the drawing area...
 
 		Message.printStatus(2, routine,
-			"Limits for plot data are " + xmin
-			+ "," + ymin + " to " + xmax + "," + ymax);
+			"Limits for plot data are " + xmin + "," + ymin + " to " + xmax + "," + ymax);
 	
 		GRLimits grlimits = new GRLimits(xmin, ymin, xmax, ymax);
 		drawingArea.setDataLimits(grlimits);
@@ -1605,8 +1524,7 @@ private void setupGUI() {
 	southPanel.setLayout(new GridBagLayout());
 	getContentPane().add("South", southPanel);
 
-	__reference.setBorder(BorderFactory.createTitledBorder(
-		"Network Reference"));
+	__reference.setBorder(BorderFactory.createTitledBorder( "Network Reference"));
 
 	JGUIUtil.addComponent(centerPanel, __reference,
 		0, 2, 1, 1, 0, 0, 
@@ -2012,11 +1930,10 @@ public void windowClosing(WindowEvent event) {
 //		+ "\nNewNetwork: " + __newNetwork
 //		+ "\nDirty: " + __device.isDirty());
 	if (__saveOnExit) {
-		if (__newNetwork || __device.isDirty()) {
+		if (__device.isDirty()) {
 			int x = (new ResponseJDialog(this, "Save network?",
 				"The network has not been saved.  Save?",
-				ResponseJDialog.YES | ResponseJDialog.NO))
-				.response();
+				ResponseJDialog.YES | ResponseJDialog.NO)).response();
 			if (x == ResponseJDialog.YES) {
 				__device.saveXML(getFilename());
 				__device.setDirty(false);
@@ -2048,8 +1965,7 @@ Does nothing.
 */
 public void windowOpened(WindowEvent event) {}
 
-// REVISIT (JTS - 2005-04-19)
-// necessary anymore??
+// TODO (JTS - 2005-04-19) necessary anymore??
 public void setSaveOnExit(boolean saveOnExit) {
 	__saveOnExit = saveOnExit;
 }
@@ -2078,6 +1994,6 @@ System.out.println("TW/TH: " + __device.getTotalWidth() + "  "
 
 }
 
-// REVISIT (JTS - 2004-08-17)
+// TODO (JTS - 2004-08-17)
 // the box in the reference window does not follow the mouse cursor exactly.
 // the more you move to the up and right, the more "off" the box becomes.

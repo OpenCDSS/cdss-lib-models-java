@@ -124,10 +124,8 @@ import RTi.Util.String.StringUtil;
 /**
 This class draws the network that can be printed, viewed and altered.
 */
-public class StateMod_Network_JComponent 
-extends GRJComponentDevice
-implements ActionListener, KeyListener, MouseListener, MouseMotionListener, 
-Printable {
+public class StateMod_Network_JComponent extends GRJComponentDevice
+implements ActionListener, KeyListener, MouseListener, MouseMotionListener, Printable {
 
 /**
 Strings for menu items.
@@ -209,8 +207,7 @@ Whether anything on the network can be changed or not.
 private boolean __editable = true;
 
 /**
-Whether the legend should not be drawn on the next draw (because it is being
-dragged).
+Whether the legend should not be drawn on the next draw (because it is being dragged).
 */
 private boolean __eraseLegend = false;
 
@@ -257,7 +254,9 @@ private boolean __legendLimitsDetermined = false;
 
 /**
 Keeps track of whether the network has been changed by adding or deleting
-a node since the last save or file open.
+a node or changing network properties since the last save or file open.  Use getIsDirty()
+to determine if the main network or any of the node properties have changed.
+TODO SAM 2008-12-11 Why isn't this information stored in the network object instead of this component?
 */
 private boolean __networkChanged = false;
 
@@ -454,8 +453,7 @@ private double __totalDataHeight;
 
 /**
 The total data width necessary to draw the entire network on the paper.  If
-the network is widier than the paper, then the width is the width of the
-entire network.
+the network is wider than the paper, then the width is the width of the entire network.
 */
 private double __totalDataWidth;
 
@@ -474,20 +472,17 @@ things are sized the same on paper that they are on screen.
 private double __zoomPercentage = 0;
 
 /**
-The dash pattern that is used when drawing grids and debugging lines on the
-screen.
+The dash pattern that is used when drawing grids and debugging lines on the screen.
 */
 private float[] __dashes = {3, 5f};
 
 /**
-The dash pattern that is used when drawing grids and debugging lines on the
-screen.
+The dash pattern that is used when drawing grids and debugging lines on the screen.
 */
 private float[] __dots = {3, 3f};
 
 /**
-The graphics context that should be used for drawing to the temporary 
-BufferedImage for printing.
+The graphics context that should be used for drawing to the temporary BufferedImage for printing.
 */
 private Graphics2D __bufferGraphics = null;
 
@@ -514,7 +509,7 @@ private GRLimits __draggedNodeLimits;
 
 /**
 Temporary limits used while printing.  Declared here so as to avoid creating
-one object everytime paint() is called, even when not printing.  Limits used
+one object every time paint() is called, even when not printing.  Limits used
 to store the data limits during a drag when they're changed.
 */
 private GRLimits __holdLimits;
@@ -548,8 +543,7 @@ The node that was last clicked on.
 private int __clickedNodeNum = -1;
 
 /**
-The dpi of the screen.  System-dependent.  On PCs, it should be 96 dpi.  For
-Macs, it should be 72.
+The dpi of the screen.  System-dependent.  On PCs, it should be 96 dpi.  For Macs, it should be 72.
 */
 private int __dpi = 0;
 
@@ -631,7 +625,7 @@ private int __totalBufferWidth;
 /**
 The current position within the undo Vector.  The change operation at 
 position __undoPos - 1 is the one that last happened.  If __undoPos is 
-less than __undoOperations.size(), then redoes can be done.  If __undoPos is 0
+less than __undoOperations.size(), then redo-es can be done.  If __undoPos is 0
 then no undos can be done.
 */
 private int __undoPos = 0;
@@ -682,8 +676,7 @@ private String
 	__holdPaperOrientation = null,
 	__holdPaperSize = null;
 
-// FIXME SAM 2008-01-25 Need to change so annotations are not same object type
-// normal nodes.
+// FIXME SAM 2008-01-25 Need to change so annotations are not same object type normal nodes.
 /**
 Vector of all the annotations displayed on the network.  Note that internally
 annotations are managed as a list of HydrologyNode.
@@ -723,8 +716,7 @@ Constructor.
 @param scale the scale to use for determining how the network should be drawn
 for printing.  Printing is done at 72 dpi by default.  A printing scale of
 .5 would mean that printed output would be rendered at 144 dpi, and .25 would
-mean at 288 dpi.  Since each node is 20 pixels across, a scale of .25 seems to
-work best.
+mean at 288 dpi.  Since each node is 20 pixels across, a scale of .25 seems to work best.
 */
 public StateMod_Network_JComponent(StateMod_Network_JFrame parent, 
 double scale) {
@@ -744,10 +736,8 @@ double scale) {
 
 	buildPopupMenus();
 
-	// set the default print font size for when the network is first
-	// displayed.
-	// REVISIT (JTS - 2004-07-13)
-	// remove this call?
+	// set the default print font size for when the network is first displayed.
+	// TODO (JTS - 2004-07-13) remove this call?
 	setPrintFontSize(10);	
 
 	__undoOperations = new Vector();
@@ -765,11 +755,11 @@ public void actionPerformed(ActionEvent event) {
 			return;
 		}
 		addAnnotation(__popupX, __popupY);
-		__networkChanged = true;
+		setNetworkChanged (true);
 	}
 	else if (action.equals(__MENU_ADD_LINK)) {
 		new StateMod_Network_AddLink_JDialog(__parent, this, __nodes);
-		__networkChanged = true;
+		setNetworkChanged (true);
 	}
 	else if (action.equals(__MENU_ADD_NODE)) {
 		if (!__editable) {
@@ -777,14 +767,13 @@ public void actionPerformed(ActionEvent event) {
 		}
 		new StateMod_Network_AddNode_JDialog(__parent,
 			__nodes[__popupNodeNum]);
-		// REVISIT (JTS - 2004-07-13)
-		// need a way to make sure that a node was really added 
+		// TODO (JTS - 2004-07-13) need a way to make sure that a node was really added 
 		// and mark changed appropriately
-		__networkChanged = true;
+		setNetworkChanged (true);
 	}
 	else if (action.equals(__MENU_DELETE_ANNOTATION)) {
 		__annotations.remove(__popupNodeNum);
-		__networkChanged = true;
+		setNetworkChanged (true);
 		forceRepaint();
 	}
 	else if (action.equals(__MENU_DELETE_LINK)) {
@@ -810,7 +799,7 @@ public void actionPerformed(ActionEvent event) {
 			__parent.setUndo(false);
 			__parent.setRedo(false);			
 		}
-		__networkChanged = true;
+		setNetworkChanged (true);
 		forceRepaint();
 	}
 	else if (action.equals(__MENU_DRAW_NODE_LABELS)) {
@@ -871,11 +860,9 @@ public void actionPerformed(ActionEvent event) {
 	}
 	else if (action.equals(__MENU_PROPERTIES)) {
 		if (__isLastSelectedAnAnnotation) {
-			HydrologyNode node = (HydrologyNode)
-				__annotations.get(__popupNodeNum);
+			HydrologyNode node = (HydrologyNode)__annotations.get(__popupNodeNum);
 
-			new StateMod_Network_AnnotationProperties_JDialog(
-				this, __editable, node, __popupNodeNum);
+			new StateMod_Network_AnnotationProperties_JDialog( this, __editable, node, __popupNodeNum);
 		}
 		else {
 			String idPre = __nodes[__popupNodeNum].getCommonID();
@@ -996,8 +983,7 @@ protected void addAnnotation(double x, double y) {
 	else if (position.equalsIgnoreCase("UpperLeft")) {
 		node.setPosition(x - w, y, w, h);
 	}
-	else if (position.equalsIgnoreCase("Above")
-	        || position.equalsIgnoreCase("AboveCenter")) {
+	else if (position.equalsIgnoreCase("Above") || position.equalsIgnoreCase("AboveCenter")) {
 		node.setPosition(x - (w / 2), y, w, h);
 	}
 	else if (position.equalsIgnoreCase("Center")) {
@@ -1033,19 +1019,18 @@ Adds a node to the network.
 @param type the type of the node.
 @param upID the ID of the node immediately upstream.
 @param downID the ID of the node immediately downstream.
-@param isBaseflow whether the node is a baseflow node.
+@param isNaturalFlow whether the node is a natural flow node.
 */
 protected void addNode(String name, int type, String upID, String downID, 
-boolean isBaseflow, boolean isImport) {
+boolean isNaturalFlow, boolean isImport) {
 	if (upID == null || upID.equals("None")) {
 		upID = null;
 	}
 	StateMod_NodeNetwork network = getNetwork();
 
-	network.addNode(name, type, upID, downID, isBaseflow, isImport);
-	// REVISIT (JTS - 2004-07-13)
-	// is there a more efficient way??
-	__networkChanged = true;
+	network.addNode(name, type, upID, downID, isNaturalFlow, isImport);
+	// TODO (JTS - 2004-07-13) is there a more efficient way??
+	setNetworkChanged (true);
 	__parent.setNetwork(network, true, true);
 	buildNodeArray();
 	findMaxReachLevel();
@@ -1168,8 +1153,7 @@ private void buildNodeArray() {
 				nodes.add(node);
 			}
 			holdNode = node;	
-			node = StateMod_NodeNetwork.getDownstreamNode(node, 
-				StateMod_NodeNetwork.POSITION_COMPUTATIONAL);		
+			node = StateMod_NodeNetwork.getDownstreamNode(node, StateMod_NodeNetwork.POSITION_COMPUTATIONAL);		
 		
 			if (node == holdNode) {
 				done = true;
@@ -1199,7 +1183,7 @@ private void buildNodeArray() {
 		__nodes[i].setSymbol(null);
 		__nodes[i].setBoundsCalculated(false);
 		__nodes[i].setDataDiameter(diam);
-		__nodes[i].calculateBounds(__drawingArea);
+		__nodes[i].calculateExtents(__drawingArea);
 	}
 	
 	// Make sure that all the nodes have unique IDs.  If they don't,
@@ -1362,11 +1346,9 @@ private void buildSelectedNodesLimits() {
 		__draggedNodes[i] = num;
 
 		// if snap to grid is on, the positions of the nodes to be 
-		// dragged are shifted to the nearest grid points prior to
-		// dragging.
+		// dragged are shifted to the nearest grid points prior to dragging.
 		if (__snapToGrid) {
-			p = findNearestGridXY(__nodes[num].getX(),
-				__nodes[num].getY());
+			p = findNearestGridXY(__nodes[num].getX(), __nodes[num].getY());
 			__draggedNodesXs[i] = p[0];
 			__draggedNodesYs[i] = p[1];
 		}
@@ -1395,8 +1377,7 @@ protected void calculateDataLimits() {
 	// next, the ratio of the width to the height of the paper will be
 	// checked and if the ratio is not sufficient to allow the data
 	// to be all printed on the page (no compression!), the data limits
-	// will be reset so that there is extra room (off paper) in the 
-	// drawing area
+	// will be reset so that there is extra room (off paper) in the drawing area
 	if (dWidth >= dHeight) {
 		__fitWidth = true;
 		__totalDataWidth = dWidth;
@@ -1420,13 +1401,10 @@ protected void calculateDataLimits() {
 			// otherwise, if the height of the network can 
 			// fit within the paper entirely, center the
 			// network vertically on the paper
-			double diff = __totalDataHeight 
-				- __dataLimits.getHeight();
-			__dataBottomY = __dataLimits.getBottomY()
-				- (diff / 2);
+			double diff = __totalDataHeight - __dataLimits.getHeight();
+			__dataBottomY = __dataLimits.getBottomY() - (diff / 2);
 			setLimits.setBottomY(__dataBottomY);
-			setLimits.setTopY(setLimits.getBottomY() 
-				+ __totalDataHeight);
+			setLimits.setTopY(setLimits.getBottomY() + __totalDataHeight);
 		}
 	}
 	else {
@@ -1442,27 +1420,22 @@ protected void calculateDataLimits() {
 		if (__dataLimits.getWidth() > __totalDataWidth) {
 			// if the data limits are greater than the total
 			// data width that can fit on the paper, then 
-			// reset the total data width to be the width of
-			// the data limits. 
+			// reset the total data width to be the width of the data limits. 
 			__dataLeftX = __dataLimits.getLeftX();
 			__totalDataWidth = __dataLimits.getWidth();
 		}
 		else {
 			// otherwise, if the width of the network can
 			// fit within the paper entirely, center the network
-			// horizontally on the paper.  This is when the 
-			// network is zoomed out.
-			double diff = __totalDataWidth 
-				- __dataLimits.getWidth();
-			__dataLeftX = __dataLimits.getLeftX()
-				- (diff / 2);
+			// horizontally on the paper.  This is when the network is zoomed out.
+			double diff = __totalDataWidth - __dataLimits.getWidth();
+			__dataLeftX = __dataLimits.getLeftX() - (diff / 2);
 			setLimits.setLeftX(__dataLeftX);
 			setLimits.setRightX(__dataLeftX + __totalDataWidth);
 		}
 	}
 	__drawingArea.setDataLimits(setLimits);
-	// REVISIT (JTS - 2004-07-13)
-	// why are the __dataLimits not reset here??
+	// TODO (JTS - 2004-07-13) why are the __dataLimits not reset here??
 }
 
 /**
@@ -1657,7 +1630,7 @@ private void deleteLink() {
 		// node, then delete it outright.
 		int i = ((Integer)nums.get(0)).intValue();
 		__links.remove(i);
-		__networkChanged = true;
+		setNetworkChanged (true);
 		forceRepaint();
 		return;
 	}
@@ -1682,7 +1655,7 @@ private void deleteLink() {
 			int j = ((Integer)nums.get(i)).intValue();
 			__links.remove(j);
 			forceRepaint();
-			__networkChanged = true;
+			setNetworkChanged (true);
 			return;
 		}
 	}			
@@ -1741,8 +1714,7 @@ private void drawAnnotations() {
 	String origFontSize = null;
 	for (int i = 0; i < size; i++) {
 		if (i == __clickedNodeNum && __isLastSelectedAnAnnotation) {
-			// skip it -- outline being drawn for
-			// drag
+			// skip it -- outline being drawn for drag
 			continue;
 		}
 		node = (HydrologyNode)__annotations.get(i);
@@ -1810,11 +1782,14 @@ private void drawDraggedNodeOutline(int num) {
 }
 
 /**
-Draws the legend.
+Draws the legend.  A single node is created, its properties are set, and then it is drawn
+directly on the network.
 */
 private void drawLegend() {
-/*
-	Legends look generally like this:
+	/*
+	Legends look generally like this, where the left column has normal nodes and
+	the right column has nodes decorated to indicate natural flow,
+	which are typically the same as the normal node but with an extra outer outline.
 
 	+-----------------------------------------------------+
 	|   Legend                                            |
@@ -1822,21 +1797,17 @@ private void drawLegend() {
 	|                                                     |
 	|   [Icon]  Node Text         [Icon] Node Text        |
 	|                                                     |
-       \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
-                      .............................
-       \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+    |                  .............................      |
 	|                                                     |
 	|   [Icon]  Node Text         [Icon] Node Text        |
 	+-----------------------------------------------------+
-*/
+	*/
 
 	GRLimits limits = null;
 	
 	int by = 0;
-	int col2x = 0;		// the X value of the point where the
-				// 	second column begins
-	int dividerY = 0;	// the Y value of the line dividing the
-				// 	legend title from the rest
+	int col2x = 0;		// the X value of the point where the second column begins
+	int dividerY = 0;	// the Y value of the line dividing the legend title from the rest
 	int height = 0;		// running total of the height of the legend
 	int tempW = 0;
 	int lx = 0;
@@ -1846,24 +1817,20 @@ private void drawLegend() {
 	////////////////////////////////////////////////////////////////
 	// Spacing parameters
 	////////////////////////////////////////////////////////////////
-	double colsp = convertX(15);	// spacing between columns 1 and 2
-	double edge = convertX(2);    	// spacing between the edge lines and 
-					// the interior
-	int line = 1;			// boundary line width
-	double tsp = convertX(4);	// spacing between nodes and node text
-	double vsp = convertY(4);	// vertical spacing between lines
+	double colsp = convertX(15); // spacing between columns 1 and 2
+	double edge = convertX(2); // spacing between the edge lines and the interior boundary line width
+	int line = 1;
+	double tsp = convertX(4); // spacing between nodes and node text
+	double vsp = convertY(4); // vertical spacing between lines
 	
 	String text = "Legend";
-	limits = GRDrawingAreaUtil.getTextExtents(__drawingArea, text,
-		GRUnits.DATA);
+	limits = GRDrawingAreaUtil.getTextExtents(__drawingArea, text, GRUnits.DATA);
 	
-	// add the height of the text, plus space around the text before
-	// the bounday lines
+	// Add the height of the text, plus space around the text before the boundary lines
 	height += (int)limits.getHeight() + (edge * 2);
-	// add the height of the line that divides the title from the
-	// rest
+	// Add the height of the line that divides the title from the rest
 	height += line;
-	// hold this point for calculating the exact divider Y point later
+	// Hold this point for calculating the exact divider Y point later
 	dividerY = height;
 
 	double id = 0;
@@ -1893,46 +1860,36 @@ private void drawLegend() {
 		}		
 	}
 
-	// add enough room to accomodate 11 icons vertically, plus vertical
-	// space between them, plus space around them between the lines,
-	// 
-	height += (11 
-		* (id + bd 
-		+ vsp)) 
-		+ (edge * 2) - vsp;
+	// Add enough room to accommodate the number of node icons vertically, plus vertical
+	// space between them, plus space around them between the lines.
+	int numIcons = 10;
+	height += (numIcons * (id + bd + vsp)) + (edge * 2) - vsp;
 
 	// Determine the width of the legend by taking the widths of the
-	// two longest node labels and using them to determine the width
-	// required 
-	text = "Baseflow (no gage/structure)";
-	limits = GRDrawingAreaUtil.getTextExtents(__drawingArea, text,
-		GRUnits.DATA);
+	// two longest node labels and using them to determine the width required 
+	text = "Most Downstream Node";
+	limits = GRDrawingAreaUtil.getTextExtents(__drawingArea, text, GRUnits.DATA);
 	tempW = (int)limits.getWidth();
 
-	// store the X point at which the second column begins
+	// Store the X point at which the second column begins
 	col2x = (int)(edge + id + bd
 		+ tsp + tempW + colsp 
 		+ ((id + bd)/2));
 
-	text = "Diversion + Well(s) / Baseflow";
-	limits = GRDrawingAreaUtil.getTextExtents(__drawingArea, text,
-		GRUnits.DATA);
+	text = "Instream (Minimum) Flow / Natural Flow";
+	limits = GRDrawingAreaUtil.getTextExtents(__drawingArea, text, GRUnits.DATA);
 
 	tempW = (int)limits.getWidth();
 	
 	// calculate the overall width of the legend
-	width = (int)(col2x 
-		+ ((id + bd)/ 2)
-		+ tsp + tempW + edge);
+	width = (int)(col2x + ((id + bd)/ 2) + tsp + tempW + edge);
 	
-	// the legend's limits will be not null if the legend has already been
-	// drawn once.
+	// the legend's limits will be not null if the legend has already been drawn once.
 	if (__legendLimitsDetermined) {
 		lx = (int)__legendLimits.getLeftX();
 		by = (int)__legendLimits.getBottomY();
 	}
-	// they will be null if the legend has not been drawn yet, or if the
-	// paper size has changed
+	// they will be null if the legend has not been drawn yet, or if the paper size has changed
 	else {
 /*	
 		lx = (int)convertX((int)(__pageFormat.getImageableX() 
@@ -1946,10 +1903,8 @@ private void drawLegend() {
 			by = (int)__network.getLegendY();
 		}
 		else {
-			lx = (int)(__dataLimits.getLeftX() 
-				+ (0.05 * __dataLimits.getWidth()));
-			by = (int)(__dataLimits.getBottomY()
-				+ (0.05 * __dataLimits.getHeight()));
+			lx = (int)(__dataLimits.getLeftX() + (0.05 * __dataLimits.getWidth()));
+			by = (int)(__dataLimits.getBottomY() + (0.05 * __dataLimits.getHeight()));
 		}
 		__legendLimitsDetermined = true;
 	}	
@@ -1966,8 +1921,7 @@ private void drawLegend() {
 	// move the second column X position to take into account the new left X
 	col2x += lx;
 	// determine the point at which the first column will go.
-	int col1x = (int)(lx + edge 
-		+ ((id + bd)/2));
+	int col1x = (int)(lx + edge + ((id + bd)/2));
 
 	// NOTE:
 	// since the nodes are drawn centered on points, notice that both the
@@ -1975,40 +1929,34 @@ private void drawLegend() {
 
 	// draw the outline of the legend
 	GRDrawingAreaUtil.setColor(__drawingArea, GRColor.black);
-	GRDrawingAreaUtil.drawLine(__drawingArea, 
-		lx, by, lx + width, by);
-	GRDrawingAreaUtil.drawLine(__drawingArea,
-		lx, by + height, lx + width, by + height);
-	GRDrawingAreaUtil.drawLine(__drawingArea,
-		lx, by, lx, by + height);
-	GRDrawingAreaUtil.drawLine(__drawingArea,
-		lx + width, by, lx + width, by + height);
-	GRDrawingAreaUtil.drawLine(__drawingArea,
-		lx, dividerY, lx + width, dividerY);
+	GRDrawingAreaUtil.drawLine(__drawingArea, lx, by, lx + width, by);
+	GRDrawingAreaUtil.drawLine(__drawingArea, lx, by + height, lx + width, by + height);
+	GRDrawingAreaUtil.drawLine(__drawingArea, lx, by, lx, by + height);
+	GRDrawingAreaUtil.drawLine(__drawingArea, lx + width, by, lx + width, by + height);
+	GRDrawingAreaUtil.drawLine(__drawingArea, lx, dividerY, lx + width, dividerY);
 
-	// determine the amounts to increment X and Y values after drawing
-	// nodes and rows of nodes.
+	// determine the amounts to increment X and Y values after drawing nodes and rows of nodes.
 	int yInc = (int)((id + bd) + vsp);
 	int xInc = (int)((id + bd) / 2 + tsp);
 	
-	// determine the X positions for drawing the first and second
-	// column's text
+	// determine the X positions for drawing the first and second column's text
 	int text1x = col1x + xInc;
 	int text2x = col2x + xInc;
 
 	// draw the title
-	GRDrawingAreaUtil.drawText(__drawingArea, "Legend", col1x, 
-		dividerY + edge, 0, 0);
+	GRDrawingAreaUtil.drawText(__drawingArea, "Legend", col1x, dividerY + edge, 0, 0);
 
 	// draw the nodes.  
 	// For the most part, if there are two columns of nodes, the second
-	// column is the same type as the first, but Baseflow also, and the
-	// second column's text has " / Baseflow" appended to it.  
+	// column is the same type as the first but displays the natural flow representation, with
+	// " / Natural Flow" appended to the node label.  
 	// So between drawing column 1 and column 2, just change the X 
-	// value and set isBaseflow to true.  When moving down a row to a
-	// new node type, call newNode() in order that various internal 
-	// values can be reset.
+	// value and set isNaturalFlow to true.  When moving down a row to a
+	// new node type, call resetNode() to reset node properties.
+	// The node graphic is drawn using the single node and its properties.
+	// The text for node labels is drawn separate from the nodes, not as the standard node label.
 
+	// End of network
 	HydrologyNode node = new HydrologyNode();
 	// FIXME SAM 2003-08-15 Need to remove WIS code
 	//node.setInWis(false);
@@ -2016,168 +1964,134 @@ private void drawLegend() {
 	node.setY(dividerY - edge -((id + bd)/2));
 	node.setType(HydrologyNode.NODE_TYPE_END);
 	node.draw(__drawingArea);
-
 	text = "Most Downstream Node";
 	GRDrawingAreaUtil.drawText(__drawingArea, text, text1x, node.getY(), 0, GRText.CENTER_Y);
-	
-	node.setY(node.getY() - yInc);
-	node.newNode(HydrologyNode.NODE_TYPE_OTHER);
-	node.setIsBaseflow(true);
-	node.draw(__drawingArea);
 
-	text = "Baseflow (no gage / structure)";
-	GRDrawingAreaUtil.drawText(__drawingArea, text, text1x, node.getY(), 0, GRText.CENTER_Y);	
-
-	node.setY(node.getY() - yInc);
-	node.newNode(HydrologyNode.NODE_TYPE_FLOW);
-	node.draw(__drawingArea);
-
-	text = "Streamflow Gage";
-	GRDrawingAreaUtil.drawText(__drawingArea, text, text1x, node.getY(),
-		0, GRText.CENTER_Y);
-	
-	node.setX(col2x);
-	node.setIsBaseflow(true);
-	node.draw(__drawingArea);
-
-	text += " / Baseflow";
-	GRDrawingAreaUtil.drawText(__drawingArea, text, text2x, node.getY(),
-		0, GRText.CENTER_Y);
-	
+	// Diversion
 	node.setY(node.getY() - yInc);
 	node.setX(col1x);
-	node.newNode(HydrologyNode.NODE_TYPE_RES);
+	node.resetNode(HydrologyNode.NODE_TYPE_DIV, false, false );
 	node.draw(__drawingArea);
-
-	text = "Reservoir";
-	GRDrawingAreaUtil.drawText(__drawingArea, text, text1x, node.getY(),
-		0, GRText.CENTER_Y);
-	
-	node.setX(col2x);
-	node.setIsBaseflow(true);
-	node.draw(__drawingArea);
-
-	text += " / Baseflow";
-	GRDrawingAreaUtil.drawText(__drawingArea, text, text2x, node.getY(),
-		0, GRText.CENTER_Y);
-	
-	node.setY(node.getY() - yInc);
-	node.setX(col1x);
-	node.newNode(HydrologyNode.NODE_TYPE_ISF);
-	node.draw(__drawingArea);
-
-	text = "Instream Flow";
-	GRDrawingAreaUtil.drawText(__drawingArea, text, text1x, node.getY(),
-		0, GRText.CENTER_Y);
-	
-	node.setX(col2x);
-	node.setIsBaseflow(true);
-	node.draw(__drawingArea);
-
-	text += " / Baseflow";
-	GRDrawingAreaUtil.drawText(__drawingArea, text, text2x, node.getY(),
-		0, GRText.CENTER_Y);
-	
-	node.setY(node.getY() - yInc);
-	node.setX(col1x);
-	node.newNode(HydrologyNode.NODE_TYPE_OTHER);
-	
-	node.setIsImport(true);
-	node.draw(__drawingArea);
-
-	text = "Import";
-	GRDrawingAreaUtil.drawText(__drawingArea, text, text1x, node.getY(),
-		0, GRText.CENTER_Y);
-	
-	node.setX(col2x);
-	node.setIsBaseflow(true);
-	node.draw(__drawingArea);
-
-	text += " / Baseflow";
-	GRDrawingAreaUtil.drawText(__drawingArea, text, text2x, node.getY(),
-		0, GRText.CENTER_Y);
-	
-	node.setY(node.getY() - yInc);
-	node.setX(col1x);
-	node.newNode(HydrologyNode.NODE_TYPE_DIV_AND_WELL);
-	node.draw(__drawingArea);
-
-	text = "Diversion + Well(s)";
-	GRDrawingAreaUtil.drawText(__drawingArea, text, text1x, node.getY(),
-		0, GRText.CENTER_Y);
-	
-	node.setX(col2x);
-	node.setIsBaseflow(true);
-	node.draw(__drawingArea);
-
-	text += " / Baseflow";
-	GRDrawingAreaUtil.drawText(__drawingArea, text, text2x, node.getY(),
-		0, GRText.CENTER_Y);
-	
-	node.setY(node.getY() - yInc);
-	node.setX(col1x);
-	node.newNode(HydrologyNode.NODE_TYPE_WELL);
-	node.draw(__drawingArea);
-
-	text = "Well";
-	GRDrawingAreaUtil.drawText(__drawingArea, text, text1x, node.getY(),
-		0, GRText.CENTER_Y);
-	
-	node.setX(col2x);
-	node.setIsBaseflow(true);
-	node.draw(__drawingArea);
-
-	text += " / Baseflow";
-	GRDrawingAreaUtil.drawText(__drawingArea, text, text2x, node.getY(),
-		0, GRText.CENTER_Y);
-	
-	node.setY(node.getY() - yInc);
-	node.setX(col1x);
-	node.newNode(HydrologyNode.NODE_TYPE_DIV);
-	node.draw(__drawingArea);
-
 	text = "Diversion";
-	GRDrawingAreaUtil.drawText(__drawingArea, text, text1x, node.getY(),
-		0, GRText.CENTER_Y);
-	
+	GRDrawingAreaUtil.drawText(__drawingArea, text, text1x, node.getY(), 0, GRText.CENTER_Y);
 	node.setX(col2x);
-	node.setIsBaseflow(true);
+	node.resetNode(HydrologyNode.NODE_TYPE_DIV, true, false );
 	node.draw(__drawingArea);
-
-	text += " / Baseflow";
-	GRDrawingAreaUtil.drawText(__drawingArea, text, text2x, node.getY(),
-		0, GRText.CENTER_Y);
+	text += " / Natural Flow";
+	GRDrawingAreaUtil.drawText(__drawingArea, text, text2x, node.getY(), 0, GRText.CENTER_Y);
 	
+	// Diversion + Wells
 	node.setY(node.getY() - yInc);
 	node.setX(col1x);
-	node.newNode(HydrologyNode.NODE_TYPE_OTHER);
+	node.resetNode(HydrologyNode.NODE_TYPE_DIV_AND_WELL, false, false);
 	node.draw(__drawingArea);
-
-	text = "Other";
-	GRDrawingAreaUtil.drawText(__drawingArea, text, text1x, node.getY(),
-		0, GRText.CENTER_Y);
-	
+	text = "Diversion + Well(s)";
+	GRDrawingAreaUtil.drawText(__drawingArea, text, text1x, node.getY(), 0, GRText.CENTER_Y);
 	node.setX(col2x);
-	node.setIsBaseflow(true);
+	node.resetNode(HydrologyNode.NODE_TYPE_DIV_AND_WELL, true, false);
 	node.draw(__drawingArea);
-
-	text += " / Baseflow";
-	GRDrawingAreaUtil.drawText(__drawingArea, text, text2x, node.getY(),
-		0, GRText.CENTER_Y);
-
-	// REVISIT (JTS - 2004-03-17)
-	// this might need changed later
-	text = "Node labels are short identifiers";
-	GRDrawingAreaUtil.drawText(__drawingArea, text, text1x, 
-		node.getY() - yInc, 0, GRText.CENTER_Y);
+	text += " / Natural Flow";
+	GRDrawingAreaUtil.drawText(__drawingArea, text, text2x, node.getY(), 0, GRText.CENTER_Y);
+	
+	// Instream flow
+	node.setY(node.getY() - yInc);
+	node.setX(col1x);
+	node.resetNode(HydrologyNode.NODE_TYPE_ISF, false, false);
+	node.draw(__drawingArea);
+	text = "Instream (Minimum) Flow";
+	GRDrawingAreaUtil.drawText(__drawingArea, text, text1x, node.getY(), 0, GRText.CENTER_Y);
+	node.setX(col2x);
+	node.resetNode(HydrologyNode.NODE_TYPE_ISF, true, false);
+	node.draw(__drawingArea);
+	text += " / Natural Flow";
+	GRDrawingAreaUtil.drawText(__drawingArea, text, text2x, node.getY(), 0, GRText.CENTER_Y);
+	
+	// Other
+	node.setY(node.getY() - yInc);
+	node.setX(col1x);
+	node.resetNode(HydrologyNode.NODE_TYPE_OTHER, false, false );
+	node.draw(__drawingArea);
+	text = "Other";
+	GRDrawingAreaUtil.drawText(__drawingArea, text, text1x, node.getY(), 0, GRText.CENTER_Y);
+	node.setX(col2x);
+	node.resetNode(HydrologyNode.NODE_TYPE_OTHER, true, false );
+	node.draw(__drawingArea);
+	text += " / Natural Flow";
+	GRDrawingAreaUtil.drawText(__drawingArea, text, text2x, node.getY(), 0, GRText.CENTER_Y);
+	
+	// Plan
+	node.setY(node.getY() - yInc);
+	node.setX(col1x);
+	node.resetNode(HydrologyNode.NODE_TYPE_PLAN, false, false);
+	node.draw(__drawingArea);
+	text = "Plan";
+	GRDrawingAreaUtil.drawText(__drawingArea, text, text1x, node.getY(), 0, GRText.CENTER_Y);
+	node.setX(col2x);
+	node.resetNode(HydrologyNode.NODE_TYPE_PLAN, true, false);
+	node.draw(__drawingArea);
+	text += " / Natural Flow";
+	GRDrawingAreaUtil.drawText(__drawingArea, text, text2x, node.getY(), 0, GRText.CENTER_Y);
+	
+	// Reservoir
+	node.setY(node.getY() - yInc);
+	node.setX(col1x);
+	node.resetNode(HydrologyNode.NODE_TYPE_RES, false, false);
+	node.draw(__drawingArea);
+	text = "Reservoir";
+	GRDrawingAreaUtil.drawText(__drawingArea, text, text1x, node.getY(), 0, GRText.CENTER_Y);
+	node.setX(col2x);
+	node.resetNode(HydrologyNode.NODE_TYPE_RES, true, false);
+	node.draw(__drawingArea);
+	text += " / Natural Flow";
+	GRDrawingAreaUtil.drawText(__drawingArea, text, text2x, node.getY(), 0, GRText.CENTER_Y);
+	
+	// Streamflow
+	node.setY(node.getY() - yInc);
+	node.setX(col1x);
+	node.resetNode(HydrologyNode.NODE_TYPE_FLOW, false, false );
+	node.draw(__drawingArea);
+	text = "Streamflow Gage";
+	GRDrawingAreaUtil.drawText(__drawingArea, text, text1x, node.getY(), 0, GRText.CENTER_Y);
+	node.setX(col2x);
+	node.resetNode(HydrologyNode.NODE_TYPE_FLOW, true, false );
+	node.draw(__drawingArea);
+	text += " / Natural Flow";
+	GRDrawingAreaUtil.drawText(__drawingArea, text, text2x, node.getY(), 0, GRText.CENTER_Y);
+	
+	// Well
+	node.setY(node.getY() - yInc);
+	node.setX(col1x);
+	node.resetNode(HydrologyNode.NODE_TYPE_WELL, false, false );
+	node.draw(__drawingArea);
+	text = "Well(s)";
+	GRDrawingAreaUtil.drawText(__drawingArea, text, text1x, node.getY(), 0, GRText.CENTER_Y);
+	node.setX(col2x);
+	node.resetNode(HydrologyNode.NODE_TYPE_WELL, true, false );
+	node.draw(__drawingArea);
+	text += " / Natural Flow";
+	GRDrawingAreaUtil.drawText(__drawingArea, text, text2x, node.getY(), 0, GRText.CENTER_Y);
+	
+	// Other
+	node.setY(node.getY() - yInc);
+	node.setX(col1x);
+	node.resetNode(HydrologyNode.NODE_TYPE_OTHER, false, true );
+	node.draw(__drawingArea);
+	text = "Import Indicator";
+	GRDrawingAreaUtil.drawText(__drawingArea, text, text1x, node.getY(), 0, GRText.CENTER_Y);
+	/* TODO SAM 2008-12-09 - export
+	node.setX(col2x);
+	node.resetNode(HydrologyNode.NODE_TYPE_OTHER, true, false );
+	node.draw(__drawingArea);
+	text += " / Natural Flow";
+	GRDrawingAreaUtil.drawText(__drawingArea, text, text2x, node.getY(), 0, GRText.CENTER_Y);
+	*/
 }
 
 /**
 Draws links between nodes.
-REVISIT (JTS - 2004-07-13)
-This would be faster if the nodes were not looked up everytime.  Store the
+TODO (JTS - 2004-07-13) This would be faster if the nodes were not looked up every time.  Store the
 position of the nodes within the node array.  The positions would have to be
-recomputed everytime a node is added or deleted.
+recomputed every time a node is added or deleted.
 */
 private void drawLinks() {
 	if (__links == null) {
@@ -2245,7 +2159,7 @@ private void drawNetworkLines() {
 	for (node = nodeTop; node != null; 
 	    node = StateMod_NodeNetwork.getDownstreamNode(
 	    node, StateMod_NodeNetwork.POSITION_COMPUTATIONAL)) {
-	    	// move ahead and skip and blank or unknown nodes (which won't
+	    // move ahead and skip and blank or unknown nodes (which won't
 		// be drawn, anyways -- check buildNodeArray()), so that 
 		// connections are only between visible nodes
 		if (holdNode == node) {
@@ -2279,7 +2193,7 @@ private void drawNetworkLines() {
 			dots = true;
 		}
 
-	    	// move ahead and skip and blank or unknown nodes (which won't
+	   	// move ahead and skip and blank or unknown nodes (which won't
 		// be drawn, anyways -- check buildNodeArray()), so that 
 		// connections are only between visible nodes
 		holdNode2 = ds;
@@ -2298,8 +2212,7 @@ private void drawNetworkLines() {
 	
 		if (__shadedRivers) {
 			// must show a shaded wide line for the rivers
-			GRDrawingAreaUtil.setColor(__drawingArea,
-				GRColor.gray);
+			GRDrawingAreaUtil.setColor(__drawingArea, GRColor.gray);
 			GRDrawingAreaUtil.setLineWidth(__drawingArea,
 				(double)(__maxReachLevel - node.getReachLevel()
 				+ 1) * __lineThickness);
@@ -2351,32 +2264,24 @@ private void drawNodesOutlines(Graphics g) {
 	GRDrawingAreaUtil.drawLine(__drawingArea, 
 		__mouseDataX - __xAdjust, 
 		__mouseDataY - __yAdjust, 
-		__draggedNodeLimits.getWidth() + __mouseDataX 
-			- __xAdjust, 
+		__draggedNodeLimits.getWidth() + __mouseDataX - __xAdjust, 
 		__mouseDataY - __yAdjust);
 	
 	GRDrawingAreaUtil.drawLine(__drawingArea, 
 		__mouseDataX - __xAdjust, 
-		__mouseDataY + __draggedNodeLimits.getHeight() 
-			- __yAdjust,
-		__draggedNodeLimits.getWidth() + __mouseDataX 
-			- __xAdjust,
-		__mouseDataY + __draggedNodeLimits.getHeight() 
-			- __yAdjust);
+		__mouseDataY + __draggedNodeLimits.getHeight() - __yAdjust,
+		__draggedNodeLimits.getWidth() + __mouseDataX - __xAdjust,
+		__mouseDataY + __draggedNodeLimits.getHeight() - __yAdjust);
 	GRDrawingAreaUtil.drawLine(__drawingArea, 
 		__mouseDataX - __xAdjust, 
 		__mouseDataY - __yAdjust,
 		__mouseDataX - __xAdjust, 
-		__mouseDataY + __draggedNodeLimits.getHeight() 
-			- __yAdjust);
+		__mouseDataY + __draggedNodeLimits.getHeight() - __yAdjust);
 	GRDrawingAreaUtil.drawLine(__drawingArea,
-		__mouseDataX + __draggedNodeLimits.getWidth() 
-			- __xAdjust,	
+		__mouseDataX + __draggedNodeLimits.getWidth() - __xAdjust,	
 		__mouseDataY - __yAdjust, 
-		__mouseDataX + __draggedNodeLimits.getWidth() 
-			- __xAdjust,
-		__mouseDataY + __draggedNodeLimits.getHeight() 
-			- __yAdjust);
+		__mouseDataX + __draggedNodeLimits.getWidth() - __xAdjust,
+		__mouseDataY + __draggedNodeLimits.getHeight() - __yAdjust);
 	
 	for (int i = 0; i < __draggedNodes.length; i++) {
 		drawDraggedNodeOutline(i);
@@ -2387,7 +2292,7 @@ private void drawNodesOutlines(Graphics g) {
 Called when a user presses OK on an Add Node dialog.
 */
 protected void endAddNode() {
-	__networkChanged = true;
+	setNetworkChanged (true);
 	forceRepaint();
 }
 
@@ -2425,8 +2330,7 @@ throws Throwable {
 }
 
 /**
-Finds the highest reach level in the entire network.  This is used for
-shading rivers.
+Finds the highest reach level in the entire network.  This is used for shading rivers.
 @return the highest reach level in the entire network.
 */
 private int findMaxReachLevel() {
@@ -2440,27 +2344,23 @@ private int findMaxReachLevel() {
 }
 
 /**
-Determines the nearest grid point in data units relative to the data unit 
-points passed in.
+Determines the nearest grid point in data units relative to the data unit points passed in.
 @param px an X point, in data units
 @param py a Y point, in data units
 @return a two-element integer array.  Element one stores the X location of
-the nearest grid point and element two stores the Y location.  Both are in
-data units.
+the nearest grid point and element two stores the Y location.  Both are in data units.
 */
 private double[] findNearestGridXY(int px, int py) {
 	double[] p = new double[2];
 
-	// determine the amount that the point is away from a grid 
-	// location
+	// determine the amount that the point is away from a grid location
 	double lx = Math.abs(__dataLeftX) % __gridStep;
 	double by = Math.abs(__dataBottomY) % __gridStep;
 	
 	double posX = (px % __gridStep) - lx;
 	double posY = (py % __gridStep) - by;
 	
-	// then determine which gridstep it is closer to -- for X, the left
-	// one or the right one
+	// then determine which gridstep it is closer to -- for X, the left one or the right one
 	if (posX > (__gridStep / 2)) {
 		p[0] = (__gridStep - posX);
 	}
@@ -2479,8 +2379,7 @@ private double[] findNearestGridXY(int px, int py) {
 }
 
 /**
-Determines the nearest grid point in data units relative to the point 
-stored in the MouseEvent.
+Determines the nearest grid point in data units relative to the point stored in the MouseEvent.
 @param event the MouseEvent for which to find the nearest grid point.
 @return a two-element integer array.  Element one stores the X location of
 the nearest grid point and element two stores the Y location.  Both are in
@@ -2512,8 +2411,7 @@ private double[] findNearestGridXY(MouseEvent event) {
 	
 	double posX = (x % __gridStep) + lx;
 	double posY = (y % __gridStep) + by;
-	// then determine which gridstep it is closer to -- for X, the left
-	// one or the right one
+	// then determine which gridstep it is closer to -- for X, the left one or the right one
 	if (posX > (__gridStep / 2)) {
 		p[0] = x + (__gridStep - posX);
 	}
@@ -2534,12 +2432,10 @@ private double[] findNearestGridXY(MouseEvent event) {
 }
 
 /**
-Determines the nearest grid point in data units relative to the point 
-stored in the MouseEvent.
+Determines the nearest grid point in data units relative to the point stored in the MouseEvent.
 @param event the MouseEvent for which to find the nearest grid point.
 @return a two-element integer array.  Element one stores the X location of
-the nearest grid point and element two stores the Y location.  Both are in
-data units.
+the nearest grid point and element two stores the Y location.  Both are in data units.
 */
 private double[] findNearestGridXY(double x, double y) {
 	double[] p = new double[2];
@@ -2563,8 +2459,7 @@ private double[] findNearestGridXY(double x, double y) {
 	
 	double posX = (x % __gridStep) + lx;
 	double posY = (y % __gridStep) + by;
-	// then determine which gridstep it is closer to -- for X, the left
-	// one or the right one
+	// then determine which gridstep it is closer to -- for X, the left one or the right one
 	if (posX > (__gridStep / 2)) {
 		p[0] = x + (__gridStep - posX);
 	}
@@ -2611,8 +2506,7 @@ private void findNode() {
 		return;
 	}
 
-	// find the node in the network and center the display window 
-	// around it.
+	// find the node in the network and center the display window around it.
 	double x = 0;
 	double y = 0;
 	boolean found = false;
@@ -2699,10 +2593,8 @@ protected void forceRepaint() {
 }
 
 /**
-Returns the annotation node held in the annotations Vector at the specified
-position.
-@return the annotation node held in the annotations Vector at the specified
-position.
+Returns the annotation node held in the annotations Vector at the specified position.
+@return the annotation node held in the annotations Vector at the specified position.
 */
 protected HydrologyNode getAnnotationNode(int nodeNum) {
 	return (HydrologyNode)__annotations.get(nodeNum);
@@ -2772,6 +2664,14 @@ Returns the node network.
 */
 protected StateMod_NodeNetwork getNetwork() {
 	return __network;
+}
+
+/**
+Indicate whether any of the main network or its node properties have changed since the last load/save.
+*/
+public boolean getNetworkChanged ()
+{
+	return __networkChanged;
 }
 
 /**
@@ -2864,14 +2764,13 @@ Checks to see if the network is dirty.
 @return true if the network is dirty, false if not.
 */
 public boolean isDirty() {
-	if (__networkChanged) {
+	if (getNetworkChanged()) {
 //		Message.printStatus(1, "", "isDirty: NetworkChanged: true");
 		return true;
 	}
 	for (int i = 0; i < __nodes.length; i++) {
 		if (__nodes[i].isDirty()) {
-//			Message.printStatus(1, "", 
-//				"isDirty: Node[" + i + "]: dirty");
+//			Message.printStatus(1, "", "isDirty: Node[" + i + "]: dirty");
 			return true;
 		}
 	}
@@ -2880,8 +2779,7 @@ public boolean isDirty() {
 	for (int i = 0; i < size; i++) {
 		node = (HydrologyNode)__annotations.get(i);
 		if (node.isDirty()) {
-//			Message.printStatus(1, "", 
-//				"isDirty: Annotation[" + i + "]: dirty");
+//			Message.printStatus(1, "", "isDirty: Annotation[" + i + "]: dirty");
 			return true;
 		}
 	}
@@ -2896,24 +2794,18 @@ public void keyPressed(KeyEvent event) {
 	if (__legendDrag || __nodeDrag) {
 		// only worry about escape keypresses
 		if (event.getKeyCode() == KeyEvent.VK_ESCAPE) {
-			// and only worry about them if something is 
-			// currently being dragged
+			// and only worry about them if something is currently being dragged
 			if (__legendDrag) {
 				__legendDrag = false;
 			}
 			else if (__nodeDrag) {
 				if (__isLastSelectedAnAnnotation) {
-					HydrologyNode node = (HydrologyNode)
-						__annotations.get(
-						__clickedNodeNum);
+					HydrologyNode node = (HydrologyNode)__annotations.get(__clickedNodeNum);
 					node.setVisible(true);
 				}
 				else {
-					__parent.displayNodeXY(
-					      __nodes[__clickedNodeNum].getX(),
-					      __nodes[__clickedNodeNum].getY());
-					__nodes[__clickedNodeNum].setVisible(
-						true);
+					__parent.displayNodeXY(__nodes[__clickedNodeNum].getX(), __nodes[__clickedNodeNum].getY());
+					__nodes[__clickedNodeNum].setVisible(true);
 				}
 				__clickedNodeNum = -1;
 				__nodeDrag = false;
@@ -2956,12 +2848,10 @@ public void mouseDragged(MouseEvent event) {
 			// the conversion to data units from mouse-click units 
 			double[] p = findNearestGridXY(event);
 
-			// if the nearest grid position is not where the node
-			// currently is located ...
+			// if the nearest grid position is not where the node currently is located ...
 			if (p[0] != (int)__mouseDataX 
 				|| p[1] != (int)__mouseDataY) {
-				// move the node to be situated on that grid
-				// point
+				// move the node to be situated on that grid point
 				__mouseDataX = p[0];
 				__mouseDataY = p[1];
 				repaint();
@@ -2971,8 +2861,7 @@ public void mouseDragged(MouseEvent event) {
 			// convert the mouse click to data units so that the
 			// node bounding box can be drawn on the screen
 			__mouseDataX = convertX(event.getX()) + __screenLeftX;
-			__mouseDataY = convertY(invertY(event.getY())) 
-				+ __screenBottomY;
+			__mouseDataY = convertY(invertY(event.getY())) + __screenBottomY;
 			repaint();
 		}
 		__parent.displayNodeXY(__mouseDataX, __mouseDataY);
@@ -2987,12 +2876,10 @@ public void mouseDragged(MouseEvent event) {
 			double[] p = findNearestGridXY((int)cx - (int)__xAdjust,
 				(int)cy - (int)__yAdjust);
 
-			// if the nearest grid location is different from where
-			// the legend was last ...
+			// if the nearest grid location is different from where the legend was last ...
 			if (__mouseDataX != ((int)cx + p[0]) 
 				|| __mouseDataY != ((int)cy + p[1])){
-				// move the legend so that it is at that
-				// grid location
+				// move the legend so that it is at that grid location
 				__mouseDataX = (int)cx + p[0];
 				__mouseDataY = (int)cy + p[1];
 			}
@@ -3000,15 +2887,13 @@ public void mouseDragged(MouseEvent event) {
 		}
 		else {
 			__mouseDataX = convertX(event.getX()) + __screenLeftX;
-			__mouseDataY = convertY(invertY(event.getY())) 
-				+ __screenBottomY;
+			__mouseDataY = convertY(invertY(event.getY())) + __screenBottomY;
 			repaint();
 		}
 	}
 	else if (__screenDrag) {
 		double mouseX = convertX(event.getX()) + __screenLeftX;
-		double mouseY = convertY(invertY(event.getY())) 
-			+ __screenBottomY;
+		double mouseY = convertY(invertY(event.getY())) +  __screenBottomY;
 
 		double dx = __mouseDataX - mouseX;
 		double dy = __mouseDataY - mouseY;
@@ -3044,9 +2929,7 @@ public void mouseDragged(MouseEvent event) {
 			// or left.
 			if (__screenLeftX >(__dataLeftX + __totalDataWidth)
 				- convertX(getBounds().width)) {
-				__screenLeftX = (__dataLeftX 
-					+ __totalDataWidth)
-					- convertX(getBounds().width);
+				__screenLeftX = (__dataLeftX + __totalDataWidth) - convertX(getBounds().width);
 			}	
 
 			if (__screenLeftX < __dataLeftX) {
@@ -3081,8 +2964,7 @@ public void mouseDragged(MouseEvent event) {
 			__mouseDataY -= __screenBottomY;
 			__screenBottomY += (dy * __DY);
 
-			// don't allow the screen to be moved too far up 
-			// or down.
+			// don't allow the screen to be moved too far up or down.
 			if (__screenBottomY > (__dataBottomY 
 				+ __totalDataHeight)
 				- convertY(getBounds().height)) {
@@ -3153,15 +3035,13 @@ public void mousePressed(MouseEvent event) {
 		else {
 			__parent.displayNode(__nodes[__clickedNodeNum]);
 		}
-		// ... then set everything up so that the node can be
-		// dragged around the screen.  
+		// ... then set everything up so that the node can be dragged around the screen.  
 		if (!__editable) {
 			return;
 		}		
 
 		if (__isLastSelectedAnAnnotation) {
-			HydrologyNode node = (HydrologyNode)
-				__annotations.get(__clickedNodeNum);
+			HydrologyNode node = (HydrologyNode)__annotations.get(__clickedNodeNum);
 			__draggedNodeLimits = new GRLimits(node.getX(), 
 				node.getY(), 
 				node.getX() + node.getWidth(),
@@ -3172,10 +3052,8 @@ public void mousePressed(MouseEvent event) {
 				__mouseDataY = p[1];
 			}
 			else {
-				__mouseDataX = convertX(event.getX()) 
-					+ __screenLeftX;
-				__mouseDataY = convertY(invertY(event.getY())) 
-					+ __screenBottomY;
+				__mouseDataX = convertX(event.getX()) + __screenLeftX;
+				__mouseDataY = convertY(invertY(event.getY())) + __screenBottomY;
 			}
 			__xAdjust = __mouseDataX- __draggedNodeLimits.getMinX();
 			__yAdjust = __mouseDataY- __draggedNodeLimits.getMinY();
@@ -3189,22 +3067,16 @@ public void mousePressed(MouseEvent event) {
 				__mouseDownX = __mouseDataX;
 				__mouseDataY = p[1];
 				__mouseDownY = __mouseDataY;
-				__draggedNodeLimits = 
-					__nodes[__clickedNodeNum].getLimits();
-				__xAdjust = __nodes[__clickedNodeNum].getWidth()
-					/ 2;
-				__yAdjust =__nodes[__clickedNodeNum].getHeight()
-					/ 2;
+				__draggedNodeLimits = __nodes[__clickedNodeNum].getLimits();
+				__xAdjust = __nodes[__clickedNodeNum].getWidth()/ 2;
+				__yAdjust =__nodes[__clickedNodeNum].getHeight()/ 2;
 			}
 			else {
-				__mouseDataX = convertX(event.getX()) 
-					+ __screenLeftX;
+				__mouseDataX = convertX(event.getX()) + __screenLeftX;
 				__mouseDownX = __mouseDataX;
-				__mouseDataY = convertY(invertY(event.getY())) 
-					+ __screenBottomY;
+				__mouseDataY = convertY(invertY(event.getY())) + __screenBottomY;
 				__mouseDownY = __mouseDataY;
-				__draggedNodeLimits = 
-					__nodes[__clickedNodeNum].getLimits();
+				__draggedNodeLimits = __nodes[__clickedNodeNum].getLimits();
 				__xAdjust = convertX(event.getX()) 
 					+ __screenLeftX
 					- __draggedNodeLimits.getMinX();
@@ -3215,12 +3087,10 @@ public void mousePressed(MouseEvent event) {
 			}
 
 			if (__nodes[__clickedNodeNum].isSelected()) {
-				// if the node is already selected, retain
-				// the existing node selection.
+				// if the node is already selected, retain the existing node selection.
 			}
 			else {
-				// otherwise, the node is the only selected
-				// one
+				// otherwise, the node is the only selected one
 				for (int i = 0; i < __nodes.length; i++) {
 					__nodes[i].setSelected(false);		
 				}		
@@ -3240,37 +3110,27 @@ public void mousePressed(MouseEvent event) {
 			if (!__editable) {
 				return;
 			}
-			// ... if so, set everything up so it can be
-			// dragged.
+			// ... if so, set everything up so it can be dragged.
 			__legendDrag = true;
 			__mouseDataX = convertX(event.getX()) + __screenLeftX;
-			__mouseDataY = convertY(invertY(event.getY())) 
-				+ __screenBottomY;
-			__xAdjust = convertX(event.getX()) + __screenLeftX
-				- __legendLimits.getMinX();
-			__yAdjust = 
-				convertY(invertY(event.getY()))+__screenBottomY
-				- __legendLimits.getMinY();
+			__mouseDataY = convertY(invertY(event.getY())) + __screenBottomY;
+			__xAdjust = convertX(event.getX()) + __screenLeftX - __legendLimits.getMinX();
+			__yAdjust = convertY(invertY(event.getY()))+__screenBottomY - __legendLimits.getMinY();
 			__eraseLegend = true;
 			forceRepaint();
 		}
 		else {
 			if (__networkMouseMode == MODE_PAN) {
-				// otherwise, prepare the screen to 
-				// be moved around
+				// otherwise, prepare the screen to be moved around
 				__screenDrag = true;
-				__mouseDataX = convertX(event.getX()) 
-					+ __screenLeftX;
-				__mouseDataY = convertY(invertY(event.getY())) 
-					+ __screenBottomY;
+				__mouseDataX = convertX(event.getX()) + __screenLeftX;
+				__mouseDataY = convertY(invertY(event.getY())) + __screenBottomY;
 				repaint();
 			}
 			else {
 				__drawingBox = true;
-				__dragStartX = convertX(event.getX()) 
-					+ __screenLeftX;
-				__dragStartY = convertY(invertY(event.getY())) 
-					+ __screenBottomY;
+				__dragStartX = convertX(event.getX()) + __screenLeftX;
+				__dragStartY = convertY(invertY(event.getY())) + __screenBottomY;
 			}
 		}
 	}
@@ -3284,8 +3144,7 @@ legend in its new position, or by showing a popup menu.
 public void mouseReleased(MouseEvent event) {
 	if (event.isPopupTrigger()) {
 		// find the node on which the popup menu was triggered
-		int nodeNum = findNodeOrAnnotationAtXY(convertX(event.getX()) 
-			+ __screenLeftX,
+		int nodeNum = findNodeOrAnnotationAtXY(convertX(event.getX()) + __screenLeftX,
 			convertY(invertY(event.getY())) + __screenBottomY);
 		__popupX = convertX(event.getX()) + __screenLeftX;
 		__popupY = convertY(invertY(event.getY())) + __screenBottomY;
@@ -3311,14 +3170,12 @@ public void mouseReleased(MouseEvent event) {
 					__addNodeMenuItem.setEnabled(false);
 					__deleteNodeMenuItem.setEnabled(false);
 				}
-				__nodePopup.show(event.getComponent(), 
-					event.getX(), event.getY());
+				__nodePopup.show(event.getComponent(), event.getX(), event.getY());
 			}
 		}
 		else {
 			// no node was clicked on
-			__networkPopup.show(event.getComponent(), event.getX(), 
-				event.getY());
+			__networkPopup.show(event.getComponent(), event.getX(), event.getY());
 		}
 		return;
 	}
@@ -3333,10 +3190,8 @@ public void mouseReleased(MouseEvent event) {
 
 		// make sure that the user didn't simply click on a node and
 		// release the mouse button without moving.  Without the 
-		// following check there's a good chance that the node will
-		// be moved slightly. 
-		if (__mouseDeviceX == event.getX() 
-			&& __mouseDeviceY == event.getY()) {
+		// following check there's a good chance that the node will be moved slightly. 
+		if (__mouseDeviceX == event.getX() && __mouseDeviceY == event.getY()) {
 			__clickedNodeNum = -1;
 			forceRepaint();
 			return;
@@ -3344,34 +3199,27 @@ public void mouseReleased(MouseEvent event) {
 		
 		if (!__snapToGrid) {
 			__mouseDataX = convertX(event.getX()) + __screenLeftX;
-			__mouseDataY = convertY(invertY(event.getY())) 
-				+ __screenBottomY;
+			__mouseDataY = convertY(invertY(event.getY())) + __screenBottomY;
 		}
 			
 		if (__isLastSelectedAnAnnotation) {
-			// prevent nodes from being dragged off the drawing
-			// area completely.
+			// prevent nodes from being dragged off the drawing area completely.
 			__mouseDataX -= __xAdjust;
 			__mouseDataY -= __yAdjust;
 
-			HydrologyNode node = (HydrologyNode)
-				__annotations.get(__clickedNodeNum);
+			HydrologyNode node = (HydrologyNode)__annotations.get(__clickedNodeNum);
 			GRLimits data = __drawingArea.getDataLimits();
 			if (__mouseDataX < data.getLeftX()) {
-				__mouseDataX = data.getLeftX() 
-					+ node.getWidth() / 2;
+				__mouseDataX = data.getLeftX() + node.getWidth() / 2;
 			}
 			if (__mouseDataY < data.getBottomY()) {
-				__mouseDataY = data.getBottomY() 
-					+ node.getHeight() / 2;
+				__mouseDataY = data.getBottomY() + node.getHeight() / 2;
 			}
 			if (__mouseDataX > data.getRightX()) {
-			__mouseDataX = data.getRightX() 
-				- node.getWidth() / 2;
+			__mouseDataX = data.getRightX() - node.getWidth() / 2;
 			}
 			if (__mouseDataY > data.getTopY()) {
-				__mouseDataY = data.getTopY()
-					- node.getHeight() / 2;
+				__mouseDataY = data.getTopY() - node.getHeight() / 2;
 			}
 
 			nodeWasMoved();
@@ -3399,14 +3247,11 @@ public void mouseReleased(MouseEvent event) {
 			//__mouseDataY = __mouseDataY;
 		} 
 		else {
-			__mouseDataX = convertX(event.getX()) + __screenLeftX
-				- __xAdjust;
-			__mouseDataY = convertY(invertY(event.getY())) 
-				+ __screenBottomY - __yAdjust;
+			__mouseDataX = convertX(event.getX()) + __screenLeftX - __xAdjust;
+			__mouseDataY = convertY(invertY(event.getY())) + __screenBottomY - __yAdjust;
 		}
 
-		// prevent the legend from being dragged off the edge of
-		// the screen
+		// prevent the legend from being dragged off the edge of the screen
 		GRLimits data = __drawingArea.getDataLimits();
 		if (__mouseDataX < data.getLeftX()) {
 			__mouseDataX = data.getLeftX() + 10;
@@ -3435,8 +3280,7 @@ public void mouseReleased(MouseEvent event) {
 		__screenDrag = false;
 	}
 	else if (__drawingBox) {
-		// finish drawing the box and select all the nodes that
-		// were within it
+		// finish drawing the box and select all the nodes that were within it
 		__drawingBox = false;
 
 		double lx, rx, ty, by;
@@ -3487,10 +3331,8 @@ private void moveDraggedNode(int num) {
 	double nodeY = __draggedNodesYs[num] + dy;
 
 	if (__snapToGrid) {
-		__nodes[__draggedNodes[num]].setX(nodeX 
-			+ __nodes[__draggedNodes[num]].getWidth() / 2);
-		__nodes[__draggedNodes[num]].setY(nodeY
-			+ __nodes[__draggedNodes[num]].getHeight() / 2);
+		__nodes[__draggedNodes[num]].setX(nodeX + __nodes[__draggedNodes[num]].getWidth() / 2);
+		__nodes[__draggedNodes[num]].setY(nodeY + __nodes[__draggedNodes[num]].getHeight() / 2);
 	}
 	else {
 		__nodes[__draggedNodes[num]].setX(nodeX);
@@ -3507,23 +3349,16 @@ private void moveDraggedNodes() {
 	// area completely.
 	GRLimits data = __drawingArea.getDataLimits();
 	if (__mouseDataX < data.getLeftX()) {
-		__mouseDataX = data.getLeftX() 
-			+ __nodes[__clickedNodeNum].getWidth() 
-			/ 2;
+		__mouseDataX = data.getLeftX() + __nodes[__clickedNodeNum].getWidth() / 2;
 	}
 	if (__mouseDataY < data.getBottomY()) {
-		__mouseDataY = data.getBottomY() 
-			+ __nodes[__clickedNodeNum].getHeight() 
-			/ 2;
+		__mouseDataY = data.getBottomY() + __nodes[__clickedNodeNum].getHeight() / 2;
 	}
 	if (__mouseDataX > data.getRightX()) {
-	__mouseDataX = data.getRightX() 
-		- __nodes[__clickedNodeNum].getWidth() / 2;
+	__mouseDataX = data.getRightX() - __nodes[__clickedNodeNum].getWidth() / 2;
 	}
 	if (__mouseDataY > data.getTopY()) {
-		__mouseDataY = data.getTopY()
-			- __nodes[__clickedNodeNum].getHeight() 
-			/ 2;
+		__mouseDataY = data.getTopY() - __nodes[__clickedNodeNum].getHeight() / 2;
 	}
 			
 	if (__draggedNodes == null || __draggedNodes.length == 0) {
@@ -3673,7 +3508,7 @@ public void paint(Graphics g) {
 		setPrintNodeSize(__currNodeSize);
 
 		for (int i = 0; i < __nodes.length; i++) {
-			__nodes[i].calculateBounds(__drawingArea);
+			__nodes[i].calculateExtents(__drawingArea);
 		}
 	
 		// odd-looking, but it works.  With the above things in place,
@@ -3742,8 +3577,7 @@ public void paint(Graphics g) {
 		Font f = __drawingArea.getFont();
 		// a normal paint() call -- translate the screen so the proper
 		// portion is drawn in the screen and set up the drawing limits.
-		if (!__printingNetwork && !__printingScreen && !__savingNetwork
-		    && !__savingScreen) {
+		if (!__printingNetwork && !__printingScreen && !__savingNetwork && !__savingScreen) {
 			__drawingArea.setFont(f.getName(), f.getStyle(), __fontPointSize);
 			setLimits(getLimits(true));			
 			__drawingArea.setDataLimits(new GRLimits(
@@ -4081,16 +3915,12 @@ public int print(Graphics g, PageFormat pageFormat, int pageIndex) {
 		    "Plotter")) {
 			if (pageFormat.getOrientation() 
 			    == PageFormat.LANDSCAPE) {
-				transX = pageFormat.getImageableX() 
-					* (1 / 1);
-				transY = pageFormat.getImageableY() 
-					* (1 / 1);
+				transX = pageFormat.getImageableX() * (1 / 1);
+				transY = pageFormat.getImageableY() * (1 / 1);
 			}
 			else {
-				transX = pageFormat.getImageableX() 
-					* (1 / 1);
-				transY = pageFormat.getImageableY() 
-					* (1 / 1);
+				transX = pageFormat.getImageableX() * (1 / 1);
+				transY = pageFormat.getImageableY() * (1 / 1);
 			}
 		}
 
@@ -4155,7 +3985,6 @@ protected void printNetwork()
 	// go back to the previous zoom level
 	if (zoom > 100) {
 		for (double d = 100; d < zoom; d *= 2) {
-
 			zoomIn();
 		}
 	}
@@ -4239,10 +4068,8 @@ private void processAnnotations() {
 		double x = (new Double(xs)).doubleValue();
 		double y = (new Double(ys)).doubleValue();
 
-		int fontSize = 
-			new Integer(p.getValue("OriginalFontSize")).intValue();
-		fontSize = calculateScaledFont(p.getValue("FontName"), 
-			p.getValue("FontStyle"), fontSize, false);
+		int fontSize = new Integer(p.getValue("OriginalFontSize")).intValue();
+		fontSize = calculateScaledFont(p.getValue("FontName"), p.getValue("FontStyle"), fontSize, false);
 
 		GRLimits limits = GRDrawingAreaUtil.getTextExtents(
 			__drawingArea, text, GRUnits.DEVICE,
@@ -4251,8 +4078,7 @@ private void processAnnotations() {
 		double w = convertX(limits.getWidth());
 		double h = convertY(limits.getHeight());
 
-		// calculate the actual limits for the from the lower-left 
-		// corner
+		// calculate the actual limits for the from the lower-left  corner
 		// to the upper-right, in order to know when the text has been 
 		// clicked on (for dragging, or popup menus).
 	
@@ -4278,8 +4104,7 @@ private void processAnnotations() {
 		else if (position.equalsIgnoreCase("UpperLeft")) {
 			node.setPosition(x - w, y, w, h);
 		}
-		else if (position.equalsIgnoreCase("Above")
-		        || position.equalsIgnoreCase("AboveCenter")) {
+		else if (position.equalsIgnoreCase("Above") || position.equalsIgnoreCase("AboveCenter")) {
 			node.setPosition(x - (w / 2), y, w, h);
 		}
 		else if (position.equalsIgnoreCase("Center")) {
@@ -4373,8 +4198,7 @@ private void removeIDFromLinks(String id) {
 		if (found) {
 			__links.remove(i);
 			Message.printWarning(2, routine, 
-				"ID '" + id + "' found in a link.  The link "
-				+ "will no longer be drawn.");
+				"ID '" + id + "' found in a link.  The link will no longer be drawn.");
 		}
 	}
 }	
@@ -4411,18 +4235,17 @@ protected void saveScreen() {
 	__savingScreen = false;
 }
 
+// FIXME SAM 2008-12-11 Need a way to save the selected filename so that it can be the default
+// for the next save.
 /**
 Saves the network as an XML file.
-@param filename the name of the file to put into the JFileChooser.  If null,
-it will be ignored. 
+@param filename the name of the file to put into the JFileChooser.  If null, it will be ignored. 
 */
 protected void saveXML(String filename) {
 	String lastDirectorySelected = JGUIUtil.getLastFileDialogDirectory();
-	JFileChooser fc = JFileChooserFactory.createJFileChooser(
-		lastDirectorySelected);
+	JFileChooser fc = JFileChooserFactory.createJFileChooser( lastDirectorySelected);
 	fc.setDialogTitle("Save XML Network File");
-	SimpleFileFilter netff = new SimpleFileFilter("net",
-		"Network Files");
+	SimpleFileFilter netff = new SimpleFileFilter("net", "Network Files");
 	fc.addChoosableFileFilter(netff);
 	fc.setFileFilter(netff);
 	fc.setDialogType(JFileChooser.SAVE_DIALOG);	
@@ -4457,21 +4280,17 @@ protected void saveXML(String filename) {
 	
 	PropList p = new PropList("");
 	p.set("ID=\"Main\"");
-	p.set("PaperSize=\"" + PrintUtil.pageFormatToString(__pageFormat) 
-		+ "\"");
-	p.set("PageOrientation=\"" 
-		+ PrintUtil.getOrientationAsString(__pageFormat) + "\"");
+	p.set("PaperSize=\"" + PrintUtil.pageFormatToString(__pageFormat) + "\"");
+	p.set("PageOrientation=\"" + PrintUtil.getOrientationAsString(__pageFormat) + "\"");
 	p.set("NodeLabelFontPointSize=" + __printFontPixelSize);
 	p.set("NodeSize=" + __nodeSize);
 
 	try {
-		__network.writeXML(selectedFilename, limits, 
-			__parent.getLayouts(), __annotations, __links, 
-			__legendLimits);
+		__network.writeXML(selectedFilename, limits, __parent.getLayouts(), __annotations, __links, __legendLimits);
 	}
 	catch (Exception e) {
 		String routine = "StateMod_Network_JComponent.saveXML()";
-		Message.printWarning(1, routine, "Error saving XML.");
+		Message.printWarning(1, routine, "Error saving network XML file.");
 		Message.printWarning(2, routine, e);
 	}
 	printNetworkInfo();
@@ -4504,16 +4323,17 @@ private void scaleUnscalables() {
 }
 
 /**
-Sets whether the network and its nodes are dirty.  Usually will be called with
-a parameter of false.
+Sets whether the network and its nodes are dirty.  Usually will be called with a parameter of false
+after a save has occurred.
 @param dirty whether to mark everything dirty or not.
 */
 protected void setDirty(boolean dirty) {
 //	Message.printStatus(1, "", "SetDirty: " + dirty);
-	__networkChanged = dirty;
+	setNetworkChanged ( dirty );
 	for (int i = 0; i < __nodes.length; i++) {
+		// FIXME SAM 2008-12-11 Why is the following always false?
 		__nodes[i].setDirty(false);
-	}	
+	}
 }
 
 /**
@@ -4535,8 +4355,7 @@ protected void setMode(int mode) {
 }
 
 /**
-Sets the network to be used.  Called by the code that has read in a network
-from an XML file.
+Sets the network to be used.  Called by the code that has read in a network from an XML file.
 @param network the network to use.
 */
 protected void setNetwork(StateMod_NodeNetwork network, boolean dirty, boolean doAll) {
@@ -4552,7 +4371,7 @@ protected void setNetwork(StateMod_NodeNetwork network, boolean dirty, boolean d
 		__annotations = new Vector();
 	}	
 	printNetworkInfo();
-	__networkChanged = dirty;
+	setNetworkChanged ( dirty );
 	if (!doAll) {
 		return;
 	}
@@ -4562,6 +4381,14 @@ protected void setNetwork(StateMod_NodeNetwork network, boolean dirty, boolean d
 	__network.setAnnotations(__annotations);
 	__referenceJComponent.setNetwork(__network );
 	__referenceJComponent.setNodesArray(__nodes);
+}
+
+/**
+Set whether the network has been changed, in particular nodes added/deleted.
+*/
+public void setNetworkChanged ( boolean networkChanged )
+{
+	__networkChanged = networkChanged;
 }
 
 /**
@@ -4589,12 +4416,10 @@ protected void setOrientation(String orientation) {
 		__pageFormat = PrintUtil.getPageFormat(
 			PrintUtil.pageFormatToString(__pageFormat));
 		if (orientation.trim().equalsIgnoreCase("Landscape")) {
-			PrintUtil.setPageFormatOrientation(__pageFormat, 
-				PrintUtil.LANDSCAPE);
+			PrintUtil.setPageFormatOrientation(__pageFormat, PrintUtil.LANDSCAPE);
 		}
 		else {
-			PrintUtil.setPageFormatOrientation(__pageFormat, 
-				PrintUtil.PORTRAIT);
+			PrintUtil.setPageFormatOrientation(__pageFormat, PrintUtil.PORTRAIT);
 		}
 		PrintUtil.setPageFormatMargins(__pageFormat,.75, .75, .75, .75);
 		int hPixels = (int)(__pageFormat.getWidth() / __printScale);
@@ -4635,8 +4460,7 @@ protected void setPaperSize(String size) {
 	}
 	try {
 		__pageFormat = PrintUtil.getPageFormat(size);
-		PrintUtil.setPageFormatOrientation(__pageFormat, 
-			PrintUtil.LANDSCAPE);
+		PrintUtil.setPageFormatOrientation(__pageFormat, PrintUtil.LANDSCAPE);
 		PrintUtil.setPageFormatMargins(__pageFormat,.75, .75, .75, .75);
 		int hPixels = (int)(__pageFormat.getWidth() / __printScale);
 		int vPixels = (int)(__pageFormat.getHeight() / __printScale);
@@ -4660,8 +4484,7 @@ piece of paper could only have 792 x 612 pixels on it.  Since each node in the
 network is drawn at 20 pixels high, it is possible that larger networks would
 run out of space.  <p>
 At the same time, it should be possible to scale larger networks so that 
-even then can fit on a smaller piece of paper.  Thus the use of the printing 
-scale.  <p>
+even then can fit on a smaller piece of paper.  Thus the use of the printing scale.  <p>
 The printing scale basically adjusts the DPI at which Java prints.  A scale
 of .5 would result in 144 DPI and .25 in 288 DPI.  2 would result in 36 DPI.<P>
 .25 is a good scale for most purposes, but further adjustments may be necessary
@@ -4721,23 +4544,21 @@ protected void setPrintNodeSize(double size) {
 		__nodes[i].setSymbol(null);
 		__nodes[i].setBoundsCalculated(false);
 		__nodes[i].setDataDiameter(diam);
-		__nodes[i].calculateBounds(__drawingArea);
+		__nodes[i].calculateExtents(__drawingArea);
 	}
 	forceRepaint();
 }
 
 /**
 Sets the reference display to use in conjunction with this display.
-@param reference the reference display that goes along with this network
-display.
+@param reference the reference display that goes along with this network display.
 */
 protected void setReference(StateMod_NetworkReference_JComponent reference) {
 	__referenceJComponent = reference;
 }
 
 /**
-Sets the total height and width of the entire network display, in device unit
-pixels.
+Sets the total height and width of the entire network display, in device unit pixels.
 @param w the total width of the entire network.
 @param h the total height of the entire network.
 */
@@ -4766,21 +4587,16 @@ protected void setViewPosition(int x, int y) {
 	__screenBottomY = y;
 	__screenLeftX = x;
 
-	// make sure the view position is not moved beyond the network
-	// drawing boundaries
-	if (__screenLeftX > (__dataLeftX + __totalDataWidth)
-	    - convertX(getBounds().width)) {
-		__screenLeftX = (__dataLeftX + __totalDataWidth)
-			- convertX(getBounds().width);
+	// make sure the view position is not moved beyond the network drawing boundaries
+	if (__screenLeftX > (__dataLeftX + __totalDataWidth) - convertX(getBounds().width)) {
+		__screenLeftX = (__dataLeftX + __totalDataWidth) - convertX(getBounds().width);
 	}	
 	if (__screenLeftX < __dataLeftX)  {
 		__screenLeftX = __dataLeftX;
 	}
 
-	if (__screenBottomY > (__dataBottomY + __totalDataHeight)
-            - convertY(getBounds().height)) {
-		__screenBottomY = (__dataBottomY + __totalDataHeight)
-			- convertY(getBounds().height);
+	if (__screenBottomY > (__dataBottomY + __totalDataHeight) - convertY(getBounds().height)) {
+		__screenBottomY = (__dataBottomY + __totalDataHeight) - convertY(getBounds().height);
 	}	
 	if (__screenBottomY < __dataBottomY) {
 		__screenBottomY = __dataBottomY;
@@ -4797,16 +4613,14 @@ Sets the data limits for the network from what was read in an XML file.
 @param h the height of the network in data units.
 */
 protected void setXMLDataLimits(double lx, double by, double w, double h) {
-	GRLimits limits = new GRLimits(
-		lx, by, lx + w, by + h);
+	GRLimits limits = new GRLimits( lx, by, lx + w, by + h);
 	__dataLimits = limits;
 	__drawingArea.setDataLimits(limits);
 	calculateDataLimits();
 }
 
 /**
-Takes a double and trims its decimal values so that it only has 6 places of
-precision.
+Takes a double and trims its decimal values so that it only has 6 places of precision.
 @param d the double to trim.
 @return the same double with only 6 places of precision.
 */
@@ -4844,8 +4658,7 @@ private double unconvertX(double x) {
 /**
 Converts an Y value in data units to an Y value in drawing units.
 @param y the y value to convert.
-@return the y value, converted from being scaled for data limits to being 
-scaled for drawing units.
+@return the y value, converted from being scaled for data limits to being scaled for drawing units.
 */
 /* TODO SAM 2007-03-01 Evaluate whether needed
 private double unconvertY(double y) {
@@ -4905,8 +4718,7 @@ info in reaction to the annotation being moved on the screen.
 to have the proplist updated.
 */
 private void updateAnnotationLocation(int annotation) {
-	HydrologyNode node = 
-		(HydrologyNode)__annotations.get(annotation);
+	HydrologyNode node = (HydrologyNode)__annotations.get(annotation);
 
 	double x = node.getX();
 	double y = node.getY();
@@ -4939,8 +4751,7 @@ private void updateAnnotationLocation(int annotation) {
 	else if (position.equalsIgnoreCase("UpperLeft")) {
 		p.setValue("Point", "" + (x + w) + "," + y);
 	}
-	else if (position.equalsIgnoreCase("Above")
-		|| position.equalsIgnoreCase("AboveCenter")) {
+	else if (position.equalsIgnoreCase("Above") || position.equalsIgnoreCase("AboveCenter")) {
 		p.setValue("Point", "" + (x + (w / 2)) + "," + y);
 	}
 	else if (position.equalsIgnoreCase("Center")) {
@@ -4949,17 +4760,14 @@ private void updateAnnotationLocation(int annotation) {
 }
 
 /**
-Updates one of the annotaiton nodes with location and text information stored 
-in the passed-in node.
+Updates one of the annotaiton nodes with location and text information stored in the passed-in node.
 @param nodeNum the number of the node (in the node array) to update.
-@param node the node holding information with which the other node should
-be updated.
+@param node the node holding information with which the other node should be updated.
 */
 protected void updateAnnotation(int nodeNum, HydrologyNode node) {
 	PropList p = (PropList)node.getAssociatedObject();
 
-	HydrologyNode vNode = (HydrologyNode)__annotations.get(
-		nodeNum);
+	HydrologyNode vNode = (HydrologyNode)__annotations.get( nodeNum);
 	PropList vp = (PropList)vNode.getAssociatedObject();
 	vNode.setAssociatedObject(p);
 
@@ -5106,8 +4914,7 @@ private void writeListFiles()
 {	String routine = "StateMod_Network_JComponent.writeListFiles";
 
 	String lastDirectorySelected = JGUIUtil.getLastFileDialogDirectory();
-	JFileChooser fc = JFileChooserFactory.createJFileChooser(
-		lastDirectorySelected);
+	JFileChooser fc = JFileChooserFactory.createJFileChooser( lastDirectorySelected);
 	fc.setDialogTitle("Select Base Filename for List Files");
 	SimpleFileFilter tff = new SimpleFileFilter("txt", "Text Files");
 	fc.addChoosableFileFilter(tff);
@@ -5135,19 +4942,14 @@ private void writeListFiles()
 		HydrologyNode.NODE_TYPE_FLOW,		// Stream gage
 		HydrologyNode.NODE_TYPE_DIV,		// Diversion
 		HydrologyNode.NODE_TYPE_DIV_AND_WELL,	// Diversion + Well
+		HydrologyNode.NODE_TYPE_PLAN,		// Plan stations
 		HydrologyNode.NODE_TYPE_RES,		// Reservoir
 		HydrologyNode.NODE_TYPE_ISF,		// Instream flow
 		HydrologyNode.NODE_TYPE_WELL,		// Well
-		// REVISIT SAM 2006-01-03
-		// This is not a one to one on node type yet - need to
-		// evaluate becauase Ray Bennett is not separating RIS into
-		// stream gage and stream estimate.
-		//HydrologyNode.NODE_TYPE_BASEFLOW,	// Stream estimate
 		HydrologyNode.NODE_TYPE_OTHER		// Not other stations
 	};
 	
-	/* REVISIT SAM 2006-01-03
-	  Just use node abbreviations from network
+	/* TODO SAM 2006-01-03 Just use node abbreviations from network
 	// Suffix for output, to be added to file basename...
 
 	String[] nodetype_string = {
@@ -5193,13 +4995,11 @@ private void writeListFiles()
 
 			comments = new String[1];
 			if ( types[i] == -1 ) {
-				comments[0] = "The following list contains " +
-					"data for all node types.";
+				comments[0] = "The following list contains data for all node types.";
 				outputFilename = front + "_All." + end;
 			}
 			else {
-				comments[0] = "The following list contains " +
-					"data for the following node type:  " +
+				comments[0] = "The following list contains data for the following node type:  " +
 					HydrologyNode.getTypeString(
 					types[i], HydrologyNode.ABBREVIATION) +
 					" (" +
@@ -5223,10 +5023,8 @@ private void writeListFiles()
 			}
 		}
 	}
-	// REVISIT SAM 2006-01-03
-	// Write at level 1 since this is currently triggered from an
-	// interactive action.  However, may need to change if executed in
-	// batch mode.
+	// TODO SAM 2006-01-03 Write at level 1 since this is currently triggered from an
+	// interactive action.  However, may need to change if executed in batch mode.
 	if ( warning.length() > 0 ) {
 		Message.printWarning(1, routine, warning );
 	}
@@ -5277,8 +5075,7 @@ protected void zoomIn() {
 }
 
 /**
-Zooms so that the network as shown on the screen is how it will look when
-printed.  
+Zooms so that the network as shown on the screen is how it will look when printed.  
 */
 protected void zoomOneToOne() {
 	//__screenLeftX = __dataLeftX;
@@ -5319,8 +5116,7 @@ protected void zoomOneToOne() {
 		// dpi for the screen and the paper size
 		double pixels = __dpi * (int)(__pageFormat.getHeight() / 72);
 
-		// figure out the percentage of the entire paper that
-		// can fit on the screen
+		// figure out the percentage of the entire paper that can fit on the screen
 		double pct = (getBounds().height / pixels);
 
 		// show that percentage of the data at once

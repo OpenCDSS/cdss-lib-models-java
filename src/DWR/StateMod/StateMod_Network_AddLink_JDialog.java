@@ -91,8 +91,7 @@ public void actionPerformed(ActionEvent event) {
 		dispose();
 	}
 	else if (action.equals(__BUTTON_OK)) {
-		__device.addLink(__node1ComboBox.getSelected(),
-			__node2ComboBox.getSelected());
+		__device.addLink(__node1ComboBox.getSelected(), __node2ComboBox.getSelected());
 		dispose();
 	}
 	else {
