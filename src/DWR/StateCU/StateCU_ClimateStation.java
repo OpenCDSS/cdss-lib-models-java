@@ -260,10 +260,12 @@ Specify as null if no previous file is available.
 @exception IOException if there is an error writing the file.
 */
 public static void writeStateCUFile ( String filenamePrev, String filename, List dataList,
-		String [] newComments )
+		List newComments )
 throws IOException
-{	String [] comment_str = { "#" };
-	String [] ignore_comment_str = { "#>" };
+{	List comment_str = new Vector(1);
+	comment_str.add ( "#" );
+	List ignore_comment_str = new Vector(1);
+	ignore_comment_str.add ( "#>" );
 	PrintWriter out = null;
 	String full_filename_prev = IOUtil.getPathUsingWorkingDir ( filenamePrev );
 	String full_filename = IOUtil.getPathUsingWorkingDir ( filename );
@@ -272,7 +274,7 @@ throws IOException
 	if ( out == null ) {
 		throw new IOException ( "Error writing to \"" + full_filename + "\"" );
 	}
-	writeVector ( dataList, out );
+	writeStateCUFile ( dataList, out );
 	out.flush();
 	out.close();
 	out = null;
@@ -284,7 +286,7 @@ Write a list of StateCU_ClimateStation to an opened file.
 @param out output PrintWriter.
 @exception IOException if an error occurs.
 */
-private static void writeVector ( List dataList, PrintWriter out )
+private static void writeStateCUFile ( List dataList, PrintWriter out )
 throws IOException
 {	int i;
 	String iline;
@@ -352,13 +354,12 @@ file.  Any strings in the body of the file that contain the field delimiter will
 @param filename the name of the file to which the data will be written.
 @param delimiter the delimiter to use for separating field values.
 @param update whether to update an existing file, retaining the current 
-header (true) or to create a new file with a new header.
+header (true) or to create a new file with a new header@param data the Vector of objects to write.  
 @param outputComments Comments to add to the header, usually the command file and database information.
-@param data the Vector of objects to write.  
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter, boolean update, List outputComments,
-		List data) 
+public static void writeListFile(String filename, String delimiter, boolean update,
+		List data, List outputComments ) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
@@ -392,17 +393,30 @@ throws Exception {
 	int j = 0;
 	PrintWriter out = null;
 	StateCU_ClimateStation cli = null;
-	String[] commentString = { "#" };
-	String[] ignoreCommentString = { "#>" };
+	List commentString = new Vector(1);
+	commentString.add ( "#" );
+	List ignoreCommentString = new Vector(1);
+	ignoreCommentString.add ( "#>" );
 	String[] line = new String[fieldCount];
-	String[] newComments = StringUtil.toArray(outputComments);
 	StringBuffer buffer = new StringBuffer();
 	
-	try {	
+	try {
+		// Add some basic comments at the top of the file.  However, do this to a copy of the
+		// incoming comments so that they are not modified in the calling code.
+		List newComments2 = null;
+		if ( outputComments == null ) {
+			newComments2 = new Vector();
+		}
+		else {
+			newComments2 = new Vector(outputComments);
+		}
+		newComments2.add(0,"");
+		newComments2.add(1,"StateCU climate stations as a delimited list file.");
+		newComments2.add(2,"");
 		out = IOUtil.processFileHeaders(
 			oldFile,
 			IOUtil.getPathUsingWorkingDir(filename), 
-			newComments, commentString, ignoreCommentString, 0);
+			newComments2, commentString, ignoreCommentString, 0);
 
 		for (int i = 0; i < fieldCount; i++) {
 			buffer.append("\"" + names[i] + "\"");

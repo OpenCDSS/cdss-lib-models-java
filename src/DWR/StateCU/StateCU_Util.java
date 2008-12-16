@@ -30,8 +30,7 @@ import RTi.Util.String.StringUtil;
 import RTi.Util.Time.DateTime;
 
 /**
-This StateCU_Util class contains static data and methods used in the StateCU
-package.
+This StateCU_Util class contains static data and methods used in the StateCU package.
 */
 public abstract class StateCU_Util
 {
@@ -65,7 +64,7 @@ public static void checkAndSet(double d, JTextField textField) {
 /**
 Helper method to return validators to check an ID.
 @return List of Validators.
- */
+*/
 public static Validator[] getIDValidators()
 {
 	return new Validator[] { Validators.notBlankValidator(),
@@ -81,8 +80,7 @@ collection information is assumed to have been defined for the locations.
 @param part_id The identifier to be found in the list of locations.
 @return the matching StateCU_Location, or null if a match cannot be found.
 */
-public static StateCU_Location getLocationForPartID (
-		List CULocation_Vector, String part_id )
+public static StateCU_Location getLocationForPartID ( List CULocation_Vector, String part_id )
 {
 	// First try to match the main location.
 	
@@ -118,25 +116,23 @@ public static StateCU_Location getLocationForPartID (
 /**
 Helper method to return general validators for numbers.
 @return List of Validators.
- */
+*/
 public static Validator[] getNumberValidators()
 {
 	//Validators.regexValidator( "^[0-9]+.*" ),
-	return new Validator[] { Validators.notBlankValidator(),
-		Validators.rangeValidator( 0, 999999 )};
+	return new Validator[] { Validators.notBlankValidator(), Validators.rangeValidator( 0, 999999 )};
 }
 
 /**
 Helper method to return general validators for an on/off switch.
 @return List of Validators.
- */
+*/
 public static Validator[] getOnOffSwitchValidator()
 {
 	Validator[] orValidator = new Validator[] {
 		Validators.isEquals( new Integer( 0 )),
 		Validators.isEquals( new Integer( 1 )) };		
-	return new Validator[] { Validators.notBlankValidator(),
-		Validators.or( orValidator ) };
+	return new Validator[] { Validators.notBlankValidator(), Validators.or( orValidator ) };
 }
 
 // FIXME SAM 2008-08-22 Need to review all this doc once the software is working
@@ -144,8 +140,7 @@ public static Validator[] getOnOffSwitchValidator()
 Get the time series data types associated with a component.
 Currently this returns all possible data types but does not
 cut down the lists based on what is actually available.
-@param comp_type Component type for a station:
-StateCU_DataSet.COMP_CU_LOCATIONS.
+@param comp_type Component type for a station:  StateCU_DataSet.COMP_CU_LOCATIONS.
 @param binary_filename name of the binary output file for which data types
 (parameters) are being returned, typically selected by the user with a file
 chooser.  The path to the file is not adjusted to a working directory so do that
@@ -156,14 +151,12 @@ choices to those appropriate for the dataset.
 the id to check for valid time series data types.  For example, it can be used
 to return data types for estimated time series.
 @param statecu_version StateCU version as a floating point number.  If this
-is greater than ??VERSION_11_00??, then binary file parameters are read from the
-file.
+is greater than ??VERSION_11_00??, then binary file parameters are read from the file.
 @param interval TimeInterval.DAY or TimeInterval.MONTH.
 @param include_input If true, input time series including historic data from
 ASCII input files are returned with the
 list (suitable for StateMod GUI graphing tool).
-@param include_input_estimated If true, input time series that are estimated are
-included.
+@param include_input_estimated If true, input time series that are estimated are included.
 @param include_output If true, output time series are included in the list (this
 is used by the graphing tool).  Note that some output time series are for
 internal model use and are not suitable for viewing (as per Ray Bennett) and
@@ -181,34 +174,12 @@ useful when retrieving time series.
 @return a non-null list of data types.  The list will have zero size if no
 data types are requested or are valid.
 */
-public static List getTimeSeriesDataTypes (   String binary_filename,
-                        int comp_type, String id,
-                        StateCU_DataSet dataset,
-                        double statecu_version,
-                        int interval,
-                        boolean include_input,
-                        boolean include_input_estimated,
-                        boolean include_output,
-                        boolean check_availability,
-                        boolean add_group,
-                        boolean add_note )
+public static List getTimeSeriesDataTypes ( String binary_filename, int comp_type, String id,
+    StateCU_DataSet dataset, double statecu_version, int interval, boolean include_input,
+    boolean include_input_estimated, boolean include_output, boolean check_availability,
+    boolean add_group, boolean add_note )
 {   String routine = "StateCU_Util.getTimeSeriesDataTypes";
 	List data_types = new Vector();
-    /* FIXME SAM 2008-08-26 Need to clean up - get rid of StateMod code
-    String [] diversion_types0 = null;
-    String [] instream_types0 = null;
-    String [] reservoir_types0 = null;
-    String [] stream_types0 = null;
-    String [] well_types0 = null;
-    String [] diversion_types = null;
-    String [] instream_types = null;
-    String [] reservoir_types = null;
-    String [] stream_types = null;
-    String [] well_types = null;
-    */
-
-    // If a filename is given and reading it shows a version >= ??11.0??, read
-    // information from the file for use below.
 
     StateCU_BTS bts = null;
     if ( binary_filename != null ) {
@@ -219,21 +190,11 @@ public static List getTimeSeriesDataTypes (   String binary_filename,
             // Error reading the file.  Print a warning but go on
             // and just do not have a list of parameters...
             Message.printWarning ( 3, routine,
-            "Error opening/reading binary file \"" +
-            binary_filename + "\" to determine parameters." );
+            "Error opening/reading binary file \"" + binary_filename + "\" to determine parameters." );
             Message.printWarning ( 3, routine, e );
             bts = null;
         }
         // Close the file below after getting information...
-        //double version_double = bts.getVersion();
-        /* FIXME SAM 2008-08-26 Fix to deal with version
-        if ( isVersionAtLeast ( version_double, 11.0 ) ) { // FIXME SAM 2008-08-22 VERSION_11_00) ) {
-            // Reset information to override possible user flags.
-            statecu_version = version_double;
-            add_group = false;  // Not available from file
-            add_note = false;   // Not available from file
-        }
-        */
     }
     
     // Get the list of output data types based on the StateCU version.
@@ -257,321 +218,18 @@ public static List getTimeSeriesDataTypes (   String binary_filename,
             bts = null;
         }
     //}
-        
-    // FIXME SAM 2008-08-26 Need feedback from Rice/State as to whether input/output
-    // are needed.  For now just pass back as is
+
     data_types = new Vector(parameters.length);
     for ( int i = 0; i < parameters.length; i++ ) {
         data_types.add ( parameters[i] );
     }
- 
-    /*
-    // Based on the requested data type, put together a list of time series
-    // data types.  To simplify determination of whether a type is input or
-    // output, add one of the following descriptors to the end if requested...
-    String input = "";
-    String output = "";
-    // The above lists contain the data group.  If the group is NOT desired,
-    // remove the group below...
-    if ( add_note ) {
-        input = " - Input";
-        output = " - Output";
-    }
-    int diversion_types_length = 0;
-    if ( diversion_types0 != null ) {
-        diversion_types_length = diversion_types0.length;
-        diversion_types = new String[diversion_types_length];
-    }
-    for ( int i = 0; i < diversion_types_length; i++ ) {
-        if ( add_group ) {
-            diversion_types[i] = diversion_types0[i] + output;
-        }
-        else {  // Remove group from front if necessary...
-            if ( diversion_types0[i].indexOf("-") > 0 ) {
-                diversion_types[i] = StringUtil.getToken(
-                diversion_types0[i],"-",0,1).trim() + output;
-            }
-            else {  diversion_types[i] = diversion_types0[i];
-            }
-        }
-    }
- 
-    if (    (comp_type == StateMod_DataSet.COMP_STREAMGAGE_STATIONS) ||
-        (comp_type == StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS) ) {
-        // Stream gage and stream estimate stations are the same other
-        // than stream estimate do not have historical time series...
-        // Include input time series if reqeusted...
-        // Input baseflow...
-        if ( include_input && (interval == TimeInterval.MONTH) ) {
-            data_types.addElement ( 
-            StateMod_DataSet.lookupTimeSeriesDataType (
-            StateMod_DataSet.COMP_STREAMGAGE_BASEFLOW_TS_MONTHLY) +
-            input );
-        }
-        else if(include_input && (interval == TimeInterval.DAY) ) {
-            data_types.addElement ( 
-                StateMod_DataSet.lookupTimeSeriesDataType (
-            StateMod_DataSet.COMP_STREAMGAGE_BASEFLOW_TS_DAILY) +
-            input );
-        }
-        // Input historical time series if requested...
-        if (    include_input && (interval == TimeInterval.MONTH) &&
-            (comp_type==StateMod_DataSet.COMP_STREAMGAGE_STATIONS)){
-            data_types.addElement ( 
-                StateMod_DataSet.lookupTimeSeriesDataType (
-                StateMod_DataSet.
-                COMP_STREAMGAGE_HISTORICAL_TS_MONTHLY) + input);
-        }
-        else if (include_input && (interval == TimeInterval.DAY) &&
-            (comp_type==StateMod_DataSet.COMP_STREAMGAGE_STATIONS)){
-            data_types.addElement ( 
-                StateMod_DataSet.lookupTimeSeriesDataType (
-                StateMod_DataSet.
-                COMP_STREAMGAGE_HISTORICAL_TS_DAILY) + input);
-        }
-        // Include the estimated input time series if requested...
-        // Add the estimated input...
-        if (    include_input_estimated &&
-            (interval == TimeInterval.DAY) ) {
-            // REVISIT - need to check daily ID on station...
-            data_types.addElement ( 
-                StateMod_DataSet.lookupTimeSeriesDataType (
-            StateMod_DataSet.COMP_STREAMGAGE_BASEFLOW_TS_DAILY) +
-            "Estimated" + input);
-        }
-        // Input historical time series if requested...
-        if (    include_input_estimated &&
-            (interval == TimeInterval.DAY) &&
-            (comp_type==StateMod_DataSet.COMP_STREAMGAGE_STATIONS)){
-            // REVISIT - need to check daily ID on station...
-            data_types.addElement ( 
-                StateMod_DataSet.lookupTimeSeriesDataType (
-                StateMod_DataSet.
-                COMP_STREAMGAGE_HISTORICAL_TS_DAILY) +
-                "Estimated" + input);
-        }
-        // Include the output time series if requested...
-        if ( include_output ) {
-            data_types = StringUtil.addListToStringList (data_types,
-                StringUtil.toVector ( stream_types ) );
-        }
-    }
-    else if ( comp_type == StateMod_DataSet.COMP_DIVERSION_STATIONS ) {
-        if ( include_input && (interval == TimeInterval.MONTH) ) {
-            data_types.addElement (
-                StateMod_DataSet.lookupTimeSeriesDataType (
-                StateMod_DataSet.COMP_DIVERSION_TS_MONTHLY) +
-                input);
-            data_types.addElement (
-                StateMod_DataSet.lookupTimeSeriesDataType (
-                StateMod_DataSet.COMP_DEMAND_TS_MONTHLY) +
-                input);
-            data_types.addElement (
-                StateMod_DataSet.lookupTimeSeriesDataType (
-                StateMod_DataSet.
-                COMP_DEMAND_TS_OVERRIDE_MONTHLY) +
-                input);
-            data_types.addElement (
-                StateMod_DataSet.lookupTimeSeriesDataType (
-                StateMod_DataSet.
-                COMP_DEMAND_TS_AVERAGE_MONTHLY) +
-                input);
-            data_types.addElement (
-                StateMod_DataSet.lookupTimeSeriesDataType (
-                StateMod_DataSet.
-                COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_MONTHLY) +
-                input);
-        }
-        else if ( include_input && (interval == TimeInterval.DAY) ) {
-            data_types.addElement ( 
-                StateMod_DataSet.lookupTimeSeriesDataType (
-                StateMod_DataSet.COMP_DIVERSION_TS_DAILY) +
-                input);
-            data_types.addElement ( 
-                StateMod_DataSet.lookupTimeSeriesDataType (
-                StateMod_DataSet.COMP_DEMAND_TS_DAILY) +
-                input);
-            data_types.addElement (
-                StateMod_DataSet.lookupTimeSeriesDataType (
-                StateMod_DataSet.
-                COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_DAILY) +
-                input);
-        }
-        if ( include_input ) {
-            data_types.addElement (
-                StateMod_DataSet.lookupTimeSeriesDataType (
-                StateMod_DataSet.COMP_DIVERSION_RIGHTS) +
-                input);
-        }
-        if (    include_input_estimated &&
-            (interval == TimeInterval.DAY) ) {
-            data_types.addElement ( 
-                StateMod_DataSet.lookupTimeSeriesDataType (
-                StateMod_DataSet.COMP_DIVERSION_TS_DAILY) +
-                "Estimated" + input);
-            data_types.addElement ( 
-                StateMod_DataSet.lookupTimeSeriesDataType (
-                StateMod_DataSet.COMP_DEMAND_TS_DAILY) +
-                "Estimated" + input);
-            data_types.addElement (
-                StateMod_DataSet.lookupTimeSeriesDataType (
-                StateMod_DataSet.
-                COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_DAILY) +
-                "Estimate" + input);
-        }
-        if ( include_output ) {
-            data_types = StringUtil.addListToStringList (data_types,
-                StringUtil.toVector ( diversion_types ) );
-        }
-    }
-    else if ( comp_type == StateMod_DataSet.COMP_RESERVOIR_STATIONS ) {
-        // Include input time series if requested...
-        if ( include_input && (interval == TimeInterval.MONTH) ) {
-            data_types.addElement ( 
-                StateMod_DataSet.lookupTimeSeriesDataType (
-                StateMod_DataSet.
-                COMP_RESERVOIR_CONTENT_TS_MONTHLY) + input);
-            data_types.addElement ( 
-                StateMod_DataSet.lookupTimeSeriesDataType (
-                StateMod_DataSet.
-                COMP_RESERVOIR_TARGET_TS_MONTHLY) + "Min" +
-                input);
-            data_types.addElement ( 
-                StateMod_DataSet.lookupTimeSeriesDataType (
-                StateMod_DataSet.
-                COMP_RESERVOIR_TARGET_TS_MONTHLY) + "Max" +
-                input);
-        }
-        else if ( include_input && (interval == TimeInterval.DAY) ) {
-            data_types.addElement ( 
-                StateMod_DataSet.lookupTimeSeriesDataType (
-                StateMod_DataSet.
-                COMP_RESERVOIR_CONTENT_TS_DAILY) + input );
-            data_types.addElement ( 
-                StateMod_DataSet.lookupTimeSeriesDataType (
-                StateMod_DataSet.
-                COMP_RESERVOIR_TARGET_TS_DAILY) +"Min" + input);
-            data_types.addElement ( 
-                StateMod_DataSet.lookupTimeSeriesDataType (
-                StateMod_DataSet.
-                COMP_RESERVOIR_TARGET_TS_DAILY) +"Max" + input);
-        }
-        if ( include_input ) {
-            data_types.addElement (
-                StateMod_DataSet.lookupTimeSeriesDataType (
-                StateMod_DataSet.COMP_RESERVOIR_RIGHTS) +
-                input);
-        }
-        // Include estimated input if requested...
-        if (    include_input_estimated &&
-            (interval == TimeInterval.DAY) ) {
-            data_types.addElement ( 
-                StateMod_DataSet.lookupTimeSeriesDataType (
-                StateMod_DataSet.
-                COMP_RESERVOIR_CONTENT_TS_DAILY) + "Estimated" +
-                input);
-            data_types.addElement ( 
-                StateMod_DataSet.lookupTimeSeriesDataType (
-                StateMod_DataSet.
-                COMP_RESERVOIR_TARGET_TS_DAILY)+"MinEstimated" +
-                input);
-            data_types.addElement ( 
-                StateMod_DataSet.lookupTimeSeriesDataType (
-                StateMod_DataSet.
-                COMP_RESERVOIR_TARGET_TS_DAILY)+"MaxEstimated" +
-                input);
-        }
-        // Include output if requested...
-        if ( include_output ) {
-            data_types = StringUtil.addListToStringList (data_types,
-                StringUtil.toVector ( reservoir_types ) );
-        }
-    }
-    else if ( comp_type == StateMod_DataSet.COMP_INSTREAM_STATIONS ) {
-        if ( include_input && (interval == TimeInterval.MONTH) ) {
-            data_types.addElement ( 
-                StateMod_DataSet.lookupTimeSeriesDataType (
-                StateMod_DataSet.
-                COMP_INSTREAM_DEMAND_TS_MONTHLY) + input);
-            data_types.addElement ( 
-                StateMod_DataSet.lookupTimeSeriesDataType (
-                StateMod_DataSet.
-                COMP_INSTREAM_DEMAND_TS_AVERAGE_MONTHLY) +
-                input);
-        }
-        else if ( include_input && (interval == TimeInterval.DAY) ) {
-            data_types.addElement ( 
-                StateMod_DataSet.lookupTimeSeriesDataType (
-            StateMod_DataSet.COMP_INSTREAM_DEMAND_TS_DAILY) +input);
-        }
-        if ( include_input ) {
-            data_types.addElement (
-                StateMod_DataSet.lookupTimeSeriesDataType (
-                StateMod_DataSet.COMP_INSTREAM_RIGHTS) +
-                input);
-        }
-        if (    include_input_estimated &&
-            (interval == TimeInterval.DAY) ) {
-            data_types.addElement ( 
-                StateMod_DataSet.lookupTimeSeriesDataType (
-                StateMod_DataSet.COMP_INSTREAM_DEMAND_TS_DAILY)+
-                "Estimated" + input);
-        }
-        if ( include_output ) {
-            data_types = StringUtil.addListToStringList (data_types,
-                StringUtil.toVector ( instream_types ) );
-        }
-    }
-    else if ( comp_type == StateMod_DataSet.COMP_WELL_STATIONS ) {
-        if ( include_input && (interval == TimeInterval.MONTH) ) {
-            data_types.addElement ( 
-                StateMod_DataSet.lookupTimeSeriesDataType (
-                StateMod_DataSet.COMP_WELL_PUMPING_TS_MONTHLY) +
-                input);
-            data_types.addElement ( 
-                StateMod_DataSet.lookupTimeSeriesDataType (
-                StateMod_DataSet.COMP_WELL_DEMAND_TS_MONTHLY) +
-                input);
-        }
-        else if ( include_input && (interval == TimeInterval.DAY) ) {
-            data_types.addElement ( 
-                StateMod_DataSet.lookupTimeSeriesDataType (
-                StateMod_DataSet.COMP_WELL_PUMPING_TS_DAILY) +
-                input);
-            data_types.addElement (
-                StateMod_DataSet.lookupTimeSeriesDataType (
-                StateMod_DataSet.COMP_WELL_DEMAND_TS_DAILY) +
-                input);
-        }
-        if ( include_input ) {
-            data_types.addElement (
-                StateMod_DataSet.lookupTimeSeriesDataType (
-                StateMod_DataSet.COMP_WELL_RIGHTS) + input);
-        }
-        if (    include_input_estimated &&
-            (interval == TimeInterval.DAY) ) {
-            data_types.addElement ( 
-                StateMod_DataSet.lookupTimeSeriesDataType (
-                StateMod_DataSet.COMP_WELL_PUMPING_TS_DAILY) +
-                "Estimated" + input);
-            data_types.addElement (
-                StateMod_DataSet.lookupTimeSeriesDataType (
-                StateMod_DataSet.COMP_WELL_DEMAND_TS_DAILY) +
-                "Estimated" + input);
-        }
-        if ( include_output ) {
-            data_types = StringUtil.addListToStringList (data_types,
-                StringUtil.toVector ( well_types ) );
-        }
-    }
-    */
 
     return data_types;
 }
 
 /**
 Find the position of a StateCU_Data object in the data Vector, using the
-identifer.  The position for the first match is returned.
+identifier.  The position for the first match is returned.
 @return the position, or -1 if not found.
 @param id StateCU_Data identifier.
 */
@@ -617,11 +275,11 @@ Indicate if a double value is missing.
 @return true if the value is missing, false, if not.
 */
 public static boolean isMissing ( double d )
-{	if (	(d < MISSING_DOUBLE_CEILING) &&
-		(d > MISSING_DOUBLE_FLOOR) ) {
+{	if ( (d < MISSING_DOUBLE_CEILING) && (d > MISSING_DOUBLE_FLOOR) ) {
 		return true;
 	}
-	else {	return false;
+	else {
+		return false;
 	}
 }
 
@@ -634,7 +292,8 @@ public static boolean isMissing ( int i )
 {	if ( i == MISSING_INT ) {
 		return true;
 	}
-	else {	return false;
+	else {
+		return false;
 	}
 }
 
@@ -647,20 +306,20 @@ public static boolean isMissing ( String s )
 {	if ( (s == null) || (s.length() == 0) ) {
 		return true;
 	}
-	else {	return false;
+	else {
+		return false;
 	}
 }
 
 /**
 Look up a title to use for a time series graph, given the data set component.
-Currently this simply returns the component name, replacing " TS " with
-" Time Series ".
+Currently this simply returns the component name, replacing " TS " with " Time Series ".
 @param comp_type StateCU component type.
 */
 public static String lookupTimeSeriesGraphTitle ( int comp_type )
-{	try {	StateCU_DataSet dataset = new StateCU_DataSet();
-		return dataset.lookupComponentName (
-			comp_type ).replaceAll(" TS ", " Time Series " );
+{	try {
+	StateCU_DataSet dataset = new StateCU_DataSet();
+		return dataset.lookupComponentName ( comp_type ).replaceAll(" TS ", " Time Series " );
 	}
 	catch ( Exception e ) {
 		// Should not happen.
@@ -669,8 +328,7 @@ public static String lookupTimeSeriesGraphTitle ( int comp_type )
 }
 
 /**
-Find a list of StateCU_Data in a Vector, using a regular expression to match
-identifiers.
+Find a list of StateCU_Data in a Vector, using a regular expression to match identifiers.
 @param data_Vector a Vector of StateCU_Data to search.
 @param pattern Regular expression pattern to use when finding 
 @return a Vector containing StateCU_Data from data_Vector that have an
@@ -684,8 +342,7 @@ public static List match ( List data_Vector, String pattern )
 	}
 	StateCU_Data data = null;
 	List matches_Vector = new Vector ( size/10 + 1 );	// Guess size
-	// Apparently if the pattern is "*", Java complains so do a specific
-	// check...
+	// Apparently if the pattern is "*", Java complains so do a specific check...
 	boolean return_all = false;
 	if ( pattern.equals("*") ) {
 		return_all = true;
@@ -701,28 +358,24 @@ public static List match ( List data_Vector, String pattern )
 }
 
 /**
-Sorts a Vector of StateCU_Data objects, depending on the compareTo() method
-for the specific object.
-@param data a Vector of StateCU_Data objects.  Can be null.
-@return a new sorted Vector with references to the same data objects in the
-passed-in Vector.  If a null Vector is passed in, an empty Vector will be
-returned.
+Sorts a list of StateCU_Data objects, depending on the compareTo() method for the specific object.
+@param data a list of StateCU_Data objects.  Can be null.
+@return a new sorted list with references to the same data objects in the
+passed-in list.  If a null list is passed in, an empty list will be returned.
 */
-public static List sortStateCU_DataVector ( List data )
-{	return sortStateCU_DataVector ( data, true );
+public static List sortStateCUDataList ( List data )
+{	return sortStateCUDataList ( data, true );
 }
 
 /**
-Sorts a Vector of StateCU_Data objects, depending on the compareTo() method
-for the specific object.
-@param data a Vector of StateMod_Data objects.  Can be null.
-@param return_new If true, return a new Vector with references to the data.
-If false, return the original Vector, with sorted contents.
-@return a sorted Vector with references to the same data objects in the
-passed-in Vector.  If a null Vector is passed in, an empty Vector will be
-returned.
+Sorts a list of StateCU_Data objects, depending on the compareTo() method for the specific object.
+@param data a list of StateMod_Data objects.  Can be null.
+@param return_new If true, return a new list with references to the data.
+If false, return the original list, with sorted contents.
+@return a sorted list with references to the same data objects in the
+passed-in list.  If a null list is passed in, an empty list will be returned.
 */
-public static List sortStateCU_DataVector ( List data, boolean return_new )
+public static List sortStateCUDataList ( List data, boolean return_new )
 {	if (data == null) {
 		return new Vector();
 	}
@@ -749,13 +402,11 @@ public static List sortStateCU_DataVector ( List data, boolean return_new )
 /**
 Returns the property value for a component.  
 @param componentType the kind of component to look up for.
-@param propType the property to look up.  One of "FieldName", 
-"FieldNameHeader", "ToolTip", or "Format".  
+@param propType the property to look up.  One of "FieldName", "FieldNameHeader", "ToolTip", or "Format".  
 @param field the field for which to return the property.  
 @return the property, or if it could not be found null will be returned.
 */
-public static String lookupPropValue(int componentType, String propType,
-String field) {
+public static String lookupPropValue(int componentType, String propType, String field) {
 	if (componentType == StateCU_DataSet.COMP_BLANEY_CRIDDLE) {
 		return lookupBlaneyCriddlePropValue(propType, field);
 	}
@@ -768,17 +419,14 @@ String field) {
 	else if (componentType == StateCU_DataSet.COMP_CU_LOCATIONS) {
 		return lookupLocationPropValue(propType, field);
 	}
-	else if (componentType 
-	    == StateCU_DataSet.COMP_CU_LOCATION_CLIMATE_STATIONS) {
+	else if (componentType == StateCU_DataSet.COMP_CU_LOCATION_CLIMATE_STATIONS) {
 		return lookupLocationClimateStationPropValue(propType, field);
 	}	
-	else if (componentType 
-	    == StateCU_DataSet.COMP_CU_LOCATION_COLLECTIONS) {
+	else if (componentType == StateCU_DataSet.COMP_CU_LOCATION_COLLECTIONS) {
 		return lookupLocationCollectionPropValue(propType, field);
 	}		
-	else if (componentType 
-	    == StateCU_DataSet.COMP_DELAY_TABLE_ASSIGNMENT_MONTHLY) {
-	    	return lookupDelayTableAssignmentPropValue(propType, field);
+	else if (componentType == StateCU_DataSet.COMP_DELAY_TABLE_ASSIGNMENT_MONTHLY) {
+	    return lookupDelayTableAssignmentPropValue(propType, field);
 	}
 
 	return null;
@@ -801,14 +449,13 @@ public static boolean isVersionAtLeast ( double version, double known_version )
 }
 
 /**
-Returns the property value for blaney criddle data.
+Returns the property value for Blaney-Criddle data.
 @param propType the property to look up.  One of "FieldName", 
 "FieldNameHeader", "ToolTip", or "Format".  
 @param field the field for which to return the property.  
 @return the property, or if it could not be found null will be returned.
 */
-private static String lookupBlaneyCriddlePropValue(String propType, 
-String field) {
+private static String lookupBlaneyCriddlePropValue(String propType, String field) {
 	if (propType.equalsIgnoreCase("FieldName")) {
 		if (field.equalsIgnoreCase("Name")) {
 			return "CROP NAME";
@@ -837,8 +484,7 @@ String field) {
 		}
 		else if (field.equalsIgnoreCase("DayPercent")) {
 			return "<html>Day of year if Perennial (start, middle, "
-				+ "end of month).<br>Percent of year if annual "
-				+ "(5% increments).</html>";
+				+ "end of month).<br>Percent of year if annual (5% increments).</html>";
 		}
 		else if (field.equalsIgnoreCase("Coefficient")) {	
 			return "Crop coefficient";
@@ -1116,20 +762,16 @@ String field) {
 			return "";
 		}
 		else if (field.equalsIgnoreCase("SpringFrost")) {
-			return "<html>Spring frost date flag"
-				+ "<br>0 = mean<br>1 = 28F<br>2 = 32F</html>"; 
+			return "<html>Spring frost date flag<br>0 = mean<br>1 = 28F<br>2 = 32F</html>"; 
 		}
 		else if (field.equalsIgnoreCase("FallFrost")) {
-			return "<html>Fall frost date flag"
-				+ "<br>0 = mean<br>1 = 28F<br>2 = 32F</html>";
+			return "<html>Fall frost date flag<br>0 = mean<br>1 = 28F<br>2 = 32F</html>";
 		}
 		else if (field.equalsIgnoreCase("DaysBetween1And2")) {
-			return "<html>Days between 1st and 2nd cutting."
-				+ "<br>Alfalfa only.</html>";
+			return "<html>Days between 1st and 2nd cutting.<br>Alfalfa only.</html>";
 		}
 		else if (field.equalsIgnoreCase("DaysBetween2And3")) {
-			return "<html>Days between 2nd and 3rd cutting."
-				+ "<br>Alfalfa only.</html>";
+			return "<html>Days between 2nd and 3rd cutting.<br>Alfalfa only.</html>";
 		}		
 	}
 	else if (propType.equalsIgnoreCase("Format")) {
@@ -1280,7 +922,7 @@ private static String lookupLocationPropValue(String propType, String field) {
 			return "NUMBER OF CLIMATE STATIONS";
 		}
 		else if (field.equalsIgnoreCase("AWC")) {
-			return "AVAILABLE WATER CONTENT AWC, (FRACTION)";
+			return "AVAILABLE WATER CONTENT, AWC (FRACTION)";
 		}
 	}
 	else if (propType.equalsIgnoreCase("FieldNameHeader")) {	
@@ -1527,4 +1169,4 @@ String field) {
 	return null;
 }
 
-} // End StateCU_Util
+}
