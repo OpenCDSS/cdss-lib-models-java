@@ -1393,7 +1393,7 @@ throws Exception {
 	commentString.add ( "#" );
 	List ignoreCommentString = new Vector(1);
 	ignoreCommentString.add ( "#>" );
-	String[] line = new String[fieldCount];
+	String[] field = new String[fieldCount];
 	String colType = null;
 	String id = null;
 	String partType = null;	
@@ -1413,15 +1413,16 @@ throws Exception {
 		newComments2.add(0,"");
 		newComments2.add(1,"StateCU location collection information as delimited list file.");
 		newComments2.add(2,"See also the associated location and climate station assignment files.");
-		newComments2.add(3,"");
+		newComments2.add(3,"Division and year are only used with well aggregates.");
+		newComments2.add(4,"");
 		out = IOUtil.processFileHeaders( oldFile, IOUtil.getPathUsingWorkingDir(filename), 
 			newComments2, commentString, ignoreCommentString, 0);
 
 		for (int i = 0; i < fieldCount; i++) {
-			buffer.append("\"" + names[i] + "\"");
-			if (i < (fieldCount - 1)) {
+			if ( i != 0 ) {
 				buffer.append(delimiter);
 			}
+			buffer.append("\"" + names[i] + "\"");
 		}
 
 		out.println(buffer.toString());
@@ -1439,28 +1440,31 @@ throws Exception {
 			}
 			colType = loc.getCollectionType();
 			partType = loc.getCollectionPartType();
-			
+			// Loop through the number of years of collection data
 			for (j = 0; j < num; j++) {
 				ids = loc.getCollectionPartIDs(years[j]);
-				line[0] = StringUtil.formatString(id,formats[0]).trim();
-				line[1] = StringUtil.formatString(div,formats[1]).trim();
-				line[2] = StringUtil.formatString(years[j],formats[2]).trim();
-				line[3] = StringUtil.formatString(colType,formats[3]).trim();
-				line[4] = StringUtil.formatString(partType,formats[4]).trim();
-				line[5] = StringUtil.formatString(((String)(ids.get(k))),formats[5]).trim();
-
-				buffer = new StringBuffer();	
-				for (k = 0; k < fieldCount; k++) {
-					if (line[k].indexOf(delimiter) > -1) {
-						line[k] = "\"" + line[k] + "\"";
-					}
-					buffer.append(line[k]);
-					if (k < (fieldCount - 1)) {
-						buffer.append(delimiter);
-					}
-				}
+				// Loop through the identifiers for the specific year
+				for ( k = 0; k < ids.size(); k++ ) {
+					field[0] = StringUtil.formatString(id,formats[0]).trim();
+					field[1] = StringUtil.formatString(div,formats[1]).trim();
+					field[2] = StringUtil.formatString(years[j],formats[2]).trim();
+					field[3] = StringUtil.formatString(colType,formats[3]).trim();
+					field[4] = StringUtil.formatString(partType,formats[4]).trim();
+					field[5] = StringUtil.formatString(((String)(ids.get(k))),formats[5]).trim();
 	
-				out.println(buffer.toString());
+					buffer = new StringBuffer();	
+					for (int ifield = 0; ifield < fieldCount; ifield++) {
+						if (ifield > 0) {
+							buffer.append(delimiter);
+						}
+						if (field[ifield].indexOf(delimiter) > -1) {
+							field[ifield] = "\"" + field[ifield] + "\"";
+						}
+						buffer.append(field[ifield]);
+					}
+		
+					out.println(buffer.toString());
+				}
 			}
 		}
 		out.flush();
