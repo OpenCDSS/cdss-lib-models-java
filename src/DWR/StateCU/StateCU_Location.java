@@ -1239,6 +1239,8 @@ throws Exception {
 	fields.add("StationID");
 	fields.add("TempWeight");
 	fields.add("PrecipWeight");
+	fields.add("OrographicTempAdj");
+	fields.add("OrographicPrecipAdj");
 	int fieldCount = fields.size();
 
 	List names = new Vector(fieldCount);
@@ -1304,8 +1306,10 @@ throws Exception {
 			for (j = 0; j < num; j++) {
 				line[0] = StringUtil.formatString(id, ((String)formats.get(0))).trim();
 				line[1] = StringUtil.formatString( loc.getClimateStationID(j), ((String)formats.get(1))).trim();
-				line[2] = StringUtil.formatString( loc.getTemperatureStationWeight(j), ((String)formats.get(3))).trim();
-				line[3] = StringUtil.formatString( loc.getPrecipitationStationWeight(j), ((String)formats.get(2))).trim();
+				line[2] = StringUtil.formatString( loc.getTemperatureStationWeight(j), ((String)formats.get(2))).trim();
+				line[3] = StringUtil.formatString( loc.getPrecipitationStationWeight(j), ((String)formats.get(3))).trim();
+				line[4] = StringUtil.formatString( loc.getOrographicTemperatureAdjustment(j), ((String)formats.get(4))).trim();
+				line[5] = StringUtil.formatString( loc.getOrographicPrecipitationAdjustment(j), ((String)formats.get(5))).trim();
 				
 				buffer = new StringBuffer();	
 				for (k = 0; k < fieldCount; k++) {

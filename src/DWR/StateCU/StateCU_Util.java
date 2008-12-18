@@ -1014,14 +1014,19 @@ Returns the property value for location climate stations.
 @param field the field for which to return the property.  
 @return the property, or if it could not be found null will be returned.
 */
-private static String lookupLocationClimateStationPropValue(String propType, 
-String field) {
+private static String lookupLocationClimateStationPropValue(String propType, String field) {
 	if (propType.equalsIgnoreCase("FieldName")) {
 		if (field.equalsIgnoreCase("LocationID")) {
 			return "CU LOCATION ID";
 		}
 		else if (field.equalsIgnoreCase("StationID")) {
 			return "CLIMATE STATION ID";
+		}
+		else if (field.equalsIgnoreCase("OrographicPrecipAdj")) {
+			return "OROGRAPHIC PRECIPITATION ADJUSTMENT (FRACTION)";
+		}
+		else if (field.equalsIgnoreCase("OrographicTempAdj")) {
+			return "OROGRAPHIC TEMPERATURE ADJUSTMENT (DEGF/1000 FT)";
 		}
 		else if (field.equalsIgnoreCase("PrecipWeight")) {
 			return "PRECIPITATION STATION WEIGHT (FRACTION)";
@@ -1037,6 +1042,12 @@ String field) {
 		else if (field.equalsIgnoreCase("StationID")) {
 			return "\nCLIMATE\nSTATION\nID";
 		}
+		else if (field.equalsIgnoreCase("OrographicPrecipAdj")) {
+			return "OROGRAPHIC\nPRECIPITATION\nADJUSTMENT\n(FRACTION)";
+		}
+		else if (field.equalsIgnoreCase("OrographicTempAdj")) {
+			return "OROGRAPHIC\nTEMPERATURE\nADJUSTMENT\n(DEGF/1000 FT)";
+		}
 		else if (field.equalsIgnoreCase("PrecipWeight")) {
 			return "PRECIPITATION\nSTATION\nWEIGHT\n(FRACTION)";
 		}
@@ -1049,6 +1060,12 @@ String field) {
 			return "";
 		}
 		else if (field.equalsIgnoreCase("StationID")) {
+			return "";
+		}
+		else if (field.equalsIgnoreCase("OrographicPrecipAdj")) {
+			return "";
+		}
+		else if (field.equalsIgnoreCase("OrographicTempAdj")) {
 			return "";
 		}
 		else if (field.equalsIgnoreCase("PrecipWeight")) {
@@ -1064,6 +1081,12 @@ String field) {
 		}
 		else if (field.equalsIgnoreCase("StationID")) {
 			return "%-20.20s";
+		}
+		else if (field.equalsIgnoreCase("OrographicPrecipAdj")) {
+			return "%8.2f";
+		}
+		else if (field.equalsIgnoreCase("OrographicTempAdj")) {
+			return "%8.2f";
 		}
 		else if (field.equalsIgnoreCase("PrecipWeight")) {
 			return "%8.2f";
