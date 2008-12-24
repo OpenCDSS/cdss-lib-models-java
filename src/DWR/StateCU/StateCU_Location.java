@@ -1462,6 +1462,7 @@ throws Exception {
 							buffer.append(delimiter);
 						}
 						if (field[ifield].indexOf(delimiter) > -1) {
+							// Wrap delimiter in quoted field
 							field[ifield] = "\"" + field[ifield] + "\"";
 						}
 						buffer.append(field[ifield]);

@@ -2820,26 +2820,31 @@ throws Exception {
 			colType = well.getCollectionType();
 			partType = well.getCollectionPartType();
 			
-			for (j = 0; j < num; j++) {
-				ids = well.getCollectionPartIDs(years[j]);
-				line[0] = StringUtil.formatString(id, formats[0]).trim();
-				line[1] = StringUtil.formatString(years[j], formats[1]).trim();
-				line[2] = StringUtil.formatString(colType, formats[2]).trim();
-				line[3] = StringUtil.formatString(partType, formats[3]).trim();
-				line[4] = StringUtil.formatString( ((String)(ids.get(k))), formats[4]).trim();
-
-				buffer = new StringBuffer();	
-				for (k = 0; k < fieldCount; k++) {
-					if (line[k].indexOf(delimiter) > -1) {
-						line[k] = "\"" + line[k] + "\"";
-					}
-					buffer.append(line[k]);
-					if (k < (fieldCount - 1)) {
-						buffer.append(delimiter);
-					}
-				}
+			// Loop through the number of years of collection data
+			for (int iyear = 0; iyear < num; iyear++) {
+				ids = well.getCollectionPartIDs(years[iyear]);
+				// Loop through the identifiers for the specific year
+				for ( k = 0; k < ids.size(); k++ ) {
+					line[0] = StringUtil.formatString(id, formats[0]).trim();
+					line[1] = StringUtil.formatString(years[j], formats[1]).trim();
+					line[2] = StringUtil.formatString(colType, formats[2]).trim();
+					line[3] = StringUtil.formatString(partType, formats[3]).trim();
+					line[4] = StringUtil.formatString( ((String)(ids.get(k))), formats[4]).trim();
 	
-				out.println(buffer.toString());
+					buffer = new StringBuffer();	
+					for (int ifield = 0; ifield < fieldCount; ifield++) {
+						if (ifield > 0) {
+							buffer.append(delimiter);
+						}
+						if (line[ifield].indexOf(delimiter) > -1) {
+							// Wrap delimiter in quoted field
+							line[ifield] = "\"" + line[ifield] + "\"";
+						}
+						buffer.append(line[ifield]);
+					}
+		
+					out.println(buffer.toString());
+				}
 			}
 		}
 	}
