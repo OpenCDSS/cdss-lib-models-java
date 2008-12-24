@@ -112,13 +112,14 @@
 // 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 // EndHeader
-// REVISIT SAM 2006-04-09
+// TODO SAM 2006-04-09
 // The _parcel_Vector has minimal support and is not yet considered in
 // copy, clone, equals, etc.
 
 package DWR.StateMod;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.PrintWriter;
 import java.util.List;
@@ -142,43 +143,36 @@ This class stores all relevant data for a StateMod well.
 public class StateMod_Well 
 extends StateMod_Data
 implements Cloneable, Comparable, StateMod_Component {
-protected String 	_cdividyw;	// Well id to use for daily data.
-private double		_divcapw;	// Well capacity(cfs)
-private String		_idvcow2;	// Diversion this well is tied to 
-					// ("N/A" if not tied to a diversion)
-private int		_idvcomw;	// Demand code
-private double		_divefcw;	// System efficiency(%)
-private double		_areaw;		// Irrigated area associated with well
-private int		_irturnw;	// Use type
-private int		_demsrcw;	// Irrig acreage source
-private double		_diveff[];	// 12 efficiency values 
-private List		_rivret;	// Return flow data
-private List		_depl;		// Depletion data
-private MonthTS		_pumping_MonthTS;// Historical time series (monthly)
-private double []	__weh_monthly = null;	// 12 monthly and annual average
-						// over period, used by StateDMI
-private DayTS		_pumping_DayTS;	// Historical time series (daily)
-private MonthTS		_demand_MonthTS;// Demand time series
-private DayTS		_demand_DayTS;	// Daily demand time series
-private StateCU_IrrigationPracticeTS
-			_ipy_YearTS;	// Irrigation practice time series.
-private MonthTS		_cwr_MonthTS;	// Consumptive water requirement
-private double []	__cwr_monthly = null;	// 12 monthly and annual average
-						// over period, used by StateDMI
-private DayTS		_cwr_DayTS;	// time series - only used when idvcow2
-					// is "N/A".
-private List		_rights;	// Well rights
-private double		_primary;	// priority switch
-private GeoRecord	_georecord;	// Link to spatial data.
+protected String _cdividyw;	// Well id to use for daily data.
+private double _divcapw;	// Well capacity(cfs)
+private String _idvcow2;	// Diversion this well is tied to ("N/A" if not tied to a diversion)
+private int _idvcomw;	// Demand code
+private double _divefcw;	// System efficiency(%)
+private double _areaw;		// Irrigated area associated with well
+private int _irturnw;	// Use type
+private int _demsrcw;	// Irrig acreage source
+private double _diveff[];	// 12 efficiency values 
+private List _rivret;	// Return flow data
+private List _depl;		// Depletion data
+private MonthTS _pumping_MonthTS;// Historical time series (monthly)
+private double [] __weh_monthly = null;	// 12 monthly and annual average over period, used by StateDMI
+private DayTS _pumping_DayTS;	// Historical time series (daily)
+private MonthTS _demand_MonthTS;// Demand time series
+private DayTS _demand_DayTS;	// Daily demand time series
+private StateCU_IrrigationPracticeTS _ipy_YearTS;	// Irrigation practice time series.
+private MonthTS _cwr_MonthTS;	// Consumptive water requirement
+private double [] __cwr_monthly = null;	// 12 monthly and annual average over period, used by StateDMI
+private DayTS _cwr_DayTS;	// time series - only used when idvcow2 is "N/A".
+private List _rights;	// Well rights
+private double _primary;	// priority switch
+private GeoRecord _georecord;	// Link to spatial data.
 
 /**
-Vector of parcel data, in particular to allow StateDMI to detect when a
-diverion had no data.
+Vector of parcel data, in particular to allow StateDMI to detect when a diversion had no data.
 */
 protected List _parcel_Vector = new Vector();
 
-// Collections are set up to be specified by year for wells, using parcels as
-// the parts.
+// Collections are set up to be specified by year for wells, using parcels as the parts.
 
 /**
 Types of collections.  An aggregate merges the water rights/permits whereas
@@ -193,8 +187,7 @@ public static String COLLECTION_PART_TYPE_PARCEL = "Parcel";
 private String __collection_type = StateMod_Util.MISSING_STRING;
 
 private String __collection_part_type = COLLECTION_PART_TYPE_PARCEL;
-					// Used by DMI software - currently no
-					// options.
+					// Used by DMI software - currently no options.
 private List __collection_Vector = null;
 					// The identifiers for data that are
 					// collected - null if not a collection
@@ -248,7 +241,7 @@ public void acceptChanges() {
 
 /**
 Add depletion node to the vector of depletion nodes.  Updates the variable
-which tracks the number of deplation nodes for this well.
+which tracks the number of depletion nodes for this well.
 @param depl depletion data object
 */
 public void addDepletion(StateMod_ReturnFlow depl)
@@ -344,8 +337,7 @@ Performs data checks for this component.
 @return String[] - Array of data that has been checked. Returns null if
 there were no problems found.
  */
-public String[] checkComponentData( int count, StateMod_DataSet dataset,
-PropList props )
+public String[] checkComponentData( int count, StateMod_DataSet dataset, PropList props )
 {	
 	StateMod_Parcel parcel = null;	// Parcel associated with a well station
 	String id_i = null;
@@ -353,9 +345,7 @@ PropList props )
 	double wes_parcel_area = 0.0;	// Area of parcels for well station
 	int wes_well_parcel_count = 0;	// Parcel (with wells) count for well
 					// station.
-	double wes_well_parcel_area = 0.0;
-					// Area of parcels with wells for well
-					// station.
+	double wes_well_parcel_area = 0.0; // Area of parcels with wells for well station.
 	List parcel_Vector;		// List of parcels for well station.
 								// potential problems.
 	// check proplist for valid values
@@ -368,16 +358,14 @@ PropList props )
 		if ( propRights != null && propRights.equalsIgnoreCase("true")) {
 			checkRights = true;
 			DataSetComponent wer_comp = 
-				dataset.getComponentForComponentType (
-				StateMod_DataSet.COMP_WELL_RIGHTS );
+				dataset.getComponentForComponentType ( StateMod_DataSet.COMP_WELL_RIGHTS );
 			wer_Vector = (List)wer_comp.getData();
 		}
 	}
 	id_i = getID();
 	if ( getAreaw() <= 0.0 ) {
 		if ( checkRights ) {
-			List rights = 
-				StateMod_Util.getRightsForStation ( id_i, wer_Vector );
+			List rights = StateMod_Util.getRightsForStation ( id_i, wer_Vector );
 			if ( rights != null  &&  rights.size() != 0 ) {
 				return null;
 			}
@@ -392,17 +380,13 @@ PropList props )
 		if ( parcel_Vector != null ) {
 			wes_parcel_count = parcel_Vector.size();
 			for ( int j = 0; j < wes_parcel_count; j++ ) {
-				parcel = (StateMod_Parcel)
-					parcel_Vector.get(j);
+				parcel = (StateMod_Parcel)parcel_Vector.get(j);
 				if ( parcel.getArea() > 0.0 ) {
-					wes_parcel_area +=
-						parcel.getArea();
+					wes_parcel_area += parcel.getArea();
 				}
 				if ( parcel.getWellCount() > 0 ) {
-					wes_well_parcel_count +=
-						parcel.getWellCount();
-					wes_well_parcel_area +=
-						parcel.getArea();
+					wes_well_parcel_count += parcel.getWellCount();
+					wes_well_parcel_area += parcel.getArea();
 				}
 			}
 		}
@@ -449,28 +433,26 @@ public String[] checkComponentData_Capacity( List wer_Vector, int count )
 	}
 	// Get the sum of the rights, assuming that all should be
 	// compared against the capacity (i.e., sum of rights at the
-	// end of the period will be compared with the current well
-	// capacity)...
+	// end of the period will be compared with the current well capacity)...
 	decree_sum = 0.0;
 	for ( int iright = 0; iright < size_rights; iright++ ) {
 		wer_i = (StateMod_WellRight)rights.get(iright);
 		decree = wer_i.getDcrdivw();
 		onoff = getSwitch();
 		if ( decree < 0.0 ) {
-			// Ignore - missing values will cause a bad
-			// sum.
+			// Ignore - missing values will cause a bad sum.
 			continue;
 		}
 		if ( onoff <= 0 ) {
 			// Subtract the decree...
 			decree_sum -= decree;
 		}
-		else {	// Add the decree...
+		else {
+			// Add the decree...
 			decree_sum += decree;
 		}
 	}
-	// Compare to a whole number, which is the greatest precision
-	// for documented files.
+	// Compare to a whole number, which is the greatest precision for documented files.
 	if ( !StringUtil.formatString(decree_sum,"%.2f").equals(
 		StringUtil.formatString(getDivcapw(),"%.2f")) ) {
 		// new format for check file
@@ -654,10 +636,8 @@ public static void connectAllRights ( List wells, List rights ) {
 /**
 Connect the wells time series to this instance.
 @param wells all wells 
-@param cwr_MonthTS Vector of monthly consumptive water requirement time series,
-or null.
-@param cwr_DayTS Vector of daily consumptive water requirement time series,
-or null.
+@param cwr_MonthTS Vector of monthly consumptive water requirement time series, or null.
+@param cwr_DayTS Vector of daily consumptive water requirement time series, or null.
 */
 public static void connectAllTS (	List wells,
 		List pumping_MonthTS,
@@ -704,8 +684,7 @@ public static void connectAllTS (	List wells,
 }
 
 /**
-Connect daily CWR series pointer.  The connection is made using the
-value of "cdividyw" for the well.
+Connect daily CWR series pointer.  The connection is made using the value of "cdividyw" for the well.
 @param tslist demand time series
 */
 public void connectCWRDayTS ( List tslist )
@@ -730,8 +709,7 @@ public void connectCWRDayTS ( List tslist )
 }
 
 /**
-Connect monthly CWR time series pointer.  The time series name is set to
-that of the well.
+Connect monthly CWR time series pointer.  The time series name is set to that of the well.
 @param tslist Time series list.
 */
 public void connectCWRMonthTS ( List tslist )
@@ -931,8 +909,7 @@ public void deleteReturnFlowAt(int index) {
 	}
 }
 
-// REVISIT - in the GUI need to decide if the right is actually removed from
-// the main list
+// TODO - in the GUI need to decide if the right is actually removed from the main list
 /**
 Remove right from list.  A comparison on the ID is made.
 @param right Right to remove.  Note that the right is only removed from the
@@ -944,8 +921,7 @@ public void disconnectRight ( StateMod_WellRight right )
 	}
 	int size = _rights.size();
 	StateMod_WellRight right2;
-	// Assume that more than on instance can exist, even though this is
-	// not allowed...
+	// Assume that more than on instance can exist, even though this is not allowed...
 	for ( int i = 0; i < size; i++ ) {
 		right2 = (StateMod_WellRight)_rights.get(i);
 		if ( right2.getID().equalsIgnoreCase(right.getID()) ) {
@@ -1107,7 +1083,7 @@ public MonthTS getConsumptiveWaterRequirementMonthTS() {
 /**
 Returns the table header for StateMod_Well data tables.
 @return String[] header - Array of header elements.
- */
+*/
 public static String[] getDataHeader()
 {
 	return new String[] {"Num",
@@ -1183,7 +1159,7 @@ public double getDiveff(int index) {
 Return the system efficiency for the specified month index, where the month
 is always for calendar year (0=January).
 @param index 0-based monthly index (0=January).
-@param yeartype The yeartype for the diversion stations file (consistent with
+@param yeartype The year type for the diversion stations file (consistent with
 the control file for a full data set).  Recognized values are:
 <ol>
 <li>	"Calendar", "CYR" (Jan - Dec).</li>
@@ -1198,13 +1174,11 @@ public double getDiveff ( int index, String yeartype )
 	}
 	else if ( yeartype.equalsIgnoreCase("Water") ||
 		yeartype.equalsIgnoreCase("WYR") ) {
-		index = TimeUtil.convertCalendarMonthToCustomMonth (
-				(index + 1), 10 ) - 1;
+		index = TimeUtil.convertCalendarMonthToCustomMonth ( (index + 1), 10 ) - 1;
 	}
 	else if ( yeartype.equalsIgnoreCase("Irrigation") ||
 		yeartype.equalsIgnoreCase("IYR") ) {
-		index = TimeUtil.convertCalendarMonthToCustomMonth (
-				(index + 1), 11 ) - 1;
+		index = TimeUtil.convertCalendarMonthToCustomMonth ( (index + 1), 11 ) - 1;
 	}
 	return _diveff[index];
 }
@@ -1282,8 +1256,7 @@ public static List getIdvcomwChoices ( boolean include_notes )
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.set(i, StringUtil.getToken(
-				(String)v.get(i), " ", 0, 0) );
+			v.set(i, StringUtil.getToken( (String)v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
@@ -1298,7 +1271,8 @@ public static String getIdvcomDefault ( boolean include_notes )
 {	if ( include_notes ) {
 		return "1 - Monthly total demand";
 	}
-	else {	return "1";
+	else {
+		return "1";
 	}
 }
 
@@ -1371,22 +1345,19 @@ Return a list of primary option strings, for use in GUIs.
 The options are of the form "0" if include_notes is false and
 "0 - Off", if include_notes is true.
 @return a list primary switch option strings, for use in GUIs.
-@param include_notes Indicate whether notes should be added after the parameter
-values.
+@param include_notes Indicate whether notes should be added after the parameter values.
 */
 public static List getPrimaryChoices ( boolean include_notes )
 {	List v = new Vector(52);
 	v.add ( "0 - Use water right priorities" );
 	for ( int i = 1000; i < 50000; i += 1000 ) {
-		v.add ( "" +
-		i + " - Well water rights will be adjusted by " + i );
+		v.add ( "" + i + " - Well water rights will be adjusted by " + i );
 	}
 	if ( !include_notes ) {
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.set(i,StringUtil.getToken(
-				(String)v.get(i), " ", 0, 0) );
+			v.set(i,StringUtil.getToken( (String)v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
@@ -1402,7 +1373,8 @@ public static String getPrimaryDefault ( boolean include_notes )
 	if ( include_notes ) {
 		return ( "0 - Use water right priorities" );
 	}
-	else {	return "0";
+	else {
+		return "0";
 	}
 }
 
@@ -1432,7 +1404,8 @@ public StateMod_WellRight getRight(int index)
 {	if ( (index < 0) || (index >= _rights.size()) ) {
 		return null;
 	}
-	else {	return (StateMod_WellRight)_rights.get(index);
+	else {
+		return (StateMod_WellRight)_rights.get(index);
 	}
 }
 
@@ -1444,13 +1417,11 @@ public List getRights() {
 }
 
 /**
-Indicate if the well is a DivAndWell (D&W, DW) node, indicated by an associated
-diversion ID in idvcow2
+Indicate if the well is a DivAndWell (D&W, DW) node, indicated by an associated diversion ID in idvcow2
 @return true if "idvcow2" is not blank or "NA", false otherwise.
 */
 public boolean hasAssociatedDiversion ()
-{	if (	(_idvcow2 != null) && !_idvcow2.equals("") &&
-		!_idvcow2.equalsIgnoreCase("NA") ) {
+{	if ( (_idvcow2 != null) && !_idvcow2.equals("") && !_idvcow2.equalsIgnoreCase("NA") ) {
 		return true;
 	}
 	return false;
@@ -1462,8 +1433,7 @@ be the case if the location is a collection with part type of "Parcel".
 */
 public boolean hasGroundwaterOnlySupply ()
 {
-	if ( isCollection() &&
-			getCollectionPartType().equalsIgnoreCase("Parcel")) {
+	if ( isCollection() && getCollectionPartType().equalsIgnoreCase("Parcel")) {
 		// TODO SAM 2007-05-11 Rectify part types with StateCU
 		return true;
 	}
@@ -1502,8 +1472,7 @@ private void initialize ( boolean initialize_defaults )
 	_georecord	= null;
 
 	if ( initialize_defaults ) {
-		_cdividyw 	= "0";	// Estimate average daily from monthly
-					// data.
+		_cdividyw 	= "0";	// Estimate average daily from monthly data.
 		_idvcow2 	= "N/A";
 		_diveff	 	= new double[12];
 		for ( int i = 0; i < 12; i++ ) {
@@ -1517,7 +1486,8 @@ private void initialize ( boolean initialize_defaults )
 		_demsrcw	= 1;
 		_primary	= 0;
 	}
-	else {	_cdividyw 	= "";
+	else {
+		_cdividyw 	= "";
 		_idvcow2 	= "";
 		_diveff	 	= new double[12];
 		for (int i=0; i<12; i++) {
@@ -1541,7 +1511,8 @@ public boolean isCollection()
 {	if ( __collection_Vector == null ) {
 		return false;
 	}
-	else {	return true;
+	else {
+		return true;
 	}
 }
 
@@ -1567,7 +1538,8 @@ public static List readStateModFile(String filename)
 throws Exception {
 	String routine = "StateMod_Well.readStateModFile";
 	List theWellStations = new Vector();
-	int [] format_1 = {	StringUtil.TYPE_STRING,
+	int [] format_1 = {
+				StringUtil.TYPE_STRING,
 				StringUtil.TYPE_STRING,
 				StringUtil.TYPE_STRING,
 				StringUtil.TYPE_INTEGER,
@@ -1576,7 +1548,8 @@ throws Exception {
 				StringUtil.TYPE_STRING,
 				StringUtil.TYPE_SPACE,
 				StringUtil.TYPE_DOUBLE };
-	int [] format_1w = {	12,
+	int [] format_1w = {
+				12,
 				24,
 				12,
 				8,
@@ -1585,7 +1558,8 @@ throws Exception {
 				12,
 				1,
 				12 };
-	int [] format_2 = {	StringUtil.TYPE_SPACE,
+	int [] format_2 = {
+				StringUtil.TYPE_SPACE,
 				StringUtil.TYPE_STRING,
 				StringUtil.TYPE_INTEGER,
 				StringUtil.TYPE_INTEGER,
@@ -1594,7 +1568,8 @@ throws Exception {
 				StringUtil.TYPE_DOUBLE,
 				StringUtil.TYPE_INTEGER,
 				StringUtil.TYPE_INTEGER };
-	int [] format_2w = {	36,
+	int [] format_2w = {
+				36,
 				12,
 				8,
 				8,
@@ -1603,11 +1578,13 @@ throws Exception {
 				8,
 				8,
 				8 };
-	int [] format_4 = {	StringUtil.TYPE_SPACE,
+	int [] format_4 = {
+				StringUtil.TYPE_SPACE,
 				StringUtil.TYPE_STRING,
 				StringUtil.TYPE_DOUBLE,
 				StringUtil.TYPE_INTEGER };
-	int [] format_4w = {	36,
+	int [] format_4w = {
+				36,
 				12,
 				8,
 				8 };
@@ -1623,8 +1600,8 @@ throws Exception {
 
 	Message.printStatus(1, routine, "Reading well file: " + filename);
 	
-	try {	in = new BufferedReader(new FileReader(
-			IOUtil.getPathUsingWorkingDir(filename)));
+	try {
+		in = new BufferedReader(new FileReader(	IOUtil.getPathUsingWorkingDir(filename)));
 		++linecount;
 		while ((iline = in.readLine()) != null) {
 			if (iline.startsWith("#") || iline.trim().length()==0) {
@@ -1635,8 +1612,7 @@ throws Exception {
 
 			StringUtil.fixedRead(iline, format_1, format_1w, v);
 			if (Message.isDebugOn) {
-				Message.printDebug(50, routine, 
-				"iline: " + iline);
+				Message.printDebug(50, routine, "iline: " + iline);
 			}
 			aWell.setID(((String)v.get(0)).trim());
 			aWell.setName(((String)v.get(1)).trim());
@@ -1651,13 +1627,11 @@ throws Exception {
 			iline = in.readLine();
 			StringUtil.fixedRead(iline, format_2, format_2w, v);
 			if (Message.isDebugOn) {
-				Message.printDebug(50, routine, 
-				"iline: " + iline);
+				Message.printDebug(50, routine, "iline: " + iline);
 			}
 			aWell.setIdvcow2(((String)v.get(0)).trim());
 			aWell.setIdvcomw((Integer)v.get(1));
-			// don't set the number of return flow data get(2)
-			// or depletion data get(3)
+			// Don't set the number of return flow data get(2) or depletion data get(3) because
 			// those will be calculated
 			nrtn = ((Integer)v.get(2)).intValue();
 			ndepl = ((Integer)v.get(3)).intValue();
@@ -1666,54 +1640,44 @@ throws Exception {
 			aWell.setIrturnw((Integer)v.get(6));
 			aWell.setDemsrcw((Integer)v.get(7));
 			if (aWell.getDivefcw()>= 0) {
-				// efficency line won't be included
-				for (int i = 0; i < 12; i++)
-					aWell.setDiveff(i, aWell.getDivefcw());
-			}
-			else {	// 12 efficiency values
-				iline = in.readLine();
-				effv = StringUtil.breakStringList(iline,
-					" ", StringUtil.DELIM_SKIP_BLANKS);
+				// Efficiency line won't be included - set each value to the average
 				for (int i = 0; i < 12; i++) {
-					aWell.setDiveff(i, 
-						(String)effv.get(0));
+					aWell.setDiveff(i, aWell.getDivefcw());
+				}
+			}
+			else {
+				// 12 efficiency values
+				iline = in.readLine();
+				effv = StringUtil.breakStringList(iline, " ", StringUtil.DELIM_SKIP_BLANKS);
+				for (int i = 0; i < 12; i++) {
+					aWell.setDiveff(i, (String)effv.get(i));
 				}
 			}
 
 			// return flow data
 
 			if (Message.isDebugOn) {
-				Message.printDebug(50, routine, 
-				"Number of return flows: " + nrtn);
+				Message.printDebug(50, routine, "Number of return flows: " + nrtn);
 			}
 			for (int i = 0; i < nrtn; i++) {
 				iline = in.readLine();
-				StringUtil.fixedRead(iline, format_4,
-					format_4w, v);
+				StringUtil.fixedRead(iline, format_4, format_4w, v);
 				if (Message.isDebugOn) {
-					Message.printDebug(50, routine, 
-					"Fixed read returned " 
-					+ v.size()+ " elements");
+					Message.printDebug(50, routine, "Fixed read returned " + v.size()+ " elements");
 				}
 
-				aReturnNode = new StateMod_ReturnFlow(
-					StateMod_DataSet.COMP_WELL_STATIONS);
+				aReturnNode = new StateMod_ReturnFlow(StateMod_DataSet.COMP_WELL_STATIONS);
 				s = ((String)v.get(0)).trim();
 				if (s.length()<= 0) {
 					aReturnNode.setCrtnid(s);
-					Message.printWarning(2, routine, 
-						"Return node for structure \"" +
-						aWell.getID()+
-						"\" is blank. ");
+					Message.printWarning(2, routine, "Return node for structure \"" + aWell.getID()+ "\" is blank. ");
 				}
 				else {	
 					aReturnNode.setCrtnid(s);
 				}
 
-				aReturnNode.setPcttot(
-					((Double)v.get(1)));
-				aReturnNode.setIrtndl(
-					((Integer)v.get(2)));
+				aReturnNode.setPcttot( ((Double)v.get(1)));
+				aReturnNode.setIrtndl( ((Integer)v.get(2)));
 				aWell.addReturnFlow(aReturnNode);
 			}
 
@@ -1721,27 +1685,21 @@ throws Exception {
 
 			for (int i = 0; i < ndepl; i++) {
 				iline = in.readLine();
-				StringUtil.fixedRead(iline, format_4,
-					format_4w, v);
+				StringUtil.fixedRead(iline, format_4, format_4w, v);
 
-				aReturnNode = new StateMod_ReturnFlow(
-					StateMod_DataSet.COMP_WELL_STATIONS);
+				aReturnNode = new StateMod_ReturnFlow( StateMod_DataSet.COMP_WELL_STATIONS);
 				s = ((String)v.get(0)).trim();
 				if (s.length() <= 0) {
 					aReturnNode.setCrtnid(s);
 					Message.printWarning(2, routine, 
-						"Return node for structure \"" +
-						aWell.getID()+
-						"\" is blank. ");
+						"Return node for structure \"" + aWell.getID()+ "\" is blank. ");
 				}
 				else {	
 					aReturnNode.setCrtnid(s);
 				}
 
-				aReturnNode.setPcttot(
-					((Double)v.get(1)));
-				aReturnNode.setIrtndl(
-					((Integer)v.get(2)));
+				aReturnNode.setPcttot( ((Double)v.get(1)));
+				aReturnNode.setIrtndl( ((Integer)v.get(2)));
 				aWell.addDepletion(aReturnNode);
 			}
 
@@ -1925,7 +1883,8 @@ public void setCollectionPartIDs ( int year, List ids )
 		__collection_year = new int[1];
 		__collection_year[0] = year;
 	}
-	else {	// See if the year matches any previous contents...
+	else {
+		// See if the year matches any previous contents...
 		for ( int i = 0; i < __collection_year.length; i++ ) {
 			if ( year == __collection_year[i] ) {
 				pos = i;
@@ -1944,7 +1903,8 @@ public void setCollectionPartIDs ( int year, List ids )
 			__collection_year = temp;
 			__collection_year[pos] = year;
 		}
-		else {	// Existing item...
+		else {
+			// Existing item...
 			__collection_Vector.set ( pos, ids );
 			__collection_year[pos] = year;
 		}
@@ -1953,8 +1913,7 @@ public void setCollectionPartIDs ( int year, List ids )
 
 /**
 Set the collection part type.
-@param collection_part_type The collection part type
-(see COLLECTION_PART_TYPE_*).
+@param collection_part_type The collection part type (see COLLECTION_PART_TYPE_*).
 */
 public void setCollectionPartType ( String collection_part_type )
 {	__collection_part_type = collection_part_type;
@@ -1969,16 +1928,14 @@ public void setCollectionType ( String collection_type )
 }
 
 /**
-Set the consumptive water requirement daily time series for the well
-structure.
+Set the consumptive water requirement daily time series for the well structure.
 */
 public void setConsumptiveWaterRequirementDayTS ( DayTS cwr_DayTS) {
 	_cwr_DayTS = cwr_DayTS;
 }
 
 /**
-Set the consumptive water requirement monthly time series for the well
-structure.
+Set the consumptive water requirement monthly time series for the well structure.
 */
 public void setConsumptiveWaterRequirementMonthTS ( MonthTS cwr_MonthTS) {
 	_cwr_MonthTS = cwr_MonthTS;
@@ -2001,8 +1958,7 @@ public void setDemandMonthTS ( MonthTS demand_MonthTS) {
 }
 
 /**
-Set the irrigated acreage source(see StateMod documentation for list of
-available sources).
+Set the irrigated acreage source(see StateMod documentation for list of available sources).
 @param demsrcw source for irrigated acreage
 */
 public void setDemsrcw(int demsrcw) {
@@ -2016,8 +1972,7 @@ public void setDemsrcw(int demsrcw) {
 }
 
 /**
-Set the irrigated acreage source(see StateMod documentation for list of
-available sources).
+Set the irrigated acreage source(see StateMod documentation for list of available sources).
 @param demsrcw source for irrigated acreage
 */
 public void setDemsrcw(Integer demsrcw) {
@@ -2028,8 +1983,7 @@ public void setDemsrcw(Integer demsrcw) {
 }
 
 /**
-Set the irrigated acreage source(see StateMod documentation for list of
-available sources).
+Set the irrigated acreage source(see StateMod documentation for list of available sources).
 @param demsrcw source for irrigated acreage
 */
 public void setDemsrcw(String demsrcw) {
@@ -2039,7 +1993,7 @@ public void setDemsrcw(String demsrcw) {
 	setDemsrcw(StringUtil.atoi(demsrcw.trim()));
 }
 
-// REVISIT - need to handle dirty flag
+// TODO - need to handle dirty flag
 public void setDepletions(List depl) {
 	_depl = depl;
 }
@@ -2082,8 +2036,7 @@ public void setDivcapw(String divcapw) {
 
 /**
 Set the system efficiency
-@param divefcw efficiency of the system.  If negative, 12 efficiency
-values will be used.
+@param divefcw efficiency of the system.  If negative, 12 efficiency values will be used.
 */
 public void setDivefcw(double divefcw) {
 	if (divefcw != _divefcw) {
@@ -2097,8 +2050,7 @@ public void setDivefcw(double divefcw) {
 
 /**
 Set the system efficiency
-@param divefcw efficiency of the system.  If negative, 12 efficiency
-values will be used.
+@param divefcw efficiency of the system.  If negative, 12 efficiency values will be used.
 @see StateMod_Well#setDiveff
 */
 public void setDivefcw(Double divefcw) {
@@ -2110,8 +2062,7 @@ public void setDivefcw(Double divefcw) {
 
 /**
 Set the system efficiency
-@param divefcw efficiency of the system.  If negative, 12 efficiency
-values will be used.
+@param divefcw efficiency of the system.  If negative, 12 efficiency values will be used.
 @see StateMod_Well#setDiveff
 */
 public void setDivefcw(String divefcw) {
@@ -2153,20 +2104,17 @@ public void setDiveff(int index, double diveff, String yeartype )
 	}
 	else if ( yeartype.equalsIgnoreCase("Water") ||
 		yeartype.equalsIgnoreCase("WYR") ) {
-		index = TimeUtil.convertCalendarMonthToCustomMonth (
-				(index + 1), 10 ) - 1;
+		index = TimeUtil.convertCalendarMonthToCustomMonth ( (index + 1), 10 ) - 1;
 	}
 	else if ( yeartype.equalsIgnoreCase("Irrigation") ||
 		yeartype.equalsIgnoreCase("IYR") ) {
-		index = TimeUtil.convertCalendarMonthToCustomMonth (
-				(index + 1), 11 ) - 1;
+		index = TimeUtil.convertCalendarMonthToCustomMonth ( (index + 1), 11 ) - 1;
 	}
 	if (_diveff[index] != diveff) {
 		_diveff[index] = diveff;
 		setDirty(true);
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(
-			StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
+			_dataset.setDirty( StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
 		}
 	}
 }
@@ -2178,8 +2126,7 @@ Set the variable efficiency
 */
 public void setDiveff(int index, double diveff) {
 	if (index < 0 || index > 11) {
-		Message.printWarning(2, "setDiveff", 
-			"Unable to set efficiency for month index " + index);
+		Message.printWarning(2, "setDiveff", "Unable to set efficiency for month index " + index);
 		return;
 	}
 	if (diveff != _diveff[index]) {
@@ -2370,12 +2317,12 @@ public void setPrimary(String primary) {
 	setPrimary(StringUtil.atod(primary.trim()));
 }
 
-// REVISIT - need to handle dirty flag
+// TODO - need to handle dirty flag
 public void setReturnFlows(List rivret) {
 	_rivret = rivret;
 }
 
-// REVISIT - need to handle dirty flag
+// TODO - need to handle dirty flag
 public void setRights(List rights) {
 	_rights = rights;
 }
@@ -2385,228 +2332,187 @@ Print well information to output.  History header information
 is also maintained by calling this routine.
 @param instrfile input file from which previous history should be taken
 @param outstrfile output file to which to write
-@param theWellStations vector of wells to print
-@param new_comments addition comments which should be included in history
-REVISIT -- Incorrect tag syntax: see RTi.Util.IO#processFileHeaders
+@param theWellStations list of wells to print
+@param newComments addition comments which should be included in history
+@see RTi.Util.IOUtil#processFileHeaders
 */
 public static void writeStateModFile(String instrfile, String outstrfile,
-		List theWellStations, String[] new_comments)
+		List theWellStations, List newComments)
 throws Exception {
-	String [] comment_str = { "#" };
-	String [] ignore_comment_str = { "#>" };
+	List commentIndicators = new Vector(1);
+	commentIndicators.add ( "#" );
+	List ignoredCommentIndicators = new Vector(1);
+	ignoredCommentIndicators.add ( "#>");
 	PrintWriter out = null;
 	try {
-	out = IOUtil.processFileHeaders(
-		IOUtil.getPathUsingWorkingDir(instrfile),
-		IOUtil.getPathUsingWorkingDir(outstrfile),
-		new_comments, comment_str, ignore_comment_str, 0);
-
-	int i,j;
-	String iline = null;
-	String cmnt = "#>";
-	String format_1 = "%-12.12s%-24.24s%-12.12s%8d%#8.2F %-12.12s %#12.5F";
-	String format_2 =
-		"                                    %-12.12s%8d%8d%8d%#8.0F%"
-		+ "#8.0F%8d%8d";
-	String format_4 =
-		"                                    %-12.12s%8.2F%8d";
-	StateMod_Well well = null;
-	StateMod_ReturnFlow ret = null;
-	List v = new Vector(8);
-	List wellDepletion = null;
-	List wellReturnFlow = null;
-
-	out.println(cmnt);
-	out.println(cmnt
-		+ " *******************************************************");
-	out.println(cmnt + "  Well Station File");
-	out.println(cmnt);
-	out.println(cmnt + "  Card 1 format:  (a12, a24, a12,i8, f8.2, "
-		+ "1x, a12, 1x, f12.5)");
-	out.println(cmnt);
-	out.println(cmnt + "  ID        cdividw:  Well ID");
-	out.println(cmnt + "  Name      divnamw:  Well name");
-	out.println(cmnt 
-		+ "  Riv ID    idvstaw:  River Node where well is located");
-	out.println(cmnt + "  On/Off    idivsww:  Switch 0=off; 1=on");
-	out.println(cmnt + "  Capacity  divcapw:  Well capacity (cfs)");
-	out.println(cmnt + "  Daily ID cdividyw:  " 
-		+ "Well ID to use for daily data");
-	out.println(cmnt + "  Primary   primary:  " 
-		+ "See StateMod documentation");
-	out.println(cmnt);
-	out.println(cmnt 
-		+ "  Card 2 format:  (36x, a12, 3i8, f8.2, f8.0, i8, f8.0)");
-	out.println(cmnt);
-	out.println(cmnt + "  DivID     idvcow2:  Diversion this " 
-		+ "well is tied to (N/A if not tied to a diversion)");
-	out.println(cmnt 
-		+ "  DataType  idvcomw:  Data type (see StateMod doc)");
-	out.println(cmnt + "  #-Ret       nrtnw:  " 
-		+ "Number of return flow locations");
-	out.println(cmnt + "  #-Dep      nrtnw2:  " 
-		+ "Number of depletion locations");
-	out.println(cmnt + "  Eff %     divefcw:  System efficiency (%)");
-	out.println(cmnt + "  Area        areaw:  Area served.");
-	out.println(cmnt + "  UseType   irturnw:  Use type; 1-3=Inbasin; " 
-		+ "4=Transmountain");
-	out.println(cmnt + "  Demsrc    demsrcw:  Irrig acreage source " 
-		+ "(1=GIS, 2=tia, 3=GIS-primary, 4=tia-primary,");
-	out.println(cmnt + "                       5=secondary, 6=M&I " 
-		+ "no acreage, 7=carrier no acreage, 8=user),");
-	out.println(cmnt);
-	out.println(cmnt + "  Card 3   Variable Efficiency Data " 
-		+ "(Enter if diveff < 0)");
-	out.println(cmnt);
-	out.println(cmnt
-		+ "  Card 4  format:  (36x, a12, f8.0, i8)");
-	out.println(cmnt);
-	out.println(cmnt
-		+ "  Ret Id   crtnidw:  River ID receiving return flow");
-	out.println(cmnt
-		+ "  Ret %    pcttotw:  Percent of return flow to location ");
-	out.println(cmnt 
-		+ "  Table #  irtndlw:  Return flow table id");
-	out.println(cmnt);
-	out.println(cmnt
-		+ "  Card 5  format:  (36x, a12, f8.0, i8)");
-	out.println(cmnt
-		+ "  Dep Id   crtnidw2:  River ID being depletion");
-	out.println(cmnt
-		+ "  Dep %    pcttotw2:  Percent of depletion to river node ");
-	out.println(cmnt
-		+ "  Table #  irtndlw2:  Return (depletion) table id");
-	out.println(cmnt);
-	out.println(cmnt + "   ID         Name                  Riv ID    " 
-		+ " On/Off Capacity  Daily ID     Primary    ");
-	out.println(cmnt + "---------eb----------------------eb----------e" 
-		+ "b------eb------exb----------exb----------e");
-	out.println(cmnt + "                                    " 
-		+ "   DivID    " 
-		+ "DataCode #-Ret   #-Dep   Eff %   Area   UseType Demsrc" 
-		+ "Type  Source");
-	out.println(cmnt + "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" 
-		+ "b----------e" 
-		+ "b------eb------eb------eb------eb------eb------eb------e");
-	out.println(cmnt + "  Eff %    Diveff Efficiency for month " 
-		+ "1-12 where 1 is tied to year type");
-	out.println(cmnt + " eff(1)  eff(2)  eff(3)  eff(4)  eff(5)  " 
-		+ "eff(6)  eff(7)  eff(8)  eff(9) eff(10) eff(11) eff(12)");
-	out.println(cmnt + "-----eb------eb------eb------eb------eb---" 
-		+ "---eb------eb------eb------eb------eb------eb------e");
-	out.println(cmnt + "                                  " 
-		+ "  Ret ID     Ret %   Table #");
-	out.println(cmnt + "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" 
-		+ "b----------eb------eb------e");
-	out.println(cmnt + "                                  " 
-		+ "  Dep ID     Dep %   Table #");
-	out.println(cmnt + "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" 
-		+ "b----------eb------eb------e");
-	out.println(cmnt);
-	out.println(cmnt + "EndHeader");
-	out.println(cmnt);
-
-	int num = 0;
-	if (theWellStations != null) {
-		num = theWellStations.size();
-	}
-
-	for (i = 0; i < num; i++) {
-		well = (StateMod_Well)theWellStations.get(i);
-		if (well == null) {
-			continue;
+		out = IOUtil.processFileHeaders(
+			IOUtil.getPathUsingWorkingDir(instrfile),
+			IOUtil.getPathUsingWorkingDir(outstrfile),
+			newComments, commentIndicators, ignoredCommentIndicators, 0);
+	
+		int i,j;
+		String iline = null;
+		String cmnt = "#>";
+		String format_1 = "%-12.12s%-24.24s%-12.12s%8d%#8.2F %-12.12s %#12.5F";
+		String format_2 = "                                    %-12.12s%8d%8d%8d%#8.0F%#8.0F%8d%8d";
+		String format_4 = "                                    %-12.12s%8.2F%8d";
+		StateMod_Well well = null;
+		StateMod_ReturnFlow ret = null;
+		List v = new Vector(8);
+		List wellDepletion = null;
+		List wellReturnFlow = null;
+	
+		out.println(cmnt);
+		out.println(cmnt + " *******************************************************");
+		out.println(cmnt + "  Well Station File");
+		out.println(cmnt);
+		out.println(cmnt + "  Row 1 format:  (a12, a24, a12,i8, f8.2, 1x, a12, 1x, f12.5)");
+		out.println(cmnt);
+		out.println(cmnt + "  ID        cdividw:  Well ID");
+		out.println(cmnt + "  Name      divnamw:  Well name");
+		out.println(cmnt + "  Riv ID    idvstaw:  River Node where well is located");
+		out.println(cmnt + "  On/Off    idivsww:  Switch 0=off; 1=on");
+		out.println(cmnt + "  Capacity  divcapw:  Well capacity (cfs)");
+		out.println(cmnt + "  Daily ID cdividyw:  Well ID to use for daily data");
+		out.println(cmnt + "  Primary   primary:  See StateMod documentation");
+		out.println(cmnt);
+		out.println(cmnt + "  Row 2 format:  (36x, a12, 3i8, f8.2, f8.0, i8, f8.0)");
+		out.println(cmnt);
+		out.println(cmnt + "  DivID     idvcow2:  Diversion this well is tied to (N/A if not tied to a diversion)");
+		out.println(cmnt + "  DataType  idvcomw:  Data type (see StateMod doc)");
+		out.println(cmnt + "  #-Ret       nrtnw:  Number of return flow locations");
+		out.println(cmnt + "  #-Dep      nrtnw2:  Number of depletion locations");
+		out.println(cmnt + "  Eff %     divefcw:  System efficiency (%) - if negative, include row 3");
+		out.println(cmnt + "  Area        areaw:  Area served.");
+		out.println(cmnt + "  UseType   irturnw:  Use type; 1-3=Inbasin; 4=Transmountain");
+		out.println(cmnt + "  Demsrc    demsrcw:  Irrig acreage source (1=GIS, 2=tia, 3=GIS-primary, 4=tia-primary,");
+		out.println(cmnt + "                       5=secondary, 6=M&I no acreage, 7=carrier no acreage, 8=user),");
+		out.println(cmnt);
+		out.println(cmnt + "  Row 3   Variable efficiency data, % (enter if divefcw < 0) - free format");
+		out.println(cmnt);
+		out.println(cmnt + "  Row 4  format:  (36x, a12, f8.0, i8)");
+		out.println(cmnt);
+		out.println(cmnt + "  Ret Id   crtnidw:  River ID receiving return flow");
+		out.println(cmnt + "  Ret %    pcttotw:  Percent of return flow to location ");
+		out.println(cmnt + "  Table #  irtndlw:  Return flow table id");
+		out.println(cmnt);
+		out.println(cmnt + "  Row 5  format:  (36x, a12, f8.0, i8)");
+		out.println(cmnt + "  Dep Id   crtnidw2:  River ID being depletion");
+		out.println(cmnt + "  Dep %    pcttotw2:  Percent of depletion to river node ");
+		out.println(cmnt + "  Table #  irtndlw2:  Return (depletion) table id");
+		out.println(cmnt);
+		out.println(cmnt + "   ID         Name                  Riv ID     On/Off Capacity  Daily ID     Primary    ");
+		out.println(cmnt + "---------eb----------------------eb----------eb------eb------exb----------exb----------e");
+		out.println(cmnt + "                                       DivID  DataCode #-Ret   #-Dep   Eff %   Area   UseType  Demsrc");
+		out.println(cmnt + "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxb----------eb------eb------eb------eb------eb------eb------eb------e");
+		out.println(cmnt + "  Eff %    Diveff Efficiency for month 1-12 where 1 is tied to year type");
+		out.println(cmnt + "eff(1)  eff(2)  eff(3)  eff(4)  eff(5)  eff(6)  eff(7)  eff(8)  eff(9) eff(10) eff(11) eff(12)");
+		out.println(cmnt + "-----eb------eb------eb------eb------eb------eb------eb------eb------eb------eb------eb------e");
+		out.println(cmnt + "                                    Ret ID     Ret %   Table #");
+		out.println(cmnt + "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxb----------eb------eb------e");
+		out.println(cmnt + "                                    Dep ID     Dep %   Table #");
+		out.println(cmnt + "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxb----------eb------eb------e");
+		out.println(cmnt);
+		out.println(cmnt + "EndHeader");
+		out.println(cmnt);
+	
+		int num = 0;
+		if (theWellStations != null) {
+			num = theWellStations.size();
 		}
-
-		// line 1
-		v.clear();
-		v.add(well.getID());
-		v.add(well.getName());
-		v.add(well.getCgoto());
-		v.add(new Integer(well.getSwitch()));
-		v.add(new Double (well.getDivcapw()));
-		v.add(well.getCdividyw());
-		v.add(new Double(well.getPrimary()));
-		iline = StringUtil.formatString(v, format_1);
-		out.println(iline);
-
-		// line 2
-		v.clear();
-		v.add(well.getIdvcow2());
-		v.add(new Integer(well.getIdvcomw()));
-		v.add(new Integer(well.getNrtnw()));
-		v.add(new Integer(well.getNrtnw2()));
-		v.add(new Double (well.getDivefcw()));
-		v.add(new Double (well.getAreaw()));
-		v.add(new Integer(well.getIrturnw()));
-		v.add(new Integer(well.getDemsrcw()));
-		iline = StringUtil.formatString(v, format_2);
-		out.println(iline);
-
-		// line 3 - well efficiency
-		if (well.getDivefcw()< 0) {
-			for (j = 0; j < 12; j++) {
-				v.clear();
-				v.add(new Double(well.getDiveff(j)));
-				iline = StringUtil.formatString(v, " %#5.0F");
-				out.print(iline);
+	
+		for (i = 0; i < num; i++) {
+			well = (StateMod_Well)theWellStations.get(i);
+			if (well == null) {
+				continue;
 			}
-
-			out.println();
-		}
-
-		// line 4 - return information
-		int nrtn = well.getNrtnw();
-		wellReturnFlow = well.getReturnFlows();
-		for (j = 0; j < nrtn; j++) {
+	
+			// line 1
 			v.clear();
-			ret = (StateMod_ReturnFlow)wellReturnFlow.get(j);
-			v.add(ret.getCrtnid());
-			v.add(new Double(ret.getPcttot()));
-			v.add(new Integer(ret.getIrtndl()));
-			// SAM changed on 2000-02-24 as per Ray Bennett...
-			//iline = StringUtil.formatString(v, format_4);
-			iline = StringUtil.formatString(v, format_4)
-				+" Rtn" + StringUtil.formatString((j+1),"%02d");
+			v.add(well.getID());
+			v.add(well.getName());
+			v.add(well.getCgoto());
+			v.add(new Integer(well.getSwitch()));
+			v.add(new Double (well.getDivcapw()));
+			v.add(well.getCdividyw());
+			v.add(new Double(well.getPrimary()));
+			iline = StringUtil.formatString(v, format_1);
 			out.println(iline);
-		}
-
-		// line 5 - depletion information
-		nrtn = well.getNrtnw2();
-		wellDepletion = well.getDepletions();
-		for (j = 0; j < nrtn; j++) {
+	
+			// line 2
 			v.clear();
-			ret = (StateMod_ReturnFlow)wellDepletion.get(j);
-			v.add(ret.getCrtnid());
-			v.add(new Double(ret.getPcttot()));
-			v.add(new Integer(ret.getIrtndl()));
-			// SAM changed on 2000-02-24 as per Ray Bennett...
-			//iline = StringUtil.formatString(v, format_4);
-			iline = StringUtil.formatString(v, format_4)
-				+" Dep" + StringUtil.formatString((j+1),"%02d");
+			v.add(well.getIdvcow2());
+			v.add(new Integer(well.getIdvcomw()));
+			v.add(new Integer(well.getNrtnw()));
+			v.add(new Integer(well.getNrtnw2()));
+			v.add(new Double (well.getDivefcw()));
+			v.add(new Double (well.getAreaw()));
+			v.add(new Integer(well.getIrturnw()));
+			v.add(new Integer(well.getDemsrcw()));
+			iline = StringUtil.formatString(v, format_2);
 			out.println(iline);
+	
+			// line 3 - well efficiency
+			if (well.getDivefcw()< 0) {
+				for (j = 0; j < 12; j++) {
+					v.clear();
+					v.add(new Double(well.getDiveff(j)));
+					iline = StringUtil.formatString(v, " %#5.0F");
+					out.print(iline);
+				}
+	
+				out.println();
+			}
+	
+			// line 4 - return information
+			int nrtn = well.getNrtnw();
+			wellReturnFlow = well.getReturnFlows();
+			for (j = 0; j < nrtn; j++) {
+				v.clear();
+				ret = (StateMod_ReturnFlow)wellReturnFlow.get(j);
+				v.add(ret.getCrtnid());
+				v.add(new Double(ret.getPcttot()));
+				v.add(new Integer(ret.getIrtndl()));
+				// SAM changed on 2000-02-24 as per Ray Bennett...
+				//iline = StringUtil.formatString(v, format_4);
+				iline = StringUtil.formatString(v, format_4) +" Rtn" + StringUtil.formatString((j+1),"%02d");
+				out.println(iline);
+			}
+	
+			// line 5 - depletion information
+			nrtn = well.getNrtnw2();
+			wellDepletion = well.getDepletions();
+			for (j = 0; j < nrtn; j++) {
+				v.clear();
+				ret = (StateMod_ReturnFlow)wellDepletion.get(j);
+				v.add(ret.getCrtnid());
+				v.add(new Double(ret.getPcttot()));
+				v.add(new Integer(ret.getIrtndl()));
+				// SAM changed on 2000-02-24 as per Ray Bennett...
+				//iline = StringUtil.formatString(v, format_4);
+				iline = StringUtil.formatString(v, format_4) +" Dep" + StringUtil.formatString((j+1),"%02d");
+				out.println(iline);
+			}
 		}
-	}
-		
-	out.flush();
-	out.close();
-	comment_str = null;
-	ignore_comment_str = null;
-	out = null;
+			
+		out.flush();
+		out.close();
+		out = null;
 	} 
 	catch (Exception e) {
-		comment_str = null;
-		ignore_comment_str = null;
+		out = null;
+		throw e;
+	}
+	finally {
 		if (out != null) {
 			out.flush();
 			out.close();
 		}
-		out = null;
-		throw e;
 	}
 }
 
 /**
-Writes a Vector of StateMod_Well objects to a list file.  A header is 
+Writes a list of StateMod_Well objects to a list file.  A header is 
 printed to the top of the file, containing the commands used to generate the 
 file.  Any strings in the body of the file that contain the field delimiter will be wrapped in "...".  
 This method also writes well Return Flows to
@@ -2620,10 +2526,14 @@ with a filename parameter of "wells.txt", four files will be generated:
 @param delimiter the delimiter to use for separating field values.
 @param update whether to update an existing file, retaining the current 
 header (true) or to create a new file with a new header.
-@param data the Vector of objects to write.  
+@param data the list of objects to write.
+@param newComments comments to add at the top of the file (e.g., command file, HydroBase version).
+@return a list of files that were actually written, because this method controls all the secondary
+filenames.
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter, boolean update, List data) 
+public static List writeListFile(String filename, String delimiter, boolean update,
+		List data, List newComments ) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
@@ -2678,21 +2588,36 @@ throws Exception {
 	PrintWriter out = null;
 	StateMod_ReturnFlow rf = null;
 	StateMod_Well well = null;
-	String[] commentString = { "#" };
-	String[] ignoreCommentString = { "#>" };
+	List commentIndicators = new Vector(1);
+	commentIndicators.add ( "#" );
+	List ignoredCommentIndicators = new Vector(1);
+	ignoredCommentIndicators.add ( "#>");
 	String[] line = new String[fieldCount];
-	String[] newComments = null;
 	String id = null;
 	StringBuffer buffer = new StringBuffer();
 	List depletions = new Vector();
 	List returnFlows = new Vector();
 	List temp = null;
 	
-	try {	
+	String filenameFull = IOUtil.getPathUsingWorkingDir(filename);
+	try {
+		// Add some basic comments at the top of the file.  However, do this to a copy of the
+		// incoming comments so that they are not modified in the calling code.
+		List newComments2 = null;
+		if ( newComments == null ) {
+			newComments2 = new Vector();
+		}
+		else {
+			newComments2 = new Vector(newComments);
+		}
+		newComments2.add(0,"");
+		newComments2.add(1,"StateMod well stations as a delimited list file.");
+		newComments2.add(2,"See also the associated return flow, depletion, and collection files.");
+		newComments2.add(3,"");
 		out = IOUtil.processFileHeaders(
 			oldFile,
-			IOUtil.getPathUsingWorkingDir(filename), 
-			newComments, commentString, ignoreCommentString, 0);
+			IOUtil.getPathUsingWorkingDir(filenameFull), 
+			newComments2, commentIndicators, ignoredCommentIndicators, 0);
 
 		for (int i = 0; i < fieldCount; i++) {
 			buffer.append("\"" + names[i] + "\"");
@@ -2706,56 +2631,31 @@ throws Exception {
 		for (int i = 0; i < size; i++) {
 			well = (StateMod_Well)data.get(i);
 			
-			line[0] = StringUtil.formatString(well.getID(), 
-				formats[0]).trim();
-			line[1] = StringUtil.formatString(well.getName(), 
-				formats[1]).trim();
-			line[2] = StringUtil.formatString(well.getCgoto(), 
-				formats[2]).trim();
-			line[3] = StringUtil.formatString(well.getSwitch(), 
-				formats[3]).trim();
-			line[4] = StringUtil.formatString(well.getDivcapw(), 
-				formats[4]).trim();
-			line[5] = StringUtil.formatString(well.getCdividyw(), 
-				formats[5]).trim();
-			line[6] = StringUtil.formatString(well.getPrimary(), 
-				formats[6]).trim();
-			line[7] = StringUtil.formatString(well.getIdvcow2(), 
-				formats[7]).trim();
-			line[8] = StringUtil.formatString(well.getIdvcomw(), 
-				formats[8]).trim();
-			line[9] = StringUtil.formatString(well.getDivefcw(), 
-				formats[9]).trim();
-			line[10] = StringUtil.formatString(well.getAreaw(), 
-				formats[10]).trim();
-			line[11] = StringUtil.formatString(well.getIrturnw(), 
-				formats[11]).trim();
-			line[12] = StringUtil.formatString(well.getDemsrcw(), 
-				formats[12]).trim();
-			line[13] = StringUtil.formatString(well.getDiveff(0), 
-				formats[13]).trim();
-			line[14] = StringUtil.formatString(well.getDiveff(1), 
-				formats[14]).trim();
-			line[15] = StringUtil.formatString(well.getDiveff(2), 
-				formats[15]).trim();
-			line[16] = StringUtil.formatString(well.getDiveff(3), 
-				formats[16]).trim();
-			line[17] = StringUtil.formatString(well.getDiveff(4), 
-				formats[17]).trim();
-			line[18] = StringUtil.formatString(well.getDiveff(5), 
-				formats[18]).trim();
-			line[19] = StringUtil.formatString(well.getDiveff(6), 
-				formats[19]).trim();
-			line[20] = StringUtil.formatString(well.getDiveff(7), 
-				formats[20]).trim();
-			line[21] = StringUtil.formatString(well.getDiveff(8), 
-				formats[21]).trim();
-			line[22] = StringUtil.formatString(well.getDiveff(9), 
-				formats[22]).trim();
-			line[23] = StringUtil.formatString(well.getDiveff(10), 
-				formats[23]).trim();
-			line[24] = StringUtil.formatString(well.getDiveff(11), 
-				formats[24]).trim();
+			line[0] = StringUtil.formatString(well.getID(), formats[0]).trim();
+			line[1] = StringUtil.formatString(well.getName(), formats[1]).trim();
+			line[2] = StringUtil.formatString(well.getCgoto(), formats[2]).trim();
+			line[3] = StringUtil.formatString(well.getSwitch(), formats[3]).trim();
+			line[4] = StringUtil.formatString(well.getDivcapw(), formats[4]).trim();
+			line[5] = StringUtil.formatString(well.getCdividyw(), formats[5]).trim();
+			line[6] = StringUtil.formatString(well.getPrimary(), formats[6]).trim();
+			line[7] = StringUtil.formatString(well.getIdvcow2(), formats[7]).trim();
+			line[8] = StringUtil.formatString(well.getIdvcomw(), formats[8]).trim();
+			line[9] = StringUtil.formatString(well.getDivefcw(), formats[9]).trim();
+			line[10] = StringUtil.formatString(well.getAreaw(), formats[10]).trim();
+			line[11] = StringUtil.formatString(well.getIrturnw(), formats[11]).trim();
+			line[12] = StringUtil.formatString(well.getDemsrcw(), formats[12]).trim();
+			line[13] = StringUtil.formatString(well.getDiveff(0), formats[13]).trim();
+			line[14] = StringUtil.formatString(well.getDiveff(1), formats[14]).trim();
+			line[15] = StringUtil.formatString(well.getDiveff(2), formats[15]).trim();
+			line[16] = StringUtil.formatString(well.getDiveff(3), formats[16]).trim();
+			line[17] = StringUtil.formatString(well.getDiveff(4), formats[17]).trim();
+			line[18] = StringUtil.formatString(well.getDiveff(5), formats[18]).trim();
+			line[19] = StringUtil.formatString(well.getDiveff(6), formats[19]).trim();
+			line[20] = StringUtil.formatString(well.getDiveff(7), formats[20]).trim();
+			line[21] = StringUtil.formatString(well.getDiveff(8), formats[21]).trim();
+			line[22] = StringUtil.formatString(well.getDiveff(9), formats[22]).trim();
+			line[23] = StringUtil.formatString(well.getDiveff(10), formats[23]).trim();
+			line[24] = StringUtil.formatString(well.getDiveff(11), formats[24]).trim();
 
 			buffer = new StringBuffer();	
 			for (j = 0; j < fieldCount; j++) {
@@ -2787,17 +2687,13 @@ throws Exception {
 				depletions.add(rf);
 			}
 		}
-		out.flush();
-		out.close();
-		out = null;
 	}
-	catch (Exception e) {
+	finally {
 		if (out != null) {
 			out.flush();
 			out.close();
 		}
 		out = null;
-		throw e;
 	}
 
 	int lastIndex = filename.lastIndexOf(".");
@@ -2806,16 +2702,21 @@ throws Exception {
 	
 	String returnFlowFilename = front + "_ReturnFlows." + end;
 	StateMod_ReturnFlow.writeListFile(returnFlowFilename, delimiter,
-		update, returnFlows, 
-		StateMod_DataSet.COMP_WELL_STATION_DELAY_TABLES);	
+		update, returnFlows, StateMod_DataSet.COMP_WELL_STATION_DELAY_TABLES, newComments );	
 
 	String depletionFilename = front + "_Depletions." + end;
 	StateMod_ReturnFlow.writeListFile(depletionFilename, delimiter,
-		update, depletions, 
-		StateMod_DataSet.COMP_WELL_STATION_DEPLETION_TABLES);	
+		update, depletions, StateMod_DataSet.COMP_WELL_STATION_DEPLETION_TABLES, newComments );	
 
 	String collectionFilename = front + "_Collections." + end;
-	writeCollectionListFile(collectionFilename, delimiter, update, data);		
+	writeCollectionListFile(collectionFilename, delimiter, update, data, newComments );
+	
+	List filesWritten = new Vector();
+	filesWritten.add ( new File(filenameFull) );
+	filesWritten.add ( new File(returnFlowFilename) );
+	filesWritten.add ( new File(depletionFilename) );
+	filesWritten.add ( new File(collectionFilename) );
+	return filesWritten;
 }
 
 /**
@@ -2830,7 +2731,8 @@ header (true) or to create a new file with a new header.
 @param data the Vector of objects to write.  
 @throws Exception if an error occurs.
 */
-public static void writeCollectionListFile(String filename, String delimiter, boolean update, List data) 
+public static void writeCollectionListFile(String filename, String delimiter, boolean update,
+	List data, List newComments )
 throws Exception {
 	int size = 0;
 	if (data != null) {
@@ -2866,21 +2768,35 @@ throws Exception {
 	int num = 0;
 	PrintWriter out = null;
 	StateMod_Well well = null;
-	String[] commentString = { "#" };
-	String[] ignoreCommentString = { "#>" };
+	List commentIndicators = new Vector(1);
+	commentIndicators.add ( "#" );
+	List ignoredCommentIndicators = new Vector(1);
+	ignoredCommentIndicators.add ( "#>");
 	String[] line = new String[fieldCount];
-	String[] newComments = null;	
 	String colType = null;
 	String id = null;
 	String partType = null;	
 	StringBuffer buffer = new StringBuffer();
 	List ids = null;
 
-	try {		
+	try {
+		// Add some basic comments at the top of the file.  However, do this to a copy of the
+		// incoming comments so that they are not modified in the calling code.
+		List newComments2 = null;
+		if ( newComments == null ) {
+			newComments2 = new Vector();
+		}
+		else {
+			newComments2 = new Vector(newComments);
+		}
+		newComments2.add(0,"");
+		newComments2.add(1,"StateMod well station collection information as delimited list file.");
+		newComments2.add(2,"See also the associated well station file.");
+		newComments2.add(3,"");
 		out = IOUtil.processFileHeaders(
 			oldFile,
 			IOUtil.getPathUsingWorkingDir(filename), 
-			newComments, commentString, ignoreCommentString, 0);
+			newComments2, commentIndicators, ignoredCommentIndicators, 0);
 
 		for (int i = 0; i < fieldCount; i++) {
 			buffer.append("\"" + names[i] + "\"");
@@ -2906,17 +2822,11 @@ throws Exception {
 			
 			for (j = 0; j < num; j++) {
 				ids = well.getCollectionPartIDs(years[j]);
-				line[0] = StringUtil.formatString(id,
-					formats[0]).trim();
-				line[1] = StringUtil.formatString(years[j],
-					formats[1]).trim();
-				line[2] = StringUtil.formatString(colType,
-					formats[2]).trim();
-				line[3] = StringUtil.formatString(partType,
-					formats[3]).trim();
-				line[4] = StringUtil.formatString(
-					((String)(ids.get(k))),
-					formats[4]).trim();
+				line[0] = StringUtil.formatString(id, formats[0]).trim();
+				line[1] = StringUtil.formatString(years[j], formats[1]).trim();
+				line[2] = StringUtil.formatString(colType, formats[2]).trim();
+				line[3] = StringUtil.formatString(partType, formats[3]).trim();
+				line[4] = StringUtil.formatString( ((String)(ids.get(k))), formats[4]).trim();
 
 				buffer = new StringBuffer();	
 				for (k = 0; k < fieldCount; k++) {
@@ -2932,18 +2842,14 @@ throws Exception {
 				out.println(buffer.toString());
 			}
 		}
-		out.flush();
-		out.close();
-		out = null;
 	}
-	catch (Exception e) {
+	finally {
 		if (out != null) {
 			out.flush();
 			out.close();
 		}
 		out = null;
-		throw e;
 	}
 }
 
-} // End StateMod_Well
+}

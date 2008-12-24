@@ -5771,7 +5771,7 @@ private static String lookupWellPropValue(String propType, String field) {
 			return "ON/OFF SWITCH";
 		}
 		else if (field.equalsIgnoreCase("Capacity")) {
-			return "CAPACITY (CFS) ";
+			return "CAPACITY (CFS)";
 		}
 		else if (field.equalsIgnoreCase("DailyID")) {
 			return "DAILY ID";
@@ -5931,7 +5931,7 @@ private static String lookupWellPropValue(String propType, String field) {
 			return "%-12.12s";
 		}
 		else if (field.equalsIgnoreCase("Primary")) {
-			return "%10.2f";
+			return "%15.5f";
 		}
 		else if (field.equalsIgnoreCase("DiversionID")) {
 			return "%-12.12s";
@@ -6600,35 +6600,28 @@ public static List sortStateMod_DataVector ( List data )
 }
 
 /**
-Sorts a Vector of StateMod_Data objects, depending on the compareTo() method for the specific object.
-@param data a Vector of StateMod_Data objects.  Can be null.
-@param return_new If true, return a new Vector with references to the data.
-If false, return the original Vector, with sorted contents.
-@return a sorted Vector with references to the same data objects in the
-passed-in Vector.  If a null Vector is passed in, an empty Vector will be returned.
+Sorts a list of StateMod_Data objects, depending on the compareTo() method for the specific object.
+@param data a list of StateMod_Data objects.  Can be null.
+@param returnNew If true, return a new list with references to the data.
+If false, return the original list, with sorted contents.
+@return a sorted list with references to the same data objects in the
+passed-in list.  If null is passed in, an empty list will be returned.
 */
-public static List sortStateMod_DataVector ( List data, boolean return_new )
+public static List sortStateMod_DataVector ( List data, boolean returnNew )
 {	if (data == null) {
 		return new Vector();
 	}
-	List v = data;
+	List dataSorted = data;
 	int size = data.size();
-	if ( return_new ) {
+	if ( returnNew ) {
 		if (size == 0) {
 			return new Vector();
 		}
-		v = new Vector(size);
-		for (int i = 0; i < size; i++) {
-			v.add(data.get(i));
-		}
+		dataSorted = new Vector(data);
 	}
 
-	if (size == 1) {
-		return v;
-	}
-
-	Collections.sort(v);
-	return v;
+	Collections.sort(dataSorted);
+	return dataSorted;
 }
 
 /**

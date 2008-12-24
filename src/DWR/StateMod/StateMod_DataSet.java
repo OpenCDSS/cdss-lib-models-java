@@ -7904,18 +7904,15 @@ public void removeProcessListener(ProcessListener p) {
 Performs the check file setup and calls code to check component.  Also sets
 the check file to the list in the GUI.  If problems are encountered when
 running data checks are added to the check file.
-@param int type - StateModComponent type.
+@param type StateModComponent type.
 */
-public String runComponentChecks( int type, String fname, 
-String commands, String header )
+public String runComponentChecks( int type, String fname, String commands, String header )
 {
 	String check_file = "";
 	CheckFile chk = new CheckFile( fname, commands );
 	chk.addToHeader( header );
-	StateMod_ComponentDataCheck check = new StateMod_ComponentDataCheck(
-		type, chk, this);
-	// Run the data checks for the component and retrieve the
-	// finalized check file
+	StateMod_ComponentDataCheck check = new StateMod_ComponentDataCheck(type, chk, this);
+	// Run the data checks for the component and retrieve the finalized check file
 	CheckFile final_check = check.checkComponentType( null );
 	try {
 		final_check.finalizeCheckFile();
@@ -7923,8 +7920,7 @@ String commands, String header )
 	} catch (Exception e) {
 		Message.printWarning(2, "StateDMI_Processor.runComponentChecks",
 		"Check file: " +  final_check.toString() + " couldn't be finalized.");
-		Message.printWarning(3, "StateDMI_Processor.runComponentChecks",
-		e);
+		Message.printWarning(3, "StateDMI_Processor.runComponentChecks",e);
 	}
 	return check_file;
 }
@@ -7940,14 +7936,13 @@ processing headers).  Specify as null if no previous file is available.
 if no comments are available.
 @throws IOException if there is an error writing the file.
 */
-public void writeXMLFile(String filename_prev, String filename, 
-StateMod_DataSet dataset, String[] new_comments)
+public void writeXMLFile(String filename_prev, String filename,
+	StateMod_DataSet dataset, String[] new_comments)
 throws IOException {
 	String[] comment_str = { "#" };
 	String[] ignore_comment_str = { "#" };
 	PrintWriter out = null;
-	String full_filename_prev = IOUtil.getPathUsingWorkingDir(
-		filename_prev);
+	String full_filename_prev = IOUtil.getPathUsingWorkingDir(filename_prev);
 	if (!StringUtil.endsWithIgnoreCase(filename, ".xml")) {
 		filename = filename + ".xml";
 	}

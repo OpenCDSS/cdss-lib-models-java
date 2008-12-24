@@ -56,6 +56,7 @@ import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
+import RTi.Util.String.StringUtil;
 
 /**
 This GUI displays a list of all the data set components that have been changed
@@ -541,7 +542,7 @@ throws Exception {
 			break;
 		case StateMod_DataSet.COMP_DIVERSION_STATIONS:
 			StateMod_Diversion.writeStateModFile(oldFilename,
-				newFilename, (List)data, comments, daily);
+				newFilename, (List)data, StringUtil.toList(comments), daily );
 			name = "Diversion";
 			break;
 		case StateMod_DataSet.COMP_DIVERSION_RIGHTS:
@@ -604,7 +605,7 @@ throws Exception {
 			break;
 		case StateMod_DataSet.COMP_WELL_STATIONS:
 			StateMod_Well.writeStateModFile(oldFilename,
-				newFilename, (List)data, comments);
+				newFilename, (List)data, StringUtil.toList(comments));
 			name = "Well";
 			break;
 		case StateMod_DataSet.COMP_PLANS:

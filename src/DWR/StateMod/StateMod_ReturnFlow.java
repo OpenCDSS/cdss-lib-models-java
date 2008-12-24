@@ -342,7 +342,7 @@ public String toString() {
 }
 
 /**
-Writes a Vector of StateMod_ReturnFlow objects to a list file.  A header is 
+Writes a list of StateMod_ReturnFlow objects to a list file.  A header is 
 printed to the top of the file, containing the commands used to generate the 
 file.  Any strings in the body of the file that contain the field delimiter 
 will be wrapped in "...".  
@@ -350,11 +350,12 @@ will be wrapped in "...".
 @param delimiter the delimiter to use for separating field values.
 @param update whether to update an existing file, retaining the current 
 header (true) or to create a new file with a new header.
-@param data the Vector of objects to write.  
+@param data the list of objects to write. 
+@param newComments new comments to add to the header (e.g., command file, HydroBase version).
 @throws Exception if an error occurs.
 */
 public static void writeListFile(String filename, String delimiter,
-boolean update, List data, int componentType) 
+boolean update, List data, int componentType, List newComments ) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
@@ -364,8 +365,7 @@ throws Exception {
 	List fields = new Vector();
 	fields.add("ID");
 	fields.add("RiverNodeID");
-	if (componentType 
-	   == StateMod_DataSet.COMP_WELL_STATION_DEPLETION_TABLES) {
+	if (componentType == StateMod_DataSet.COMP_WELL_STATION_DEPLETION_TABLES) {
 	   	fields.add("DepletionPercent");
 	}
 	else {
@@ -392,17 +392,41 @@ throws Exception {
 	int j = 0;
 	PrintWriter out = null;
 	StateMod_ReturnFlow rf = null;
-	String[] commentString = { "#" };
-	String[] ignoreCommentString = { "#>" };
+	List commentIndicators = new Vector(1);
+	commentIndicators.add ( "#" );
+	List ignoredCommentIndicators = new Vector(1);
+	ignoredCommentIndicators.add ( "#>");
 	String[] line = new String[fieldCount];
-	String[] newComments = null;
 	StringBuffer buffer = new StringBuffer();
 
-	try {	
+	try {
+		// Add some basic comments at the top of the file.  However, do this to a copy of the
+		// incoming comments so that they are not modified in the calling code.
+		List newComments2 = null;
+		if ( newComments == null ) {
+			newComments2 = new Vector();
+		}
+		else {
+			newComments2 = new Vector(newComments);
+		}
+		newComments2.add(0,"");
+		if (componentType == StateMod_DataSet.COMP_DIVERSION_STATION_DELAY_TABLES) {
+			newComments2.add(1,"StateMod diversion delay (return) file.");
+			newComments2.add(2,"See also the associated diversion station file.");
+		}
+		else if (componentType == StateMod_DataSet.COMP_WELL_STATION_DEPLETION_TABLES) {
+			newComments2.add(1,"StateMod well depletion file.");
+			newComments2.add(2,"See also the associated well station and return files.");
+		}
+		else if (componentType == StateMod_DataSet.COMP_WELL_STATION_DELAY_TABLES) {
+			newComments2.add(1,"StateMod well delay (return) file.");
+			newComments2.add(2,"See also the associated well station and depletion files.");
+		}
+		newComments2.add(3,"");
 		out = IOUtil.processFileHeaders(
 			oldFile,
 			IOUtil.getPathUsingWorkingDir(filename), 
-			newComments, commentString, ignoreCommentString, 0);
+			newComments2, commentIndicators, ignoredCommentIndicators, 0);
 
 		for (int i = 0; i < fieldCount; i++) {
 			buffer.append("\"" + names[i] + "\"");
@@ -416,14 +440,10 @@ throws Exception {
 		for (int i = 0; i < size; i++) {
 			rf = (StateMod_ReturnFlow)data.get(i);
 			
-			line[0] = StringUtil.formatString(rf.getID(), 
-				formats[0]).trim();
-			line[1] = StringUtil.formatString(rf.getCrtnid(), 
-				formats[1]).trim();
-			line[2] = StringUtil.formatString(rf.getPcttot(), 
-				formats[2]).trim();
-			line[3] = StringUtil.formatString(rf.getIrtndl(), 
-				formats[3]).trim();
+			line[0] = StringUtil.formatString(rf.getID(), formats[0]).trim();
+			line[1] = StringUtil.formatString(rf.getCrtnid(), formats[1]).trim();
+			line[2] = StringUtil.formatString(rf.getPcttot(), formats[2]).trim();
+			line[3] = StringUtil.formatString(rf.getIrtndl(), formats[3]).trim();
 
 			buffer = new StringBuffer();	
 			for (j = 0; j < fieldCount; j++) {

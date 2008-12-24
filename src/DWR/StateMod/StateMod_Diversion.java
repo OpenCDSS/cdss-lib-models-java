@@ -2553,13 +2553,13 @@ is also maintained by calling this routine.  Daily data fields are written.
 @param instrfile input file from which previous history should be taken
 @param outstrfile output file to which to write
 @param theDiversions vector of diversions to write.
-@param new_comments addition comments which should be included in history
+@param newComments addition comments which should be included in history
 @exception Exception if an error occurs.
 */
 public static void writeStateModFile(String instrfile, String outstrfile,
-		List theDiversions, String[] new_comments)
+		List theDiversions, List newComments)
 throws Exception {
-	writeStateModFile(instrfile, outstrfile, theDiversions, new_comments, true);
+	writeStateModFile(instrfile, outstrfile, theDiversions, newComments, true);
 }
 
 /**
@@ -2568,132 +2568,85 @@ is also maintained by calling this routine.
 @param instrfile input file from which previous history should be taken
 @param outstrfile output file to which to write
 @param theDiversions vector of diversions to write.
-@param new_comments addition comments which should be included in history
+@param newComments addition comments which should be included in history
 @param use_daily_data Indicates whether daily data should be written.  The data
 are only used if the control file indicates that a daily run is occurring.
 @exception Exception if an error occurs.
 */
 public static void writeStateModFile(String instrfile, String outstrfile,
-		List theDiversions, String[] new_comments, boolean use_daily_data)
+		List theDiversions, List newComments, boolean use_daily_data)
 throws Exception {
-	String [] comment_str = { "#" };
-	String [] ignore_comment_str = { "#>" };
+	List commentIndicators = new Vector(1);
+	commentIndicators.add ( "#" );
+	List ignoredCommentIndicators = new Vector(1);
+	ignoredCommentIndicators.add ( "#>");
 	PrintWriter out = null;
-	try {	out = IOUtil.processFileHeaders(
+	try {
+		out = IOUtil.processFileHeaders(
 			IOUtil.getPathUsingWorkingDir(instrfile),
 			IOUtil.getPathUsingWorkingDir(outstrfile), 
-			new_comments, comment_str, ignore_comment_str, 0);
+			newComments, commentIndicators, ignoredCommentIndicators, 0);
 
 		int i;
 		int j;
 		String iline;
 		String cmnt = "#>";
-		String format_1 =	// With daily ID
-			"%-12.12s%-24.24s%-12.12s%8d%#8.2F%8d%8d %-12.12s";
-		String format_1A=	// Without daily ID
-			"%-12.12s%-24.24s%-12.12s%8d%#8.2F%8d%8d";
-		String format_2 =
-		"            %-24.24s            %8d%8d%#8.0F%#8.2F%8d%8d";
+		// With daily ID....
+		String format_1 = "%-12.12s%-24.24s%-12.12s%8d%#8.2F%8d%8d %-12.12s";
+		// Without daily ID...
+		String format_1A= "%-12.12s%-24.24s%-12.12s%8d%#8.2F%8d%8d";
+		String format_2 = "            %-24.24s            %8d%8d%#8.0F%#8.2F%8d%8d";
 		String format_3 = "%1.1s%#5.0F";
-		String format_4 =
-		"                                    %-12.12s%8.2F%8d";
+		String format_4 = "                                    %-12.12s%8.2F%8d";
 		StateMod_Diversion div = null;
 		StateMod_ReturnFlow ret = null;
 		List v = new Vector(9);	// Reuse for all output lines.
 		List v5 = null;		// For return flows.
 
 		out.println(cmnt);
-		out.println(cmnt
-			+ "*************************************************");
+		out.println(cmnt + "*************************************************");
 		out.println(cmnt + "  Direct Diversion Station File");
 		out.println(cmnt);
-		out.println(cmnt
-			+ "  Card 1 format (a12, a24, a12, i8, f8.2, 2i8, "
-			+ "1x, a12)");
+		out.println(cmnt + "  Card 1 format (a12, a24, a12, i8, f8.2, 2i8, 1x, a12)");
 		out.println(cmnt);
-		out.println(cmnt
-			+ "  ID          cdivid:  Diversion station ID");
-		out.println(cmnt
-			+ "  Name        divnam:  Diversion name");
-		out.println(cmnt
-			+ "  Riv ID       cgoto:  River node for diversion");
-		out.println(cmnt
-			+ "  On/Off      idivsw:  Switch 0=off, 1=on");
-		out.println(cmnt
-			+ "  Capacity    divcap:  Diversion capacity (CFS)");
-		out.println(cmnt
-			+ "                dumx:  Not currently used");
-		out.println(cmnt
-			+ "  RepType    ireptyp:  Replacement reservoir option "
-			+ "(see StateMod doc)");
-		out.println(cmnt
-			+ "  Daily ID   cdividy:  Daily diversion ID");
+		out.println(cmnt + "  ID          cdivid:  Diversion station ID");
+		out.println(cmnt + "  Name        divnam:  Diversion name");
+		out.println(cmnt + "  Riv ID       cgoto:  River node for diversion");
+		out.println(cmnt + "  On/Off      idivsw:  Switch 0=off, 1=on");
+		out.println(cmnt + "  Capacity    divcap:  Diversion capacity (CFS)");
+		out.println(cmnt + "                dumx:  Not currently used");
+		out.println(cmnt + "  RepType    ireptyp:  Replacement reservoir option (see StateMod doc)");
+		out.println(cmnt + "  Daily ID   cdividy:  Daily diversion ID");
 		out.println(cmnt);
-		out.println(cmnt
-			+ "  Card 2 format (12x, a24, 12x, 2i8, f8.2, f8.0, "
-			+ "2i8)");
+		out.println(cmnt + "  Card 2 format (12x, a24, 12x, 2i8, f8.2, f8.0, 2i8)");
 		out.println(cmnt);
-		out.println(cmnt
-			+ "  User Name  usernam:  User name.");
-		out.println(cmnt
-			+ "  DemType     idvcom:  Demand data type switch (see "
-			+ "StateMod doc)");
-		out.println(cmnt
-			+ "  #-Ret         nrtn:  Number of return "
-			+ "flow table ref");
-		out.println(cmnt
-			+ "  Eff         divefc:  Annual system efficiency");
-		out.println(cmnt
-			+ "  Area          area:  Irrigated acreage");
-		out.println(cmnt
-			+ "  UseType     irturn:  Use type (see StateMod doc)");
-		out.println(cmnt
-			+ "  Demsrc      demsrc:  Demand source (see "
-			+ "StateMod doc)");
+		out.println(cmnt + "  User Name  usernam:  User name.");
+		out.println(cmnt + "  DemType     idvcom:  Demand data type switch (see StateMod doc)");
+		out.println(cmnt + "  #-Ret         nrtn:  Number of return flow table ref");
+		out.println(cmnt + "  Eff         divefc:  Annual system efficiency");
+		out.println(cmnt + "  Area          area:  Irrigated acreage");
+		out.println(cmnt + "  UseType     irturn:  Use type (see StateMod doc)");
+		out.println(cmnt + "  Demsrc      demsrc:  Demand source (see StateMod doc)");
 		out.println(cmnt);
-		out.println(cmnt
-			+ "  Card 3 format (free format)");
+		out.println(cmnt + "  Card 3 format (free format)");
 		out.println(cmnt);
-		out.println(cmnt
-			+ "     diveff (12):  System efficiency % by month");
+		out.println(cmnt + "     diveff (12):  System efficiency % by month");
 		out.println(cmnt);
-		out.println(cmnt
-			+ "  Card 4 format (36x, a12, f8.2, i8)");
+		out.println(cmnt + "  Card 4 format (36x, a12, f8.2, i8)");
 		out.println(cmnt);
-		out.println(cmnt
-			+ "  Ret ID      crtnid:  River node receiving "
-			+ "return flow");
-		out.println(cmnt
-			+ "  Ret %       pcttot:  Percent of return flow to "
-			+ "this river node");
-		out.println(cmnt
-			+ "  Table #     irtndl:  Delay (return flow) "
-			+ "table for this return flow.");
+		out.println(cmnt + "  Ret ID      crtnid:  River node receiving return flow");
+		out.println(cmnt + "  Ret %       pcttot:  Percent of return flow to this river node");
+		out.println(cmnt + "  Table #     irtndl:  Delay (return flow) table for this return flow.");
 		out.println(cmnt);
 
-		out.println(cmnt
-			+ " ID               Name             Riv ID     "
-			+ "On/Off  Capacity        RepType   Daily ID");
-		out.println(cmnt 
-			+ "---------eb----------------------eb----------e"
-			+ "b------eb------eb------eb------exb----------e");
-		out.println(cmnt 
-			+ "              User Name                       "
-			+ "DemType   #-Ret   Eff %   Area  UseType DemSrc");
-		out.println(cmnt 
-			+ "xxxxxxxxxxb----------------------exxxxxxxxxxxx"
-			+ "b------eb------eb------eb------eb------eb------e");
-		out.println(cmnt 
-			+ "          ... Monthly Efficiencies...");
-		out.println(cmnt
-			+ "b------------------------------------------------"
-			+ "----------------------------e");
-		out.println(cmnt 
-			+ "                                   Ret ID     "
-			+ "  Ret % Table #");
-		out.println(cmnt
-			+ "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxb----------e"
-			+ "b------eb------e");
+		out.println(cmnt + " ID               Name             Riv ID     On/Off  Capacity        RepType   Daily ID");
+		out.println(cmnt + "---------eb----------------------eb----------eb------eb------eb------eb------exb----------e");
+		out.println(cmnt + "              User Name                       DemType   #-Ret   Eff %   Area  UseType DemSrc");
+		out.println(cmnt + "xxxxxxxxxxb----------------------exxxxxxxxxxxxb------eb------eb------eb------eb------eb------e");
+		out.println(cmnt + "          ... Monthly Efficiencies...");
+		out.println(cmnt + "b----------------------------------------------------------------------------e");
+		out.println(cmnt + "                                   Ret ID       Ret % Table #");
+		out.println(cmnt + "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxb----------eb------eb------e");
 		out.println(cmnt + "EndHeader");
 
 		int num = 0;
@@ -2713,8 +2666,7 @@ throws Exception {
 			v.add(div.getCgoto());
 			v.add(new Integer(div.getSwitch()));
 			v.add(new Double (div.getDivcap()));
-			v.add(new Integer(1));	// Old nduser not used
-							// anymore.
+			v.add(new Integer(1));	// Old nduser not used anymore.
 			v.add(new Integer(div.getIreptype()));
 			if (use_daily_data) {
 				v.add(div.getCdividy());
@@ -2742,10 +2694,8 @@ throws Exception {
 				for (j=0; j<12; j++) {
 					v.clear();
 					v.add("");
-					v.add(new Double(
-						div.getDiveff(j)));
-					iline = StringUtil.formatString(
-						v, format_3);
+					v.add(new Double(div.getDiveff(j)));
+					iline = StringUtil.formatString(v, format_3);
 					out.print(iline);
 				}
 
@@ -2766,27 +2716,21 @@ throws Exception {
 			}
 
 		}
-		
-	out.flush();
-	out.close();
-	comment_str = null;
-	ignore_comment_str = null;
-	out = null;
 	} 
 	catch (Exception e) {
-		comment_str = null;
-		ignore_comment_str = null;
+		throw e;
+	}
+	finally {
 		if (out != null) {
 			out.flush();
 			out.close();
 		}
 		out = null;
-		throw e;
 	}
 }
 
 /**
-Writes a Vector of StateMod_Diversion objects to a list file.  A header is 
+Writes a list of StateMod_Diversion objects to a list file.  A header is 
 printed to the top of the file, containing the commands used to generate the 
 file.  Any strings in the body of the file that contain the field delimiter 
 will be wrapped in "...".  This method also prints Diversion Return Flows to
@@ -2798,10 +2742,12 @@ with a filename parameter of "diversions.txt", two files will be generated:
 @param delimiter the delimiter to use for separating field values.
 @param update whether to update an existing file, retaining the current 
 header (true) or to create a new file with a new header.
-@param data the Vector of objects to write.  
+@param data the list of objects to write.
+@param newComments new comments to add to the header (command file, HydroBase version, etc.).
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter, boolean update, List data) 
+public static void writeListFile(String filename, String delimiter, boolean update,
+	List data, List newComments ) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
@@ -2854,10 +2800,11 @@ throws Exception {
 	int j = 0;
 	int size2 = 0;
 	PrintWriter out = null;
-	String[] commentString = { "#" };
-	String[] ignoreCommentString = { "#>" };
+	List commentIndicators = new Vector(1);
+	commentIndicators.add ( "#" );
+	List ignoredCommentIndicators = new Vector(1);
+	ignoredCommentIndicators.add ( "#>");
 	String[] line = new String[fieldCount];
-	String[] newComments = null;
 	String id = null;
 	StringBuffer buffer = new StringBuffer();
 	StateMod_Diversion div = null;
@@ -2869,7 +2816,7 @@ throws Exception {
 		out = IOUtil.processFileHeaders(
 			oldFile,
 			IOUtil.getPathUsingWorkingDir(filename), 
-			newComments, commentString, ignoreCommentString, 0);
+			newComments, commentIndicators, ignoredCommentIndicators, 0);
 
 		for (int i = 0; i < fieldCount; i++) {
 			buffer.append("\"" + names[i] + "\"");
@@ -2883,56 +2830,31 @@ throws Exception {
 		for (int i = 0; i < size; i++) {
 			div = (StateMod_Diversion)data.get(i);
 			
-			line[0] = StringUtil.formatString(div.getID(), 
-				formats[0]).trim();
-			line[1] = StringUtil.formatString(div.getName(), 
-				formats[1]).trim();
-			line[2] = StringUtil.formatString(div.getCgoto(), 
-				formats[2]).trim();
-			line[3] = StringUtil.formatString(div.getSwitch(), 
-				formats[3]).trim();
-			line[4] = StringUtil.formatString(div.getDivcap(), 
-				formats[4]).trim();
-			line[5] = StringUtil.formatString(div.getIreptype(), 
-				formats[5]).trim();
-			line[6] = StringUtil.formatString(div.getCdividy(), 
-				formats[6]).trim();
-			line[7] = StringUtil.formatString(div.getUsername(), 
-				formats[7]).trim();
-			line[8] = StringUtil.formatString(div.getIdvcom(), 
-				formats[8]).trim();
-			line[9] = StringUtil.formatString(div.getArea(), 
-				formats[9]).trim();
-			line[10] = StringUtil.formatString(div.getIrturn(), 
-				formats[10]).trim();
-			line[11] = StringUtil.formatString(div.getDemsrc(), 
-				formats[11]).trim();
-			line[12] = StringUtil.formatString(div.getDivefc(), 
-				formats[12]).trim();
-			line[13] = StringUtil.formatString(div.getDiveff(0), 
-				formats[13]).trim();
-			line[14] = StringUtil.formatString(div.getDiveff(1), 
-				formats[14]).trim();
-			line[15] = StringUtil.formatString(div.getDiveff(2), 
-				formats[15]).trim();
-			line[16] = StringUtil.formatString(div.getDiveff(3), 
-				formats[16]).trim();
-			line[17] = StringUtil.formatString(div.getDiveff(4), 
-				formats[17]).trim();
-			line[18] = StringUtil.formatString(div.getDiveff(5), 
-				formats[18]).trim();
-			line[19] = StringUtil.formatString(div.getDiveff(6), 
-				formats[19]).trim();
-			line[20] = StringUtil.formatString(div.getDiveff(7), 
-				formats[20]).trim();
-			line[21] = StringUtil.formatString(div.getDiveff(8), 
-				formats[21]).trim();
-			line[22] = StringUtil.formatString(div.getDiveff(9), 
-				formats[22]).trim();
-			line[23] = StringUtil.formatString(div.getDiveff(10),
-				formats[23]).trim();
-			line[24] = StringUtil.formatString(div.getDiveff(11),
-				formats[24]).trim();
+			line[0] = StringUtil.formatString(div.getID(), formats[0]).trim();
+			line[1] = StringUtil.formatString(div.getName(), formats[1]).trim();
+			line[2] = StringUtil.formatString(div.getCgoto(), formats[2]).trim();
+			line[3] = StringUtil.formatString(div.getSwitch(), formats[3]).trim();
+			line[4] = StringUtil.formatString(div.getDivcap(),  formats[4]).trim();
+			line[5] = StringUtil.formatString(div.getIreptype(), formats[5]).trim();
+			line[6] = StringUtil.formatString(div.getCdividy(), formats[6]).trim();
+			line[7] = StringUtil.formatString(div.getUsername(), formats[7]).trim();
+			line[8] = StringUtil.formatString(div.getIdvcom(), formats[8]).trim();
+			line[9] = StringUtil.formatString(div.getArea(), formats[9]).trim();
+			line[10] = StringUtil.formatString(div.getIrturn(), formats[10]).trim();
+			line[11] = StringUtil.formatString(div.getDemsrc(), formats[11]).trim();
+			line[12] = StringUtil.formatString(div.getDivefc(), formats[12]).trim();
+			line[13] = StringUtil.formatString(div.getDiveff(0), formats[13]).trim();
+			line[14] = StringUtil.formatString(div.getDiveff(1), formats[14]).trim();
+			line[15] = StringUtil.formatString(div.getDiveff(2), formats[15]).trim();
+			line[16] = StringUtil.formatString(div.getDiveff(3), formats[16]).trim();
+			line[17] = StringUtil.formatString(div.getDiveff(4), formats[17]).trim();
+			line[18] = StringUtil.formatString(div.getDiveff(5), formats[18]).trim();
+			line[19] = StringUtil.formatString(div.getDiveff(6), formats[19]).trim();
+			line[20] = StringUtil.formatString(div.getDiveff(7), formats[20]).trim();
+			line[21] = StringUtil.formatString(div.getDiveff(8), formats[21]).trim();
+			line[22] = StringUtil.formatString(div.getDiveff(9), formats[22]).trim();
+			line[23] = StringUtil.formatString(div.getDiveff(10), formats[23]).trim();
+			line[24] = StringUtil.formatString(div.getDiveff(11), formats[24]).trim();
 
 			buffer = new StringBuffer();	
 			for (j = 0; j < fieldCount; j++) {
@@ -2956,17 +2878,16 @@ throws Exception {
 				returnFlows.add(rf);
 			}
 		}
-		out.flush();
-		out.close();
-		out = null;
 	}
 	catch (Exception e) {
+		throw e;
+	}
+	finally {
 		if (out != null) {
 			out.flush();
 			out.close();
 		}
 		out = null;
-		throw e;
 	}
 
 	int lastIndex = filename.lastIndexOf(".");
@@ -2975,15 +2896,14 @@ throws Exception {
 	
 	String returnFlowFilename = front + "_ReturnFlows." + end;
 	StateMod_ReturnFlow.writeListFile(returnFlowFilename, delimiter,
-		update, returnFlows,
-		StateMod_DataSet.COMP_DIVERSION_STATION_DELAY_TABLES);
+		update, returnFlows, StateMod_DataSet.COMP_DIVERSION_STATION_DELAY_TABLES, newComments );
 
 	String collectionFilename = front + "_Collections." + end;
-	writeCollectionListFile(collectionFilename, delimiter, update, data);		
+	writeCollectionListFile(collectionFilename, delimiter, update, data, newComments);		
 }
 
 /**
-Writes the collection data from a Vector of StateMod_Diversion objects to a 
+Writes the collection data from a list of StateMod_Diversion objects to a 
 list file.  A header is printed to the top of the file, containing the commands 
 used to generate the file.  Any strings in the body of the file that contain 
 the field delimiter will be wrapped in "...". 
@@ -2991,10 +2911,12 @@ the field delimiter will be wrapped in "...".
 @param delimiter the delimiter to use for separating field values.
 @param update whether to update an existing file, retaining the current 
 header (true) or to create a new file with a new header.
-@param data the Vector of objects to write.  
+@param data the list of objects to write.
+@param newComments new comments to add to header (command file, HydroBase version, etc.).
 @throws Exception if an error occurs.
 */
-public static void writeCollectionListFile(String filename, String delimiter, boolean update, List data) 
+public static void writeCollectionListFile(String filename, String delimiter, boolean update,
+	List data, List newComments ) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
@@ -3030,10 +2952,11 @@ throws Exception {
 	int num = 0;
 	PrintWriter out = null;
 	StateMod_Diversion div = null;
-	String[] commentString = { "#" };
-	String[] ignoreCommentString = { "#>" };
+	List commentIndicators = new Vector(1);
+	commentIndicators.add ( "#" );
+	List ignoredCommentIndicators = new Vector(1);
+	ignoredCommentIndicators.add ( "#>");
 	String[] line = new String[fieldCount];
-	String[] newComments = null;
 	String colType = null;
 	String id = null;
 	String partType = null;	
@@ -3044,7 +2967,7 @@ throws Exception {
 		out = IOUtil.processFileHeaders(
 			oldFile,
 			IOUtil.getPathUsingWorkingDir(filename), 
-			newComments, commentString, ignoreCommentString, 0);
+			newComments, commentIndicators, ignoredCommentIndicators, 0);
 
 		for (int i = 0; i < fieldCount; i++) {
 			buffer.append("\"" + names[i] + "\"");
@@ -3070,17 +2993,11 @@ throws Exception {
 			
 			for (j = 0; j < num; j++) {
 				ids = div.getCollectionPartIDs(years[j]);
-				line[0] = StringUtil.formatString(id,
-					formats[0]).trim();
-				line[1] = StringUtil.formatString(years[j],
-					formats[1]).trim();
-				line[2] = StringUtil.formatString(colType,
-					formats[2]).trim();
-				line[3] = StringUtil.formatString(partType,
-					formats[3]).trim();
-				line[4] = StringUtil.formatString(
-					((String)(ids.get(k))),
-					formats[4]).trim();
+				line[0] = StringUtil.formatString(id,formats[0]).trim();
+				line[1] = StringUtil.formatString(years[j],formats[1]).trim();
+				line[2] = StringUtil.formatString(colType,formats[2]).trim();
+				line[3] = StringUtil.formatString(partType,formats[3]).trim();
+				line[4] = StringUtil.formatString(((String)(ids.get(k))),formats[4]).trim();
 
 				buffer = new StringBuffer();	
 				for (k = 0; k < fieldCount; k++) {
@@ -3096,18 +3013,18 @@ throws Exception {
 				out.println(buffer.toString());
 			}
 		}
-		out.flush();
-		out.close();
-		out = null;
 	}
 	catch (Exception e) {
+		// TODO SAM Log it
+		throw e;
+	}
+	finally {
 		if (out != null) {
 			out.flush();
 			out.close();
 		}
 		out = null;
-		throw e;
 	}
 }
 
-} // End StateMod_Diversion
+}
