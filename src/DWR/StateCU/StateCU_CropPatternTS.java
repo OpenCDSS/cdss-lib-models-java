@@ -695,8 +695,7 @@ throws Exception
 	// If early versions (earlier than 10?), the period is not in the header
 	// so determine by reading the first and last part of the file...
 	// TODO SAM 2007-03-04 Need to figure out what version the addition
-	// of period to the header occurred.  It seems to have been in version 10
-	// and later?
+	// of period to the header occurred.  It seems to have been in version 10 and later?
 	boolean period_in_header = isPeriodInHeader ( full_filename );
 	String AutoAdjust = props.getValue ( "AutoAdjust" );
 	boolean AutoAdjust_boolean = false;
@@ -781,8 +780,7 @@ throws Exception
 	}
 
 	// Data records within a location.
-	// Newest (version 12) format specifiers for crop record,
-	// including the crop fraction and area...
+	// Newest (version 12) format specifiers for crop record, including the crop fraction and area...
 	int format_1[] = {	
 				StringUtil.TYPE_SPACE,
 				StringUtil.TYPE_STRING,	// Crop name
@@ -849,25 +847,20 @@ throws Exception
 		ra.read ( b );
 		String string = null;
 		String bs = new String ( b );
-		List v2 = StringUtil.breakStringList ( bs, "\n\r",
-			StringUtil.DELIM_SKIP_BLANKS );
+		List v2 = StringUtil.breakStringList ( bs, "\n\r", StringUtil.DELIM_SKIP_BLANKS );
 		// Loop through and figure out the first date.
 		int size = v2.size();
 		String date1_string = null;
-		List	tokens = null;
+		List tokens = null;
 		for ( int i = 0; i < size; i++ ) {
 			string = ((String)v2.get(i)).trim();
-			if (	(string.length() == 0) ||
-				(string.charAt(0) == '#') ||
-				(string.charAt(0) == ' ') ) {
+			if ( (string.length() == 0) || (string.charAt(0) == '#') || (string.charAt(0) == ' ') ) {
 				continue;
 			}
-			tokens = StringUtil.breakStringList( string, " \t",
-				StringUtil.DELIM_SKIP_BLANKS );
+			tokens = StringUtil.breakStringList( string, " \t", StringUtil.DELIM_SKIP_BLANKS );
 			date1_string = (String)tokens.get(0);
 			// Check for reasonable dates...
-			if (	StringUtil.isInteger(date1_string) &&
-				(StringUtil.atoi(date1_string) < 2050) ) {
+			if ( StringUtil.isInteger(date1_string) && (StringUtil.atoi(date1_string) < 2050) ) {
 				break;
 			}
 		}
@@ -885,26 +878,20 @@ throws Exception
 		ra = null;
 		// Now break the bytes into records...
 		bs = new String ( b );
-		v2 = StringUtil.breakStringList ( bs, "\n\r",
-			StringUtil.DELIM_SKIP_BLANKS );
+		v2 = StringUtil.breakStringList ( bs, "\n\r", StringUtil.DELIM_SKIP_BLANKS );
 		// Loop through and figure out the last date.  Start at the
-		// second record because it is likely that a complete record was
-		// not found...
+		// second record because it is likely that a complete record was not found...
 		size = v2.size();
 		String date2_string = null;
 		for ( int i = 1; i < size; i++ ) {
 			string = ((String)v2.get(i)).trim();
-			if (	(string.length() == 0) ||
-				(string.charAt(0) == '#') ||
-				(string.charAt(0) == ' ') ) {
+			if ( (string.length() == 0) || (string.charAt(0) == '#') || (string.charAt(0) == ' ') ) {
 				continue;
 			}
-			tokens = StringUtil.breakStringList( string, " \t",
-				StringUtil.DELIM_SKIP_BLANKS );
+			tokens = StringUtil.breakStringList( string, " \t", StringUtil.DELIM_SKIP_BLANKS );
 			string = (String)tokens.get(0);
 			// Check for reasonable dates...
-			if (	StringUtil.isInteger(string) &&
-				(StringUtil.atoi(string) < 2050) ) {
+			if ( StringUtil.isInteger(string) && (StringUtil.atoi(string) < 2050) ) {
 				date2_string = string;
 			}
 		}
@@ -920,14 +907,16 @@ throws Exception
 			date1 = date1_req;
 			//year1_req = date1_req.getYear();
 		}
-		else {	date1 = date1_file;
+		else {
+			date1 = date1_file;
 			//year1_req = date1_file.getYear();
 		}
 		if ( date2_req != null ) {
 			date2 = date2_req;
 			//year2_req = date2_req.getYear();
 		}
-		else {	date2 = date2_file;
+		else {
+			date2 = date2_file;
 			//year2_req = date2_file.getYear();
 		}
 
@@ -964,55 +953,53 @@ throws Exception
 			// "  Header format (i5,1x,i4,5x,i5,1x,i4,a5,a5)" );
 			//"    M/YYYY        MM/YYYY UNIT  CYR"
 			String format_header = "x6s4x11s4s5s5";
-			tokens = StringUtil.fixedRead ( iline,
-					format_header );
+			tokens = StringUtil.fixedRead ( iline, format_header );
 			date1_file = new DateTime ( DateTime.PRECISION_YEAR );
-			date1_file.setYear ( StringUtil.atoi(
-					((String)tokens.get(0)).trim()) );
+			date1_file.setYear ( StringUtil.atoi( ((String)tokens.get(0)).trim()) );
 			year1 = date1_file.getYear();
 			date2_file = new DateTime ( DateTime.PRECISION_YEAR );
-			date2_file.setYear ( 
-				StringUtil.atoi(
-					((String)tokens.get(1)).trim()) );
+			date2_file.setYear ( StringUtil.atoi( ((String)tokens.get(1)).trim()) );
 			
 			if(iline.startsWith("      ")) {
-				// this is the newest format
-				List toks = StringUtil.breakStringList( iline, " ",
-					StringUtil.DELIM_SKIP_BLANKS );
+				// this is the newest format - have startYear, endYear, units
+				List toks = StringUtil.breakStringList( iline, " ", StringUtil.DELIM_SKIP_BLANKS );
 				units_file = ((String)toks.get(2));
 			}
 			else {
 				units_file = ((String)tokens.get(2)).trim();
 			}
-			// Year type is ignored - not used for anything.
+			Message.printStatus( 2, routine, "Units from file are \"" + units_file + "\"" );
+			// Year type is ignored - not used for anything - will be output as CYR when writing.
 
 			// Set the dates for processing...
 			if ( date1_req != null ) {
 				date1 = date1_req;
 				//year1_req = date1_req.getYear();
 			}
-			else {	date1 = date1_file;
+			else {
+				date1 = date1_file;
 				//year1_req = date1_file.getYear();
 			}
 			if ( date2_req != null ) {
 				date2 = date2_req;
 				//year2_req = date2_req.getYear();
 			}
-			else {	date2 = date2_file;
+			else {
+				date2 = date2_file;
 				//year2_req = date2_file.getYear();
 			}
 			continue;
 		}
 
 		if ( iline.charAt(0) == ' ' ) {
-			// Continuation of previous Year/CULocation, indicating
-			// another crop.
+			// Continuation of previous Year/CULocation, indicating another crop.
 			StringUtil.fixedRead ( iline, format_1, format_1w, v );
 			if ( AutoAdjust_boolean ) {
 				// Replace "." with "-" in the crop names.
 				crop_names[ncrops] = ((String)v.get(0)).trim().replace('.','-');
 			}
-			else {	// Just use the crop name as it is in the file...
+			else {
+				// Just use the crop name as it is in the file...
 				crop_names[ncrops] = ((String)v.get(0)).trim();
 			}
 			crop_fractions[ncrops] = StringUtil.atod(((String)v.get(1)).trim());
@@ -1023,18 +1010,16 @@ throws Exception
 			// Increment crop count.
 			++ncrops;
 		}
-		else {	// Assume a new year/CULocation...
+		else {
+			// Assume a new year/CULocation...
 			// If the number of crops from the previous record is
-			// >= 0, set the crops (if the total is zero then the
-			// total will still be set)...
+			// >= 0, set the crops (if the total is zero then the total will still be set)...
 			if ( (ncrops >= 0) && (cupat != null) ) {
 				if ( ReadDataFrom_CropArea_boolean ) {
-					cupat.setPatternUsingAreas ( year,
-					ncrops, crop_names, crop_areas );
+					cupat.setPatternUsingAreas ( year, ncrops, crop_names, crop_areas );
 				}
 				else {
-					cupat.setPatternUsingFractions ( year,
-					StringUtil.atod(total_area),
+					cupat.setPatternUsingFractions ( year, StringUtil.atod(total_area),
 					ncrops, crop_names, crop_fractions );
 				}
 			}
@@ -1061,49 +1046,32 @@ throws Exception
 				// year, even if it has zero crops for a year.
 				pos = StateCU_Util.indexOf(cupat_Vector, culoc);
 				if ( pos >= 0 ) {
-					// Should not happen!  The CU Location
-					// is apparently listed twice in the
+					// Should not happen!  The CU Location is apparently listed twice in the
 					// first year...
 					Message.printWarning ( 1, routine,
-					"CU Location \"" + culoc +
-					"\" is listed more than once in the" +
-					" first year." );
+					"CU Location \"" + culoc + "\" is listed more than once in the first year." );
 					cupat = (StateCU_CropPatternTS)cupat_Vector.get(pos);
 				}
-				else {	cupat = new StateCU_CropPatternTS (
-						culoc, date1, date2,
-						units_file, full_filename );
+				else {
+					cupat = new StateCU_CropPatternTS ( culoc, date1, date2, units_file, full_filename );
 					cupat_Vector.add ( cupat );
-					//Message.printStatus ( 1, "",
-					//"SAMX created new
-					// StateCU_CropPatternTS:" +
-					//cupat );
+					//Message.printStatus ( 1, "", "SAMX created new StateCU_CropPatternTS:" + cupat );
 				}
 			}
-			else {	// Find the object of interest for this
-				// CU Location so it can be used to set data
+			else {
+				// Find the object of interest for this CU Location so it can be used to set data
 				// values...
 				pos = StateCU_Util.indexOf(cupat_Vector, culoc);
 				if ( pos < 0 ) {
-					// Should not happen!  Apparently the
-					// CU Location was not listed in the
-					// first year...
-					Message.printWarning ( 2, routine,
-					"CU Location \"" + culoc +
-					"\" found in year " + year +
-					" but was not listed in the first" +
-					" year." );
-					cupat = new StateCU_CropPatternTS (
-						culoc, date1, date2,
-						units_file, full_filename );
+					// Should not happen!  Apparently the CU Location was not listed in the first year...
+					Message.printWarning ( 3, routine, "CU Location \"" + culoc + "\" found in year " +
+						year + " but was not listed in the first year." );
+					cupat = new StateCU_CropPatternTS ( culoc, date1, date2, units_file, full_filename );
 					cupat_Vector.add ( cupat );
-					//Message.printStatus ( 1, "",
-					//"SAMX created new
-					// StateCU_CropPatternTS:" +
-					//cupat );
+					//Message.printStatus ( 1, "", "SAMX created new StateCU_CropPatternTS:" + cupat );
 				}
-				else {	cupat = (StateCU_CropPatternTS)
-					cupat_Vector.get(pos);
+				else {
+					cupat = (StateCU_CropPatternTS)cupat_Vector.get(pos);
 				}
 			}
 		}
@@ -1111,19 +1079,16 @@ throws Exception
 	// Process the data for the last CU Location that is read...
 	if ( ncrops >= 0 ) {
 		if ( ReadDataFrom_CropArea_boolean ) {
-			cupat.setPatternUsingAreas ( year,
-			ncrops, crop_names, crop_areas );
+			cupat.setPatternUsingAreas ( year, ncrops, crop_names, crop_areas );
 		}
 		else {
 			cupat.setPatternUsingFractions ( year,
-			StringUtil.atod(total_area),
-			ncrops, crop_names, crop_fractions );
+			StringUtil.atod(total_area), ncrops, crop_names, crop_fractions );
 		}
 	}
 	}
 	catch ( Exception e ) {
-		Message.printWarning ( 2, routine, "Error processing near line "
-		+ linecount + ": " + iline );
+		Message.printWarning ( 2, routine, "Error processing near line " + linecount + ": " + iline );
 		Message.printWarning ( 2, routine, e );
 		// Now rethrow to calling code...
 		throw ( e );
@@ -1863,76 +1828,7 @@ throws Exception
 }
 
 /**
-Write a Vector of StateCU_CropPatternTS to a CDS file.  The filename is
-adjusted to the working directory if necessary using
-IOUtil.getPathUsingWorkingDir().
-@param filename_prev The name of the previous version of the file (for
-processing headers).  Specify as null if no previous file is available.
-@param filename The name of the file to write.
-@param data_Vector A Vector of StateCU_CropPatternTS to write.
-@param new_comments Comments to add to the top of the file.  Specify as null 
-if no comments are available.
-@param write_crop_area If true, then the acreage for each crop is shown in
-addition to the fractions.
-@exception IOException if there is an error writing the file.
-*/
-public static void writeStateCUFile (	String filename_prev, String filename,
-		List data_Vector,
-					String [] new_comments,
-					boolean write_crop_area )
-throws IOException
-{	PropList props = new PropList ( "writeStateCUFile" );
-	if ( !write_crop_area ) {
-		// Default is true so only set to false if specified...
-		props.set ( "WriteCropArea", "False" );
-	}
-	writeStateCUFile ( filename_prev, filename, data_Vector, new_comments,
-			null, null, props );
-}
-
-/**
-Write a Vector of StateCU_CropPatternTS to a CDS file.  The filename is
-adjusted to the working directory if necessary using
-IOUtil.getPathUsingWorkingDir().
-@param filename_prev The name of the previous version of the file (for
-processing headers).  Specify as null if no previous file is available.
-@param filename The name of the file to write.
-@param data_Vector A Vector of StateCU_CropPatternTS to write.
-@param new_comments Comments to add to the top of the file.  Specify as null 
-if no comments are available.
-@param write_crop_area If true, then the acreage for each crop is shown in
-addition to the fractions.
-@param req_date1 Requested output start date.
-@param req_date2 Requested output end date.
-@param props Properties to control the write.
-@exception IOException if there is an error writing the file.
-*/
-public static void writeStateCUFile (	String filename_prev, String filename,
-		List data_Vector,
-					String [] new_comments,
-					DateTime req_date1, DateTime req_date2,
-					PropList props )
-throws IOException
-{	String [] comment_str = { "#" };
-	String [] ignore_comment_str = { "#>" };
-	PrintWriter out = null;
-	String full_filename_prev = IOUtil.getPathUsingWorkingDir (
-		filename_prev );
-	String full_filename = IOUtil.getPathUsingWorkingDir ( filename );
-	out = IOUtil.processFileHeaders ( full_filename_prev, full_filename, 
-		new_comments, comment_str, ignore_comment_str, 0 );
-	if ( out == null ) {
-		throw new IOException ( "Error writing to \"" +
-			full_filename + "\"" );
-	}
-	writeVector ( data_Vector, out, req_date1, req_date2, props );
-	out.flush();
-	out.close();
-	out = null;
-}
-
-/**
-Write a Vector of StateCU_CropPatternTS to a DateValue file.  The filename is
+Write a list of StateCU_CropPatternTS to a DateValue file.  The filename is
 adjusted to the working directory if necessary using IOUtil.getPathUsingWorkingDir().
 @param filename_prev The name of the previous version of the file (for
 processing headers).  Specify as null if no previous file is available.
@@ -1942,7 +1838,7 @@ processing headers).  Specify as null if no previous file is available.
 @exception IOException if there is an error writing the file.
 */
 public static void writeDateValueFile (	String filename_prev, String filename,
-					List dataList, String [] new_comments )
+					List dataList, List new_comments )
 throws Exception
 {	// For now ignore the previous file and new comments.
 	// Create a new Vector with the time series data...
@@ -1953,8 +1849,67 @@ throws Exception
 }
 
 /**
-Write a Vector of StateCU_CropPatternTS to an opened file.
-@param data_Vector A Vector of StateCU_CropPatternTS to write.
+Write a List of StateCU_CropPatternTS to a CDS file.  The filename is
+adjusted to the working directory if necessary using IOUtil.getPathUsingWorkingDir().
+@param filename_prev The name of the previous version of the file (for
+processing headers).  Specify as null if no previous file is available.
+@param filename The name of the file to write.
+@param dataList A list of StateCU_CropPatternTS to write.
+@param new_comments Comments to add to the top of the file.  Specify as null
+if no comments are available.
+@param write_crop_area If true, then the acreage for each crop is shown in addition to the fractions.
+@exception IOException if there is an error writing the file.
+*/
+public static void writeStateCUFile ( String filename_prev, String filename,
+		List dataList, List new_comments, boolean write_crop_area )
+throws IOException
+{	PropList props = new PropList ( "writeStateCUFile" );
+	if ( !write_crop_area ) {
+		// Default is true so only set to false if specified...
+		props.set ( "WriteCropArea", "False" );
+	}
+	writeStateCUFile ( filename_prev, filename, dataList, new_comments, null, null, props );
+}
+
+/**
+Write a list of StateCU_CropPatternTS to a CDS file.  The filename is
+adjusted to the working directory if necessary using IOUtil.getPathUsingWorkingDir().
+@param filename_prev The name of the previous version of the file (for
+processing headers).  Specify as null if no previous file is available.
+@param filename The name of the file to write.
+@param dataList A list of StateCU_CropPatternTS to write.
+@param new_comments Comments to add to the top of the file.  Specify as null 
+if no comments are available.
+@param write_crop_area If true, then the acreage for each crop is shown in addition to the fractions.
+@param req_date1 Requested output start date.
+@param req_date2 Requested output end date.
+@param props Properties to control the write.
+@exception IOException if there is an error writing the file.
+*/
+public static void writeStateCUFile ( String filename_prev, String filename,
+		List dataList, List new_comments, DateTime req_date1, DateTime req_date2, PropList props )
+throws IOException
+{	List commentStr = new Vector(1);
+	commentStr.add ( "#" );
+	List ignoreCommentStr = new Vector(1);
+	ignoreCommentStr.add ( "#>" );
+	PrintWriter out = null;
+	String full_filename_prev = IOUtil.getPathUsingWorkingDir ( filename_prev );
+	String full_filename = IOUtil.getPathUsingWorkingDir ( filename );
+	out = IOUtil.processFileHeaders ( full_filename_prev, full_filename, 
+		new_comments, commentStr, ignoreCommentStr, 0 );
+	if ( out == null ) {
+		throw new IOException ( "Error writing to \"" + full_filename + "\"" );
+	}
+	writeStateCUFile ( dataList, out, req_date1, req_date2, props );
+	out.flush();
+	out.close();
+	out = null;
+}
+
+/**
+Write a list of StateCU_CropPatternTS to an opened file.
+@param dataList A list of StateCU_CropPatternTS to write.
 @param out output PrintWriter.
 @param add_part_acres If true, then the acreage for each crop is shown in
 addition to the fractions.
@@ -1984,31 +1939,27 @@ This is useful when verifying output and only the total is being checked.
 </table>
 @exception IOException if an error occurs.
 */
-private static void writeVector (	List data_Vector, PrintWriter out,
-					DateTime req_date1, DateTime req_date2,
-					PropList props )
+private static void writeStateCUFile ( List dataList, PrintWriter out,
+					DateTime req_date1, DateTime req_date2, PropList props )
 throws IOException
 {	int i;
 	String iline;
 	String cmnt = "#>";
-	String format0 = "%-4.4s %-12.12s                  " +
-		"%10.10s%10.10s";
+	String format0 = "%-4.4s %-12.12s                  %10.10s%10.10s";
 	String format1 = "     %-30.30s%10.10s";
-	String rec1_format = "  Record 1 format (i4,1x,a12,18x,f10.0,i10)" +
-	"- for each year/CULocation.";
-	String rec2_format = "  Record 2 format (5x,a30,f10.3,f10.3) - " +
-		"for each crop for Record 1";
+	String rec1_format = "  Record 1 format (i4,1x,a12,18x,f10.0,i10) - for each year/CULocation.";
+	String rec2_format = "  Record 2 format (5x,a30,f10.3,f10.3) - for each crop for Record 1";
 	
 	if ( props == null ) {
 		props = new PropList ( "writeVector" );
 	}
 	
-	boolean WriteCropArea_boolean = true;		// Default
+	boolean WriteCropArea_boolean = true; // Default
 	String propval = props.getValue ( "WriteCropArea" );
 	if ( (propval != null) && propval.equalsIgnoreCase("False") ) {
 		WriteCropArea_boolean = false;
 	}
-	boolean WriteOnlyTotal_boolean = false;		// Default
+	boolean WriteOnlyTotal_boolean = false; // Default
 	propval = props.getValue ( "WriteOnlyTotal" );
 	if ( (propval != null) && propval.equalsIgnoreCase("True") ) {
 		WriteOnlyTotal_boolean = true;
@@ -2021,21 +1972,18 @@ throws IOException
 	// setup to write as old version 10
 	String Version = props.getValue ( "Version" );
 	boolean version10 = false;	// Use the most current format
-	if(Version != null && Version.equalsIgnoreCase("10"))
-	{	version10 = true;
+	if ( (Version != null) && Version.equalsIgnoreCase("10") ) {
+		version10 = true;
 		format0 = "%-4.4s %-12.12s        %10.10s%10.10s";
 		format1 = "     %-20.20s%10.10s";
 	
 		// set the record format strings
-		rec1_format = "  Record 1 format (i4,1x,a12,8x,f10.3,i10)" +
-		"- for each year/CULocation.";
+		rec1_format = "  Record 1 format (i4,1x,a12,8x,f10.3,i10) - for each year/CULocation.";
 		if ( WriteCropArea_boolean ) {
-			rec2_format = "  Record 2 format (5x,a20,f10.3,f10.3) - " +
-			"for each crop for Record 1";
+			rec2_format = "  Record 2 format (5x,a20,f10.3,f10.3) - for each crop for Record 1";
 		}
 		else {
-			rec2_format = "  Record 2 format (5x,a20,f10.3) - " +
-			"for each crop for Record 1";
+			rec2_format = "  Record 2 format (5x,a20,f10.3) - for each crop for Record 1";
 		}
 		
 		if ( WriteCropArea_boolean ) {
@@ -2048,118 +1996,89 @@ throws IOException
 	out.println ( cmnt );
 	out.println ( cmnt + "  StateCU Crop Patterns (CDS) File" );
 	out.println ( cmnt );
-	out.println ( cmnt +
-	"  Header format (i5,1x,i4,5x,i5,1x,i4,a5,a5)" );
+	if ( version10 ) {
+		out.println ( cmnt + "  Header format (i5,1x,i4,5x,i5,1x,i4,a5,a5)" );
+	}
+	else {
+		out.println ( cmnt + "  Header format (6x,i4,5x,6x,i4,a5,a5)" );
+	}
 	out.println ( cmnt );
 	if ( version10 ) {
-	out.println ( cmnt +
-		"  month1           :  Beginning month of data (always 1)." );
+		out.println ( cmnt + "  month1           :  Beginning month of data (always 1)." );
 	}
-	out.println ( cmnt +
-		"  year1            :  Beginning year of data (calendar year)." );
+	out.println ( cmnt + "  year1            :  Beginning year of data (calendar year)." );
 	if ( version10 ) {
-		out.println ( cmnt +
-		"  month2           :  Ending month of data (always 12)." );
+		out.println ( cmnt + "  month2           :  Ending month of data (always 12)." );
 	}
-	out.println ( cmnt +
-		"  year2            :  Ending year of data (calendar year)." );
+	out.println ( cmnt + "  year2            :  Ending year of data (calendar year)." );
 	if ( version10) {
-		out.println ( cmnt +
-		"  units            :  Data units for crop areas." );
+		out.println ( cmnt + "  units            :  Data units for crop areas." );
 	}
-	out.println ( cmnt +
-		"  yeartype         :  Year type (always CYR for calendar)." );
+	out.println ( cmnt + "  yeartype         :  Year type (always CYR for calendar)." );
 	out.println ( cmnt );
 	out.println ( cmnt + rec1_format );
 	out.println ( cmnt );
-	out.println ( cmnt +
-		"  Yr            tyr:  Year for data (calendar year)." );
-	out.println ( cmnt +
-		"  CULocation    tid:  CU Location ID (e.g., " +
-					"structure/station).");
-	out.println ( cmnt +
-		"  TotalAcres ttacre:  Total acreage for the CU Location." );
-	out.println ( cmnt +
-		"  NCrop            :  Number of crops at location/year." );
+	out.println ( cmnt + "  Yr            tyr:  Year for data (calendar year)." );
+	out.println ( cmnt + "  CULocation    tid:  CU Location ID (e.g., structure/station).");
+	out.println ( cmnt + "  TotalAcres ttacre:  Total acreage for the CU Location." );
+	out.println ( cmnt + "  NCrop            :  Number of crops at location/year." );
 	out.println ( cmnt );
 	out.println ( cmnt + rec2_format);
 	out.println ( cmnt );
-	out.println ( cmnt +
-		"  CropName    cropn:  Crop name (e.g., ALFALFA).");
-	out.println ( cmnt +
-		"  Fraction     tpct:  Decimal fraction of total acreage");
-	out.println ( cmnt +
-		"                      for the crop (0.0 to 1.0) - INFO ONLY." );
-	out.println ( cmnt +
-		"                      Equal to total/crop acres." );
-	out.println ( cmnt +
-		"                      Fractions should add to 1.0." );
+	out.println ( cmnt + "  CropName    cropn:  Crop name (e.g., ALFALFA).");
+	out.println ( cmnt + "  Fraction     tpct:  Decimal fraction of total acreage");
+	out.println ( cmnt + "                      for the crop (0.0 to 1.0) - INFO ONLY." );
+	out.println ( cmnt + "                      Equal to total/crop acres." );
+	out.println ( cmnt + "                      Fractions should add to 1.0." );
 	if ( WriteCropArea_boolean ) {
-		out.println ( cmnt +
-		"  Acres       acres:  Acreage for crop.");
-		out.println ( cmnt +
-		"                      Should sum to the total acres.");
+		out.println ( cmnt + "  Acres       acres:  Acreage for crop.");
+		out.println ( cmnt + "                      Should sum to the total acres.");
 	}
 	out.println ( cmnt );
 	if ( version10 ) {
-	// Old format...
-	out.println ( cmnt +	
-		"Yr  CULocation     TotalArea       NCrop" );
-	out.println ( cmnt +	
-		"-exb----------exxxxxxxxb--------eb--------e" );
-	if ( WriteCropArea_boolean ) {
-		out.println ( cmnt +	
-		"     CropName          Fraction    Acres" );
-		out.println ( cmnt +	
-		"xxxb------------------eb--------eb--------e" );
-	}
-	else {	out.println ( cmnt +	
-		"     CropName          Fraction" );
-		out.println ( cmnt +	
-		"xxxb------------------eb--------e" );
-	}
+		// Old format...
+		out.println ( cmnt + "Yr  CULocation     TotalArea       NCrop" );
+		out.println ( cmnt + "-exb----------exxxxxxxxb--------eb--------e" );
+		if ( WriteCropArea_boolean ) {
+			out.println ( cmnt + "     CropName          Fraction    Acres" );
+			out.println ( cmnt + "xxxb------------------eb--------eb--------e" );
+		}
+		else {
+			out.println ( cmnt + "     CropName          Fraction" );
+			out.println ( cmnt + "xxxb------------------eb--------e" );
+		}
 	}
 	else {
 		// Current format...
-		out.println ( cmnt +	
-		"Yr  CULocation                   TotalArea   NCrop" );
-	out.println ( cmnt +	
-		"-exb----------exxxxxxxxxxxxxxxxxxb--------eb--------e" );
-	if ( WriteCropArea_boolean ) {
-		out.println ( cmnt +	
-		"     CropName                    Fraction    Acres" );
-		out.println ( cmnt +	
-		"xxxb----------------------------eb--------eb--------e" );
-	}
-	else {	out.println ( cmnt +	
-		"     CropName                    Fraction" );
-		out.println ( cmnt +	
-		"xxxb----------------------------eb--------e" );
-	}
+		out.println ( cmnt + "Yr  CULocation                   TotalArea   NCrop" );
+		out.println ( cmnt + "-exb----------exxxxxxxxxxxxxxxxxxb--------eb--------e" );
+		if ( WriteCropArea_boolean ) {
+			out.println ( cmnt + "     CropName                    Fraction    Acres" );
+			out.println ( cmnt + "xxxb----------------------------eb--------eb--------e" );
+		}
+		else {
+			out.println ( cmnt + "     CropName                    Fraction" );
+			out.println ( cmnt + "xxxb----------------------------eb--------e" );
+		}
 	}
 	if ( !WriteCropArea_boolean ) {
-		out.println ( cmnt +
-		"   Writing crop areas has been disabled (only fractions " +
-		"are shown)." );
+		out.println ( cmnt + "   Writing crop areas has been disabled (only fractions are shown)." );
 	}
 	if ( WriteOnlyTotal_boolean ) {
-		out.println ( cmnt +
-		"   Only totals for location are shown (area by crop has been" +
-		" disabled)." );
+		out.println ( cmnt + "   Only totals for location are shown (area by crop has been disabled)." );
 	}
 	out.println ( cmnt + "EndHeader" );
 
 	int num = 0;
-	if ( data_Vector != null ) {
-		num = data_Vector.size();
+	if ( dataList != null ) {
+		num = dataList.size();
 	}
 	if ( num == 0 ) {
 		return;
 	}
 	StateCU_CropPatternTS cds = null;
-	// The dates are taken from the first object and are assumed to be
-	// consistent betwen objects...
-	cds = (StateCU_CropPatternTS)data_Vector.get(0);
+	// The dates are taken from the first object and are assumed to be consistent between objects...
+	cds = (StateCU_CropPatternTS)dataList.get(0);
 	DateTime date1 = cds.getDate1();
 	if ( req_date1 != null ) {
 		date1 = req_date1;
@@ -2175,17 +2094,15 @@ throws IOException
 	int year = 0;
 	List crop_names = null;
 	String crop_name = null;
-	String row1_header = "      " +
-	StringUtil.formatString(date1.getYear(),"%4d") +
-	"           " +
-	StringUtil.formatString(date2.getYear(),"%4d") + "       " + "CYR";
+	// Default is for current version...
+	String row1_header = "      " + StringUtil.formatString(date1.getYear(),"%4d") +
+		"           " +	StringUtil.formatString(date2.getYear(),"%4d") + " " +
+		StringUtil.formatString(units,"%-4.4s") + " " + StringUtil.formatString("CYR","%-4.5s");
 	double total_area, area, fraction;
 	// Print the header...
-	if( version10 )
-	{
+	if( version10 )	{
 		row1_header = "    1/" +
-		StringUtil.formatString(date1.getYear(),"%4d") +
-		"        12/" +
+		StringUtil.formatString(date1.getYear(),"%4d") + "        12/" +
 		StringUtil.formatString(date2.getYear(),"%4d") + " " +
 		StringUtil.formatString(units,"%4.4s") +
 		StringUtil.formatString("CYR","%4.4s");
@@ -2195,7 +2112,7 @@ throws IOException
 	// Make sure that the time series are refreshed before writing.  The
 	// totals are needed to calculate percentages.
 	for ( i=0; i<num; i++ ) {
-		cds = (StateCU_CropPatternTS)data_Vector.get(i);
+		cds = (StateCU_CropPatternTS)dataList.get(i);
 		cds.refresh();
 	}
 	// Outer loop is for the time series period...
@@ -2203,7 +2120,7 @@ throws IOException
 		year = date.getYear();
 		// Inner loop is for each StateCU_Location
 		for ( i=0; i<num; i++ ) {
-			cds = (StateCU_CropPatternTS)data_Vector.get(i);
+			cds = (StateCU_CropPatternTS)dataList.get(i);
 			if ( cds == null ) {
 				continue;
 			}
@@ -2218,12 +2135,10 @@ throws IOException
 			iline = StringUtil.formatString ( v, format0 );
 			out.println ( iline );
 			if ( WriteOnlyTotal_boolean ) {
-				// Only writing the total so no need to do the
-				// following...
+				// Only writing the total so no need to do the following...
 				continue;
 			}
-			// Now loop through the crops for the year and
-			// CULocation...
+			// Now loop through the crops for the year and CULocation...
 			//long area_sum_int = 0;
 			//long fraction_sum_int = 0;
 			for ( icrop = 0; icrop < ncrops; icrop++ ) {
@@ -2240,12 +2155,9 @@ throws IOException
 				v.add( StringUtil.formatString(fraction,"%10.3f"));
 				// Write the area...
 				if ( WriteCropArea_boolean ) {
-					// TODO SAM 2004-07-28
-					// May need to evaluate whether there
-					// needs to be an option of how to write
-					// the crop area.  For now, calculate to
-					// 3 significant figures since that is
-					// what the fraction is...
+					// TODO SAM 2004-07-28 May need to evaluate whether there
+					// needs to be an option of how to write the crop area.  For now, calculate to
+					// 3 significant figures since that is what the fraction is...
 					area = cds.getCropArea ( crop_name,	year, false );
 					/* TODO SAM 2007-10-02 Old code - remove when tested out
 					if ( (total_area < 0.0) || (fraction < 0.0) ) {
@@ -2284,4 +2196,4 @@ throws IOException
 	}
 }
 
-} // End StateCU_CropPatternTS
+}
