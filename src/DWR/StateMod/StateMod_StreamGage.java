@@ -924,10 +924,10 @@ throws Exception {
 			newComments2, commentIndicators, ignoredCommentIndicators, 0);
 
 		for (int i = 0; i < fieldCount; i++) {
-			buffer.append("\"" + names[i] + "\"");
-			if (i < (fieldCount - 1)) {
+			if (i > 0) {
 				buffer.append(delimiter);
 			}
+			buffer.append("\"" + names[i] + "\"");
 		}
 
 		out.println(buffer.toString());

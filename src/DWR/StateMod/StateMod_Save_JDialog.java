@@ -589,7 +589,7 @@ throws Exception {
 			break;
 		case StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS:
 			StateMod_StreamEstimate.writeStateModFile(oldFilename,
-				newFilename, (List)data, comments, daily);
+				newFilename, (List)data, StringUtil.toList(comments), daily);
 			name = "Stream Estimate";
 			break;
 		case StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS:

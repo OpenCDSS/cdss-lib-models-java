@@ -86,32 +86,39 @@ public class StateMod_StreamEstimate
 extends StateMod_Data
 implements Cloneable, Comparable, StateMod_Component {
 
-protected MonthTS	_baseflow_MonthTS;
-					// Monthly base flow time series, for
-					// use with the stream estimate station
-					// file, read from the .xbm/.rim file.
-protected DayTS		_baseflow_DayTS;// Daily base flow time series, read
-					// from the .rid file
-protected String	_crunidy;	// Used with .rbs (column 4) - daily
-					// stream station identifier.
-protected GeoRecord	_georecord;	// Reference to spatial data for this
-					// stream estimate station.
+/**
+Monthly base flow time series, for use with the stream estimate station
+file, read from the .xbm/.rim file.
+*/
+protected MonthTS _baseflow_MonthTS;
 
-protected int		_related_smdata_type;
-					// The StateMod_DataSet component type
-					// for the node.  At some point the
-					// related object reference may also be
-					// added, but there are cases when this
-					// is not known (only the type is
-					// known, for example in StateDMI).
+/**
+Daily base flow time series, read from the .rid file
+*/
+protected DayTS _baseflow_DayTS;
+/**
+Used with .rbs (column 4) - daily stream station identifier.
+*/
+protected String _crunidy;
+/**
+Reference to spatial data for this stream estimate station.
+*/
+protected GeoRecord	_georecord;
 
-protected int		_related_smdata_type2;
-					// Second related type.  This is only
-					// used for D&W node types and should
-					// be set to the well stations component
-					// type.
+/**
+The StateMod_DataSet component type for the node.  At some point the
+related object reference may also be added, but there are cases when this
+is not known (only the type is known, for example in StateDMI).
+*/
+protected int _related_smdata_type;
 
-// REVISIT - should we connect the .rib data similar to how water rights are
+/**
+Second related type.  This is only used for D&W node types and should
+be set to the well stations component type.
+ */
+protected int _related_smdata_type2;
+
+// TODO - should we connect the .rib data similar to how water rights are
 // connected?   The data are not used as much as water rights.
 	
 /**
@@ -126,11 +133,10 @@ public StateMod_StreamEstimate ()
 Constructor for stream estimate station.
 @param initialize_defaults If true, the time series are set to null and other
 information is empty strings - this is suitable for the StateMod GUI.  If false,
-the data are set to missing - this is suitable for StateDMI where data will
-be filled.
+the data are set to missing - this is suitable for StateDMI where data will be filled.
 */
 public StateMod_StreamEstimate ( boolean initialize_defaults )
-{	super ( );
+{	super ();
 	initialize ( initialize_defaults );
 }
 
@@ -161,7 +167,7 @@ public boolean changed() {
 @param dataset StateMod dataset object.
 @param props Extra properties for specific data checks.
 @return List of data that failed specific checks.
- */
+*/
 public String[] checkComponentData( int count, 
 StateMod_DataSet dataset, PropList props ) 
 {
@@ -183,8 +189,7 @@ public Object clone() {
 /**
 Compares this object to another StateMod_StreamEstimate object.
 @param o the object to compare against.
-@return 0 if they are the same, 1 if this object is greater than the other
-object, or -1 if it is less.
+@return 0 if they are the same, 1 if this object is greater than the other object, or -1 if it is less.
 */
 public int compareTo(Object o) {
 	int res = super.compareTo(o);
@@ -218,16 +223,13 @@ public int compareTo(Object o) {
 /**
 Connect the time series pointers to the appropriate time series objects
 for all the elements in the Vector of StateMod_StreamEstimate objects.
-@param rivs Vector of StateMod_StreamEstimate (e.g., as read from StateMod 
-.rbs file).
-@param baseflow_MonthTS Vector of baseflow MonthTS (e.g., as read from StateMod
+@param rivs list of StateMod_StreamEstimate (e.g., as read from StateMod .rbs file).
+@param baseflow_MonthTS list of baseflow MonthTS (e.g., as read from StateMod
 .xbm or .rim file).  Pass as null to not connect.
-@param baseflow_DayTS Vector of baseflow MonthTS (e.g., as read from StateMod
+@param baseflow_DayTS list of baseflow MonthTS (e.g., as read from StateMod
 .xbd? or .rid file).  Pass as null to not connect.
 */
-public static void connectAllTS ( List rivs,
-		List baseflow_MonthTS,
-		List baseflow_DayTS )
+public static void connectAllTS ( List rivs, List baseflow_MonthTS, List baseflow_DayTS )
 {	if ( rivs == null ) {
 		return;
 	}
@@ -245,10 +247,9 @@ public static void connectAllTS ( List rivs,
 }
 
 /**
-Connect the daily base streamflow TS pointer to the appropriate TS in the
-Vector.
+Connect the daily base streamflow TS pointer to the appropriate TS in the list.
 A connection is made if the node identifier matches the time series location.
-@param tslist Vector of DayTS.
+@param tslist list of DayTS.
 */
 private void connectBaseflowDayTS ( List tslist )
 {	if ( tslist == null ) {
@@ -298,8 +299,7 @@ public void connectBaseflowMonthTS ( List tslist )
 }
 
 /**
-Creates a copy of the object for later use in checking to see if it was 
-changed in a GUI.
+Creates a copy of the object for later use in checking to see if it was changed in a GUI.
 */
 public void createBackup() {
 	_original = clone();
@@ -389,8 +389,7 @@ public int getRelatedSMDataType2()
 Initialize data.
 @param initialize_defaults If true, the time series are set to null and other
 information is empty strings - this is suitable for the StateMod GUI.  If false,
-the data are set to missing - this is suitable for StateDMI where data will
-be filled.
+the data are set to missing - this is suitable for StateDMI where data will be filled.
 */
 private void initialize ( boolean initialize_defaults )
 {	_smdata_type = StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS;
@@ -402,7 +401,8 @@ private void initialize ( boolean initialize_defaults )
 		// Reasonable defaults...
 		_crunidy = "0";	// Estimate average daily from monthly data.
 	}
-	else {	// Missing...
+	else {
+		// Missing...
 		_crunidy = "";
 	}
 	_georecord = null;
@@ -410,24 +410,18 @@ private void initialize ( boolean initialize_defaults )
 
 /**
 This method can be called when an old-style *.ris file containing both stream
-gage station and stream estimate stations is read.  The following adjustments to
-the data occur:
+gage station and stream estimate stations is read.  The following adjustments to the data occur:
 <ol>
-<li>	Objects in the ris that do not have matching identifiers in the rih are
-	removed from the ris.</li>
-<li>	Objects in the rbs that do not have matching identifiers in the rib are
-	removed from the rbs.</li>
+<li>	Objects in the ris that do not have matching identifiers in the rih are	removed from the ris.</li>
+<li>	Objects in the rbs that do not have matching identifiers in the rib are	removed from the rbs.</li>
 </ol>
-@param ris_Vector Vector of StateMod_StreamGage, after initial read.
-@param rih_Vector Vector of historical MonthTS, after initial read.
-@param rbs_Vector Vector of StateMod_StreamEstimate, after initial read.
-@param rib_Vector Vector of StateMod_StreamEstimte_Coefficients, after initial
+@param ris_Vector list of StateMod_StreamGage, after initial read.
+@param rih_Vector list of historical MonthTS, after initial read.
+@param rbs_Vector list of StateMod_StreamEstimate, after initial read.
+@param rib_Vector list of StateMod_StreamEstimte_Coefficients, after initial
 read.
 */
-public static void processStreamData (	List ris_Vector,
-		List rih_Vector,
-		List rbs_Vector,
-		List rib_Vector )
+public static void processStreamData ( List ris_Vector, List rih_Vector, List rbs_Vector, List rib_Vector )
 {	int nris = 0;
 	if ( ris_Vector != null ) {
 		nris = ris_Vector.size();
@@ -474,8 +468,7 @@ public static void processStreamData (	List ris_Vector,
 		id = rbs.getID();
 		found = false;
 		for ( j = 0; j < nrib; j++ ) {
-			rib = (StateMod_StreamEstimate_Coefficients)
-				rib_Vector.get(j);
+			rib = (StateMod_StreamEstimate_Coefficients)rib_Vector.get(j);
 			if ( id.equalsIgnoreCase(rib.getID())) {
 				found = true;
 				break;
@@ -520,58 +513,48 @@ throws Exception
 	int linecount = 0;
 
 	if ( Message.isDebugOn ) {
-		Message.printDebug ( 10, rtn, 
-		"in " + rtn + " reading file: " + filename );
+		Message.printDebug ( 10, rtn, "in " + rtn + " reading file: " + filename );
 	}
-	try {	BufferedReader in = new BufferedReader (
-			new FileReader ( filename ));
-		while ( (iline = in.readLine()) != null )
-		{
+	BufferedReader in = null;
+	try {
+		in = new BufferedReader ( new FileReader ( filename ));
+		while ( (iline = in.readLine()) != null ) {
 			++linecount;
 			// check for comments
-			if (iline.startsWith("#") || iline.trim().length()==0)
+			if (iline.startsWith("#") || iline.trim().length()==0) {
 				continue;
+			}
 
 			// allocate new StateMod_BaseFlowStation node
-			StateMod_StreamEstimate aRiverNode =
-				new StateMod_StreamEstimate();
+			StateMod_StreamEstimate aRiverNode = new StateMod_StreamEstimate();
 
 			// line 1
 			if ( Message.isDebugOn ) {
-				Message.printDebug ( 50, rtn, 
-				"line 1: " + iline );
+				Message.printDebug ( 50, rtn, "line 1: " + iline );
 			}
 			StringUtil.fixedRead ( iline, format_0, format_0w, v );
 			if ( Message.isDebugOn ) {
-				Message.printDebug ( 50, rtn, 
-				"Fixed read returned " 
-				+ v.size() + " elements");
+				Message.printDebug ( 50, rtn, "Fixed read returned " + v.size() + " elements");
 			}
 			aRiverNode.setID ( ((String)v.get(0)).trim() );
 			aRiverNode.setName ( ((String)v.get(1)).trim() );
 			aRiverNode.setCgoto ( ((String)v.get(2)).trim() );
-			aRiverNode.setCrunidy (((String)v.get(3)).trim());
+			// Space
+			aRiverNode.setCrunidy (((String)v.get(4)).trim());
 
 			// add the node to the vector of river nodes
 			theRivs.add ( aRiverNode );
 		}
 	} catch (Exception e) {
-		// Clean up...
-		v = null;
-		rtn = null;
-		iline = null;
-		format_0 = null;
-		format_0w = null;
-		Message.printWarning ( 2, rtn,
-		"Error reading \"" + filename + "\" at line " + linecount );
+		Message.printWarning ( 2, rtn, "Error reading \"" + filename + "\" at line " + linecount );
 		throw e;
 	}
-	// Clean up...
-	v = null;
-	rtn = null;
-	iline = null;
-	format_0 = null;
-	format_0w = null;
+	finally {
+		if ( in != null ) {
+			in.close();
+			in = null;
+		}
+	}
 	return theRivs;
 }
 
@@ -629,8 +612,7 @@ public void setGeoRecord ( GeoRecord georecord )
 
 /**
 Set the StateMod_DataSet component type for the data for this node.
-@param related_smdata_type The StateMod_DataSet component type for the data for 
-this node.
+@param related_smdata_type The StateMod_DataSet component type for the data for this node.
 */
 public void setRelatedSMDataType ( int related_smdata_type )
 {	_related_smdata_type = related_smdata_type;
@@ -638,8 +620,7 @@ public void setRelatedSMDataType ( int related_smdata_type )
 
 /**
 Set the second StateMod_DataSet component type for the data for this node.
-@param related_smdata_type The second StateMod_DataSet component type for the
-data for this node.
+@param related_smdata_type The second StateMod_DataSet component type for the data for this node.
 This is only used for D&W nodes and should be set to the well component type.
 */
 public void setRelatedSMDataType2 ( int related_smdata_type2 )
@@ -651,17 +632,18 @@ Write the new (updated) river baseflow stations file.  If an original file is
 specified, then the original header is carried into the new file.
 @param infile Name of old file or null if no old file to update.
 @param outfile Name of new file to create (can be the same as the old file).
-@param theRivs Vector of StateMod_StreamEstimate to write.
+@param theRivs list of StateMod_StreamEstimate to write.
 @param newcomments New comments to write in the file header.
 @param do_daily Indicates whether daily modeling fields should be written.
 */
 public static void writeStateModFile( String infile, String outfile,
-		List theRivs, String[] newcomments,
-			boolean do_daily )
+		List theRivs, List newcomments, boolean do_daily )
 throws Exception
-{	PrintWriter	out;
-	String [] comment_str = { "#" };
-	String [] ignore_str = { "#>" };
+{	PrintWriter	out = null;
+	List commentIndicators = new Vector(1);
+	commentIndicators.add ( "#" );
+	List ignoredCommentIndicators = new Vector(1);
+	ignoredCommentIndicators.add ( "#>");
 	String routine = "StateMod_StreamEstimate.writeStateModFile";
 
 	if ( Message.isDebugOn ) {
@@ -670,67 +652,45 @@ throws Exception
 		outfile + "\" using \"" + infile + "\" header..." );
 	}
 
-	try {	// Process the header from the old file...
+	try {
+		// Process the header from the old file...
 		out = IOUtil.processFileHeaders (
 			IOUtil.getPathUsingWorkingDir(infile),
 			IOUtil.getPathUsingWorkingDir(outfile), 
-			newcomments, comment_str, ignore_str, 0 );
+			newcomments, commentIndicators, ignoredCommentIndicators, 0 );
 
 		String cmnt = "#>";
 		String iline = null;
 		String format = null;
 		StateMod_StreamEstimate riv = null;
 
-		out.println ( cmnt + 
-			" *****************************" +
-			"**************************" );
+		out.println ( cmnt + " *******************************************************" );
 		out.println ( cmnt + "  Stream Estimate Station File" );
 		out.println ( cmnt );
-		out.println ( cmnt +
-		"  This file contains a list of stations at which stream" );
-		out.println ( cmnt +
-		"  baseflows are estimated." );
-		out.println ( cmnt +
-		"  The IDs for nodes will match the IDs in one of the" +
-		"following files:" );
-		out.println ( cmnt +
-		"      Diversion stations" );
-		out.println ( cmnt +
-		"      Reservoir stations" );
-		out.println ( cmnt +
-		"      Instream flow stations" );
-		out.println ( cmnt +
-		"      Well stations" );
-		out.println ( cmnt +
-		"  Stream gages with historical data are in the stream gage" +
-		" station file." );
-		out.println ( cmnt +
-		"  \"Other\" nodes with baseflow data are only listed in the" +
-		" river network file." );
+		out.println ( cmnt + "  This file contains a list of stations at which stream" );
+		out.println ( cmnt + "  natural flows are estimated." );
+		out.println ( cmnt + "  The IDs for nodes will match the IDs in one of the following files:" );
+		out.println ( cmnt + "      Diversion stations" );
+		out.println ( cmnt + "      Reservoir stations" );
+		out.println ( cmnt + "      Instream flow stations" );
+		out.println ( cmnt + "      Well stations" );
+		out.println ( cmnt + "  Stream gages with historical data are in the stream gage station file." );
+		out.println ( cmnt + "  \"Other\" nodes with baseflow data are only listed in the river network file." );
 		out.println ( cmnt );
-		out.println ( cmnt +
-		"     format:  (a12, a24, a12, 1x, a12)" );
+		out.println ( cmnt + "     format:  (a12, a24, a12, 1x, a12)" );
 		out.println ( cmnt );
-		out.println ( cmnt +
-		"  ID         crunid:  Station ID" );
-		out.println ( cmnt +
-		"  Name       runnam:  Station name" );
-		out.println ( cmnt +
-		"  River ID    cgoto:  River node with stream estimate " +
-			"station" );
-		out.println ( cmnt +
-		"  Daily ID  crunidy:  Daily stream station ID." );
+		out.println ( cmnt + "  ID         crunid:  Station ID" );
+		out.println ( cmnt + "  Name       runnam:  Station name" );
+		out.println ( cmnt + "  River ID    cgoto:  River node with stream estimate station" );
+		out.println ( cmnt + "  Daily ID  crunidy:  Daily stream station ID." );
 		out.println ( cmnt );
-		out.println ( cmnt +
-		"    ID              Name          " +
-		" River ID     Daily ID   " );
-		out.println ( cmnt +
-		"---------eb----------------------e" +
-		"b----------exb----------e" );
+		out.println ( cmnt + "    ID              Name           River ID     Daily ID   " );
+		out.println ( cmnt + "---------eb----------------------eb----------exb----------e" );
 		if ( do_daily ) {
 			format = "%-12.12s%-24.24s%-12.12s %-12.12s";
 		}
-		else {	format = "%-12.12s%-24.24s%-12.12s";
+		else {
+			format = "%-12.12s%-24.24s%-12.12s";
 		}
 		out.println ( cmnt );
 		out.println ( cmnt + "EndHeader" );
@@ -759,27 +719,34 @@ throws Exception
 		iline = null;
 		format = null;
 
-		out.flush();
-		out.close();
+
 	}
 	catch ( Exception e ) {
 		Message.printWarning ( 2, routine, e );
 		throw e;
 	}
+	finally {
+		if ( out != null ) {
+			out.flush();
+			out.close();
+		}
+	}
 }
 
 /**
-Writes a Vector of StateMod_StreamEstimate objects to a list file.  A header is 
+Writes a list of StateMod_StreamEstimate objects to a list file.  A header is 
 printed to the top of the file, containing the commands used to generate the 
 file.  Any strings in the body of the file that contain the field delimiter will be wrapped in "...".  
 @param filename the name of the file to which the data will be written.
 @param delimiter the delimiter to use for separating field values.
 @param update whether to update an existing file, retaining the current 
 header (true) or to create a new file with a new header.
-@param data the Vector of objects to write.  
+@param data the list of objects to write.
+@param newComments list of new comments to add in the file header.
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter, boolean update, List data) 
+public static void writeListFile(String filename, String delimiter, boolean update, List data,
+	List newComments ) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
@@ -812,23 +779,36 @@ throws Exception {
 	int j = 0;
 	PrintWriter out = null;
 	StateMod_StreamEstimate se = null;
-	String[] commentString = { "#" };
-	String[] ignoreCommentString = { "#>" };
+	List commentIndicators = new Vector(1);
+	commentIndicators.add ( "#" );
+	List ignoredCommentIndicators = new Vector(1);
+	ignoredCommentIndicators.add ( "#>");
 	String[] line = new String[fieldCount];
-	String[] newComments = null;
 	StringBuffer buffer = new StringBuffer();
 	
-	try {	
+	try {
+		// Add some basic comments at the top of the file.  Do this to a copy of the
+		// incoming comments so that they are not modified in the calling code.
+		List newComments2 = null;
+		if ( newComments == null ) {
+			newComments2 = new Vector();
+		}
+		else {
+			newComments2 = new Vector(newComments);
+		}
+		newComments2.add(0,"");
+		newComments2.add(1,"StateMod stream estimate stations as a delimited list file.");
+		newComments2.add(2,"");
 		out = IOUtil.processFileHeaders(
 			oldFile,
 			IOUtil.getPathUsingWorkingDir(filename), 
-			newComments, commentString, ignoreCommentString, 0);
+			newComments2, commentIndicators, ignoredCommentIndicators, 0);
 
 		for (int i = 0; i < fieldCount; i++) {
-			buffer.append("\"" + names[i] + "\"");
-			if (i < (fieldCount - 1)) {
+			if (i > 0) {
 				buffer.append(delimiter);
 			}
+			buffer.append("\"" + names[i] + "\"");
 		}
 
 		out.println(buffer.toString());
@@ -836,24 +816,20 @@ throws Exception {
 		for (int i = 0; i < size; i++) {
 			se = (StateMod_StreamEstimate)data.get(i);
 			
-			line[0] = StringUtil.formatString(se.getID(), 
-				formats[0]).trim();
-			line[1] = StringUtil.formatString(se.getName(), 
-				formats[1]).trim();
-			line[2] = StringUtil.formatString(se.getCgoto(), 
-				formats[2]).trim();
-			line[3] = StringUtil.formatString(se.getCrunidy(), 
-				formats[3]).trim();
+			line[0] = StringUtil.formatString(se.getID(), formats[0]).trim();
+			line[1] = StringUtil.formatString(se.getName(),	formats[1]).trim();
+			line[2] = StringUtil.formatString(se.getCgoto(), formats[2]).trim();
+			line[3] = StringUtil.formatString(se.getCrunidy(), formats[3]).trim();
 
 			buffer = new StringBuffer();	
 			for (j = 0; j < fieldCount; j++) {
+				if (j > 0) {
+					buffer.append(delimiter);
+				}
 				if (line[j].indexOf(delimiter) > -1) {
 					line[j] = "\"" + line[j] + "\"";
 				}
 				buffer.append(line[j]);
-				if (j < (fieldCount - 1)) {
-					buffer.append(delimiter);
-				}
 			}
 
 			out.println(buffer.toString());
@@ -863,13 +839,16 @@ throws Exception {
 		out = null;
 	}
 	catch (Exception e) {
+		// TODO SAM 2009-01-05 Log it?
+		throw e;
+	}
+	finally {
 		if (out != null) {
 			out.flush();
 			out.close();
 		}
 		out = null;
-		throw e;
 	}
 }
 
-} // End StateMod_StreamEstimate
+}
