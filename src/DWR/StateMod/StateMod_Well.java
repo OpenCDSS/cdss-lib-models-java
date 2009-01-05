@@ -2601,7 +2601,7 @@ throws Exception {
 	
 	String filenameFull = IOUtil.getPathUsingWorkingDir(filename);
 	try {
-		// Add some basic comments at the top of the file.  However, do this to a copy of the
+		// Add some basic comments at the top of the file.  Do this to a copy of the
 		// incoming comments so that they are not modified in the calling code.
 		List newComments2 = null;
 		if ( newComments == null ) {

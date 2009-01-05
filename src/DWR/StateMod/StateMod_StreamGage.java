@@ -161,41 +161,51 @@ implements Cloneable, Comparable, StateMod_Component
 
 //protected String 	_cgoto;		// River node for stream station.
 
-protected MonthTS 	_historical_MonthTS;
-					// Monthly historical TS from the .rih
-					// file that is associated with the
-					// .ris station - only streamflow gages
-					// in the .ris have these data
+/**
+Monthly historical TS from the .rih file that is associated with the
+.ris station - only streamflow gages in the .ris have these data
+*/
+protected MonthTS _historical_MonthTS;
 
-protected MonthTS	_baseflow_MonthTS;
-					// Monthly base flow time series, for
-					// use with the river station (.ris)
-					// file, read from the .xbm/.rim file.
-protected DayTS		_baseflow_DayTS;// Daily base flow time series, read
-					// from the .rid file
-protected DayTS 	_historical_DayTS;
-					// Daily historical TS from the .riy
-					// file that is associated with the .ris
-					// station - only streamflow gages in
-					// the .riy have these data
-protected String	_crunidy;	// Used with .ris (column 4) - daily
-					// stream station identifier.
-protected GeoRecord	_georecord;	// Reference to spatial data for this
-					// river station.  Currently not cloned.
+/**
+Monthly base flow time series, for use with the river station (.ris)
+file, read from the .xbm/.rim file.
+*/
+protected MonthTS _baseflow_MonthTS;
 
-protected int		_related_smdata_type;
-					// The StateMod_DataSet component type
-					// for the node.  At some point the
-					// related object reference may also be
-					// added, but there are cases when this
-					// is not known (only the type is
-					// known, for example in StateDMI).
+/**
+Daily base flow time series, read from the .rid file.
+*/
+protected DayTS _baseflow_DayTS;
 
-protected int		_related_smdata_type2;
-					// Second related type.  This is only
-					// used for D&W node types and should
-					// be set to the well stations component
-					// type.
+/**
+Daily historical TS from the .riy file that is associated with the .ris
+station - only streamflow gages in the .riy have these data
+*/
+protected DayTS _historical_DayTS;
+
+/**
+Used with .ris (column 4) - daily stream station identifier.
+*/
+protected String	_crunidy;
+
+/**
+Reference to spatial data for this river station.  Currently not cloned.
+*/
+protected GeoRecord	_georecord;
+
+/**
+The StateMod_DataSet component type for the node.  At some point the related object reference
+may also be added, but there are cases when this is not known (only the type is
+known, for example in StateDMI).
+*/
+protected int _related_smdata_type;
+
+/**
+Second related type.  This is only used for D&W node types and should be set to the
+well stations component type.
+*/
+protected int _related_smdata_type2;
 	
 /**
 Constructor for stream gage station.
@@ -252,8 +262,7 @@ public boolean changed() {
 public String[] checkComponentData( int count, 
 StateMod_DataSet dataset, PropList props ) 
 {
-	// TODO KAT 2007-04-16
-	// add specific checks here
+	// TODO KAT 2007-04-16 add specific checks here
 	return null;
 }
 
@@ -310,15 +319,11 @@ public int compareTo(Object o) {
 
 /**
 Connect the historical monthly and daily TS pointers to the appropriate TS
-for all the elements in the Vector of StateMod_StreamGage objects.
-@param rivs Vector of StateMod_StreamGage (e.g., as read from StateMod 
-.ris file).
+for all the elements in the list of StateMod_StreamGage objects.
+@param rivs list of StateMod_StreamGage (e.g., as read from StateMod .ris file).
 */
-public static void connectAllTS (	List rivs,
-		List historical_MonthTS,
-		List historical_DayTS,
-		List baseflow_MonthTS,
-		List baseflow_DayTS )
+public static void connectAllTS ( List rivs, List historical_MonthTS, List historical_DayTS,
+		List baseflow_MonthTS, List baseflow_DayTS )
 {	if ( rivs == null ) {
 		return;
 	}
@@ -342,10 +347,9 @@ public static void connectAllTS (	List rivs,
 }
 
 /**
-Connect the daily base streamflow TS pointer to the appropriate TS in the
-Vector.
+Connect the daily base streamflow TS pointer to the appropriate TS in the list.
 A connection is made if the node identifier matches the time series location.
-@param tslist Vector of DayTS.
+@param tslist list of DayTS.
 */
 private void connectBaseflowDayTS ( List tslist )
 {	if ( tslist == null ) {
@@ -438,8 +442,7 @@ public void connectHistoricalMonthTS ( List tslist )
 			continue;
 		}
 		if ( _id.equalsIgnoreCase(ts.getLocation())) {
-			// The name is usually not set when reading the time
-			// series...
+			// The name is usually not set when reading the time series...
 			ts.setDescription ( getName() );
 			_historical_MonthTS = ts;
 			break;
@@ -448,8 +451,7 @@ public void connectHistoricalMonthTS ( List tslist )
 }
 
 /**
-Creates a copy of the object for later use in checking to see if it was 
-changed in a GUI.
+Creates a copy of the object for later use in checking to see if it was changed in a GUI.
 */
 public void createBackup() {
 	_original = clone();
@@ -512,8 +514,7 @@ Returns the data column header for the specifically checked data.
  */
 public static String[] getDataHeader()
 {
-	// TODO KAT 2007-04-16 
-	// When specific checks are added to checkComponentData
+	// TODO KAT 2007-04-16 When specific checks are added to checkComponentData
 	// return the header for that data here
 	return new String[] {};
 }
@@ -578,17 +579,17 @@ private void initialize ( boolean initialize_defaults )
 	_baseflow_DayTS = null;
 	if ( initialize_defaults ) {
 		// Set to reasonable defaults...
-		_crunidy = "0";		// Use monthly data
+		_crunidy = "0"; // Use monthly data
 	}
-	else {	// Initialize to missing
+	else {
+		// Initialize to missing
 		_crunidy = "";
 	}
 	_georecord = null;
 }
 
 /**
-Read the stream gage station file and store return a Vector of
-StateMod_StreamGage.
+Read the stream gage station file and store return a Vector of StateMod_StreamGage.
 @return a Vector of StateMod_StreamGage.
 @param filename Name of file to read.
 @exception Exception if there is an error reading the file.
@@ -616,33 +617,28 @@ throws Exception
 	int linecount = 0;
 
 	if ( Message.isDebugOn ) {
-		Message.printDebug ( 10, rtn, 
-		"in " + rtn + " reading file: " + filename );
+		Message.printDebug ( 10, rtn, "in " + rtn + " reading file: " + filename );
 	}
+	BufferedReader in = null;
 	try {
-		BufferedReader in = new BufferedReader (
-			new FileReader ( filename ));
-		while ( (iline = in.readLine()) != null )
-		{
+		in = new BufferedReader ( new FileReader ( filename ));
+		while ( (iline = in.readLine()) != null ) {
 			++linecount;
 			// check for comments
-			if (iline.startsWith("#") || iline.trim().length()==0)
+			if (iline.startsWith("#") || iline.trim().length()==0) {
 				continue;
+			}
 
 			// allocate new StateMod_StreamGage node
-			StateMod_StreamGage aRiverNode =
-				new StateMod_StreamGage();
+			StateMod_StreamGage aRiverNode = new StateMod_StreamGage();
 
 			// line 1
 			if ( Message.isDebugOn ) {
-				Message.printDebug ( 50, rtn, 
-				"line 1: " + iline );
+				Message.printDebug ( 50, rtn, "line 1: " + iline );
 			}
 			StringUtil.fixedRead ( iline, format_0, format_0w, v );
 			if ( Message.isDebugOn ) {
-				Message.printDebug ( 50, rtn, 
-				"Fixed read returned " 
-				+ v.size() + " elements");
+				Message.printDebug ( 50, rtn, "Fixed read returned " + v.size() + " elements");
 			}
 			aRiverNode.setID ( ((String)v.get(0)).trim() );
 			aRiverNode.setName ( ((String)v.get(1)).trim() );
@@ -653,23 +649,18 @@ throws Exception
 			// add the node to the vector of river nodes
 			theRivs.add ( aRiverNode );
 		}
-	} catch (Exception e) {
+	}
+	catch (Exception e) {
 		// Clean up...
-		v = null;
-		rtn = null;
-		iline = null;
-		format_0 = null;
-		format_0w = null;
-		Message.printWarning ( 2, rtn,
-		"Error reading \"" + filename + "\" at line " + linecount );
+		Message.printWarning ( 3, rtn, "Error reading \"" + filename + "\" at line " + linecount );
 		throw e;
 	}
-	// Clean up...
-	v = null;
-	rtn = null;
-	iline = null;
-	format_0 = null;
-	format_0w = null;
+	finally {
+		// Clean up...
+		if ( in != null ) {
+			in.close();
+		}
+	}
 	return theRivs;
 }
 
@@ -757,8 +748,7 @@ public void setHistoricalMonthTS ( MonthTS ts ) {
 
 /**
 Set the StateMod_DataSet component type for the data for this node.
-@param related_smdata_type The StateMod_DataSet component type for the data for 
-this node.
+@param related_smdata_type The StateMod_DataSet component type for the data for this node.
 */
 public void setRelatedSMDataType ( int related_smdata_type )
 {	_related_smdata_type = related_smdata_type;
@@ -766,8 +756,7 @@ public void setRelatedSMDataType ( int related_smdata_type )
 
 /**
 Set the second StateMod_DataSet component type for the data for this node.
-@param related_smdata_type The second StateMod_DataSet component type for the
-data for this node.
+@param related_smdata_type The second StateMod_DataSet component type for the data for this node.
 This is only used for D&W nodes and should be set to the well component type.
 */
 public void setRelatedSMDataType2 ( int related_smdata_type2 )
@@ -784,58 +773,48 @@ specified, then the original header is carried into the new file.
 @param do_daily Indicates whether daily modeling fields should be written.
 */
 public static void writeStateModFile( String infile, String outfile,
-		List theRivs, String[] newcomments,
-			boolean do_daily )
+		List theRivs, List newcomments, boolean do_daily )
 throws Exception
-{	PrintWriter	out;
-	String [] comment_str = { "#" };
-	String [] ignore_str = { "#>" };
+{	PrintWriter	out = null;
+	List commentIndicators = new Vector(1);
+	commentIndicators.add ( "#" );
+	List ignoredCommentIndicators = new Vector(1);
+	ignoredCommentIndicators.add ( "#>");
 	String routine = "StateMod_StreamGage.writeStateModFile";
 
 	if ( Message.isDebugOn ) {
-		Message.printDebug ( 2, routine, 
-		"Writing stream gage stations to file \"" +
+		Message.printDebug ( 2, routine, "Writing stream gage stations to file \"" +
 		outfile + "\" using \"" + infile + "\" header..." );
 	}
 
-	try {	// Process the header from the old file...
-		out = IOUtil.processFileHeaders (
-			IOUtil.getPathUsingWorkingDir(infile),
+	try {
+		// Process the header from the old file...
+		out = IOUtil.processFileHeaders ( IOUtil.getPathUsingWorkingDir(infile),
 			IOUtil.getPathUsingWorkingDir(outfile), 
-			newcomments, comment_str, ignore_str, 0 );
+			newcomments, commentIndicators, ignoredCommentIndicators, 0 );
 
 		String cmnt = "#>";
 		String iline = null;
 		String format = null;
 		StateMod_StreamGage riv = null;
 
-		out.println ( cmnt + 
-			" *****************************" +
-			"**************************" );
+		out.println ( cmnt + " *******************************************************" );
 		out.println ( cmnt + "  Stream Gage Station File" );
 		out.println ( cmnt );
-		out.println ( cmnt +
-		"     format:  (a12, a24, a12, 1x, a12)" );
+		out.println ( cmnt + "     format:  (a12, a24, a12, 1x, a12)" );
 		out.println ( cmnt );
-		out.println ( cmnt +
-		"  ID         crunid:  Station ID" );
-		out.println ( cmnt +
-		"  Name       runnam:  Station name" );
-		out.println ( cmnt +
-		"  River ID    cgoto:  River node with stream gage" );
-		out.println ( cmnt +
-		"  Daily ID  crunidy:  Daily stream station ID." );
+		out.println ( cmnt + "  ID         crunid:  Station ID" );
+		out.println ( cmnt + "  Name       runnam:  Station name" );
+		out.println ( cmnt + "  River ID    cgoto:  River node with stream gage" );
+		out.println ( cmnt + "  Daily ID  crunidy:  Daily stream station ID." );
 		out.println ( cmnt );
-		out.println ( cmnt +
-		"    ID              Name          " +
-		" River ID     Daily ID   " );
-		out.println ( cmnt +
-		"---------eb----------------------e" +
-		"b----------exb----------e" );
+		out.println ( cmnt + "    ID              Name           River ID     Daily ID   " );
+		out.println ( cmnt + "---------eb----------------------eb----------exb----------e" );
 		if ( do_daily ) {
 			format = "%-12.12s%-24.24s%-12.12s %-12.12s";
 		}
-		else {	format = "%-12.12s%-24.24s%-12.12s";
+		else {
+			format = "%-12.12s%-24.24s%-12.12s";
 		}
 		out.println ( cmnt );
 		out.println ( cmnt + "EndHeader" );
@@ -863,29 +842,33 @@ throws Exception
 		cmnt = null;
 		iline = null;
 		format = null;
-
-		out.flush();
-		out.close();
 	}
 	catch ( Exception e ) {
-		Message.printWarning ( 2, routine, e );
+		Message.printWarning ( 3, routine, e );
 		throw e;
+	}
+	finally {
+		if ( out != null ) {
+			out.flush();
+			out.close();
+		}
 	}
 }
 
 /**
-Writes a Vector of StateMod_StreamGage objects to a list file.  A header is 
+Writes a list of StateMod_StreamGage objects to a list file.  A header is 
 printed to the top of the file, containing the commands used to generate the 
-file.  Any strings in the body of the file that contain the field delimiter 
-will be wrapped in "...".  
+file.  Any strings in the body of the file that contain the field delimiter will be wrapped in "...".  
 @param filename the name of the file to which the data will be written.
 @param delimiter the delimiter to use for separating field values.
 @param update whether to update an existing file, retaining the current 
 header (true) or to create a new file with a new header.
-@param data the Vector of objects to write.  
+@param data the list of objects to write.  
+@param newComments list of comments to add at the top of the file.
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter, boolean update, List data) 
+public static void writeListFile(String filename, String delimiter, boolean update, List data,
+		List newComments ) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
@@ -917,17 +900,28 @@ throws Exception {
 	int j = 0;
 	PrintWriter out = null;
 	StateMod_StreamGage gage = null;
-	String[] commentString = { "#" };
-	String[] ignoreCommentString = { "#>" };
+	List commentIndicators = new Vector(1);
+	commentIndicators.add ( "#" );
+	List ignoredCommentIndicators = new Vector(1);
+	ignoredCommentIndicators.add ( "#>");
 	String[] line = new String[fieldCount];
-	String[] newComments = null;
 	StringBuffer buffer = new StringBuffer();
 	
-	try {	
-		out = IOUtil.processFileHeaders(
-			oldFile,
-			IOUtil.getPathUsingWorkingDir(filename), 
-			newComments, commentString, ignoreCommentString, 0);
+	try {
+		// Add some basic comments at the top of the file.  Do this to a copy of the
+		// incoming comments so that they are not modified in the calling code.
+		List newComments2 = null;
+		if ( newComments == null ) {
+			newComments2 = new Vector();
+		}
+		else {
+			newComments2 = new Vector(newComments);
+		}
+		newComments2.add(0,"");
+		newComments2.add(1,"StateMod stream gage stations as a delimited list file.");
+		newComments2.add(2,"");
+		out = IOUtil.processFileHeaders( oldFile, IOUtil.getPathUsingWorkingDir(filename), 
+			newComments2, commentIndicators, ignoredCommentIndicators, 0);
 
 		for (int i = 0; i < fieldCount; i++) {
 			buffer.append("\"" + names[i] + "\"");
@@ -941,40 +935,34 @@ throws Exception {
 		for (int i = 0; i < size; i++) {
 			gage = (StateMod_StreamGage)data.get(i);
 			
-			line[0] = StringUtil.formatString(gage.getID(), 
-				formats[0]).trim();
-			line[1] = StringUtil.formatString(gage.getName(), 
-				formats[1]).trim();
-			line[2] = StringUtil.formatString(gage.getCgoto(), 
-				formats[2]).trim();
-			line[3] = StringUtil.formatString(gage.getCrunidy(), 
-				formats[3]).trim();
+			line[0] = StringUtil.formatString(gage.getID(), formats[0]).trim();
+			line[1] = StringUtil.formatString(gage.getName(), formats[1]).trim();
+			line[2] = StringUtil.formatString(gage.getCgoto(), formats[2]).trim();
+			line[3] = StringUtil.formatString(gage.getCrunidy(), formats[3]).trim();
 
 			buffer = new StringBuffer();	
 			for (j = 0; j < fieldCount; j++) {
+				if ( j > 0 ) {
+					buffer.append(delimiter);
+				}
 				if (line[j].indexOf(delimiter) > -1) {
 					line[j] = "\"" + line[j] + "\"";
 				}
 				buffer.append(line[j]);
-				if (j < (fieldCount - 1)) {
-					buffer.append(delimiter);
-				}
 			}
 
 			out.println(buffer.toString());
 		}
-		out.flush();
-		out.close();
-		out = null;
 	}
 	catch (Exception e) {
+		throw e;
+	}
+	finally {
 		if (out != null) {
 			out.flush();
 			out.close();
 		}
-		out = null;
-		throw e;
 	}
 }
 
-} // End StateMod_StreamGage
+}

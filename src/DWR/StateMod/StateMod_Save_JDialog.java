@@ -600,7 +600,7 @@ throws Exception {
 			break;
 		case StateMod_DataSet.COMP_STREAMGAGE_STATIONS:
 			StateMod_StreamGage.writeStateModFile(oldFilename,
-				newFilename, (List)data, comments, daily);
+				newFilename, (List)data, StringUtil.toList(comments), daily);
 			name = "Streamgage Stations";
 			break;
 		case StateMod_DataSet.COMP_WELL_STATIONS:
