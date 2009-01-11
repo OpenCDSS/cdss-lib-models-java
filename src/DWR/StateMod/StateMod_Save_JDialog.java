@@ -59,7 +59,7 @@ import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 
 /**
-This GUI displays a list of all the data set components that have been changed
+This dialog displays a list of all the data set components that have been changed
 and prompts the user to select the ones that should be saved.
 */
 public class StateMod_Save_JDialog extends JDialog
@@ -115,13 +115,14 @@ private StateMod_Save_TableModel __tableModel;
 Constructor.
 @param parent the JFrame on which to display this dialog.  Must not be null.
 @param dataset the dataset that is being worked with.
+@param datasetWindowManager the window manager that is managing this window.
 */
-public StateMod_Save_JDialog (	JFrame parent, StateMod_DataSet dataset,
-				StateMod_DataSet_WindowManager dataset_wm )
+public StateMod_Save_JDialog ( JFrame parent, StateMod_DataSet dataset,
+				StateMod_DataSet_WindowManager datasetWindowManager )
 {	super(parent, "Save Modified StateMod Files", true);
 
 	__dataset = dataset;
-	__dataset_wm = dataset_wm;
+	__dataset_wm = datasetWindowManager;
 	__parent = parent;
 
 	setupGUI();
@@ -140,21 +141,19 @@ public void actionPerformed(ActionEvent ae) {
 	else if (action.equals(__BUTTON_SAVE)) {
 		if ( saveData () ) {
 			if ( __dataset_wm != null ) {
-				__dataset_wm.updateWindowStatus (
-				StateMod_DataSet_WindowManager.WINDOW_MAIN );
+				__dataset_wm.updateWindowStatus ( StateMod_DataSet_WindowManager.WINDOW_MAIN );
 			}
 			closeWindow();
 		}
 	}
 	else if (action.equals(__BUTTON_HELP)) {
-		// REVISIT HELP (JTS - 2003-09-10)
+		// TODO HELP (JTS - 2003-09-10)
 	}
 }
 
 /**
 Checks the data for validity before saving.
-@return 0 if the text fields are okay, 1 if fatal errors exist, and -1 if only
-non-fatal errors exist.
+@return 0 if the text fields are okay, 1 if fatal errors exist, and -1 if only non-fatal errors exist.
 */
 private int checkInput()
 {	String routine = "StateMod_Save_JDialog.checkInput";
@@ -163,7 +162,7 @@ private int checkInput()
 	int fatal_count = 0;
 
 	/*
-	// REVISIT - need to make sure that if a component file name has changed
+	// TODO - need to make sure that if a component file name has changed
 	// that the response file is forced to be saved???  This may require
 	// that the data set maintain an original copy of itself after creation
 
@@ -175,18 +174,19 @@ private int checkInput()
 	*/
 
 	if ( warning.length() > 0 ) {
-		warning = "\nResponse file:  " +
-			warning + "\nCorrect or Cancel.";
+		warning = "\nResponse file:  " + warning + "\nCorrect or Cancel.";
 		Message.printWarning ( 1, routine, warning );
 		if ( fatal_count > 0 ) {
 			// Fatal errors...
 			return 1;
 		}
-		else {	// Nonfatal errors...
+		else {
+			// Nonfatal errors...
 			return -1;
 		}
 	}
-	else {	// No errors...
+	else {
+		// No errors...
 		return 0;
 	}
 }
@@ -229,11 +229,11 @@ private boolean saveData()
 	int comp_type;
 	DataSetComponent comp = null;
 	int error_count = 0;	// Counter for save errors.
-	String newFilename0 = null;	// Used withing path
+	String newFilename0 = null;	// Used within path
 	String newFilename = null;
 	String oldFilename = null;
 	String [] comments = null;
-	// REVISIT - add a checkbox to the display.
+	// TODO - add a checkbox to the display.
 	//if ( __add_revision_comments_JCheckBox.isSelected() ) {
 	if (__updateCheckbox.isSelected()) {
 		comments = new String[2];
@@ -241,8 +241,7 @@ private boolean saveData()
 	else {
 		comments = new String[1];
 	}
-	comments[0] = "Modification to data made interactively by "
-		+ "user with " + IOUtil.getProgramName() + " " 
+	comments[0] = "Modification to data made interactively by user with " + IOUtil.getProgramName() + " " 
 		+ IOUtil.getProgramVersion();
 	
 	if (__updateCheckbox.isSelected()) {
@@ -250,10 +249,10 @@ private boolean saveData()
 	}
 	//}
 	for (int i = 0; i < selectedRows.length; i++) {	
-		try {	comp_type = __tableModel.getRowComponentNum(i);
+		try {
+			comp_type = __tableModel.getRowComponentNum(i);
 		
-			comp = (DataSetComponent)
-			__dataset.getComponentForComponentType( comp_type );
+			comp = (DataSetComponent)__dataset.getComponentForComponentType( comp_type );
 			newFilename0 = comp.getDataFileName();
 			newFilename = __dataset.getDataFilePathAbsolute(comp);
 
@@ -267,62 +266,45 @@ private boolean saveData()
 			if ( comp_type == StateMod_DataSet.COMP_RESPONSE ) {
 				boolean free_format = true;
 				if ( !__dataset.isFreeFormat() ) {
-					int response =
-					new ResponseJDialog(this, 
-					"Save as free format?",
-					"The original response file was not " +
-					"free-format.\n" +
-					"The new free-format file is easier to"+
-					" maintain.\n" +
-					"Do you want to save the response file"+
-					" as free format (No to use " +
-					"fixed-format)?",
-					ResponseJDialog.YES |
-					ResponseJDialog.NO |
-					ResponseJDialog.CANCEL ).response();
+					int response = new ResponseJDialog(this, "Save as free format?",
+					"The original response file was not free-format.\n" +
+					"The new free-format file is easier to maintain.\n" +
+					"Do you want to save the response file as free format (No to use fixed-format)?",
+					ResponseJDialog.YES | ResponseJDialog.NO | ResponseJDialog.CANCEL ).response();
 					if (response == ResponseJDialog.CANCEL){
-						// Go to next file in the
-						// loop...
+						// Go to next file in the loop...
 						continue;
 					}
 					if ( response == ResponseJDialog.NO ) {
 						free_format = false;
 					}
 				}
-				// REVISIT - need to track the original file
-				// name...
+				// TODO - need to track the original file name...
 				StateMod_DataSet.writeStateModFile (
-					__dataset, oldFilename, newFilename, 
-					comments, free_format );
-				// Now indicate whether the current data set is
-				// free format...
+					__dataset, oldFilename, newFilename, comments, free_format );
+				// Now indicate whether the current data set is free format...
 				__dataset.setFreeFormat ( free_format );
 				// Mark the component clean...
 				comp.setDirty ( false );
 			}
 			else if ( newFilename0.length() == 0 ) {
 				// SAM 2006-03-04...
-				// Just set to not dirty.  If someone sets a
-				// filename to blank and actually makes changes,
-				// they don't know what they are doing.
+				// Just set to not dirty.  If someone sets a filename to blank and actually makes
+				// changes, they don't know what they are doing.
 				comp.setDirty ( false );
 			}
 			else if ( newFilename0.length() > 0 ) {
 				try {
-					saveComponent(comp, oldFilename, 
-						newFilename, comments);
+					saveComponent(comp, oldFilename, newFilename, comments);
 				}
 				catch (Exception e) {
-					Message.printWarning(1, routine, 
-						"Error saving file '"
-						+ newFilename + "'");
+					Message.printWarning(1, routine, "Error saving file \"" + newFilename + "\"");
 					Message.printWarning(2, routine, e);
 				}
 			}
 		}
 		catch ( Exception e ) {
-			Message.printWarning ( 1, routine,
-			"Error saving " + comp.getComponentName() +
+			Message.printWarning ( 1, routine, "Error saving " + comp.getComponentName() +
 			" to \"" + newFilename + "\"" );
 			Message.printWarning ( 2, routine, e );
 			++error_count;
@@ -332,7 +314,8 @@ private boolean saveData()
 	if ( error_count > 0 ) {
 		return false;
 	}
-	else {	return true;
+	else {
+		return true;
 	}
 }
 
@@ -360,9 +343,9 @@ private void setupGUI() {
 
 	int[] widths = null;
 	JScrollWorksheet jsw = null;
-	try {	__tableModel = new StateMod_Save_TableModel(__dataset);
-		StateMod_Save_CellRenderer crr = new
-			StateMod_Save_CellRenderer(__tableModel);
+	try {
+		__tableModel = new StateMod_Save_TableModel(__dataset);
+		StateMod_Save_CellRenderer crr = new StateMod_Save_CellRenderer(__tableModel);
 	
 		jsw = new JScrollWorksheet(crr, __tableModel, p);
 		__worksheet = jsw.getJWorksheet();
@@ -389,25 +372,21 @@ private void setupGUI() {
 
 	JPanel panel = new JPanel();
 	panel.setLayout(new GridBagLayout());
-	JGUIUtil.addComponent(panel, 
-		new JLabel("Data from the following files have been modified."),
+	JGUIUtil.addComponent(panel, new JLabel("Data from the following files have been modified."),
 		0, 0, 2, 1, 1, 1,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.NORTHWEST);
 	JGUIUtil.addComponent(panel, 
-		new JLabel("Select files to be saved and press the \"Save "
-			+ "Selected Files\" button."),
+		new JLabel("Select files to be saved and press the \"Save Selected Files\" button."),
 		0, 1, 2, 1, 1, 1,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.NORTHWEST);
 	JGUIUtil.addComponent(panel,
-		new JLabel("To change the filenames, use the Data..."
-			+ "Control...Response menu"),
+		new JLabel("To change the filenames, use the Data...Control...Response menu"),
 		0, 2, 2, 1, 1, 1,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.NORTHWEST);
-	JGUIUtil.addComponent(panel, new JLabel(
-		"Data set base name (from *.rsp):  "),
+	JGUIUtil.addComponent(panel, new JLabel( "Data set base name (from *.rsp):  "),
 		0, 3, 1, 1, 0, 0,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.NORTHEAST);
@@ -419,8 +398,7 @@ private void setupGUI() {
 		0, 4, 1, 1, 0, 0,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.NORTHEAST);
-	JGUIUtil.addComponent(panel, 
-		new JLabel(__dataset.getDataSetDirectory()),
+	JGUIUtil.addComponent(panel, new JLabel(__dataset.getDataSetDirectory()),
 		1, 4, 1, 1, 1, 1,
 		0, 0, 0, 0,
 		GridBagConstraints.BOTH, GridBagConstraints.NORTHWEST);		
@@ -430,8 +408,7 @@ private void setupGUI() {
 		0, 6, 1, 1, 0, 0,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.NORTHEAST);		
-	JGUIUtil.addComponent(panel, 
-		new JLabel("Carry forward old file comments?"),
+	JGUIUtil.addComponent(panel, new JLabel("Carry forward old file comments?"),
 		1, 6, 1, 1, 0, 0,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.NORTHWEST);		
@@ -474,8 +451,7 @@ Responds to Window closed events; does nothing.
 public void windowClosed(WindowEvent e) {}
 
 /**
-Responds to Window closing events; closes the window and marks it closed
-in StateMod_GUIUtil.
+Responds to Window closing events; closes the window and marks it closed in StateMod_GUIUtil.
 @param e the WindowEvent that happened.
 */
 public void windowClosing(WindowEvent e) {
@@ -512,8 +488,7 @@ Responds to Window opening events; does nothing.
 */
 public void windowOpening(WindowEvent e) {}
 
-private void saveComponent(DataSetComponent comp, String oldFilename,
-String newFilename, String[] comments) 
+private void saveComponent(DataSetComponent comp, String oldFilename,String newFilename, String[] comments) 
 throws Exception {
 	boolean daily = false;
 	int type = comp.getComponentType();
@@ -524,20 +499,17 @@ throws Exception {
 	////////////////////////////////////////////////////////
 	// StateMod_* classes
 		case StateMod_DataSet.COMP_CONTROL:
-			StateMod_DataSet.writeStateModControlFile(__dataset,
-				oldFilename, newFilename, comments);
+			StateMod_DataSet.writeStateModControlFile(__dataset, oldFilename, newFilename, comments);
 			name = "Control";
 			break;
 		case StateMod_DataSet.COMP_DELAY_TABLES_DAILY:
 			StateMod_DelayTable.writeStateModFile(oldFilename,
-				newFilename, (List)data, comments,
-				__dataset.getInterv());
+				newFilename, (List)data, comments, __dataset.getInterv());
 			name = "Delay Tables Daily";
 			break;
 		case StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY:
 			StateMod_DelayTable.writeStateModFile(oldFilename,
-				newFilename, (List)data, comments,
-				__dataset.getInterv());
+				newFilename, (List)data, comments, __dataset.getInterv());
 			name = "Delay Tables Monthly";
 			break;
 		case StateMod_DataSet.COMP_DIVERSION_STATIONS:
@@ -557,14 +529,12 @@ throws Exception {
 			break;
 		case StateMod_DataSet.COMP_INSTREAM_RIGHTS:
 			StateMod_InstreamFlowRight.writeStateModFile(
-				oldFilename, newFilename, (List)data, 
-				comments);
+				oldFilename, newFilename, (List)data, comments);
 			name = "Instream Rights";
 			break;
 		case StateMod_DataSet.COMP_OPERATION_RIGHTS:
 			StateMod_OperationalRight.writeStateModFile(
-				oldFilename, newFilename, (List)data, 
-				comments);
+				oldFilename, newFilename, (List)data, comments);
 			name = "Operational Rights";
 			break;
 		case StateMod_DataSet.COMP_RESERVOIR_STATIONS:
@@ -594,8 +564,7 @@ throws Exception {
 			break;
 		case StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS:
 			StateMod_StreamEstimate_Coefficients.writeStateModFile(
-				oldFilename, newFilename, (List)data, 
-				comments);
+				oldFilename, newFilename, (List)data, StringUtil.toList(comments) );
 			name = "Stream Estimate Coefficients";
 			break;
 		case StateMod_DataSet.COMP_STREAMGAGE_STATIONS:
@@ -609,8 +578,7 @@ throws Exception {
 			name = "Well";
 			break;
 		case StateMod_DataSet.COMP_PLANS:
-			StateMod_Plan.writeStateModFile(oldFilename,
-				newFilename, (List)data, comments);
+			StateMod_Plan.writeStateModFile(oldFilename, newFilename, (List)data, comments);
 			name = "Plan";
 			break;
 		case StateMod_DataSet.COMP_WELL_RIGHTS:
@@ -621,10 +589,8 @@ throws Exception {
 
 	//////////////////////////////////////////////////////
 	// StateMod Time Series
-		case StateMod_DataSet
-			.COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_DAILY:
-		case StateMod_DataSet
-			.COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_MONTHLY:
+		case StateMod_DataSet.COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_DAILY:
+		case StateMod_DataSet.COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_MONTHLY:
 		case StateMod_DataSet.COMP_DEMAND_TS_DAILY:
 		case StateMod_DataSet.COMP_DEMAND_TS_AVERAGE_MONTHLY:
 		case StateMod_DataSet.COMP_DEMAND_TS_MONTHLY:
@@ -669,8 +635,7 @@ throws Exception {
 			}
 			
 			StateMod_TS.writeTimeSeriesList(oldFilename,
-				newFilename, comments, (List)data, null, null,
-				year, missing, precision);
+				newFilename, comments, (List)data, null, null, year, missing, precision);
 			name = "TS (" + type + ")";
 			break;
 
@@ -682,8 +647,7 @@ throws Exception {
 	Message.printStatus(1, "", "Component '" + name + "' written");
 }
 
-// REVISIT SAM 2006-08-22
-// Why are these here?
+// TODO SAM 2006-08-22 Why are these here?
 /*
 public static final int   COMP_OUTPUT_REQUEST = 3;
 public final static int   COMP_SOIL_MOISTURE = 26;

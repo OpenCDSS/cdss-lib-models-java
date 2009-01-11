@@ -103,21 +103,48 @@ import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 
-public class StateMod_StreamEstimate_Coefficients 
-extends StateMod_Data 
-implements Cloneable, StateMod_Component {
+// FIXME SAM 2009-01-11 Need to remove N and M data members - they are redundant with the size of the
+// lists, which can lead to inconsistencies.
 
-// REVISIT - why is this needed?
+public class StateMod_StreamEstimate_Coefficients extends StateMod_Data 
+implements Cloneable, StateMod_Component
+{
+
+// TODO SAM 2009-01-05 Why is this needed?  Apparently for the table model for setting data?
 public static final int MAX_BASEFLOWS = 15;
 
-protected String 	_flowX;	// node where flow is to be estimated
-protected int		_N;	// number of stations upstream X
-protected List	_coefn;	// double - factors to weight the gaged flow
-protected List	_upper;	// String - station id upstream X
-protected double	_proratnf;	// factor to distribute the gain
-protected int		_M;	// number of stations used to calc the gain
-protected List	_coefm;	// double - factors to weight the flow for gain
-protected List	_flowm;	// String - station id upstream X
+/**
+Node where flow is to be estimated.
+*/
+protected String _flowX;
+/**
+Number of stations upstream X.
+*/
+protected int _N;
+/**
+Factors to weight the gaged flow (Double).
+*/
+protected List _coefn;
+/**
+Station ids upstream X.
+*/
+protected List _upper;
+/**
+Factor to distribute the gain.
+*/
+protected double _proratnf;
+/**
+Number of stations used to calculate the gain.
+*/
+protected int _M;
+/**
+Factors to weight the flow for gain (Double).
+*/
+protected List _coefm;
+/**
+Station ids upstream X
+*/
+protected List _flowm;
 	
 /**
 Constructor.
@@ -207,8 +234,7 @@ public boolean changed() {
 public String[] checkComponentData( int count, 
 StateMod_DataSet dataset, PropList props ) 
 {
-	// TODO KAT 2007-04-16
-	// add specific checks here
+	// TODO KAT 2007-04-16 add specific checks here
 	return null;
 }
 
@@ -217,8 +243,7 @@ Clones the data object.
 @return a cloned object.
 */
 public Object clone() {
-	StateMod_StreamEstimate_Coefficients c 
-		= (StateMod_StreamEstimate_Coefficients)super.clone();
+	StateMod_StreamEstimate_Coefficients c = (StateMod_StreamEstimate_Coefficients)super.clone();
 	c._isClone = true;
 	// Copy contents of lists...
 	c._coefn = new Vector(_coefn.size());
@@ -252,8 +277,7 @@ public int compareTo(Object o) {
 		return res;
 	}
 
-	StateMod_StreamEstimate_Coefficients c 
-		= (StateMod_StreamEstimate_Coefficients)o;
+	StateMod_StreamEstimate_Coefficients c = (StateMod_StreamEstimate_Coefficients)o;
 
 	res = _flowX.compareTo(c._flowX);
 	if (res != 0) {
@@ -405,8 +429,7 @@ public int compareTo(Object o) {
 }
 
 /**
-Creates a copy of the object for later use in checking to see if it was 
-changed in a GUI.
+Creates a copy of the object for later use in checking to see if it was changed in a GUI.
 */
 public void createBackup() {
 	_original = clone();
@@ -461,8 +484,7 @@ Returns the data column header for the specifically checked data.
  */
 public static String[] getDataHeader()
 {
-	// TODO KAT 2007-04-16 
-	// When specific checks are added to checkComponentData
+	// TODO KAT 2007-04-16 When specific checks are added to checkComponentData
 	// return the header for that data here
 	return new String[] {};
 }
@@ -510,14 +532,14 @@ public double getProratnf() {
 }
 
 /**
-Retrun the upper id corresponding to a particular index.
+Return the upper id corresponding to a particular index.
 */
 public String getUpper(int index) {
 	return (String)_upper.get(index);
 }
 
 /**
-Retrun the upper id corresponding to a particular index.
+Return the upper id corresponding to a particular index.
 */
 public List getUpper() {
 	return _upper;
@@ -543,8 +565,7 @@ Cancels any changes made to this object within a GUI since createBackup()
 was called and sets _original to null.
 */
 public void restoreOriginal() {
-	StateMod_StreamEstimate_Coefficients c 
-		= (StateMod_StreamEstimate_Coefficients)_original;
+	StateMod_StreamEstimate_Coefficients c = (StateMod_StreamEstimate_Coefficients)_original;
 	super.restoreOriginal();
 	_flowX = c._flowX;
 	_N = c._N;
@@ -680,14 +701,14 @@ public void setM(int i) {
 }
 
 /**
-Set the number of stations used to calc the gain.
+Set the number of stations used to calculate the gain.
 */
 public void setM(Integer i) {
 	setM(i.intValue());
 }
 
 /**
-Set the number of stations used to calc the gain.
+Set the number of stations used to calculate the gain.
 */
 public void setM(String str) {
 	if (str != null) {
@@ -786,9 +807,7 @@ the same, or null if not found.
 @param baseflow Vector of StateMod_BaseFlowCoefficients data.
 @param id Baseflow node identifier to locate.
 */
-public static StateMod_StreamEstimate_Coefficients
-		locateBaseNode(List baseflow, 
-String id) {
+public static StateMod_StreamEstimate_Coefficients locateBaseNode(List baseflow, String id) {
 	int index = StateMod_Util.locateIndexFromID(id, baseflow);
 	if (index < 0) {
 		return null;
@@ -797,9 +816,9 @@ String id) {
 }
 
 /**
-Read stream estimate coefficients and store in a Vector.
+Read stream estimate coefficients and store in a list.
 @param filename Name of file to read.
-@return Vector of baseflow data
+@return list of streamflow estimate coefficients data
 @exception Exception if there is an error reading the file.
 */
 public static List readStateModFile(String filename)
@@ -810,30 +829,38 @@ throws Exception {
 	String iline = null;
 	List v = new Vector(2);	// used to retrieve from fixedRead
 	String adnl = null;
-	int [] format_0 = {	StringUtil.TYPE_STRING,
-				StringUtil.TYPE_SPACE,
-				StringUtil.TYPE_INTEGER };
-	int [] format_0w = {	12,
-				8,
-				8 };
-	int [] format_1 = {	StringUtil.TYPE_DOUBLE,
-				StringUtil.TYPE_SPACE,
-				StringUtil.TYPE_STRING };
-	int [] format_1w = {	8,
-				1,
-				12 };
-	int [] format_2 = {	StringUtil.TYPE_SPACE,
-				StringUtil.TYPE_DOUBLE,
-				StringUtil.TYPE_INTEGER };
-	int [] format_2w = {	12,
-				8,
-				8 };
-	int [] format_3 = {	StringUtil.TYPE_DOUBLE,
-				StringUtil.TYPE_SPACE,
-				StringUtil.TYPE_STRING };
-	int [] format_3w = {	8,
-				1,
-				12 };
+	int [] format_0 = {
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_SPACE,
+		StringUtil.TYPE_INTEGER };
+	int [] format_0w = {
+		12,
+		8,
+		8 };
+	int [] format_1 = {
+		StringUtil.TYPE_DOUBLE,
+		StringUtil.TYPE_SPACE,
+		StringUtil.TYPE_STRING };
+	int [] format_1w = {
+		8,
+		1,
+		12 };
+	int [] format_2 = {
+		StringUtil.TYPE_SPACE,
+		StringUtil.TYPE_DOUBLE,
+		StringUtil.TYPE_INTEGER };
+	int [] format_2w = {
+		12,
+		8,
+		8 };
+	int [] format_3 = {
+		StringUtil.TYPE_DOUBLE,
+		StringUtil.TYPE_SPACE,
+		StringUtil.TYPE_STRING };
+	int [] format_3w = {
+		8,
+		1,
+		12 };
 	BufferedReader in = null;
 	StateMod_StreamEstimate_Coefficients aBaseflow = null;
 	int i = 0;
@@ -877,8 +904,7 @@ throws Exception {
 				begin_pos = 28 +(i * 21);
 				end_pos = begin_pos + 21;
 				adnl = iline.substring(begin_pos, end_pos);
-				StringUtil.fixedRead(adnl, format_1,
-					format_1w, v);
+				StringUtil.fixedRead(adnl, format_1, format_1w, v);
 				aBaseflow.addCoefn((Double)v.get(0));
 				aBaseflow.addUpper((String)v.get(1));
 			}
@@ -894,8 +920,7 @@ throws Exception {
 				begin_pos = 28 +(i * 21);
 				end_pos = begin_pos + 21;
 				adnl = iline.substring(begin_pos, end_pos);
-				StringUtil.fixedRead(adnl, format_3,
-					format_3w, v);
+				StringUtil.fixedRead(adnl, format_3, format_3w, v);
 				aBaseflow.addCoefm((Double)v.get(0));
 				aBaseflow.addFlowm((String)v.get(1));
 			}
@@ -905,45 +930,16 @@ throws Exception {
 		}
 	}
 	catch (Exception e) {
-		Message.printWarning(2, routine, "Error reading near line "
-			+ linecount);
-		routine = null;
-		iline = null;
-		v = null;	// used to retrieve from fixedRead
-		adnl = null;
-		format_0 = null;
-		format_0w = null;
-		format_1 = null;
-		format_1w = null;
-		format_2 = null;
-		format_2w = null;
-		format_3 = null;
-		format_3w = null;
+		Message.printWarning(3, routine, "Error reading near line " + linecount);
+		Message.printWarning(3, routine, e);
+		throw e;
+	}
+	finally {
 		if (in != null) {
 			in.close();
 		}
 		in = null;
-		aBaseflow = null;
-		Message.printWarning(2, routine, e);
-		throw e;
 	}
-	routine = null;
-	iline = null;
-	v = null;	// used to retrieve from fixedRead
-	adnl = null;
-	format_0 = null;
-	format_0w = null;
-	format_1 = null;
-	format_1w = null;
-	format_2 = null;
-	format_2w = null;
-	format_3 = null;
-	format_3w = null;
-	if (in != null) {
-		in.close();
-	}
-	in = null;
-	aBaseflow = null;
 	return theBaseflows;
 }
 
@@ -951,108 +947,70 @@ throws Exception {
 Write stream estimate station coefficients to output.  History header
 information is also maintained by calling this routine.
 @param infile input file from which previous history should be taken
-@param outfile output file to which to write
-@param theBaseflows vector of baseflow to print
+@param outfile output file to write
+@param theBaseflows list of baseflow coefficients to print
 @param newComments addition comments which should be included in history
 @exception Exception if an error occurs.
 */
-public static void writeStateModFile(String infile, String outfile,
-		List theBaseflows, String[] newComments)
+public static void writeStateModFile(String infile, String outfile,	List theBaseflows, List newComments)
 throws Exception {
-	String routine =
-		"StateMod_StreamStation_Coefficients.writeStateModFile";
-	String [] comment_str = { "#" };
-	String [] ignore_str = { "#>" };
+	String routine = "StateMod_StreamStation_Coefficients.writeStateModFile";
+	List commentIndicators = new Vector(1);
+	commentIndicators.add ( "#" );
+	List ignoredCommentIndicators = new Vector(1);
+	ignoredCommentIndicators.add ( "#>");
 	PrintWriter out = null;
 
-	Message.printStatus(1, routine, 
-		"Writing new stream estimate station coefficients to file \"" +
+	Message.printStatus(2, routine, "Writing stream estimate station coefficients to file \"" +
 			outfile + "\" using \"" + infile + "\" header...");
 
 	try {	
-	out = IOUtil.processFileHeaders(
-		IOUtil.getPathUsingWorkingDir(infile),
-		IOUtil.getPathUsingWorkingDir(outfile), 
-		newComments, comment_str, ignore_str, 0);
+		out = IOUtil.processFileHeaders( IOUtil.getPathUsingWorkingDir(infile),
+			IOUtil.getPathUsingWorkingDir(outfile), 
+			newComments, commentIndicators, ignoredCommentIndicators, 0);
+	
+		String cmnt = "#>";
+		String iline = null;
+		StateMod_StreamEstimate_Coefficients bf = null;
+		String format_1 = "%-12.12s        %8d";
+		String format_2 = "%8.3f %-12.12s";
+		String format_3 = "            %8.3f%8d";
+		List v = new Vector(2);
 
-	String cmnt = "#>";
-	String iline = null;
-	StateMod_StreamEstimate_Coefficients bf = null;
-	String format_1 = "%-12.12s        %8d";
-	String format_2 = "%8.3f %-12.12s";
-	String format_3 = "            %8.3f%8d";
-	List v = new Vector(2);
-
-		out.println(cmnt 
-			+ "---------------------------------------------" 
-			+ "------------------------------");
-		out.println(cmnt +"  Stream Estimate Station Coefficient Data");
+		out.println(cmnt + "---------------------------------------------------------------------------");
+		out.println(cmnt +"  StateMod Stream Estimate Station Coefficient Data");
 		out.println(cmnt);
-		out.println(cmnt 
-			+ "  FlowX = (FlowB(1)*coefB(1) + FlowG(2)*coefB(2) "
-			+ "+ ...)+");
-		out.println(cmnt 
-			+ "          pf * (FlowG(1)*coefG(1) + FlowG(2)*"
-			+ "coefG(2) + ...)+");
+		out.println(cmnt + "  FlowX = (FlowB(1)*coefB(1) + FlowG(2)*coefB(2) + ...)+");
+		out.println(cmnt + "          pf * (FlowG(1)*coefG(1) + FlowG(2)*coefG(2) + ...)+");
 		out.println(cmnt);
 		out.println(cmnt + "  where:");
 		out.println(cmnt);
-		out.println(cmnt 
-			+ "  FlowX = Flow at intermediate node to be "
-			+ "estimated.");
-		out.println(cmnt 
-			+ "  FlowB =   Estimate flow station(s).");
-		out.println(cmnt 
-			+ "  FlowG =   Gain flow station(s).");
+		out.println(cmnt + "  FlowX = Flow at intermediate node to be estimated.");
+		out.println(cmnt + "  FlowB =   Estimate flow station(s).");
+		out.println(cmnt + "  FlowG =   Gain flow station(s).");
 		out.println(cmnt);
-		out.println(cmnt 
-			+ "     pf = Proration factor for gain term.");
-		out.println(cmnt 
-			+ "  coefB =   Estimate flow coefficient.");
-		out.println(cmnt 
-			+ "  coefG =   Gain flow coefficient.");
+		out.println(cmnt + "     pf = Proration factor for gain term.");
+		out.println(cmnt + "  coefB =   Estimate flow coefficient.");
+		out.println(cmnt + "  coefG =   Gain flow coefficient.");
 		out.println(cmnt);
-		out.println(cmnt 
-			+ "  Card 1 format (a12, 8x, i8, 10(f8.3,1x,a12)");
+		out.println(cmnt + "  Card 1 format (a12, 8x, i8, 10(f8.3,1x,a12)");
 		out.println(cmnt);
-		out.println(cmnt 
-			+ "       FlowX:  Node where flow is to be estimated");
-		out.println(cmnt 
-			+ "       Mbase:  Number of base stations to follow");
-		out.println(cmnt 
-			+ "       coefB:  Estimate flow coefficient");
-		out.println(cmnt 
-			+ "       FlowB:  Estimate station ID");
+		out.println(cmnt + "       FlowX:  Node where flow is to be estimated");
+		out.println(cmnt + "       Mbase:  Number of base stations to follow");
+		out.println(cmnt + "       coefB:  Estimate flow coefficient");
+		out.println(cmnt + "       FlowB:  Estimate station ID");
 		out.println(cmnt);
-		out.println(cmnt 
-			+ "  Card 2 format (12x, f8.2, i8, 10(f8.3,1x,a12)");
+		out.println(cmnt + "  Card 2 format (12x, f8.2, i8, 10(f8.3,1x,a12)");
 		out.println(cmnt);
-		out.println(cmnt 
-			+ "          pf:  Proration factor for gain term.");
-		out.println(cmnt 
-			+ "       nbase:  Number of gain stations to follow");
-		out.println(cmnt 
-			+ "       coefG:  Gain flow coefficient.");
-		out.println(cmnt 
-			+ "       FlowG:  Gaged flow stations used " 
-			+ "to calculate gain");
+		out.println(cmnt + "          pf:  Proration factor for gain term.");
+		out.println(cmnt + "       nbase:  Number of gain stations to follow");
+		out.println(cmnt + "       coefG:  Gain flow coefficient.");
+		out.println(cmnt + "       FlowG:  Gaged flow stations used to calculate gain");
 		out.println(cmnt);
-		out.println(cmnt 
-			+ " FlowX              mbase   coefB1    FlowB1   " 
-			+ " coefB2    FlowB2    coefB3   FlowB3     " 
-			+ " coefB3    FlowB4     ...");
-		out.println(cmnt 
-			+ "---------exxxxxxxxb------eb------exb----------e" 
-			+ "b------exb----------eb------exb----------e" 
-			+ "b------exb----------e ...");
-		out.println(cmnt 
-			+ "             pf     nbase   coefG1   FlowG1    " 
-			+ " coefG2    FlowG2     coefG3    FlowG3    " 
-			+ " coefG4    FlowG4     ...");
-		out.println(cmnt 
-			+ "xxxxxxxxxxb------eb------eb------exb----------e" 
-			+ "b------exb----------eb------exb----------e" 
-			+ "b------exb----------e ...");
+		out.println(cmnt + " FlowX              mbase   coefB1    FlowB1    coefB2    FlowB2    coefB3   FlowB3      coefB3    FlowB4     ...");
+		out.println(cmnt + "---------exxxxxxxxb------eb------exb----------eb------exb----------eb------exb----------eb------exb----------e ...");
+		out.println(cmnt + "             pf     nbase   coefG1   FlowG1     coefG2    FlowG2     coefG3    FlowG3     coefG4    FlowG4     ...");
+		out.println(cmnt + "xxxxxxxxxxb------eb------eb------exb----------eb------exb----------eb------exb----------eb------exb----------e ...");
 		out.println(cmnt);
 		out.println(cmnt + "EndHeader");
 		out.println(cmnt);
@@ -1062,8 +1020,7 @@ throws Exception {
 			num = theBaseflows.size();
 		}
 		for (int i = 0; i < num; i++) {
-			bf = (StateMod_StreamEstimate_Coefficients)
-				theBaseflows.get(i);
+			bf = (StateMod_StreamEstimate_Coefficients)theBaseflows.get(i);
 			if (bf == null) {
 				continue;
 			}
@@ -1099,29 +1056,22 @@ throws Exception {
 			}
 			out.println();
 		}
-
-	out.flush();
-	out.close();
-	out = null;
-	routine = null;
-	comment_str = null;
-	ignore_str = null;
 	} 
 	catch (Exception e) {
-		if (out != null) {
-			out.close();
-		}
-		out = null;
-		routine = null;
-		comment_str = null;
-		ignore_str = null;
-		Message.printWarning(2, routine, e);
+		Message.printWarning(3, routine, e);
 		throw e;
+	}
+	finally {
+		if ( out != null ) {
+			out.flush();
+			out.close();
+			out = null;
+		}
 	}
 }
 
 /**
-Writes a Vector of StateMod_StreamEstimate_Coefficients objects to a list file. 
+Writes a list of StateMod_StreamEstimate_Coefficients objects to a list file. 
 A header is printed to the top of the file, containing the commands used to 
 generate the file.  Any strings in the body of the file that contain the field 
 delimiter will be wrapped in "...".  
@@ -1129,10 +1079,12 @@ delimiter will be wrapped in "...".
 @param delimiter the delimiter to use for separating field values.
 @param update whether to update an existing file, retaining the current 
 header (true) or to create a new file with a new header.
-@param data the Vector of objects to write.  
+@param data the list of objects to write.
+@param newComments list of new comments to add to the header.
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter, boolean update, List data) 
+public static void writeListFile(String filename, String delimiter, boolean update, List data,
+	List newComments ) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
@@ -1170,24 +1122,36 @@ throws Exception {
 	int N = 0;
 	PrintWriter out = null;
 	StateMod_StreamEstimate_Coefficients coeff = null;
-	String[] commentString = { "#" };
-	String[] ignoreCommentString = { "#>" };
+	List commentIndicators = new Vector(1);
+	commentIndicators.add ( "#" );
+	List ignoredCommentIndicators = new Vector(1);
+	ignoredCommentIndicators.add ( "#>");
 	String[] line = new String[fieldCount];
-	String[] newComments = null;
 	String id = null;
 	StringBuffer buffer = new StringBuffer();
 	
-	try {	
-		out = IOUtil.processFileHeaders(
-			oldFile,
+	try {
+		// Add some basic comments at the top of the file.  Do this to a copy of the
+		// incoming comments so that they are not modified in the calling code.
+		List newComments2 = null;
+		if ( newComments == null ) {
+			newComments2 = new Vector();
+		}
+		else {
+			newComments2 = new Vector(newComments);
+		}
+		newComments2.add(0,"");
+		newComments2.add(1,"StateMod stream estimate coefficients as a delimited list file.");
+		newComments2.add(2,"");
+		out = IOUtil.processFileHeaders( oldFile,
 			IOUtil.getPathUsingWorkingDir(filename), 
-			newComments, commentString, ignoreCommentString, 0);
+			newComments2, commentIndicators, ignoredCommentIndicators, 0);
 
 		for (int i = 0; i < fieldCount; i++) {
-			buffer.append("\"" + names[i] + "\"");
-			if (i < (fieldCount - 1)) {
+			if (i > 0) {
 				buffer.append(delimiter);
 			}
+			buffer.append("\"" + names[i] + "\"");
 		}
 
 		out.println(buffer.toString());
@@ -1203,16 +1167,11 @@ throws Exception {
 			num = M < N ? N : M;
 			
 			for (j = 0; j < num; j++) {
-				line[0] = StringUtil.formatString(id,
-					formats[0]).trim();	
+				line[0] = StringUtil.formatString(id,formats[0]).trim();	
 
 				if (j < N) {
-					line[1] = StringUtil.formatString(
-						coeff.getCoefn(j),
-						formats[1]).trim();
-					line[2] = StringUtil.formatString(
-						coeff.getUpper(j), 
-						formats[2]).trim();
+					line[1] = StringUtil.formatString(coeff.getCoefn(j),formats[1]).trim();
+					line[2] = StringUtil.formatString(coeff.getUpper(j),formats[2]).trim();
 				}
 				else {
 					line[1] = "";
@@ -1220,15 +1179,9 @@ throws Exception {
 				}
 
 				if (j < M) {
-					line[3] = StringUtil.formatString(
-						coeff.getProratnf(), 
-						formats[3]).trim();
-					line[4] = StringUtil.formatString(
-						coeff.getCoefm(j), 
-						formats[4]).trim();
-					line[5] = StringUtil.formatString(
-						coeff.getFlowm(j), 
-						formats[5]).trim();
+					line[3] = StringUtil.formatString(coeff.getProratnf(),formats[3]).trim();
+					line[4] = StringUtil.formatString(coeff.getCoefm(j),formats[4]).trim();
+					line[5] = StringUtil.formatString(coeff.getFlowm(j),formats[5]).trim();
 				}
 				else {
 					line[3] = "";
@@ -1238,13 +1191,13 @@ throws Exception {
 
 				buffer = new StringBuffer();	
 				for (k = 0; k < fieldCount; k++) {
+					if (k > 0) {
+						buffer.append(delimiter);
+					}
 					if (line[k].indexOf(delimiter) > -1) {
 						line[k] = "\"" + line[k] + "\"";
 					}
 					buffer.append(line[k]);
-					if (k < (fieldCount - 1)) {
-						buffer.append(delimiter);
-					}
 				}
 
 				out.println(buffer.toString());
@@ -1255,12 +1208,15 @@ throws Exception {
 		out = null;
 	}
 	catch (Exception e) {
+		// TODO SAM 2009-01-05 Log?
+		throw e;
+	}
+	finally {
 		if (out != null) {
 			out.flush();
 			out.close();
 		}
 		out = null;
-		throw e;
 	}
 }
 

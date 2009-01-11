@@ -647,8 +647,7 @@ throws Exception
 	String routine = "StateMod_StreamEstimate.writeStateModFile";
 
 	if ( Message.isDebugOn ) {
-		Message.printDebug ( 2, routine, 
-		"Writing stream estimate stations to file \"" +
+		Message.printDebug ( 2, routine, "Writing stream estimate stations to file \"" +
 		outfile + "\" using \"" + infile + "\" header..." );
 	}
 
