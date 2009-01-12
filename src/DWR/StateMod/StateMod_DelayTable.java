@@ -865,7 +865,12 @@ throws Exception {
 			newComments2 = new Vector(newComments);
 		}
 		newComments2.add(0,"");
-		newComments2.add(1,"StateMod delay tables as a delimited list file.");
+		if ( comp == StateMod_DataSet.COMP_DELAY_TABLES_DAILY ) {
+			newComments2.add(1,"StateMod delay tables (daily) as a delimited list file.");
+		}
+		else {
+			newComments2.add(1,"StateMod delay tables (monthly) as a delimited list file.");
+		}
 		newComments2.add(2,"");
 		out = IOUtil.processFileHeaders( IOUtil.getPathUsingWorkingDir(oldFile),
 			IOUtil.getPathUsingWorkingDir(filename), 
