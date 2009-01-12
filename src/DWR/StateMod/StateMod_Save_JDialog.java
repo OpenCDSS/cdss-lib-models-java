@@ -504,12 +504,12 @@ throws Exception {
 			break;
 		case StateMod_DataSet.COMP_DELAY_TABLES_DAILY:
 			StateMod_DelayTable.writeStateModFile(oldFilename,
-				newFilename, (List)data, comments, __dataset.getInterv());
+				newFilename, (List)data, StringUtil.toList(comments), __dataset.getInterv(), -1);
 			name = "Delay Tables Daily";
 			break;
 		case StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY:
 			StateMod_DelayTable.writeStateModFile(oldFilename,
-				newFilename, (List)data, comments, __dataset.getInterv());
+				newFilename, (List)data, StringUtil.toList(comments), __dataset.getInterv(), -1);
 			name = "Delay Tables Monthly";
 			break;
 		case StateMod_DataSet.COMP_DIVERSION_STATIONS:

@@ -103,17 +103,17 @@ protected String _units;
 /**
 Indicate whether the delay table is for monthly or daily data.
 */
-protected boolean _is_monthly;
+protected boolean _isMonthly;
 	
 /**
 Constructor.
-@param is_monthly If true, the delay table contains monthly data.  If false, the
+@param isMonthly If true, the delay table contains monthly data.  If false, the
 delay table contains daily data.
 */
-public StateMod_DelayTable ( boolean is_monthly )
+public StateMod_DelayTable ( boolean isMonthly )
 {	super();
 	initialize();
-	_is_monthly = is_monthly;
+	_isMonthly = isMonthly;
 }
 
 /**
@@ -175,8 +175,7 @@ public boolean changed() {
 public String[] checkComponentData( int count, 
 StateMod_DataSet dataset, PropList props ) 
 {
-	// TODO KAT 2007-04-16
-	// add specific checks here
+	// TODO KAT 2007-04-16 add specific checks here
 	return null;
 }
 
@@ -204,8 +203,7 @@ public Object clone() {
 /**
 Compares this object to another StateMod_DelayTable object.
 @param o the object to compare against.
-@return 0 if they are the same, 1 if this object is greater than the other
-object, or -1 if it is less.
+@return 0 if they are the same, 1 if this object is greater than the other object, or -1 if it is less.
 */
 public int compareTo(Object o) {
 	int res = super.compareTo(o);
@@ -213,7 +211,7 @@ public int compareTo(Object o) {
 		return res;
 	}
 
-/*
+/* FIXME SAM 2009-01-11 Determine what to do with this code
 	StateMod_DelayTable dt = (StateMod_DelayTable)_original;
 	
 	Message.printStatus(1, "", "'" + _ndly + "'  '" + dt._ndly + "'");
@@ -258,7 +256,7 @@ public int compareTo(Object o) {
 		return res;
 	}
 
-	if (_is_monthly != d._is_monthly) {
+	if (_isMonthly != d._isMonthly) {
 		return -1;
 	}
 
@@ -305,8 +303,7 @@ public int compareTo(Object o) {
 }
 
 /**
-Creates a copy of the object for later use in checking to see if it was 
-changed in a GUI.
+Creates a copy of the object for later use in checking to see if it was changed in a GUI.
 */
 public void createBackup() {
 	_original = clone();
@@ -330,8 +327,7 @@ Returns the data column header for the specifically checked data.
  */
 public static String[] getDataHeader()
 {
-	// TODO KAT 2007-04-16 
-	// When specific checks are added to checkComponentData
+	// TODO KAT 2007-04-16 When specific checks are added to checkComponentData
 	// return the header for that data here
 	return new String[] {};
 }
@@ -416,7 +412,7 @@ Indicate whether the delay table contains monthly or daily data.
 @return true if the delay table contains monthly data, false if daily.
 */
 public boolean isMonthly ()
-{	return _is_monthly;
+{	return _isMonthly;
 }
 
 /**
@@ -442,7 +438,7 @@ public void restoreOriginal() {
 	_ndly = d._ndly;
 	_ret_val = d._ret_val;
 	_units = d._units;
-	_is_monthly = d._is_monthly;
+	_isMonthly = d._isMonthly;
 
 	_isClone = false;
 	_original = null;
@@ -510,8 +506,7 @@ Set the id.
 public void setTableID(String str) {
 	if (!str.equals(_id)) {
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(
-				StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY, true);
 		}
 		_id = str;
 		// Set the name to the same as the ID...
@@ -527,8 +522,7 @@ public void setUnits(String units) {
 	if (!units.equals(_units)) {
 		if (units != null) {
 			if (!_isClone && _dataset != null) {
-				_dataset.setDirty(
-				StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY, true);
+				_dataset.setDirty(StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY, true);
 			}
 			_units = units;
 		}
@@ -536,9 +530,8 @@ public void setUnits(String units) {
 }
 
 /**
-Returns the value for nrtn to be compared against the interv in the control
-file.  Either a value is returned (if every nrtn is the same) or a -1 is
-returned (variable values for nrtn).
+Returns the value for nrtn to be compared against the interv in the control file.  Either a value
+is returned (if every nrtn is the same) or a -1 is returned (variable values for nrtn).
 */
 /* TODO SAM 2007-03-01 Evaluate use
 private int checkDelayInterv(Vector delaysVector) {
@@ -567,32 +560,26 @@ private int checkDelayInterv(Vector delaysVector) {
 
 /** 
 Read delay information in and store in a java vector.  The new delay entries are
-added to the end of the previously stored delays.  Returns the delay table
-information.
+added to the end of the previously stored delays.  Returns the delay table information.
 @param filename the filename to read from.
-@param is_monthly Set to true if the delay table contains monthly data, false
-if it contains daily data.
+@param isMonthly Set to true if the delay table contains monthly data, false if it contains daily data.
 @param interv The control file interv parameter.  +n indicates the number of
 values in each delay pattern.  -1 indicates variable number of values with
-values as percent (0-100).  -100 indicates variable number of values with values
-as fraction (0-1).
+values as percent (0-100).  -100 indicates variable number of values with values as fraction (0-1).
 */
-public static List readStateModFile (	String filename, boolean is_monthly,
-					int interv )
+public static List readStateModFile ( String filename, boolean isMonthly, int interv )
 throws Exception {
 	String routine = "StateMod_DelayTable.readStateModFile";
 	String iline;
 	List theDelays = new Vector(1);
-	StateMod_DelayTable aDelay = new StateMod_DelayTable ( is_monthly );
-	int num_read=0, total_num_to_read=0;
+	StateMod_DelayTable aDelay = new StateMod_DelayTable ( isMonthly );
+	int numRead=0, totalNumToRead=0;
 	boolean reading=false;
 	BufferedReader in = null;
 	StringTokenizer split = null;
 
 	if (Message.isDebugOn) {
-		Message.printDebug(10, routine, 
-		"in readStateModFile reading file: " 
-		+ filename);
+		Message.printDebug(10, routine, "in readStateModFile reading file: " + filename);
 	}
 	try {	
 		in = new BufferedReader(new FileReader(filename));
@@ -610,8 +597,8 @@ throws Exception {
 
 			if (!reading) {
 				// allocate new delay node
-				aDelay = new StateMod_DelayTable ( is_monthly );
-				num_read = 0;
+				aDelay = new StateMod_DelayTable ( isMonthly );
+				numRead = 0;
 				reading = true;
 				theDelays.add(aDelay);
 				aDelay.setTableID(split.nextToken());
@@ -622,9 +609,8 @@ throws Exception {
 				else {	
 					aDelay.setNdly(interv);
 				}
-				total_num_to_read = aDelay.getNdly();
-				// Set the delay table units(default is
-				// percent)...
+				totalNumToRead = aDelay.getNdly();
+				// Set the delay table units(default is percent)...
 				aDelay.setUnits("PCT");
 				if (interv == -100) {
 					aDelay.setUnits("FRACTION");
@@ -633,37 +619,27 @@ throws Exception {
 
 			while (split.hasMoreTokens()) {
 				aDelay.addRet_val(split.nextToken());
-				num_read++;
+				numRead++;
 			}
-			if (num_read >= total_num_to_read) {
+			if (numRead >= totalNumToRead) {
 				reading = false;
 			}
 		}
 	} catch (Exception e) {
-		routine = null;
-		iline = null;
-		aDelay = null;
-		split = null;
+		Message.printWarning(3, routine, e);
+		throw e;
+	}
+	finally {
 		if (in != null) {
 			in.close();
 		}
 		in = null;
-		Message.printWarning(2, routine, e);
-		throw e;
 	}
-	routine = null;
-	iline = null;
-	aDelay = null;
-	split = null;
-	if (in != null) {
-		in.close();
-	}
-	in = null;
 	return theDelays;
 }
 
 /**
-Scale the delay table by the given value.
+Scale the delay table by the given value.  This is used to convert between percent and fraction.
 @param value Value by which to multiple the delay table values.
 */
 public void scale ( double value )
@@ -673,164 +649,172 @@ public void scale ( double value )
 }
 
 /**
-Write the new (updated) delay table file.  This routine writes the new delay
-table file.  If an original file is specified, then the original header is
-carried into the new file.  The writing of data is done by the dumpDelayFile
-routine which now does not mess with headers.
+Write the new (updated) delay table file.  This routine writes the new delay table file.
+If an original file is specified, then the original header is carried into the new file.
+The writing of data is done by the dumpDelayFile routine which now does not mess with headers.
 @param inputFile old file (used as input)
 @param outputFile new file to create
-@param dly Vector of delays
+@param dly list of delays
 @param newcomments new comments to save with the header of the file
-@param interv interv variabled specified in control file
+@param interv interv variable specified in control file (if negative, include the number
+of entries at the start of each record).
+@param precision number of digits after the decimal to write.  If negative, 2 is assumed.
 @throws Exception if an error occurs
 */
 public static void writeStateModFile(String inputFile, String outputFile,
-		List dly, String []newcomments, int interv)
+		List dly, List newcomments, int interv, int precision )
 throws Exception {
 	PrintWriter	out = null;
-	String [] comment_str = { "#" };
-	String [] ignore_str = { "#>" };
-	String routine = "writeStateModFile";
+	List commentIndicators = new Vector(1);
+	commentIndicators.add ( "#" );
+	List ignoredCommentIndicators = new Vector(1);
+	ignoredCommentIndicators.add ( "#>");
+	String routine = "StateMod_DelayTable.writeStateModFile";
+	if ( precision < 0 ) {
+		precision = 2;
+	}
 
-	Message.printStatus(1, routine, 
-		"Writing new delay table to file \"" + outputFile 
+	Message.printStatus(2, routine, "Writing delay tables to file \"" + outputFile 
 		+ "\" using \"" + inputFile + "\" header...");
 
 	try {	
-	// Process the header from the old file...
-	out = IOUtil.processFileHeaders(inputFile, outputFile,
-		newcomments, comment_str, ignore_str, 0);
-
-	// Now write the new data...
-	String month_del = null;
-	String cmnt="#>";
-	String m_format = "%8.2f";
-	StringBuffer iline = new StringBuffer();
-	StateMod_DelayTable delay = null;
-	List v = new Vector(2);
-
-	out.println(cmnt);
-	out.println(cmnt
-		+ " *******************************************************");
-	out.println(cmnt
-		+ " Delay (Return flow) Table");
-	out.println(cmnt);
-	out.println(cmnt
-		+ "     Format (a8, i4, (12f8.2)");
-	out.println(cmnt);
-	out.println(cmnt
-		+ "   ID       idly: Delay table id");
-	out.println(cmnt
-		+ "   Ndly     ndly: Number of entries in delay table idly.");
-	out.println(cmnt
-		+ "                  Include only if \"interv\" in the");
-	out.println(cmnt
-		+ "                  control file is equal to -1.");
-	out.println(cmnt
-		+ "                  interv = -1 = Variable number of entries");
-	out.println(cmnt
-		+ "                                as percent (0-100)");
-	out.println(cmnt
-		+ "                  interv = -100 = Variable number of " +
-								"entries");
-	out.println(cmnt
-		+ "                                as fraction (0-1)");
-	out.println(cmnt
-		+ "   Ret  dlyrat(1-n,idl): Return for month n, station idl");
-	out.println(cmnt);
-	out.println(cmnt
-		+ " ID   Ndly  Ret1    Ret2    Ret3    Ret4    Ret5    Ret6  " +
-		"  Ret7    Ret8    Ret9    Ret10   Ret11   Ret12");
-	out.println(cmnt
-		+ "-----eb--eb------eb------eb------eb------eb------eb------e" +
-		"b------eb------eb------eb------eb------eb------e..." );
-	out.println(cmnt + "EndHeader");
-	out.println(cmnt);
-
-	int ndly = 0;
-	if (dly != null) {
-		ndly = dly.size();
-	}
-	int num_printed, num_to_print;
-	boolean printing;
-	if (Message.isDebugOn) {
-		Message.printDebug(3, routine, "Printing " + ndly + 
-		" delay table entries.");
-	}
-
-	for (int i = 0; i < ndly; i++) {
-		delay = (StateMod_DelayTable)dly.get(i);
-		num_printed = 0;
-		printing = true;
-
-		// create one delay entry of input
-		if (interv < 0) {
-			v.clear();
-			v.add(delay.getTableID());
-			v.add(new Integer(delay.getNdly()));
+		// Process the header from the old file...
+		out = IOUtil.processFileHeaders(inputFile, outputFile,
+			newcomments, commentIndicators, ignoredCommentIndicators, 0);
+	
+		// Now write the new data...
+		String delayVal = null;
+		String cmnt="#>";
+		String idFormat = "%8.8s"; // Right justify because StateMod actually uses integers
+		String delayValueFormat0 = "%8."; // no precision
+		String delayValueFormat = "%8." + precision + "f";
+		String countFormat = "%4d";
+	
+		out.println(cmnt);
+		out.println(cmnt + " *******************************************************");
+		out.println(cmnt + " StateMod Delay (Return flow) Table");
+		out.println(cmnt);
+		out.println(cmnt + "     Format (a8, i4, (12f8.2)");
+		out.println(cmnt);
+		out.println(cmnt + "   ID       idly: Delay table id");
+		out.println(cmnt + "   Ndly     ndly: Number of entries in delay table idly.");
+		out.println(cmnt + "                  Include only if \"interv\" in the");
+		out.println(cmnt + "                  control file is equal to -1.");
+		out.println(cmnt + "                  interv = -1 = Variable number of entries");
+		out.println(cmnt + "                                as percent (0-100)");
+		out.println(cmnt + "                  interv = -100 = Variable number of entries");
+		out.println(cmnt + "                                as fraction (0-1)");
+		out.println(cmnt + "   Ret  dlyrat(1-n,idl): Return for month n, station idl");
+		out.println(cmnt);
+		out.println(cmnt + " ID   Ndly  Ret1    Ret2    Ret3    Ret4    Ret5    Ret6    Ret7    Ret8    Ret9    Ret10   Ret11   Ret12");
+		out.println(cmnt + "-----eb--eb------eb------eb------eb------eb------eb------eb------eb------eb------eb------eb------eb------e...next line" );
+		out.println(cmnt + "EndHeader");
+		out.println(cmnt);
+	
+		int ndly = 0;
+		if (dly != null) {
+			ndly = dly.size();
 		}
-		else {
-			v.clear();
-			v.add(delay.getTableID());
+		int numWritten, numToWrite;
+		if (Message.isDebugOn) {
+			Message.printDebug(3, routine, "Writing " + ndly + " delay table entries.");
 		}
-
-		while (printing) {
+		StringBuffer iline = new StringBuffer();
+		StateMod_DelayTable delay = null;
+		for (int i = 0; i < ndly; i++) {
+			delay = (StateMod_DelayTable)dly.get(i);
+			// Clear out the string buffer for the new delay table
 			iline.setLength(0);
-			num_to_print = delay.getNdly() - num_printed;
-
-			if (num_to_print > 12) {
-				num_to_print = 12;
-				printing = true;
+			// Create one delay table entry with ID, Nvals, and 12 return values per line.
+			if (interv < 0) {
+				iline.append ( StringUtil.formatString(delay.getTableID(),idFormat));
+				iline.append ( StringUtil.formatString(delay.getNdly(),countFormat));
 			}
-			else {	
-				printing = false;
+			else {
+				iline.append ( StringUtil.formatString(delay.getTableID(),idFormat) );
 			}
-
-			for (int j = 0; j < num_to_print; j++) {
-				v.clear();
-				v.add(new Double(
-					delay.getRet_val(j + num_printed)));
-				month_del = 
-					StringUtil.formatString(v, m_format);
-				iline.append(month_del);
-			}
-			out.println(iline);
-			num_printed += num_to_print;
-		}	
-	}
-	out.flush();
-	out.close();
-	out = null;
-	comment_str = null;
-	ignore_str = null;
-	routine = null;
+			
+			numWritten = 0; // Number of values written for this delay table
+			int numDelayVals = delay.getNdly();
+			while (true) {
+				if ( numWritten > 0 ) {
+					// Clear lines 2+ before adding values
+					iline.setLength(0);
+					// Add spaces as per the record header info
+					if (interv < 0) {
+						iline.append ( "            " );
+					}
+					else {
+						iline.append ( "        " );
+					}
+				}
+				// Number of values remaining to write
+				numToWrite = numDelayVals - numWritten;
+	
+				if (numToWrite > 12) {
+					// Have more than 12 so only write 12 on this line
+					numToWrite = 12;
+				}
+	
+				for (int j = 0; j < numToWrite; j++) {
+					delayVal = StringUtil.formatString(delay.getRet_val(numWritten + j),delayValueFormat);
+					if ( delayVal.indexOf(' ') < 0 ) {
+						// There are no spaces - this will be a problem because the file is free format.
+						// Do a little more work here to reduce the precision until there is a leading
+						// space.
+						for ( int iprecision = precision -1; iprecision >= 0; iprecision-- ) {
+							delayVal = StringUtil.formatString(delay.getRet_val(numWritten + j),
+								delayValueFormat0 + iprecision + ".f");
+							if ( delayVal.indexOf(' ') >= 0 ) {
+								// Done
+								break;
+							}
+						}
+					}
+					iline.append(delayVal);
+				}
+				// Now output the line:
+				
+				out.println(iline);
+				numWritten += numToWrite;
+				if ( numWritten == numDelayVals ) {
+					// Done writing so break out
+					break;
+				}
+			}	
+		}
 	} 
 	catch (Exception e) {
 		if (out != null) {
 			out.close();
 		}
-		out = null;
-		comment_str = null;
-		ignore_str = null;
-		routine = null;
-		Message.printWarning(2, routine, e);
+		Message.printWarning(3, routine, e);
 		throw e;
+	}
+	finally {
+		if ( out != null ) {
+			out.flush();
+			out.close();
+		}
 	}
 }
 
 /**
-Writes a Vector of StateMod_DelayTable objects to a list file.  A header is 
+Writes a list of StateMod_DelayTable objects to a list file.  A header is 
 printed to the top of the file, containing the commands used to generate the 
 file.  Any strings in the body of the file that contain the field delimiter will be wrapped in "...".  
 @param filename the name of the file to which the data will be written.
 @param delimiter the delimiter to use for separating field values.
 @param update whether to update an existing file, retaining the current 
 header (true) or to create a new file with a new header.
-@param data the Vector of objects to write.  
-@param comp the component type being written (to distinguish between daily and monthly delay tables).
+@param data the list of objects to write.
+@param newComments the list of new comments to write to the header, or null if none.
+@param comp the component type being written (to distinguish between daily and monthly delay tables),
+either StateMod_DataSet.COMP_DELAY_TABLES_DAILY or StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY.
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter, boolean update, List data, int comp) 
+public static void writeListFile(String filename, String delimiter, boolean update, List data,
+	List newComments, int comp ) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
@@ -862,18 +846,30 @@ throws Exception {
 	int num = 0;
 	PrintWriter out = null;
 	StateMod_DelayTable delay = null;
-	String[] commentString = { "#" };
-	String[] ignoreCommentString = { "#>" };
-	String[] line = new String[fieldCount];
-	String[] newComments = null;	
+	List commentIndicators = new Vector(1);
+	commentIndicators.add ( "#" );
+	List ignoredCommentIndicators = new Vector(1);
+	ignoredCommentIndicators.add ( "#>");
+	String[] line = new String[fieldCount];	
 	String id = null;
 	StringBuffer buffer = new StringBuffer();
 	
-	try {	
-		out = IOUtil.processFileHeaders(
-			oldFile,
+	try {
+		// Add some basic comments at the top of the file.  Do this to a copy of the
+		// incoming comments so that they are not modified in the calling code.
+		List newComments2 = null;
+		if ( newComments == null ) {
+			newComments2 = new Vector();
+		}
+		else {
+			newComments2 = new Vector(newComments);
+		}
+		newComments2.add(0,"");
+		newComments2.add(1,"StateMod delay tables as a delimited list file.");
+		newComments2.add(2,"");
+		out = IOUtil.processFileHeaders( IOUtil.getPathUsingWorkingDir(oldFile),
 			IOUtil.getPathUsingWorkingDir(filename), 
-			newComments, commentString, ignoreCommentString, 0);
+			newComments2, commentIndicators, ignoredCommentIndicators, 0);
 
 		for (int i = 0; i < fieldCount; i++) {
 			buffer.append("\"" + names[i] + "\"");
@@ -890,22 +886,19 @@ throws Exception {
 			id = delay.getID();
 			num = delay.getNdly();
 			for (j = 0; j < num; j++) {			
-				line[0] = StringUtil.formatString(id, 
-					formats[0]).trim();
-				line[1] = StringUtil.formatString((j + 1),
-					formats[1]).trim();
-				line[2] = StringUtil.formatString(
-					delay.getRet_val(j), formats[2]).trim();
+				line[0] = StringUtil.formatString(id, formats[0]).trim();
+				line[1] = StringUtil.formatString((j + 1), formats[1]).trim();
+				line[2] = StringUtil.formatString( delay.getRet_val(j), formats[2]).trim();
 
 				buffer = new StringBuffer();	
 				for (k = 0; k < fieldCount; k++) {
+					if (k > 0) {
+						buffer.append(delimiter);
+					}
 					if (line[k].indexOf(delimiter) > -1) {
 						line[k] = "\"" + line[k] + "\"";
 					}
 					buffer.append(line[k]);
-					if (k < (fieldCount - 1)) {
-						buffer.append(delimiter);
-					}
 				}
 	
 				out.println(buffer.toString());
@@ -916,13 +909,15 @@ throws Exception {
 		out = null;
 	}
 	catch (Exception e) {
+		// TODO SAM 2009-01-11 Log it?
+		throw e;
+	}
+	finally {
 		if (out != null) {
 			out.flush();
 			out.close();
 		}
-		out = null;
-		throw e;
 	}
 }
 
-} // End StateMod_DelayTable
+}
