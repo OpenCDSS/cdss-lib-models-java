@@ -82,20 +82,34 @@ import RTi.Util.String.StringUtil;
 /**
 This class provides stores all the information associated with a well right.
 */
-
 public class StateMod_WellRight extends StateMod_Data
 implements Cloneable, Comparable, StateMod_Component, StateMod_Right {
 
-private String 	_irtem;		// administration number
-private double	_dcrdivw;	// decreed amount
+/**
+Administration number.
+*/
+private String 	_irtem;
+/**
+Decreed amount.
+*/
+private double	_dcrdivw;
 
 // Parcel data used in processing and relationships to GIS.
 // This work is exploratory and may or may not be part of the
 // official files.
 
-private int __parcel_year;	// Year for parcels
-private String __parcel_id;	// Identifier for parcel
-private int __parcel_match_class; // Well to parcel matching "class"
+/**
+Year for parcels.
+*/
+private int __parcelYear;
+/**
+Identifier for parcel.
+*/
+private String __parcelId;
+/**
+Well to parcel matching "class".
+*/
+private int __parcelMatchClass;
 	
 /**
 Constructor
@@ -120,8 +134,7 @@ Performs specific data checks for StateMod Well Rights.
 @param props List of additional properties for the data test.
 @return List of invalid data.
  */
-public String[] checkComponentData( int count, StateMod_DataSet dataset,
-PropList props) 
+public String[] checkComponentData( int count, StateMod_DataSet dataset, PropList props) 
 {
 	//int pos = 0;			// Position in well station vector
 	//String wes_name = null;		// Well station name
@@ -133,14 +146,11 @@ PropList props)
 	//		StateMod_DataSet.COMP_WELL_STATIONS );
 	//Vector wes_Vector = ( Vector )wes_comp.getData();
 	// Format to two digits to match StateMod output...
-	decree = StringUtil.atod(
-		StringUtil.formatString( wer_i.getDcrdivw(),"%.2f" ) );
+	decree = StringUtil.atod(StringUtil.formatString( wer_i.getDcrdivw(),"%.2f" ) );
 	if ( decree <= 0.0 ) {
-		// Find associated well station for output to print ID
-		// and name...
+		// Find associated well station for output to print ID and name...
 		++count;
-//		pos = StateMod_Util.indexOf( wes_Vector,
-//				wer_i.getCgoto() );
+//		pos = StateMod_Util.indexOf( wes_Vector, wer_i.getCgoto() );
 //		StateMod_Well wes_i = null;
 //		if ( pos >= 0 ) {
 //			wes_i = ( StateMod_Well )wes_Vector.elementAt( pos );
@@ -218,10 +228,8 @@ public void createBackup() {
 
 /**
 Compare two rights Vectors and see if they are the same.
-@param v1 the first Vector of StateMod_WellRight s to check.  Can not
-be null.
-@param v2 the second Vector of StateMod_WellRight s to check.  Can not
-be null.
+@param v1 the first Vector of StateMod_WellRight s to check.  Cannot be null.
+@param v2 the second Vector of StateMod_WellRight s to check.  Cannot be null.
 @return true if they are the same, false if not.
 */
 public static boolean equals(List v1, List v2) {
@@ -236,18 +244,17 @@ public static boolean equals(List v1, List v2) {
 		// sort the Vectors and compare item-by-item.  Any differences
 		// and data will need to be saved back into the dataset.
 		int size = v1.size();
-		Message.printStatus(1, routine, "Vectors are of size: " + size);
+		Message.printStatus(2, routine, "Vectors are of size: " + size);
 		List v1Sort = StateMod_Util.sortStateMod_DataVector(v1);
 		List v2Sort = StateMod_Util.sortStateMod_DataVector(v2);
-		Message.printStatus(1, routine, "Vectors have been sorted");
+		Message.printStatus(2, routine, "Vectors have been sorted");
 	
 		for (int i = 0; i < size; i++) {			
 			r1 = (StateMod_WellRight)v1Sort.get(i);	
 			r2 = (StateMod_WellRight)v2Sort.get(i);	
-			Message.printStatus(1, routine, r1.toString());
-			Message.printStatus(1, routine, r2.toString());
-			Message.printStatus(1, routine, "Element " + i 
-				+ " comparison: " + r1.compareTo(r2));
+			Message.printStatus(2, routine, r1.toString());
+			Message.printStatus(2, routine, r2.toString());
+			Message.printStatus(2, routine, "Element " + i + " comparison: " + r1.compareTo(r2));
 			if (r1.compareTo(r2) != 0) {
 				return false;
 			}
@@ -257,8 +264,7 @@ public static boolean equals(List v1, List v2) {
 }
 
 /**
-Tests to see if two diversion rights are equal.  Strings are compared with
-case sensitivity.
+Tests to see if two diversion rights are equal.  Strings are compared with case sensitivity.
 @param right the right to compare.
 @return true if they are equal, false otherwise.
 */
@@ -267,8 +273,7 @@ public boolean equals(StateMod_WellRight right) {
 	 	return false;
 	}
 	
-	if (	right._irtem.equals(_irtem) 
-		&& right._dcrdivw == _dcrdivw) {
+	if ( right._irtem.equals(_irtem) && right._dcrdivw == _dcrdivw) {
 		return true;
 	}
 	return false;
@@ -288,10 +293,11 @@ Returns the table header for StateMod_WellRight data tables.
  */
 public static String[] getDataHeader()
 {
-	return new String[] { "Num",
-			"Well Right ID",
-			"Well Station ID" };
-			//"Well Name" };
+	return new String[] {
+		"Num",
+		"Well Right ID",
+		"Well Station ID" };
+		//"Well Name" };
 }
 
 /**
@@ -345,21 +351,21 @@ public String getLocationIdentifier()
 @return the parcel identifier
 */
 public String getParcelID() {
-	return __parcel_id;
+	return __parcelId;
 }
 
 /**
 @return the parcel match class.
 */
 public int getParcelMatchClass() {
-	return __parcel_match_class;
+	return __parcelMatchClass;
 }
 
 /**
 @return the parcel year.
 */
 public int getParcelYear() {
-	return __parcel_year;
+	return __parcelYear;
 }
 
 private void initialize() {
@@ -367,14 +373,13 @@ private void initialize() {
 	_irtem = "99999";
 	_dcrdivw = 0;
 	// Parcel data...
-	__parcel_id = "";
-	__parcel_year = StateMod_Util.MISSING_INT;
-	__parcel_match_class = StateMod_Util.MISSING_INT;
+	__parcelId = "";
+	__parcelYear = StateMod_Util.MISSING_INT;
+	__parcelMatchClass = StateMod_Util.MISSING_INT;
 }
 
 /**
-Determine whether a file is a well right file.  Currently true is returned
-if the file extension is ".wer".
+Determine whether a file is a well right file.  Currently true is returned if the file extension is ".wer".
 @param filename Name of the file being checked.
 @return true if the file is a StateMod well right file.
 */
@@ -396,9 +401,9 @@ public void restoreOriginal() {
 	_smdata_type = right._smdata_type;
 	_irtem = right._irtem;
 	_dcrdivw = right._dcrdivw;
-	__parcel_id = right.__parcel_id;
-	__parcel_match_class = right.__parcel_match_class;
-	__parcel_year = right.__parcel_year;
+	__parcelId = right.__parcelId;
+	__parcelMatchClass = right.__parcelMatchClass;
+	__parcelYear = right.__parcelYear;
 	_isClone = false;
 	_original = null;
 }
@@ -445,11 +450,10 @@ throws Exception {
 	BufferedReader in = null;
 	StateMod_WellRight aRight = null;
 
-	Message.printStatus(1, routine, "Reading well rights file: "
-		+ filename);
+	Message.printStatus(1, routine, "Reading well rights file: " + filename);
 
-	try {	in = new BufferedReader(new FileReader(
-		IOUtil.getPathUsingWorkingDir(filename)));
+	try {
+		in = new BufferedReader(new FileReader(IOUtil.getPathUsingWorkingDir(filename)));
 		while ((iline = in.readLine()) != null) {
 			// check for comments
 			if (iline.startsWith("#") || 
@@ -460,8 +464,7 @@ throws Exception {
 			aRight = new StateMod_WellRight();
 
 			if (Message.isDebugOn) {
-				Message.printDebug(50, routine , 
-				"iline: " + iline);
+				Message.printDebug(50, routine, "iline: " + iline);
 			}
 			StringUtil.fixedRead(iline, format_0, format_0w, v);
 			aRight.setID(((String)v.get(0)).trim());
@@ -487,29 +490,15 @@ throws Exception {
 		}
 	} 
 	catch(Exception e) {
-		routine = null;
-		format_0 = null;
-		format_0w = null;
-		iline = null;
-		v = null;
+		Message.printWarning(3, routine, e);
+		throw e;
+	}
+	finally {
 		if (in != null) {
 			in.close();
 		}
 		in = null;
-		aRight = null;
-		Message.printWarning(2, routine, e);
-		throw e;
 	}
-	routine = null;
-	format_0 = null;
-	format_0w = null;
-	iline = null;
-	v = null;
-	if (in != null) {
-		in.close();
-	}
-	in = null;
-	aRight = null;
 	return theWellRights;
 }
 
@@ -532,8 +521,9 @@ Set the decreed amount(cfs)
 @param dcrdivw decreed amount for this right
 */
 public void setDcrdivw(Double dcrdivw) {
-	if (dcrdivw == null)
+	if (dcrdivw == null) {
 		return;
+	}
 	setDcrdivw(dcrdivw.doubleValue());
 }
 
@@ -573,8 +563,8 @@ public void setParcelID(String parcel_id) {
 	if (parcel_id == null) {
 		return;
 	}
-	if (!parcel_id.equals(__parcel_id)) {
-		__parcel_id = parcel_id.trim();
+	if (!parcel_id.equals(__parcelId)) {
+		__parcelId = parcel_id.trim();
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_WELL_RIGHTS, true);
@@ -587,8 +577,9 @@ Set the parcel match class.
 @param parcel_match_class Parcel to well match class.
 */
 public void setParcelMatchClass(Integer parcel_match_class) {
-	if (parcel_match_class == null)
+	if (parcel_match_class == null) {
 		return;
+	}
 	setParcelMatchClass(parcel_match_class.intValue());
 }
 
@@ -597,8 +588,8 @@ Set the parcel match class, used to match wells to parcels.
 @param parcel_match_class Parcel match class.
 */
 public void setParcelMatchClass(int parcel_match_class) {
-	if (parcel_match_class != __parcel_match_class) {
-		__parcel_match_class = parcel_match_class;
+	if (parcel_match_class != __parcelMatchClass) {
+		__parcelMatchClass = parcel_match_class;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_WELL_RIGHTS, true);
@@ -611,8 +602,9 @@ Set the parcel year.
 @param parcel_year Parcel year.
 */
 public void setParcelYear(Integer parcel_year) {
-	if (parcel_year == null)
+	if (parcel_year == null) {
 		return;
+	}
 	setParcelYear(parcel_year.intValue());
 }
 
@@ -621,8 +613,8 @@ Set the parcel year, used to match wells to parcels.
 @param parcel_year Parcel year.
 */
 public void setParcelYear(int parcel_year) {
-	if (parcel_year != __parcel_year) {
-		__parcel_year = parcel_year;
+	if (parcel_year != __parcelYear) {
+		__parcelYear = parcel_year;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_WELL_RIGHTS, true);
@@ -638,25 +630,23 @@ through the new_comments parameter.
 Comments for each data item will be written if provided - these are being used
 for evaluation during development but are not a part of the standard file.
 @param infile name of file to retrieve previous comments and history from
-@param outfile name of output file to print to
-@param theRights vector of rights to print
-@param new_comments additional comments to print to the comment section
-@param write_props Properties to control the rights.  Currently only
+@param outfile name of output file to write.
+@param theRights list of rights to write.
+@param newComments additional comments to print to the comment section
+@param writeProps Properties to control the rights.  Currently only
 WriteDataComments=True/False is recognized
 */
 public static void writeStateModFile(String infile, String outfile,
-		List theRights, String[]new_comments, PropList write_props )
+		List theRights, List newComments, PropList writeProps )
 throws Exception {
-	String [] comment_str = { "#" };
-	String [] ignore_comment_str = { "#>" };
 	PrintWriter out = null;
 	String routine = "StateMod_WellRight.writeStateModFile";
 	
-	if ( write_props == null ) {
+	if ( writeProps == null ) {
 		// Create properties to check
-		write_props = new PropList ( "" );
+		writeProps = new PropList ( "" );
 	}
-	String WriteDataComments = write_props.getValue ( "WriteDataComments");
+	String WriteDataComments = writeProps.getValue ( "WriteDataComments");
 	boolean WriteDataComments_boolean = false;
 	if ( (WriteDataComments != null) &&
 		WriteDataComments.equalsIgnoreCase("True") ) {
@@ -664,79 +654,60 @@ throws Exception {
 	}
 
 	if (outfile == null) {
-		String msg = "Unable to print to null filename";
+		String msg = "Unable to write to null filename";
 		Message.printWarning(2, routine, msg);
 		throw new Exception(msg);
 	}
 			
-	Message.printStatus(2, routine, "Print well rights to: " +
-		outfile);
+	Message.printStatus(2, routine, "Writing well rights to: " + outfile);
 
+	List commentIndicators = new Vector(1);
+	commentIndicators.add ( "#" );
+	List ignoredCommentIndicators = new Vector(1);
+	ignoredCommentIndicators.add ( "#>");
 	try {	
-	out = IOUtil.processFileHeaders(
-		IOUtil.getPathUsingWorkingDir(infile),
-		IOUtil.getPathUsingWorkingDir(outfile), 
-		new_comments, comment_str, ignore_comment_str, 0);
-
-	String iline = null;
-	String cmnt = "#>";
-	String format_0 = "%-12.12s%-24.24s%-12.12s%16.16s%8.2F%8d";
-	StateMod_WellRight right = null;
-	List v = new Vector(6);
+		out = IOUtil.processFileHeaders(IOUtil.getPathUsingWorkingDir(infile),
+			IOUtil.getPathUsingWorkingDir(outfile), 
+			newComments, commentIndicators, ignoredCommentIndicators, 0);
+	
+		String iline = null;
+		String cmnt = "#>";
+		String format_0 = "%-12.12s%-24.24s%-12.12s%16.16s%8.2F%8d";
+		StateMod_WellRight right = null;
+		List v = new Vector(6);
 
 		out.println(cmnt);
-		out.println(cmnt 
- 			+"***************************************************");
+		out.println(cmnt + "***************************************************");
 		out.println(cmnt + "  Well Right File");
 		out.println(cmnt);
 		String format_add = "";
 		if ( WriteDataComments_boolean ) {
 			format_add = ", 1x, i4, 1x, i4, ix, a6";
 		}
-		out.println(cmnt 
-			+ "  Format:  (a12, a24, a12, f16.5, f8.2, i8" + format_add + ")");
+		out.println(cmnt + "  Format:  (a12, a24, a12, f16.5, f8.2, i8" + format_add + ")");
 		out.println(cmnt);
-		out.println(cmnt 
-			+ "     ID        cidvi:  Well right ID ");
-		out.println(cmnt 
-			+ "     Name     cnamew:  Well right name");
-		out.println(cmnt 
-			+ "     Struct    cgoto:  Well " 
-			+ "Structure ID associated with this right");
-		out.println(cmnt 
-			+ "     Admin #   irtem:  Administration number" );
-		out.println(cmnt 
-			+ "                       (priority, small is senior)");
-		out.println(cmnt 
-			+ "     Decree  dcrdivw:  Well right (cfs)");
-		out.println(cmnt 
-			+ "     On/Off  idvrsww:  Switch 0 = off, 1 = on");
-		out.println(cmnt 
-			+ "                       YYYY = on for years >= YYYY");
-		out.println(cmnt 
-			+ "                       -YYYY = off for years > " +
-			"YYYY" );
+		out.println(cmnt + "     ID        cidvi:  Well right ID ");
+		out.println(cmnt + "     Name     cnamew:  Well right name");
+		out.println(cmnt + "     Struct    cgoto:  Well Structure ID associated with this right");
+		out.println(cmnt + "     Admin #   irtem:  Administration number" );
+		out.println(cmnt + "                       (priority, small is senior)");
+		out.println(cmnt + "     Decree  dcrdivw:  Well right (cfs)");
+		out.println(cmnt + "     On/Off  idvrsww:  Switch 0 = off, 1 = on");
+		out.println(cmnt + "                       YYYY = on for years >= YYYY");
+		out.println(cmnt + "                       -YYYY = off for years > YYYY" );
 		String header1_add = "";
 		String header2_add = "";
 		if ( WriteDataComments_boolean ) {
 			header1_add = " PYr--Cls--PID   ";
 			header2_add = "xb--exb--exb----e";
-			out.println(cmnt 
-					+ " Parcel Year     Pyr:  Parcel year used for parcel/well matching");
-			out.println(cmnt 
-					+ "Well match class Cls:  Indicates how well matched to parcel");
-			out.println(cmnt 
-					+ "                       (see CDSS documentation).");
-			out.println(cmnt 
-					+ "Parcel ID        PID:  Parcel ID for year.");
+			out.println(cmnt + " Parcel Year     Pyr:  Parcel year used for parcel/well matching");
+			out.println(cmnt + "Well match class Cls:  Indicates how well matched to parcel");
+			out.println(cmnt + "                       (see CDSS documentation).");
+			out.println(cmnt + "Parcel ID        PID:  Parcel ID for year.");
 		}
 		out.println(cmnt);
-		out.println(cmnt 
-			+ "   ID               Name             Struct   " 
-			+ "       Admin #   Decree  On/Off " + header1_add );
-		out.println(cmnt 
-			+ "---------eb----------------------eb----------e" 
-			+ "b--------------eb------eb------e" + header2_add );
+		out.println(cmnt + "   ID               Name             Struct          Admin #   Decree  On/Off " + header1_add );
+		out.println(cmnt + "---------eb----------------------eb----------eb--------------eb------eb------e" + header2_add );
 		out.println(cmnt);
 		out.println(cmnt + "EndHeader");
 		out.println(cmnt);
@@ -772,42 +743,37 @@ throws Exception {
 					out.println ( iline + " " + comment );
 				//}
 			}
-			else { out.println(iline);
+			else {
+				out.println(iline);
 			}
 		}
-		
-	out.flush();
-	out.close();
-	out = null;
-	comment_str = null;
-	ignore_comment_str = null;
-	routine = null;
 	} 
 	catch(Exception e) {
+		Message.printWarning(3, routine, e);
+		throw e;
+	}
+	finally {
 		if (out != null) {
 			out.close();
 		}
 		out = null;
-		comment_str = null;
-		ignore_comment_str = null;
-		routine = null;
-		Message.printWarning(3, routine, e);
-		throw e;
 	}
 }
 
 /**
-Writes a Vector of StateMod_WellRight objects to a list file.  A header is 
+Writes a list of StateMod_WellRight objects to a list file.  A header is 
 printed to the top of the file, containing the commands used to generate the 
 file.  Any strings in the body of the file that contain the field delimiter will be wrapped in "...".  
 @param filename the name of the file to which the data will be written.
 @param delimiter the delimiter to use for separating field values.
 @param update whether to update an existing file, retaining the current 
 header (true) or to create a new file with a new header.
-@param data the Vector of objects to write.  
+@param data the list of objects to write.
+@param newComments the list of new comments to write to the header.
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter, boolean update, List data) 
+public static void writeListFile(String filename, String delimiter, boolean update, List data,
+	List newComments ) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
@@ -841,23 +807,36 @@ throws Exception {
 	int j = 0;
 	PrintWriter out = null;
 	StateMod_WellRight right = null;
-	String[] commentString = { "#" };
-	String[] ignoreCommentString = { "#>" };
+	List commentIndicators = new Vector(1);
+	commentIndicators.add ( "#" );
+	List ignoredCommentIndicators = new Vector(1);
+	ignoredCommentIndicators.add ( "#>");
 	String[] line = new String[fieldCount];
-	String[] newComments = null;
 	StringBuffer buffer = new StringBuffer();
 	
-	try {	
+	try {
+		// Add some basic comments at the top of the file.  Do this to a copy of the
+		// incoming comments so that they are not modified in the calling code.
+		List newComments2 = null;
+		if ( newComments == null ) {
+			newComments2 = new Vector();
+		}
+		else {
+			newComments2 = new Vector(newComments);
+		}
+		newComments2.add(0,"");
+		newComments2.add(1,"StateMod well rights as a delimited list file.");
+		newComments2.add(2,"");
 		out = IOUtil.processFileHeaders(
 			oldFile,
 			IOUtil.getPathUsingWorkingDir(filename), 
-			newComments, commentString, ignoreCommentString, 0);
+			newComments2, commentIndicators, ignoredCommentIndicators, 0);
 
 		for (int i = 0; i < fieldCount; i++) {
-			buffer.append("\"" + names[i] + "\"");
-			if (i < (fieldCount - 1)) {
+			if (i > 0) {
 				buffer.append(delimiter);
 			}
+			buffer.append("\"" + names[i] + "\"");
 		}
 
 		out.println(buffer.toString());
@@ -865,44 +844,38 @@ throws Exception {
 		for (int i = 0; i < size; i++) {
 			right = (StateMod_WellRight)data.get(i);
 			
-			line[0] = StringUtil.formatString(right.getID(), 
-				formats[0]).trim();
-			line[1] = StringUtil.formatString(right.getName(), 
-				formats[1]).trim();
-			line[2] = StringUtil.formatString(right.getCgoto(), 
-				formats[2]).trim();
-			line[3] = StringUtil.formatString(right.getIrtem(), 
-				formats[3]).trim();
-			line[4] = StringUtil.formatString(right.getDcrdivw(), 
-				formats[4]).trim();
-			line[5] = StringUtil.formatString(right.getSwitch(), 
-				formats[5]).trim();
+			line[0] = StringUtil.formatString(right.getID(), formats[0]).trim();
+			line[1] = StringUtil.formatString(right.getName(), formats[1]).trim();
+			line[2] = StringUtil.formatString(right.getCgoto(), formats[2]).trim();
+			line[3] = StringUtil.formatString(right.getIrtem(), formats[3]).trim();
+			line[4] = StringUtil.formatString(right.getDcrdivw(), formats[4]).trim();
+			line[5] = StringUtil.formatString(right.getSwitch(), formats[5]).trim();
 
 			buffer = new StringBuffer();	
 			for (j = 0; j < fieldCount; j++) {
+				if (j > 0) {
+					buffer.append(delimiter);
+				}
 				if (line[j].indexOf(delimiter) > -1) {
 					line[j] = "\"" + line[j] + "\"";
 				}
 				buffer.append(line[j]);
-				if (j < (fieldCount - 1)) {
-					buffer.append(delimiter);
-				}
 			}
 
 			out.println(buffer.toString());
 		}
-		out.flush();
-		out.close();
-		out = null;
 	}
 	catch (Exception e) {
+		// FIXME SAM 2009-01-12 Log?
+		throw e;
+	}
+	finally {
 		if (out != null) {
 			out.flush();
 			out.close();
 		}
 		out = null;
-		throw e;
 	}
 }
 
-} // End StateMod_WellRight
+}

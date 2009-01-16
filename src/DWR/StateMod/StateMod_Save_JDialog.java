@@ -583,7 +583,7 @@ throws Exception {
 			break;
 		case StateMod_DataSet.COMP_WELL_RIGHTS:
 			StateMod_WellRight.writeStateModFile(oldFilename,
-				newFilename, (List)data, comments, (PropList)null);
+				newFilename, (List)data, StringUtil.toList(comments), (PropList)null);
 			name = "Well Rights";
 			break;
 
