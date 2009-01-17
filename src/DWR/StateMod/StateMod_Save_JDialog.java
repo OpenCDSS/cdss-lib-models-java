@@ -524,7 +524,7 @@ throws Exception {
 			break;
 		case StateMod_DataSet.COMP_INSTREAM_STATIONS:
 			StateMod_InstreamFlow.writeStateModFile(oldFilename,
-				newFilename, (List)data, comments, daily);
+				newFilename, (List)data, StringUtil.toList(comments), daily);
 			name = "Instream";
 			break;
 		case StateMod_DataSet.COMP_INSTREAM_RIGHTS:

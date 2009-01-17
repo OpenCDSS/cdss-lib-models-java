@@ -108,47 +108,46 @@ implements StateMod_Component
 /**
 Daily instream flow id
 */
-protected String 	_cifridy;
+protected String _cifridy;
 
 /**
 Downstream river node, ins located
 */
-protected String 	_ifrrdn;
+protected String _ifrrdn;
 
 /**
 Instream flow rights
 */
-protected List	_rights;
+protected List _rights;
 
 /**
 Annual demand time series
 */
-protected MonthTS	_demand_average_MonthTS;
+protected MonthTS _demand_average_MonthTS;
 
 /**
 Monthly demand time series
 */
-protected MonthTS	_demand_MonthTS;
+protected MonthTS _demand_MonthTS;
 
 /**
 Daily demand time series
 */
-protected DayTS		_demand_DayTS;
+protected DayTS _demand_DayTS;
 
 /**
 Data type switch
 */
-protected int		_iifcom;
+protected int _iifcom;
 
 /**
 Link to spatial data -- currently not cloned.
 */
-protected GeoRecord	_georecord;
+protected GeoRecord _georecord;
 	
 /**
 Construct a new instance of a StateMod instream flow station.
-The initial data values are empty strings, no rights or time series, and
-iifcom=1.
+The initial data values are empty strings, no rights or time series, and ifcom=1.
 */
 public StateMod_InstreamFlow()
 {	this ( true );
@@ -207,8 +206,7 @@ public boolean changed() {
 public String[] checkComponentData( int count, 
 StateMod_DataSet dataset, PropList props ) 
 {
-	// TODO KAT 2007-04-16
-	// add specific checks here
+	// TODO KAT 2007-04-16 add specific checks here
 	return null;
 }
 
@@ -223,7 +221,7 @@ public Object clone() {
 	// The following are not cloned because there is no need to.  
 	// The cloned values are only used for comparing between the 
 	// values that can be changed in a single GUI.  The following
-	// Vectors' data have their changes committed in other GUIs.	
+	// lists' data have their changes committed in other GUIs.	
 	i._rights = _rights;
 	return i;
 }
@@ -231,8 +229,7 @@ public Object clone() {
 /**
 Compares this object to another StateMod_InstreamFlow object.
 @param o the object to compare against.
-@return 0 if they are the same, 1 if this object is greater than the other
-object, or -1 if it is less.
+@return 0 if they are the same, 1 if this object is greater than the other object, or -1 if it is less.
 */
 public int compareTo(Object o) {
 	int res = super.compareTo(o);
@@ -287,10 +284,7 @@ public static void connectAllRights ( List isfs, List rights )
 /**
 Connect all instream flow time series to the instream flow objects.
 */
-public static void connectAllTS (	List theIns,
-		List demand_MonthTS,
-		List demand_average_MonthTS,
-		List demand_DayTS )
+public static void connectAllTS ( List theIns, List demandMonthTS, List demandAverageMonthTS, List demandDayTS )
 {	if ( theIns == null ) {
 		return;
 	}
@@ -302,15 +296,15 @@ public static void connectAllTS (	List theIns,
 		if (insflow == null) {
 			continue;
 		}
-		if ( demand_MonthTS != null ) {
-			insflow.connectDemandMonthTS(demand_MonthTS);
+		if ( demandMonthTS != null ) {
+			insflow.connectDemandMonthTS(demandMonthTS);
 		}
-		if ( demand_average_MonthTS != null ) {
+		if ( demandAverageMonthTS != null ) {
 			insflow.connectDemandAverageMonthTS(
-			demand_average_MonthTS);
+			demandAverageMonthTS);
 		}
-		if ( demand_DayTS != null ) {
-			insflow.connectDemandDayTS(demand_DayTS);
+		if ( demandDayTS != null ) {
+			insflow.connectDemandDayTS(demandDayTS);
 		}
 	}
 }
@@ -393,8 +387,7 @@ public void connectDemandMonthTS(List tslist) {
 }
 
 /**
-Connect the rights in the main rights file to this instream flow, using the
-instream flow ID.
+Connect the rights in the main rights file to this instream flow, using the instream flow ID.
 */
 public void connectRights(List rights) {
 	if (rights == null) {
@@ -415,8 +408,7 @@ public void connectRights(List rights) {
 }
 
 /**
-Creates a copy of the object for later use in checking to see if it was 
-changed in a GUI.
+Creates a copy of the object for later use in checking to see if it was changed in a GUI.
 */
 public void createBackup() {
 	_original = clone();
@@ -424,13 +416,11 @@ public void createBackup() {
 	_isClone = true;
 }
 
-// REVISIT - in the GUI need to decide if the right is actually removed from
-// the main list
+// TODO - in the GUI need to decide if the right is actually removed from the main list
 /**
 Remove right from list.  A comparison on the ID is made.
 @param right Right to remove.  Note that the right is only removed from the
-list for this diversion and must also be removed from the main diversion right
-list.
+list for this diversion and must also be removed from the main diversion right list.
 */
 public void disconnectRight ( StateMod_InstreamFlowRight right )
 {	if (right == null) {
@@ -438,8 +428,7 @@ public void disconnectRight ( StateMod_InstreamFlowRight right )
 	}
 	int size = _rights.size();
 	StateMod_InstreamFlowRight right2;
-	// Assume that more than on instance can exist, even though this is
-	// not allowed...
+	// Assume that more than on instance can exist, even though this is not allowed...
 	for ( int i = 0; i < size; i++ ) {
 		right2 = (StateMod_InstreamFlowRight)_rights.get(i);
 		if ( right2.getID().equalsIgnoreCase(right.getID()) ) {
@@ -480,11 +469,10 @@ public String getCifridy() {
 /**
 Returns the data column header for the specifically checked data.
 @return Data column header.
- */
+*/
 public static String[] getDataHeader()
 {
-	// TODO KAT 2007-04-16 
-	// When specific checks are added to checkComponentData
+	// TODO KAT 2007-04-16 When specific checks are added to checkComponentData
 	// return the header for that data here
 	return new String[] {};
 }
@@ -540,8 +528,7 @@ public static List getIifcomChoices ( boolean include_notes )
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.set(i, StringUtil.getToken(
-				(String)v.get(i), " ", 0, 0) );
+			v.set(i, StringUtil.getToken((String)v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
@@ -556,7 +543,8 @@ public static String getIifcomDefault ( boolean include_notes )
 {	if ( include_notes ) {
 		return "2 - Average monthly demand";
 	}
-	else {	return "2";
+	else {
+		return "2";
 	}
 }
 
@@ -593,7 +581,8 @@ public StateMod_InstreamFlowRight getRight(int index)
 {	if ( (index < 0) || (index >= _rights.size()) ) {
 		return null;
 	}
-	else {	return (StateMod_InstreamFlowRight)_rights.get(index);
+	else {
+		return (StateMod_InstreamFlowRight)_rights.get(index);
 	}
 }
 
@@ -606,19 +595,20 @@ public List getRights() {
 
 /**
 Initialize data.
-@param initialize_defaults If true, then data values are initialized to
+@param initializeDefaults If true, then data values are initialized to
 reasonable defaults - this is suitable for adding a new instance in the
 StateMod GUI.  If false, data values are initialized to missing - this is
 suitable for a new instance in StateDMI.
 */
-private void initialize ( boolean initialize_defaults )
+private void initialize ( boolean initializeDefaults )
 {	_smdata_type = StateMod_DataSet.COMP_INSTREAM_STATIONS;
 	_ifrrdn = "";
-	if ( initialize_defaults ) {
+	if ( initializeDefaults ) {
 		_cifridy = "0";	// Estimate average daily data from monthly
 		_iifcom = 2;	// Default to annual
 	}
-	else {	_cifridy = "";
+	else {
+		_cifridy = "";
 		_iifcom = StateMod_Util.MISSING_INT;
 	}
 	_rights = new Vector();
@@ -629,7 +619,7 @@ private void initialize ( boolean initialize_defaults )
 }
 
 /**
-Read instream flow information in and store in a Vector.  The new instream
+Read instream flow information in and store in a list.  The new instream
 flows are added to the end of the previously stored instream flows.
 @param filename Name of file to read.
 @exception Exception if there is an error reading the file.
@@ -640,72 +630,68 @@ throws Exception {
 	String iline, s;
 	List theIns = new Vector();
 	List v = new Vector(9);
-	int format_0[] = {	StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_INTEGER,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING };
-	int format_0w[] = {	12,
-				24,
-				12,
-				8,
-				1,
-				12,
-				1,
-				12,
-				8 };
+	int format_0[] = {
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_INTEGER,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING };
+	int format_0w[] = {
+		12,
+		24,
+		12,
+		8,
+		1,
+		12,
+		1,
+		12,
+		8 };
 
 	if (Message.isDebugOn) {
-		Message.printDebug(10, routine, 
-		"in SMParseInsfFile reading file: " + filename);
+		Message.printDebug(10, routine, "Reading file: " + filename);
 	}
+	BufferedReader in = null;
 	try {
-		BufferedReader in = new BufferedReader(
-			new FileReader(filename));
+		in = new BufferedReader(new FileReader(filename));
 		StateMod_InstreamFlow anIns;
 		while ((iline = in.readLine()) != null) {
 			// check for comments
-			if (iline.startsWith("#") || iline.trim().length()==0)
+			if (iline.startsWith("#") || iline.trim().length()==0) {
 				continue;
+			}
 
 			// allocate new instream flow node
 			anIns = new StateMod_InstreamFlow();
 
 			// line 1
-			if (Message.isDebugOn)
-				Message.printDebug(50, routine, 
-				"line 1: " + iline);
+			if (Message.isDebugOn) {
+				Message.printDebug(50, routine, "line 1: " + iline);
+			}
 			StringUtil.fixedRead(iline, format_0, format_0w, v);
-			if (Message.isDebugOn)
-				Message.printDebug(50, routine, 
-				"Fixed read returned " 
-				+ v.size()+ " elements");
-			s = StringUtil.unpad((String)v.get(0), 
-				" ", StringUtil.PAD_FRONT_BACK);
+			if (Message.isDebugOn) {
+				Message.printDebug(50, routine, "Fixed read returned " + v.size()+ " elements");
+			}
+			s = StringUtil.unpad((String)v.get(0), " ", StringUtil.PAD_FRONT_BACK);
 			anIns.setID(s);
-			s = StringUtil.unpad((String)v.get(1), 
-				" ", StringUtil.PAD_FRONT_BACK);
+			s = StringUtil.unpad((String)v.get(1), " ", StringUtil.PAD_FRONT_BACK);
 			anIns.setName(s);
-			s = StringUtil.unpad((String)v.get(2), 
-				" ", StringUtil.PAD_FRONT_BACK);
+			s = StringUtil.unpad((String)v.get(2), " ", StringUtil.PAD_FRONT_BACK);
 			anIns.setCgoto(s);
 			anIns.setSwitch((Integer)v.get(3));
-			s = StringUtil.unpad((String)v.get(5), 
-				" ", StringUtil.PAD_FRONT_BACK);
-			if (Message.isDebugOn)
+			s = StringUtil.unpad((String)v.get(5), " ", StringUtil.PAD_FRONT_BACK);
+			if (Message.isDebugOn) {
 				Message.printDebug(50, routine, "Ifrrdn: " + s);
+			}
 			anIns.setIfrrdn(s);
 			// daily id
-			s = StringUtil.unpad((String)v.get(7), 
-				" ", StringUtil.PAD_FRONT_BACK);
+			s = StringUtil.unpad((String)v.get(7), " ", StringUtil.PAD_FRONT_BACK);
 			anIns.setCifridy(s);
 			// Data type(read as string and convert to integer)...
-			s = StringUtil.unpad((String)v.get(8), 
-				" ", StringUtil.PAD_FRONT_BACK);
+			s = StringUtil.unpad((String)v.get(8), " ", StringUtil.PAD_FRONT_BACK);
 			anIns.setIifcom(s);
 
 			// add the instream flow to the vector of instream flows
@@ -713,27 +699,20 @@ throws Exception {
 		}
 	} 
 	catch (Exception e) {
-		Message.printWarning(2, routine, e);
-		routine = null;
-		iline = null;
-		s = null;
-		v = null;
-		format_0 = null;
-		format_0w = null;
+		Message.printWarning(3, routine, e);
 		throw e;
 	}
-	routine = null;
-	iline = null;
-	s = null;
-	v = null;
-	format_0 = null;
-	format_0w = null;
+	finally {
+		if ( in != null ) {
+			in.close();
+		}
+	}
 	return theIns;
 }
 
 /**
 Cancels any changes made to this object within a GUI since createBackup()
-was caled and sets _original to null.
+was called and sets _original to null.
 */
 public void restoreOriginal() {
 	StateMod_InstreamFlow i = (StateMod_InstreamFlow)_original;
@@ -821,10 +800,10 @@ public void setIfrrdn(String ifrrdn) {
 	}
 }
 
-// REVISIT - need to make sure dirty flag is handled.
+// TODO - need to make sure dirty flag is handled.
 /**
-Set the rights vector.
-@param rights Vector of rights to set - this should not be null.
+Set the rights list.
+@param rights list of rights to set - this should not be null.
 */
 public void setRights ( List rights )
 {	_rights = rights;
@@ -835,12 +814,11 @@ Write instream flow information to output.  History header information
 is also maintained by calling this routine.
 @param infile input file from which previous history should be taken
 @param outfile output file to which to write
-@param theInsf vector of instream flows to write
+@param theInsf list of instream flows to write
 @param newcomments addition comments which should be included in history
 @exception Exception if an error occurs.
 */
-public static void writeStateModFile(String infile, String outfile,
-		List theInsf, String[] newcomments)
+public static void writeStateModFile(String infile, String outfile, List theInsf, List newcomments)
 throws Exception {
 	writeStateModFile(infile, outfile, theInsf, newcomments, true);
 }
@@ -849,134 +827,111 @@ throws Exception {
 Write the instream flow objects to the StateMod file.
 @param infile input file(original file read from, can be null).
 @param outfile output file(to create or update, can be same as input).
-@param theInsf Vector of StateMod_InstreamFlow instances.
+@param theInsf list of StateMod_InstreamFlow instances.
 @param newcomments Comments to add at the top of the file.
-@param use_daily_data Indicates whether daily and extended data(cifridy,
-iifcom)should be used.
+@param useDailyData Indicates whether daily and extended data(cifridy, iifcom)should be used.
 @throws Exception if an error occurs
 */
 public static void writeStateModFile(String infile, String outfile,
-		List theInsf, String[] newcomments, boolean use_daily_data)
+		List theInsf, List newcomments, boolean useDailyData)
 throws Exception {
 	String routine = "StateMod_InstreamFlow.writeStateModFile";
-	String [] comment_str = { "#" };
-	String [] ignore_comment_str = { "#>" };
-	PrintWriter out;
-	Message.printStatus(2, routine,
-		"Writing new instream flows to file \""
+	List commentIndicators = new Vector(1);
+	commentIndicators.add ( "#" );
+	List ignoredCommentIndicators = new Vector(1);
+	ignoredCommentIndicators.add ( "#>");
+	PrintWriter out = null;
+	Message.printStatus(2, routine, "Writing instream flows to file \""
 		+ outfile + "\" using \"" + infile + "\" header...");
 
 	// Process the header from the old file...
 
 	try {	
-	out = IOUtil.processFileHeaders(
-		IOUtil.getPathUsingWorkingDir(infile),
-		IOUtil.getPathUsingWorkingDir(outfile), 
-		newcomments, comment_str, ignore_comment_str, 0);
-
-	int i;
-	String iline;
-	String cmnt = "#>";
-	List v = new Vector(7);
-	StateMod_InstreamFlow insf = null;
-	String format_0 = "%-12.12s%-24.24s%-12.12s%8d %-12.12s %-12.12s%8d";
-	String format_1 = "%-12.12s%-24.24s%-12.12s%8d %-12.12s";
-
-	out.println(cmnt);
-	out.println(cmnt 
-		+ " ******************************************************* ");
-	out.println(cmnt 
-		+ "  Instream Flow Station File");
-	out.println(cmnt);
-	out.println(cmnt 
-		+ "  Card format:  (a12,a24,a12,i8,1x,a12,1x,a12,i8)");
-	out.println(cmnt);
-	out.println(cmnt 
-		+ "  ID           cifrid:  Instream Flow ID");
-	out.println(cmnt 
-		+ "  Name         cfrnam:  Instream Flow Name");
-	out.println(cmnt 
-		+ "  Riv ID        cgoto:  Upstream river ID where instream "
-		+ "flow is located");
-	out.println(cmnt 
-		+ "  On/Off       ifrrsw:  Switch; 0=off, 1=on");
-	out.println(cmnt 
-		+ "  Downstream   ifrrdn:  Downstream river ID where instream "
-		+ "flow is located");
-	out.println(cmnt 
-		+ "                        (blank indicates downstream=" +
-		"upstream)");
-	out.println(cmnt 
-		+ "  DailyID     cifridy:  Daily instream flow ID (" +
-		"see StateMod doc)");
-	out.println(cmnt 
-		+ "  DemandType   iifcom:  Demand type switch (" +
-		"see StateMod doc)");
-	out.println(cmnt);
-	out.println(cmnt 
-		+ " ID        Name                    Riv ID     On/Off  "
-		+ " Downstream    DailyID    DemandType");
-	out.println(cmnt 
-		+ "---------eb----------------------eb----------eb------e"
-		+ "-b----------exb----------eb------e");
-	out.println(cmnt + "EndHeader");
-	out.println(cmnt);
-
-	int num = 0;
-	if (theInsf != null) {
-		num = theInsf.size();
-	}
-	for (i = 0; i < num; i++) {
-		insf = (StateMod_InstreamFlow)theInsf.get(i);
-		if (insf == null) {
-			continue;
+		out = IOUtil.processFileHeaders(
+			IOUtil.getPathUsingWorkingDir(infile),
+			IOUtil.getPathUsingWorkingDir(outfile), 
+			newcomments, commentIndicators, ignoredCommentIndicators, 0);
+	
+		int i;
+		String iline;
+		String cmnt = "#>";
+		List v = new Vector(7);
+		StateMod_InstreamFlow insf = null;
+		String format_0 = "%-12.12s%-24.24s%-12.12s%8d %-12.12s %-12.12s%8d";
+		String format_1 = "%-12.12s%-24.24s%-12.12s%8d %-12.12s";
+	
+		out.println(cmnt);
+		out.println(cmnt + " ******************************************************* ");
+		out.println(cmnt + "  StateMod Instream Flow Station File");
+		out.println(cmnt);
+		out.println(cmnt + "  Card format:  (a12,a24,a12,i8,1x,a12,1x,a12,i8)");
+		out.println(cmnt);
+		out.println(cmnt + "  ID           cifrid:  Instream Flow ID");
+		out.println(cmnt + "  Name         cfrnam:  Instream Flow Name");
+		out.println(cmnt + "  Riv ID        cgoto:  Upstream river ID where instream flow is located");
+		out.println(cmnt + "  On/Off       ifrrsw:  Switch; 0=off, 1=on");
+		out.println(cmnt + "  Downstream   ifrrdn:  Downstream river ID where instream flow is located");
+		out.println(cmnt + "                        (blank indicates downstream=upstream)");
+		out.println(cmnt + "  DailyID     cifridy:  Daily instream flow ID (see StateMod doc)");
+		out.println(cmnt + "  DemandType   iifcom:  Demand type switch (see StateMod doc)");
+		out.println(cmnt);
+		out.println(cmnt + " ID        Name                    Riv ID     On/Off   Downstream    DailyID    DemandType");
+		out.println(cmnt + "---------eb----------------------eb----------eb------e-b----------exb----------eb------e");
+		out.println(cmnt + "EndHeader");
+		out.println(cmnt);
+	
+		int num = 0;
+		if (theInsf != null) {
+			num = theInsf.size();
 		}
-		v.clear();
-		v.add(insf.getID());
-		v.add(insf.getName());
-		v.add(insf.getCgoto());
-		v.add(new Integer(insf.getSwitch()));
-		v.add(insf.getIfrrdn());
-		if (use_daily_data) {
-			v.add(insf.getCifridy());
-			v.add(new Integer(insf.getIifcom()));
-			iline = StringUtil.formatString(v, format_0);
+		for (i = 0; i < num; i++) {
+			insf = (StateMod_InstreamFlow)theInsf.get(i);
+			if (insf == null) {
+				continue;
+			}
+			v.clear();
+			v.add(insf.getID());
+			v.add(insf.getName());
+			v.add(insf.getCgoto());
+			v.add(new Integer(insf.getSwitch()));
+			v.add(insf.getIfrrdn());
+			if (useDailyData) {
+				v.add(insf.getCifridy());
+				v.add(new Integer(insf.getIifcom()));
+				iline = StringUtil.formatString(v, format_0);
+			}
+			else {	
+				iline = StringUtil.formatString(v, format_1);
+			}
+			out.println(iline);
 		}
-		else {	
-			iline = StringUtil.formatString(v, format_1);
-		}
-		out.println(iline);
-	}
-		
-	out.flush();
-	out.close();
 	} 
 	catch (Exception e) {
-		Message.printWarning(2, routine, e);
-		routine = null;
-		comment_str = null;
-		ignore_comment_str = null;
-		out = null;
+		Message.printWarning(3, routine, e);
 		throw e;
-	} 
-	routine = null;
-	comment_str = null;
-	ignore_comment_str = null;
-	out = null;
+	}
+	finally {
+		if ( out != null ) {
+			out.flush();
+			out.close();
+		}
+	}
 }
 
 /**
-Writes a Vector of StateMod_InstreamFlow objects to a list file.  A header is 
+Writes a list of StateMod_InstreamFlow objects to a list file.  A header is 
 printed to the top of the file, containing the commands used to generate the 
 file.  Any strings in the body of the file that contain the field delimiter will be wrapped in "...".  
 @param filename the name of the file to which the data will be written.
 @param delimiter the delimiter to use for separating field values.
 @param update whether to update an existing file, retaining the current 
 header (true) or to create a new file with a new header.
-@param data the Vector of objects to write.  
+@param data the list of objects to write. 
+@param newComments additional comments to write to the header.
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter, boolean update, List data) 
+public static void writeListFile(String filename, String delimiter, boolean update, List data,
+		List newComments ) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
@@ -1011,18 +966,29 @@ throws Exception {
 	int j = 0;
 	PrintWriter out = null;
 	StateMod_InstreamFlow flo = null;
-	String[] commentString = { "#" };
-	String[] ignoreCommentString = { "#>" };
+	List commentIndicators = new Vector(1);
+	commentIndicators.add ( "#" );
+	List ignoredCommentIndicators = new Vector(1);
+	ignoredCommentIndicators.add ( "#>");
 	String[] line = new String[fieldCount];
-	String[] newComments = null;
 	StringBuffer buffer = new StringBuffer();
 	
 	try {	
-
-		out = IOUtil.processFileHeaders(
-			oldFile,
+		// Add some basic comments at the top of the file.  Do this to a copy of the
+		// incoming comments so that they are not modified in the calling code.
+		List newComments2 = null;
+		if ( newComments == null ) {
+			newComments2 = new Vector();
+		}
+		else {
+			newComments2 = new Vector(newComments);
+		}
+		newComments2.add(0,"");
+		newComments2.add(1,"StateMod instream flow stations as a delimited list file.");
+		newComments2.add(2,"");
+		out = IOUtil.processFileHeaders( oldFile,
 			IOUtil.getPathUsingWorkingDir(filename), 
-			newComments, commentString, ignoreCommentString, 0);
+			newComments2, commentIndicators, ignoredCommentIndicators, 0);
 
 		for (int i = 0; i < fieldCount; i++) {
 			buffer.append("\"" + names[i] + "\"");
@@ -1036,20 +1002,13 @@ throws Exception {
 		for (int i = 0; i < size; i++) {
 			flo = (StateMod_InstreamFlow)data.get(i);
 			
-			line[0] = StringUtil.formatString(flo.getID(), 
-				formats[0]).trim();
-			line[1] = StringUtil.formatString(flo.getName(), 
-				formats[1]).trim();
-			line[2] = StringUtil.formatString(flo.getCgoto(), 
-				formats[2]).trim();
-			line[3] = StringUtil.formatString(flo.getSwitch(), 
-				formats[3]).trim();
-			line[4] = StringUtil.formatString(flo.getIfrrdn(), 
-				formats[4]).trim();
-			line[5] = StringUtil.formatString(flo.getCifridy(), 
-				formats[5]).trim();				
-			line[6] = StringUtil.formatString(flo.getIifcom(), 
-				formats[6]).trim();
+			line[0] = StringUtil.formatString(flo.getID(), formats[0]).trim();
+			line[1] = StringUtil.formatString(flo.getName(), formats[1]).trim();
+			line[2] = StringUtil.formatString(flo.getCgoto(), formats[2]).trim();
+			line[3] = StringUtil.formatString(flo.getSwitch(), formats[3]).trim();
+			line[4] = StringUtil.formatString(flo.getIfrrdn(), formats[4]).trim();
+			line[5] = StringUtil.formatString(flo.getCifridy(), formats[5]).trim();				
+			line[6] = StringUtil.formatString(flo.getIifcom(), formats[6]).trim();
 
 			buffer = new StringBuffer();	
 			for (j = 0; j < fieldCount; j++) {
@@ -1078,4 +1037,4 @@ throws Exception {
 	}
 }
 
-} // End StateMod_InstreamFlow
+}
