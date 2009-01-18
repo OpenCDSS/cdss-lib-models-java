@@ -529,7 +529,7 @@ throws Exception {
 			break;
 		case StateMod_DataSet.COMP_INSTREAM_RIGHTS:
 			StateMod_InstreamFlowRight.writeStateModFile(
-				oldFilename, newFilename, (List)data, comments);
+				oldFilename, newFilename, (List)data, StringUtil.toList(comments) );
 			name = "Instream Rights";
 			break;
 		case StateMod_DataSet.COMP_OPERATION_RIGHTS:
@@ -635,7 +635,7 @@ throws Exception {
 			}
 			
 			StateMod_TS.writeTimeSeriesList(oldFilename,
-				newFilename, comments, (List)data, null, null, year, missing, precision);
+				newFilename, StringUtil.toList(comments), (List)data, null, null, year, missing, precision);
 			name = "TS (" + type + ")";
 			break;
 
