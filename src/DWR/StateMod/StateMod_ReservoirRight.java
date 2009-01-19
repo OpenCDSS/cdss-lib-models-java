@@ -99,27 +99,27 @@ implements Cloneable, Comparable, StateMod_Component, StateMod_Right {
 /**
 Administration number
 */
-protected String 	_rtem;
+protected String _rtem;
 /**
 Decreed amount
 */
-protected double	_dcrres;
+protected double _dcrres;
 /**
 Filling ratio
 */
-protected int		_iresco;
+protected int _iresco;
 /**
 Reservoir type
 */
-protected int		_ityrstr;
+protected int _ityrstr;
 /**
 Reservoir right type
 */
-protected int		_n2fill;
+protected int _n2fill;
 /**
 out of priority associated op right
 */
-protected String	_copid;
+protected String _copid;
 	
 /**
 Constructor.
@@ -138,8 +138,7 @@ public StateMod_ReservoirRight() {
 public String[] checkComponentData( int count, 
 StateMod_DataSet dataset, PropList props ) 
 {
-	// TODO KAT 2007-04-16
-	// add specific checks here
+	// TODO KAT 2007-04-16 add specific checks here
 	return null;
 }
 
@@ -217,37 +216,34 @@ public void createBackup() {
 }
 
 /**
-Compare two rights Vectors and see if they are the same.
-@param v1 the first Vector of StateMod_ReservoirRight s to check.  Can not
-be null.
-@param v2 the second Vector of StateMod_ReservoirRight s to check.  Can not
-be null.
+Compare two rights lists and see if they are the same.
+@param v1 the first list of StateMod_ReservoirRight s to check.  Cannot be null.
+@param v2 the second list of StateMod_ReservoirRight s to check.  Cannot be null.
 @return true if they are the same, false if not.
 */
-public static boolean equals(List v1, List v2) {
-	String routine = "StateMod_ReservoirRight.equals(Vector, Vector)";
+public static boolean equals(List v1, List v2)
+{
 	StateMod_ReservoirRight r1;	
 	StateMod_ReservoirRight r2;	
 	if (v1.size() != v2.size()) {
-		Message.printStatus(1, routine, "Vectors are different sizes");
+		//Message.printStatus(2, routine, "Lists are different sizes");
 		return false;
 	}
 	else {
-		// sort the Vectors and compare item-by-item.  Any differences
+		// sort the lists and compare item-by-item.  Any differences
 		// and data will need to be saved back into the dataset.
 		int size = v1.size();
-		Message.printStatus(1, routine, "Vectors are of size: " + size);
+		//Message.printStatus(2, routine, "Lists are of size: " + size);
 		List v1Sort = StateMod_Util.sortStateMod_DataVector(v1);
 		List v2Sort = StateMod_Util.sortStateMod_DataVector(v2);
-		Message.printStatus(1, routine, "Vectors have been sorted");
+		//Message.printStatus(2, routine, "Lists have been sorted");
 	
 		for (int i = 0; i < size; i++) {			
 			r1 = (StateMod_ReservoirRight)v1Sort.get(i);	
 			r2 = (StateMod_ReservoirRight)v2Sort.get(i);	
-			Message.printStatus(1, routine, r1.toString());
-			Message.printStatus(1, routine, r2.toString());
-			Message.printStatus(1, routine, "Element " + i 
-				+ " comparison: " + r1.compareTo(r2));
+			//Message.printStatus(2, routine, r1.toString());
+			//Message.printStatus(2, routine, r2.toString());
+			//Message.printStatus(2, routine, "Element " + i + " comparison: " + r1.compareTo(r2));
 			if (r1.compareTo(r2) != 0) {
 				return false;
 			}
@@ -257,8 +253,7 @@ public static boolean equals(List v1, List v2) {
 }
 
 /**
-Tests to see if two diversion rights are equal.  Strings are compared with
-case sensitivity.
+Tests to see if two diversion rights are equal.  Strings are compared with case sensitivity.
 @param right the right to compare.
 @return true if they are equal, false otherwise.
 */
@@ -267,12 +262,8 @@ public boolean equals(StateMod_ReservoirRight right) {
 	 	return false;
 	}
 	
-	if (	right._rtem.equals(_rtem)
-		&& right._dcrres == _dcrres
-		&& right._iresco == _iresco
-		&& right._ityrstr == _ityrstr
-		&& right._n2fill == _n2fill
-		&& right._copid.equals(_copid)) {
+	if ( right._rtem.equals(_rtem) && right._dcrres == _dcrres && right._iresco == _iresco
+		&& right._ityrstr == _ityrstr && right._n2fill == _n2fill && right._copid.equals(_copid)) {
 		return true;
 	}
 	return false;
@@ -309,8 +300,7 @@ Returns the data column header for the specifically checked data.
  */
 public static String[] getDataHeader()
 {
-	// TODO KAT 2007-04-16 
-	// When specific checks are added to checkComponentData
+	// TODO KAT 2007-04-16 When specific checks are added to checkComponentData
 	// return the header for that data here
 	return new String[] {};
 }
@@ -359,8 +349,7 @@ Return a list of account distribution switch option strings, for use in GUIs.
 The options are of the form "1" if include_notes is false and
 "1 - Account to be served by right", if include_notes is true.
 @return a list of on/off switch option strings, for use in GUIs.
-@param include_notes Indicate whether notes should be added after the parameter
-values.
+@param include_notes Indicate whether notes should be added after the parameter values.
 */
 public static List getIrescoChoices ( boolean include_notes )
 {	List v = new Vector(102);	// Allow for one blank in StateDMI
@@ -374,8 +363,7 @@ public static List getIrescoChoices ( boolean include_notes )
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.set(i,StringUtil.getToken(
-				(String)v.get(i), " ", 0, 0));
+			v.set(i,StringUtil.getToken((String)v.get(i), " ", 0, 0));
 		}
 	}
 	return v;
@@ -391,7 +379,8 @@ public static String getIrescoDefault ( boolean include_notes )
 	if ( include_notes ) {
 		return ( "1 - Account served by right" );
 	}
-	else {	return "1";
+	else {
+		return "1";
 	}
 }
 
@@ -400,8 +389,7 @@ Return a list of on/off switch option strings, for use in GUIs.
 The options are of the form "0" if include_notes is false and
 "0 - Off", if include_notes is true.
 @return a list of on/off switch option strings, for use in GUIs.
-@param include_notes Indicate whether notes should be added after the parameter
-values.
+@param include_notes Indicate whether notes should be added after the parameter values.
 */
 public static List getIrsrswChoices ( boolean include_notes )
 {	return StateMod_DiversionRight.getIdvrswChoices ( include_notes );
@@ -428,8 +416,7 @@ Return a list of right type option strings, for use in GUIs.
 The options are of the form "1" if include_notes is false and
 "1 - Standard", if include_notes is true.
 @return a list of fill switch option strings, for use in GUIs.
-@param include_notes Indicate whether notes should be added after the parameter
-values.
+@param include_notes Indicate whether notes should be added after the parameter values.
 */
 public static List getItyrsrChoices ( boolean include_notes )
 {	List v = new Vector(2);
@@ -439,8 +426,7 @@ public static List getItyrsrChoices ( boolean include_notes )
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.set(i,StringUtil.getToken(
-				(String)v.get(i), " ", 0, 0) );
+			v.set(i,StringUtil.getToken( (String)v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
@@ -452,11 +438,12 @@ to pick a default for a new diversion.
 @return the default right type choice.
 */
 public static String getItyrsrDefault ( boolean include_notes )
-{	// Make this aggree with the above method...
+{	// Make this agree with the above method...
 	if ( include_notes ) {
 		return ( "1 - Standard" );
 	}
-	else {	return "1";
+	else {
+		return "1";
 	}
 }
 
@@ -480,8 +467,7 @@ Return a list of fill switch option strings, for use in GUIs.
 The options are of the form "1" if include_notes is false and
 "1 - First fill", if include_notes is true.
 @return a list of fill switch option strings, for use in GUIs.
-@param include_notes Indicate whether notes should be added after the parameter
-values.
+@param include_notes Indicate whether notes should be added after the parameter values.
 */
 public static List getN2fillChoices ( boolean include_notes )
 {	List v = new Vector(2);
@@ -491,24 +477,23 @@ public static List getN2fillChoices ( boolean include_notes )
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.set(i,StringUtil.getToken(
-				(String)v.get(i), " ", 0, 0) );
+			v.set(i,StringUtil.getToken((String)v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
 }
 
 /**
-Return the default fill type choice.  This can be used by GUI code
-to pick a default for a new diversion.
+Return the default fill type choice.  This can be used by GUI code to pick a default for a new diversion.
 @return the default fill type choice.
 */
 public static String getN2fillDefault ( boolean include_notes )
-{	// Make this aggree with the above method...
+{	// Make this agree with the above method...
 	if ( include_notes ) {
 		return ( "1 - First fill" );
 	}
-	else {	return "1";
+	else {
+		return "1";
 	}
 }
 
@@ -547,7 +532,7 @@ public static boolean isReservoirRightFile ( String filename )
 }
 
 /**
-Read reservoir right information in and store in a Vector.
+Read reservoir right information in and store in a list.
 @param filename Name of file to read.
 @return Vector of reservoir right data
 @exception Exception if there is an error reading the file.
@@ -556,36 +541,37 @@ public static List readStateModFile(String filename)
 throws Exception {
 	String routine = "StateMod_ReservoirRight.readStateModFile";
 	List theRights = new Vector();
-	int [] format_0 = {	StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_DOUBLE,
-				StringUtil.TYPE_INTEGER,
-				StringUtil.TYPE_INTEGER,
-				StringUtil.TYPE_INTEGER,
-				StringUtil.TYPE_INTEGER,
-				StringUtil.TYPE_STRING };
-	int [] format_0w = {	12,
-				24,
-				12,
-				16,
-				8,
-				8,
-				8,
-				8,
-				8,
-				12 };
+	int [] format_0 = {
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_DOUBLE,
+		StringUtil.TYPE_INTEGER,
+		StringUtil.TYPE_INTEGER,
+		StringUtil.TYPE_INTEGER,
+		StringUtil.TYPE_INTEGER,
+		StringUtil.TYPE_STRING };
+	int [] format_0w = {
+		12,
+		24,
+		12,
+		16,
+		8,
+		8,
+		8,
+		8,
+		8,
+		12 };
 	String iline = null;
 	List v = new Vector(10);
 	BufferedReader in = null;
 	StateMod_ReservoirRight aRight = null;
 
-	Message.printStatus(1, routine, "Reading reservoir rights file: " +
-		filename);
+	Message.printStatus(2, routine, "Reading reservoir rights file: " + filename);
 	
-	try {	in = new BufferedReader(new FileReader(
-			IOUtil.getPathUsingWorkingDir(filename)));
+	try {
+		in = new BufferedReader(new FileReader(IOUtil.getPathUsingWorkingDir(filename)));
 		while ((iline = in.readLine())!= null) {
 			if (iline.startsWith("#")|| iline.trim().length()==0) {
 				continue;
@@ -595,8 +581,7 @@ throws Exception {
 
 			StringUtil.fixedRead(iline, format_0, format_0w, v);
 			if (Message.isDebugOn) {
-				Message.printDebug(50, routine, 
-				"iline: " + iline);
+				Message.printDebug(50, routine, "iline: " + iline);
 			}
 			aRight.setID(((String)v.get(0)).trim());
 			aRight.setName(((String)v.get(1)).trim());
@@ -612,29 +597,14 @@ throws Exception {
 		}
 	} 
 	catch (Exception e) {
-		routine = null;
-		format_0 = null;
-		format_0w = null;
-		iline = null;
-		v = null;
+		Message.printWarning(3, routine, e);
+		throw e;
+	}
+	finally {
 		if (in != null) {
 			in.close();
 		}
-		in = null;
-		aRight = null;
-		Message.printWarning(2, routine, e);
-		throw e;
 	}
-	routine = null;
-	format_0 = null;
-	format_0w = null;
-	iline = null;
-	v = null;
-	if (in != null) {
-		in.close();
-	}
-	in = null;
-	aRight = null;
 	return theRights;
 }
 
@@ -806,10 +776,9 @@ is also maintained by calling this routine.
 @param newComments addition comments which should be included in history
 @exception Exception if an error occurs.
 */
-public static void writeStateModFile(String infile, String outfile,
-		List theRights, String []newComments)
+public static void writeStateModFile(String infile, String outfile, List theRights, List newComments)
 throws Exception {
-	writeStateModFile(infile, outfile, theRights, newComments,false);
+	writeStateModFile(infile, outfile, theRights, newComments, false);
 }
 
 /**
@@ -817,177 +786,138 @@ Write reservoir right information to output.  History header information
 is also maintained by calling this routine.
 @param infile input file from which previous history should be taken
 @param outfile output file to which to write
-@param theRights vector of reservoir right to print
+@param theRights list of reservoir right to print
 @param newComments addition comments which should be included in history
 @param oldAdminNumFormat whether to use the old admin num format or not
 @exception Exception if an error occurs.
 */
 public static void writeStateModFile(String infile, String outfile,
-		List theRights, String []newComments, boolean oldAdminNumFormat)
-throws Exception {
-	String [] comment_str = { "#" };	
-	String [] ignore_comment_str = { "#>" };	
+		List theRights, List newComments, boolean oldAdminNumFormat)
+throws Exception
+{
+	List commentIndicators = new Vector(1);
+	commentIndicators.add ( "#" );
+	List ignoredCommentIndicators = new Vector(1);
+	ignoredCommentIndicators.add ( "#>");	
 	String routine = "StateMod_ReservoirRight.writeStateModFile";
 	PrintWriter out = null;
 
 	if (Message.isDebugOn) {
-		Message.printDebug(2, routine, 
-		"Print reservoir rights to file: " + outfile);
+		Message.printDebug(2, routine, "Writing reservoir rights to file: " + outfile);
 	}
 	try {	
-	out = IOUtil.processFileHeaders(
-		IOUtil.getPathUsingWorkingDir(infile),
-		IOUtil.getPathUsingWorkingDir(outfile), 
-		newComments, comment_str, ignore_comment_str, 0);
-
-	String iline = null;
-	String cmnt = "#>";
-	StateMod_ReservoirRight right = null;
-	List v = new Vector(10);
-	String format_0 = null;
-	String format_1 = null;
-	if (oldAdminNumFormat) {
-		// Left justify...
-		format_0 =
-			"%-12.12s%-24.24s%-12.12s    %-12.12s%8.0f%8d%8d%8d%8d"
-			+ "%-12.12s";
-		format_1 =
-			"%-12.12s%-24.24s%-12.12s    %-12.12s%8.2f%8d%8d%8d"
-			+ "%8d%-12.12s";
-	}
-	else {	
-		// Right justify...
-		format_0 =
-			"%-12.12s%-24.24s%-12.12s    %12.12s%8.0f%8d%8d%8d%8d"
-			+ "%-12.12s";
-		format_1 = 
-			"%-12.12s%-24.24s%-12.12s    %12.12s%8.2f%8d%8d%8d%8d"
-			+ "%-12.12s";
-	}
-
-	out.println(cmnt);
-	out.println(cmnt
-		+ " *******************************************************");
-	out.println(cmnt
-		+ "  Reservoir Right File");
-	out.println(cmnt);
-	out.println(cmnt
-		+ "  format:  (a12, a24, a12, F16.5, f8.0, 4i8, a12)");
-	out.println(cmnt);
-	out.println(cmnt
-		+ "  ID       cirsid:  Reservoir right ID");
-	out.println(cmnt
-		+ "  Name      namer:  Reservoir name");
-	out.println(cmnt
-		+ "  Res ID    cgoto:  Reservoir ID tied to this right");
-	out.println(cmnt
-		+ "  Admin #    rtem:  Administration number");
-	out.println(cmnt
-		+ "                    (small is senior).");
-	out.println(cmnt
-		+ "  Decree   dcrres:  Decreed amount (af)");
-	out.println(cmnt
-		+ "  On/Off   irsrsw:  Switch 0 = off,1 = on");
-	out.println(cmnt
-		+ "                    YYYY = on for years >= YYYY" );
-	out.println(cmnt
-		+ "                    -YYYY = off for years > YYYY" );
-	out.println(cmnt
-		+ "  Owner    iresco:  Ownership code");
-	out.println(cmnt
-		+ "                      >0, account to be filled");
-	out.println(cmnt
-		+ "                      <0, ownership go to 1st (n) accounts");
-	out.println(cmnt
-		+ "  Type     ityrsr:  Reservoir type");
-	out.println(cmnt
-		+ "                      1=Standard");
-	out.println(cmnt
-		+ "                      2=Out of priority water right");
-	out.println(cmnt
-		+ "  Fill #   n2fill:  Right type 1=1st fill, 2=2nd "
-		+ "fill");
-	out.println(cmnt
-		+"  Out ID    copid:  Out of priority associated operational ");
-	out.println(cmnt
-		+ "                      right  (when ityrsr=-1)");
-	out.println(cmnt);
-	out.println(cmnt
-		+ "    ID     Name                    Res ID          "
-		+ "  Admin #   Decree  On/Off  Owner   Type    Fill # "
-		+ " Out ID     ");
-	out.println(cmnt
-		+ "---------eb----------------------eb----------eb---"
-		+ "-----------eb------eb------eb------eb------eb------e"
-		+ "b----------e");
-	out.println(cmnt);
-	out.println(cmnt + "EndHeader");
-	out.println(cmnt);
-
-	int num = 0;
-	if (theRights != null) {
-		num = theRights.size();
-	}
-	for (int i = 0; i < num; i++) {
-		right =(StateMod_ReservoirRight)theRights.get(i);
-		if (right == null) {
-			continue;
-		}
-		v.clear();
-		v.add(right.getID());
-		v.add(right.getName());
-		v.add(right.getCgoto());
-		v.add(right.getRtem());
-		v.add(new Double(right.getDcrres()));
-		v.add(new Integer(right.getSwitch()));
-		v.add(new Integer(right.getIresco()));
-		v.add(new Integer(right.getItyrstr()));
-		v.add(new Integer(right.getN2fill()));
-		v.add(right.getCopid());
-		if (right.getDcrres()< 1.0) {
-			// Use the format for a small right(8.2)...
-			iline = StringUtil.formatString(v, format_1);
+		out = IOUtil.processFileHeaders(
+			IOUtil.getPathUsingWorkingDir(infile),
+			IOUtil.getPathUsingWorkingDir(outfile), 
+			newComments, commentIndicators, ignoredCommentIndicators, 0);
+	
+		String iline = null;
+		String cmnt = "#>";
+		StateMod_ReservoirRight right = null;
+		List v = new Vector(10);
+		String format_0 = null;
+		String format_1 = null;
+		if (oldAdminNumFormat) {
+			// Left justify...
+			format_0 = "%-12.12s%-24.24s%-12.12s    %-12.12s%8.0f%8d%8d%8d%8d%-12.12s";
+			format_1 = "%-12.12s%-24.24s%-12.12s    %-12.12s%8.2f%8d%8d%8d%8d%-12.12s";
 		}
 		else {	
-			// Default format 8.0...
-			iline = StringUtil.formatString(v, format_0);
+			// Right justify...
+			format_0 = "%-12.12s%-24.24s%-12.12s    %12.12s%8.0f%8d%8d%8d%8d%-12.12s";
+			format_1 = "%-12.12s%-24.24s%-12.12s    %12.12s%8.2f%8d%8d%8d%8d%-12.12s";
 		}
-		out.println(iline);
-	}		
-
-	out.flush();
-	out.close();
-	out = null;
-	comment_str = null;
-	ignore_comment_str = null;
-	routine = null;
+	
+		out.println(cmnt);
+		out.println(cmnt + " *******************************************************");
+		out.println(cmnt + "  StateMod Reservoir Right File");
+		out.println(cmnt);
+		out.println(cmnt + "  format:  (a12, a24, a12, F16.5, f8.0, 4i8, a12)");
+		out.println(cmnt);
+		out.println(cmnt + "  ID       cirsid:  Reservoir right ID");
+		out.println(cmnt + "  Name      namer:  Reservoir name");
+		out.println(cmnt + "  Res ID    cgoto:  Reservoir ID tied to this right");
+		out.println(cmnt + "  Admin #    rtem:  Administration number");
+		out.println(cmnt + "                    (small is senior).");
+		out.println(cmnt + "  Decree   dcrres:  Decreed amount (af)");
+		out.println(cmnt + "  On/Off   irsrsw:  Switch 0 = off,1 = on");
+		out.println(cmnt + "                    YYYY = on for years >= YYYY" );
+		out.println(cmnt + "                    -YYYY = off for years > YYYY" );
+		out.println(cmnt + "  Owner    iresco:  Ownership code");
+		out.println(cmnt + "                      >0, account to be filled");
+		out.println(cmnt + "                      <0, ownership go to 1st (n) accounts");
+		out.println(cmnt + "  Type     ityrsr:  Reservoir type");
+		out.println(cmnt + "                      1=Standard");
+		out.println(cmnt + "                      2=Out of priority water right");
+		out.println(cmnt + "  Fill #   n2fill:  Right type 1=1st fill, 2=2nd fill");
+		out.println(cmnt + "  Out ID    copid:  Out of priority associated operational ");
+		out.println(cmnt + "                      right  (when ityrsr=-1)");
+		out.println(cmnt);
+		out.println(cmnt + "    ID     Name                    Res ID            Admin #   Decree  On/Off  Owner   Type    Fill #  Out ID     ");
+		out.println(cmnt + "---------eb----------------------eb----------eb--------------eb------eb------eb------eb------eb------eb----------e");
+		out.println(cmnt);
+		out.println(cmnt + "EndHeader");
+		out.println(cmnt);
+	
+		int num = 0;
+		if (theRights != null) {
+			num = theRights.size();
+		}
+		for (int i = 0; i < num; i++) {
+			right =(StateMod_ReservoirRight)theRights.get(i);
+			if (right == null) {
+				continue;
+			}
+			v.clear();
+			v.add(right.getID());
+			v.add(right.getName());
+			v.add(right.getCgoto());
+			v.add(right.getRtem());
+			v.add(new Double(right.getDcrres()));
+			v.add(new Integer(right.getSwitch()));
+			v.add(new Integer(right.getIresco()));
+			v.add(new Integer(right.getItyrstr()));
+			v.add(new Integer(right.getN2fill()));
+			v.add(right.getCopid());
+			if (right.getDcrres()< 1.0) {
+				// Use the format for a small right(8.2)...
+				iline = StringUtil.formatString(v, format_1);
+			}
+			else {	
+				// Default format 8.0...
+				iline = StringUtil.formatString(v, format_0);
+			}
+			out.println(iline);
+		}		
 	}
 	catch (Exception e) {
+		Message.printWarning(3, routine, e);
+		throw e;
+	}
+	finally {
 		if (out != null) {
+			out.flush();
 			out.close();
 		}
-		out = null;
-		comment_str = null;
-		ignore_comment_str = null;
-		routine = null;
-		Message.printWarning(2, routine, e);
-		throw e;
 	}
 }
 
 /**
-Writes a Vector of StateMod_XXX objects to a list file.  A header is 
+Writes a list of StateMod_ReservoirRight objects to a list file.  A header is 
 printed to the top of the file, containing the commands used to generate the 
 file.  Any strings in the body of the file that contain the field delimiter will be wrapped in "...".  
 @param filename the name of the file to which the data will be written.
 @param delimiter the delimiter to use for separating field values.
 @param update whether to update an existing file, retaining the current 
 header (true) or to create a new file with a new header.
-@param data the Vector of objects to write.  
+@param data the list of objects to write.
+@param newComments comments to write to the top of the file.
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter, boolean update, List data) 
-throws Exception {
+public static void writeListFile(String filename, String delimiter, boolean update, List data,
+	List newComments ) 
+throws Exception
+{	String routine = "StateMod_ReservoirRight.writeListFile";
 	int size = 0;
 	if (data != null) {
 		size = data.size();
@@ -1023,24 +953,35 @@ throws Exception {
 	
 	int j = 0;
 	StateMod_ReservoirRight right = null;
-	String[] commentString = { "#" };
-	String[] ignoreCommentString = { "#>" };
+	List commentIndicators = new Vector(1);
+	commentIndicators.add ( "#" );
+	List ignoredCommentIndicators = new Vector(1);
+	ignoredCommentIndicators.add ( "#>");
 	String[] line = new String[fieldCount];
-	String[] newComments = null;
 	StringBuffer buffer = new StringBuffer();
 	PrintWriter out = null;
 
-	try {	
-		out = IOUtil.processFileHeaders(
-			oldFile,
-			IOUtil.getPathUsingWorkingDir(filename), 
-			newComments, commentString, ignoreCommentString, 0);
+	try {
+		// Add some basic comments at the top of the file.  Do this to a copy of the
+		// incoming comments so that they are not modified in the calling code.
+		List newComments2 = null;
+		if ( newComments == null ) {
+			newComments2 = new Vector();
+		}
+		else {
+			newComments2 = new Vector(newComments);
+		}
+		newComments2.add(0,"");
+		newComments2.add(1,"StateMod reservoir rights as a delimited list file.");
+		newComments2.add(2,"");
+		out = IOUtil.processFileHeaders( oldFile, IOUtil.getPathUsingWorkingDir(filename), 
+			newComments2, commentIndicators, ignoredCommentIndicators, 0);
 
 		for (int i = 0; i < fieldCount; i++) {
-			buffer.append("\"" + names[i] + "\"");
-			if (i < (fieldCount - 1)) {
+			if (i > 0) {
 				buffer.append(delimiter);
 			}
+			buffer.append("\"" + names[i] + "\"");
 		}
 
 		out.println(buffer.toString());
@@ -1048,52 +989,41 @@ throws Exception {
 		for (int i = 0; i < size; i++) {
 			right = (StateMod_ReservoirRight)data.get(i);
 			
-			line[0] = StringUtil.formatString(right.getID(), 
-				formats[0]).trim();
-			line[1] = StringUtil.formatString(right.getName(), 
-				formats[1]).trim();
-			line[2] = StringUtil.formatString(right.getCgoto(), 
-				formats[2]).trim();
-			line[3] = StringUtil.formatString(right.getRtem(), 
-				formats[3]).trim();
-			line[4] = StringUtil.formatString(right.getDcrres(), 
-				formats[4]).trim();
-			line[5] = StringUtil.formatString(right.getSwitch(), 
-				formats[5]).trim();
-			line[6] = StringUtil.formatString(right.getIresco(), 
-				formats[6]).trim();
-			line[7] = StringUtil.formatString(right.getItyrstr(), 
-				formats[7]).trim();
-			line[8] = StringUtil.formatString(right.getN2fill(), 
-				formats[8]).trim();
-			line[9] = StringUtil.formatString(right.getCopid(), 
-				formats[9]).trim();
+			line[0] = StringUtil.formatString(right.getID(),formats[0]).trim();
+			line[1] = StringUtil.formatString(right.getName(),formats[1]).trim();
+			line[2] = StringUtil.formatString(right.getCgoto(),formats[2]).trim();
+			line[3] = StringUtil.formatString(right.getRtem(),formats[3]).trim();
+			line[4] = StringUtil.formatString(right.getDcrres(),formats[4]).trim();
+			line[5] = StringUtil.formatString(right.getSwitch(),formats[5]).trim();
+			line[6] = StringUtil.formatString(right.getIresco(),formats[6]).trim();
+			line[7] = StringUtil.formatString(right.getItyrstr(),formats[7]).trim();
+			line[8] = StringUtil.formatString(right.getN2fill(),formats[8]).trim();
+			line[9] = StringUtil.formatString(right.getCopid(),formats[9]).trim();
 
 			buffer = new StringBuffer();	
 			for (j = 0; j < fieldCount; j++) {
+				if (j > 0) {
+					buffer.append(delimiter);
+				}
 				if (line[j].indexOf(delimiter) > -1) {
 					line[j] = "\"" + line[j] + "\"";
 				}
 				buffer.append(line[j]);
-				if (j < (fieldCount - 1)) {
-					buffer.append(delimiter);
-				}
 			}
 
 			out.println(buffer.toString());
 		}
-		out.flush();
-		out.close();
-		out = null;
 	}
 	catch (Exception e) {
+		Message.printWarning(3, routine, e);
+		throw e;
+	}
+	finally {
 		if (out != null) {
 			out.flush();
 			out.close();
-		}
-		out = null;
-		throw e;
+		}	
 	}
 }
 
-} // End StateMod_ReservoirRight
+}

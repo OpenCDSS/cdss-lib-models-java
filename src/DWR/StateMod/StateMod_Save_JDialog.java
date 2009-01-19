@@ -544,7 +544,7 @@ throws Exception {
 			break;
 		case StateMod_DataSet.COMP_RESERVOIR_RIGHTS:
 			StateMod_ReservoirRight.writeStateModFile(oldFilename,
-				newFilename, (List)data, comments);
+				newFilename, (List)data, StringUtil.toList(comments));
 			name = "Reservoir Rights";
 			break;
 		case StateMod_DataSet.COMP_RESPONSE:

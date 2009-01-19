@@ -2364,7 +2364,7 @@ throws Exception {
 	
 		out.println(cmnt);
 		out.println(cmnt + " *******************************************************");
-		out.println(cmnt + "  Well Station File");
+		out.println(cmnt + "  StateMod Well Station File");
 		out.println(cmnt);
 		out.println(cmnt + "  Row 1 format:  (a12, a24, a12,i8, f8.2, 1x, a12, 1x, f12.5)");
 		out.println(cmnt);
@@ -2763,7 +2763,6 @@ throws Exception {
 	}
 	
 	int[] years = null;
-	int j = 0;
 	int k = 0;
 	int num = 0;
 	PrintWriter out = null;
@@ -2826,7 +2825,7 @@ throws Exception {
 				// Loop through the identifiers for the specific year
 				for ( k = 0; k < ids.size(); k++ ) {
 					line[0] = StringUtil.formatString(id, formats[0]).trim();
-					line[1] = StringUtil.formatString(years[j], formats[1]).trim();
+					line[1] = StringUtil.formatString(years[iyear], formats[1]).trim();
 					line[2] = StringUtil.formatString(colType, formats[2]).trim();
 					line[3] = StringUtil.formatString(partType, formats[3]).trim();
 					line[4] = StringUtil.formatString( ((String)(ids.get(k))), formats[4]).trim();
