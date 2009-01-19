@@ -145,6 +145,7 @@
 package DWR.StateMod;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.PrintWriter;
 import java.util.List;
@@ -164,59 +165,58 @@ import RTi.Util.String.StringUtil;
 The Reservoir class holds data for entries in the StateMod reservoir station
 file.  Secondary data classes are used in cases where lists of data are used.
 */
-public class StateMod_Reservoir 
-extends StateMod_Data
+public class StateMod_Reservoir extends StateMod_Data
 implements Cloneable, Comparable, StateMod_Component {
 
 /**
 date for one fill rule admin
 */
-protected double	_rdate;	
+protected double _rdate;	
 
 /**
 minimum reservoir content
 */
-protected double 	_volmin;
+protected double _volmin;
 
 /**
 Maximum reservoir content
 */
-protected double 	_volmax;
+protected double _volmax;
 
 /**
 maximum reservoir release
 */
-protected double 	_flomax;
+protected double _flomax;
 
 /**
 dead storage in reservoir
 */
-protected double 	_deadst;
+protected double _deadst;
 
 /**
-Vector of owners
+List of owners
 */
-protected List	_owners;
+protected List _owners;
 
 /**
 Daily id
 */
-protected String	_cresdy;
+protected String _cresdy;
 
 /**
-Vector of evap/precip stations
+List of evap/precip stations
 */
-protected List	_climate_Vector;
+protected List _climate_Vector;
 
 /**
-vector of area capacity values
+List of area capacity values
 */
-protected List	_areacapvals;
+protected List _areacapvals;
 
 /**
-Vector of reservoir rights
+List of reservoir rights
 */
-protected List	_rights;
+protected List _rights;
 
 /**
 End of month content time series.
@@ -226,7 +226,7 @@ protected MonthTS _content_MonthTS;
 /**
 End of day content time series.
 */
-protected DayTS	 _content_DayTS;
+protected DayTS _content_DayTS;
 
 /**
 Minimum target time series (Monthly).
@@ -241,12 +241,12 @@ protected MonthTS _maxtarget_MonthTS;
 /**
 Minimum target time series (Daily).
 */
-protected DayTS	_mintarget_DayTS;
+protected DayTS _mintarget_DayTS;
 
 /**
 Maximum target time series (Daily).
 */
-protected DayTS	_maxtarget_DayTS;
+protected DayTS _maxtarget_DayTS;
 
 /**
 link to spatial data -- currently NOT cloned.
@@ -265,24 +265,23 @@ public static String COLLECTION_TYPE_SYSTEM = "System";
 
 private String __collection_type = StateMod_Util.MISSING_STRING;
 
+/**
+Used by DMI software - currently no options.
+*/
 private String __collection_part_type = "Reservoir";
-					// Used by DMI software - currently no
-					// options.
+
+/**
+The identifiers for data that are collected - null if not a collection location.
+This is a list of List where the __collection_year is the first dimension.
+This is ugly but need to use the code to see if it can be made cleaner.
+ */
 private List __collection_Vector = null;
-					// The identifiers for data that are
-					// collected - null if not a collection
-					// location.  This is actually a Vector
-					// of Vector's where the
-					// __collection_year is the first
-					// dimension.  This is ugly but need to
-					// use the code to see if it can be
-					// made cleaner.
 
+/**
+An array of years that correspond to the aggregate/system.  Reservoirs currently only have one year.
+*/
 private int [] __collection_year = null;
-					// An array of years that correspond to
-					// the aggregate/system.  Ditches
-					// currently only have one year.
-
+					
 /**
 Construct and initialize data to reasonable defaults where appropriate.
 **/
@@ -318,8 +317,7 @@ public void addAccount(StateMod_ReservoirAccount owner)
 		_owners.add(owner);
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(
-			StateMod_DataSet.COMP_RESERVOIR_STATIONS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_STATIONS, true);
 		}
 	}
 }
@@ -333,8 +331,7 @@ public void addAreaCap(StateMod_ReservoirAreaCap areacap)
 		_areacapvals.add(areacap);
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(
-			StateMod_DataSet.COMP_RESERVOIR_STATIONS,true);
+			_dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_STATIONS,true);
 		}
 	}
 }
@@ -348,8 +345,7 @@ public void addClimate(StateMod_ReservoirClimate climate) {
 		_climate_Vector.add(climate);
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(
-			StateMod_DataSet.COMP_RESERVOIR_STATIONS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_STATIONS, true);
 		}
 	}
 }
@@ -383,12 +379,10 @@ public boolean changed() {
 @param dataset StateMod dataset object.
 @param props Extra properties for specific data checks.
 @return List of data that failed specific checks.
- */
-public String[] checkComponentData( int count, 
-StateMod_DataSet dataset, PropList props ) 
+*/
+public String[] checkComponentData( int count, StateMod_DataSet dataset, PropList props ) 
 {
-	// TODO KAT 2007-04-16
-	// add specific checks here
+	// TODO KAT 2007-04-16 add specific checks here
 	return null;
 }
 
@@ -469,8 +463,7 @@ public int compareTo(Object o) {
 
 /**
 This set of routines don't actually add an element to an array.  They already
-exist as part of a Vector of StateMod_ReservoirRight.  We are just connecting 
-pointers.
+exist as part of a Vector of StateMod_ReservoirRight.  We are just connecting pointers.
 */
 public static void connectAllRights(List reservoirs, List rights)
 {	if (reservoirs == null) {
@@ -491,19 +484,14 @@ public static void connectAllRights(List reservoirs, List rights)
 
 /**
 Connect all reservoir-related time series to reservoir data objects.
-@param reservoirs Vector of StateMod_Reservoir.
-@param content_MonthTS Vector of MonthTS containing end-of-month content.
-@param content_DayTS Vector of DayTS containing end-of-day content.
-@param target_MonthTS Vector of MonthTS containing minimum/maximum target time
-series pairs.
-@param target_DayTS Vector of DayTS containing minimum/maximum target time
-series pairs.
+@param reservoirs List of StateMod_Reservoir.
+@param content_MonthTS List of MonthTS containing end-of-month content.
+@param content_DayTS List of DayTS containing end-of-day content.
+@param target_MonthTS List of MonthTS containing minimum/maximum target time series pairs.
+@param target_DayTS List of DayTS containing minimum/maximum target time series pairs.
 */
-public static void connectAllTS (	List reservoirs,
-		List content_MonthTS,
-		List content_DayTS,
-		List target_MonthTS,
-		List target_DayTS)
+public static void connectAllTS ( List reservoirs, List content_MonthTS, List content_DayTS,
+		List target_MonthTS, List target_DayTS)
 {	if (reservoirs == null) {
 		return;
 	}
@@ -644,10 +632,8 @@ public void connectTargetMonthTS(List targetTS) {
 			// Now set max, which should be the next time series.
 			if ( (i + 1) < numTS ) {
 				ts2 = (MonthTS)targetTS.get(i+1);
-				if (	!_id.equals(ts2.getIdentifier().
-					getLocation())) {
-					// Time series is for a different
-					// reservoir so reset to null...
+				if ( !_id.equals(ts2.getIdentifier().getLocation())) {
+					// Time series is for a different reservoir so reset to null...
 					ts2 = null;
 				}
 			}
@@ -742,13 +728,11 @@ public void deleteAccountAt(int index) {
 	}
 }
 
-// REVISIT - need to decide in the GUI if the right is actually removed from
-// the main list.
+// TODO - need to decide in the GUI if the right is actually removed from the main list.
 /**
 Remove right from list.  A comparison on the ID is made.
 @param right Right to remove.  Note that the right is only removed from the
-list for this diversion and must also be removed from the main diversion right
-list.
+list for this diversion and must also be removed from the main diversion right list.
 */
 public void disconnectRight ( StateMod_ReservoirRight right )
 {	if (right == null) {
@@ -756,8 +740,7 @@ public void disconnectRight ( StateMod_ReservoirRight right )
 	}
 	int size = _rights.size();
 	StateMod_ReservoirRight right2;
-	// Assume that more than on instance can exist, even though this is
-	// not allowed...
+	// Assume that more than on instance can exist, even though this is not allowed...
 	for ( int i = 0; i < size; i++ ) {
 		right2 = (StateMod_ReservoirRight)_rights.get(i);
 		if ( right2.getID().equalsIgnoreCase(right.getID()) ) {
@@ -832,7 +815,7 @@ public StateMod_ReservoirClimate getClimate(int index) {
 }
 
 /**
-Return the climate station asignments.
+Return the climate station assignments.
 */
 public List getClimates() {
 	return _climate_Vector;
@@ -846,7 +829,7 @@ regardless of the year value.
 */
 public List getCollectionPartIDs ( int year )
 {	if ( __collection_Vector.size() == 0 ) {
-			return null;
+		return null;
 	}
 	//if ( __collection_part_type.equalsIgnoreCase("Reservoir") ) {
 		// The list of part IDs will be the first and only list...
@@ -918,8 +901,7 @@ Returns the data column header for the specifically checked data.
  */
 public static String[] getDataHeader()
 {
-	// TODO KAT 2007-04-16 
-	// When specific checks are added to checkComponentData
+	// TODO KAT 2007-04-16 When specific checks are added to checkComponentData
 	// return the header for that data here
 	return new String[] {};
 }
@@ -948,11 +930,9 @@ public GeoRecord getGeoRecord() {
 
 /**
 Return a list of on/off switch option strings, for use in GUIs.
-The options are of the form "0" if include_notes is false and
-"0 - Off", if include_notes is true.
+The options are of the form "0" if include_notes is false and "0 - Off", if include_notes is true.
 @return a list of on/off switch option strings, for use in GUIs.
-@param include_notes Indicate whether notes should be added after the parameter
-values.
+@param include_notes Indicate whether notes should be added after the parameter values.
 */
 public static List getIresswChoices ( boolean include_notes )
 {	List v = new Vector(2);
@@ -964,8 +944,7 @@ public static List getIresswChoices ( boolean include_notes )
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.set(i,StringUtil.getToken(
-				(String)v.get(i), " ", 0, 0) );
+			v.set(i,StringUtil.getToken((String)v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
@@ -981,7 +960,8 @@ public static String getIresswDefault ( boolean include_notes )
 	if ( include_notes ) {
 		return "1 - On, do not store above reservoir targets";
 	}
-	else {	return "1";
+	else {
+		return "1";
 	}
 }
 
@@ -1045,14 +1025,12 @@ public int getNrange() {
 Return the number of evaporation time series for the reservoir.
 @param tslist The Vector of monthly evaporation data to check.
 @param check_ts If true, get the count of non-null time series (the reservoir
-may reference evaporation station indentifiers but the identifiers may not
-actually exist).
+may reference evaporation station identifiers but the identifiers may not actually exist).
 @return the number of evaporation time series for the reservoir.
 */
 public int getNumEvaporationMonthTS ( List tslist, boolean check_ts )
 {	// Loop through the evaporation data for this reservoir.  For each
-	// referenced evaporation station, if a matching time series is
-	// found, increment the count.
+	// referenced evaporation station, if a matching time series is found, increment the count.
 	int nsta = _climate_Vector.size();
 	int nts = 0;
 	TS ts;
@@ -1061,27 +1039,25 @@ public int getNumEvaporationMonthTS ( List tslist, boolean check_ts )
 	for ( int i = 0; i < nsta; i++ ) {
 		sta = (StateMod_ReservoirClimate)_climate_Vector.get(i);
 		if ( sta.getType() != StateMod_ReservoirClimate.CLIMATE_EVAP ) {
-			Message.printStatus ( 1, "", "SAMX climate " +
-				sta.getID() + " is not evap" );
+			Message.printStatus ( 1, "", "SAMX climate " + sta.getID() + " is not evap" );
 			continue;
 		}
 		pos = TSUtil.indexOf ( tslist, sta.getID(), "Location", 1 );
-		Message.printStatus ( 1, "", "SAMX climate " +
-				sta.getID() + " pos is " + pos );
+		//Message.printStatus ( 2, "", "SAMX climate " + sta.getID() + " pos is " + pos );
 		if ( pos >= 0 ) {
 			if ( check_ts ) {
 				// Make sure that the time series has data...
 				ts = (TS)tslist.get(pos);
 				if ( (ts != null) && ts.hasData() ) {
-					Message.printStatus ( 1, "",
-					"SAMX ts has data." );
+					//Message.printStatus ( 2, "", "SAMX ts has data." );
 					++nts;
 				}
-				else	Message.printStatus ( 1, "",
-					"SAMX ts has NO data." );
+				else {
+					//Message.printStatus ( 2, "", "SAMX ts has NO data." );
+				}
 			}
-			else {	// Just a count of the evaporation time
-				// series...
+			else {
+				// Just a count of the evaporation time series...
 				++nts;
 			}
 		}
@@ -1093,14 +1069,12 @@ public int getNumEvaporationMonthTS ( List tslist, boolean check_ts )
 Return the number of precipitation time series for the reservoir.
 @param tslist The Vector of monthly precipitation data to check.
 @param check_ts If true, get the count of non-null time series (the reservoir
-may reference precipitation station indentifiers but the identifiers may not
-actually exist).
+may reference precipitation station identifiers but the identifiers may not actually exist).
 @return the number of precipitation time series for the reservoir.
 */
 public int getNumPrecipitationMonthTS ( List tslist, boolean check_ts )
 {	// Loop through the precipitation data for this reservoir.  For each
-	// referenced precipitation station, if a matching time series is
-	// found, then increment the count.
+	// referenced precipitation station, if a matching time series is found, then increment the count.
 	int nsta = _climate_Vector.size();
 	int nts = 0;
 	TS ts;
@@ -1120,8 +1094,8 @@ public int getNumPrecipitationMonthTS ( List tslist, boolean check_ts )
 					++nts;
 				}
 			}
-			else {	// Just a count of the evaporation time
-				// series...
+			else {
+				// Just a count of the evaporation time series...
 				++nts;
 			}
 		}
@@ -1146,10 +1120,9 @@ public double getRdate() {
 /**
 Return a list of one fill rule (rdate) switch option strings, for use in GUIs.
 The options are of the form "-1" if include_notes is false and
-"-1 - Do not adminisiter one fill rule", if include_notes is true.
+"-1 - Do not administer one fill rule", if include_notes is true.
 @return a list of on/off switch option strings, for use in GUIs.
-@param include_notes Indicate whether notes should be added after the parameter
-values.
+@param include_notes Indicate whether notes should be added after the parameter values.
 */
 public static List getRdateChoices ( boolean include_notes )
 {	List v = new Vector(2);
@@ -1170,8 +1143,7 @@ public static List getRdateChoices ( boolean include_notes )
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.set(i, StringUtil.getToken(
-				(String)v.get(i), " ", 0, 0) );
+			v.set(i, StringUtil.getToken((String)v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
@@ -1183,11 +1155,12 @@ to pick a default for a new diversion.
 @return the default reservoir replacement choice.
 */
 public static String getRdateDefault ( boolean include_notes )
-{	// Make this aggree with the above method...
+{	// Make this agree with the above method...
 	if ( include_notes ) {
 		return ( "-1 - Do not administer the one fill rule" );
 	}
-	else {	return "-1";
+	else {
+		return "-1";
 	}
 }
 
@@ -1200,7 +1173,8 @@ public StateMod_ReservoirRight getRight(int index)
 {	if ( (index < 0) || (index >= _rights.size()) ) {
 		return null;
 	}
-	else {	return (StateMod_ReservoirRight)_rights.get(index);
+	else {
+		return (StateMod_ReservoirRight)_rights.get(index);
 	}
 }
 /**
@@ -1252,7 +1226,8 @@ private void initialize ( boolean initialize_defaults )
 		_flomax	= 99999.0;	// As per old SMGUI new reservoir
 		_deadst	= 0;
 	}
-	else {	_cresdy = "";
+	else {
+		_cresdy = "";
 		_rdate = StateMod_Util.MISSING_INT;
 		_volmin	= StateMod_Util.MISSING_DOUBLE;
 		_volmax	= StateMod_Util.MISSING_DOUBLE;
@@ -1269,7 +1244,8 @@ public boolean isCollection()
 {	if ( __collection_Vector == null ) {
 		return false;
 	}
-	else {	return true;
+	else {
+		return true;
 	}
 }
 
@@ -1281,8 +1257,7 @@ public void insertAreaCapAt(StateMod_ReservoirAreaCap areacap, int i) {
 		_areacapvals.add(i,areacap);
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(
-			StateMod_DataSet.COMP_RESERVOIR_STATIONS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_STATIONS, true);
 		}
 	}
 }
@@ -1298,64 +1273,74 @@ throws Exception
 	List theReservoirs = new Vector();
 	String iline = null;
 	List v = new Vector(9);
-	int [] format_0 = {	StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_INTEGER,
-				StringUtil.TYPE_DOUBLE,
-				StringUtil.TYPE_SPACE,
-				StringUtil.TYPE_STRING };
-	int [] format_0w = {	12,
-				24,
-				12,
-				8,
-				8,
-				1,
-				12 };
-	int [] format_1 = {	StringUtil.TYPE_SPACE,
-				StringUtil.TYPE_DOUBLE,
-				StringUtil.TYPE_DOUBLE,
-				StringUtil.TYPE_DOUBLE,
-				StringUtil.TYPE_DOUBLE,
-				StringUtil.TYPE_INTEGER,
-				StringUtil.TYPE_INTEGER,
-				StringUtil.TYPE_INTEGER,
-				StringUtil.TYPE_INTEGER };
-	int [] format_1w = {	24,
-				8,
-				8,
-				8,
-				8,
-				8,
-				8,
-				8,
-				8 };
-	int [] format_2 = {	StringUtil.TYPE_SPACE,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_DOUBLE,
-				StringUtil.TYPE_DOUBLE,
-				StringUtil.TYPE_DOUBLE,
-				StringUtil.TYPE_INTEGER };
-	int [] format_2w = {	12,
-				12,
-				8,
-				8,
-				8,
-				8 };
-	int [] format_3 = {	StringUtil.TYPE_SPACE,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_DOUBLE };
-	int [] format_3w = {	24,
-				12,
-				8 };
-	int [] format_4 = {	StringUtil.TYPE_SPACE,
-				StringUtil.TYPE_DOUBLE,
-				StringUtil.TYPE_DOUBLE,
-				StringUtil.TYPE_DOUBLE };
-	int [] format_4w = {	24,
-				8,
-				8,
-				8 };
+	int [] format_0 = {
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_INTEGER,
+		StringUtil.TYPE_DOUBLE,
+		StringUtil.TYPE_SPACE,
+		StringUtil.TYPE_STRING };
+	int [] format_0w = {
+		12,
+		24,
+		12,
+		8,
+		8,
+		1,
+		12 };
+	int [] format_1 = {
+		StringUtil.TYPE_SPACE,
+		StringUtil.TYPE_DOUBLE,
+		StringUtil.TYPE_DOUBLE,
+		StringUtil.TYPE_DOUBLE,
+		StringUtil.TYPE_DOUBLE,
+		StringUtil.TYPE_INTEGER,
+		StringUtil.TYPE_INTEGER,
+		StringUtil.TYPE_INTEGER,
+		StringUtil.TYPE_INTEGER };
+	int [] format_1w = {
+		24,
+		8,
+		8,
+		8,
+		8,
+		8,
+		8,
+		8,
+		8 };
+	int [] format_2 = {
+		StringUtil.TYPE_SPACE,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_DOUBLE,
+		StringUtil.TYPE_DOUBLE,
+		StringUtil.TYPE_DOUBLE,
+		StringUtil.TYPE_INTEGER };
+	int [] format_2w = {
+		12,
+		12,
+		8,
+		8,
+		8,
+		8 };
+	int [] format_3 = {
+		StringUtil.TYPE_SPACE,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_DOUBLE };
+	int [] format_3w = {
+		24,
+		12,
+		8 };
+	int [] format_4 = {
+		StringUtil.TYPE_SPACE,
+		StringUtil.TYPE_DOUBLE,
+		StringUtil.TYPE_DOUBLE,
+		StringUtil.TYPE_DOUBLE };
+	int [] format_4w = {
+		24,
+		8,
+		8,
+		8 };
 	BufferedReader in = null;
 	StateMod_Reservoir aReservoir = null;
 	StateMod_ReservoirAccount anAccount = null;
@@ -1364,26 +1349,25 @@ throws Exception
 	int i = 0;
 
 	if (Message.isDebugOn) {
-		Message.printDebug(10, routine, 
-		"in SMParseResFile reading file: " 
-		+ filename);
+		Message.printDebug(10, routine, "in SMParseResFile reading file: " + filename);
 	}
 	int line_count = 0;
-	try {	in = new BufferedReader(new FileReader(
+	try {
+		in = new BufferedReader(new FileReader(
 		IOUtil.getPathUsingWorkingDir(filename)));
 		while ((iline = in.readLine())!= null) {
 			++line_count;
 			// check for comments
-			if (iline.startsWith("#")|| iline.trim().length()==0)
+			if (iline.startsWith("#")|| iline.trim().length()==0) {
 				continue;
+			}
 
 			// allocate new reservoir node
 			aReservoir = new StateMod_Reservoir();
 
 			// line 1
 			if (Message.isDebugOn) {
-				Message.printDebug(50, routine, 
-					"line 1: " + iline);
+				Message.printDebug(50, routine, "line 1: " + iline);
 			}
 			StringUtil.fixedRead(iline, format_0, format_0w, v);
 			aReservoir.setID(((String)v.get(0)).trim());
@@ -1397,8 +1381,7 @@ throws Exception
 			iline = in.readLine();
 			++line_count;
 			if (Message.isDebugOn) {
-				Message.printDebug(50, routine, 
-					"line 2: " + iline);
+				Message.printDebug(50, routine, "line 2: " + iline);
 			}
 			StringUtil.fixedRead(iline, format_1, format_1w, v);
 			aReservoir.setVolmin(((Double)v.get(0)));
@@ -1412,18 +1395,15 @@ throws Exception
 
 			// get the owner's information
 			if (Message.isDebugOn) {
-				Message.printDebug(50, routine, 
-					"Number of owners: " + nowner);
+				Message.printDebug(50, routine, "Number of owners: " + nowner);
 			}
 			for (i = 0; i < nowner; i++) {
 				iline = in.readLine();
 				++line_count;
-				StringUtil.fixedRead(iline, format_2,
-					format_2w, v);
+				StringUtil.fixedRead(iline, format_2,format_2w, v);
 				anAccount = new StateMod_ReservoirAccount();
 				anAccount.setID ( "" + (i + 1) );
-				anAccount.setName(
-					((String)v.get(0)).trim());
+				anAccount.setName( ((String)v.get(0)).trim());
 				anAccount.setOwnmax( ((Double)v.get(1)));
 				anAccount.setCurown( ((Double)v.get(2)));
 				anAccount.setPcteva( ((Double)v.get(3)));
@@ -1435,12 +1415,10 @@ throws Exception
 			for (i = 0; i < nevap; i++) {
 				iline = in.readLine();
 				++line_count;
-				StringUtil.fixedRead(iline, format_3,
-					format_3w, v);
+				StringUtil.fixedRead(iline, format_3,format_3w, v);
 				anEvap = new StateMod_ReservoirClimate();
 				anEvap.setID( ((String)v.get(0)).trim());
-				anEvap.setType(
-				StateMod_ReservoirClimate.CLIMATE_EVAP);
+				anEvap.setType(StateMod_ReservoirClimate.CLIMATE_EVAP);
 				anEvap.setWeight(((Double)v.get(1)));
 				aReservoir.addClimate(anEvap);
 			}
@@ -1449,12 +1427,10 @@ throws Exception
 			for (i = 0; i < nptpx; i++) {
 				iline = in.readLine();
 				++line_count;
-				StringUtil.fixedRead(iline, format_3,
-					format_3w, v);
+				StringUtil.fixedRead(iline, format_3, format_3w, v);
 				aPtpx = new StateMod_ReservoirClimate();
 				aPtpx.setID( ((String)v.get(0)).trim());
-				aPtpx.setType(
-				StateMod_ReservoirClimate.CLIMATE_PTPX);
+				aPtpx.setType( StateMod_ReservoirClimate.CLIMATE_PTPX);
 				aPtpx.setWeight(((Double)v.get(1)));
 				aReservoir.addClimate(aPtpx);
 			}
@@ -1463,16 +1439,11 @@ throws Exception
 			for (i = 0; i < nrange; i++) {
 				iline = in.readLine();
 				++line_count;
-				StringUtil.fixedRead(iline, format_4,
-					format_4w, v);
-				StateMod_ReservoirAreaCap anAreaCap = 
-					new StateMod_ReservoirAreaCap();
-				anAreaCap.setConten(
-					((Double)v.get(0)));
-				anAreaCap.setSurarea(
-					((Double)v.get(1)));
-				anAreaCap.setSeepage(
-					((Double)v.get(2)));
+				StringUtil.fixedRead(iline, format_4, format_4w, v);
+				StateMod_ReservoirAreaCap anAreaCap = new StateMod_ReservoirAreaCap();
+				anAreaCap.setConten(((Double)v.get(0)));
+				anAreaCap.setSurarea(((Double)v.get(1)));
+				anAreaCap.setSeepage(((Double)v.get(2)));
 				aReservoir.addAreaCap(anAreaCap);
 			}
 
@@ -1480,53 +1451,14 @@ throws Exception
 			theReservoirs.add(aReservoir);
 		}
 	} catch (Exception e) {
-		routine = null;
-		iline = null;
-		v = null;
-		format_0 = null;
-		format_0w = null;
-		format_1 = null;
-		format_1w = null;
-		format_2 = null;
-		format_2w = null;
-		format_3 = null;
-		format_3w = null;
-		format_4 = null;
-		format_4w = null;
+		Message.printWarning(3, routine, "Error reading reservoir stations in line " + line_count );
+		throw e;
+	}
+	finally {
 		if (in != null) {
 			in.close();
 		}
-		in = null;
-		aReservoir = null;
-		anAccount = null;
-		anEvap = null;
-		aPtpx = null;
-		Message.printWarning(2, routine,
-		"Error reading reservoir stations in line " + line_count );
-		throw e;
 	}
-
-	routine = null;
-	iline = null;
-	v = null;
-	format_0 = null;
-	format_0w = null;
-	format_1 = null;
-	format_1w = null;
-	format_2 = null;
-	format_2w = null;
-	format_3 = null;
-	format_3w = null;
-	format_4 = null;
-	format_4w = null;
-	if (in != null) {
-		in.close();
-	}
-	in = null;
-	aReservoir = null;
-	anAccount = null;
-	anEvap = null;
-	aPtpx = null;
 	return theReservoirs;
 }
 
@@ -1549,17 +1481,15 @@ public void restoreOriginal() {
 
 /**
 Set owners (accounts).  The new list may have the same or different objects than
-the original list.  A comparison of objects is made to verify whether any
-data are dirty.
-@param owners Vector of StateMod_ReservoirAccount to set.  This should be a
-non-null Vector.
+the original list.  A comparison of objects is made to verify whether any data are dirty.
+@param owners Vector of StateMod_ReservoirAccount to set.  This should be a non-null Vector.
 */
 public void setAccounts ( List owners )
 {	// All of the following work id done to make sure the dirty flag on the
 	// component and individual objects is correct.  We could just delete
 	// all existing accounts and re-add, but we don't know for sure that
 	// the dirty flags would be correct.
-/* REVISIT
+/* TODO
 	int size = owners.size();
 	StateMod_ReservoirAccount account;
 	// Array to track whether all old accounts are accounted for.  If the
@@ -1588,7 +1518,7 @@ public void setAccounts ( List owners )
 	_owners = owners;
 }
 
-// REVISIT - need to check dirty flag
+// TODO - need to check dirty flag
 /**
 Set the area capacity vector.
 */
@@ -1596,7 +1526,7 @@ public void setAreaCaps ( List areacapvals )
 {	_areacapvals = areacapvals ;
 }
 
-// REVISIT - need to check dirty flag
+// TODO - need to check dirty flag
 /**
 Sets the climate station vector.
 */
@@ -1614,7 +1544,8 @@ public void setCollectionPartIDs ( List ids )
 		__collection_Vector = new Vector ( 1 );
 		__collection_year = new int[1];
 	}
-	else {	// Remove the previous contents...
+	else {
+		// Remove the previous contents...
 		__collection_Vector.clear();
 	}
 	// Now assign...
@@ -1654,8 +1585,7 @@ public void setCresdy(String cresdy) {
 		_cresdy = cresdy;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(
-			StateMod_DataSet.COMP_RESERVOIR_STATIONS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_STATIONS, true);
 		}
 	}
 }
@@ -1668,8 +1598,7 @@ public void setDeadst(double deadst) {
 		_deadst = deadst;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(
-			StateMod_DataSet.COMP_RESERVOIR_STATIONS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_STATIONS, true);
 		}
 	}
 }
@@ -1698,8 +1627,7 @@ public void setFlomax(double flomax) {
 		_flomax = flomax;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(
-			StateMod_DataSet.COMP_RESERVOIR_STATIONS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_STATIONS, true);
 		}
 	}
 }
@@ -1762,8 +1690,7 @@ public void setMinTargetMonthTS(MonthTS ts)
 
 /**
 Set the date for one fill rule admin.
-The value 0 is meaninging(??)- should be 1-12 or -1 to signify do not 
-administer rule
+The value 0 is meaning (??)- should be 1-12 or -1 to signify do not administer rule
 */
 public void setRdate(double rdate) {
 	if ( rdate == 0 ) {
@@ -1774,8 +1701,7 @@ public void setRdate(double rdate) {
 		_rdate = rdate;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(
-			StateMod_DataSet.COMP_RESERVOIR_STATIONS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_STATIONS, true);
 		}
 	}
 }
@@ -1796,7 +1722,7 @@ public void setRdate(String rdate) {
 	}
 }
 
-// REVISIT - need to check dirty correctly
+// TODO - need to check dirty correctly
 /**
 Set the rights
 */
@@ -1812,8 +1738,7 @@ public void setVolmax(double volmax) {
 		_volmax = volmax;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(
-			StateMod_DataSet.COMP_RESERVOIR_STATIONS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_STATIONS, true);
 		}
 	}
 }
@@ -1842,8 +1767,7 @@ public void setVolmin(double volmin) {
 		_volmin = volmin;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(
-			StateMod_DataSet.COMP_RESERVOIR_STATIONS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_STATIONS, true);
 		}
 	}
 }
@@ -1875,7 +1799,7 @@ is also maintained by calling this routine.
 */
 
 public static void writeStateModFile(String infile, String outfile, 
-		List theReservoirs, String[] newComments)
+		List theReservoirs, List newComments)
 throws Exception {
 	writeStateModFile(infile, outfile, theReservoirs, newComments, true);
 }
@@ -1885,341 +1809,265 @@ Write reservoirs information to output.  History header information
 is also maintained by calling this routine.
 @param infile input file from which previous history should be taken
 @param outfile output file to which to write
-@param theReservoirs vector of reservoirs to print
+@param theReservoirs list of reservoirs to print
 @param newComments addition comments which should be included in history
 @param useDailyData whether to use daily data
 @exception Exception if an error occurs.
 */
 public static void writeStateModFile(String infile, String outfile, 
-		List theReservoirs, String[] newComments, boolean useDailyData)
+		List theReservoirs, List newComments, boolean useDailyData)
 throws Exception {
 	String routine = "StateMod_Reservoirs.writeStateModFile";
-	String [] comment_str = { "#" };
-	String [] ignore_comment_str = { "#>" };
+	List commentIndicators = new Vector(1);
+	commentIndicators.add ( "#" );
+	List ignoredCommentIndicators = new Vector(1);
+	ignoredCommentIndicators.add ( "#>");
 	PrintWriter out = null;
 
 	if (Message.isDebugOn) {
-		Message.printDebug(1, routine, 
-		"in writeStateModFile printing file: " + outfile);
+		Message.printDebug(1, routine, "in writeStateModFile printing file: " + outfile);
 	}
 
 	try {	
-	out = IOUtil.processFileHeaders(
-		IOUtil.getPathUsingWorkingDir(infile),
-		IOUtil.getPathUsingWorkingDir(outfile), 
-		newComments, comment_str, ignore_comment_str, 0);
-
-	String iline = null;
-	String cmnt = "#>";
-	String format_0 = null;
-	if (useDailyData) {
-		format_0 = "%-12.12s%-24.24s%-12.12s%8d%#8.0f %-12.12s";
-	}
-	else {	
-		format_0 = "%-12.12s%-24.24s%-12.12s%8d%#8.0f";
-	}
-	String format_1 =
-		"                        %#8.0f%#8.0f%#8.0f%#8.0f%8d%8d%8d%8d";
-	String format_2 = "            %-12.12s%#8.0f%#8.0f%8.0f%8d";
-	// TODO SAM 2007-03-01 Evaluate use
-	//String format_3 = "            %-12.12s%#8.0f%#8.0f%8.0f%8d";
-	String format_4 = "            %-12.12s%-12.12s%#8.0f";
-	//String format_5 = "            %-12.12s%#8.0f%8.0f%8.0f";
-	String desc = null;
-	StateMod_Reservoir res = null;
-	StateMod_ReservoirAreaCap ac = null;
-	StateMod_ReservoirAccount own = null;
-	StateMod_ReservoirClimate clmt = null;
-	String ch1 = null;
-	List v = new Vector(6);	
-	List ownv = null;
-	List climatev = null;
-	List areacapv = null;
-
-	int i,j=0;
+		out = IOUtil.processFileHeaders(
+			IOUtil.getPathUsingWorkingDir(infile),
+			IOUtil.getPathUsingWorkingDir(outfile), 
+			newComments, commentIndicators, ignoredCommentIndicators, 0);
 	
-	// print out header
-	out.println(cmnt);
-	out.println(cmnt +
-		" *********************************"
-		+ "****************************");
-	out.println(cmnt + "  Reservoir Station file");
-	out.println(cmnt);
-	out.println(cmnt
-		+ "  Card 1   format:  (a12, a24, a12, i8, f8.0, 1x, a12)");
-	out.println(cmnt);
-	out.println(cmnt
-		+ "  ID       cresid:  Reservoir Id");
-	out.println(cmnt
-		+ "  Name     resnam:  Reservoir name");
-	out.println(cmnt
-		+ "  Riv ID    cgoto:  Node where Reservoir is located");
-	out.println(cmnt
-		+ "  On/Off   iressw:  Switch 0 = off, 1 = on");
-	out.println(cmnt
-		+ "  Admin #   rdate:  Administration date for 1 fill rule");
-	out.println(cmnt
-		+ "  Daily ID cresdy:  Identifier for daily time series.");
-	out.println(cmnt);
-	out.println(cmnt
-		+ "  Card 2 format:  (24x, 4f8.0, 4i8)");
-	out.println(cmnt);
-	out.println(cmnt
-		+ "  VolMin   volmin:  Min storage (ac-ft)");
-	out.println(cmnt
-		+ "  VolMax   volmax:  Max storage (ac-ft)");
-	out.println(cmnt
-		+ "  FloMax   flomax:  Max discharge (cfs)");
-	out.println(cmnt
-		+ "  DeadSt   deadst:  Dead storage (ac-ft)");
-	out.println(cmnt
-		+ "  NumOwner nowner:  Number of owners");
-	out.println(cmnt
-		+ "  NumEva   nevapo:  Number of evaporation stations");
-	out.println(cmnt
-		+ "  NumPre   nprecp:  Number of precipitation stations");
-	out.println(cmnt
-		+ "  NumTable nrange:  Number of area capacity values");
-	out.println(cmnt);
-	out.println(cmnt
-		+ "     Card 3 format:  (12x, a12, 3f8.0, i8)");
-	out.println(cmnt);
-	out.println(cmnt
-		+ "  OwnName  ownnam:  Owner name");
-	out.println(cmnt
-		+ "  OwnMax   ownmax:  Maximum storage for "
-		+ "that owner (ac-ft)");
-	out.println(cmnt
-		+ "  Sto-1    curown:  Initial storage for "
-		+ "that owner (ac-ft)");
-	out.println(cmnt
-		+ "  EvapTyp  pcteva:  Evaporation distribution");
-	out.println(cmnt
-		+ "  FillTyp   n2own:  Ownership type 1=First "
-		+ "fill; 2=Second fill");
-	out.println(cmnt);
-	out.println(cmnt
-		+ "  Card 4  format:  (24x, a12, f8.0)");
-	out.println(cmnt);
-	out.println(cmnt
-		+ "  Evap ID  cevar:  Evaporation station");
-	out.println(cmnt
-		+ "  EvapWt  weigev:  Evaporation station weight (%%)");
-	out.println(cmnt);
-	out.println(cmnt
-		+ "  Card 5 format:  (24x, a12, f8.0)");
-	out.println(cmnt);
-	out.println(cmnt
-		+ "  Prec ID   cprer:  Precipitation station");
-	out.println(cmnt
-		+ "  PrecWt   weigpr:  Precipitation station weight (%%)");
-	out.println(cmnt);
-	out.println(cmnt
-		+ "  Card 6 format:  (24x, 3f8.0)");
-	out.println(cmnt
-		+ "     Cont     conten:  Content (ac-ft)");
-	out.println(cmnt
-		+ "     Area    surarea:  Area (ac)");
-	out.println(cmnt
-		+ "     Seep    seepage:  Seepage (ac-ft)");
-	out.println(cmnt);
-	out.println(cmnt
-		+ " *****************************************"
-		+ "********************");
-	out.println(cmnt);
-
-	out.println(cmnt
-		+ "    ID              Name              Node    "
-		+ " On/Off  RDate       DailyID ");
-	out.println(cmnt
-		+ "---------eb----------------------eb----------e"
-		+ "b------eb------exb----------e");
-	out.println(cmnt
-		+ "                       VolMin  VolMax  FloMax "
-		+ " DeadSt NumOwner NumEva  NumPre NumTable");
-	out.println(cmnt
-		+ "xxxxxxxxxxxxxxxxxxxxxxb------eb------eb------e"
-		+ "b------eb------eb------eb------eb------e");
-	out.println(cmnt
-		+ "                         OwnName   OwnMax   Sto-1 "
-		+ "EvapTyp FillTyp");
-	out.println(cmnt
-		+ "xxxxxxxxxxxxxxxxxxxxxxb----------eb------eb------e"
-		+ "b------eb------e");
-	out.println(cmnt
-		+ "                        Evap Id    EvapWt ");
-	out.println(cmnt
-		+ "xxxxxxxxxxxxxxxxxxxxxxb----------eb------e");
-	out.println(cmnt
-		+ "                        Prec Id    PrecWt ");
-	out.println(cmnt
-		+ "xxxxxxxxxxxxxxxxxxxxxxb----------eb------e");
-	out.println(cmnt
-		+ "                        Cont    Area    Seep  ");
-	out.println(cmnt
-		+ "xxxxxxxxxxxxxxxxxxxxxxb------eb------eb------e");
-	out.println(cmnt + "EndHeader");
-	out.println(cmnt);
-
-	int num = 0;
-	if (theReservoirs != null) {
-		num = theReservoirs.size();
-	}
-	int nevap, nptpx, nareacap, nclmt, nowner;
-	for (i = 0; i < num; i++) {
-		res =(StateMod_Reservoir)theReservoirs.get(i);
-		if (res == null) {
-			continue;
-		}
-
-		v.clear();
-		v.add(res.getID());
-		v.add(res.getName());
-		v.add(res.getCgoto());
-		v.add(new Integer(res.getSwitch()));
-		v.add(new Double(res.getRdate()));
+		String iline = null;
+		String cmnt = "#>";
+		String format_0 = null;
 		if (useDailyData) {
-			v.add(res.getCresdy());
+			format_0 = "%-12.12s%-24.24s%-12.12s%8d%#8.0f %-12.12s";
 		}
-		iline = StringUtil.formatString(v, format_0);
-		out.println(iline);
-
-		// print reservoir statics: min, max, maxrelease, dead storage,
-		// #owners, #evaps ...
-		// count the number climate stations which are evap vs precip
-		nevap = StateMod_ReservoirClimate.getNumEvap(
-			res.getClimates());
-		nptpx = StateMod_ReservoirClimate.getNumPrecip(
-			res.getClimates());
-		if (Message.isDebugOn) {
-			Message.printDebug(50, routine, "nevap: " + nevap + 
-			" nptpx: " + nptpx);
+		else {	
+			format_0 = "%-12.12s%-24.24s%-12.12s%8d%#8.0f";
 		}
-		v.clear();
-		v.add(new Double(res.getVolmin()));
-		v.add(new Double(res.getVolmax()));
-		v.add(new Double(res.getFlomax()));
-		v.add(new Double(res.getDeadst()));
-		v.add(new Integer(res.getNowner()));
-		v.add(new Integer(nevap));
-		v.add(new Integer(nptpx));
-		v.add(new Integer(res.getNrange()));
-		iline = StringUtil.formatString(v, format_1);
-		out.println(iline);
-
-		// print the owner information 
-		ownv = res.getAccounts();
-		nowner = ownv.size();
-		for (j = 0; j < nowner; j++) {
-			own = (StateMod_ReservoirAccount)ownv.get(j);
-			if (own == null) {
-				out.println();
+		String format_1 = "                        %#8.0f%#8.0f%#8.0f%#8.0f%8d%8d%8d%8d";
+		String format_2 = "            %-12.12s%#8.0f%#8.0f%8.0f%8d";
+		// TODO SAM 2007-03-01 Evaluate use
+		//String format_3 = "            %-12.12s%#8.0f%#8.0f%8.0f%8d";
+		String format_4 = "            %-12.12s%-12.12s%#8.0f";
+		//String format_5 = "            %-12.12s%#8.0f%8.0f%8.0f";
+		String desc = null;
+		StateMod_Reservoir res = null;
+		StateMod_ReservoirAreaCap ac = null;
+		StateMod_ReservoirAccount own = null;
+		StateMod_ReservoirClimate clmt = null;
+		String ch1 = null;
+		List v = new Vector(6);	
+		List ownv = null;
+		List climatev = null;
+		List areacapv = null;
+	
+		int i,j=0;
+		
+		// print out header
+		out.println(cmnt);
+		out.println(cmnt + " *************************************************************");
+		out.println(cmnt + "  StateMod Reservoir Station file");
+		out.println(cmnt);
+		out.println(cmnt + "  Card 1   format:  (a12, a24, a12, i8, f8.0, 1x, a12)");
+		out.println(cmnt);
+		out.println(cmnt + "  ID       cresid:  Reservoir Id");
+		out.println(cmnt + "  Name     resnam:  Reservoir name");
+		out.println(cmnt + "  Riv ID    cgoto:  Node where Reservoir is located");
+		out.println(cmnt + "  On/Off   iressw:  Switch 0 = off, 1 = on");
+		out.println(cmnt + "  Admin #   rdate:  Administration date for 1 fill rule");
+		out.println(cmnt + "  Daily ID cresdy:  Identifier for daily time series.");
+		out.println(cmnt);
+		out.println(cmnt + "  Card 2 format:  (24x, 4f8.0, 4i8)");
+		out.println(cmnt);
+		out.println(cmnt + "  VolMin   volmin:  Min storage (ac-ft)");
+		out.println(cmnt + "  VolMax   volmax:  Max storage (ac-ft)");
+		out.println(cmnt + "  FloMax   flomax:  Max discharge (cfs)");
+		out.println(cmnt + "  DeadSt   deadst:  Dead storage (ac-ft)");
+		out.println(cmnt + "  NumOwner nowner:  Number of owners");
+		out.println(cmnt + "  NumEva   nevapo:  Number of evaporation stations");
+		out.println(cmnt + "  NumPre   nprecp:  Number of precipitation stations");
+		out.println(cmnt + "  NumTable nrange:  Number of area capacity values");
+		out.println(cmnt);
+		out.println(cmnt + "     Card 3 format:  (12x, a12, 3f8.0, i8)");
+		out.println(cmnt);
+		out.println(cmnt + "  OwnName  ownnam:  Owner name");
+		out.println(cmnt + "  OwnMax   ownmax:  Maximum storage for that owner (ac-ft)");
+		out.println(cmnt + "  Sto-1    curown:  Initial storage for that owner (ac-ft)");
+		out.println(cmnt + "  EvapTyp  pcteva:  Evaporation distribution");
+		out.println(cmnt + "  FillTyp   n2own:  Ownership type 1=First fill; 2=Second fill");
+		out.println(cmnt);
+		out.println(cmnt + "  Card 4  format:  (24x, a12, f8.0)");
+		out.println(cmnt);
+		out.println(cmnt + "  Evap ID  cevar:  Evaporation station");
+		out.println(cmnt + "  EvapWt  weigev:  Evaporation station weight (%%)");
+		out.println(cmnt);
+		out.println(cmnt + "  Card 5 format:  (24x, a12, f8.0)");
+		out.println(cmnt);
+		out.println(cmnt + "  Prec ID   cprer:  Precipitation station");
+		out.println(cmnt + "  PrecWt   weigpr:  Precipitation station weight (%%)");
+		out.println(cmnt);
+		out.println(cmnt + "  Card 6 format:  (24x, 3f8.0)");
+		out.println(cmnt + "     Cont     conten:  Content (ac-ft)");
+		out.println(cmnt + "     Area    surarea:  Area (ac)");
+		out.println(cmnt + "     Seep    seepage:  Seepage (ac-ft)");
+		out.println(cmnt);
+		out.println(cmnt + " *************************************************************");
+		out.println(cmnt);
+	
+		out.println(cmnt + "    ID              Name              Node     On/Off  RDate       DailyID ");
+		out.println(cmnt + "---------eb----------------------eb----------eb------eb------exb----------e");
+		out.println(cmnt + "                       VolMin  VolMax  FloMax  DeadSt NumOwner NumEva  NumPre NumTable");
+		out.println(cmnt + "xxxxxxxxxxxxxxxxxxxxxxb------eb------eb------eb------eb------eb------eb------eb------e");
+		out.println(cmnt + "                         OwnName   OwnMax   Sto-1 EvapTyp FillTyp");
+		out.println(cmnt + "xxxxxxxxxxxxxxxxxxxxxxb----------eb------eb------eb------eb------e");
+		out.println(cmnt + "                        Evap Id    EvapWt ");
+		out.println(cmnt + "xxxxxxxxxxxxxxxxxxxxxxb----------eb------e");
+		out.println(cmnt + "                        Prec Id    PrecWt ");
+		out.println(cmnt + "xxxxxxxxxxxxxxxxxxxxxxb----------eb------e");
+		out.println(cmnt + "                        Cont    Area    Seep  ");
+		out.println(cmnt + "xxxxxxxxxxxxxxxxxxxxxxb------eb------eb------e");
+		out.println(cmnt + "EndHeader");
+		out.println(cmnt);
+	
+		int num = 0;
+		if (theReservoirs != null) {
+			num = theReservoirs.size();
+		}
+		int nevap, nptpx, nareacap, nclmt, nowner;
+		for (i = 0; i < num; i++) {
+			res =(StateMod_Reservoir)theReservoirs.get(i);
+			if (res == null) {
 				continue;
 			}
-			desc = own.getName();
-			if (desc.length()== 0) {
-				desc = "Account " + (j + 1);
+	
+			v.clear();
+			v.add(res.getID());
+			v.add(res.getName());
+			v.add(res.getCgoto());
+			v.add(new Integer(res.getSwitch()));
+			v.add(new Double(res.getRdate()));
+			if (useDailyData) {
+				v.add(res.getCresdy());
+			}
+			iline = StringUtil.formatString(v, format_0);
+			out.println(iline);
+	
+			// print reservoir statics: min, max, maxrelease, dead storage,
+			// #owners, #evaps ...
+			// count the number climate stations which are evap vs precip
+			nevap = StateMod_ReservoirClimate.getNumEvap( res.getClimates());
+			nptpx = StateMod_ReservoirClimate.getNumPrecip(	res.getClimates());
+			if (Message.isDebugOn) {
+				Message.printDebug(50, routine, "nevap: " + nevap + " nptpx: " + nptpx);
 			}
 			v.clear();
-			v.add(desc);
-			v.add(new Double(own.getOwnmax()));
-			v.add(new Double(own.getCurown()));
-			v.add(new Double(own.getPcteva()));
-			v.add(new Integer(own.getN2own()));
-			iline = StringUtil.formatString(v, format_2);
+			v.add(new Double(res.getVolmin()));
+			v.add(new Double(res.getVolmax()));
+			v.add(new Double(res.getFlomax()));
+			v.add(new Double(res.getDeadst()));
+			v.add(new Integer(res.getNowner()));
+			v.add(new Integer(nevap));
+			v.add(new Integer(nptpx));
+			v.add(new Integer(res.getNrange()));
+			iline = StringUtil.formatString(v, format_1);
 			out.println(iline);
-		}
-
-		// print the evap information
-		climatev = res.getClimates();
-		nclmt = climatev.size();
-		for (j = 0; j < nclmt; j++) {
-			clmt =(StateMod_ReservoirClimate)climatev.get(j);
-			if (clmt == null) {
-				out.println();
-				continue;
-			}
-			if (	clmt.getType()==
-				StateMod_ReservoirClimate.CLIMATE_EVAP) {
+	
+			// print the owner information 
+			ownv = res.getAccounts();
+			nowner = ownv.size();
+			for (j = 0; j < nowner; j++) {
+				own = (StateMod_ReservoirAccount)ownv.get(j);
+				if (own == null) {
+					out.println();
+					continue;
+				}
+				desc = own.getName();
+				if (desc.length()== 0) {
+					desc = "Account " + (j + 1);
+				}
 				v.clear();
-				v.add("Evaporation");
-				v.add(clmt.getID());
-				v.add(new Double(clmt.getWeight()));
-				iline = StringUtil.formatString(v, format_4);
+				v.add(desc);
+				v.add(new Double(own.getOwnmax()));
+				v.add(new Double(own.getCurown()));
+				v.add(new Double(own.getPcteva()));
+				v.add(new Integer(own.getN2own()));
+				iline = StringUtil.formatString(v, format_2);
+				out.println(iline);
+			}
+	
+			// print the evap information
+			climatev = res.getClimates();
+			nclmt = climatev.size();
+			for (j = 0; j < nclmt; j++) {
+				clmt =(StateMod_ReservoirClimate)climatev.get(j);
+				if (clmt == null) {
+					out.println();
+					continue;
+				}
+				if ( clmt.getType()== StateMod_ReservoirClimate.CLIMATE_EVAP) {
+					v.clear();
+					v.add("Evaporation");
+					v.add(clmt.getID());
+					v.add(new Double(clmt.getWeight()));
+					iline = StringUtil.formatString(v, format_4);
+					out.println(iline);
+				}
+			}
+	
+			// Print the precip information
+			for (j = 0; j < nclmt; j++) {
+				clmt =(StateMod_ReservoirClimate)climatev.get(j);
+				if (clmt == null) {
+					out.println();
+					continue;
+				}
+				if ( clmt.getType()== StateMod_ReservoirClimate.CLIMATE_PTPX) {
+					v.clear();
+					v.add("Precipitatn");
+					v.add(clmt.getID());
+					v.add(new Double(clmt.getWeight()));
+					iline = StringUtil.formatString(v, format_4);
+					out.println(iline);
+				}
+			}
+	
+			// print the area capacity information
+			areacapv = res.getAreaCaps();
+			nareacap = areacapv.size();
+			for (j = 0; j < nareacap; j++) {
+				ac = (StateMod_ReservoirAreaCap)areacapv.get(j);
+				if (ac == null) {
+					out.println();
+					continue;
+				}
+				ch1 = "CAP-AREA" + StringUtil.formatString(j, "%3.3s");
+				iline = StringUtil.formatString(ch1, "            %-12.12s");
+				// Not very efficient but this file does not get written often...
+				if (ac.getConten()< 100.0) {
+					iline += StringUtil.formatString(ac.getConten(), "%8.2f");
+				}
+				else {
+					iline += StringUtil.formatString(ac.getConten(), "%#8.0f");
+				}
+				if (ac.getSurarea()< 100.0) {
+					iline += StringUtil.formatString(ac.getSurarea(), "%8.2f");
+				}
+				else {
+					iline += StringUtil.formatString(ac.getSurarea(), "%8.0f");
+				}
+				iline += StringUtil.formatString(ac.getSeepage(),"%8.0f");
 				out.println(iline);
 			}
 		}
-
-		// Print the precip information
-		for (j = 0; j < nclmt; j++) {
-			clmt =(StateMod_ReservoirClimate)climatev.get(j);
-			if (clmt == null) {
-				out.println();
-				continue;
-			}
-			if (	clmt.getType()==
-				StateMod_ReservoirClimate.CLIMATE_PTPX) {
-				v.clear();
-				v.add("Precipitatn");
-				v.add(clmt.getID());
-				v.add(new Double(clmt.getWeight()));
-				iline = StringUtil.formatString(v, format_4);
-				out.println(iline);
-			}
-		}
-
-		// print the area capacity information
-		areacapv = res.getAreaCaps();
-		nareacap = areacapv.size();
-		for (j = 0; j < nareacap; j++) {
-			ac = (StateMod_ReservoirAreaCap)areacapv.get(j);
-			if (ac == null) {
-				out.println();
-				continue;
-			}
-			ch1 = "CAP-AREA" + StringUtil.formatString(j, "%3.3s");
-			iline =
-			StringUtil.formatString(ch1, "            %-12.12s");
-			// Not very efficient but this file does not get written
-			// often...
-			if (ac.getConten()< 100.0) {
-				iline += StringUtil.formatString(
-					ac.getConten(), "%8.2f");
-			}
-			else {	iline += StringUtil.formatString(
-					ac.getConten(), "%#8.0f");
-			}
-			if (ac.getSurarea()< 100.0) {
-				iline += StringUtil.formatString(
-					ac.getSurarea(), "%8.2f");
-			}
-			else {	iline += StringUtil.formatString(
-					ac.getSurarea(), "%8.0f");
-			}
-			iline += StringUtil.formatString(
-					ac.getSeepage(),"%8.0f");
-			out.println(iline);
-		}
-	}
-		
-	out.flush();
-	out.close();
-	out = null;
-	routine = null;
-	comment_str = null;
-	ignore_comment_str = null;
 	} 
 	catch (Exception e) {
+		Message.printWarning(3, routine, e);
+		throw e;
+	}
+	finally {
 		if (out != null) {
 			out.flush();
 			out.close();
-		}
-		out = null;
-		routine = null;
-		comment_str = null;
-		ignore_comment_str = null;
-		Message.printWarning(2, routine, e);
-		throw e;
+		}	
 	}
 }
 
@@ -2240,11 +2088,16 @@ is called with a filename parameter of "reservoirs.txt", six files will be gener
 @param delimiter the delimiter to use for separating field values.
 @param update whether to update an existing file, retaining the current 
 header (true) or to create a new file with a new header.
-@param data the Vector of objects to write.  
+@param data the list of objects to write.
+@param newComments comments to add to the top of the file.
+@return a list of files that were actually written, because this method controls all the secondary
+filenames.
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter, boolean update, List data) 
-throws Exception {
+public static List writeListFile(String filename, String delimiter, boolean update, List data,
+		List newComments ) 
+throws Exception
+{	String routine = "StateMod_Reservoir.writeListFile";
 	int size = 0;
 	if (data != null) {
 		size = data.size();
@@ -2290,10 +2143,11 @@ throws Exception {
 	StateMod_ReservoirAccount account = null;
 	StateMod_ReservoirAreaCap areaCap = null;
 	StateMod_ReservoirClimate climate = null;	
-	String[] commentString = { "#" };
-	String[] ignoreCommentString = { "#>" };
+	List commentIndicators = new Vector(1);
+	commentIndicators.add ( "#" );
+	List ignoredCommentIndicators = new Vector(1);
+	ignoredCommentIndicators.add ( "#>");
 	String[] line = new String[fieldCount];
-	String[] newComments = null;
 	StringBuffer buffer = new StringBuffer();
 	List accounts = new Vector();
 	List areaCaps = new Vector();
@@ -2301,13 +2155,25 @@ throws Exception {
 	List precipClimates = new Vector();
 	List tempV = null;
 	
-	try {	
-	
-
+	try {
+		// Add some basic comments at the top of the file.  Do this to a copy of the
+		// incoming comments so that they are not modified in the calling code.
+		List newComments2 = null;
+		if ( newComments == null ) {
+			newComments2 = new Vector();
+		}
+		else {
+			newComments2 = new Vector(newComments);
+		}
+		newComments2.add(0,"");
+		newComments2.add(1,"StateMod reservoir stations as a delimited list file.");
+		newComments2.add(2,"See also the associated account, precipitation station, evaporation station,");
+		newComments2.add(3,"content/area/seepage, and collection files.");
+		newComments2.add(4,"");
 		out = IOUtil.processFileHeaders(
 			oldFile,
 			IOUtil.getPathUsingWorkingDir(filename), 
-			newComments, commentString, ignoreCommentString, 0);
+			newComments2, commentIndicators, ignoredCommentIndicators, 0);
 
 		for (int i = 0; i < fieldCount; i++) {
 			buffer.append("\"" + names[i] + "\"");
@@ -2321,36 +2187,21 @@ throws Exception {
 		for (int i = 0; i < size; i++) {
 			res = (StateMod_Reservoir)data.get(i);
 			
-			line[0] = StringUtil.formatString(res.getID(), 
-				formats[0]).trim();
-			line[1] = StringUtil.formatString(res.getName(), 
-				formats[1]).trim();
-			line[2] = StringUtil.formatString(res.getCgoto(), 
-				formats[2]).trim();
-			line[3] = StringUtil.formatString(res.getSwitch(), 
-				formats[3]).trim();
-			line[4] = StringUtil.formatString(res.getRdate(), 
-				formats[4]).trim();
-			line[5] = StringUtil.formatString(res.getVolmin(), 
-				formats[5]).trim();
-			line[6] = StringUtil.formatString(res.getVolmax(), 
-				formats[6]).trim();
-			line[7] = StringUtil.formatString(res.getFlomax(), 
-				formats[7]).trim();
-			line[8] = StringUtil.formatString(res.getDeadst(), 
-				formats[8]).trim();
-			line[9] = StringUtil.formatString(res.getCresdy(), 
-				formats[9]).trim();
-			line[10] = StringUtil.formatString(res.getNowner(), 
-				formats[10]).trim();
+			line[0] = StringUtil.formatString(res.getID(),formats[0]).trim();
+			line[1] = StringUtil.formatString(res.getName(),formats[1]).trim();
+			line[2] = StringUtil.formatString(res.getCgoto(),formats[2]).trim();
+			line[3] = StringUtil.formatString(res.getSwitch(),formats[3]).trim();
+			line[4] = StringUtil.formatString(res.getRdate(), formats[4]).trim();
+			line[5] = StringUtil.formatString(res.getVolmin(),formats[5]).trim();
+			line[6] = StringUtil.formatString(res.getVolmax(),formats[6]).trim();
+			line[7] = StringUtil.formatString(res.getFlomax(),formats[7]).trim();
+			line[8] = StringUtil.formatString(res.getDeadst(),formats[8]).trim();
+			line[9] = StringUtil.formatString(res.getCresdy(),formats[9]).trim();
+			line[10] = StringUtil.formatString(res.getNowner(),formats[10]).trim();
 			line[11] = StringUtil.formatString(
-				StateMod_ReservoirClimate.getNumEvap(
-					res.getClimates()), 
-				formats[11]).trim();
+				StateMod_ReservoirClimate.getNumEvap(res.getClimates()),formats[11]).trim();
 			line[12] = StringUtil.formatString(
-				StateMod_ReservoirClimate.getNumPrecip(
-					res.getClimates()), 
-				formats[12]).trim();
+				StateMod_ReservoirClimate.getNumPrecip(res.getClimates()),formats[12]).trim();
 			
 			tempV = res.getAreaCaps();
 		 	if (tempV == null) {
@@ -2364,20 +2215,19 @@ throws Exception {
 				
 			buffer = new StringBuffer();	
 			for (j = 0; j < fieldCount; j++) {
+				if (j > 0) {
+					buffer.append(delimiter);
+				}
 				if (line[j].indexOf(delimiter) > -1) {
 					line[j] = "\"" + line[j] + "\"";
 				}
 				buffer.append(line[j]);
-				if (j < (fieldCount - 1)) {
-					buffer.append(delimiter);
-				}
 			}
 
 			tempV = res.getAccounts();
 			size2 = tempV.size();
 			for (j = 0; j < size2; j++) {
-				account = (StateMod_ReservoirAccount)
-					tempV.get(j);
+				account = (StateMod_ReservoirAccount)tempV.get(j);
 				account.setCgoto(res.getID());
 				accounts.add(account);
 			}
@@ -2385,8 +2235,7 @@ throws Exception {
 			tempV = res.getAreaCaps();
 			size2 = tempV.size();
 			for (j = 0; j < size2; j++) {
-				areaCap = (StateMod_ReservoirAreaCap)
-					tempV.get(j);
+				areaCap = (StateMod_ReservoirAreaCap)tempV.get(j);
 				areaCap.setCgoto(res.getID());
 				areaCaps.add(areaCap);
 			}
@@ -2394,12 +2243,10 @@ throws Exception {
 			tempV = res.getClimates();
 			size2 = tempV.size();
 			for (j = 0; j < size2; j++) {
-				climate = (StateMod_ReservoirClimate)
-					tempV.get(j);
+				climate = (StateMod_ReservoirClimate)tempV.get(j);
 				climate.setCgoto(res.getID());
-				if (climate.getType() 
-				    == StateMod_ReservoirClimate.CLIMATE_PTPX) {
-				    	precipClimates.add(climate);
+				if (climate.getType() == StateMod_ReservoirClimate.CLIMATE_PTPX) {
+				    precipClimates.add(climate);
 				}
 				else {
 					evapClimates.add(climate);
@@ -2413,12 +2260,14 @@ throws Exception {
 		out = null;
 	}
 	catch (Exception e) {
+		Message.printWarning(3, routine, e);
+		throw e;
+	}
+	finally {
 		if (out != null) {
 			out.flush();
 			out.close();
 		}
-		out = null;
-		throw e;
 	}
 
 	int lastIndex = filename.lastIndexOf(".");
@@ -2426,25 +2275,32 @@ throws Exception {
 	String end = filename.substring((lastIndex + 1), filename.length());
 
 	String accountFilename = front + "_Accounts." + end;
-	StateMod_ReservoirAccount.writeListFile(accountFilename, delimiter,
-		update, accounts);	
+	StateMod_ReservoirAccount.writeListFile(accountFilename, delimiter, update, accounts, newComments );	
 		
 	String areaCapFilename = front + "_ContentAreaSeepage." + end;
-	StateMod_ReservoirAreaCap.writeListFile(areaCapFilename, delimiter,
-		update, areaCaps);	
-
-	String precipClimateFilename = front + "_PrecipStations." + end;
-	StateMod_ReservoirClimate.writeListFile(precipClimateFilename, 
-		delimiter, update, precipClimates,
-		StateMod_DataSet.COMP_RESERVOIR_STATION_PRECIP_STATIONS);
+	StateMod_ReservoirAreaCap.writeListFile(areaCapFilename, delimiter, update, areaCaps, newComments );	
 
 	String evapClimateFilename = front + "_EvapStations." + end;
 	StateMod_ReservoirClimate.writeListFile(evapClimateFilename, 
-		delimiter, update, evapClimates,
-		StateMod_DataSet.COMP_RESERVOIR_STATION_EVAP_STATIONS);
+		delimiter, update, evapClimates, newComments,
+		StateMod_DataSet.COMP_RESERVOIR_STATION_EVAP_STATIONS );
+	
+	String precipClimateFilename = front + "_PrecipStations." + end;
+	StateMod_ReservoirClimate.writeListFile(precipClimateFilename, 
+		delimiter, update, precipClimates, newComments,
+		StateMod_DataSet.COMP_RESERVOIR_STATION_PRECIP_STATIONS );
 
 	String collectionFilename = front + "_Collections." + end;
-	writeCollectionListFile(collectionFilename, delimiter, update, data);
+	writeCollectionListFile(collectionFilename, delimiter, update, data, newComments );
+	
+	List filesWritten = new Vector();
+	filesWritten.add ( new File(filename) );
+	filesWritten.add ( new File(accountFilename) );
+	filesWritten.add ( new File(areaCapFilename) );
+	filesWritten.add ( new File(precipClimateFilename) );
+	filesWritten.add ( new File(evapClimateFilename) );
+	filesWritten.add ( new File(collectionFilename) );
+	return filesWritten;
 }
 
 /**
@@ -2456,11 +2312,14 @@ the field delimiter will be wrapped in "...".
 @param delimiter the delimiter to use for separating field values.
 @param update whether to update an existing file, retaining the current 
 header (true) or to create a new file with a new header.
-@param data the Vector of objects to write.  
+@param data the list of objects to write.
+@param newComments list of comments to add to the top of the file.
 @throws Exception if an error occurs.
 */
-public static void writeCollectionListFile(String filename, String delimiter, boolean update, List data) 
-throws Exception {
+public static void writeCollectionListFile(String filename, String delimiter, boolean update, List data,
+	List newComments ) 
+throws Exception
+{	String routine = "StateMod_Reservoir.writeCollectionListFile";
 	int size = 0;
 	if (data != null) {
 		size = data.size();
@@ -2490,14 +2349,13 @@ throws Exception {
 	}
 	
 	int[] years = null;
-	int j = 0;
-	int k = 0;
-	int num = 0;
+	int numYears = 0;
 	StateMod_Reservoir res = null;
-	String[] commentString = { "#" };
-	String[] ignoreCommentString = { "#>" };
-	String[] line = new String[fieldCount];
-	String[] newComments = null;	
+	List commentIndicators = new Vector(1);
+	commentIndicators.add ( "#" );
+	List ignoredCommentIndicators = new Vector(1);
+	ignoredCommentIndicators.add ( "#>");
+	String[] line = new String[fieldCount];	
 	String colType = null;
 	String id = null;
 	String partType = null;
@@ -2505,17 +2363,28 @@ throws Exception {
 	PrintWriter out = null;
 	List ids = null;
 	
-	try {	
-		out = IOUtil.processFileHeaders(
-			oldFile,
-			IOUtil.getPathUsingWorkingDir(filename), 
-			newComments, commentString, ignoreCommentString, 0);
+	try {
+		// Add some basic comments at the top of the file.  However, do this to a copy of the
+		// incoming comments so that they are not modified in the calling code.
+		List newComments2 = null;
+		if ( newComments == null ) {
+			newComments2 = new Vector();
+		}
+		else {
+			newComments2 = new Vector(newComments);
+		}
+		newComments2.add(0,"");
+		newComments2.add(1,"StateMod reservoir station collection information as delimited list file.");
+		newComments2.add(2,"See also the associated reservoir station file.");
+		newComments2.add(3,"");
+		out = IOUtil.processFileHeaders( oldFile, IOUtil.getPathUsingWorkingDir(filename), 
+			newComments2, commentIndicators, ignoredCommentIndicators, 0);
 
 		for (int i = 0; i < fieldCount; i++) {
-			buffer.append("\"" + names[i] + "\"");
-			if (i < (fieldCount - 1)) {
+			if (i > 0) {
 				buffer.append(delimiter);
 			}
+			buffer.append("\"" + names[i] + "\"");
 		}
 
 		out.println(buffer.toString());
@@ -2525,54 +2394,51 @@ throws Exception {
 			id = res.getID();
 			years = res.getCollectionYears();
 			if (years == null) {
-				num = 0;
+				numYears = 0;
 			}
 			else {
-				num = years.length;
+				numYears = years.length;
 			}
 			colType = res.getCollectionType();
 			partType = res.getCollectionPartType();
-			
-			for (j = 0; j < num; j++) {
-				ids = res.getCollectionPartIDs(years[j]);
-				line[0] = StringUtil.formatString(id,
-					formats[0]).trim();
-				line[1] = StringUtil.formatString(years[j],
-					formats[1]).trim();
-				line[2] = StringUtil.formatString(colType,
-					formats[2]).trim();
-				line[3] = StringUtil.formatString(partType,
-					formats[3]).trim();
-				line[4] = StringUtil.formatString(
-					((String)(ids.get(k))),
-					formats[4]).trim();
-
-				buffer = new StringBuffer();	
-				for (k = 0; k < fieldCount; k++) {
-					if (line[k].indexOf(delimiter) > -1) {
-						line[k] = "\"" + line[k] + "\"";
-					}
-					buffer.append(line[k]);
-					if (k < (fieldCount - 1)) {
-						buffer.append(delimiter);
-					}
-				}
+			//Message.printStatus(2, routine, "For " + id + " numYears=" + numYears );
+			// Loop through the number of years of collection data...
+			for ( int iyear = 0; iyear < numYears; iyear++) {
+				ids = res.getCollectionPartIDs(years[iyear]);
+				//Message.printStatus(2, routine, "Part ids for year " + years[iyear] + " = " + ids );
+				// Loop through the identifiers for the specific year
+				for ( int k = 0; k < ids.size(); k++ ) { 
+					line[0] = StringUtil.formatString(id,formats[0]).trim();
+					line[1] = StringUtil.formatString(years[iyear],formats[1]).trim();
+					line[2] = StringUtil.formatString(colType,formats[2]).trim();
+					line[3] = StringUtil.formatString(partType,formats[3]).trim();
+					line[4] = StringUtil.formatString(((String)(ids.get(k))),formats[4]).trim();
 	
-				out.println(buffer.toString());
+					buffer = new StringBuffer();	
+					for (int ifield = 0; ifield < fieldCount; ifield++) {
+						if (ifield > 0) {
+							buffer.append(delimiter);
+						}
+						if (line[ifield].indexOf(delimiter) > -1) {
+							line[ifield] = "\"" + line[ifield] + "\"";
+						}
+						buffer.append(line[ifield]);
+					}
+					out.println(buffer.toString());
+				}
 			}
 		}
-		out.flush();
-		out.close();
-		out = null;
 	}
 	catch (Exception e) {
+		Message.printWarning(3, routine, e);
+		throw e;
+	}
+	finally {
 		if (out != null) {
 			out.flush();
 			out.close();
-		}
-		out = null;
-		throw e;
+		}	
 	}
 }
 
-} // End StateMod_Reservoir
+}

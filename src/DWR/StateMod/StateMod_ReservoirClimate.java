@@ -65,10 +65,8 @@ import RTi.Util.String.StringUtil;
 /**
 This class stores reservoir climate information, including evaporation and 
 precipitation stations, which pertain to an individual reservoir.
-The actual time series data are stored as separate components and are shared
-among reservoirs.
-Any calls to "set" routines sets the StateMod_DataSet.COMP_RESERVOIR_STATIONS 
-dirty.
+The actual time series data are stored as separate components and are shared among reservoirs.
+Any calls to "set" routines sets the StateMod_DataSet.COMP_RESERVOIR_STATIONS dirty.
 */
 public class StateMod_ReservoirClimate extends StateMod_Data
 implements Cloneable, Comparable {
@@ -76,21 +74,21 @@ implements Cloneable, Comparable {
 /**
 Precipitation station type.
 */
-public static final int CLIMATE_PTPX	= 0;
+public static final int CLIMATE_PTPX = 0;
 /**
 Evaporation station type.
 */
-public static final int CLIMATE_EVAP	= 1;
+public static final int CLIMATE_EVAP = 1;
 
 /**
 CLIMATE_PTPX or CLIMATE_EVAP
 */
-protected int		_type;
+protected int _type;
 
 /**
 Percent of this station to use.
 */
-protected double	_weight;
+protected double _weight;
 	
 /**
 Constructor allocates a String for the station id, sets the weight to 0 and
@@ -106,19 +104,16 @@ Clones the data object.
 @return a cloned object.
 */
 public Object clone() {
-	StateMod_ReservoirClimate rc = 
-		(StateMod_ReservoirClimate)super.clone();
+	StateMod_ReservoirClimate rc = (StateMod_ReservoirClimate)super.clone();
 	rc._isClone = true;
 	return rc;
 }
 
 /**
 Compares this object to another StateMod_Data object based on the sorted
-order from the StateMod_Data variables, and then by _type and _weight, in 
-that order.
+order from the StateMod_Data variables, and then by _type and _weight, in that order.
 @param o the object to compare against.
-@return 0 if they are the same, 1 if this object is greater than the other
-object, or -1 if it is less.
+@return 0 if they are the same, 1 if this object is greater than the other object, or -1 if it is less.
 */
 public int compareTo(Object o) {
 	int res = super.compareTo(o);
@@ -156,10 +151,8 @@ public void createBackup() {
 
 /**
 Compare two rights Vectors and see if they are the same.
-@param v1 the first Vector of StateMod_ReservoirClimate s to check.  Can not
-be null.
-@param v2 the second Vector of StateMod_ReservoirClimate s to check.  Can not
-be null.
+@param v1 the first Vector of StateMod_ReservoirClimate s to check.  Cannot be null.
+@param v2 the second Vector of StateMod_ReservoirClimate s to check.  Cannot be null.
 @return true if they are the same, false if not.
 */
 public static boolean equals(List v1, List v2) {
@@ -184,8 +177,7 @@ public static boolean equals(List v1, List v2) {
 			r2 = (StateMod_ReservoirClimate)v2Sort.get(i);	
 			Message.printStatus(1, routine, r1.toString());
 			Message.printStatus(1, routine, r2.toString());
-			Message.printStatus(1, routine, "Element " + i 
-				+ " comparison: " + r1.compareTo(r2));
+			Message.printStatus(1, routine, "Element " + i + " comparison: " + r1.compareTo(r2));
 			if (r1.compareTo(r2) != 0) {
 				return false;
 			}
@@ -195,8 +187,7 @@ public static boolean equals(List v1, List v2) {
 }
 
 /**
-Tests to see if two diversion rights are equal.  Strings are compared with
-case sensitivity.
+Tests to see if two diversion rights are equal.  Strings are compared with case sensitivity.
 @param rc the rc to compare.
 @return true if they are equal, false otherwise.
 */
@@ -205,8 +196,7 @@ public boolean equals(StateMod_ReservoirClimate rc) {
 	 	return false;
 	}
 
-	if (	_type == rc._type
-		&& _weight == rc._weight) {
+	if ( _type == rc._type && _weight == rc._weight) {
 		return true;
 	}
 	return false;
@@ -265,8 +255,7 @@ Set the type.  Use either CLIMATE_PTPX or CLIMATE_EVAP.
 public void setType(int i) {
 	if (i != _type) {
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(
-			StateMod_DataSet.COMP_RESERVOIR_STATIONS,true);
+			_dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_STATIONS,true);
 		}
 		_type = i;
 	}
@@ -279,8 +268,7 @@ Set the weight.
 public void setWeight(double d) {
 	if (d != _weight) {
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(
-			StateMod_DataSet.COMP_RESERVOIR_STATIONS,true);
+			_dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_STATIONS,true);
 		}
 		_weight = d;
 	}
@@ -305,10 +293,8 @@ public void setWeight(String str) {
 }
 
 /**
-Calculates the number of StateMod_ReservoirClimate objects that are evaporation
-stations.
-@return the number of StateMod_ReservoirClimate objects that are evaporation
-stations.
+Calculates the number of StateMod_ReservoirClimate objects that are evaporation stations.
+@return the number of StateMod_ReservoirClimate objects that are evaporation stations.
 */
 public static int getNumEvap(List climates)
 {	if (climates == null) {
@@ -319,8 +305,7 @@ public static int getNumEvap(List climates)
 	int num = climates.size();
 	
 	for (int i=0; i<num; i++) {
-		if (((StateMod_ReservoirClimate)
-			climates.get(i)).getType() == CLIMATE_EVAP) {
+		if (((StateMod_ReservoirClimate)climates.get(i)).getType() == CLIMATE_EVAP) {
 			nevap++;
 		}
 	} 
@@ -328,10 +313,8 @@ public static int getNumEvap(List climates)
 }
 
 /**
-Calculates the number of StateMod_ReservoirClimate objects that are
-precipitation stations.
-@return the number of StateMod_ReservoirClimate objects that are precipitation
-stations.
+Calculates the number of StateMod_ReservoirClimate objects that are precipitation stations.
+@return the number of StateMod_ReservoirClimate objects that are precipitation stations.
 */
 public static int getNumPrecip(List climates)
 {	if (climates == null) {
@@ -342,8 +325,7 @@ public static int getNumPrecip(List climates)
 	int num = climates.size();
 	
 	for (int i=0; i<num; i++) {
-		if (((StateMod_ReservoirClimate)
-			climates.get(i)).getType() == CLIMATE_PTPX) {
+		if (((StateMod_ReservoirClimate)climates.get(i)).getType() == CLIMATE_PTPX) {
 			nptpx++;
 		}
 	}
@@ -359,23 +341,22 @@ public String toString() {
 }
 
 /**
-Writes a Vector of StateMod_ReservoirClimate objects to a list file.  A header 
+Writes a list of StateMod_ReservoirClimate objects to a list file.  A header 
 is printed to the top of the file, containing the commands used to generate the 
-file.  Any strings in the body of the file that contain the field delimiter 
-will be wrapped in "...".  
+file.  Any strings in the body of the file that contain the field delimiter will be wrapped in "...".  
 @param filename the name of the file to which the data will be written.
 @param delimiter the delimiter to use for separating field values.
 @param update whether to update an existing file, retaining the current 
 header (true) or to create a new file with a new header.
 @param data the Vector of objects to write.  
-@param componentType one of either 
-StateMod_DataSet.COMP_RESERVOIR_PRECIP_STATIONS or
+@param componentType one of either StateMod_DataSet.COMP_RESERVOIR_PRECIP_STATIONS or
 StateMod_DataSet.COMP_RESERVOIR_EVAP_STATIONS.
 @throws Exception if an error occurs.
 */
 public static void writeListFile(String filename, String delimiter,
-boolean update, List data, int componentType) 
-throws Exception {
+boolean update, List data, List newComments, int componentType) 
+throws Exception
+{	String routine = "StateMod_ReservoirClimate.writeListFile";
 	int size = 0;
 	if (data != null) {
 		size = data.size();
@@ -405,23 +386,42 @@ throws Exception {
 	int j = 0;
 	PrintWriter out = null;
 	StateMod_ReservoirClimate cli = null;
-	String[] commentString = { "#" };
-	String[] ignoreCommentString = { "#>" };
+	List commentIndicators = new Vector(1);
+	commentIndicators.add ( "#" );
+	List ignoredCommentIndicators = new Vector(1);
+	ignoredCommentIndicators.add ( "#>");
 	String[] line = new String[fieldCount];
-	String[] newComments = null;
 	StringBuffer buffer = new StringBuffer();
 	
-	try {	
-		out = IOUtil.processFileHeaders(
-			oldFile,
-			IOUtil.getPathUsingWorkingDir(filename), 
-			newComments, commentString, ignoreCommentString, 0);
+	try {
+		// Add some basic comments at the top of the file.  Do this to a copy of the
+		// incoming comments so that they are not modified in the calling code.
+		List newComments2 = null;
+		if ( newComments == null ) {
+			newComments2 = new Vector();
+		}
+		else {
+			newComments2 = new Vector(newComments);
+		}
+		newComments2.add(0,"");
+		if ( componentType == StateMod_DataSet.COMP_RESERVOIR_STATION_EVAP_STATIONS ) {
+			newComments2.add(1,"StateMod reservoir evaporation station assignment as a delimited list file.");
+			newComments2.add(2,"See also the associated station, account, precipitation station,");
+		}
+		else if ( componentType == StateMod_DataSet.COMP_RESERVOIR_STATION_PRECIP_STATIONS ){
+			newComments2.add(1,"StateMod reservoir precipitation station assignment as a delimited list file.");
+			newComments2.add(2,"See also the associated station, account, evaporation station,");
+		}
+		newComments2.add(3,"content/area/seepage, and collection files.");
+		newComments2.add(4,"");
+		out = IOUtil.processFileHeaders( oldFile, IOUtil.getPathUsingWorkingDir(filename), 
+			newComments2, commentIndicators, ignoredCommentIndicators, 0);
 
 		for (int i = 0; i < fieldCount; i++) {
-			buffer.append("\"" + names[i] + "\"");
-			if (i < (fieldCount - 1)) {
+			if (i > 0) {
 				buffer.append(delimiter);
 			}
+			buffer.append("\"" + names[i] + "\"");
 		}
 
 		out.println(buffer.toString());
@@ -429,37 +429,33 @@ throws Exception {
 		for (int i = 0; i < size; i++) {
 			cli = (StateMod_ReservoirClimate)data.get(i);
 			
-			line[0] = StringUtil.formatString(cli.getCgoto(), 
-				formats[0]).trim();
-			line[1] = StringUtil.formatString(cli.getID(), 
-				formats[1]).trim();
-			line[2] = StringUtil.formatString(cli.getWeight(), 
-				formats[2]).trim();
+			line[0] = StringUtil.formatString(cli.getCgoto(),formats[0]).trim();
+			line[1] = StringUtil.formatString(cli.getID(),formats[1]).trim();
+			line[2] = StringUtil.formatString(cli.getWeight(),formats[2]).trim();
 
 			buffer = new StringBuffer();	
 			for (j = 0; j < fieldCount; j++) {
+				if (j > 0) {
+					buffer.append(delimiter);
+				}
 				if (line[j].indexOf(delimiter) > -1) {
 					line[j] = "\"" + line[j] + "\"";
 				}
 				buffer.append(line[j]);
-				if (j < (fieldCount - 1)) {
-					buffer.append(delimiter);
-				}
 			}
 
 			out.println(buffer.toString());
 		}
-		out.flush();
-		out.close();
-		out = null;
 	}
 	catch (Exception e) {
+		Message.printWarning(3, routine, e);
+		throw e;
+	}
+	finally {
 		if (out != null) {
 			out.flush();
 			out.close();
 		}
-		out = null;
-		throw e;
 	}
 }
 

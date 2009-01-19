@@ -48,24 +48,25 @@ import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 
 public class StateMod_ReservoirAccount extends StateMod_Data 
-implements Cloneable, Comparable {
+implements Cloneable, Comparable
+{
 
 /**
 Maximum storage of owner
 */
-protected double	_ownmax;
+protected double _ownmax;
 /**
-INitial storage of owner
+Initial storage of owner
 */
-protected double	_curown;
+protected double _curown;
 /**
-Prorate res evap btwn accnt owners
+Prorate reservoir evaporation between account owners
 */
-protected double	_pcteva;
+protected double _pcteva;
 /**
 Ownership is tied to n fill right
 */
-protected int		_n2own;
+protected int _n2own;
 
 // Base class _name is used for the owner name.
 // The ID should be sete when reading, adding, or deleting accounts - set to
@@ -84,8 +85,7 @@ Clones the data object.
 @return a cloned object.
 */
 public Object clone() {
-	StateMod_ReservoirAccount acct = 
-		(StateMod_ReservoirAccount)super.clone();
+	StateMod_ReservoirAccount acct = (StateMod_ReservoirAccount)super.clone();
 	acct._isClone = true;
 	return acct;
 }
@@ -148,10 +148,8 @@ public void createBackup() {
 
 /**
 Compare two rights Vectors and see if they are the same.
-@param v1 the first Vector of StateMod_ReservoirAccounts to check.  Can not
-be null.
-@param v2 the second Vector of StateMod_ReservoirAccounts to check.  Can not
-be null.
+@param v1 the first Vector of StateMod_ReservoirAccounts to check.  Cannot be null.
+@param v2 the second Vector of StateMod_ReservoirAccounts to check.  Cannot be null.
 @return true if they are the same, false if not.
 */
 public static boolean equals(List v1, List v2) {
@@ -176,8 +174,7 @@ public static boolean equals(List v1, List v2) {
 			r2 = (StateMod_ReservoirAccount)v2Sort.get(i);	
 			Message.printStatus(1, routine, r1.toString());
 			Message.printStatus(1, routine, r2.toString());
-			Message.printStatus(1, routine, "Element " + i 
-				+ " comparison: " + r1.compareTo(r2));
+			Message.printStatus(1, routine, "Element " + i + " comparison: " + r1.compareTo(r2));
 			if (r1.compareTo(r2) != 0) {
 				return false;
 			}
@@ -187,9 +184,8 @@ public static boolean equals(List v1, List v2) {
 }
 
 /**
-Tests to see if two diversion rights are equal.  Strings are compared with
-case sensitivity.
-@param acct the acct to compare.
+Tests to see if two diversion rights are equal.  Strings are compared with case sensitivity.
+@param acct the account to compare.
 @return true if they are equal, false otherwise.
 */
 public boolean equals(StateMod_ReservoirAccount acct) {
@@ -197,10 +193,8 @@ public boolean equals(StateMod_ReservoirAccount acct) {
 	 	return false;
 	}
 
-	if (	_ownmax == acct._ownmax
-		&& _curown == acct._curown
-		&& _pcteva == acct._pcteva
-		&& _n2own == acct._n2own) {
+	if ( _ownmax == acct._ownmax && _curown == acct._curown
+		&& _pcteva == acct._pcteva && _n2own == acct._n2own) {
 		return true;
 	}
 	return false;
@@ -240,8 +234,7 @@ Return a list of N2own option strings, for use in GUIs.
 The options are of the form "1" if include_notes is false and
 "1 - Ownership is tied to first fill right(s)", if include_notes is true.
 @return a list of N2own option strings, for use in GUIs.
-@param include_notes Indicate whether notes should be added after the parameter
-values.
+@param include_notes Indicate whether notes should be added after the parameter values.
 */
 public static List getN2ownChoices ( boolean include_notes )
 {	List v = new Vector(2);
@@ -251,16 +244,14 @@ public static List getN2ownChoices ( boolean include_notes )
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.set(i,StringUtil.getToken(
-				(String)v.get(i), " ", 0, 0) );
+			v.set(i,StringUtil.getToken((String)v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
 }
 
 /**
-Return the default N2own choice.  This can be used by GUI code
-to pick a default for a new diversion.
+Return the default N2own choice.  This can be used by GUI code to pick a default for a new diversion.
 @return the default N2own choice.
 */
 public static String getN2ownDefault ( boolean include_notes )
@@ -268,7 +259,8 @@ public static String getN2ownDefault ( boolean include_notes )
 	if ( include_notes ) {
 		return "1 - Ownership is tied to first fill right(s)";
 	}
-	else {	return "1";
+	else {
+		return "1";
 	}
 }
 
@@ -284,39 +276,36 @@ Return a list of Pcteva option strings, for use in GUIs.
 The options are of the form "0" if include_notes is false and
 "0 - Prorate evaporation based on current storage", if include_notes is true.
 @return a list of Pcteva option strings, for use in GUIs.
-@param include_notes Indicate whether notes should be added after the parameter
-values.
+@param include_notes Indicate whether notes should be added after the parameter values.
 */
 public static List getPctevaChoices ( boolean include_notes )
 {	List v = new Vector(2);
 	v.add ( "0 - Prorate evaporation based on current storage" );
 	for ( int i = 100; i >= 1; i-- ) {
-		v.add ( "" + i + " - Apply " + i +
-		" % of evaporation to account" );
+		v.add ( "" + i + " - Apply " + i + " % of evaporation to account" );
 	}
 	v.add ( "-1 - No evaporation for this account" );
 	if ( !include_notes ) {
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.set(i,StringUtil.getToken(
-				(String)v.get(i), " ", 0, 0) );
+			v.set(i,StringUtil.getToken((String)v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
 }
 
 /**
-Return the default Pcteva choice.  This can be used by GUI code
-to pick a default for a new diversion.
+Return the default Pcteva choice.  This can be used by GUI code to pick a default for a new diversion.
 @return the default Pcteva choice.
 */
 public static String getPctevaDefault ( boolean include_notes )
-{	// Make this aggree with the above method...
+{	// Make this agree with the above method...
 	if ( include_notes ) {
 		return "0 - Prorate evaporation based on current storage";
 	}
-	else {	return "0";
+	else {
+		return "0";
 	}
 }
 
@@ -447,14 +436,14 @@ public void setPcteva(double d) {
 }
 
 /**
-Set the prorate res evap btwn accnt owners.
+Set the prorate reservoir evaporation between account owners.
 */
 public void setPcteva(Double d) {
 	setPcteva(d.doubleValue());
 }
 
 /**
-Set the prorate res evap btwn accnt owners.
+Set the prorate reservoir evaporation between account owners.
 */
 public void setPcteva(String str) {
 	if (str == null) {
@@ -468,25 +457,25 @@ Returns a String representation of this object.
 @return a String representation of this object.
 */
 public String toString() {
-	return super.toString() + ", " + _ownmax + ", " + _curown + ", "
-		+ _pcteva + ", " + _n2own;
+	return super.toString() + ", " + _ownmax + ", " + _curown + ", " + _pcteva + ", " + _n2own;
 }
 
 /**
-Writes a Vector of StateMod_ReservoirAccount objects to a list file.  A header 
+Writes a list of StateMod_ReservoirAccount objects to a list file.  A header 
 is printed to the top of the file, containing the commands used to generate the
-file.  Any strings in the body of the file that contain the field delimiter 
-will be wrapped in "...".  
+file.  Any strings in the body of the file that contain the field delimiter will be wrapped in "...".  
 @param filename the name of the file to which the data will be written.
 @param delimiter the delimiter to use for separating field values.
 @param update whether to update an existing file, retaining the current 
 header (true) or to create a new file with a new header.
-@param data the Vector of objects to write.  
+@param data the list of objects to write.
+@param newComments new comments to add to the top of the file.
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter,
-boolean update, List data) 
-throws Exception {
+public static void writeListFile(String filename, String delimiter, boolean update, List data,
+	List newComments ) 
+throws Exception
+{	String routine = "StateMod_ReservoirAccount.writeListFile";
 	int size = 0;
 	if (data != null) {
 		size = data.size();
@@ -519,19 +508,33 @@ throws Exception {
 	
 	int j = 0;
 	StateMod_ReservoirAccount acct = null;
-	String[] commentString = { "#" };
-	String[] ignoreCommentString = { "#>" };
+	List commentIndicators = new Vector(1);
+	commentIndicators.add ( "#" );
+	List ignoredCommentIndicators = new Vector(1);
+	ignoredCommentIndicators.add ( "#>");
 	String[] line = new String[fieldCount];
-	String[] newComments = null;
 	StringBuffer buffer = new StringBuffer();
 	PrintWriter out = null;
 	
 	try {	
-
+		// Add some basic comments at the top of the file.  Do this to a copy of the
+		// incoming comments so that they are not modified in the calling code.
+		List newComments2 = null;
+		if ( newComments == null ) {
+			newComments2 = new Vector();
+		}
+		else {
+			newComments2 = new Vector(newComments);
+		}
+		newComments2.add(0,"");
+		newComments2.add(1,"StateMod reservoir station accounts as a delimited list file.");
+		newComments2.add(2,"See also the associated station, precipitation station, evaporation station,");
+		newComments2.add(3,"content/area/seepage, and collection files.");
+		newComments2.add(4,"");
 		out = IOUtil.processFileHeaders(
 			oldFile,
 			IOUtil.getPathUsingWorkingDir(filename), 
-			newComments, commentString, ignoreCommentString, 0);
+			newComments2, commentIndicators, ignoredCommentIndicators, 0);
 
 		for (int i = 0; i < fieldCount; i++) {
 			buffer.append("\"" + names[i] + "\"");
@@ -545,20 +548,13 @@ throws Exception {
 		for (int i = 0; i < size; i++) {
 			acct = (StateMod_ReservoirAccount)data.get(i);
 			
-			line[0] = StringUtil.formatString(acct.getCgoto(), 
-				formats[0]).trim();
-			line[1] = StringUtil.formatString(acct.getID(), 
-				formats[1]).trim();
-			line[2] = StringUtil.formatString(acct.getName(), 
-				formats[2]).trim();
-			line[3] = StringUtil.formatString(acct.getOwnmax(), 
-				formats[3]).trim();
-			line[4] = StringUtil.formatString(acct.getCurown(), 
-				formats[4]).trim();
-			line[5] = StringUtil.formatString(acct.getPcteva(), 
-				formats[5]).trim();
-			line[6] = StringUtil.formatString(acct.getN2own(), 
-				formats[6]).trim();
+			line[0] = StringUtil.formatString(acct.getCgoto(),formats[0]).trim();
+			line[1] = StringUtil.formatString(acct.getID(),formats[1]).trim();
+			line[2] = StringUtil.formatString(acct.getName(),formats[2]).trim();
+			line[3] = StringUtil.formatString(acct.getOwnmax(),formats[3]).trim();
+			line[4] = StringUtil.formatString(acct.getCurown(),formats[4]).trim();
+			line[5] = StringUtil.formatString(acct.getPcteva(),formats[5]).trim();
+			line[6] = StringUtil.formatString(acct.getN2own(),formats[6]).trim();
 
 			buffer = new StringBuffer();	
 			for (j = 0; j < fieldCount; j++) {
@@ -573,17 +569,16 @@ throws Exception {
 
 			out.println(buffer.toString());
 		}
-		out.flush();
-		out.close();
-		out = null;
 	}
 	catch (Exception e) {
+		Message.printWarning(3, routine, e);
+		throw e;
+	}
+	finally {
 		if (out != null) {
 			out.flush();
 			out.close();
 		}
-		out = null;
-		throw e;
 	}
 }
 

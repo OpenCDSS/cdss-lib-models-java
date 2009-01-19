@@ -49,8 +49,7 @@ import RTi.Util.String.StringUtil;
 
 /**
 Object used to store reservoir area capacity information in.
-Any calls to "set" routines sets the _dataset.COMP_RESERVOIR_STATIONS flag 
-dirty.
+Any calls to "set" routines sets the _dataset.COMP_RESERVOIR_STATIONS flag dirty.
 */
 public class StateMod_ReservoirAreaCap extends StateMod_Data 
 implements Cloneable, Comparable {
@@ -58,15 +57,15 @@ implements Cloneable, Comparable {
 /**
 Content in area cap table.
 */
-protected double	_conten;
+protected double _conten;
 /**
 Area associated with the content.
 */
-protected double	_surarea;
+protected double _surarea;
 /**
 Seepage associated with the content.
 */
-protected double	_seepage;
+protected double _seepage;
 	
 /**
 Constructor.
@@ -88,8 +87,7 @@ public Object clone() {
 
 /**
 Compares this object to another StateMod_Data object based on the sorted
-order from the StateMod_Data variables, and then by conten, surarea and 
-seepage, in that order.
+order from the StateMod_Data variables, and then by conten, surarea and seepage, in that order.
 @param o the object to compare against.
 @return 0 if they are the same, 1 if this object is greater than the other
 object, or -1 if it is less.
@@ -138,36 +136,33 @@ public void createBackup() {
 
 /**
 Compare two rights Vectors and see if they are the same.
-@param v1 the first Vector of StateMod_ReservoirAreaCap s to check.  Can not
-be null.
-@param v2 the second Vector of StateMod_ReservoirAreaCap s to check.  Can not
-be null.
+@param v1 the first Vector of StateMod_ReservoirAreaCap s to check.  Cannot be null.
+@param v2 the second Vector of StateMod_ReservoirAreaCap s to check.  Cannot be null.
 @return true if they are the same, false if not.
 */
 public static boolean equals(List v1, List v2) {
-	String routine = "StateMod_ReservoirAreaCap.equals(Vector, Vector)";
+	String routine = "StateMod_ReservoirAreaCap.equals";
 	StateMod_ReservoirAreaCap r1;	
 	StateMod_ReservoirAreaCap r2;	
 	if (v1.size() != v2.size()) {
-		Message.printStatus(1, routine, "Vectors are different sizes");
+		Message.printStatus(2, routine, "Lists are different sizes");
 		return false;
 	}
 	else {
 		// sort the Vectors and compare item-by-item.  Any differences
 		// and data will need to be saved back into the dataset.
 		int size = v1.size();
-		Message.printStatus(1, routine, "Vectors are of size: " + size);
+		Message.printStatus(1, routine, "Lists are of size: " + size);
 		List v1Sort = StateMod_Util.sortStateMod_DataVector(v1);
 		List v2Sort = StateMod_Util.sortStateMod_DataVector(v2);
-		Message.printStatus(1, routine, "Vectors have been sorted");
+		Message.printStatus(2, routine, "Vectors have been sorted");
 	
 		for (int i = 0; i < size; i++) {			
 			r1 = (StateMod_ReservoirAreaCap)v1Sort.get(i);	
 			r2 = (StateMod_ReservoirAreaCap)v2Sort.get(i);	
 			Message.printStatus(1, routine, r1.toString());
 			Message.printStatus(1, routine, r2.toString());
-			Message.printStatus(1, routine, "Element " + i 
-				+ " comparison: " + r1.compareTo(r2));
+			Message.printStatus(1, routine, "Element " + i + " comparison: " + r1.compareTo(r2));
 			if (r1.compareTo(r2) != 0) {
 				return false;
 			}
@@ -177,8 +172,7 @@ public static boolean equals(List v1, List v2) {
 }
 
 /**
-Tests to see if two diversion rights are equal.  Strings are compared with
-case sensitivity.
+Tests to see if two diversion rights are equal.  Strings are compared with case sensitivity.
 @param ac the ac to compare.
 @return true if they are equal, false otherwise.
 */
@@ -187,10 +181,7 @@ public boolean equals(StateMod_ReservoirAreaCap ac) {
 	 	return false;
 	}
 
-	if (	_conten == ac._conten
-		&& _surarea == ac._surarea
-		&& _seepage == ac._seepage) {
-		
+	if ( _conten == ac._conten && _surarea == ac._surarea && _seepage == ac._seepage) {
 		return true;
 	}
 	return false;
@@ -353,25 +344,25 @@ Returns a String representation of this object.
 @return a String representation of this object.
 */
 public String toString() {
-	return super.toString() + ", " + _conten + ", " + _surarea + ", "
-		+ _seepage;
+	return super.toString() + ", " + _conten + ", " + _surarea + ", " + _seepage;
 }
  
- /**
-Writes a Vector of StateMod_ReservoirAreaCap objects to a list file.  A header 
+/**
+Writes a list of StateMod_ReservoirAreaCap objects to a list file.  A header 
 is printed to the top of the file, containing the commands used to generate the 
-file.  Any strings in the body of the file that contain the field delimiter 
-will be wrapped in "...".  
+file.  Any strings in the body of the file that contain the field delimiter will be wrapped in "...".  
 @param filename the name of the file to which the data will be written.
 @param delimiter the delimiter to use for separating field values.
 @param update whether to update an existing file, retaining the current 
 header (true) or to create a new file with a new header.
-@param data the Vector of objects to write.  
+@param data the list of objects to write.
+@param newComments new comments to add at the top of the file.
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter,
-boolean update, List data) 
-throws Exception {
+public static void writeListFile(String filename, String delimiter, boolean update, List data,
+	List newComments ) 
+throws Exception
+{	String routine = "StateMod_ReservoirAreaCap.writeListFile";
 	int size = 0;
 	if (data != null) {
 		size = data.size();
@@ -403,22 +394,35 @@ throws Exception {
 	PrintWriter out = null;
 	StateMod_ReservoirAreaCap area = null;
 	String[] line = new String[fieldCount];
-	String[] commentString = { "#" };
-	String[] ignoreCommentString = { "#>" };
-	String[] newComments = null;
+	List commentIndicators = new Vector(1);
+	commentIndicators.add ( "#" );
+	List ignoredCommentIndicators = new Vector(1);
+	ignoredCommentIndicators.add ( "#>");
 	StringBuffer buffer = new StringBuffer();
 	
-	try {	
-		out = IOUtil.processFileHeaders(
-			oldFile,
-			IOUtil.getPathUsingWorkingDir(filename), 
-			newComments, commentString, ignoreCommentString, 0);
+	try {
+		// Add some basic comments at the top of the file.  Do this to a copy of the
+		// incoming comments so that they are not modified in the calling code.
+		List newComments2 = null;
+		if ( newComments == null ) {
+			newComments2 = new Vector();
+		}
+		else {
+			newComments2 = new Vector(newComments);
+		}
+		newComments2.add(0,"");
+		newComments2.add(1,"StateMod reservoir content/area/seepage data as a delimited list file.");
+		newComments2.add(2,"See also the associated station, account, precipitation station,");
+		newComments2.add(3,"evaporation station, and collection files.");
+		newComments2.add(4,"");
+		out = IOUtil.processFileHeaders( oldFile, IOUtil.getPathUsingWorkingDir(filename), 
+			newComments2, commentIndicators, ignoredCommentIndicators, 0);
 
 		for (int i = 0; i < fieldCount; i++) {
-			buffer.append("\"" + names[i] + "\"");
-			if (i < (fieldCount - 1)) {
+			if (i > 0) {
 				buffer.append(delimiter);
 			}
+			buffer.append("\"" + names[i] + "\"");
 		}
 
 		out.println(buffer.toString());
@@ -426,39 +430,34 @@ throws Exception {
 		for (int i = 0; i < size; i++) {
 			area = (StateMod_ReservoirAreaCap)data.get(i);
 			
-			line[0] = StringUtil.formatString(area.getCgoto(), 
-				formats[0]).trim();
-			line[1] = StringUtil.formatString(area.getConten(), 
-				formats[1]).trim();
-			line[2] = StringUtil.formatString(area.getSurarea(), 
-				formats[2]).trim();
-			line[3] = StringUtil.formatString(area.getSeepage(), 
-				formats[3]).trim();
+			line[0] = StringUtil.formatString(area.getCgoto(),formats[0]).trim();
+			line[1] = StringUtil.formatString(area.getConten(),formats[1]).trim();
+			line[2] = StringUtil.formatString(area.getSurarea(),formats[2]).trim();
+			line[3] = StringUtil.formatString(area.getSeepage(),formats[3]).trim();
 
 			buffer = new StringBuffer();	
 			for (j = 0; j < fieldCount; j++) {
+				if (j > 0) {
+					buffer.append(delimiter);
+				}
 				if (line[j].indexOf(delimiter) > -1) {
 					line[j] = "\"" + line[j] + "\"";
 				}
 				buffer.append(line[j]);
-				if (j < (fieldCount - 1)) {
-					buffer.append(delimiter);
-				}
 			}
 
 			out.println(buffer.toString());
 		}
-		out.flush();
-		out.close();
-		out = null;
 	}
 	catch (Exception e) {
+		Message.printWarning ( 3, routine, e );
+		throw e;
+	}
+	finally {
 		if (out != null) {
 			out.flush();
 			out.close();
 		}
-		out = null;
-		throw e;
 	}
 }
 

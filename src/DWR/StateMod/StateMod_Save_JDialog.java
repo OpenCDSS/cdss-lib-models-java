@@ -539,7 +539,7 @@ throws Exception {
 			break;
 		case StateMod_DataSet.COMP_RESERVOIR_STATIONS:
 			StateMod_Reservoir.writeStateModFile(oldFilename, 
-				newFilename, (List)data, comments, daily);
+				newFilename, (List)data, StringUtil.toList(comments), daily);
 			name = "Reservoir";
 			break;
 		case StateMod_DataSet.COMP_RESERVOIR_RIGHTS:
