@@ -678,7 +678,7 @@ throws Exception {
 
 		out.println(cmnt);
 		out.println(cmnt + "***************************************************");
-		out.println(cmnt + "  Well Right File");
+		out.println(cmnt + "  StateMod Well Right File");
 		out.println(cmnt);
 		String format_add = "";
 		if ( WriteDataComments_boolean ) {
