@@ -2614,9 +2614,7 @@ throws Exception {
 		newComments2.add(1,"StateMod well stations as a delimited list file.");
 		newComments2.add(2,"See also the associated return flow, depletion, and collection files.");
 		newComments2.add(3,"");
-		out = IOUtil.processFileHeaders(
-			oldFile,
-			IOUtil.getPathUsingWorkingDir(filenameFull), 
+		out = IOUtil.processFileHeaders( oldFile, IOUtil.getPathUsingWorkingDir(filenameFull), 
 			newComments2, commentIndicators, ignoredCommentIndicators, 0);
 
 		for (int i = 0; i < fieldCount; i++) {

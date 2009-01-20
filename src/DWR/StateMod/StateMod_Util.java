@@ -3787,10 +3787,10 @@ public static String lookupPropValue(int componentType, String propType, String 
 		return lookupDiversionPropValue(propType, field);
 	}
 	else if (componentType == StateMod_DataSet.COMP_DIVERSION_STATION_COLLECTIONS) {
-	    	return lookupDiversionCollectionPropValue(propType, field);
+	   	return lookupDiversionCollectionPropValue(propType, field);
 	}
 	else if (componentType == StateMod_DataSet.COMP_DIVERSION_STATION_DELAY_TABLES) {
-	     	return lookupDiversionReturnFlowPropValue(propType, field);
+	   	return lookupDiversionReturnFlowPropValue(propType, field);
 	}
 	else if (componentType == StateMod_DataSet.COMP_INSTREAM_RIGHTS) {
 		return lookupInstreamFlowRightPropValue(propType, field);
@@ -3814,7 +3814,7 @@ public static String lookupPropValue(int componentType, String propType, String 
 		return lookupReservoirEvapStationPropValue(propType, field);
 	}	
 	else if (componentType == StateMod_DataSet.COMP_RESERVOIR_STATION_COLLECTIONS) {
-	    	return lookupReservoirCollectionPropValue(propType, field);
+	   	return lookupReservoirCollectionPropValue(propType, field);
 	}
 	else if (componentType == StateMod_DataSet.COMP_RESERVOIR_RIGHTS) {	
 		return lookupReservoirRightPropValue(propType, field);
@@ -3823,10 +3823,10 @@ public static String lookupPropValue(int componentType, String propType, String 
 		return lookupRiverNodePropValue(propType, field);
 	}
 	else if (componentType == StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS) {
-	    	return lookupStreamEstimatePropValue(propType, field);
+	   	return lookupStreamEstimatePropValue(propType, field);
 	}
 	else if (componentType == StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS) {
-	    	return lookupStreamEstimateCoefficientPropValue(propType,field);
+	   	return lookupStreamEstimateCoefficientPropValue(propType,field);
 	}
 	else if (componentType == StateMod_DataSet.COMP_STREAMGAGE_STATIONS) {
 		return lookupStreamGagePropValue(propType, field);
@@ -3835,13 +3835,13 @@ public static String lookupPropValue(int componentType, String propType, String 
 		return lookupWellPropValue(propType, field);
 	}
 	else if (componentType == StateMod_DataSet.COMP_WELL_STATION_COLLECTIONS) {
-	    	return lookupWellCollectionPropValue(propType, field);
+	   	return lookupWellCollectionPropValue(propType, field);
 	}
 	else if (componentType == StateMod_DataSet.COMP_WELL_STATION_DEPLETION_TABLES) {
 		return lookupWellDepletionPropValue(propType, field);
 	}
 	else if (componentType == StateMod_DataSet.COMP_WELL_STATION_DELAY_TABLES) {
-	    	return lookupWellReturnFlowPropValue(propType, field);
+	   	return lookupWellReturnFlowPropValue(propType, field);
 	}
 	else if (componentType == StateMod_DataSet.COMP_WELL_RIGHTS) {
 		return lookupWellRightPropValue(propType, field);

@@ -519,7 +519,7 @@ throws Exception {
 			break;
 		case StateMod_DataSet.COMP_DIVERSION_RIGHTS:
 			StateMod_DiversionRight.writeStateModFile(oldFilename,
-				newFilename, (List)data, comments, daily);
+				newFilename, (List)data, StringUtil.toList(comments), daily);
 			name = "Diversion Rights";
 			break;
 		case StateMod_DataSet.COMP_INSTREAM_STATIONS:

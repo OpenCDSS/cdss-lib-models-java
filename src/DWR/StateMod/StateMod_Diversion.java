@@ -161,6 +161,7 @@
 package DWR.StateMod;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.PrintWriter;
 import java.util.StringTokenizer;
@@ -187,8 +188,7 @@ implements Cloneable, Comparable, StateMod_Component
 {
 
 /**
-Demand source values used by other software.  Most interaction is expected to
-occur through GUIs.
+Demand source values used by other software.  Most interaction is expected to occur through GUIs.
 */
 public static final int DEMSRC_UNKNOWN = 0;
 public static final int DEMSRC_GIS = 1;
@@ -203,113 +203,119 @@ public static final int DEMSRC_USER = 8;
 /**
 Daily diversion ID.
 */
-protected String	_cdividy;
+protected String _cdividy;
 
 /**
 Diversion capacity
 */
-protected double	_divcap;
+protected double _divcap;
 
 /**
 User name
 */
-protected String 	_username;
+protected String _username;
 
 /**
 data type switch
 */
-protected int 		_idvcom;
+protected int _idvcom;
 
 /**
 System efficiency switch
 */
-protected double 	_divefc;
+protected double _divefc;
 
 /**
 Efficiency % by month.  The efficiencies are in the order of the calendar for
 the data set.  Therefore, for proper display, the calendar type must be known.
 */
-protected double	_diveff[];
+protected double _diveff[];
 
 // The following are used only by StateDMI and do not needed to be handled in
 // comparison, initialization, etc.
-private double []	__calculated_efficiencies = null;
-private double []	__calculated_efficiency_stddevs = null;
-private double []	__model_efficiencies = null;
+private double [] __calculated_efficiencies = null;
+private double [] __calculated_efficiency_stddevs = null;
+private double [] __model_efficiencies = null;
 
 /**
 irrigated acreage, future
 */
-protected double	_area;
+protected double _area;
 
 /**
 use type
 */
-protected int		_irturn;
+protected int _irturn;
 
 /**
 river nodes receiving return flow
 */
-protected List	_rivret;
+protected List _rivret;
 
 /**
 Direct diversions rights
 */
-protected List	_rights;
+protected List _rights;
 
 /**
 Acreage source
 */
-protected int		_demsrc;
+protected int _demsrc;
 
 /**
 Replacement code
 */
-protected int		_ireptype;
+protected int _ireptype;
 
 /**
 Pointer to monthly demand ts.
 */
-protected MonthTS 	_demand_MonthTS;
+protected MonthTS _demand_MonthTS;
 
 /**
 Pointer to monthly demand override ts.
 */
-protected MonthTS 	_demand_override_MonthTS;
+protected MonthTS _demand_override_MonthTS;
 
 /**
 Pointer to average monthly demand override ts.
 */
-protected MonthTS 	_demand_average_MonthTS;
+protected MonthTS _demand_average_MonthTS;
 
 /**
 Pointer to daily demand ts.
 */
-protected DayTS 	_demand_DayTS;
+protected DayTS _demand_DayTS;
 
 /**
 Pointer to historical monthly diversion ts
 */
-protected MonthTS 	_diversion_MonthTS;
-private double []	__ddh_monthly = null;	// 12 monthly and annual average
-						// over period, used by StateDMI
+protected MonthTS _diversion_MonthTS;
+
+/**
+12 monthly and annual average over period, used by StateDMI.
+*/
+private double [] __ddh_monthly = null;
 
 /**
 Pointer to historical daily diversion ts
 */
-protected DayTS 	_diversion_DayTS;
+protected DayTS _diversion_DayTS;
 
 /**
 Pointer to monthly consumptive water requirement ts.
 */
-protected MonthTS 	_cwr_MonthTS;
-private double []	__cwr_monthly = null;	// 12 monthly and annual average
-						// over period, used by StateDMI
+protected MonthTS _cwr_MonthTS;
+
+/**
+12 monthly and annual average over period, used by StateDMI
+*/
+private double [] __cwr_monthly = null;
 
 /**
 Pointer to daily consumptive water requirement ts.
 */
-protected DayTS 	_cwr_DayTS;
+protected DayTS _cwr_DayTS;
 
 /**
 Pointer to the StateCU_IrrigationPracticeTS.  This object actually contains
@@ -328,8 +334,7 @@ Reference to spatial data for this diversion -- currently NOT cloned.
 protected GeoRecord _georecord;
 
 /**
-Vector of parcel data, in particular to allow StateDMI to detect when a
-diverion had no data.
+Vector of parcel data, in particular to allow StateDMI to detect when a diversion had no data.
 */
 protected List _parcel_Vector = new Vector();
 
@@ -375,23 +380,22 @@ public static String COLLECTION_TYPE_MULTISTRUCT = "MultiStruct";
 
 private String __collection_type = StateMod_Util.MISSING_STRING;
 
+/**
+Used by DMI software - currently no options.
+*/
 private String __collection_part_type = "Ditch";
-					// Used by DMI software - currently no
-					// options.
-private List __collection_Vector = null;
-					// The identifiers for data that are
-					// collected - null if not a collection
-					// location.  This is actually a Vector
-					// of Vector's where the
-					// __collection_year is the first
-					// dimension.  This is ugly but need to
-					// use the code to see if it can be
-					// made cleaner.
 
+/**
+The identifiers for data that are collected - null if not a collection location.
+This is a list of lists where the __collection_year is the first dimension.
+This is ugly but need to use the code to see if it can be made cleaner.
+ */
+private List __collection_Vector = null;
+
+/**
+An array of years that correspond to the aggregate/system.  Ditches currently only have one year.
+*/
 private int [] __collection_year = null;
-					// An array of years that correspond to
-					// the aggregate/system.  Ditches
-					// currently only have one year.
 
 /**
 Construct a new diversion and assign data to reasonable defaults.
@@ -421,7 +425,7 @@ been made to data on the main screen.
 public StateMod_Diversion ( StateMod_Diversion div, boolean deep_copy )
 {	this();
 	// Base class...
-	// REVISIT
+	// TODO
 	// Local data members...
 	_cdividy = div._cdividy;
 	_divcap = div._divcap;
@@ -437,8 +441,7 @@ public StateMod_Diversion ( StateMod_Diversion div, boolean deep_copy )
 	_rights = div._rights;
 	_demsrc = div._demsrc;
 	_ireptype = div._ireptype;
-	// For time series, the references are pointed to the original but
-	// data are not copied.
+	// For time series, the references are pointed to the original but data are not copied.
 	_demand_MonthTS = div._demand_MonthTS;
 	_demand_override_MonthTS = div._demand_override_MonthTS;
 	_demand_average_MonthTS = div._demand_average_MonthTS;
@@ -665,8 +668,7 @@ public int compareTo(Object o) {
 
 /**
 Given a vector containing all the diversions and another vector containing
-all the rights, creates a system of pointers to link the diversions to their
-associated rights.
+all the rights, creates a system of pointers to link the diversions to their associated rights.
 This routines doesn't add an element to an array.  The array
 already exists, we are just connecting next and previous pointers.
 @param diversions all diversions
@@ -693,21 +695,16 @@ public static void connectAllRights ( List diversions, List rights )
 Given a vector containing all the diversion objects and lists of time series
 objects, sets pointers from the diversions to the associated time series.
 @param diversions All diversions.
-@param diversion_MonthTS Vector of monthly historical diversion time series,
-or null.
-@param diversion_DayTS Vector of daily historical diversion time series, or
-null.
+@param diversion_MonthTS Vector of monthly historical diversion time series, or null.
+@param diversion_DayTS Vector of daily historical diversion time series, or null.
 @param demand_MonthTS Vector of monthly demand time series, or null.
-@param demand_override_MonthTS Vector of monthly override demand time series,
-or null.
+@param demand_override_MonthTS Vector of monthly override demand time series, or null.
 @param demand_average_MonthTS Vector of average monthly override
 demand time series, or null.
 @param ipy_YearTS Vector of yearly irrigation practice objects, containing 
 time series of efficiencies, etc. (StateCU_IrrigationPracticeTS), or null
-@param cwr_MonthTS Vector of monthly consumptive water requirement time series,
-or null.
-@param cwr_DayTS Vector of daily consumptive water requirement time series,
-or null.
+@param cwr_MonthTS Vector of monthly consumptive water requirement time series, or null.
+@param cwr_DayTS Vector of daily consumptive water requirement time series, or null.
 */
 public static void connectAllTS (	List diversions,
 		List diversion_MonthTS,
@@ -764,8 +761,7 @@ public static void connectAllTS (	List diversions,
 }
 
 /**
-Connect daily CWR series pointer.  The connection is made using the
-value of "cdividy" for the diversion.
+Connect daily CWR series pointer.  The connection is made using the value of "cdividy" for the diversion.
 @param tslist demand time series
 */
 public void connectCWRDayTS ( List tslist )
@@ -790,8 +786,7 @@ public void connectCWRDayTS ( List tslist )
 }
 
 /**
-Connect monthly CWR time series pointer.  The time series name is set to
-that of the diversion.
+Connect monthly CWR time series pointer.  The time series name is set to that of the diversion.
 @param tslist Time series list.
 */
 public void connectCWRMonthTS ( List tslist )
@@ -868,8 +863,7 @@ public void connectDemandDayTS ( List tslist )
 }
 
 /**
-Connect monthly demand time series pointer.  The time series name is set to
-that of the diversion.
+Connect monthly demand time series pointer.  The time series name is set to that of the diversion.
 @param tslist Time series list.
 */
 public void connectDemandMonthTS ( List tslist )
@@ -995,8 +989,7 @@ public void connectIrrigationPracticeYearTS ( List tslist )
 
 /**
 Connect the diversion rights with this diversion, comparing the "cgoto" for the
-right to the diversion identifier.  Multiple rights may be associated with a
-diversion.
+right to the diversion identifier.  Multiple rights may be associated with a diversion.
 @param rights all rights.
 */
 public void connectRights ( List rights )
@@ -1019,8 +1012,7 @@ public void connectRights ( List rights )
 }
 
 /**
-Creates a copy of the object for later use in checking to see if it was 
-changed in a GUI.
+Creates a copy of the object for later use in checking to see if it was changed in a GUI.
 */
 public void createBackup() {
 	_original = clone();
@@ -1040,13 +1032,11 @@ public void deleteReturnFlowAt(int index)
 	}
 }
 
-// REVISIT - in the GUI need to decide if the right is actually removed from
-// the main list
+// TODO - in the GUI need to decide if the right is actually removed from the main list
 /**
 Remove right from list.  A comparison on the ID is made.
 @param right Right to remove.  Note that the right is only removed from the
-list for this diversion and must also be removed from the main diversion right
-list.
+list for this diversion and must also be removed from the main diversion right list.
 */
 public void disconnectRight ( StateMod_DiversionRight right )
 {	if (right == null) {
@@ -1054,8 +1044,7 @@ public void disconnectRight ( StateMod_DiversionRight right )
 	}
 	int size = _rights.size();
 	StateMod_DiversionRight right2;
-	// Assume that more than on instance can exist, even though this is
-	// not allowed...
+	// Assume that more than on instance can exist, even though this is not allowed...
 	for ( int i = 0; i < size; i++ ) {
 		right2 = (StateMod_DiversionRight)_rights.get(i);
 		if ( right2.getID().equalsIgnoreCase(right.getID()) ) {
@@ -1217,9 +1206,10 @@ Returns the column headers for the specific data checked.
  */
 public static String[] getDataHeader()
 {
-	return new String[] { "Num",
-			"Diversion ID",
-			"Diversion Name" };
+	return new String[] {
+		"Num",
+		"Diversion ID",
+		"Diversion Name" };
 }
 
 /**
@@ -1269,11 +1259,9 @@ public static List getDemsrcChoices ( boolean include_notes )
 	v.add ( "0 - Irrigated acres source unknown" );
 	v.add ( "1 - Irrigated acres from GIS" );
 	v.add ( "2 - Irrigated acres from structure file (tia)" );
-	v.add (
-	"3 - Irr. acr. from GIS, primary comp. served by mult. structs" );
+	v.add (	"3 - Irr. acr. from GIS, primary comp. served by mult. structs" );
 	v.add ( "4 - Same as 3 but data from struct. file (tia)" );
-	v.add (
-	"5 - Irr. acr. from GIS, secondary comp. served by mult. structs" );
+	v.add (	"5 - Irr. acr. from GIS, secondary comp. served by mult. structs" );
 	v.add ( "6 - Municipal, industrial, or transmountain structure");
 	v.add ( "7 - Carrier structure (no irrigated acres)" );
 	v.add ( "8 - Irrigated acres provided by user" );
@@ -1296,7 +1284,8 @@ public static String getDemsrcDefault ( boolean include_notes )
 {	if ( include_notes ) {
 		return "0 - Irrigated acres source unknown";
 	}
-	else {	return "0";
+	else {
+		return "0";
 	}
 }
 
@@ -1344,13 +1333,11 @@ public double getDiveff ( int index, String yeartype )
 	}
 	else if ( yeartype.equalsIgnoreCase("Water") ||
 		yeartype.equalsIgnoreCase("WYR") ) {
-		index = TimeUtil.convertCalendarMonthToCustomMonth (
-				(index + 1), 10 ) - 1;
+		index = TimeUtil.convertCalendarMonthToCustomMonth ((index + 1), 10 ) - 1;
 	}
 	else if ( yeartype.equalsIgnoreCase("Irrigation") ||
 		yeartype.equalsIgnoreCase("IYR") ) {
-		index = TimeUtil.convertCalendarMonthToCustomMonth (
-				(index + 1), 11 ) - 1;
+		index = TimeUtil.convertCalendarMonthToCustomMonth ((index + 1), 11 ) - 1;
 	}
 	return _diveff[index];
 }
@@ -1382,8 +1369,7 @@ Return a list of on/off switch option strings, for use in GUIs.
 The options are of the form "0" if include_notes is false and
 "0 - Off", if include_notes is true.
 @return a list of on/off switch option strings, for use in GUIs.
-@param include_notes Indicate whether notes should be added after the parameter
-values.
+@param include_notes Indicate whether notes should be added after the parameter values.
 */
 public static List getIdivswChoices ( boolean include_notes )
 {	List v = new Vector(2);
@@ -1393,8 +1379,7 @@ public static List getIdivswChoices ( boolean include_notes )
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.set(i,StringUtil.getToken(
-				(String)v.get(i), " ", 0, 0) );
+			v.set(i,StringUtil.getToken((String)v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
@@ -1410,7 +1395,8 @@ public static String getIdivswDefault ( boolean include_notes )
 	if ( include_notes ) {
 		return ( "1 - On" );
 	}
-	else {	return "1";
+	else {
+		return "1";
 	}
 }
 
@@ -1454,7 +1440,8 @@ public static String getIdvcomDefault ( boolean include_notes )
 {	if ( include_notes ) {
 		return "1 - Monthly total demand";
 	}
-	else {	return "1";
+	else {
+		return "1";
 	}
 }
 
@@ -1496,7 +1483,8 @@ public static String getIreptypeDefault ( boolean include_notes )
 {	if ( include_notes ) {
 		return "-1 - Provide depletion replacement";
 	}
-	else {	return "-1";
+	else {
+		return "-1";
 	}
 }
 
@@ -1548,7 +1536,8 @@ public static String getIrturnDefault ( boolean include_notes )
 {	if ( include_notes ) {
 		return "1 - Irrigation";
 	}
-	else {	return "1";
+	else {
+		return "1";
 	}
 }
 
@@ -1580,8 +1569,8 @@ public int getNrtn() {
 }
 
 /**
-Return the Vector of parcels.
-@return the Vector of parcels.
+Return the list of parcels.
+@return the list of parcels.
 */
 public List getParcels()
 {	return _parcel_Vector;
@@ -1611,13 +1600,14 @@ public StateMod_DiversionRight getRight(int index)
 {	if ( (index < 0) || (index >= _rights.size()) ) {
 		return null;
 	}
-	else {	return (StateMod_DiversionRight)_rights.get(index);
+	else {
+		return (StateMod_DiversionRight)_rights.get(index);
 	}
 }
 
 /**
-Return the rights Vector.
-@return the rights Vector.
+Return the rights list.
+@return the rights list.
 */
 public List getRights()
 {	return _rights;
@@ -1631,23 +1621,20 @@ public String getUsername() {
 }
 
 /**
-Initialize data.
-Sets the smdata_type to _dataset.COMP_DIVERSION_STATIONS.
+Initialize data.  Sets the smdata_type to _dataset.COMP_DIVERSION_STATIONS.
 @param initialize_defaults If true, assign data to reasonable defaults.
 If false, all data are set to missing.
 */
 private void initialize ( boolean initialize_defaults )
 {	_smdata_type = StateMod_DataSet.COMP_DIVERSION_STATIONS;
 	if ( initialize_defaults ) {
-		_divefc	= -60.0;	// Ray Bennett, Ray Alvarado,
-					// 2003-10-07 progress mtg.
+		_divefc	= -60.0;	// Ray Bennett, Ray Alvarado, 2003-10-07 progress mtg.
 		_diveff = new double[12];
 		for ( int i = 0; i < 12; i++ ) {
 			_diveff[i] = 60.0;	// See above
 		}
 		_username = "";
-		_cdividy = "0";		// Use the average monthly TS for
-					// daily TS
+		_cdividy = "0";		// Use the average monthly TS for daily TS
 		_divcap = 0;
 		_idvcom = 1;
 		_area	= 0;
@@ -1655,7 +1642,8 @@ private void initialize ( boolean initialize_defaults )
 		_demsrc	= DEMSRC_UNKNOWN;
 		_ireptype = -1;	// Provide depletion replacement
 	}
-	else {	_divefc	= StateMod_Util.MISSING_DOUBLE;
+	else {
+		_divefc	= StateMod_Util.MISSING_DOUBLE;
 		_diveff = new double[12];
 		for ( int i = 0; i < 12; i++ ) {
 			_diveff[i] = StateMod_Util.MISSING_DOUBLE;
@@ -1691,7 +1679,8 @@ public boolean isCollection()
 {	if ( __collection_Vector == null ) {
 		return false;
 	}
-	else {	return true;
+	else {
+		return true;
 	}
 }
 
@@ -1724,50 +1713,56 @@ throws Exception
 	int linecount = 0;
 	String s = null;
 	
-	int format_0[] = {	StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_INTEGER,
-				StringUtil.TYPE_DOUBLE,
-				StringUtil.TYPE_INTEGER,
-				StringUtil.TYPE_INTEGER,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING };
-	int format_0w[] = {	12,
-				24,
-				12,
-				8,
-				8,
-				8,
-				8,
-				1,
-				12 };
-	int format_1[] = {	StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_INTEGER,
-				StringUtil.TYPE_INTEGER,
-				StringUtil.TYPE_DOUBLE,
-				StringUtil.TYPE_DOUBLE,
-				StringUtil.TYPE_INTEGER,
-				StringUtil.TYPE_INTEGER };
-	int format_1w[] = {	12,
-				24,
-				12,
-				8,
-				8,
-				8,
-				8,
-				8,
-				8 };
-	int format_2[] = {	StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_DOUBLE,
-				StringUtil.TYPE_INTEGER };
-	int format_2w[] = {	36,
-				12,
-				8,
-				8 };
+	int format_0[] = {
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_INTEGER,
+		StringUtil.TYPE_DOUBLE,
+		StringUtil.TYPE_INTEGER,
+		StringUtil.TYPE_INTEGER,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING };
+	int format_0w[] = {
+		12,
+		24,
+		12,
+		8,
+		8,
+		8,
+		8,
+		1,
+		12 };
+	int format_1[] = {
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_INTEGER,
+		StringUtil.TYPE_INTEGER,
+		StringUtil.TYPE_DOUBLE,
+		StringUtil.TYPE_DOUBLE,
+		StringUtil.TYPE_INTEGER,
+		StringUtil.TYPE_INTEGER };
+	int format_1w[] = {
+		12,
+		24,
+		12,
+		8,
+		8,
+		8,
+		8,
+		8,
+		8 };
+	int format_2[] = {
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_DOUBLE,
+		StringUtil.TYPE_INTEGER };
+	int format_2w[] = {
+		36,
+		12,
+		8,
+		8 };
 
 	StateMod_Diversion aDiversion = null;
 	StateMod_ReturnFlow aReturnNode = null;
@@ -1775,8 +1770,7 @@ throws Exception
 
 	Message.printStatus(1, routine, "Reading diversion file: " + filename);
 	try {	
-		in = new BufferedReader(new FileReader(
-			IOUtil.getPathUsingWorkingDir(filename)));
+		in = new BufferedReader(new FileReader(	IOUtil.getPathUsingWorkingDir(filename)));
 		while ((iline = in.readLine()) != null) {
 			++linecount;
 			// check for comments
@@ -1789,8 +1783,7 @@ throws Exception
 
 			// line 1
 			if (Message.isDebugOn) {
-				Message.printDebug(50, routine, 
-				"line 1: " + iline);
+				Message.printDebug(50, routine, "line 1: " + iline);
 			}
 			StringUtil.fixedRead(iline, format_0, format_0w, v);
 			aDiversion.setID(((String)v.get(0)).trim()); 
@@ -1805,8 +1798,7 @@ throws Exception
 			iline = in.readLine();
 			++linecount;
 			if (Message.isDebugOn) {
-				Message.printDebug(50, routine, 
-				"line 2: " + iline);
+				Message.printDebug(50, routine, "line 2: " + iline);
 			}
 			StringUtil.fixedRead(iline, format_1, format_1w, v);
 			aDiversion.setUsername(((String)v.get(1)).trim());
@@ -1819,23 +1811,19 @@ throws Exception
 
 			// get the efficiency information
 			if (aDiversion.getDivefc() < 0) {
-				// Negative value indicates monthly efficiencies
-				// will follow...
+				// Negative value indicates monthly efficiencies will follow...
 				iline = in.readLine();
 				++linecount;
 				// Free format...
-				StringTokenizer split = 
-					new StringTokenizer(iline);
-				if (split != null && 
-				     split.countTokens ()== 12) { 
+				StringTokenizer split = new StringTokenizer(iline);
+				if (split != null && split.countTokens ()== 12) { 
 					for (i = 0; i < 12; i++) {
-						aDiversion.setDiveff(i, 
-							split.nextToken());
+						aDiversion.setDiveff(i, split.nextToken());
 					}
 				}
 			}
-			else {	// Annual efficiency so set monthly efficiencies
-				// to the annual...
+			else {
+				// Annual efficiency so set monthly efficiencies to the annual...
 				aDiversion.setDiveff(0,aDiversion.getDivefc());
 				aDiversion.setDiveff(1,aDiversion.getDivefc());
 				aDiversion.setDiveff(2,aDiversion.getDivefc());
@@ -1854,32 +1842,24 @@ throws Exception
 			for (i = 0; i < nrtn; i++) {
 				iline = in.readLine();
 				++linecount;
-				StringUtil.fixedRead(iline, format_2,
-					format_2w, v);
-				aReturnNode = new StateMod_ReturnFlow(
-				StateMod_DataSet.COMP_DIVERSION_STATIONS);
+				StringUtil.fixedRead(iline, format_2, format_2w, v);
+				aReturnNode = new StateMod_ReturnFlow(StateMod_DataSet.COMP_DIVERSION_STATIONS);
 				s = ((String)v.get(1)).trim();
 				if (s.length() <= 0) {
-					aReturnNode.setCrtnid(
-					((String)v.get(0)).trim());
-					Message.printWarning(2, routine, 
-						"Return node for structure \""
-						+ aDiversion.getID()
-						+ "\" is blank. ");
+					aReturnNode.setCrtnid(((String)v.get(0)).trim());
+					Message.printWarning(3, routine, "Return node for structure \""
+						+ aDiversion.getID() + "\" is blank. ");
 				}
 				else {	
 					aReturnNode.setCrtnid(s);
 				}
 
-				aReturnNode.setPcttot(
-					((Double)v.get(2)));
-				aReturnNode.setIrtndl(
-					((Integer)v.get(3)));
+				aReturnNode.setPcttot(((Double)v.get(2)));
+				aReturnNode.setIrtndl(((Integer)v.get(3)));
 				aDiversion.addReturnFlow(aReturnNode);
 			}
 
-			// Set the diversion to not dirty because it was just
-			// initialized...
+			// Set the diversion to not dirty because it was just initialized...
 
 			aDiversion.setDirty ( false );
 
@@ -1888,43 +1868,15 @@ throws Exception
 		}
 	} 
 	catch (Exception e) {
-		routine = null;
-		v = null;
-		s = null;
-		format_0 = null;
-		format_0w = null;
-		format_1 = null;
-		format_1w = null;
-		format_2 = null;
-		format_2w = null;
-		aDiversion = null;
-		aReturnNode = null;
+		Message.printWarning(3, routine, "Error reading line " + linecount + " \"" + iline + "\"" );
+		Message.printWarning(3, routine, e);
+		throw e;
+	}
+	finally {
 		if (in != null) {
 			in.close();
 		}
-		in = null;
-		Message.printWarning(2, routine, "Error reading line " +
-			linecount + " \"" + iline + "\"" );
-		Message.printWarning(2, routine, e);
-		throw e;
 	}
-
-	routine = null;
-	iline = null;
-	v = null;
-	s = null;
-	format_0 = null;
-	format_0w = null;
-	format_1 = null;
-	format_1w = null;
-	format_2 = null;
-	format_2w = null;
-	aDiversion = null;
-	aReturnNode = null;
-	if (in != null) {
-		in.close();
-	}
-	in = null;
 	return theDiversions;
 }
 
@@ -1937,8 +1889,7 @@ public void setArea(double area) {
 		_area = area;
 		setDirty(true);
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(
-			StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
+			_dataset.setDirty( StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
 		}
 	}
 }
@@ -1989,8 +1940,7 @@ public void setAWC(double awc) {
 		_awc = awc;
 		setDirty(true);
 		if (!_isClone && _dataset != null) {
-			_dataset.setDirty(StateMod_DataSet.COMP_DIVERSION_STATIONS, 
-				true);
+			_dataset.setDirty(StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
 		}
 	}
 }
@@ -2030,8 +1980,7 @@ historical diversions (12 monthly values + annual average), for the
 data set calendar type.  This is ONLY used by StateDMI and does not need
 to be considered in comparison code.
 */
-public void setCalculatedEfficiencyStddevs (
-	double [] calculated_efficiency_stddevs )
+public void setCalculatedEfficiencyStddevs (double [] calculated_efficiency_stddevs )
 {	__calculated_efficiency_stddevs = calculated_efficiency_stddevs;
 }
 
@@ -2047,8 +1996,7 @@ public void setCdividy(String cdividy) {
 		_cdividy = cdividy;
 		setDirty(true);
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(
-			StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
 		}
 	}
 }
@@ -2062,12 +2010,9 @@ The options are of the form "3" if include_notes is false and
 */
 public static List getCdividyChoices ( boolean include_notes )
 {	List v = new Vector(8);
-	v.add (
-		"0 - Use monthly time series to get average daily values" );
-	v.add (
-		"3 - Daily time series are supplied" );
-	v.add (
-	"4 - Daily time series interpolated from midpoints of monthly data" );
+	v.add ( "0 - Use monthly time series to get average daily values" );
+	v.add (	"3 - Daily time series are supplied" );
+	v.add (	"4 - Daily time series interpolated from midpoints of monthly data" );
 	if ( !include_notes ) {
 		// Remove the trailing notes...
 		int size = v.size();
@@ -2088,13 +2033,14 @@ public static String getCdividyDefault ( boolean include_notes )
 		return
 		"0 - Use monthly time series to get average daily values";
 	}
-	else {	return "0";
+	else {
+		return "0";
 	}
 }
 
 /**
 Cancels any changes made to this object within a GUI since createBackup()
-was caled and sets _original to null.
+was called and sets _original to null.
 */
 public void restoreOriginal() {
 	StateMod_Diversion d = (StateMod_Diversion)_original;
@@ -2125,7 +2071,8 @@ public void setCollectionPartIDs ( List ids )
 		__collection_Vector = new Vector ( 1 );
 		__collection_year = new int[1];
 	}
-	else {	// Remove the previous contents...
+	else {
+		// Remove the previous contents...
 		__collection_Vector.clear();
 	}
 	// Now assign...
@@ -2136,24 +2083,21 @@ public void setCollectionPartIDs ( List ids )
 /**
 Set the collection type.
 @param collection_type The collection type, either
-COLLECTION_TYPE_AGGREGATE, COLLECTION_TYPE_SYSTEM, or
-COLLECTION_TYPE_MULTISTRUCT.
+COLLECTION_TYPE_AGGREGATE, COLLECTION_TYPE_SYSTEM, or COLLECTION_TYPE_MULTISTRUCT.
 */
 public void setCollectionType ( String collection_type )
 {	__collection_type = collection_type;
 }
 
 /**
-Set the consumptive water requirement daily time series for the diversion
-structure.
+Set the consumptive water requirement daily time series for the diversion structure.
 */
 public void setConsumptiveWaterRequirementDayTS ( DayTS cwr_DayTS) {
 	_cwr_DayTS = cwr_DayTS;
 }
 
 /**
-Set the consumptive water requirement monthly time series for the diversion
-structure.
+Set the consumptive water requirement monthly time series for the diversion structure.
 */
 public void setConsumptiveWaterRequirementMonthTS ( MonthTS cwr_MonthTS) {
 	_cwr_MonthTS = cwr_MonthTS;
@@ -2196,8 +2140,7 @@ public void setDemsrc(int demsrc) {
 		_demsrc = demsrc;
 		setDirty(true);
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(
-			StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
 		}
 	}
 }
@@ -2230,8 +2173,7 @@ public void setDivcap(double divcap) {
 		_divcap = divcap;
 		setDirty(true);
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(
-			StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
 		}
 	}
 }
@@ -2256,22 +2198,21 @@ public void setDivcap(String divcap) {
 
 /**
 Set the system efficiency switch.
-@param divefc effeciency.
+@param divefc efficiency.
 */
 public void setDivefc(double divefc) {
 	if (divefc != _divefc) {
 		_divefc = divefc;
 		setDirty(true);
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(
-			StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
 		}
 	}
 }
 
 /**
 Set the system efficiency switch.
-@param divefc effeciency.
+@param divefc efficiency.
 */
 public void setDivefc(Double divefc) {
 	setDivefc(divefc.doubleValue());
@@ -2279,7 +2220,7 @@ public void setDivefc(Double divefc) {
 
 /**
 Set the system efficiency switch.
-@param divefc effeciency.
+@param divefc efficiency.
 */
 public void setDivefc(String divefc) {
 	if (divefc == null) {
@@ -2301,8 +2242,7 @@ public void setDiveff(int index, double diveff) {
 		_diveff[index] = diveff;
 		setDirty(true);
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(
-			StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
 		}
 	}
 }
@@ -2312,7 +2252,7 @@ Set the system efficiency for a particular month.
 The efficiencies are specified with month 0 being January.
 @param index month index (0=January).
 @param diveff monthly efficiency
-@param yeartype The yeartype for the diversion stations file (consistent with
+@param yeartype The year type for the diversion stations file (consistent with
 the control file for a full data set).  Recognized values are:
 <ol>
 <li>	"Calendar", "CYR" (Jan - Dec).</li>
@@ -2327,20 +2267,16 @@ public void setDiveff(int index, double diveff, String yeartype )
 	}
 	else if ( yeartype.equalsIgnoreCase("Water") ||
 		yeartype.equalsIgnoreCase("WYR") ) {
-		index = TimeUtil.convertCalendarMonthToCustomMonth (
-				(index + 1), 10 ) - 1;
+		index = TimeUtil.convertCalendarMonthToCustomMonth ((index + 1), 10 ) - 1;
 	}
-	else if ( yeartype.equalsIgnoreCase("Irrigation") ||
-		yeartype.equalsIgnoreCase("IYR") ) {
-		index = TimeUtil.convertCalendarMonthToCustomMonth (
-				(index + 1), 11 ) - 1;
+	else if ( yeartype.equalsIgnoreCase("Irrigation") ||yeartype.equalsIgnoreCase("IYR") ) {
+		index = TimeUtil.convertCalendarMonthToCustomMonth ((index + 1), 11 ) - 1;
 	}
 	if (_diveff[index] != diveff) {
 		_diveff[index] = diveff;
 		setDirty(true);
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(
-			StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
 		}
 	}
 }
@@ -2403,8 +2339,7 @@ public void setIdvcom(int idvcom) {
 		_idvcom = idvcom;
 		setDirty(true);
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(
-			StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
 		}
 	}
 }
@@ -2437,8 +2372,7 @@ public void setIreptype(int ireptype) {
 		_ireptype = ireptype;
 		setDirty(true);
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(
-			StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
 		}
 	}
 }
@@ -2471,8 +2405,7 @@ public void setIrturn(int irturn) {
 		_irturn = irturn;
 		setDirty(true);
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(
-			StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
 		}
 	}
 }
@@ -2507,8 +2440,8 @@ public void setModelEfficiencies ( double [] model_efficiencies )
 }
 
 /**
-Set the parcel Vector.
-@param parcel_Vector the Vector of StateMod_Parcel to set for parcel data.
+Set the parcel list.
+@param parcel_Vector the list of StateMod_Parcel to set for parcel data.
 */
 void setParcels ( List parcel_Vector )
 {	_parcel_Vector = parcel_Vector;
@@ -2541,8 +2474,7 @@ public void setUsername(String username) {
 		_username = username;
 		setDirty(true);
 		if ( !_isClone && _dataset != null ) {
-			_dataset.setDirty(
-			StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
+			_dataset.setDirty(StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
 		}
 	}
 }
@@ -2575,7 +2507,8 @@ are only used if the control file indicates that a daily run is occurring.
 */
 public static void writeStateModFile(String instrfile, String outstrfile,
 		List theDiversions, List newComments, boolean use_daily_data)
-throws Exception {
+throws Exception
+{	String routine = "StateMod_Diversin.writeStateModFile";
 	List commentIndicators = new Vector(1);
 	commentIndicators.add ( "#" );
 	List ignoredCommentIndicators = new Vector(1);
@@ -2718,6 +2651,7 @@ throws Exception {
 		}
 	} 
 	catch (Exception e) {
+		Message.printWarning(3, routine, e);
 		throw e;
 	}
 	finally {
@@ -2744,11 +2678,14 @@ with a filename parameter of "diversions.txt", two files will be generated:
 header (true) or to create a new file with a new header.
 @param data the list of objects to write.
 @param newComments new comments to add to the header (command file, HydroBase version, etc.).
+@return a list of files that were actually written, because this method controls all the secondary
+filenames.
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter, boolean update,
+public static List writeListFile(String filename, String delimiter, boolean update,
 	List data, List newComments ) 
-throws Exception {
+throws Exception
+{	String routine = "StateMod_Diversion.writeListFile";
 	int size = 0;
 	if (data != null) {
 		size = data.size();
@@ -2812,17 +2749,28 @@ throws Exception {
 	List returnFlows = new Vector();
 	List temp = null;
 	
-	try {	
-		out = IOUtil.processFileHeaders(
-			oldFile,
-			IOUtil.getPathUsingWorkingDir(filename), 
-			newComments, commentIndicators, ignoredCommentIndicators, 0);
+	try {
+		// Add some basic comments at the top of the file.  Do this to a copy of the
+		// incoming comments so that they are not modified in the calling code.
+		List newComments2 = null;
+		if ( newComments == null ) {
+			newComments2 = new Vector();
+		}
+		else {
+			newComments2 = new Vector(newComments);
+		}
+		newComments2.add(0,"");
+		newComments2.add(1,"StateMod diversion stations as a delimited list file.");
+		newComments2.add(2,"See also the associated return flow and collection files.");
+		newComments2.add(3,"");
+		out = IOUtil.processFileHeaders( oldFile, IOUtil.getPathUsingWorkingDir(filename), 
+			newComments2, commentIndicators, ignoredCommentIndicators, 0);
 
 		for (int i = 0; i < fieldCount; i++) {
-			buffer.append("\"" + names[i] + "\"");
-			if (i < (fieldCount - 1)) {
+			if (i > 0) {
 				buffer.append(delimiter);
 			}
+			buffer.append("\"" + names[i] + "\"");
 		}
 
 		out.println(buffer.toString());
@@ -2839,10 +2787,10 @@ throws Exception {
 			line[6] = StringUtil.formatString(div.getCdividy(), formats[6]).trim();
 			line[7] = StringUtil.formatString(div.getUsername(), formats[7]).trim();
 			line[8] = StringUtil.formatString(div.getIdvcom(), formats[8]).trim();
-			line[9] = StringUtil.formatString(div.getArea(), formats[9]).trim();
-			line[10] = StringUtil.formatString(div.getIrturn(), formats[10]).trim();
-			line[11] = StringUtil.formatString(div.getDemsrc(), formats[11]).trim();
-			line[12] = StringUtil.formatString(div.getDivefc(), formats[12]).trim();
+			line[9] = StringUtil.formatString(div.getDivefc(), formats[9]).trim();
+			line[10] = StringUtil.formatString(div.getArea(), formats[10]).trim();
+			line[11] = StringUtil.formatString(div.getIrturn(), formats[11]).trim();
+			line[12] = StringUtil.formatString(div.getDemsrc(), formats[12]).trim();
 			line[13] = StringUtil.formatString(div.getDiveff(0), formats[13]).trim();
 			line[14] = StringUtil.formatString(div.getDiveff(1), formats[14]).trim();
 			line[15] = StringUtil.formatString(div.getDiveff(2), formats[15]).trim();
@@ -2858,13 +2806,13 @@ throws Exception {
 
 			buffer = new StringBuffer();	
 			for (j = 0; j < fieldCount; j++) {
+				if (j > 0) {
+					buffer.append(delimiter);
+				}
 				if (line[j].indexOf(delimiter) > -1) {
 					line[j] = "\"" + line[j] + "\"";
 				}
 				buffer.append(line[j]);
-				if (j < (fieldCount - 1)) {
-					buffer.append(delimiter);
-				}
 			}
 
 			out.println(buffer.toString());
@@ -2880,6 +2828,7 @@ throws Exception {
 		}
 	}
 	catch (Exception e) {
+		Message.printWarning(3, routine, e);
 		throw e;
 	}
 	finally {
@@ -2899,7 +2848,13 @@ throws Exception {
 		update, returnFlows, StateMod_DataSet.COMP_DIVERSION_STATION_DELAY_TABLES, newComments );
 
 	String collectionFilename = front + "_Collections." + end;
-	writeCollectionListFile(collectionFilename, delimiter, update, data, newComments);		
+	writeCollectionListFile(collectionFilename, delimiter, update, data, newComments);
+	
+	List filesWritten = new Vector();
+	filesWritten.add ( new File(filename) );
+	filesWritten.add ( new File(returnFlowFilename) );
+	filesWritten.add ( new File(collectionFilename) );
+	return filesWritten;
 }
 
 /**
@@ -2917,7 +2872,8 @@ header (true) or to create a new file with a new header.
 */
 public static void writeCollectionListFile(String filename, String delimiter, boolean update,
 	List data, List newComments ) 
-throws Exception {
+throws Exception
+{	String routine = "StateMod_Diversion.writeCollectionListFile";
 	int size = 0;
 	if (data != null) {
 		size = data.size();
@@ -2948,7 +2904,6 @@ throws Exception {
 	
 	int[] years = null;
 	int k = 0;
-	int j = 0;
 	int num = 0;
 	PrintWriter out = null;
 	StateMod_Diversion div = null;
@@ -2963,17 +2918,28 @@ throws Exception {
 	StringBuffer buffer = new StringBuffer();
 	List ids = null;
 
-	try {	
-		out = IOUtil.processFileHeaders(
-			oldFile,
-			IOUtil.getPathUsingWorkingDir(filename), 
-			newComments, commentIndicators, ignoredCommentIndicators, 0);
+	try {
+		// Add some basic comments at the top of the file.  However, do this to a copy of the
+		// incoming comments so that they are not modified in the calling code.
+		List newComments2 = null;
+		if ( newComments == null ) {
+			newComments2 = new Vector();
+		}
+		else {
+			newComments2 = new Vector(newComments);
+		}
+		newComments2.add(0,"");
+		newComments2.add(1,"StateMod diversion station collection information as delimited list file.");
+		newComments2.add(2,"See also the associated diversion station file.");
+		newComments2.add(3,"");
+		out = IOUtil.processFileHeaders( oldFile, IOUtil.getPathUsingWorkingDir(filename), 
+			newComments2, commentIndicators, ignoredCommentIndicators, 0);
 
 		for (int i = 0; i < fieldCount; i++) {
-			buffer.append("\"" + names[i] + "\"");
-			if (i < (fieldCount - 1)) {
+			if (i > 0) {
 				buffer.append(delimiter);
 			}
+			buffer.append("\"" + names[i] + "\"");
 		}
 
 		out.println(buffer.toString());
@@ -2991,31 +2957,34 @@ throws Exception {
 			colType = div.getCollectionType();
 			partType = div.getCollectionPartType();
 			
-			for (j = 0; j < num; j++) {
-				ids = div.getCollectionPartIDs(years[j]);
-				line[0] = StringUtil.formatString(id,formats[0]).trim();
-				line[1] = StringUtil.formatString(years[j],formats[1]).trim();
-				line[2] = StringUtil.formatString(colType,formats[2]).trim();
-				line[3] = StringUtil.formatString(partType,formats[3]).trim();
-				line[4] = StringUtil.formatString(((String)(ids.get(k))),formats[4]).trim();
-
-				buffer = new StringBuffer();	
-				for (k = 0; k < fieldCount; k++) {
-					if (line[k].indexOf(delimiter) > -1) {
-						line[k] = "\"" + line[k] + "\"";
+			for (int iyear = 0; iyear < num; iyear++) {
+				ids = div.getCollectionPartIDs(years[iyear]);
+				// Loop through the identifiers for the specific year
+				for ( k = 0; k < ids.size(); k++ ) {
+					line[0] = StringUtil.formatString(id,formats[0]).trim();
+					line[1] = StringUtil.formatString(years[iyear],formats[1]).trim();
+					line[2] = StringUtil.formatString(colType,formats[2]).trim();
+					line[3] = StringUtil.formatString(partType,formats[3]).trim();
+					line[4] = StringUtil.formatString(((String)(ids.get(k))),formats[4]).trim();
+		
+					buffer = new StringBuffer();	
+					for (int ifield = 0; ifield < fieldCount; ifield++) {
+						if (ifield > 0) {
+							buffer.append(delimiter);
+						}
+						if (line[ifield].indexOf(delimiter) > -1) {
+							line[ifield] = "\"" + line[ifield] + "\"";
+						}
+						buffer.append(line[ifield]);
 					}
-					buffer.append(line[k]);
-					if (k < (fieldCount - 1)) {
-						buffer.append(delimiter);
-					}
+		
+					out.println(buffer.toString());
 				}
-	
-				out.println(buffer.toString());
 			}
 		}
 	}
 	catch (Exception e) {
-		// TODO SAM Log it
+		Message.printWarning(3, routine, e);
 		throw e;
 	}
 	finally {

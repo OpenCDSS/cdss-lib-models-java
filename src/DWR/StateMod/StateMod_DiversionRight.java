@@ -91,12 +91,12 @@ implements Cloneable, Comparable, StateMod_Component, StateMod_Right {
 /**
 Administration number.
 */
-protected String 	_irtem;	
+protected String _irtem;	
 
 /**
 Decreed amount
 */
-protected double	_dcrdiv;
+protected double _dcrdiv;
 
 // ID, Name, and Cgoto are in the base class.
 	
@@ -128,11 +128,9 @@ public Object clone() {
 
 /**
 Compares this object to another StateMod_Data object based on the sorted
-order from the StateMod_Data variables, and then by irtem and dcrdiv, in that
-order.
+order from the StateMod_Data variables, and then by irtem and dcrdiv, in that order.
 @param o the object to compare against.
-@return 0 if they are the same, 1 if this object is greater than the other
-object, or -1 if it is less.
+@return 0 if they are the same, 1 if this object is greater than the other object, or -1 if it is less.
 */
 public int compareTo(Object o) {
 	int res = super.compareTo(o);
@@ -161,8 +159,7 @@ public int compareTo(Object o) {
 }
 
 /**
-Creates a copy of the object for later use in checking to see if it was 
-changed in a GUI.
+Creates a copy of the object for later use in checking to see if it was changed in a GUI.
 */
 public void createBackup() {
 	_original = clone();
@@ -172,10 +169,8 @@ public void createBackup() {
 
 /**
 Compare two rights Vectors and see if they are the same.
-@param v1 the first Vector of StateMod_DiversionRights to check.  Can not
-be null.
-@param v2 the second Vector of StateMod_DiversionRights to check.  Can not
-be null.
+@param v1 the first Vector of StateMod_DiversionRights to check.  Cannot be null.
+@param v2 the second Vector of StateMod_DiversionRights to check.  Cannot be null.
 @return true if they are the same, false if not.
 */
 public static boolean equals(List v1, List v2) {
@@ -190,18 +185,17 @@ public static boolean equals(List v1, List v2) {
 		// sort the Vectors and compare item-by-item.  Any differences
 		// and data will need to be saved back into the dataset.
 		int size = v1.size();
-		Message.printStatus(1, routine, "Vectors are of size: " + size);
+		//Message.printStatus(2, routine, "Lists are of size: " + size);
 		List v1Sort = StateMod_Util.sortStateMod_DataVector(v1);
 		List v2Sort = StateMod_Util.sortStateMod_DataVector(v2);
-		Message.printStatus(1, routine, "Vectors have been sorted");
+		//Message.printStatus(2, routine, "Lists have been sorted");
 	
 		for (int i = 0; i < size; i++) {			
 			r1 = (StateMod_DiversionRight)v1Sort.get(i);	
 			r2 = (StateMod_DiversionRight)v2Sort.get(i);	
-			Message.printStatus(1, routine, r1.toString());
-			Message.printStatus(1, routine, r2.toString());
-			Message.printStatus(1, routine, "Element " + i 
-				+ " comparison: " + r1.compareTo(r2));
+			//Message.printStatus(2, routine, r1.toString());
+			//Message.printStatus(2, routine, r2.toString());
+			//Message.printStatus(2, routine, "Element " + i + " comparison: " + r1.compareTo(r2));
 			if (r1.compareTo(r2) != 0) {
 				return false;
 			}
@@ -211,17 +205,15 @@ public static boolean equals(List v1, List v2) {
 }
 
 /**
-Tests to see if two diversion rights are equal.  Strings are compared with
-case sensitivity.
+Tests to see if two diversion rights are equal.  Strings are compared with case sensitivity.
 @param right the right to compare.
 @return true if they are equal, false otherwise.
 */
 public boolean equals(StateMod_DiversionRight right) {
-	 if (!super.equals(right)) {
+	if (!super.equals(right)) {
 	 	return false;
 	}
-	if (	right._irtem.equals(_irtem)
-		&& right._dcrdiv == _dcrdiv) {
+	if ( right._irtem.equals(_irtem) && right._dcrdiv == _dcrdiv) {
 		return true;
 	}
 	return false;
@@ -250,9 +242,10 @@ Returns the column headers for the specific data checked.
  */
 public static String[] getDataHeader()
 {
-	return new String[] { "Num",
-			"Right ID",
-			"Right Name" };
+	return new String[] {
+		"Num",
+		"Right ID",
+		"Right Name" };
 }
 
 /**
@@ -289,11 +282,9 @@ public String getIdentifier()
 
 /**
 Return a list of on/off switch option strings, for use in GUIs.
-The options are of the form "0" if include_notes is false and
-"0 - Off", if include_notes is true.
+The options are of the form "0" if include_notes is false and "0 - Off", if include_notes is true.
 @return a list of on/off switch option strings, for use in GUIs.
-@param include_notes Indicate whether notes should be added after the parameter
-values.
+@param include_notes Indicate whether notes should be added after the parameter values.
 */
 public static List getIdvrswChoices ( boolean include_notes )
 {	List v = new Vector(2);
@@ -319,7 +310,8 @@ public static String getIdvrswDefault ( boolean include_notes )
 	if ( include_notes ) {
 		return ( "1 - On" );
 	}
-	else {	return "1";
+	else {
+		return "1";
 	}
 }
 
@@ -362,8 +354,7 @@ public static boolean isDiversionRightFile ( String filename )
 }
 
 /**
-Parses the diversion rights file and returns a Vector of StateMod_DiversionRight
-objects.
+Parses the diversion rights file and returns a Vector of StateMod_DiversionRight objects.
 @param filename the diversion rights file to parse.
 @return a Vector of StateMod_DiversionRight objects.
 @throws Exception if an error occurs
@@ -373,41 +364,39 @@ throws Exception {
 	String routine = "StateMod_DiversionRight.readStateModFile";
 	List theDivRights = new Vector();
 
-	int format_0[] = {	StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_STRING,
-				StringUtil.TYPE_DOUBLE,
-				StringUtil.TYPE_INTEGER };
-	int format_0w[] = {	12,
-				24,
-				12,
-				16,
-				8,
-				8 };
+	int format_0[] = {
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_STRING,
+		StringUtil.TYPE_DOUBLE,
+		StringUtil.TYPE_INTEGER };
+	int format_0w[] = {
+		12,
+		24,
+		12,
+		16,
+		8,
+		8 };
 	String iline = null;
 	List v = new Vector(6);
 	BufferedReader in = null;
 	StateMod_DiversionRight aRight = null;
 
-	Message.printStatus(1, routine, "Reading diversion rights file: "
-		+ filename);
+	Message.printStatus(2, routine, "Reading diversion rights file: " + filename);
 
 	try {	
-		in = new BufferedReader(new FileReader(
-			IOUtil.getPathUsingWorkingDir(filename)));
+		in = new BufferedReader(new FileReader(IOUtil.getPathUsingWorkingDir(filename)));
 		while ((iline = in.readLine())!= null) {
 			// check for comments
-			if (iline.startsWith("#")|| 
-				iline.trim().length()== 0) {
+			if (iline.startsWith("#")||iline.trim().length()== 0) {
 				continue;
 			}
 			
 			aRight = new StateMod_DiversionRight();
 
 			if (Message.isDebugOn) {
-				Message.printDebug(50, routine , 
-				"iline: " + iline);
+				Message.printDebug(50, routine, "iline: " + iline);
 			}
 			StringUtil.fixedRead(iline, format_0, format_0w, v);
 			aRight.setID(((String)v.get(0)).trim()); 
@@ -416,42 +405,26 @@ throws Exception {
 			aRight.setIrtem(((String)v.get(3)).trim());
 			aRight.setDcrdiv((Double)v.get(4));
 			aRight.setSwitch((Integer)v.get(5));
-			// Mark as clean because set methods may have marked
-			// dirty...
+			// Mark as clean because set methods may have marked dirty...
 			aRight.setDirty ( false );
 			theDivRights.add(aRight);
 		}
 	} 
 	catch (Exception e) {
-		routine = null;
-		format_0 = null;
-		format_0w = null;
-		iline = null;
-		v = null;
-		aRight = null;
+		Message.printWarning(3, routine, e);
+		throw e;
+	}
+	finally {
 		if (in != null) {
 			in.close();
 		}
-		in = null;
-		Message.printWarning(2, routine, e);
-		throw e;
 	}
-	routine = null;
-	format_0 = null;
-	format_0w = null;
-	iline = null;
-	v = null;
-	aRight = null;
-	if (in != null) {
-		in.close();
-	}
-	in = null;
 	return theDivRights;
 }
 
 /**
 Cancels any changes made to this object within a GUI since createBackup()
-was caled and sets _original to null.
+was called and sets _original to null.
 */
 public void restoreOriginal() {
 	StateMod_DiversionRight d = (StateMod_DiversionRight)_original;
@@ -519,9 +492,9 @@ Writes a diversion rights file.
 @throws Exception if an error occurs.
 */
 public static void writeStateModFile(String infile, String outfile,
-		List theRights, String[] newComments)
+		List theRights, List newComments)
 throws Exception {
-	writeStateModFile(infile, outfile, theRights, newComments,false);
+	writeStateModFile(infile, outfile, theRights, newComments, false);
 }
 
 /**
@@ -534,71 +507,53 @@ Writes a diversion rights file.
 @throws Exception if an error occurs.
 */
 public static void writeStateModFile(String infile, String outfile,
-		List theRights, String[] newComments, boolean useOldAdminNumFormat)
+		List theRights, List newComments, boolean useOldAdminNumFormat)
 throws Exception {
-	String [] comment_str = { "#" };
-	String [] ignore_comment_str = { "#>" };
+	List commentIndicators = new Vector(1);
+	commentIndicators.add ( "#" );
+	List ignoredCommentIndicators = new Vector(1);
+	ignoredCommentIndicators.add ( "#>");
 	PrintWriter out = null;
 	String routine = "StateMod_DiversionRight.writeStateModFile";
-	Message.printStatus(2, routine, "Print diversion rights to: " +
-		outfile);
+	Message.printStatus(2, routine, "Writing diversion rights to: " + outfile);
 
 	try {	
-		out = IOUtil.processFileHeaders(
-			IOUtil.getPathUsingWorkingDir(infile),
+		out = IOUtil.processFileHeaders( IOUtil.getPathUsingWorkingDir(infile),
 			IOUtil.getPathUsingWorkingDir(outfile), 
-			newComments, comment_str, ignore_comment_str, 0);
+			newComments, commentIndicators, ignoredCommentIndicators, 0);
 
-	String iline;
-	String cmnt = "#>";
-	String format_0 = null;
-	if (useOldAdminNumFormat) {
-		format_0 = "%-12.12s%-24.24s%-12.12s%-12.12s    %8.2F%8d";
-	}
-	else {	
-		format_0 = "%-12.12s%-24.24s%-12.12s%16.16s%8.2F%8d";
-	}
-	StateMod_DiversionRight right = null;
-	List v = new Vector(6);
+		String iline;
+		String cmnt = "#>";
+		String format_0 = null;
+		if (useOldAdminNumFormat) {
+			format_0 = "%-12.12s%-24.24s%-12.12s%-12.12s    %8.2F%8d";
+		}
+		else {	
+			format_0 = "%-12.12s%-24.24s%-12.12s%16.16s%8.2F%8d";
+		}
+		StateMod_DiversionRight right = null;
+		List v = new Vector(6);
 
-		// print out the nonpermanent header
+		// print out the non-permanent header
 		out.println(cmnt);
-		out.println(cmnt
- 			+"***************************************************");
-		out.println(cmnt + " Direct Diversion Rights File");
+		out.println(cmnt+ "***************************************************");
+		out.println(cmnt + " StateMod Direct Diversion Rights File");
 		out.println(cmnt);
-		out.println(cmnt
-			+ "     format:  (a12, a24, a12, f16.5, f8.2, i8)");
+		out.println(cmnt + "     format:  (a12, a24, a12, f16.5, f8.2, i8)");
 		out.println(cmnt);
-		out.println(cmnt
-			+ "     ID       cidvri:  Diversion right ID ");
-		out.println(cmnt
-			+ "     Name      named:  Diversion right name");
-		out.println(cmnt
-			+ "     Struct    cgoto:  Direct Diversion "
-			+ "Structure ID associated with this right");
-		out.println(cmnt
-			+ "     Admin #   irtem:  Administration number");
-		out.println(cmnt
-			+ "                       (small is senior).");
-		out.println(cmnt
-			+ "     Decree   dcrdiv:  Decreed amount (cfs)");
-		out.println(cmnt
-			+ "     On/Off   idvrsw:  Switch 0 = off, 1 = on");
-		out.println(cmnt
-			+ "                       YYYY = on for years >= " +
-			"YYYY.");
-		out.println(cmnt
-			+ "                       -YYYY = off for years > " +
-			"YYYY.");
+		out.println(cmnt + "     ID       cidvri:  Diversion right ID ");
+		out.println(cmnt + "     Name      named:  Diversion right name");
+		out.println(cmnt + "     Struct    cgoto:  Direct Diversion Structure ID associated with this right");
+		out.println(cmnt + "     Admin #   irtem:  Administration number");
+		out.println(cmnt + "                       (small is senior).");
+		out.println(cmnt + "     Decree   dcrdiv:  Decreed amount (cfs)");
+		out.println(cmnt + "     On/Off   idvrsw:  Switch 0 = off, 1 = on");
+		out.println(cmnt + "                       YYYY = on for years >= YYYY.");
+		out.println(cmnt + "                       -YYYY = off for years > YYYY.");
 		out.println(cmnt);
-		out.println(cmnt
-			+ "   ID            Name              Struct     "
-			+ "       Admin #   Decree  On/Off");
+		out.println(cmnt + "   ID            Name              Struct            Admin #   Decree  On/Off");
 		out.println(cmnt + "EndHeader");
-		out.println(cmnt
-			+ "---------eb----------------------eb----------e"
-			+ "b--------------eb------eb------e");
+		out.println(cmnt + "---------eb----------------------eb----------eb--------------eb------eb------e");
 
 		int num = 0;
 		if (theRights != null) {
@@ -619,25 +574,16 @@ throws Exception {
 			iline = StringUtil.formatString(v, format_0);
 			out.println(iline);
 		}
-
-		out.flush();
-		out.close();
-		out = null;
-		comment_str = null;
-		ignore_comment_str = null;
-		routine = null;
 	} 
 	catch (Exception e) {
+		Message.printWarning(3, routine, e);
+		throw e;
+	}
+	finally {
 		if (out != null) {
 			out.flush();
 			out.close();
 		}
-		out = null;
-		comment_str = null;
-		ignore_comment_str = null;
-		routine = null;
-		Message.printWarning(2, routine, e);
-		throw e;
 	}
 }
 
@@ -650,18 +596,21 @@ public String toString() {
 }
 
 /**
-Writes a Vector of StateMod_Diversion objects to a list file.  A header is 
+Writes a list of StateMod_Diversion objects to a list file.  A header is 
 printed to the top of the file, containing the commands used to generate the 
 file.  Any strings in the body of the file that contain the field delimiter will be wrapped in "...".  
 @param filename the name of the file to which the data will be written.
 @param delimiter the delimiter to use for separating field values.
 @param update whether to update an existing file, retaining the current 
 header (true) or to create a new file with a new header.
-@param data the Vector of objects to write.  
+@param data the list of objects to write.
+@param newComments comments to add at the top of the file (e.g., command file, HydroBase version).
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter, boolean update, List data) 
-throws Exception {
+public static void writeListFile(String filename, String delimiter, boolean update, List data,
+	List newComments ) 
+throws Exception
+{	String routine = "StateMod_DiversionRight.writeListFile";
 	int size = 0;
 	if (data != null) {
 		size = data.size();
@@ -693,25 +642,35 @@ throws Exception {
 
 	int j = 0;
 	StateMod_DiversionRight right = null;
-	String[] commentString = { "#" };
-	String[] ignoreCommentString = { "#>" };
+	List commentIndicators = new Vector(1);
+	commentIndicators.add ( "#" );
+	List ignoredCommentIndicators = new Vector(1);
+	ignoredCommentIndicators.add ( "#>");
 	String[] line = new String[fieldCount];
-	String[] newComments = null;
 	StringBuffer buffer = new StringBuffer();
 	PrintWriter out = null;
 
-	try {	
-
-		out = IOUtil.processFileHeaders(
-			oldFile,
-			IOUtil.getPathUsingWorkingDir(filename), 
-			newComments, commentString, ignoreCommentString, 0);
+	try {
+		// Add some basic comments at the top of the file.  Do this to a copy of the
+		// incoming comments so that they are not modified in the calling code.
+		List newComments2 = null;
+		if ( newComments == null ) {
+			newComments2 = new Vector();
+		}
+		else {
+			newComments2 = new Vector(newComments);
+		}
+		newComments2.add(0,"");
+		newComments2.add(1,"StateMod diversion rights as a delimited list file.");
+		newComments2.add(2,"");
+		out = IOUtil.processFileHeaders(oldFile,IOUtil.getPathUsingWorkingDir(filename), 
+			newComments2, commentIndicators, ignoredCommentIndicators, 0);
 
 		for (int i = 0; i < fieldCount; i++) {
-			buffer.append("\"" + names[i] + "\"");
-			if (i < (fieldCount - 1)) {
+			if (i > 0) {
 				buffer.append(delimiter);
 			}
+			buffer.append("\"" + names[i] + "\"");
 		}
 
 		out.println(buffer.toString());
@@ -719,44 +678,37 @@ throws Exception {
 		for (int i = 0; i < size; i++) {
 			right = (StateMod_DiversionRight)data.get(i);
 			
-			line[0] = StringUtil.formatString(right.getID(), 
-				formats[0]).trim();
-			line[1] = StringUtil.formatString(right.getName(), 
-				formats[1]).trim();
-			line[2] = StringUtil.formatString(right.getCgoto(), 
-				formats[2]).trim();
-			line[3] = StringUtil.formatString(right.getIrtem(), 
-				formats[3]).trim();
-			line[4] = StringUtil.formatString(right.getDcrdiv(), 
-				formats[4]).trim();
-			line[5] = StringUtil.formatString(right.getSwitch(), 
-				formats[5]).trim();
+			line[0] = StringUtil.formatString(right.getID(),formats[0]).trim();
+			line[1] = StringUtil.formatString(right.getName(),formats[1]).trim();
+			line[2] = StringUtil.formatString(right.getCgoto(),formats[2]).trim();
+			line[3] = StringUtil.formatString(right.getIrtem(),formats[3]).trim();
+			line[4] = StringUtil.formatString(right.getDcrdiv(),formats[4]).trim();
+			line[5] = StringUtil.formatString(right.getSwitch(),formats[5]).trim();
 
 			buffer = new StringBuffer();	
 			for (j = 0; j < fieldCount; j++) {
+				if (j > 0) {
+					buffer.append(delimiter);
+				}
 				if (line[j].indexOf(delimiter) > -1) {
 					line[j] = "\"" + line[j] + "\"";
 				}
 				buffer.append(line[j]);
-				if (j < (fieldCount - 1)) {
-					buffer.append(delimiter);
-				}
 			}
 
 			out.println(buffer.toString());
 
 		}
-		out.flush();
-		out.close();
-		out = null;
 	}
 	catch (Exception e) {
+		Message.printWarning(3, routine, e);
+		throw e;
+	}
+	finally {
 		if (out != null) {
 			out.flush();
 			out.close();
 		}
-		out = null;
-		throw e;
 	}
 }
 
