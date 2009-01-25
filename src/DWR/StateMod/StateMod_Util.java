@@ -5432,6 +5432,9 @@ private static String lookupRiverNodePropValue(String propType, String field) {
 		else if (field.equalsIgnoreCase("Comment")) {
 			return "COMMENT";
 		}
+		else if (field.equalsIgnoreCase("GWMaxRecharge")) {
+			return "GW MAX RECHARGE";
+		}
 	}
 	else if (propType.equalsIgnoreCase("FieldNameHeader")) {	
 		if (field.equalsIgnoreCase("ID")) {
@@ -5445,7 +5448,10 @@ private static String lookupRiverNodePropValue(String propType, String field) {
 		}
 		else if (field.equalsIgnoreCase("Comment")) {
 			return "COMMENT";
-		}	
+		}
+		else if (field.equalsIgnoreCase("GWMaxRecharge")) {
+			return "GW MAX RECHARGE";
+		}
 	}	
 	else if (propType.equalsIgnoreCase("Format")) {
 		if (field.equalsIgnoreCase("ID")) {
@@ -5460,6 +5466,9 @@ private static String lookupRiverNodePropValue(String propType, String field) {
 		else if (field.equalsIgnoreCase("Comment")) {	
 			return "%-80.80s";
 		}
+		else if (field.equalsIgnoreCase("GWMaxRecharge")) {
+			return "%8.8s";
+		}
 	}	
 	else if (propType.equalsIgnoreCase("ToolTip")) {
 		if (field.equalsIgnoreCase("ID")) {
@@ -5472,6 +5481,9 @@ private static String lookupRiverNodePropValue(String propType, String field) {
 			return "";
 		}
 		else if (field.equalsIgnoreCase("Comment")) {	
+			return "";
+		}
+		else if (field.equalsIgnoreCase("GWMaxRecharge")) {
 			return "";
 		}
 	}

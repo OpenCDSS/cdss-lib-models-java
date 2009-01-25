@@ -554,7 +554,7 @@ throws Exception {
 			break;
 		case StateMod_DataSet.COMP_RIVER_NETWORK:
 			StateMod_RiverNetworkNode.writeStateModFile(oldFilename,
-				newFilename, (List)data, comments, true);
+				newFilename, (List)data, StringUtil.toList(comments), true);
 			name = "River Network";
 			break;
 		case StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS:

@@ -138,35 +138,36 @@ StateMod data objects.  It should not be confused with network node objects
 (e.g., StateMod_Diversion_Node).   See the readStateModFile() method to read
 the .rin file into a true network.
 */
-public class StateMod_RiverNetworkNode 
-extends StateMod_Data
+public class StateMod_RiverNetworkNode  extends StateMod_Data
 implements Cloneable, Comparable, StateMod_Component {
 
-protected String 	_cstadn;	// Downstream node identifier
-					// Third column of files
-protected String	_comment;	// Used with .rin (column 4) - not
-					// really used anymore except by
-					// old watright code.
-protected double	_gwmaxr;	// Used with .rin (column 5) - ground
-					// water maximum recharge limit.
-
-protected int		_related_smdata_type;
-					// The StateMod_DataSet component type
-					// for the node.  At some point the
-					// related object reference may also be
-					// added, but there are cases when this
-					// is not known (only the type is
-					// known, for example in StateDMI).
-
-protected int		_related_smdata_type2;
-					// Second related type.  This is only
-					// used for D&W node types and should
-					// be set to the well stations component
-					// type.
-	
 /**
-Constructor.
-The time series are set to null and other information is empty strings.
+Downstream node identifier - third column of files.
+*/
+protected String _cstadn;
+/**
+Used with .rin (column 4) - not really used anymore except by old watright code.
+*/
+protected String _comment;
+/**
+Used with .rin (column 5) - ground water maximum recharge limit.
+*/
+protected double _gwmaxr;
+/**
+The StateMod_DataSet component type for the node.  At some point the related object reference
+may also be added, but there are cases when this is not known (only the type is
+known, for example in StateDMI).
+*/
+protected int _related_smdata_type;
+
+/**
+Second related type.  This is only used for D&W node types and should
+be set to the well stations component type.
+*/
+protected int _related_smdata_type2;
+
+/**
+Constructor.  The time series are set to null and other information is empty strings.
 */
 public StateMod_RiverNetworkNode ()
 {	super ( );
@@ -201,19 +202,16 @@ public boolean changed() {
 @param props Extra properties for specific data checks.
 @return List of data that failed specific checks.
  */
-public String[] checkComponentData( int count, 
-StateMod_DataSet dataset, PropList props ) 
+public String[] checkComponentData( int count, StateMod_DataSet dataset, PropList props ) 
 {
-	// TODO KAT 2007-04-16
-	// add specific checks here
+	// TODO KAT 2007-04-16 add specific checks here
 	return null;
 }
 
 /**
 Compares this object to another StateMod_RiverNetworkNode object.
 @param o the object to compare against.
-@return 0 if they are the same, 1 if this object is greater than the other
-object, or -1 if it is less.
+@return 0 if they are the same, 1 if this object is greater than the other object, or -1 if it is less.
 */
 public int compareTo(Object o) {
 	int res = super.compareTo(o);
@@ -309,8 +307,7 @@ Returns the data column header for the specifically checked data.
  */
 public static String[] getDataHeader()
 {
-	// TODO KAT 2007-04-16 
-	// When specific checks are added to checkComponentData
+	// TODO KAT 2007-04-16 When specific checks are added to checkComponentData
 	// return the header for that data here
 	return new String[] {};
 }
@@ -353,8 +350,7 @@ private void initialize ()
 }
 
 /**
-Read river network or stream gage information and return a Vector of
-StateMod_RiverNetworkNode.
+Read river network or stream gage information and return a list of StateMod_RiverNetworkNode.
 @param filename Name of file to read.
 @exception Exception if there is an error reading the file.
 */
@@ -386,41 +382,37 @@ throws Exception
 	int linecount = 0;
 
 	if ( Message.isDebugOn ) {
-		Message.printDebug ( 10, rtn, "in " + rtn + " reading file: " 
-		+ filename );
+		Message.printDebug ( 10, rtn, "in " + rtn + " reading file: " + filename );
 	}
-	try {	BufferedReader in = new BufferedReader (
-			new FileReader ( filename ));
+	BufferedReader in = null;
+	try {
+		in = new BufferedReader ( new FileReader ( filename ));
 		while ( (iline = in.readLine()) != null ) {
 			++linecount;
 			// check for comments
-			if (iline.startsWith("#") || iline.trim().length()==0)
+			if (iline.startsWith("#") || iline.trim().length()==0) {
 				continue;
+			}
 
 			// allocate new StateMod_RiverNetworkNode
-			StateMod_RiverNetworkNode aRiverNode =
-				new StateMod_RiverNetworkNode();
+			StateMod_RiverNetworkNode aRiverNode = new StateMod_RiverNetworkNode();
 
 			// line 1
 			if ( Message.isDebugOn ) {
-				Message.printDebug ( 50, rtn, 
-				"line 1: " + iline );
+				Message.printDebug ( 50, rtn, "line 1: " + iline );
 			}
 			StringUtil.fixedRead ( iline, format_0, format_0w, v );
 			if ( Message.isDebugOn ) {
-				Message.printDebug ( 50, rtn, 
-				"Fixed read returned " 
-				+ v.size() + " elements");
+				Message.printDebug ( 50, rtn, "Fixed read returned " + v.size() + " elements");
 			}
 			aRiverNode.setID ( ((String)v.get(0)).trim() );
 			aRiverNode.setName ( ((String)v.get(1)).trim() );
 			aRiverNode.setCstadn ( ((String)v.get(2)).trim());
-
-			// Expect that we also may have the comment and
-			// possibly the gwmaxr value...
-			aRiverNode.setComment (
-				((String)v.get(3)).trim() );
-			s = ((String)v.get(4)).trim();
+			// 3 is whitespace
+			// Expect that we also may have the comment and possibly the gwmaxr value...
+			aRiverNode.setComment ( ((String)v.get(4)).trim() );
+			// 5 is whitespace
+			s = ((String)v.get(6)).trim();
 			if ( s.length() > 0 ) { 
 				aRiverNode.setGwmaxr ( StringUtil.atod(s) );
 			}
@@ -429,24 +421,14 @@ throws Exception
 			theRivs.add ( aRiverNode );
 		}
 	} catch (Exception e) {
-		// Clean up...
-		v = null;
-		rtn = null;
-		iline = null;
-		format_0 = null;
-		format_0w = null;
-		s = null;
-		Message.printWarning ( 2, rtn,
-		"Error reading \"" + filename + "\" at line " + linecount );
+		Message.printWarning ( 3, rtn, "Error reading \"" + filename + "\" at line " + linecount );
 		throw e;
 	}
-	// Clean up...
-	v = null;
-	rtn = null;
-	iline = null;
-	format_0 = null;
-	format_0w = null;
-	s = null;
+	finally {
+		if ( in != null ) {
+			in.close();
+		}
+	}
 	return theRivs;
 }
 
@@ -520,8 +502,7 @@ public void setGwmaxr ( double gwmaxr )
 
 /**
 Set the StateMod_DataSet component type for the data for this node.
-@param related_smdata_type The StateMod_DataSet component type for the data for 
-this node.
+@param related_smdata_type The StateMod_DataSet component type for the data for this node.
 */
 public void setRelatedSMDataType ( int related_smdata_type )
 {	_related_smdata_type = related_smdata_type;
@@ -529,8 +510,7 @@ public void setRelatedSMDataType ( int related_smdata_type )
 
 /**
 Set the second StateMod_DataSet component type for the data for this node.
-@param related_smdata_type The second StateMod_DataSet component type for the
-data for this node.
+@param related_smdata_type The second StateMod_DataSet component type for the data for this node.
 This is only used for D&W nodes and should be set to the well component type.
 */
 public void setRelatedSMDataType2 ( int related_smdata_type2 )
@@ -539,74 +519,59 @@ public void setRelatedSMDataType2 ( int related_smdata_type2 )
 
 /**
 Write the new (updated) river network file to the StateMod river network
-file.  If an original file is specified, then the original header is carried
-into the new file.
+file.  If an original file is specified, then the original header is carried into the new file.
 @param infile Name of old file or null if no old file to update.
 @param outfile Name of new file to create (can be the same as the old file).
-@param theRivs Vector of StateMod_RiverInfo to write.
+@param theRivs list of StateMod_RiverInfo to write.
 @param newcomments New comments to write in the file header.
-@param do_well Indicates whether well modeling fields should be written.
+@param doWell Indicates whether well modeling fields should be written.
 */
 public static void writeStateModFile( String infile, String outfile,
-		List theRivs, String[] newcomments, boolean do_well )
+		List theRivs, List newcomments, boolean doWell )
 throws Exception
-{	PrintWriter	out;
-	String [] comment_str = { "#" };
-	String [] ignore_str = { "#>" };
+{	PrintWriter	out = null;
+	List commentIndicators = new Vector(1);
+	commentIndicators.add ( "#" );
+	List ignoredCommentIndicators = new Vector(1);
+	ignoredCommentIndicators.add ( "#>");
 	String routine = "StateMod_RiverNetworkNode.writeStateModFile";
 
 	if ( Message.isDebugOn ) {
-		Message.printDebug ( 2, routine, 
-		"Writing river network file \"" +
+		Message.printDebug ( 2, routine, "Writing river network file \"" +
 		outfile + "\" using \"" + infile + "\" header..." );
 	}
 
-	try {	// Process the header from the old file...
-	out = IOUtil.processFileHeaders (
-			IOUtil.getPathUsingWorkingDir(infile),
+	try {
+		// Process the header from the old file...
+		out = IOUtil.processFileHeaders ( IOUtil.getPathUsingWorkingDir(infile),
 			IOUtil.getPathUsingWorkingDir(outfile), 
-			newcomments, comment_str, ignore_str, 0 );
-
-	String cmnt = "#>";
-	String iline = null;
-	String format = null;
-	StateMod_RiverNetworkNode riv = null;
-
-		out.println ( cmnt + 
-			" *****************************" +
-			"**************************" );
+			newcomments, commentIndicators, ignoredCommentIndicators, 0 );
+	
+		String cmnt = "#>";
+		String iline = null;
+		String format = null;
+		StateMod_RiverNetworkNode riv = null;
+	
+		out.println ( cmnt + " *******************************************************" );
 		out.println ( cmnt + "  StateMod River Network File" );
-		out.println ( cmnt + "  WARNING - if .net file is available, " +
-				"it should be edited and the .rin" );
+		out.println ( cmnt + "  WARNING - if .net file is available, it should be edited and the .rin" );
 		out.println ( cmnt + "  file should be created from the .net" );
 		out.println ( cmnt );
-		out.println ( cmnt +
-		"  format:  (a12, a24, a12, 1x, a12, 1x, f8.0)" );
+		out.println ( cmnt + "  format:  (a12, a24, a12, 1x, a12, 1x, f8.0)" );
 		out.println ( cmnt );
-		out.println ( cmnt +
-		"  ID           cstaid:  Station ID" );
-		out.println ( cmnt +
-		"  Name         stanam:  Station name" );
-		out.println ( cmnt +
-		"  Downstream   cstadn:  Downstream node ID" );
-		out.println ( cmnt +
-		"  Comment     comment:  Alternate identifier/"
-		+ "comment." );
-		out.println ( cmnt +
-		"  GWMax        gwmaxr:  Max recharge limit (cfs) - "
-		+ "see iwell in control file." );
+		out.println ( cmnt + "  ID           cstaid:  Station ID" );
+		out.println ( cmnt + "  Name         stanam:  Station name" );
+		out.println ( cmnt + "  Downstream   cstadn:  Downstream node ID" );
+		out.println ( cmnt + "  Comment     comment:  Alternate identifier/comment." );
+		out.println ( cmnt + "  GWMax        gwmaxr:  Max recharge limit (cfs) - see iwell in control file." );
 		out.println ( cmnt );
-		out.println ( cmnt +
-		"   ID                Name         " +
-		" DownStream     Comment    GWMax  " );
-		out.println ( cmnt +
-		"---------eb----------------------e" +
-		"b----------exb----------exb------e" );
-		if ( do_well ) {
-			format =
-			"%-12.12s%-24.24s%-12.12s %-12.12s %-8.8s";
+		out.println ( cmnt + "   ID                Name          DownStream     Comment    GWMax  " );
+		out.println ( cmnt + "---------eb----------------------eb----------exb----------exb------e" );
+		if ( doWell ) {
+			format = "%-12.12s%-24.24s%-12.12s %-12.12s %8.8s";
 		}
-		else {	format = "%-12.12s%-24.24s%-12.12s %-12.12s";
+		else {
+			format = "%-12.12s%-24.24s%-12.12s %-12.12s";
 		}
 		out.println ( cmnt );
 		out.println ( cmnt + "EndHeader" );
@@ -618,48 +583,48 @@ throws Exception
 		}
 		List v = new Vector ( 5 );
 		for ( int i=0; i< num; i++ ) {
-			riv = (StateMod_RiverNetworkNode) theRivs.get(i);
+			riv = (StateMod_RiverNetworkNode)theRivs.get(i);
 			v.clear ();
 			v.add ( riv.getID() );
 			v.add ( riv.getName() );
 			v.add ( riv.getCstadn() );
 			v.add ( riv.getComment() );
-			if ( do_well ) {
-				v.add (
-				StringUtil.formatString(riv.getGwmaxr(),
-				"%8.0f") );
+			if ( doWell ) {
+				// Format as string since main format uses string.
+				v.add ( StringUtil.formatString(riv.getGwmaxr(), "%8.0f") );
 			}
 			iline = StringUtil.formatString ( v, format );
 			out.println ( iline );
 		}
-		riv = null;
-		routine = null;
-		cmnt = null;
-		iline = null;
-		format = null;
-
-	out.flush();
-	out.close();
 	} 
 	catch ( Exception e ) {
-		Message.printWarning ( 2, routine, e );
+		Message.printWarning ( 3, routine, e );
 		throw e;
+	}
+	finally {
+		if ( out != null ) {
+			out.flush();
+			out.close();
+		}
 	}
 }
 
 /**
-Writes a Vector of StateMod_RiverNetworkNode objects to a list file.  A header 
+Writes a list of StateMod_RiverNetworkNode objects to a list file.  A header 
 is printed to the top of the file, containing the commands used to generate the
 file.  Any strings in the body of the file that contain the field delimiter will be wrapped in "...".  
 @param filename the name of the file to which the data will be written.
 @param delimiter the delimiter to use for separating field values.
 @param update whether to update an existing file, retaining the current 
 header (true) or to create a new file with a new header.
-@param data the Vector of objects to write.  
+@param data the list of objects to write.
+@param newComments new comments to add to the file header.
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter, boolean update, List data) 
-throws Exception {
+public static void writeListFile(String filename, String delimiter, boolean update, List data,
+	List newComments ) 
+throws Exception
+{	String routine = "StateMod_RiverNetworkNode.writeListFile";
 	int size = 0;
 	if (data != null) {
 		size = data.size();
@@ -670,6 +635,7 @@ throws Exception {
 	fields.add("Name");
 	fields.add("DownstreamID");
 	fields.add("Comment");
+	fields.add("GWMaxRecharge");
 	int fieldCount = fields.size();
 
 	String[] names = new String[fieldCount];
@@ -691,22 +657,34 @@ throws Exception {
 	PrintWriter out = null;
 	StateMod_RiverNetworkNode rnn = null;
 	String[] line = new String[fieldCount];
-	String[] commentString = { "#" };
-	String[] ignoreCommentString = { "#>" };
-	String[] newComments = null;
+	List commentIndicators = new Vector(1);
+	commentIndicators.add ( "#" );
+	List ignoredCommentIndicators = new Vector(1);
+	ignoredCommentIndicators.add ( "#>");
 	StringBuffer buffer = new StringBuffer();
 	
-	try {	
-		out = IOUtil.processFileHeaders(
-			oldFile,
-			IOUtil.getPathUsingWorkingDir(filename), 
-			newComments, commentString, ignoreCommentString, 0);
+	try {
+		// Add some basic comments at the top of the file.  Do this to a copy of the
+		// incoming comments so that they are not modified in the calling code.
+		List newComments2 = null;
+		if ( newComments == null ) {
+			newComments2 = new Vector();
+		}
+		else {
+			newComments2 = new Vector(newComments);
+		}
+		newComments2.add(0,"");
+		newComments2.add(1,"StateMod river network as a delimited list file.");
+		newComments2.add(2,"See also the generalized network file.");
+		newComments2.add(3,"");
+		out = IOUtil.processFileHeaders( oldFile, IOUtil.getPathUsingWorkingDir(filename), 
+			newComments2, commentIndicators, ignoredCommentIndicators, 0);
 
 		for (int i = 0; i < fieldCount; i++) {
-			buffer.append("\"" + names[i] + "\"");
-			if (i < (fieldCount - 1)) {
+			if (i > 0) {
 				buffer.append(delimiter);
 			}
+			buffer.append("\"" + names[i] + "\"");
 		}
 
 		out.println(buffer.toString());
@@ -718,31 +696,31 @@ throws Exception {
 			line[1] = StringUtil.formatString(rnn.getName(), formats[1]).trim();
 			line[2] = StringUtil.formatString(rnn.getCstadn(), formats[2]).trim();
 			line[3] = StringUtil.formatString(rnn.getComment(), formats[3]).trim();
+			line[4] = StringUtil.formatString(rnn.getGwmaxr(), formats[4]).trim();
 
 			buffer = new StringBuffer();	
 			for (j = 0; j < fieldCount; j++) {
+				if (j > 0) {
+					buffer.append(delimiter);
+				}
 				if (line[j].indexOf(delimiter) > -1) {
 					line[j] = "\"" + line[j] + "\"";
 				}
 				buffer.append(line[j]);
-				if (j < (fieldCount - 1)) {
-					buffer.append(delimiter);
-				}
 			}
 
 			out.println(buffer.toString());
 		}
-		out.flush();
-		out.close();
-		out = null;
 	}
 	catch (Exception e) {
+		Message.printWarning(3, routine, e);
+		throw e;
+	}
+	finally {
 		if (out != null) {
 			out.flush();
 			out.close();
 		}
-		out = null;
-		throw e;
 	}
 }
 
@@ -750,4 +728,4 @@ public String toString() {
 	return "ID: " + _id + "    Downstream node: " + _cstadn;
 }
 
-} // End StateMod_RiverNetworkNode
+}
