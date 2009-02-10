@@ -119,6 +119,14 @@ The path to icon files, etc. used in this package.
 private final String __RESOURCE_PATH = "/DWR/StateMod";
 
 /**
+Strings for buttons.
+*/
+private final String __BUTTON_PrintEntireNetwork = "Print Entire Network";
+private final String __BUTTON_PrintScreen = "Print Screen";
+private final String __BUTTON_SaveEntireNetworkAsImage = "Save Entire Network as Image";
+private final String __BUTTON_SaveScreenAsImage = "Save Screen as Image";
+
+/**
 Strings defining the modes the GUI can be put into.
 */
 public final String 
@@ -366,7 +374,9 @@ throws Exception {
 Responds to button presses.
 @param event the ActionEvent that happened.
 */
-public void actionPerformed(ActionEvent event) {
+public void actionPerformed(ActionEvent event)
+{
+	String routine = "StateMod_Network.actionPerformed";
 	if (__ignoreEvents) {
 		return;
 	}
@@ -441,16 +451,18 @@ public void actionPerformed(ActionEvent event) {
 		__device.saveXML(getFilename());
 		__device.setDirty(false);
 	}
-	else if (command.equals("Save Image")) {
+	else if (command.equals(__BUTTON_SaveEntireNetworkAsImage)) {
 		__device.saveNetwork();
 	}
-	else if (command.equals("Save Screen")) {
+	else if (command.equals(__BUTTON_SaveScreenAsImage)) {
 		__device.saveScreen();
 	}
-	else if (command.equals("Print Network")) {
+	else if (command.equals(__BUTTON_PrintEntireNetwork)) {
+		Message.printStatus(2, routine, "Printing entire network.");
 		__device.printNetwork();
 	}
-	else if (command.equals("Print Screen")) {
+	else if (command.equals(__BUTTON_PrintScreen)) {
+		Message.printStatus(2, routine, "Printing screen.");
 		__device.printScreen();
 	}
 	else if (command.equals("Refresh")) {
@@ -501,7 +513,7 @@ public void buildToolBar() {
 	__toolBar = new JToolBar("Network Control Buttons");
 	Insets none = new Insets(0, 0, 0, 0);
 	URL url = this.getClass().getResource( __RESOURCE_PATH + "/icon_print.gif" );
-	String buttonLabel = "Print Network";
+	String buttonLabel = __BUTTON_PrintEntireNetwork;
 	if (url != null) {
 		__printJButton = new SimpleJButton(
 			new ImageIcon(url), buttonLabel, buttonLabel, none, false, this);
@@ -512,7 +524,7 @@ public void buildToolBar() {
 	__toolBar.add(__printJButton);
 
 	url = this.getClass().getResource( __RESOURCE_PATH + "/icon_printScreen.gif");
-	buttonLabel = "Print Screen";
+	buttonLabel = __BUTTON_PrintScreen;
 	if (url != null) {
 		__printScreenJButton = new SimpleJButton(
 			new ImageIcon(url), buttonLabel, buttonLabel, none, false, this);
@@ -523,23 +535,24 @@ public void buildToolBar() {
 	__toolBar.add(__printScreenJButton);
 
 	url = this.getClass().getResource( __RESOURCE_PATH + "/icon_saveAsImage.gif");
+	buttonLabel = __BUTTON_SaveEntireNetworkAsImage;
 	if (url != null) {
 		__saveAsImageJButton = new SimpleJButton(new ImageIcon(url),
-			"Save Image", "Save as Image", none, false, this);	
+				buttonLabel, buttonLabel, none, false, this);	
 	}
 	else {
-		__saveAsImageJButton = new SimpleJButton("Save", "Save Image", "Save as Image", none, false, this);	
+		__saveAsImageJButton = new SimpleJButton("Save", buttonLabel, buttonLabel, none, false, this);	
 	}
 	__toolBar.add(__saveAsImageJButton);
 	
 	url = this.getClass().getResource( __RESOURCE_PATH + "/icon_saveScreenAsImage.gif");
+	buttonLabel = __BUTTON_SaveScreenAsImage;
 	if (url != null) {
 		__saveScreenAsImageJButton = new SimpleJButton(
-			new ImageIcon(url), "Save Screen", "Save Screen as Image", none, false, this);	
+			new ImageIcon(url), buttonLabel, buttonLabel, none, false, this);	
 	}
 	else {
-		__saveScreenAsImageJButton = new SimpleJButton("Save",
-			"Save Screen", "Save Screen as Image", none, false, this);
+		__saveScreenAsImageJButton = new SimpleJButton("Save",buttonLabel, buttonLabel, none, false, this);
 	}	
 	__toolBar.add(__saveScreenAsImageJButton);	
 
@@ -979,7 +992,8 @@ public boolean isDirty() {
 Responds to item state change events, such as those that change page layout information.
 @param event the ItemEvent that happened.
 */
-public void itemStateChanged(ItemEvent event) {
+public void itemStateChanged(ItemEvent event)
+{	String routine = "StateMod_Network_JFrame.itemStateChanged";
 	if (__ignoreEvents) {
 		return;
 	}
@@ -1023,7 +1037,10 @@ public void itemStateChanged(ItemEvent event) {
 		int index = __layoutComboBox.getSelectedIndex();	
 		PropList p = (PropList)__layouts.get(index);
 		String paperFormat = p.getValue("PaperSize");
-		__paperSizeComboBox.setSelectedPrefixItem(paperFormat + " -");
+		Message.printStatus ( 2, routine, "Selected layout has paper size \"" + paperFormat + "\"" );
+		if ( !__paperSizeComboBox.setSelectedPrefixItem(paperFormat + " -") ) {
+			__paperSizeComboBox.setSelectedPrefixItem(paperFormat);
+		}
 		String orient = p.getValue("PageOrientation");
 		__orientationComboBox.select(orient);
 		String sFontSize = p.getValue("NodeLabelFontSize");
@@ -1807,7 +1824,7 @@ private void setupGUI() {
 
 /**
 Sets up the paper information when this class is instantiated with a 
-pre-existing network (ie, not one read from a net file).
+pre-existing network (i.e., not one read from a net file).
 */
 private void setupPaper() {
 	String routine = "StateMod_Network_JFrame.setupPaper()";

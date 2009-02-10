@@ -131,28 +131,28 @@ implements ActionListener, KeyListener, MouseListener, MouseMotionListener, Prin
 Strings for menu items.
 */
 private final String
-	__MENU_ADD_ANNOTATION =		"Add Annotation",
-	__MENU_ADD_LINK =		"Add Link",
-	__MENU_ADD_NODE = 		"Add Upstream Node",
-	__MENU_DELETE_ANNOTATION = 	"Delete Annotation",
-	__MENU_DELETE_LINK = 		"Delete Link",
-	__MENU_DELETE_NODE = 		"Delete Node",
-	__MENU_DRAW_NODE_LABELS = 	"Draw Text",
-	__MENU_EDITABLE = 		"Editable",
-	__MENU_FIND_NODE = 		"Find Node",
-	__MENU_INCH_GRID = 		"Show Half-Inch Grid",
-	__MENU_MARGIN = 		"Show Margins",
-	__MENU_PIXEL_GRID = 		"Show 25 Pixel Grid",
-	__MENU_PRINT_NETWORK = 		"Print Entire Network",
-	__MENU_PRINT_SCREEN = 		"Print Screen",
-	__MENU_PROPERTIES = 		"Properties",
-	__MENU_REFRESH = 		"Refresh",
-	__MENU_SAVE_NETWORK = 		"Save Network as Image",
-	__MENU_SAVE_SCREEN = 		"Save Screen as Image",
-	__MENU_SAVE_XML = 		"Save XML Network File",
-	__MENU_SHADED_RIVERS = 		"Shaded Rivers",
-	__MENU_SNAP_TO_GRID = 		"Snap to Grid",
-	__MENU_WRITE_LIST_FILES = 	"Write Network as List Files";
+	__MENU_ADD_ANNOTATION = "Add Annotation",
+	__MENU_ADD_LINK = "Add Link",
+	__MENU_ADD_NODE = "Add Upstream Node",
+	__MENU_DELETE_ANNOTATION = "Delete Annotation",
+	__MENU_DELETE_LINK = "Delete Link",
+	__MENU_DELETE_NODE = "Delete Node",
+	__MENU_DRAW_NODE_LABELS = "Draw Text",
+	__MENU_EDITABLE = "Editable",
+	__MENU_FIND_NODE = "Find Node",
+	__MENU_INCH_GRID = "Show Half-Inch Grid",
+	__MENU_MARGIN = "Show Margins",
+	__MENU_PIXEL_GRID = "Show 25 Pixel Grid",
+	__MENU_PRINT_NETWORK = "Print Entire Network",
+	__MENU_PRINT_SCREEN = "Print Screen",
+	__MENU_PROPERTIES = "Properties",
+	__MENU_REFRESH = "Refresh",
+	__MENU_SAVE_NETWORK = "Save Network as Image",
+	__MENU_SAVE_SCREEN = "Save Screen as Image",
+	__MENU_SAVE_XML = "Save XML Network File",
+	__MENU_SHADED_RIVERS = "Shaded Rivers",
+	__MENU_SNAP_TO_GRID = "Snap to Grid",
+	__MENU_WRITE_LIST_FILES = "Write Network as List Files";
 
 /**
 Modes that the network can be placed in for responding to mouse presses.
@@ -231,8 +231,7 @@ private boolean __ignoreRepaint = false;
 
 /**
 Whether drawing settings need to be initialized because it is the first
-time paint() has been called.  This should be false when the class is 
-instantiated.
+time paint() has been called.  This should be false when the class is instantiated.
 */
 private boolean __initialized = false;
 
@@ -277,8 +276,7 @@ Whether only the current screen is currently being printed.
 private boolean __printingScreen = false;
 
 /**
-Whether annotations were read from a file and will need processed before 
-being drawn.
+Whether annotations were read from a file and will need processed before being drawn.
 */
 private boolean __processAnnotations = false;
 
@@ -303,8 +301,7 @@ Whether rivers should be shaded.
 private boolean __shadedRivers = false;
 
 /**
-Whether to draw a red bounding box around annotation text.  Useful for
-debugging.
+Whether to draw a red bounding box around annotation text.  Useful for debugging.
 */
 private boolean __showAnnotationBoundingBox = false;
 
@@ -314,8 +311,7 @@ Whether to snap node and legend movements to a grid.
 private boolean __snapToGrid = false;
 
 /**
-A buffered image to use for rendering what will be printed or saved to 
-an image file.
+A buffered image to use for rendering what will be printed or saved to an image file.
 */
 private BufferedImage __tempBuffer = null;
 
@@ -365,14 +361,12 @@ The size of the grid that is both drawn and snapped-to.
 private double __gridStep = 25;
 
 /**
-The height of the drawing area, in pixels.  Used for determining when the
-screen has been resized.
+The height of the drawing area, in pixels.  Used for determining when the screen has been resized.
 */
 private double __drawingAreaHeight = 0;
 
 /**
-The width of the drawing area, in pixels.  Used for determining when the
-screen has been resized.
+The width of the drawing area, in pixels.  Used for determining when the screen has been resized.
 */
 private double __drawingAreaWidth = 0;
 
@@ -405,6 +399,7 @@ The X and Y location of the last mouse press in device values.
 private double 
 	__mouseDownX = 0,
 	__mouseDownY = 0;
+
 /**
 The X and Y locations where the last popup menu was opened, in device terms.
 */
@@ -415,10 +410,9 @@ private double
 /**
 The printing scale factor of the drawing.  This is the amount by which the
 72 dpi printable pixels are scaled.  A printing scale value of 1 means that
-the ER diagram will be printed at 72 pixels per inch (ppi), which is the 
-java standard.   A scale factor of .5 means that the ER Diagram will be 
-printed at 144 ppi.  A scale factor of 3 means that the ER Diagram will be 
-printed at 24 ppi.
+the network will be printed at 72 pixels per inch (ppi), which is the 
+Java standard.   A scale factor of .5 means that the network will be 
+printed at 144 ppi.  A scale factor of 3 means that the ER Diagram will be printed at 24 ppi.
 */
 private double __printScale = 1;
 
@@ -446,8 +440,7 @@ private double __screenDataWidth;
 
 /**
 The total data height necessary to draw the entire network on the paper.  If
-the network is taller than the paper, then the height is the height of the
-entire network.
+the network is taller than the paper, then the height is the height of the entire network.
 */
 private double __totalDataHeight;
 
@@ -625,8 +618,7 @@ private int __totalBufferWidth;
 /**
 The current position within the undo Vector.  The change operation at 
 position __undoPos - 1 is the one that last happened.  If __undoPos is 
-less than __undoOperations.size(), then redo-es can be done.  If __undoPos is 0
-then no undos can be done.
+less than __undoOperations.size(), then redo-es can be done.  If __undoPos is 0 then no undos can be done.
 */
 private int __undoPos = 0;
 
@@ -718,8 +710,8 @@ for printing.  Printing is done at 72 dpi by default.  A printing scale of
 .5 would mean that printed output would be rendered at 144 dpi, and .25 would
 mean at 288 dpi.  Since each node is 20 pixels across, a scale of .25 seems to work best.
 */
-public StateMod_Network_JComponent(StateMod_Network_JFrame parent, 
-double scale) {
+public StateMod_Network_JComponent(StateMod_Network_JFrame parent, double scale)
+{
 	super("StateMod_Network_JComponent");
 
 	__parent = parent;
@@ -765,8 +757,7 @@ public void actionPerformed(ActionEvent event) {
 		if (!__editable) {
 			return;
 		}
-		new StateMod_Network_AddNode_JDialog(__parent,
-			__nodes[__popupNodeNum]);
+		new StateMod_Network_AddNode_JDialog(__parent, __nodes[__popupNodeNum]);
 		// TODO (JTS - 2004-07-13) need a way to make sure that a node was really added 
 		// and mark changed appropriately
 		setNetworkChanged (true);
@@ -919,26 +910,24 @@ Adds an annotation node to the drawing area at the specified point.
 @param x the x location of the annotation
 @param y the y location of the annotation
 */
-protected void addAnnotation(double x, double y) {
-	String text = new TextResponseJDialog(__parent, 
-		"Enter the annotation text",
-		"Enter the annotation text:", 
-		ResponseJDialog.OK | ResponseJDialog.CANCEL).response();
+protected void addAnnotation(double x, double y)
+{
+	String text = new TextResponseJDialog(__parent, "Enter the annotation text",
+		"Enter the annotation text:", ResponseJDialog.OK | ResponseJDialog.CANCEL).response();
 
 	if (text == null) {
 		// text will be null if the user pressed cancel
 		return;
 	}
 
-	// escape all instances of " -- they can cause problems when 
-	// put into a PropList.
+	// Escape all instances of " -- they can cause problems when put into a PropList.
 	text = StringUtil.replaceString(text, "\"", "'");
 
-	// round off the X and Y values to 6 digits after the decimal point
+	// Round off the X and Y values to 6 digits after the decimal point
 	y = toSixDigits(y);
 	x = toSixDigits(x);
 
-	// default most of the information in the node
+	// Default most of the information in the node
 	HydrologyNode node = new HydrologyNode();
 	String position = "Center";
 	String props = 
@@ -952,14 +941,12 @@ protected void addAnnotation(double x, double y) {
 		+ "TextPosition=" + position;
 	PropList p = PropList.parse(props, "", ";");
 	node.setAssociatedObject(p);
-	GRLimits limits = GRDrawingAreaUtil.getTextExtents(
-		__drawingArea, text, GRUnits.DEVICE);	
+	GRLimits limits = GRDrawingAreaUtil.getTextExtents(__drawingArea, text, GRUnits.DEVICE);	
 	double w = convertX(limits.getWidth());
 	double h = convertY(limits.getHeight());
 
-	// calculate the actual limits for the from the lower-left corner
-	// to the upper-right, in order to know when the text has been 
-	// clicked on (for dragging, or popup menus).
+	// Calculate the actual limits for the from the lower-left corner to the upper-right,
+	// in order to know when the text has been clicked on (for dragging, or popup menus).
 	
 	if (position.equalsIgnoreCase("UpperRight")) {
 		node.setPosition(x, y, w, h);
@@ -970,8 +957,7 @@ protected void addAnnotation(double x, double y) {
 	else if (position.equalsIgnoreCase("LowerRight")) {
 		node.setPosition(x, y - h, w, h);
 	}
-	else if (position.equalsIgnoreCase("Below")
-		|| position.equalsIgnoreCase("BelowCenter")) {
+	else if (position.equalsIgnoreCase("Below") || position.equalsIgnoreCase("BelowCenter")) {
 		node.setPosition(x - (w / 2), y - h, w, h);
 	}
 	else if (position.equalsIgnoreCase("LowerLeft")) {
@@ -1333,8 +1319,7 @@ private void buildSelectedNodesLimits() {
 	double[] p = null;
 	
 	// go through the nodes that are selected and populate the arrays
-	// created above with the respective nodes' limits and starting X and 
-	// Y positions.  
+	// created above with the respective nodes' limits and starting X and Y positions.  
 	
 	for (int i = 0; i < size; i++) {
 		I = (Integer)v.get(i);
@@ -1367,14 +1352,14 @@ protected void calculateDataLimits() {
 		__dataLimits = data;
 	}
 
-	// get the height and width of the data as set in the main JFrame
+	// Get the height and width of the data as set in the main JFrame
 	// from what was read from the network.
 	double dWidth = __dataLimits.getRightX() - __dataLimits.getLeftX();
 	double dHeight = __dataLimits.getTopY() - __dataLimits.getBottomY();
 
 	GRLimits setLimits = new GRLimits(__dataLimits);
 
-	// next, the ratio of the width to the height of the paper will be
+	// Next, the ratio of the width to the height of the paper will be
 	// checked and if the ratio is not sufficient to allow the data
 	// to be all printed on the page (no compression!), the data limits
 	// will be reset so that there is extra room (off paper) in the drawing area
@@ -1382,25 +1367,19 @@ protected void calculateDataLimits() {
 		__fitWidth = true;
 		__totalDataWidth = dWidth;
 		__dataLeftX = __dataLimits.getLeftX();
-		// size __totalDataHeight to be proportional to 
-		// __totalDataWidth, given the screen proportions
-		__totalDataHeight = 
-			((double)__totalBufferHeight 
-			/ (double)__totalBufferWidth)
-			* __totalDataWidth;
+		// size __totalDataHeight to be proportional to __totalDataWidth, given the screen proportions
+		__totalDataHeight = ((double)__totalBufferHeight/(double)__totalBufferWidth)*__totalDataWidth;
 
 		if (__dataLimits.getHeight() > __totalDataHeight) {
 			// if the data limits are greater than the total
 			// data height that can fit on the paper, then 
-			// reset the total data height to be the height of
-			// the data limits.  
+			// reset the total data height to be the height of the data limits.  
 			__dataBottomY = __dataLimits.getBottomY();
 			__totalDataHeight = __dataLimits.getHeight();
 		}
 		else {
-			// otherwise, if the height of the network can 
-			// fit within the paper entirely, center the
-			// network vertically on the paper
+			// Otherwise, if the height of the network can 
+			// fit within the paper entirely, center the network vertically on the paper
 			double diff = __totalDataHeight - __dataLimits.getHeight();
 			__dataBottomY = __dataLimits.getBottomY() - (diff / 2);
 			setLimits.setBottomY(__dataBottomY);
@@ -1411,12 +1390,8 @@ protected void calculateDataLimits() {
 		__fitWidth = false;
 		__totalDataHeight = dHeight;
 		__dataBottomY = __dataLimits.getBottomY();
-		// size __totalDataWidth to be proportional to 
-		// __totalDataHeight, given the screen proportions		
-		__totalDataWidth = 
-			((double)__totalBufferWidth 
-			/ (double)__totalBufferHeight)
-			* __totalDataHeight;
+		// size __totalDataWidth to be proportional to __totalDataHeight, given the screen proportions		
+		__totalDataWidth = ((double)__totalBufferWidth / (double)__totalBufferHeight)* __totalDataHeight;
 		if (__dataLimits.getWidth() > __totalDataWidth) {
 			// if the data limits are greater than the total
 			// data width that can fit on the paper, then 
@@ -1449,8 +1424,7 @@ do not match up to point font sizes, because of the need to scale them.
 @param isPrinting whether the network is currently being printed or not.
 @return the equivalent font size in points.
 */
-private int calculateScaledFont(String name, String style, int size, 
-boolean isPrinting) {
+private int calculateScaledFont(String name, String style, int size, boolean isPrinting) {
 	double scale = 0;
 	if (__fitWidth) {
 		double pixels = __dpi * (int)(__pageFormat.getWidth() / 72);
@@ -1479,8 +1453,7 @@ boolean isPrinting) {
 /**
 Checks the id of the specified node to see if it is unique in the network.
 If not, the string _X (where X is the number of instances of this node's ID)
-will be appended to the node's ID.   The node is guaranteed to have a 
-unique id by the end of this method.
+will be appended to the node's ID.   The node is guaranteed to have a unique id by the end of this method.
 @param pos the position of the node in the node array.
 */
 private void checkUniqueID(int pos) {
@@ -1626,8 +1599,7 @@ private void deleteLink() {
 
 	size = links.size();
 	if (size == 1) {
-		// If there is only one link involving the clicked-on
-		// node, then delete it outright.
+		// If there is only one link involving the clicked-on node, then delete it outright.
 		int i = ((Integer)nums.get(0)).intValue();
 		__links.remove(i);
 		setNetworkChanged (true);
@@ -1738,8 +1710,7 @@ private void drawAnnotations() {
 		p.set("DrawOutOfBounds", "true");
 		node.setAssociatedObject(p);
 
-		GRDrawingAreaUtil.drawAnnotation(__drawingArea, 
-			(PropList)node.getAssociatedObject());
+		GRDrawingAreaUtil.drawAnnotation(__drawingArea, (PropList)node.getAssociatedObject());
 
 		if (__showAnnotationBoundingBox) {
 			GRDrawingAreaUtil.setColor(__drawingArea, GRColor.red);
@@ -3421,13 +3392,12 @@ Paints the screen.
 @param g the Graphics context to use for painting.
 */
 public void paint(Graphics g) {
-	// when printing is called, the print(Graphics ...) routine ends up
+	// When printing is called, the print(Graphics ...) routine ends up
 	// getting called three times.  Just a foible of Java, that routine
 	// gets called more than once, even if just one page should be printed.
 	// Multiple calls to print can result in some weirdly-drawing things,
 	// plus they slow it down.  The following check makes sure that when
-	// the network is being printed, it is only drawn to the 
-	// BufferedImage one time.
+	// the network is being printed, it is only drawn to the BufferedImage one time.
 	if (__printCount > 0) {
 		return;
 	}
@@ -3502,8 +3472,7 @@ public void paint(Graphics g) {
 		// 36 pixels across. Whatever the final node size is, it 
 		// will need adjusted to fit the printed DPI.  
 
-		// and that doesn't even BEGIN to get into the problems with
-		// points vs. pixels ...
+		// and that doesn't even BEGIN to get into the problems with points vs. pixels ...
 
 		setPrintNodeSize(__currNodeSize);
 
@@ -3548,8 +3517,7 @@ public void paint(Graphics g) {
 	// the following section is for when networks are read in from
 	// XML files.  The values below are read in after the GUI is
 	// instantiated, and are set so that whenever the GUI finds that
-	// one of them is set during a repaint it will apply them to the
-	// gui settings.
+	// one of them is set during a repaint it will apply them to the gui settings.
 	boolean repaint = false;
 	if (__holdPaperSize != null) {
 		setPaperSize(__holdPaperSize);
@@ -3645,8 +3613,7 @@ public void paint(Graphics g) {
 		// if the grid should be drawn, do so ...
 		setAntiAlias(__antiAlias);		
 		if (__drawInchGrid) {
-			// change the limits so that the drawing is done
-			// in device units, not data units
+			// Change the limits so that the drawing is done in device units, not data units
 			__drawingArea.setFloatLineDash(__dashes, 0);
 
 			double maxX = __totalBufferWidth;
@@ -3669,10 +3636,8 @@ public void paint(Graphics g) {
 			int tempMaxX = (int)(convertAbsX(maxX) + __dataLeftX);
 			for (int i = 0; i < maxY; i+= ((72/__printScale)/2)) {
 				j = (int)(convertAbsY(i) + __dataBottomY);
-				GRDrawingAreaUtil.drawLine(__drawingArea, 
-					minX, j, tempMaxX, j);
-				GRDrawingAreaUtil.drawText(__drawingArea, 
-					"" + ((double)i/(72/__printScale)),minX,
+				GRDrawingAreaUtil.drawLine(__drawingArea, minX, j, tempMaxX, j);
+				GRDrawingAreaUtil.drawText(__drawingArea, "" + ((double)i/(72/__printScale)),minX,
 					j, 0, GRText.CENTER_Y | GRText.LEFT);
 			}
 
@@ -3681,13 +3646,12 @@ public void paint(Graphics g) {
 		}
 		setAntiAlias(__antiAlias);		
 		if (__drawPixelGrid) {
-			for (int i = (int)__dataBottomY; 
-				i < __totalDataHeight; i+= 20) {
+			for (int i = (int)__dataBottomY; i < __totalDataHeight; i+= 20) {
 				GRDrawingAreaUtil.setColor(__drawingArea, GRColor.green);
 				GRDrawingAreaUtil.drawLine(__drawingArea, __dataLeftX, i, __totalDataWidth, i);
 				for (int j = i + 5; j < (i + 20); j += 5) {
-				GRDrawingAreaUtil.setColor(__drawingArea, GRColor.yellow);
-				GRDrawingAreaUtil.drawLine(__drawingArea, __dataLeftX, j, __totalDataWidth, j);
+					GRDrawingAreaUtil.setColor(__drawingArea, GRColor.yellow);
+					GRDrawingAreaUtil.drawLine(__drawingArea, __dataLeftX, j, __totalDataWidth, j);
 				}
 			}
 		}
@@ -3783,8 +3747,7 @@ public void paint(Graphics g) {
 		return;
 	}
 	else {
-		// return here because nodes can't ever be in drag when
-		// printing occurs.
+		// return here because nodes can't ever be in drag when printing occurs.
 		__drawingArea.setDataLimits(__holdLimits);
 		__drawingArea.setDrawingLimits(new GRLimits(
 			0, 0, getBounds().width, getBounds().height),
@@ -3871,7 +3834,7 @@ public void print() {
 	catch (Exception e) {
 		String routine = "StateMod_Network_JComponent.print()";
 		Message.printWarning(1, routine, "Error printing network.");
-		Message.printWarning(2, routine, e);
+		Message.printWarning(3, routine, e);
 	}
 }
 
@@ -3894,8 +3857,7 @@ public int print(Graphics g, PageFormat pageFormat, int pageIndex) {
 	setPrintNodeSize((double)(__currNodeSize / pct));
 	__legendNodeDiameter = hold;
 	Graphics2D g2d = (Graphics2D)g;
-	// Set for the GRDevice because we will temporarily use 
-	// that to do the drawing...	
+	// Set for the GRDevice because we will temporarily use that to do the drawing...	
 
 	__forceRefresh = true;
 	
@@ -3910,11 +3872,9 @@ public int print(Graphics g, PageFormat pageFormat, int pageIndex) {
 		double transX = 0;
 		double transY = 0;
 	
-		if (!StringUtil.startsWithIgnoreCase(
-		    PrintUtil.pageFormatToString(pageFormat), 
-		    "Plotter")) {
-			if (pageFormat.getOrientation() 
-			    == PageFormat.LANDSCAPE) {
+		if (!StringUtil.startsWithIgnoreCase(PrintUtil.pageFormatToString(pageFormat), "Plotter")) {
+			// TODO SAM 2009-02-10 What does the following accomplish?
+			if (pageFormat.getOrientation() == PageFormat.LANDSCAPE) {
 				transX = pageFormat.getImageableX() * (1 / 1);
 				transY = pageFormat.getImageableY() * (1 / 1);
 			}
@@ -5207,8 +5167,7 @@ private void zoomToHeight() {
 
 /**
 Zooms so that the network fits in the screen and all dimension are visible.
-REVISIT (JTS - 2004-04-01)
-Doesn't work 100% right.
+FIXME (JTS - 2004-04-01) Doesn't work 100% right.
 */
 /* TODO SAM Evaluate whether needed
 private void zoomToScreen() {
