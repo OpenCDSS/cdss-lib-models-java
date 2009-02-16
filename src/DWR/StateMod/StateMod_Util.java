@@ -1381,15 +1381,16 @@ public static TS createWaterRightTS ( StateMod_Data smdata, int interval, String
 
 /**
 Create a list of time series from a list of water rights.  A non-null list is guaranteed.
-@param smrights A Vector of StateMod_Right.
+@param smrights A list of StateMod_Right.
 @param interval_base Time series interval for returned time series, either
 TimeInterval.DAY, TimeInterval.MONTH, TimeInterval.YEAR, or TimeInterval.IRREGULAR
 (smaller interval is slower).
 @param spatial_aggregation If 0, create a time series for the location,
-which is the sum of the water rights at that location.  If 1, time series will
+which is the sum of the water rights at that location.
+If 1, time series will
 be created by parcel (requires parcel information in right - only for well rights).
 If 2, individual time series will be created (essentially step functions with one step).
-@param parcel_year If spatial_aggregation = 1, include the year to specify the years for parcel indentifiers.
+@param parcel_year If spatial_aggregation = 1, include the year to specify the years for parcel identifiers.
 @param include_dataset_totals If true, create a time series including a total
 of all time series.
 @param start Start DateTime for the time series.  If not specified, the date

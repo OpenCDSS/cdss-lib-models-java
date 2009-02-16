@@ -102,9 +102,8 @@ private int __ktsw = StateCU_Util.MISSING_INT;
 
 /**
 Construct a StateCU_BlaneyCriddle instance and set to missing and empty data.
-Number of coefficients (as per StateCU this is currently always 25 for prennial
-crops and 21 for annual crops, but in the
-future the number may be made variable).
+Number of coefficients (as per StateCU this is currently always 25 for perennial
+crops and 21 for annual crops, but in the future the number may be made variable).
 @param curve_type "Day" for perennial crop (25 coefficients are assumed) or
 "Percent" for annual crop (21 coefficients are assumed).
 */
@@ -153,8 +152,7 @@ public StateCU_BlaneyCriddle ( String curve_type )
 }
 
 /**
-Performs specific data checks and returns a list of data
-that failed the data checks.
+Performs specific data checks and returns a list of data that failed the data checks.
 @param count Index of the data vector currently being checked.
 @param dataset StateCU dataset currently in memory.
 @param props Extra properties to perform checks with.
@@ -185,7 +183,7 @@ public void createBackup() {
 			__nckca[i] = bc.__nckca[i];
 		}
 	}
-	else  {
+	else {
 		__ckcp = new double[25];
 		__nckcp = new int[25];
 		for (int i = 0; i < 25; i++) {
@@ -238,8 +236,7 @@ Returns the data column header for the specifically checked data.
  */
 public static String[] getDataHeader()
 {
-	// TODO KAT 2007-04-12 
-	// When specific checks are added to checkComponentData
+	// TODO KAT 2007-04-12 When specific checks are added to checkComponentData
 	// return the header for that data here
 	return new String[] {};
 }
@@ -253,8 +250,8 @@ public String getFlag ()
 }
 
 /**
-Return the Blaney Criddle modified/original switch
-@return the Blaney Criddle modified/original switch
+Return the Blaney-Criddle modified/original switch
+@return the Blaney-Criddle modified/original switch
 */
 public int getKtsw ()
 {
@@ -289,8 +286,7 @@ public int getNckcp(int index) {
 /**
 Checks for version 10 by reading the file
 and checking the number of fields.  Version 10 has 3 values in record 2.
-Version 11+ has 4 values in record 3.  It is assumed that values are separated
-by whitespace.
+Version 11+ has 4 values in record 3.  It is assumed that values are separated by whitespace.
 @param filename Path to Blaney-Criddle file to check.
 @return true if the file is for version 10, false if not.
 @throws IOException
@@ -312,8 +308,7 @@ private static boolean isVersion_10( String filename ) throws IOException
 			continue;
 		}
 		
-		// Version 10 has 3 columns in the third row
-		// the newest version has 4 columns
+		// Version 10 has 3 columns in the third row - the newest version has 4 columns
 		if( count == 2) {
 			List tmp = StringUtil.breakStringList(line, " \t", StringUtil.DELIM_SKIP_BLANKS);
 			if(tmp.size() == 3) {
@@ -339,15 +334,13 @@ throws IOException
 	StateCU_BlaneyCriddle kbc = null;
 	List kbc_Vector = new Vector(25);
 	BufferedReader in = null;
-	boolean version10 = isVersion_10( filename );	// Is version 10 (old)
-							// format?
+	boolean version10 = isVersion_10( filename );	// Is version 10 (old) format?
 	
 	Message.printStatus ( 1, rtn, "Reading StateCU KBC file: " + filename );
 	// The following throws an IOException if the file cannot be opened...
 	in = new BufferedReader ( new FileReader (filename));
 	int nc = -1;
-	String title = null;	// The title is currently read but not stored
-				// since it is never really used for anything.
+	String title = null; // The title is currently read but not stored since it is never really used for anything.
 	while ( (iline = in.readLine()) != null ) {
 		// check for comments
 		if (iline.startsWith("#") || iline.trim().length()==0 ){
@@ -376,8 +369,7 @@ throws IOException
 	List tokens;
 	int j = 0;
 	for ( int i = 0; i < nc; i++ ) {
-		nckca = null;	// use to check whether annual or perennial
-				// below.
+		nckca = null;	// use to check whether annual or perennial below.
 		// Read a free format line...
 
 		iline = in.readLine();
@@ -398,8 +390,7 @@ throws IOException
 
 		kbc = new StateCU_BlaneyCriddle ( flag );
 		kbc.setName ( cropn );
-		// REVISIT SAM 2005-05-22
-		// Ignore the old ID and use the crop name - this facilitates
+		// TODO SAM 2005-05-22 Ignore the old ID and use the crop name - this facilitates
 		// sorting and other standard StateCU_Data features.
 		//kbc.setID ( id );
 		kbc.setID ( cropn );
@@ -413,7 +404,8 @@ throws IOException
 			ckc = kbc.getCkcp();
 			nckcp = kbc.getNckcp();
 		}
-		else {	ckc = kbc.getCkca();
+		else {
+			ckc = kbc.getCkca();
 			nckca = kbc.getNckca();
 		}
 		npts = ckc.length;
@@ -421,14 +413,14 @@ throws IOException
 		for ( j = 0; j < npts; j++ ) {
 			iline = in.readLine();
 
-			tokens = StringUtil.breakStringList ( iline.trim(),
-				" \t", StringUtil.DELIM_SKIP_BLANKS );
+			tokens = StringUtil.breakStringList ( iline.trim(), " \t", StringUtil.DELIM_SKIP_BLANKS );
 			if ( nckca == null ) {
 				// Processing perennial crop...
 				nckcp[j] = StringUtil.atoi((String)tokens.get(0) );
 				ckc[j] = StringUtil.atod((String)tokens.get(1) );
 			}
-			else {	// Processing annual crop...
+			else {
+				// Processing annual crop...
 				nckca[j] = StringUtil.atoi((String)tokens.get(0) );
 				ckc[j] = StringUtil.atod((String)tokens.get(1) );
 			}
@@ -472,7 +464,8 @@ public void setCurveValue ( int i, double coeff )
 		// Percent of growing season - Annual..
 		__ckca[i] = coeff;
 	}
-	else {	// Day of year - Perennial...
+	else {
+		// Day of year - Perennial...
 		__ckcp[i] = coeff;
 	}
 }
@@ -490,7 +483,8 @@ public void setCurveValues ( int i, int pos, double coeff )
 		__nckca[i] = pos;
 		__ckca[i] = coeff;
 	}
-	else {	// Perennial...
+	else {
+		// Perennial...
 		__nckcp[i] = pos;
 		__ckcp[i] = coeff;
 	}
@@ -544,20 +538,19 @@ processing headers).  Specify as null if no previous file is available.
 if no comments are available.
 @exception IOException if there is an error writing the file.
 */
-public static void writeStateCUFile (	String filename_prev, String filename,
-					List data_Vector,
-					String [] new_comments )
+public static void writeStateCUFile ( String filename_prev, String filename, List data_Vector,
+	List new_comments )
 throws IOException
 {	writeStateCUFile ( filename_prev, filename, data_Vector, new_comments, null );
 }
 
 /**
-Write a Vector of StateCU_BlaneyCriddle to a file.  The filename is adjusted to
+Write a list of StateCU_BlaneyCriddle to a file.  The filename is adjusted to
 the working directory if necessary using IOUtil.getPathUsingWorkingDir().
 @param filename_prev The name of the previous version of the file (for
 processing headers).  Specify as null if no previous file is available.
 @param filename The name of the file to write.
-@param data_Vector A Vector of StateCU_BlaneyCriddle to write.
+@param data_Vector A list of StateCU_BlaneyCriddle to write.
 @param new_comments Comments to add to the top of the file.  Specify as null 
 if no comments are available.
 @param props Properties to control the output.  Currently only the
@@ -565,22 +558,20 @@ optional Precision property can be set, indicating how many digits after the
 decimal should be printed (default is 3).
 @exception IOException if there is an error writing the file.
 */
-public static void writeStateCUFile (	String filename_prev, String filename,
-					List data_Vector,
-					String [] new_comments,
-					PropList props )
+public static void writeStateCUFile ( String filename_prev, String filename, List data_Vector,
+	List new_comments, PropList props )
 throws IOException
-{	String [] comment_str = { "#" };
-	String [] ignore_comment_str = { "#>" };
+{	List comment_str = new Vector(1);
+	comment_str.add ( "#" );
+	List ignore_comment_str = new Vector(1);
+	ignore_comment_str.add ( "#>" );
 	PrintWriter out = null;
-	String full_filename_prev = IOUtil.getPathUsingWorkingDir (
-		filename_prev );
+	String full_filename_prev = IOUtil.getPathUsingWorkingDir ( filename_prev );
 	String full_filename = IOUtil.getPathUsingWorkingDir ( filename );
 	out = IOUtil.processFileHeaders ( full_filename_prev, full_filename, 
 		new_comments, comment_str, ignore_comment_str, 0 );
 	if ( out == null ) {
-		throw new IOException ( "Error writing to \"" +
-			full_filename + "\"" );
+		throw new IOException ( "Error writing to \"" + full_filename + "\"" );
 	}
 	writeVector ( data_Vector, out, props );
 	out.flush();
@@ -589,7 +580,7 @@ throws IOException
 }
 
 /**
-Write a Vector of StateCU_BlaneyCriddle to an opened file.
+Write a list of StateCU_BlaneyCriddle to an opened file.
 @param data_Vector A Vector of StateCU_BlaneyCriddle to write.
 @param out output PrintWriter.
 @param props Properties to control the output.  Currently only the
@@ -620,77 +611,47 @@ throws IOException
 	}
 
 	out.println ( cmnt );
-	out.println ( cmnt +
-		"  StateCU Blaney-Criddle Crop Coefficient (KBC) File" );
+	out.println ( cmnt + "  StateCU Blaney-Criddle Crop Coefficient (KBC) File" );
 	out.println ( cmnt );
-	out.println ( cmnt +
-		"  Record 1 format (a80)" );
+	out.println ( cmnt + "  Record 1 format (a80)" );
 	out.println ( cmnt );
-	out.println ( cmnt +
-		"  Title     remark:  Title" );
+	out.println ( cmnt + "  Title     remark:  Title" );
 	out.println ( cmnt );
-	out.println ( cmnt +
-		"  Record 2 format (free format)" );
+	out.println ( cmnt + "  Record 2 format (free format)" );
 	out.println ( cmnt );
-	out.println ( cmnt +
-		"  NumCurves     nc:  Number of crop coefficient curves" );
+	out.println ( cmnt + "  NumCurves     nc:  Number of crop coefficient curves" );
 	out.println ( cmnt );
-	out.println ( cmnt +
-		"  Record 3 format (free format)" );
+	out.println ( cmnt + "  Record 3 format (free format)" );
 	out.println ( cmnt );
-	out.println ( cmnt +
-		"  ID            id:  Crop number (not used by StateCU - written as sequential integer)" );
-	out.println ( cmnt +
-		"  CropName   cropn:  Crop name (e.g., ALFALFA)" );
-	out.println ( cmnt +
-		"  CurveType   flag:  Growth curve type" );
-	out.println ( cmnt +
-		"                     Day = perennial; specify 25 values" );
-	out.println ( cmnt +
-		"                           for start, middle, end of month");
-	out.println ( cmnt +
-		"                     Percent = annual; specify 21 values" );
-	out.println ( cmnt +
-		"                           for 0, 5, ..., 100% of season" );
+	out.println ( cmnt + "  ID            id:  Crop number (not used by StateCU)" );
+	out.println ( cmnt + "  CropName   cropn:  Crop name (e.g., ALFALFA)" );
+	out.println ( cmnt + "  CurveType   flag:  Growth curve type" );
+	out.println ( cmnt + "                     Day = perennial; specify 25 values" );
+	out.println ( cmnt + "                           for start, middle, end of month");
+	out.println ( cmnt + "                     Percent = annual; specify 21 values" );
+	out.println ( cmnt + "                           for 0, 5, ..., 100% of season" );
 	out.println ( cmnt );
 	if ( !version10 ) {
-	// Include newer format information...
-	out.println ( cmnt +
-		"  BCMethod    ktsw:  Blaney-Criddle Method" );
-	out.println ( cmnt +
-		"                     0 = SCS Modified Blaney-Criddle" );
-	out.println ( cmnt +
-		"                     1 = Original Blaney-Criddle" );
-	out.println ( cmnt +
-		"                     2 = Modifed Blaney-Criddle w/ Elev. Adj.");
-	out.println ( cmnt +
-		"                     3 = Original Blaney-Criddle w/ Elev. Adj.");
-	out.println ( cmnt +
-		"                     4 = Pochop");
-	out.println ( cmnt );
+		// Include newer format information...
+		out.println ( cmnt + "  BCMethod    ktsw:  Blaney-Criddle Method" );
+		out.println ( cmnt + "                     0 = SCS Modified Blaney-Criddle" );
+		out.println ( cmnt + "                     1 = Original Blaney-Criddle" );
+		out.println ( cmnt + "                     2 = Modifed Blaney-Criddle w/ Elev. Adj.");
+		out.println ( cmnt + "                     3 = Original Blaney-Criddle w/ Elev. Adj.");
+		out.println ( cmnt + "                     4 = Pochop");
+		out.println ( cmnt );
 	}
-	out.println ( cmnt +
-		"  Record 4 format (free format)" );
+	out.println ( cmnt + "  Record 4 format (free format)" );
 	out.println ( cmnt );
-	out.println ( cmnt +
-		"Position     nckca:  Percent (0 to 100) of growing season for "
-		+ "annual crop");
-	out.println ( cmnt +
-		"             nckcp:  Day of year (1 to 366) for perennial " +
-		"crop" );
-	out.println ( cmnt +
-		"Coeff         ckca:  Crop coefficient for annual crop" );
-	out.println ( cmnt +
-		"         OR   ckcp:  Crop coefficient for perennial crop");
+	out.println ( cmnt + "Position     nckca:  Percent (0 to 100) of growing season for annual crop");
+	out.println ( cmnt + "             nckcp:  Day of year (1 to 366) for perennial crop" );
+	out.println ( cmnt + "Coeff         ckca:  Crop coefficient for annual crop" );
+	out.println ( cmnt + "         OR   ckcp:  Crop coefficient for perennial crop");
 	out.println ( cmnt );
-	out.println ( cmnt +
-		"Title..." );
-	out.println ( cmnt +
-		"NumCurves" );
-	out.println ( cmnt +
-		"ID CropName CurveType" );
-	out.println ( cmnt +
-		"Position Coeff" );
+	out.println ( cmnt + "Title..." );
+	out.println ( cmnt + "NumCurves" );
+	out.println ( cmnt + "ID CropName CurveType" );
+	out.println ( cmnt + "Position Coeff" );
 	out.println ( cmnt + "----------------------------" );
 	out.println ( cmnt + "EndHeader" );
 	out.println ( "Crop Coefficient Curves for Blaney-Criddle" );
@@ -728,15 +689,14 @@ throws IOException
 		// we don't know, put -999...
 		String id = "" + (i + 1);  // Default to sequential number
 		if ( version10 ) {
-				// Previously used -999
-				id = "-999";
+			// Previously used -999
+			id = "-999";
 		}
 		if ( !StateCU_Util.isMissing(kbc.getID()) ) {
 			// Use the actual value...
 			id = kbc.getID();
 		}
-		// Output based on the version because file comparisons may be done
-		// when verifying files.
+		// Output based on the version because file comparisons may be done when verifying files.
 		if ( version10 ) {
 			// No ktsw...
 		    out.println ( id + " " + name + " " + kbc.getFlag() );
@@ -749,18 +709,18 @@ throws IOException
 		if ( nckca != null ) {
 			size = nckca.length;
 		}
-		else {	size = nckcp.length;
+		else {
+			size = nckcp.length;
 		}
 		for ( j = 0; j < size; j++ ) {
 			if ( nckca != null ) {
 				// Print annual curve (Percent)...
 				out.println (
-				StringUtil.formatString(nckca[j],"%-3d") +
-				StringUtil.formatString(ckca[j],value_format) );
+				StringUtil.formatString(nckca[j],"%-3d") + StringUtil.formatString(ckca[j],value_format) );
 			}
-			else {	// Print perennial curve (Day)...
-				out.println (
-				StringUtil.formatString((int)nckcp[j],"%-3d") +
+			else {
+				// Print perennial curve (Day)...
+				out.println ( StringUtil.formatString((int)nckcp[j],"%-3d") +
 				StringUtil.formatString(ckcp[j],value_format) );
 			}
 		}
@@ -768,10 +728,9 @@ throws IOException
 }
 
 /**
-Writes a Vector of StateCU_BlaneyCriddle objects to a list file.  A header is 
+Writes a list of StateCU_BlaneyCriddle objects to a list file.  A header is 
 printed to the top of the file, containing the commands used to generate the 
-file.  Any strings in the body of the file that contain the field delimiter 
-will be wrapped in "...".  
+file.  Any strings in the body of the file that contain the field delimiter will be wrapped in "...".  
 @param filename the name of the file to which the data will be written.
 @param delimiter the delimiter to use for separating field values.
 @param update whether to update an existing file, retaining the current 
@@ -779,8 +738,10 @@ header (true) or to create a new file with a new header.
 @param data the Vector of objects to write.  
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter, boolean update, List data) 
-throws Exception {
+public static void writeListFile(String filename, String delimiter, boolean update, List data,
+	List outputComments ) 
+throws Exception
+{	String routine = "StateCU_BlaneyCriddle.writeListFile";
 	int size = 0;
 	if (data != null) {
 		size = data.size();
@@ -788,6 +749,7 @@ throws Exception {
 	
 	List fields = new Vector();
 	fields.add("Name");
+	fields.add("CurveType");
 	fields.add("DayPercent");
 	fields.add("Coefficient");
 	int fieldCount = fields.size();
@@ -811,104 +773,95 @@ throws Exception {
 	int k = 0;
 	PrintWriter out = null;
 	StateCU_BlaneyCriddle bc = null;
-	String[] commentString = { "#" };
-	String[] ignoreCommentString = { "#>" };
+	List commentString = new Vector(1);
+	commentString.add ( "#" );
+	List ignoreCommentString = new Vector(1);
+	ignoreCommentString.add ( "#>" );
 	String[] line = new String[fieldCount];
-	String[] newComments = null;
 	String flag = null;
 	StringBuffer buffer = new StringBuffer();
 	
-	try {	
-		out = IOUtil.processFileHeaders(
-			oldFile,
-			IOUtil.getPathUsingWorkingDir(filename), 
-			newComments, commentString, ignoreCommentString, 0);
+	try {
+		// Add some basic comments at the top of the file.  However, do this to a copy of the
+		// incoming comments so that they are not modified in the calling code.
+		List newComments2 = null;
+		if ( outputComments == null ) {
+			newComments2 = new Vector();
+		}
+		else {
+			newComments2 = new Vector(outputComments);
+		}
+		newComments2.add(0,"");
+		newComments2.add(1,"StateCU Blaney-Criddle crop coefficients as a delimited list file.");
+		newComments2.add(2,"");
+		out = IOUtil.processFileHeaders( oldFile, IOUtil.getPathUsingWorkingDir(filename), 
+			newComments2, commentString, ignoreCommentString, 0);
 
 		for (int i = 0; i < fieldCount; i++) {
-			buffer.append("\"" + names[i] + "\"");
-			if (i < (fieldCount - 1)) {
+			if (i > 0) {
 				buffer.append(delimiter);
 			}
+			buffer.append("\"" + names[i] + "\"");
 		}
 
 		out.println(buffer.toString());
 		
 		for (int i = 0; i < size; i++) {
 			bc = (StateCU_BlaneyCriddle)data.get(i);
-
 			flag = bc.getFlag();
-
 			if (flag.equalsIgnoreCase("Percent")) {
 				for (j = 0; j < 21; j++) {
-					line[0] = StringUtil.formatString(
-						bc.getName(), 
-						formats[0]).trim();
-					line[1] = StringUtil.formatString(
-						bc.getNckca(j), 
-						formats[1]).trim();
-					line[2] = StringUtil.formatString(
-						bc.getCkca(j), 
-						formats[2]).trim();
+					line[0] = StringUtil.formatString(bc.getName(), formats[0]).trim();
+					line[1] = StringUtil.formatString(bc.getFlag(), formats[1]).trim();
+					line[2] = StringUtil.formatString(bc.getNckca(j), formats[2]).trim();
+					line[3] = StringUtil.formatString(bc.getCkca(j), formats[3]).trim();
 
 					buffer = new StringBuffer();	
 					for (k = 0; k < fieldCount; k++) {
-						if (line[k].indexOf(
-						     delimiter) > -1) {
-							line[k] = "\"" 
-								+ line[k] 
-								+ "\"";
+						if (k > 0) {
+							buffer.append(delimiter);
+						}
+						if (line[k].indexOf(delimiter) > -1) {
+							line[k] = "\"" + line[k] + "\"";
 						}
 						buffer.append(line[k]);
-						if (k < (fieldCount - 1)) {
-							buffer.append(
-								delimiter);
-						}
 					}	
 					out.println(buffer.toString());
 				}
 			}
 			else {
 				for (j = 0; j < 25; j++) {
-					line[0] = StringUtil.formatString(
-						bc.getName(), 
-						formats[0]).trim();
-					line[1] = StringUtil.formatString(
-						bc.getNckcp(j), 
-						formats[1]).trim();
-					line[2] = StringUtil.formatString(
-						bc.getCkcp(j), 
-						formats[2]).trim();
+					line[0] = StringUtil.formatString(bc.getName(), formats[0]).trim();
+					line[1] = StringUtil.formatString(bc.getFlag(), formats[1]).trim();
+					line[2] = StringUtil.formatString(bc.getNckcp(j), formats[2]).trim();
+					line[3] = StringUtil.formatString(bc.getCkcp(j),formats[3]).trim();
 
 					buffer = new StringBuffer();	
 					for (k = 0; k < fieldCount; k++) {
-						if (line[k].indexOf(
-						     delimiter) > -1) {
-							line[k] = "\"" 
-								+ line[k] 
-								+ "\"";
+						if (k > 0) {
+							buffer.append(delimiter);
+						}
+						if (line[k].indexOf(delimiter) > -1) {
+							line[k] = "\"" + line[k] + "\"";
 						}
 						buffer.append(line[k]);
-						if (k < (fieldCount - 1)) {
-							buffer.append(
-								delimiter);
-						}
 					}	
 					out.println(buffer.toString());
 				}			
 			}
 		}
-		out.flush();
-		out.close();
-		out = null;
 	}
 	catch (Exception e) {
+		Message.printWarning(3, routine, e);
+		throw e;
+	}
+	finally {
 		if (out != null) {
 			out.flush();
 			out.close();
 		}
 		out = null;
-		throw e;
 	}
 }
 
-} // End StateCU_BlaneyCriddle
+}

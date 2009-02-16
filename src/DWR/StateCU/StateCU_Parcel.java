@@ -1,15 +1,3 @@
-//------------------------------------------------------------------------------
-// StateCU_Parcel - class to store parcel information
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-// 
-// 2006-04-09  Steven A. Malers, RTi   Initial version.  Copy from
-//                                     StateMod_Parcel.
-//------------------------------------------------------------------------------
-// EndHeader
-
 package DWR.StateCU;
 
 import java.util.List;
@@ -28,27 +16,27 @@ implements Cloneable, Comparable {
 /**
 Crop name.
 */
-private String	__crop;
+private String __crop;
 
 /**
 Area associated with the parcel, acres (should reflect percent_irrig from HydroBase).
 */
-private double	__area;
+private double __area;
 
 /**
 Area units.
 */
-private String	__area_units;
+private String __area_units;
 
 /**
 Year for the data.
 */
-private int		__year;
+private int __year;
 
 /**
 Irrigation method.
 */
-private String	__irrigation_method;
+private String __irrigation_method;
 
 /**
 Water supply sources - initialize so non-null.
@@ -81,12 +69,10 @@ public Object clone() {
 }
 
 /**
-Compares this object to another StateCU_Data object based on the sorted
-order from the StateCU_Data variables, and then by crop, irrigation method,
-area, and year,in that order.
+Compares this object to another StateCU_Data object based on the sorted order from the StateCU_Data
+variables, and then by crop, irrigation method, area, and year,in that order.
 @param o the object to compare against.
-@return 0 if they are the same, 1 if this object is greater than the other
-object, or -1 if it is less.
+@return 0 if they are the same, 1 if this object is greater than the other object, or -1 if it is less.
 */
 public int compareTo(Object o) {
 	int res = super.compareTo(o);
@@ -137,10 +123,8 @@ public void createBackup() {
 // Not sure if something like this is needed.
 /**
 Compare two rights Vectors and see if they are the same.
-@param v1 the first Vector of StateMod_ReservoirAreaCap s to check.  Can not
-be null.
-@param v2 the second Vector of StateMod_ReservoirAreaCap s to check.  Can not
-be null.
+@param v1 the first Vector of StateMod_ReservoirAreaCap s to check.  Cannot be null.
+@param v2 the second Vector of StateMod_ReservoirAreaCap s to check.  Cannot be null.
 @return true if they are the same, false if not.
 */
 /*
@@ -187,8 +171,7 @@ public boolean equals(StateCU_Parcel parcel) {
 	 	return false;
 	}
 
-	if (	__crop.equals(parcel.__crop) &&
-			__irrigation_method.equalsIgnoreCase(parcel.__irrigation_method) &&
+	if ( __crop.equals(parcel.__crop) && __irrigation_method.equalsIgnoreCase(parcel.__irrigation_method) &&
 		(__area == parcel.__area) && __area_units.equalsIgnoreCase(parcel.__area_units) &&
 		(__year == parcel.__year) ) {
 		
@@ -214,7 +197,6 @@ Returns the area for the crop (acres).
 public double getArea() {
 	return __area;
 }
-
 
 /**
 Returns the area units for the crop.
@@ -268,8 +250,7 @@ public int getYear() {
 
 /**
 Indicate whether the parcel has groundwater supply.  This will be true if
-any of the StateCU_Supply associated with the parcel return isGroundWater as
-true.
+any of the StateCU_Supply associated with the parcel return isGroundWater as true.
 */
 public boolean hasGroundWaterSupply ()
 {	int size = __supply_Vector.size();
@@ -317,8 +298,7 @@ Set the crop area.
 */
 public void setArea(double area) {
 	if (area != __area) {
-		/* REVISIT SAM 2006-04-09
-		Parcels are not currently part of the data set.
+		/* TODO SAM 2006-04-09 Parcels are not currently part of the data set.
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(_dataset.COMP_RESERVOIR_STATIONS,
 			true);
@@ -334,8 +314,7 @@ Set the area units.
 */
 public void setAreaUnits(String area_units ) {
 	if ( !area_units.equalsIgnoreCase(__area_units) ) {
-		/* REVISIT SAM 2006-04-09
-		parcels are not currently part of StateMod data set.
+		/* TODO SAM 2006-04-09 parcels are not currently part of StateMod data set.
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(_dataset.COMP_RESERVOIR_STATIONS,
 			true);
@@ -351,8 +330,7 @@ Set the crop.
 */
 public void setCrop(String crop ) {
 	if ( !crop.equalsIgnoreCase(__crop) ) {
-		/* REVISIT SAM 2006-04-09
-		parcels are not currently part of StateMod data set.
+		/* TODO SAM 2006-04-09 parcels are not currently part of StateMod data set.
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(_dataset.COMP_RESERVOIR_STATIONS,
 			true);
@@ -368,8 +346,7 @@ Set the irrigation method.
 */
 public void setIrrigationMethod(String irrigation_method ) {
 	if ( !irrigation_method.equalsIgnoreCase(__irrigation_method) ) {
-		/* REVISIT SAM 2006-04-09
-		parcels are not currently part of StateMod data set.
+		/* TODO SAM 2006-04-09 parcels are not currently part of StateMod data set.
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(_dataset.COMP_RESERVOIR_STATIONS,
 			true);
@@ -380,7 +357,7 @@ public void setIrrigationMethod(String irrigation_method ) {
 }
 
 /**
-Set the number of wells assoiated with the parcel.
+Set the number of wells associated with the parcel.
 @param well_count Number of wells associated with the parcel.
 */
 /*
@@ -404,8 +381,7 @@ Set the year associated with the crop.
 */
 public void setYear(int year) {
 	if ( year != __year) {
-		/* REVISIT SAM 2006-04-09
-		parcels are not currently part of StateMod data set.
+		/* TODO SAM 2006-04-09 parcels are not currently part of StateMod data set.
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(_dataset.COMP_RESERVOIR_STATIONS,
 			true);
@@ -420,7 +396,7 @@ Returns a String representation of this object.
 @return a String representation of this object.
 */
 public String toString() {
-	return super.toString() + ", " + __crop + ", " + __irrigation_method +
+	return super.toString() + ", " + __crop + ", " + __irrigation_method + ", " +
 	__area + ", " + __area_units + ", " + __year;
 }
 

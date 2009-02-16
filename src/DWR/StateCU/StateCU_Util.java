@@ -460,6 +460,9 @@ private static String lookupBlaneyCriddlePropValue(String propType, String field
 		if (field.equalsIgnoreCase("Name")) {
 			return "CROP NAME";
 		}
+		else if (field.equalsIgnoreCase("CurveType")) {
+			return "CURVE TYPE";
+		}
 		else if (field.equalsIgnoreCase("DayPercent")) {
 			return "DAY OR PERCENT";
 		}
@@ -470,6 +473,9 @@ private static String lookupBlaneyCriddlePropValue(String propType, String field
 	else if (propType.equalsIgnoreCase("FieldNameHeader")) {	
 		if (field.equalsIgnoreCase("Name")) {
 			return "CROP\nNAME";
+		}
+		else if (field.equalsIgnoreCase("CurveType")) {
+			return "CURVE\nTYPE";
 		}
 		else if (field.equalsIgnoreCase("DayPercent")) {
 			return "DAY OR\nPERCENT";
@@ -482,6 +488,9 @@ private static String lookupBlaneyCriddlePropValue(String propType, String field
 		if (field.equalsIgnoreCase("Name")) {
 			return "Crop name";
 		}
+		else if (field.equalsIgnoreCase("CurveType")) {
+			return "<html>Curve type (Day or Percent).</html>";
+		}
 		else if (field.equalsIgnoreCase("DayPercent")) {
 			return "<html>Day of year if Perennial (start, middle, "
 				+ "end of month).<br>Percent of year if annual (5% increments).</html>";
@@ -493,6 +502,9 @@ private static String lookupBlaneyCriddlePropValue(String propType, String field
 	else if (propType.equalsIgnoreCase("Format")) {
 		if (field.equalsIgnoreCase("Name")) {
 			return "%-20.20s";
+		}
+		else if (field.equalsIgnoreCase("CurveType")) {
+			return "%-8.8s";
 		}
 		else if (field.equalsIgnoreCase("DayPercent")) {
 			return "%8d";

@@ -55,15 +55,13 @@ Class to hold StateCU crop characteristics data for StateCU/StateDMI, compatible
 with the StateCU CCH file.  The method names correspond exactly to CCH variable
 names as of StateCU Version 10 documentation.
 */
-public class StateCU_CropCharacteristics extends StateCU_Data
-implements StateCU_Component
+public class StateCU_CropCharacteristics extends StateCU_Data implements StateCU_Component
 {
 
 // List data in the same order as in the StateCU documentation...
 
 // Cropn (Crop name) is stored in the base class name.
-// kcey (crop number) is stored in the base class ID, if necessary (currently
-// not used).
+// kcey (crop number) is stored in the base class ID, if necessary (currently not used).
 
 /**
 Planting month.
@@ -151,23 +149,20 @@ Days between 2nd and 3rd cut.
 private int __cut3 = StateCU_Util.MISSING_INT;
 
 /**
-Construct a StateCU_CropCharacteristics instance and set to missing and empty
-data.
+Construct a StateCU_CropCharacteristics instance and set to missing and empty data.
 */
 public StateCU_CropCharacteristics()
 {	super();
 }
 
 /**
-Performs specific data checks and returns a list of data
-that failed the data checks.
+Performs specific data checks and returns a list of data that failed the data checks.
 @param count Index of the data vector currently being checked.
 @param dataset StateCU dataset currently in memory.
 @param props Extra properties to perform checks with.
 @return List of invalid data.
  */
-public String[] checkComponentData( int count, StateCU_DataSet dataset,
-PropList props ) {
+public String[] checkComponentData( int count, StateCU_DataSet dataset, PropList props ) {
 	// TODO KAT 2007-04-12 Add specific checks here ...
 	return null;
 }
@@ -229,8 +224,7 @@ Returns the data column header for the specifically checked data.
  */
 public static String[] getDataHeader()
 {
-	// TODO KAT 2007-04-12 
-	// When specific checks are added to checkComponentData
+	// TODO KAT 2007-04-12 When specific checks are added to checkComponentData
 	// return the header for that data here
 	return new String[] {};
 }
@@ -380,7 +374,7 @@ Read the StateCU CCH file and return as a Vector of StateCU_CropCharacteristics.
 */
 public static List readStateCUFile ( String filename )
 throws IOException
-{	String rtn = "StateCU_CropCharacteristics.readCCHFile";
+{	String rtn = "StateCU_CropCharacteristics.readStateCUFile";
 	String iline = null;
 	List v = new Vector ( 18 );
 	List cch_Vector = new Vector ( 100 );	// Data to return.
@@ -518,7 +512,7 @@ throws IOException
 	StateCU_CropCharacteristics cch = null;
 	BufferedReader in = null;
 	
-	Message.printStatus ( 1, rtn, "Reading StateCU CCH file: " + filename );
+	Message.printStatus ( 2, rtn, "Reading StateCU CCH file: " + filename );
 	// The following throws an IOException if the file cannot be opened...
 	in = new BufferedReader ( new FileReader (filename));
 	String string;
@@ -619,8 +613,7 @@ Cancels any changes made to this object within a GUI since createBackup()
 was called and sets _original to null.
 */
 public void restoreOriginal() {
-	StateCU_CropCharacteristics chars 
-		= (StateCU_CropCharacteristics)_original;
+	StateCU_CropCharacteristics chars = (StateCU_CropCharacteristics)_original;
 	super.restoreOriginal();
 
 	__apd = chars.__apd;
@@ -782,7 +775,7 @@ public void setTmois2 ( double tmois2 )
 }
 
 /**
-Write a Vector of StateCU_CropCharacteristics to a file.  The filename is
+Write a list of StateCU_CropCharacteristics to a file.  The filename is
 adjusted to the working directory if necessary using IOUtil.getPathUsingWorkingDir()
 @param filename_prev
 @param filename
@@ -790,17 +783,15 @@ adjusted to the working directory if necessary using IOUtil.getPathUsingWorkingD
 @param new_comments
 @throws IOException
  */
-public static void writeStateCUFile (	String filename_prev, String filename,
-		List data_Vector,
-		String [] new_comments )
+public static void writeStateCUFile ( String filename_prev, String filename,
+	List data_Vector, List new_comments )
 throws IOException
 {	writeStateCUFile ( filename_prev, filename, data_Vector, new_comments,
 	null );
 }
 
 /**
-Write a Vector of StateCU_CropCharacteristics to a file.  The filename is
-adjusted to
+Write a Vector of StateCU_CropCharacteristics to a file.  The filename is adjusted to
 the working directory if necessary using IOUtil.getPathUsingWorkingDir().
 @param filename_prev The name of the previous version of the file (for
 processing headers).  Specify as null if no previous file is available.
@@ -817,34 +808,32 @@ b></td>
 
 <tr>
 <td><b>AutoAdjust</b></td>
-<td><b>If "true", then if Version 10 format, strip off "." and trailing text
-from crop names.</b>
+<td><b>If "true", then if Version 10 format, strip off "." and trailing text from crop names.</b>
 <td>None - write current format.</td>
 </tr>
 
 <tr>
 <td><b>Version</b></td>
-<td><b>If "10", write StateCU Version 10 format file.  Otherwise, write the
-current format.</b>
+<td><b>If "10", write StateCU Version 10 format file.  Otherwise, write the current format.</b>
 <td>None - write current format.</td>
 </tr>
 </table>
 @exception IOException if there is an error writing the file.
 */
 public static void writeStateCUFile ( String filename_prev, String filename,
-		List data_Vector, String [] new_comments, PropList props )
+		List data_Vector, List new_comments, PropList props )
 throws IOException
-{	String [] comment_str = { "#" };
-	String [] ignore_comment_str = { "#>" };
+{	List comment_str = new Vector(1);
+	comment_str.add ( "#" );
+	List ignore_comment_str = new Vector(1);
+	ignore_comment_str.add ( "#>" );
 	PrintWriter out = null;
-	String full_filename_prev = IOUtil.getPathUsingWorkingDir (
-		filename_prev );
+	String full_filename_prev = IOUtil.getPathUsingWorkingDir (filename_prev );
 	String full_filename = IOUtil.getPathUsingWorkingDir ( filename );
 	out = IOUtil.processFileHeaders ( full_filename_prev, full_filename, 
 		new_comments, comment_str, ignore_comment_str, 0 );
 	if ( out == null ) {
-		throw new IOException ( "Error writing to \"" +
-			full_filename + "\"" );
+		throw new IOException ( "Error writing to \"" + full_filename + "\"" );
 	}
 	writeVector ( data_Vector, out, props );
 	out.flush();
@@ -853,8 +842,8 @@ throws IOException
 }
 
 /**
-Write a Vector of StateCU_CropCharacteristics to an opened file.
-@param data_Vector A Vector of StateCU_CropCharacteristics to write.
+Write a list of StateCU_CropCharacteristics to an opened file.
+@param data_Vector A list of StateCU_CropCharacteristics to write.
 @param out output PrintWriter.
 @param props Properties to control output (see writeStateCUFile).
 @exception IOException if an error occurs.
@@ -867,8 +856,7 @@ throws IOException
 	String rtn = "StateCU_CropCharacterstics.writeVector";
 	String cmnt = "#>";
 	// For header comments...
-	String rec_format = "  Record format" + 
-	" (a30,10(i6),4(f6.1),4(i5))";
+	String rec_format = "  Record format (a30,10(i6),4(f6.1),4(i5))";
 	// format used to write the file
 	String format = "%-30.30s%6.6s%6.6s%6.6s%6.6s%6.6s" +
 		"%6.6s%6.6s%6.6s%6.6s%6.6s" +
@@ -917,81 +905,43 @@ throws IOException
 	out.println ( cmnt );
 	out.println ( cmnt + "  StateCU Crop Characteristics (CCH) File" );
 	out.println ( cmnt );
-	out.println ( cmnt +
-		rec_format);
+	out.println ( cmnt + rec_format);
 	out.println ( cmnt );
-	out.println ( cmnt +
-		"  CropName   cropn:  Crop name (e.g., ALFALFA)" );
-	out.println ( cmnt +
-		"  CropNum     ckey:  Crop number (not used in StateCU - written as sequential number)" );
-	out.println ( cmnt +
-		"Plant MM    gdate1:  Planting month (1-12)" );
-	out.println ( cmnt +
-		"Plant DD    gdate2:  Planting day (e.g., 1-31)");
-	out.println ( cmnt +
-		"Harvest MM  gdate3:  Harvest month (1-12)" );
-	out.println ( cmnt +
-		"Harvest DD  gdate4:  Harvest day (1-31)" );
-	out.println ( cmnt +
-		"To Full     gdate5:  Days to full cover" );
-	out.println ( cmnt +
-		"Days Seas   gdates:  Length of season (days)" );
-	out.println ( cmnt +
-		"Ear Tem     tmois1:  Temperature early moisture (F)" );
-	out.println ( cmnt +
-		"Lat Tem     tmois2:  Temperature late moisture (F)" );
-	out.println ( cmnt +
-		"MAD            mad:  Mananagement allowable deficit (not " +
-		"used)" );
-	out.println ( cmnt +
-		"Init Dep       irx:  Initial root zone depth (in, not used)" );
-	out.println ( cmnt +
-		"Max Dep        frx:  Maximum root zone depth (in)" );
-	out.println ( cmnt +
-		"AWC            awc:  Available water holding capacity (in)" );
-	out.println ( cmnt +
-		"                     OVERWRITTEN IF .par IS SUPPLIED" );
-	out.println ( cmnt +
-		"App Dep        apd:  Maximum application depth (in)" );
-	out.println ( cmnt +
-		"Frost Sp     tflg1:  Spring frost date flag" );
-	out.println ( cmnt +
-		"                     0 = mean, 1 = 28F, 2 = 32F" );
-	out.println ( cmnt +
-		"Frost Fa     tflg2:  Fall frost date flag" );
-	out.println ( cmnt +
-		"                     0 = mean, 1 = 28F, 2 = 32F" );
-	out.println ( cmnt +
-		"Days to 2nd   cut2:  Days between 1st and 2nd cuttings" );
-	out.println ( cmnt +
-		"                     cropn = *ALFALFA* only" );
-	out.println ( cmnt +
-		"Days to 3rd   cut3:  Days between 2nd and 3rd cuttings" );
-	out.println ( cmnt +
-		"                     cropn = *ALFALFA* only" );
+	out.println ( cmnt + "  CropName   cropn:  Crop name (e.g., ALFALFA)" );
+	out.println ( cmnt + "  CropNum     ckey:  Crop number (not used in StateCU - written as sequential number)" );
+	out.println ( cmnt + "Plant MM    gdate1:  Planting month (1-12)" );
+	out.println ( cmnt + "Plant DD    gdate2:  Planting day (e.g., 1-31)");
+	out.println ( cmnt + "Harvest MM  gdate3:  Harvest month (1-12)" );
+	out.println ( cmnt + "Harvest DD  gdate4:  Harvest day (1-31)" );
+	out.println ( cmnt + "To Full     gdate5:  Days to full cover" );
+	out.println ( cmnt + "Days Seas   gdates:  Length of season (days)" );
+	out.println ( cmnt + "Ear Tem     tmois1:  Temperature early moisture (F)" );
+	out.println ( cmnt + "Lat Tem     tmois2:  Temperature late moisture (F)" );
+	out.println ( cmnt + "MAD            mad:  Mananagement allowable deficit (not used)" );
+	out.println ( cmnt + "Init Dep       irx:  Initial root zone depth (in, not used)" );
+	out.println ( cmnt + "Max Dep        frx:  Maximum root zone depth (in)" );
+	out.println ( cmnt + "AWC            awc:  Available water holding capacity (in)" );
+	out.println ( cmnt + "                     OVERWRITTEN IF .par IS SUPPLIED" );
+	out.println ( cmnt + "App Dep        apd:  Maximum application depth (in)" );
+	out.println ( cmnt + "Frost Sp     tflg1:  Spring frost date flag" );
+	out.println ( cmnt + "                     0 = mean, 1 = 28F, 2 = 32F" );
+	out.println ( cmnt + "Frost Fa     tflg2:  Fall frost date flag" );
+	out.println ( cmnt + "                     0 = mean, 1 = 28F, 2 = 32F" );
+	out.println ( cmnt + "Days to 2nd   cut2:  Days between 1st and 2nd cuttings" );
+	out.println ( cmnt + "                     cropn = *ALFALFA* only" );
+	out.println ( cmnt + "Days to 3rd   cut3:  Days between 2nd and 3rd cuttings" );
+	out.println ( cmnt + "                     cropn = *ALFALFA* only" );
 	out.println ( cmnt );
 	
 	if ( version_10 ) {
-		out.println ( cmnt +
-		"                       Plant  Harvest To   Days Ear Lat     " +
-		"Init Max       App  Frost Days to" );
-		out.println ( cmnt +
-		"     CropName          MM DD  MM  DD  Full Seas Tem Tem MAD " +
-		"Dep  Dep  AWC  Dep  Sp Fa 2nd 3rd" );
-		out.println ( cmnt +	
-		"-----------------exbexxbexbexxbexxbexxb--exb--exb-exb-exb-ex" +
-		"b--exb--exb--exb--exbexbexb-exbe" );
+		out.println ( cmnt + "                       Plant  Harvest To   Days Ear Lat     Init Max       App  Frost Days to" );
+		out.println ( cmnt + "     CropName          MM DD  MM  DD  Full Seas Tem Tem MAD Dep  Dep  AWC  Dep  Sp Fa 2nd 3rd" );
+		out.println ( cmnt + "-----------------exbexxbexbexxbexxbexxb--exb--exb-exb-exb-exb--exb--exb--exb--exbexbexb-exbe" );
 	}
 	else {
-		out.println ( cmnt +
-		"                             Crop     Plant      Harvest    To   " +
-		"Days   Ear   Lat         Init  Max         App    Frost   Days to" );
-		out.println ( cmnt +
-		"            CropName         Num    MM    DD    MM    DD   Full  " +
-		"Seas   Tem   Tem   MAD   Dep   Dep   AWC   Dep   Sp   Fa  2nd  3rd" );
-		out.println ( cmnt +	
-		"---------------------------eb----eb----eb----eb----eb----eb----e" +
-		"b----eb----eb----eb----eb----eb----eb----eb----eb---eb---eb---eb---e" );
+		out.println ( cmnt + "                             Crop     Plant      Harvest    To   Days   Ear   Lat         Init  Max         App    Frost   Days to" );
+		out.println ( cmnt + "            CropName         Num    MM    DD    MM    DD   Full  Seas   Tem   Tem   MAD   Dep   Dep   AWC   Dep   Sp   Fa  2nd  3rd" );
+		out.println ( cmnt + "---------------------------eb----eb----eb----eb----eb----eb----eb----eb----eb----eb----eb----eb----eb----eb----eb---eb---eb---eb---e" );
 	}
 	out.println ( cmnt + "EndHeader" );
 	
@@ -1011,10 +961,10 @@ throws IOException
 		int pos = 0;	// Position of object
 		name = cch.getName();
 		if ( version_10 && AutoAdjust_boolean ) {
-				pos = name.indexOf(".");
-				if ( pos > 0 ) {
-				    name = name.substring(0,pos);
-				}
+			pos = name.indexOf(".");
+			if ( pos > 0 ) {
+			    name = name.substring(0,pos);
+			}
 		}
 		v.add(name);
 		// Crop number is not used by model
@@ -1025,120 +975,113 @@ throws IOException
 		if ( StateCU_Util.isMissing(cch.__gdate1) ) {
 			v.add("-999");
 		}
-		else {	v.add(
-			StringUtil.formatString(cch.__gdate1, date_format));
+		else {
+			v.add(StringUtil.formatString(cch.__gdate1, date_format));
 		}
 		if ( StateCU_Util.isMissing(cch.__gdate2) ) {
 			v.add("-999");
 		}
-		else {	v.add(
-			StringUtil.formatString(cch.__gdate2, date_format));
+		else {
+			v.add(StringUtil.formatString(cch.__gdate2, date_format));
 		}
 		// Harvest...
 		if ( StateCU_Util.isMissing(cch.__gdate3) ) {
 			v.add("-999");
 		}
-		else {	v.add(
-			StringUtil.formatString(cch.__gdate3, date_format));
+		else {
+			v.add(StringUtil.formatString(cch.__gdate3, date_format));
 		}
 		if ( StateCU_Util.isMissing(cch.__gdate4) ) {
 			v.add("-999");
 		}
-		else {	v.add(
-			StringUtil.formatString(cch.__gdate4, date_format));
+		else {
+			v.add(StringUtil.formatString(cch.__gdate4, date_format));
 		}
 		// Days to cover...
 		if ( StateCU_Util.isMissing(cch.__gdate5) ) {
 			v.add("-999");
 		}
-		else {	v.add(
-			StringUtil.formatString(cch.__gdate5, date_format2));
+		else {
+			v.add(StringUtil.formatString(cch.__gdate5, date_format2));
 		}
 		// Length of season...
 		if ( StateCU_Util.isMissing(cch.__gdates) ) {
 			v.add("-999");
 		}
-		else {	v.add(
-			StringUtil.formatString(cch.__gdates, date_format2));
+		else {
+			v.add(StringUtil.formatString(cch.__gdates, date_format2));
 		}
 		// Moisture...
 		if ( StateCU_Util.isMissing(cch.__tmois1) ) {
 			v.add("-999");
 		}
-		else {	v.add(
-			StringUtil.formatString(cch.__tmois1, temp_format));
+		else {
+			v.add(StringUtil.formatString(cch.__tmois1, temp_format));
 		}
 		if ( StateCU_Util.isMissing(cch.__tmois2) ) {
 			v.add("-999");
 		}
-		else {	v.add(
-			StringUtil.formatString(cch.__tmois2, temp_format));
+		else {
+			v.add(StringUtil.formatString(cch.__tmois2, temp_format));
 		}
 		// MAD...
 		if ( StateCU_Util.isMissing(cch.__mad) ) {
 			v.add("-999");
 		}
-		else {	v.add(
-			StringUtil.formatString(cch.__mad, temp_format));
+		else {
+			v.add(StringUtil.formatString(cch.__mad, temp_format));
 		}
 		// Root depths...
 		if ( StateCU_Util.isMissing(cch.__irx) ) {
 			v.add("-999");
 		}
-		else {	v.add(
-			StringUtil.formatString(cch.__irx, float_format));
+		else {
+			v.add(StringUtil.formatString(cch.__irx, float_format));
 		}
 		if ( StateCU_Util.isMissing(cch.__frx) ) {
 			v.add("-999");
 		}
-		else {	v.add(
-			StringUtil.formatString(cch.__frx, float_format));
+		else {
+			v.add(StringUtil.formatString(cch.__frx, float_format));
 		}
 		if ( StateCU_Util.isMissing(cch.__awc) ) {
 			v.add("-999");
 		}
-		else {	v.add(
-			StringUtil.formatString(cch.__awc, float_format));
+		else {
+			v.add(StringUtil.formatString(cch.__awc, float_format));
 		}
 		if ( StateCU_Util.isMissing(cch.__apd) ) {
 			v.add("-999");
 		}
-		else {	v.add(
-			StringUtil.formatString(cch.__apd, float_format));
+		else {
+			v.add(StringUtil.formatString(cch.__apd, float_format));
 		}
 		// Frost date flags (check for -90 because the original data
-		// may be read in as -99 because it does not strictly comply
-		// with formatting)...
-		if (	StateCU_Util.isMissing(cch.__tflg1) ||
-			(cch.__tflg1 < -90.0) ) {
+		// may be read in as -99 because it does not strictly comply with formatting)...
+		if ( StateCU_Util.isMissing(cch.__tflg1) || (cch.__tflg1 < -90.0) ) {
 			v.add("-999");
 		}
-		else {	v.add(
-			StringUtil.formatString(cch.__tflg1, last_format));
+		else {
+			v.add(StringUtil.formatString(cch.__tflg1, last_format));
 		}
-		if (	StateCU_Util.isMissing(cch.__tflg2) ||
-			(cch.__tflg2 < -90.0) ) {
+		if ( StateCU_Util.isMissing(cch.__tflg2) || (cch.__tflg2 < -90.0) ) {
 			v.add("-999");
 		}
-		else {	v.add(
-			StringUtil.formatString(cch.__tflg2, last_format));
+		else {
+			v.add(StringUtil.formatString(cch.__tflg2, last_format));
 		}
 		// Additional cuttings (ALFALFA only)...
-		if (	StateCU_Util.isMissing(cch.__cut2) ||
-			(StringUtil.indexOfIgnoreCase(
-			cch._name,"ALFALFA",0) < 0) ) {
+		if ( StateCU_Util.isMissing(cch.__cut2) || (StringUtil.indexOfIgnoreCase(cch._name,"ALFALFA",0) < 0) ) {
 			v.add("");
 		}
-		else {	v.add(
-			StringUtil.formatString(cch.__cut2, last_format));
+		else {
+			v.add(StringUtil.formatString(cch.__cut2, last_format));
 		}
-		if (	StateCU_Util.isMissing(cch.__cut3) ||
-			(StringUtil.indexOfIgnoreCase(
-			cch._name,"ALFALFA",0) < 0) ) {
+		if ( StateCU_Util.isMissing(cch.__cut3) || (StringUtil.indexOfIgnoreCase(cch._name,"ALFALFA",0) < 0) ) {
 			v.add("");
 		}
-		else {	v.add(
-			StringUtil.formatString(cch.__cut3, last_format));
+		else {
+			v.add(StringUtil.formatString(cch.__cut3, last_format));
 		}	
 		iline = StringUtil.formatString ( v, format);
 		out.println ( iline );
@@ -1146,18 +1089,20 @@ throws IOException
 }
 
 /**
-Writes a Vector of StateCU_CropCharacteristics objects to a list file.  A header
+Writes a list of StateCU_CropCharacteristics objects to a list file.  A header
 is printed to the top of the file, containing the commands used to generate the 
 file.  Any strings in the body of the file that contain the field delimiter will be wrapped in "...".  
 @param filename the name of the file to which the data will be written.
 @param delimiter the delimiter to use for separating field values.
 @param update whether to update an existing file, retaining the current 
 header (true) or to create a new file with a new header.
-@param data the Vector of objects to write.  
+@param data the list of objects to write.  
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter, boolean update, List data) 
+public static void writeListFile(String filename, String delimiter, boolean update, List data,
+	List outputComments ) 
 throws Exception {
+	String routine = "StateCU_CropCharacteristics.writeListFile";
 	int size = 0;
 	if (data != null) {
 		size = data.size();
@@ -1202,23 +1147,34 @@ throws Exception {
 	int j = 0;
 	PrintWriter out = null;
 	StateCU_CropCharacteristics cc = null;
-	String[] commentString = { "#" };
-	String[] ignoreCommentString = { "#>" };
+	List commentString = new Vector(1);
+	commentString.add ( "#" );
+	List ignoreCommentString = new Vector(1);
+	ignoreCommentString.add ( "#>" );
 	String[] line = new String[fieldCount];
-	String[] newComments = null;
 	StringBuffer buffer = new StringBuffer();
 	
-	try {	
-		out = IOUtil.processFileHeaders(
-			oldFile,
-			IOUtil.getPathUsingWorkingDir(filename), 
-			newComments, commentString, ignoreCommentString, 0);
+	try {
+		// Add some basic comments at the top of the file.  However, do this to a copy of the
+		// incoming comments so that they are not modified in the calling code.
+		List newComments2 = null;
+		if ( outputComments == null ) {
+			newComments2 = new Vector();
+		}
+		else {
+			newComments2 = new Vector(outputComments);
+		}
+		newComments2.add(0,"");
+		newComments2.add(1,"StateCU crop characteristics as a delimited list file.");
+		newComments2.add(2,"");
+		out = IOUtil.processFileHeaders( oldFile, IOUtil.getPathUsingWorkingDir(filename), 
+			newComments2, commentString, ignoreCommentString, 0);
 
 		for (int i = 0; i < fieldCount; i++) {
-			buffer.append("\"" + names[i] + "\"");
-			if (i < (fieldCount - 1)) {
+			if (i > 0) {
 				buffer.append(delimiter);
 			}
+			buffer.append("\"" + names[i] + "\"");
 		}
 
 		out.println(buffer.toString());
@@ -1226,52 +1182,34 @@ throws Exception {
 		for (int i = 0; i < size; i++) {
 			cc = (StateCU_CropCharacteristics)data.get(i);
 			
-			line[0] = StringUtil.formatString(cc.getName(), 
-				formats[0]).trim();
-			line[1] = StringUtil.formatString(cc.getGdate1(), 
-				formats[1]).trim();
-			line[2] = StringUtil.formatString(cc.getGdate2(), 
-				formats[2]).trim();
-			line[3] = StringUtil.formatString(cc.getGdate3(), 
-				formats[3]).trim();
-			line[4] = StringUtil.formatString(cc.getGdate4(), 
-				formats[4]).trim();
-			line[5] = StringUtil.formatString(cc.getGdate5(), 
-				formats[5]).trim();
-			line[6] = StringUtil.formatString(cc.getGdates(), 
-				formats[6]).trim();
-			line[7] = StringUtil.formatString(cc.getTmois1(), 
-				formats[7]).trim();
-			line[8] = StringUtil.formatString(cc.getTmois2(), 
-				formats[8]).trim();
-			line[9] = StringUtil.formatString(cc.getMad(), 
-				formats[9]).trim();
-			line[10] = StringUtil.formatString(cc.getIrx(), 
-				formats[10]).trim();
-			line[11] = StringUtil.formatString(cc.getFrx(), 
-				formats[11]).trim();
-			line[12] = StringUtil.formatString(cc.getAwc(), 
-				formats[12]).trim();
-			line[13] = StringUtil.formatString(cc.getApd(), 
-				formats[13]).trim();
-			line[14] = StringUtil.formatString(cc.getTflg1(), 
-				formats[14]).trim();
-			line[15] = StringUtil.formatString(cc.getTflg2(), 
-				formats[15]).trim();
-			line[16] = StringUtil.formatString(cc.getCut2(), 
-				formats[16]).trim();
-			line[17] = StringUtil.formatString(cc.getCut3(), 
-				formats[17]).trim();
+			line[0] = StringUtil.formatString(cc.getName(),formats[0]).trim();
+			line[1] = StringUtil.formatString(cc.getGdate1(),formats[1]).trim();
+			line[2] = StringUtil.formatString(cc.getGdate2(),formats[2]).trim();
+			line[3] = StringUtil.formatString(cc.getGdate3(),formats[3]).trim();
+			line[4] = StringUtil.formatString(cc.getGdate4(),formats[4]).trim();
+			line[5] = StringUtil.formatString(cc.getGdate5(),formats[5]).trim();
+			line[6] = StringUtil.formatString(cc.getGdates(),formats[6]).trim();
+			line[7] = StringUtil.formatString(cc.getTmois1(),formats[7]).trim();
+			line[8] = StringUtil.formatString(cc.getTmois2(),formats[8]).trim();
+			line[9] = StringUtil.formatString(cc.getMad(),formats[9]).trim();
+			line[10] = StringUtil.formatString(cc.getIrx(),formats[10]).trim();
+			line[11] = StringUtil.formatString(cc.getFrx(),formats[11]).trim();
+			line[12] = StringUtil.formatString(cc.getAwc(),formats[12]).trim();
+			line[13] = StringUtil.formatString(cc.getApd(),formats[13]).trim();
+			line[14] = StringUtil.formatString(cc.getTflg1(),formats[14]).trim();
+			line[15] = StringUtil.formatString(cc.getTflg2(),formats[15]).trim();
+			line[16] = StringUtil.formatString(cc.getCut2(),formats[16]).trim();
+			line[17] = StringUtil.formatString(cc.getCut3(),formats[17]).trim();
 
 			buffer = new StringBuffer();	
 			for (j = 0; j < fieldCount; j++) {
+				if (j > 0) {
+					buffer.append(delimiter);
+				}
 				if (line[j].indexOf(delimiter) > -1) {
 					line[j] = "\"" + line[j] + "\"";
 				}
 				buffer.append(line[j]);
-				if (j < (fieldCount - 1)) {
-					buffer.append(delimiter);
-				}
 			}
 
 			out.println(buffer.toString());
@@ -1281,13 +1219,16 @@ throws Exception {
 		out = null;
 	}
 	catch (Exception e) {
+		Message.printWarning ( 3, routine, e );
+		throw e;
+	}
+	finally {
 		if (out != null) {
 			out.flush();
 			out.close();
 		}
 		out = null;
-		throw e;
 	}
 }
 
-} // End StateCU_CropCharacteristics
+}

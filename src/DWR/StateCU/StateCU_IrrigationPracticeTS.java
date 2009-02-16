@@ -84,8 +84,7 @@ import RTi.Util.Time.DateTime;
 
 /**
 The StateCU_IrrigationPracticeTS class is used to hold irrigation practice
-time series associated with structures.
-Each instance has an identifier, which will
+time series associated with structures.  Each instance has an identifier, which will
 match a CULocation identifier, and a list of time series for various parameters
 that are associated with the CU Location for a period of time.  If an average
 annual analysis is done, the period may consist of one zero year.
@@ -192,8 +191,7 @@ private List __parcel_Vector = new Vector();
 
 /**
 Construct a new StateCU_IrrigationPracticeTS object for the specified CU
-Location identifier.  All time series for the current version (12) are
-created.
+Location identifier.  All time series for the current version (12) are created.
 @param id CU Location identifier.
 @param date1 Starting date of period, to year precision.
 Specify with year 0 if an average annual data set.
@@ -202,19 +200,15 @@ Specify with year 0 if an average annual data set.
 @param year_type The years in the dates should correspond to the year type,
 which can be "CYR" (calendar), "WYR" (water), or "IYR" (irrigation) -
 currently "CYR" is assumed regardless.
-@param filename The name of the file that is being read, or null if created
-in memory.
+@param filename The name of the file that is being read, or null if created in memory.
 */
-public StateCU_IrrigationPracticeTS (	String id,
-					DateTime date1, DateTime date2,
-					String year_type,
-					String filename )
+public StateCU_IrrigationPracticeTS ( String id, DateTime date1, DateTime date2, String year_type,
+	String filename )
 {	this ( id, date1, date2, year_type, filename, 12 );
 }
 
 /**
-Construct a new StateCU_IrrigationPracticeTS object for the specified CU
-Location identifier.
+Construct a new StateCU_IrrigationPracticeTS object for the specified CU Location identifier.
 @param id CU Location identifier.
 @param date1 Starting date of period, to year precision.
 Specify with year 0 if an average annual data set.
@@ -223,16 +217,13 @@ Specify with year 0 if an average annual data set.
 @param year_type The years in the dates should correspond to the year type,
 which can be "CYR" (calendar), "WYR" (water), or "IYR" (irrigation) -
 currently "CYR" is assumed regardless.
-@param filename The name of the file that is being read, or null if created
-in memory.
+@param filename The name of the file that is being read, or null if created in memory.
 @param version StateCU version for file.  If < 12, groundwater and sprinkler
 acreage time series are created.  If 12+, separate time series for flood,
 sprinkler, surface, groundwater combinations are created.
 */
-public StateCU_IrrigationPracticeTS (	String id,
-					DateTime date1, DateTime date2,
-					String year_type,
-					String filename, int version )
+public StateCU_IrrigationPracticeTS ( String id, DateTime date1, DateTime date2, String year_type,
+	String filename, int version )
 {	super();
 	String routine = "IrrigationPracticeTS";
 	_id = id;
@@ -242,89 +233,83 @@ public StateCU_IrrigationPracticeTS (	String id,
 		__date1 = new DateTime ();
 		__date2 = new DateTime ();
 	}
-	else {	// Use the specified dates...
+	else {
+		// Use the specified dates...
 		__date1 = new DateTime ( date1 );
 		__date2 = new DateTime ( date2 );
 	}
 	__year_type = year_type;
 	__ceff_ts = new YearTS ();
 	TSIdent tsident = null;
-		try {	tsident = new TSIdent(_id, "StateCU", TSTYPE_Eff_SurfaceMax,
-					"Year","");
-			__ceff_ts.setIdentifier ( tsident );
-		}
-		catch ( Exception e ) {
-			// Should not happen.
-			Message.printWarning ( 2, routine,
-			"Unable to create Eff-SurfaceMax time series." );
-		}
-		__ceff_ts.setDataUnits ( "FRACTION" );
-		__ceff_ts.setDescription (
-		_id+" maximum efficiency for delivering surface water supply.");
-		__ceff_ts.getIdentifier().setInputType ( "StateCU" );
-		if ( __filename != null ) {
-			__ceff_ts.getIdentifier().setInputName ( __filename );
-		}
-		__ceff_ts.setDate1(new DateTime(__date1));
-		__ceff_ts.setDate2(new DateTime(__date2));
-		// Initialize to reasonable default...
-		__ceff_ts.allocateDataSpace( .8 );
+	try {
+		tsident = new TSIdent(_id, "StateCU", TSTYPE_Eff_SurfaceMax,"Year","");
+		__ceff_ts.setIdentifier ( tsident );
+	}
+	catch ( Exception e ) {
+		// Should not happen.
+		Message.printWarning ( 3, routine, "Unable to create Eff-SurfaceMax time series." );
+	}
+	__ceff_ts.setDataUnits ( "FRACTION" );
+	__ceff_ts.setDescription ( _id+" maximum efficiency for delivering surface water supply.");
+	__ceff_ts.getIdentifier().setInputType ( "StateCU" );
+	if ( __filename != null ) {
+		__ceff_ts.getIdentifier().setInputName ( __filename );
+	}
+	__ceff_ts.setDate1(new DateTime(__date1));
+	__ceff_ts.setDate2(new DateTime(__date2));
+	// Initialize to reasonable default...
+	__ceff_ts.allocateDataSpace( .8 );
 	__feff_ts = new YearTS ();
-		try {	tsident = new TSIdent ( _id, "StateCU", TSTYPE_Eff_FloodMax,
-				"Year", "" );
-			__feff_ts.setIdentifier ( tsident );
-		}
-		catch ( Exception e ) {
-			// Should not happen.
-			Message.printWarning ( 2, routine,
-			"Unable to create Eff-FloodMax time series." );
-		}
-		__feff_ts.setDataUnits ( "FRACTION" );
-		__feff_ts.setDescription ( _id +
-		" maximum application efficiency for flood irrigation.");
-		__feff_ts.getIdentifier().setInputType ( "StateCU" );
-		if ( __filename != null ) {
-			__feff_ts.getIdentifier().setInputName ( __filename );
-		}
-		__feff_ts.setDate1(new DateTime(__date1));
-		__feff_ts.setDate2(new DateTime(__date2));
-		// Initialize to reasonable default...
-		__feff_ts.allocateDataSpace( .7 );
+	try {
+		tsident = new TSIdent ( _id, "StateCU", TSTYPE_Eff_FloodMax,"Year", "" );
+		__feff_ts.setIdentifier ( tsident );
+	}
+	catch ( Exception e ) {
+		// Should not happen.
+		Message.printWarning ( 3, routine, "Unable to create Eff-FloodMax time series." );
+	}
+	__feff_ts.setDataUnits ( "FRACTION" );
+	__feff_ts.setDescription ( _id + " maximum application efficiency for flood irrigation.");
+	__feff_ts.getIdentifier().setInputType ( "StateCU" );
+	if ( __filename != null ) {
+		__feff_ts.getIdentifier().setInputName ( __filename );
+	}
+	__feff_ts.setDate1(new DateTime(__date1));
+	__feff_ts.setDate2(new DateTime(__date2));
+	// Initialize to reasonable default...
+	__feff_ts.allocateDataSpace( .7 );
 	__seff_ts = new YearTS ();
-		try {	tsident = new TSIdent ( _id, "StateCU",
-				TSTYPE_Eff_SprinklerMax, "Year", "");
-			__seff_ts.setIdentifier ( tsident );
-		}
-		catch ( Exception e ) {
-			// Should not happen.
-			Message.printWarning ( 2, routine,
-			"Unable to create Eff-SprinklerMax time series." );
-		}
-		__seff_ts.setDataUnits ( "FRACTION" );
-		__seff_ts.setDescription ( _id+
-		" maximum application efficiency for sprinkler irrigation.");
-		__seff_ts.getIdentifier().setInputType ( "StateCU" );
-		if ( __filename != null ) {
-			__seff_ts.getIdentifier().setInputName ( __filename );
-		}
-		__seff_ts.setDate1(new DateTime(__date1));
-		__seff_ts.setDate2(new DateTime(__date2));
-		// Initialize to reasonable default...
-		__seff_ts.allocateDataSpace( .8 );
-		
-		// Initialize new time series for V12 and newer
-		
-		// Acres surface water only
-		if ( version >= 12 ) {
+	try {
+		tsident = new TSIdent ( _id, "StateCU", TSTYPE_Eff_SprinklerMax, "Year", "");
+		__seff_ts.setIdentifier ( tsident );
+	}
+	catch ( Exception e ) {
+		// Should not happen.
+		Message.printWarning ( 3, routine, "Unable to create Eff-SprinklerMax time series." );
+	}
+	__seff_ts.setDataUnits ( "FRACTION" );
+	__seff_ts.setDescription ( _id+ " maximum application efficiency for sprinkler irrigation.");
+	__seff_ts.getIdentifier().setInputType ( "StateCU" );
+	if ( __filename != null ) {
+		__seff_ts.getIdentifier().setInputName ( __filename );
+	}
+	__seff_ts.setDate1(new DateTime(__date1));
+	__seff_ts.setDate2(new DateTime(__date2));
+	// Initialize to reasonable default...
+	__seff_ts.allocateDataSpace( .8 );
+	
+	// Initialize new time series for V12 and newer
+	
+	// Acres surface water only
+	if ( version >= 12 ) {
 		__acsw_ts = new YearTS ();
-		try {	tsident = new TSIdent ( _id, "StateCU",
-			TSTYPE_CropArea_SurfaceWaterOnly, "Year", "");
+		try {
+			tsident = new TSIdent ( _id, "StateCU", TSTYPE_CropArea_SurfaceWaterOnly, "Year", "");
 			__acsw_ts.setIdentifier ( tsident );
 		}
 		catch ( Exception e ) {
 			// Should not happen.
-			Message.printWarning ( 2, routine,
-			"Unable to create acre surface water time series." );
+			Message.printWarning ( 3, routine, "Unable to create acre surface water time series." );
 		}
 		__acsw_ts.setDataUnits ( "ACRE" );
 		__acsw_ts.setDescription (_id+" acres surface water.");
@@ -340,14 +325,13 @@ public StateCU_IrrigationPracticeTS (	String id,
 		// Acres groundwater supply
 
 		__acgw_ts = new YearTS ();
-		try {	tsident = new TSIdent ( _id, "StateCU",
-			TSTYPE_CropArea_GroundWater, "Year", "");
+		try {
+			tsident = new TSIdent ( _id, "StateCU", TSTYPE_CropArea_GroundWater, "Year", "");
 			__acgw_ts.setIdentifier ( tsident );
 		}
 		catch ( Exception e ) {
 			// Should not happen.
-			Message.printWarning ( 2, routine,
-			"Unable to create acre ground water time series." );
+			Message.printWarning ( 3, routine, "Unable to create acre ground water time series." );
 		}
 		__acgw_ts.setDataUnits ( "ACRE" );
 		__acgw_ts.setDescription (_id+" acres ground water.");
@@ -363,18 +347,16 @@ public StateCU_IrrigationPracticeTS (	String id,
 		//Acres surface water flood
 
 		__acswfl_ts = new YearTS ();
-		try {	tsident = new TSIdent ( _id, "StateCU",
-			TSTYPE_CropArea_SurfaceWaterOnlyFlood, "Year", "");
+		try {
+			tsident = new TSIdent ( _id, "StateCU", TSTYPE_CropArea_SurfaceWaterOnlyFlood, "Year", "");
 			__acswfl_ts.setIdentifier ( tsident );
 		}
 		catch ( Exception e ) {
 			// Should not happen.
-			Message.printWarning ( 2, routine,
-			"Unable to create acre surface water flood time series." );
+			Message.printWarning ( 3, routine, "Unable to create acre surface water flood time series." );
 		}
 		__acswfl_ts.setDataUnits ( "ACRE" );
-		__acswfl_ts.setDescription (_id+
-			" acres surface water flood.");
+		__acswfl_ts.setDescription (_id+ " acres surface water flood.");
 		__acswfl_ts.getIdentifier().setInputType ( "StateCU" );
 		if ( __filename != null ) {
 			__acswfl_ts.getIdentifier().setInputName ( __filename );
@@ -386,18 +368,16 @@ public StateCU_IrrigationPracticeTS (	String id,
 		
 		// Acres surface water sprinkler
 		__acswspr_ts = new YearTS ();
-		try {	tsident = new TSIdent ( _id, "StateCU",
-			TSTYPE_CropArea_SurfaceWaterOnlySprinkler, "Year", "");
+		try {
+			tsident = new TSIdent ( _id, "StateCU", TSTYPE_CropArea_SurfaceWaterOnlySprinkler, "Year", "");
 			__acswspr_ts.setIdentifier ( tsident );
 		}
 		catch ( Exception e ) {
 			// Should not happen.
-			Message.printWarning ( 2, routine,
-			"Unable to create acre surface water sprinkler time series." );
+			Message.printWarning ( 3, routine, "Unable to create acre surface water sprinkler time series." );
 		}
 		__acswspr_ts.setDataUnits ( "ACRE" );
-		__acswspr_ts.setDescription (_id+
-			" acres surface water sprinkler.");
+		__acswspr_ts.setDescription (_id+" acres surface water sprinkler.");
 		__acswspr_ts.getIdentifier().setInputType ( "StateCU" );
 		if ( __filename != null ) {
 			__acswspr_ts.getIdentifier().setInputName ( __filename );
@@ -409,18 +389,16 @@ public StateCU_IrrigationPracticeTS (	String id,
 		
 		// Acres ground water flood
 		__acgwfl_ts = new YearTS ();
-		try {	tsident = new TSIdent ( _id, "StateCU",
-			TSTYPE_CropArea_GroundWaterFlood, "Year", "");
+		try {
+			tsident = new TSIdent ( _id, "StateCU", TSTYPE_CropArea_GroundWaterFlood, "Year", "");
 			__acgwfl_ts.setIdentifier ( tsident );
 		}
 		catch ( Exception e ) {
 			// Should not happen.
-			Message.printWarning ( 2, routine,
-			"Unable to create acre ground water flood time series." );
+			Message.printWarning ( 3, routine, "Unable to create acre ground water flood time series." );
 		}
 		__acgwfl_ts.setDataUnits ( "ACRE" );
-		__acgwfl_ts.setDescription (_id+
-			" acres ground water flood.");
+		__acgwfl_ts.setDescription (_id+ " acres ground water flood.");
 		__acgwfl_ts.getIdentifier().setInputType ( "StateCU" );
 		if ( __filename != null ) {
 			__acgwfl_ts.getIdentifier().setInputName ( __filename );
@@ -432,18 +410,16 @@ public StateCU_IrrigationPracticeTS (	String id,
 		
 		// Acres ground water sprinkler
 		__acgwspr_ts = new YearTS ();
-		try {	tsident = new TSIdent ( _id, "StateCU",
-			TSTYPE_CropArea_GroundWaterSprinkler, "Year", "");
+		try {
+			tsident = new TSIdent ( _id, "StateCU", TSTYPE_CropArea_GroundWaterSprinkler, "Year", "");
 			__acgwspr_ts.setIdentifier ( tsident );
 		}
 		catch ( Exception e ) {
 			// Should not happen.
-			Message.printWarning ( 2, routine,
-			"Unable to create acre ground water sprinkler time series." );
+			Message.printWarning ( 3, routine, "Unable to create acre ground water sprinkler time series." );
 		}
 		__acgwspr_ts.setDataUnits ( "ACRE" );
-		__acgwspr_ts.setDescription (_id+
-			" acres ground water sprinkler.");
+		__acgwspr_ts.setDescription (_id+ " acres ground water sprinkler.");
 		__acgwspr_ts.getIdentifier().setInputType ( "StateCU" );
 		if ( __filename != null ) {
 			__acgwspr_ts.getIdentifier().setInputName ( __filename );
@@ -452,116 +428,111 @@ public StateCU_IrrigationPracticeTS (	String id,
 		__acgwspr_ts.setDate2(new DateTime(__date2));
 		// Initialize to missing - may fill later
 		__acgwspr_ts.allocateDataSpace();
-		}
+	}
 		
-		// Version 10 time series - keep them around also until
-		// no longer needed.
-		/* FIXME SAM 2007-10-18 Comment out because they are confusing other code
+	// Version 10 time series - keep them around also until no longer needed.
+	/* FIXME SAM 2007-10-18 Comment out because they are confusing other code
 	__gacre_ts = new YearTS ();
-		try {	tsident = new TSIdent ( _id, "StateCU",
-			TSTYPE_CropArea_GroundWaterVersion10, "Year", "");
-			__gacre_ts.setIdentifier ( tsident );
-		}
-		catch ( Exception e ) {
-			// Should not happen.
-			Message.printWarning ( 2, routine,
-			"Unable to create CropArea-Groundwater time series." );
-		}
-		__gacre_ts.setDataUnits ( "ACRE" );
-		__gacre_ts.setDescription (_id+
-			" acres with groundwater supply.");
-		__gacre_ts.getIdentifier().setInputType ( "StateCU" );
-		if ( __filename != null ) {
-			__gacre_ts.getIdentifier().setInputName ( __filename );
-		}
-		__gacre_ts.setDate1(new DateTime(__date1));
-		__gacre_ts.setDate2(new DateTime(__date2));
-		// Initialize to missing - may fill later
-		__gacre_ts.allocateDataSpace();
+	try {	tsident = new TSIdent ( _id, "StateCU",
+		TSTYPE_CropArea_GroundWaterVersion10, "Year", "");
+		__gacre_ts.setIdentifier ( tsident );
+	}
+	catch ( Exception e ) {
+		// Should not happen.
+		Message.printWarning ( 2, routine,
+		"Unable to create CropArea-Groundwater time series." );
+	}
+	__gacre_ts.setDataUnits ( "ACRE" );
+	__gacre_ts.setDescription (_id+
+		" acres with groundwater supply.");
+	__gacre_ts.getIdentifier().setInputType ( "StateCU" );
+	if ( __filename != null ) {
+		__gacre_ts.getIdentifier().setInputName ( __filename );
+	}
+	__gacre_ts.setDate1(new DateTime(__date1));
+	__gacre_ts.setDate2(new DateTime(__date2));
+	// Initialize to missing - may fill later
+	__gacre_ts.allocateDataSpace();
 	__sacre_ts = new YearTS ();
-		try {	tsident = new TSIdent ( _id, "StateCU",
-				TSTYPE_CropArea_SprinklerVersion10, "Year",
-				"");
-			__sacre_ts.setIdentifier ( tsident );
-		}
-		catch ( Exception e ) {
-			// Should not happen.
-			Message.printWarning ( 2, routine,
-			"Unable to create CropArea-Sprinkler time series." );
-		}
-		__sacre_ts.setDataUnits ( "ACRE" );
-		__sacre_ts.setDescription (_id+" acres with sprinkler supply.");
-		__sacre_ts.getIdentifier().setInputType ( "StateCU" );
-		if ( __filename != null ) {
-			__sacre_ts.getIdentifier().setInputName ( __filename );
-		}
-		__sacre_ts.setDate1(new DateTime(__date1));
-		__sacre_ts.setDate2(new DateTime(__date2));
-		// Initialize to missing - may fill later
-		__sacre_ts.allocateDataSpace();
-		*/
+	try {	tsident = new TSIdent ( _id, "StateCU",
+			TSTYPE_CropArea_SprinklerVersion10, "Year",
+			"");
+		__sacre_ts.setIdentifier ( tsident );
+	}
+	catch ( Exception e ) {
+		// Should not happen.
+		Message.printWarning ( 2, routine,
+		"Unable to create CropArea-Sprinkler time series." );
+	}
+	__sacre_ts.setDataUnits ( "ACRE" );
+	__sacre_ts.setDescription (_id+" acres with sprinkler supply.");
+	__sacre_ts.getIdentifier().setInputType ( "StateCU" );
+	if ( __filename != null ) {
+		__sacre_ts.getIdentifier().setInputName ( __filename );
+	}
+	__sacre_ts.setDate1(new DateTime(__date1));
+	__sacre_ts.setDate2(new DateTime(__date2));
+	// Initialize to missing - may fill later
+	__sacre_ts.allocateDataSpace();
+	*/
 		
 	__mprate_ts = new YearTS ();
-		try {	tsident = new TSIdent ( _id, "StateCU",
-				TSTYPE_PumpingMax,
-				"Year", "");
-			__mprate_ts.setIdentifier ( tsident );
-		}
-		catch ( Exception e ) {
-			// Should not happen.
-			Message.printWarning ( 2, routine,
-			"Unable to create PumpingMax time series." );
-		}
-		__mprate_ts.setDataUnits ( "ACFT" );
-		__mprate_ts.setDescription ( _id+ " Maximum monthly pumping.");
-		__mprate_ts.getIdentifier().setInputType ( "StateCU" );
-		if ( __filename != null ) {
-			__mprate_ts.getIdentifier().setInputName ( __filename );
-		}
-		__mprate_ts.setDate1(new DateTime(__date1));
-		__mprate_ts.setDate2(new DateTime(__date2));
-		// Initialize to missing - may fill later
-		__mprate_ts.allocateDataSpace();
+	try {
+		tsident = new TSIdent ( _id, "StateCU", TSTYPE_PumpingMax, "Year", "");
+		__mprate_ts.setIdentifier ( tsident );
+	}
+	catch ( Exception e ) {
+		// Should not happen.
+		Message.printWarning ( 3, routine, "Unable to create PumpingMax time series." );
+	}
+	__mprate_ts.setDataUnits ( "ACFT" );
+	__mprate_ts.setDescription ( _id+ " Maximum monthly pumping.");
+	__mprate_ts.getIdentifier().setInputType ( "StateCU" );
+	if ( __filename != null ) {
+		__mprate_ts.getIdentifier().setInputName ( __filename );
+	}
+	__mprate_ts.setDate1(new DateTime(__date1));
+	__mprate_ts.setDate2(new DateTime(__date2));
+	// Initialize to missing - may fill later
+	__mprate_ts.allocateDataSpace();
 	__gmode_ts = new YearTS ();
-		try {	tsident = new TSIdent ( _id, "StateCU",
-				TSTYPE_GWUseMode,	"Year", "");
-			__gmode_ts.setIdentifier ( tsident );
-		}
-		catch ( Exception e ) {
-			// Should not happen.
-			Message.printWarning ( 2, routine,
-			"Unable to create GWUseMode time series." );
-		}
-		__gmode_ts.setDataUnits ( "" );
-		__gmode_ts.setDescription ( _id+ " Groundwater use mode.");
-		__gmode_ts.getIdentifier().setInputType ( "StateCU" );
-		if ( __filename != null ) {
-			__gmode_ts.getIdentifier().setInputName ( __filename );
-		}
-		__gmode_ts.setDate1(new DateTime(__date1));
-		__gmode_ts.setDate2(new DateTime(__date2));
-		// Initialize to reasonable default...
-		__gmode_ts.allocateDataSpace ( 2.0 );
+	try {
+		tsident = new TSIdent ( _id, "StateCU", TSTYPE_GWUseMode, "Year", "");
+		__gmode_ts.setIdentifier ( tsident );
+	}
+	catch ( Exception e ) {
+		// Should not happen.
+		Message.printWarning ( 3, routine, "Unable to create GWUseMode time series." );
+	}
+	__gmode_ts.setDataUnits ( "" );
+	__gmode_ts.setDescription ( _id+ " Groundwater use mode.");
+	__gmode_ts.getIdentifier().setInputType ( "StateCU" );
+	if ( __filename != null ) {
+		__gmode_ts.getIdentifier().setInputName ( __filename );
+	}
+	__gmode_ts.setDate1(new DateTime(__date1));
+	__gmode_ts.setDate2(new DateTime(__date2));
+	// Initialize to reasonable default...
+	__gmode_ts.allocateDataSpace ( 2.0 );
 	__tacre_ts = new YearTS ();
-		try {	tsident = new TSIdent ( _id, "StateCU",
-				TSTYPE_CropArea_Total, "Year", "");
-			__tacre_ts.setIdentifier ( tsident );
-		}
-		catch ( Exception e ) {
-			// Should not happen.
-			Message.printWarning ( 2, routine,
-			"Unable to create CropArea-AllIrrigation time series.");
-		}
-		__tacre_ts.setDataUnits ( "ACRE" );
-		__tacre_ts.setDescription ( _id+ " Total acres");
-		__tacre_ts.getIdentifier().setInputType ( "StateCU" );
-		if ( __filename != null ) {
-			__tacre_ts.getIdentifier().setInputName ( __filename );
-		}
-		__tacre_ts.setDate1(new DateTime(__date1));
-		__tacre_ts.setDate2(new DateTime(__date2));
-		// Initialize to missing - may fill later
-		__tacre_ts.allocateDataSpace();
+	try {
+		tsident = new TSIdent ( _id, "StateCU", TSTYPE_CropArea_Total, "Year", "");
+		__tacre_ts.setIdentifier ( tsident );
+	}
+	catch ( Exception e ) {
+		// Should not happen.
+		Message.printWarning ( 3, routine, "Unable to create CropArea-AllIrrigation time series.");
+	}
+	__tacre_ts.setDataUnits ( "ACRE" );
+	__tacre_ts.setDescription ( _id+ " Total acres");
+	__tacre_ts.getIdentifier().setInputType ( "StateCU" );
+	if ( __filename != null ) {
+		__tacre_ts.getIdentifier().setInputName ( __filename );
+	}
+	__tacre_ts.setDate1(new DateTime(__date1));
+	__tacre_ts.setDate2(new DateTime(__date2));
+	// Initialize to missing - may fill later
+	__tacre_ts.allocateDataSpace();
 }
 
 /**
@@ -573,8 +544,7 @@ public void addParcel ( StateCU_Parcel parcel )
 }
 
 /**
-Add to Gacre.  If the initial value is missing, it will be set to the specified
-value.
+Add to Gacre.  If the initial value is missing, it will be set to the specified value.
 @param year Year for data.
 @param gacre Gacre value to add.
 */
@@ -594,8 +564,7 @@ public void addToGacre ( int year, double gacre )
 */
 
 /**
-Adjust the ground water acreage to the total acres if necessary.  The total acres
-must be set previously.
+Adjust the ground water acreage to the total acres if necessary.  The total acres must be set previously.
 This is typically done when processing the IPY file and setting the groundwater acreage
 first, causing a cascade to set the other values.
 It is required that both groundwater acreage parts (sprinkler and flood) are set.
@@ -654,8 +623,7 @@ public void adjustGroundwaterAcresToTotalAcres ( DateTime date, boolean is_gw_on
 	
 		__acgw_ts.setDataValue(date,cds_total);
 		Acgw_prev = cds_total;
-		Message.printStatus ( 2, routine,
-				"Location \"" + _id + "\" " + year +
+		Message.printStatus ( 2, routine, "Location \"" + _id + "\" " + year +
 				" is ground water only.  Setting GWacres to Total acres (" + StringUtil.formatString(cds_total,"%.1f") + ")." );
 	}
 	else {
@@ -664,8 +632,7 @@ public void adjustGroundwaterAcresToTotalAcres ( DateTime date, boolean is_gw_on
 		if ( Acgw_prev > cds_total ) {
 			__acgw_ts.setDataValue(date,cds_total);
 			Acgw_prev = cds_total;
-			Message.printStatus ( 2, routine,
-					"Location \"" + _id + "\" " + year +
+			Message.printStatus ( 2, routine, "Location \"" + _id + "\" " + year +
 					" Adjusting GWacres down to Total acres (" + StringUtil.formatString(cds_total,"%.1f") + ")." );
 		}
 		// Else GW is less than total and let SW take up slack below.
@@ -693,8 +660,7 @@ passed to improve performance, assuming it was also set/used in calling code.
 @param Acgwspr_prev Acres of groundwater (sprinkler) to give previous ratio.
 This is passed to improve performance, assuming it was also set/used in calling code.
 */
-private void adjustGroundWaterIrrigationMethodAcres ( DateTime date,
-		double Acgw_prev,
+private void adjustGroundWaterIrrigationMethodAcres ( DateTime date, double Acgw_prev,
 		double Acgwfl_prev, double Acgwspr_prev  )
 {	String routine = "StateCU_IrrigationPracticeTS.adjustGroundWaterIrrigationMethodAcres";
 	int year = date.getYear();
@@ -707,14 +673,14 @@ private void adjustGroundWaterIrrigationMethodAcres ( DateTime date,
 	else if ( Acgw_prev == 0.0 ) {
 		// Set the irrigation method terms to zero...
 		Message.printStatus ( 2,routine,
-				"Location \"" + _id + "\" " + year + ":  Acgw is 0.  Setting irrigation method terms to zero.");
+			"Location \"" + _id + "\" " + year + ":  Acgw is 0.  Setting irrigation method terms to zero.");
 		__acgwfl_ts.setDataValue(date, 0.0);
 		__acgwspr_ts.setDataValue(date, 0.0);
 	}
 	else if ( (Acgwfl_prev < 0.0) && (Acgwspr_prev < 0.0) ) {
 		// Both missing so can't adjust.
 		Message.printStatus ( 2,routine,
-				"Location \"" + _id + "\" " + year + ":  Acgw is known but irrigation method terms are missing.  Unable to adjust irrigation method terms.");
+			"Location \"" + _id + "\" " + year + ":  Acgw is known but irrigation method terms are missing.  Unable to adjust irrigation method terms.");
 		return;
 	}
 	else if ( (Acgwfl_prev >= 0.0) && (Acgwspr_prev >= 0.0)){
@@ -724,16 +690,16 @@ private void adjustGroundWaterIrrigationMethodAcres ( DateTime date,
 		double Acgwfl_new = Acgw_prev*Acgwfl_prev/Acgw_parts_total;
 		__acgwfl_ts.setDataValue(date,Acgwfl_new);
 		Message.printStatus(2, routine, "For location " + _id + " " + year +
-				" setting GWflood prorated to previous GWtotal (" +
-				StringUtil.formatString(Acgwfl_new,"%.3f") + ") previous=" +
-				StringUtil.formatString(Acgwfl_prev,"%.3f"));
+			" setting GWflood prorated to previous GWtotal (" +
+			StringUtil.formatString(Acgwfl_new,"%.3f") + ") previous=" +
+			StringUtil.formatString(Acgwfl_prev,"%.3f"));
 
 		double Acgwspr_new = Acgw_prev*Acgwspr_prev/Acgw_parts_total;
 		__acgwspr_ts.setDataValue(date,Acgwspr_new);
 		Message.printStatus(2, routine, "For location " + _id + " " + year +
-				" setting GWsprinkler prorated to previous GWtotal (" +
-				StringUtil.formatString(Acgwspr_new,"%.3f") + ") previous=" +
-				StringUtil.formatString(Acgwspr_prev,"%.3f"));
+			" setting GWsprinkler prorated to previous GWtotal (" +
+			StringUtil.formatString(Acgwspr_new,"%.3f") + ") previous=" +
+			StringUtil.formatString(Acgwspr_prev,"%.3f"));
 		// Refresh the total acres groundwater.
 		refreshAcgw(year);
 	}
@@ -744,16 +710,16 @@ private void adjustGroundWaterIrrigationMethodAcres ( DateTime date,
 			setAcgwspr(year,Acgw_prev);
 			Acgwspr_prev = Acgw_prev;
 			Message.printStatus ( 2,routine,
-					"Location \"" + _id + "\" " + year + ":  Acgwspr reduced to Acgw = " +
-					StringUtil.formatString(Acgwspr_prev,"%.3f"));
+				"Location \"" + _id + "\" " + year + ":  Acgwspr reduced to Acgw = " +
+				StringUtil.formatString(Acgwspr_prev,"%.3f"));
 		}
 		// Now compute the flood acres...
 		setAcgwfl(year,(Acgw_prev - Acgwspr_prev));
 		Message.printStatus ( 2,routine,
-				"Location \"" + _id + "\" " + year + ":  Acgwfl computed as Acgw-Acgwspr=" +
-				StringUtil.formatString(Acgw_prev,"%.3f") + " - " +
-				StringUtil.formatString(Acgwspr_prev,"%.3f") + " = " +
-				StringUtil.formatString(getAcgwfl(year),"%.3f"));
+			"Location \"" + _id + "\" " + year + ":  Acgwfl computed as Acgw-Acgwspr=" +
+			StringUtil.formatString(Acgw_prev,"%.3f") + " - " +
+			StringUtil.formatString(Acgwspr_prev,"%.3f") + " = " +
+			StringUtil.formatString(getAcgwfl(year),"%.3f"));
 	}
 	else if ( Acgwspr_prev < 0.0 ) {
 		// Only sprinkler is missing so compute from the total minus the
@@ -761,17 +727,16 @@ private void adjustGroundWaterIrrigationMethodAcres ( DateTime date,
 		if ( Acgwfl_prev > Acgw_prev ) {
 			setAcgwfl(year,Acgw_prev);
 			Acgwfl_prev = Acgw_prev;
-			Message.printStatus ( 2,routine,
-					"Location \"" + _id + "\" " + year + ":  Acgwfl reduced to Acgw = " +
-					StringUtil.formatString(Acgwfl_prev,"%.3f"));
+			Message.printStatus ( 2,routine, "Location \"" + _id + "\" " + year +
+				":  Acgwfl reduced to Acgw = " + StringUtil.formatString(Acgwfl_prev,"%.3f"));
 		}
 		// Now compute the sprinkler acres...
 		setAcswspr(year,(Acgw_prev - Acgwfl_prev));
 		Message.printStatus ( 2,routine,
-				"Location \"" + _id + "\" " + year + ":  Acgwspr computed as Acgw-Acgwfl=" +
-				StringUtil.formatString(Acgw_prev,"%.3f") + " - " +
-				StringUtil.formatString(Acgwfl_prev,"%.3f") + " = " +
-				StringUtil.formatString(getAcgwspr(year),"%.3f"));
+			"Location \"" + _id + "\" " + year + ":  Acgwspr computed as Acgw-Acgwfl=" +
+			StringUtil.formatString(Acgw_prev,"%.3f") + " - " +
+			StringUtil.formatString(Acgwfl_prev,"%.3f") + " = " +
+			StringUtil.formatString(getAcgwspr(year),"%.3f"));
 	}
 }
 
@@ -885,8 +850,7 @@ private void adjustSurfaceWaterIrrigationMethodAcres ( DateTime date, double Acs
 		}
 		setAcswfl(year,Acswfl_new);
 		setAcswspr(year,Acswspr_new);
-		Message.printStatus ( 2,routine,
-		"Location \"" + _id + "\" " + year + ":  Adjusted SW acres (" +
+		Message.printStatus ( 2,routine, "Location \"" + _id + "\" " + year + ":  Adjusted SW acres (" +
 		StringUtil.formatString(Acsw_prev,"%.3f")
 		+ ") to Total-GW.  Prorated to get new Acswfl="+
 			StringUtil.formatString(Acswfl_new,"%.3f") + " Acswspr=" +
@@ -898,9 +862,8 @@ private void adjustSurfaceWaterIrrigationMethodAcres ( DateTime date, double Acs
 		if ( Acswspr_prev > Acsw_prev ) {
 			setAcswspr(year,Acsw_prev);
 			Acswspr_prev = Acsw_prev;
-			Message.printStatus ( 2,routine,
-					"Location \"" + _id + "\" " + year + ":  Acswspr reduced to Acsw = " +
-					StringUtil.formatString(Acswspr_prev,"%.3f"));
+			Message.printStatus ( 2,routine, "Location \"" + _id + "\" " + year +
+				":  Acswspr reduced to Acsw = " + StringUtil.formatString(Acswspr_prev,"%.3f"));
 		}
 		// Now compute the flood acres...
 		setAcswfl(year,(Acsw_prev - Acswspr_prev));
@@ -1013,7 +976,7 @@ public double getAcswfl ( int year )
 }
 
 /**
-Returns the acre suface water flood time series.
+Returns the acre surface water flood time series.
 @return acre surface water flood TS
  */
 public YearTS getAcswflTS ()
@@ -1032,9 +995,9 @@ public double getAcswspr ( int year )
 }
 
 /**
-Returns the acre suface water sprinkler time series.
+Returns the acre surface water sprinkler time series.
 @return acre surface water sprinkler TS
- */
+*/
 public YearTS getAcswsprTS ()
 {
 	return __acswspr_ts;
@@ -1125,7 +1088,8 @@ public int getGmode ( int year )
 	if ( __gmode_ts.isDataMissing(gmode) ) {
 		return -999;
 	}
-	else {	return (int)(gmode + .1);
+	else {
+		return (int)(gmode + .1);
 	}
 }
 
@@ -1156,8 +1120,7 @@ public YearTS getMprateTS ()
 }
 
 /**
-Return the parcels for a requested year.  These values can be used in data
-filling.
+Return the parcels for a requested year.  These values can be used in data filling.
 @param year Parcel year of interest or <= number if all years should be returned.
 @return the list of StateCU_Parcel for a year
 */
@@ -1237,8 +1200,7 @@ public double getTacre ( int year )
 
 /**
 Return a time series, based on the data type.
-@return a time series, based on the data type, or null if the data type is not
-recognized.
+@return a time series, based on the data type, or null if the data type is not recognized.
 @param datatype The data type of the time series to return.  The data type
 should match one of the values returned by getTimeSeriesDataTypes().
 */
@@ -1296,12 +1258,10 @@ Return the time series data types available in this class.  This can be called
 to more generically handle time series.  The data types are returned in the
 order of the file.  The default is to return the types based on the most current
 file format.  Call the overloaded method to get types based on an older format.
-@return a list of time series data types available for a
-StateCU_IrrigationPracticeTS.
+@return a list of time series data types available for a StateCU_IrrigationPracticeTS.
 @param include_gwmode If true, include the GW mode time series data type.  This
 is a flag that is not suitable for numerical filling.
-@param include_notes If true, include " - Note" notes after the data type.
-This is currently disabled.
+@param include_notes If true, include " - Note" notes after the data type. This is currently disabled.
 */
 public static List getTimeSeriesDataTypes (	boolean include_gwmode, boolean include_notes )
 {	return getTimeSeriesDataTypes ( include_gwmode, include_notes, null );
@@ -1309,14 +1269,11 @@ public static List getTimeSeriesDataTypes (	boolean include_gwmode, boolean incl
 
 /**
 Return the time series data types available in this class.  This can be called
-to more generically handle time series.  The data types are returned in the
-order of the file.
-@return a list of time series data types available for a
-StateCU_IrrigationPracticeTS.
+to more generically handle time series.  The data types are returned in the order of the file.
+@return a list of time series data types available for a StateCU_IrrigationPracticeTS.
 @param include_gwmode If true, include the GW mode time series data type.  This
 is flag that is not suitable for numerical filling.
-@param include_notes If true, include " - Note" notes after the data type.
-This is currently disabled.
+@param include_notes If true, include " - Note" notes after the data type.  This is currently disabled.
 @param version File version.  Use null or blank for the most recent version or
 use "10" for version 10 data types.
 */
@@ -1394,8 +1351,7 @@ public static boolean isIrrigationPracticeTSFile ( String filename )
 
 /**
 Checks for the period in the header by reading the first non-comment line.
-If the first 2 characters are spaces, it is assumed that a period header
-is present.
+If the first 2 characters are spaces, it is assumed that a period header is present.
 @param filename Absolute path to filename to check.
 @return true if the file includes a period in the header, false if not.
 @throws IOException if the file cannot be opened.
@@ -1416,8 +1372,7 @@ private static boolean isPeriodInHeader( String filename ) throws IOException
 		// Not a comment so break out of loop...
 		break;
 	}
-	// The last line read above should be the header line with the
-	// period, or the first line of data.
+	// The last line read above should be the header line with the period, or the first line of data.
 		
 	boolean period_in_header = false;
 	if ( (line.length() > 2) && line.substring(0,2).equals("  ")) {
@@ -1436,8 +1391,7 @@ private static boolean isPeriodInHeader( String filename ) throws IOException
 }
 
 /**
-Checks for version 10 by reading the file
-and checking the field length 
+Checks for version 10 by reading the file and checking the field length 
 @param filename
 @return rVal
 @throws IOException
@@ -1481,8 +1435,7 @@ private static boolean isVersion_10( String filename ) throws IOException
 }
 
 /**
-Read the StateCU TSP file and return as a Vector of
-StateCU_IrrigationPracticeTS.
+Read the StateCU TSP file and return as a Vector of StateCU_IrrigationPracticeTS.
 @param filename filename containing irrigation practice time series records.
 @param date1_req Requested start of period.
 @param date2_req Requested end of period.
@@ -1493,8 +1446,7 @@ throws Exception
 }
 
 /**
-Read the StateCU TSP file and return as a Vector of
-StateCU_IrrigationPracticeTS.
+Read the StateCU TSP file and return as a Vector of StateCU_IrrigationPracticeTS.
 @param filename filename containing irrigation practice time series records.
 @param date1_req Requested start of period.
 @param date2_req Requested end of period.
@@ -1523,8 +1475,7 @@ throws Exception
 		props = new PropList ( "IPY" );
 	}
 	String full_filename = IOUtil.getPathUsingWorkingDir ( filename );
-	Message.printStatus(2,routine,"Reading StateCU IPY file: " +
-		full_filename );
+	Message.printStatus(2,routine,"Reading StateCU IPY file: " + full_filename );
 	// If early versions (earlier than 10?), the period is not in the header
 	// so determine by reading the first and last part of the file...
 	// TODO SAM 2007-04-16 Need to figure out what version the addition
@@ -1538,7 +1489,8 @@ throws Exception
 		Version_10 = true;
 		Message.printStatus( 2, routine, "Version 10 has been specified for file." );
 	}
-	else { // override the command if the version is found to be 10 
+	else {
+		// override the command if the version is found to be 10 
 		// by checking field length of the second row
 		Version_10 = isVersion_10( full_filename );
 		//if ( Version_10 ) {
@@ -1634,11 +1586,9 @@ throws Exception
 	int year1 = -1, year = 0;
 
 	if ( !period_in_header ) {
-		// Older files do not have header information
-		// with the period for the time series.  Therefore, grab a
-		// reasonable amount of the start and end of the file - then
-		// read lines (broken by line breaks) until the last data
-		// line is encountered...
+		// Older files do not have header information with the period for the time series.  Therefore,
+		// grab a reasonable amount of the start and end of the file - then
+		// read lines (broken by line breaks) until the last data line is encountered...
 	
 		RandomAccessFile ra = new RandomAccessFile(full_filename, "r" );
 
@@ -1655,9 +1605,7 @@ throws Exception
 		List tokens = null;
 		for ( int i = 0; i < size; i++ ) {
 			string = ((String)v2.get(i)).trim();
-			if (	(string.length() == 0) ||
-				(string.charAt(0) == '#') ||
-				(string.charAt(0) == ' ') ) {
+			if ( (string.length() == 0) || (string.charAt(0) == '#') || (string.charAt(0) == ' ') ) {
 				continue;
 			}
 			tokens = StringUtil.breakStringList( string, " \t", StringUtil.DELIM_SKIP_BLANKS );
@@ -1681,25 +1629,20 @@ throws Exception
 		ra = null;
 		// Now break the bytes into records...
 		bs = new String ( b );
-		v2 = StringUtil.breakStringList ( bs, "\n\r",
-			StringUtil.DELIM_SKIP_BLANKS );
+		v2 = StringUtil.breakStringList ( bs, "\n\r", StringUtil.DELIM_SKIP_BLANKS );
 		// Loop through and figure out the last date.  Start at the
-		// second record because it is likely that a complete record was
-		// not found...
+		// second record because it is likely that a complete record was not found...
 		size = v2.size();
 		String date2_string = null;
 		for ( int i = 1; i < size; i++ ) {
 			string = ((String)v2.get(i)).trim();
-			if (	(string.length() == 0) ||
-				(string.charAt(0) == '#') ||
-				(string.charAt(0) == ' ') ) {
+			if ( (string.length() == 0) || (string.charAt(0) == '#') || (string.charAt(0) == ' ') ) {
 				continue;
 			}
 			tokens = StringUtil.breakStringList( string, " \t", StringUtil.DELIM_SKIP_BLANKS );
 			string = (String)tokens.get(0);
 			// Check for reasonable dates...
-			if (	StringUtil.isInteger(string) &&
-				(StringUtil.atoi(string) < 2050) ) {
+			if ( StringUtil.isInteger(string) && (StringUtil.atoi(string) < 2050) ) {
 				date2_string = string;
 			}
 		}
@@ -1714,12 +1657,14 @@ throws Exception
 		if ( date1_req != null ) {
 			date1 = date1_req;
 		}
-		else {	date1 = date1_file;
+		else {
+			date1 = date1_file;
 		}
 		if ( date2_req != null ) {
 			date2 = date2_req;
 		}
-		else {	date2 = date2_file;
+		else {
+			date2 = date2_file;
 		}
 
 		year1 = date1_file.getYear();
@@ -1745,205 +1690,186 @@ throws Exception
 	//TS gacrets = null;		// Time series for groundwater and sprinkler acres
 	//TS sacrets = null;
 	try {
-	while ( (iline = in.readLine()) != null ) {
-		++linecount;
-		// check for comments
-		if (iline.startsWith("#") || iline.trim().length()==0 ){
-			continue;
-		}
-
-		count++;
-		// If the dates have not been determined, do so (assume that
-		// the first line is header with the period, etc.).  Only read
-		// the years.
-		if ( date1_file == null ) {
-			// Treat all as strings for initial read...
-			// The beginning and ending month, units, and year type
-			// are ignored (assumed to be calendar and data type
-			// varies by column).
-			String format_header = "x6s4x11s4";
-			tokens = StringUtil.fixedRead ( iline,
-					format_header );
-			date1_file = new DateTime ( DateTime.PRECISION_YEAR );
-			date1_file.setYear ( StringUtil.atoi( ((String)tokens.get(0)).trim()) );
-			date2_file = new DateTime ( DateTime.PRECISION_YEAR );
-			date2_file.setYear ( StringUtil.atoi( ((String)tokens.get(1)).trim()) );
-			// Year type is always assumed to be "CYR".
-			year1 = date1_file.getYear();	// Expect the first line
-							// to match this.
-			// Set the dates for processing...
-			if ( date1_req != null ) {
-				date1 = date1_req;
+		while ( (iline = in.readLine()) != null ) {
+			++linecount;
+			// check for comments
+			if (iline.startsWith("#") || iline.trim().length()==0 ){
+				continue;
 			}
-			else {	date1 = date1_file;
+	
+			count++;
+			// If the dates have not been determined, do so (assume that
+			// the first line is header with the period, etc.).  Only read the years.
+			if ( date1_file == null ) {
+				// Treat all as strings for initial read...
+				// The beginning and ending month, units, and year type
+				// are ignored (assumed to be calendar and data type varies by column).
+				String format_header = "x6s4x11s4";
+				tokens = StringUtil.fixedRead ( iline,format_header );
+				date1_file = new DateTime ( DateTime.PRECISION_YEAR );
+				date1_file.setYear ( StringUtil.atoi( ((String)tokens.get(0)).trim()) );
+				date2_file = new DateTime ( DateTime.PRECISION_YEAR );
+				date2_file.setYear ( StringUtil.atoi( ((String)tokens.get(1)).trim()) );
+				// Year type is always assumed to be "CYR".
+				year1 = date1_file.getYear();	// Expect the first line to match this.
+				// Set the dates for processing...
+				if ( date1_req != null ) {
+					date1 = date1_req;
+				}
+				else {
+					date1 = date1_file;
+				}
+				if ( date2_req != null ) {
+					date2 = date2_req;
+				}
+				else {
+					date2 = date2_file;
+				}
+				continue;
 			}
-			if ( date2_req != null ) {
-				date2 = date2_req;
-			}
-			else {	date2 = date2_file;
-			}
-			continue;
-		}
-		
-		// We already read the header line and got the date above.
-		// Need to skip this line. 
-		//if( count == 1 && !period_in_header) {
-			//continue;
-		//}
-		
-		// Process the line of data...
-		StringUtil.fixedRead ( iline, format_0, format_0w, v );
-		year = StringUtil.atoi(((String)v.get(0)).trim());
-		culoc = ((String)v.get(1)).trim();
-		
-		if ( year == year1 ) {
-			// First year of data in the file.
-			// Create an object for the CU Location.  It is assumed
-			// that the structures are always listed in the first
-			// year at least (and probably every year).
-			pos = StateCU_Util.indexOf ( ipyts_Vector, culoc );
-			if ( pos >= 0 ) {
-				// Should not happen!  The CU Location
-				// is apparently listed twice in the
-				// first year...
-				Message.printWarning ( 2, routine,
-				"CU Location \"" + culoc +
-				"\" is listed more than once in the" +
-				" first year." );
-				ipyts = (StateCU_IrrigationPracticeTS)ipyts_Vector.get(pos);
-			}
-			else {	if ( Version_10 ) {
+			
+			// We already read the header line and got the date above.  Need to skip this line. 
+			//if( count == 1 && !period_in_header) {
+				//continue;
+			//}
+			
+			// Process the line of data...
+			StringUtil.fixedRead ( iline, format_0, format_0w, v );
+			year = StringUtil.atoi(((String)v.get(0)).trim());
+			culoc = ((String)v.get(1)).trim();
+			
+			if ( year == year1 ) {
+				// First year of data in the file.
+				// Create an object for the CU Location.  It is assumed
+				// that the structures are always listed in the first year at least (and probably every year).
+				pos = StateCU_Util.indexOf ( ipyts_Vector, culoc );
+				if ( pos >= 0 ) {
+					// Should not happen!  The CU Location is apparently listed twice in the first year...
+					Message.printWarning ( 2, routine, "CU Location \"" + culoc +
+					"\" is listed more than once in the first year." );
+					ipyts = (StateCU_IrrigationPracticeTS)ipyts_Vector.get(pos);
+				}
+				else {
+					if ( Version_10 ) {
 						ipyts = new StateCU_IrrigationPracticeTS (
-						culoc, date1, date2, year_type,
-						full_filename, 10 );
+							culoc, date1, date2, year_type, full_filename, 10 );
 					}
 					else {
 						ipyts = new StateCU_IrrigationPracticeTS (
-								culoc, date1, date2, year_type,
-								full_filename, 12 );
+							culoc, date1, date2, year_type, full_filename, 12 );
 					}
-				ipyts_Vector.add ( ipyts );
+					ipyts_Vector.add ( ipyts );
+				}
 			}
-		}
-		else {	// Find the object of interest for this CU Location so it
-			// can be used to set data values...
-			pos = StateCU_Util.indexOf ( ipyts_Vector, culoc );
-			if ( pos < 0 ) {
-				// Should not happen!  Apparently the CU
-				// Location was not listed in the first year...
-				++pos_error_count;
-				Message.printWarning ( 2, routine,
-				"CU Location \"" + culoc +
-				"\" found in year " + year +
-				" but was not listed in the first" + " year." );
-				ipyts = new StateCU_IrrigationPracticeTS(culoc,
-					date1, date2, year_type,
-					full_filename );
-				ipyts_Vector.add ( ipyts );
+			else {
+				// Find the object of interest for this CU Location so it can be used to set data values...
+				pos = StateCU_Util.indexOf ( ipyts_Vector, culoc );
+				if ( pos < 0 ) {
+					// Should not happen!  Apparently the CU Location was not listed in the first year...
+					++pos_error_count;
+					Message.printWarning ( 3, routine, "CU Location \"" + culoc +
+					"\" found in year " + year + " but was not listed in the first" + " year." );
+					ipyts = new StateCU_IrrigationPracticeTS(culoc,
+						date1, date2, year_type, full_filename );
+					ipyts_Vector.add ( ipyts );
+				}
+				else {
+					ipyts = (StateCU_IrrigationPracticeTS)ipyts_Vector.get(pos);
+				}
 			}
-			else {	ipyts = (StateCU_IrrigationPracticeTS)
-					ipyts_Vector.get(pos);
-			}
-		}
-		// Now set the values...
-		ipyts.setCeff ( year,
-			StringUtil.atof(((String)v.get(2)).trim()) );
-		ipyts.setFeff ( year,
-			StringUtil.atof(((String)v.get(3)).trim()) );
-		ipyts.setSeff ( year,
-			StringUtil.atof(((String)v.get(4)).trim()) );
-		
-		if( !period_in_header || Version_10 ) {
-			// Have 2 acreage values and total acreage if version 10
-			/* FIXME SAM 2007-10-18 Remove later when tested out
-			ipyts.setGacre ( year,
-				StringUtil.atof(((String)v.elementAt(5)).trim()) );
-			ipyts.setSacre ( year,
-				StringUtil.atof(((String)v.elementAt(6)).trim()) );
+			// Now set the values...
+			ipyts.setCeff ( year, StringUtil.atof(((String)v.get(2)).trim()) );
+			ipyts.setFeff ( year, StringUtil.atof(((String)v.get(3)).trim()) );
+			ipyts.setSeff ( year, StringUtil.atof(((String)v.get(4)).trim()) );
+			
+			if( !period_in_header || Version_10 ) {
+				// Have 2 acreage values and total acreage if version 10
+				/* FIXME SAM 2007-10-18 Remove later when tested out
+				ipyts.setGacre ( year, StringUtil.atof(((String)v.elementAt(5)).trim()) );
+				ipyts.setSacre ( year, StringUtil.atof(((String)v.elementAt(6)).trim()) );
 				*/
-			ipyts.setMprate ( year,
-				StringUtil.atof(((String)v.get(7)).trim()) );
-			ipyts.setGmode ( year,
-				StringUtil.atoi(((String)v.get(8)).trim()) );
-			if ( Version_10 ) {
-				ipyts.setTacre ( year,
-						StringUtil.atof(((String)v.get(9)).trim()) );
+				ipyts.setMprate ( year, StringUtil.atof(((String)v.get(7)).trim()) );
+				ipyts.setGmode ( year, StringUtil.atoi(((String)v.get(8)).trim()) );
+				if ( Version_10 ) {
+					ipyts.setTacre ( year, StringUtil.atof(((String)v.get(9)).trim()) );
+				}
+			}
+			else {
+				// New version 12 format
+				acswfl = StringUtil.atof(((String)v.get(5)).trim());
+				ipyts.setAcswfl ( year, acswfl );
+	
+				acswspr = StringUtil.atof(((String)v.get(6)).trim());
+				ipyts.setAcswspr ( year, acswspr );
+					
+				acgwfl = StringUtil.atof(((String)v.get(7)).trim());
+				ipyts.setAcgwfl ( year, acgwfl );
+				
+				acgwspr = StringUtil.atof(((String)v.get(8)).trim());
+				ipyts.setAcgwspr ( year, acgwspr );
+				
+				// Refresh the total by supply type...
+				
+				ipyts.refreshAcsw(year);
+				ipyts.refreshAcgw(year);
+					
+				ipyts.setMprate ( year, StringUtil.atof(((String)v.get(9)).trim()) );
+				ipyts.setGmode ( year, StringUtil.atoi(((String)v.get(10)).trim()) );
+				ipyts.setTacre ( year, StringUtil.atof(((String)v.get(11)).trim()) );
+				
+				/* FIXME SAM 2007-10-18 Remove later when tested out
+				// Set the Gacre and Sacre totals based on the sum
+				// of the Gacre flood, sprinkler and the Sacre flood, sprinkler.
+				// This way the code can still write old version files
+				
+				gacrets = ipyts.getGacreTS ();
+				// Set the groundwater flood acres, whether missing or not...
+				ipyts.setGacre ( year, acgwfl );
+				// Add the groundwater sprinkler acres...
+				if ( !gacrets.isDataMissing(acgwspr) ) {
+					// Set/add the value
+					if ( gacrets.isDataMissing(acgwfl)) {
+						ipyts.setGacre ( year, acgwspr );
+					}
+					else {
+						ipyts.setGacre ( year, acgwspr + acgwfl );
+					}
+				}
+				sacrets = ipyts.getSacreTS ();
+				// Set the groundwater sprinkler acres, whether missing or not...
+				ipyts.setSacre ( year, acgwspr );
+				// Add the surface water sprinkler acres...
+				if ( !sacrets.isDataMissing(acswspr) ) {
+					// Set/add the value
+					if ( sacrets.isDataMissing(acgwspr)) {
+						ipyts.setSacre ( year, acswspr );
+					}
+					else {
+						ipyts.setSacre ( year, acgwspr + acswspr );
+					}
+				}
+				*/
 			}
 		}
-		else {	// New version 12 format
-			acswfl = StringUtil.atof(((String)v.get(5)).trim());
-			ipyts.setAcswfl ( year, acswfl );
-
-			acswspr = StringUtil.atof(((String)v.get(6)).trim());
-			ipyts.setAcswspr ( year, acswspr );
-				
-			acgwfl = StringUtil.atof(((String)v.get(7)).trim());
-			ipyts.setAcgwfl ( year, acgwfl );
-			
-			acgwspr = StringUtil.atof(((String)v.get(8)).trim());
-			ipyts.setAcgwspr ( year, acgwspr );
-			
-			// Refresh the total by supply type...
-			
-			ipyts.refreshAcsw(year);
-			ipyts.refreshAcgw(year);
-				
-			ipyts.setMprate ( year, StringUtil.atof(((String)v.get(9)).trim()) );
-			ipyts.setGmode ( year, StringUtil.atoi(((String)v.get(10)).trim()) );
-			ipyts.setTacre ( year, StringUtil.atof(((String)v.get(11)).trim()) );
-			
-			/* FIXME SAM 2007-10-18 Remove later when tested out
-			// Set the Gacre and Sacre totals based on the sum
-			// of the Gacre flood, sprinkler and the Sacre flood, sprinkler.
-			// This way the code can still write old version files
-			
-			gacrets = ipyts.getGacreTS ();
-			// Set the groundwater flood acres, whether missing or not...
-			ipyts.setGacre ( year, acgwfl );
-			// Add the groundwater sprinkler acres...
-			if ( !gacrets.isDataMissing(acgwspr) ) {
-				// Set/add the value
-				if ( gacrets.isDataMissing(acgwfl)) {
-					ipyts.setGacre ( year, acgwspr );
-				}
-				else {
-					ipyts.setGacre ( year, acgwspr + acgwfl );
-				}
-			}
-			sacrets = ipyts.getSacreTS ();
-			// Set the groundwater sprinkler acres, whether missing or not...
-			ipyts.setSacre ( year, acgwspr );
-			// Add the surface water sprinkler acres...
-			if ( !sacrets.isDataMissing(acswspr) ) {
-				// Set/add the value
-				if ( sacrets.isDataMissing(acgwspr)) {
-					ipyts.setSacre ( year, acswspr );
-				}
-				else {
-					ipyts.setSacre ( year, acgwspr + acswspr );
-				}
-			}
-			*/
+		if ( pos_error_count > 0 ) {
+			// FIXME SAM 2009-02-12 Evaluate how to handle
+			Message.printWarning ( 1, routine, "One or more CU Location identifiers " +
+			"were not listed in the first year of data.\n" +
+			"The calendar type in the header may be incompatible with the data records.\n" +
+			"See the log file for more information." );
 		}
-	}
-	if ( pos_error_count > 0 ) {
-		Message.printWarning ( 1, routine,
-		"One or more CU Location identifiers " +
-		"were not listed in the first year of data.\n" +
-		"The calendar type in the header may be incompatible with "+
-		"the data records.\n" +
-		"See the log file for more information." );
-	}
 	}
 	catch ( Exception e ) {
-		Message.printWarning ( 2, routine, "Error processing near line "
-		+ linecount + ": " + iline );
-		Message.printWarning ( 2, routine, e );
+		Message.printWarning ( 3, routine, "Error processing near line " + linecount + ": " +
+			iline + " (" + e + ").");
+		Message.printWarning ( 3, routine, e );
 		// Now rethrow to calling code...
 		throw ( e );
 	}
-	if ( in != null ) {
-		in.close();
+	finally {
+		if ( in != null ) {
+			in.close();
+		}
 	}
 	return ipyts_Vector;
 }
@@ -1954,26 +1880,20 @@ The TSID string is specified in addition to the path to the file.  It is
 expected that a TSID in the file
 matches the TSID (and the path to the file, if included in the TSID would not
 properly allow the TSID to be specified).  This method can be used with newer
-code where the I/O path is separate from the TSID that is used to identify the
-time series.
+code where the I/O path is separate from the TSID that is used to identify the time series.
 The IOUtil.getPathUsingWorkingDir() method is applied to the filename.
-@return a pointer to a newly-allocated time series if successful, a NULL pointer
-if not.
+@return a pointer to a newly-allocated time series if successful, null if not.
 @param tsident_string The full identifier for the time series to
 read.  This string can also be the alias for the time series in the file.
 @param filename The name of a file to read
-(in which case the tsident_string must match one of the TSID strings in the
-file).
-@param date1 Starting date to initialize period (null to read the entire time
-series).
-@param date2 Ending date to initialize period (null to read the entire time
-series).
+(in which case the tsident_string must match one of the TSID strings in the file).
+@param date1 Starting date to initialize period (null to read the entire time series).
+@param date2 Ending date to initialize period (null to read the entire time series).
 @param units Units to convert to.
 @param read_data Indicates whether data should be read (false=no, true=yes).
 */
-public static TS readTimeSeries (	String tsident_string, String filename,
-					DateTime date1, DateTime date2,
-					String units, boolean read_data )
+public static TS readTimeSeries ( String tsident_string, String filename,
+	DateTime date1, DateTime date2, String units, boolean read_data )
 throws Exception
 {	TS ts = null;
 	List v = readTimeSeriesList ( tsident_string, filename, date1, date2, units, read_data );
@@ -1986,18 +1906,15 @@ throws Exception
 /**
 Read all the time series from a StateCU format file.
 The IOUtil.getPathUsingWorkingDir() method is applied to the filename.
-@return a pointer to a newly-allocated Vector of time series if successful,
-a NULL pointer if not.
+@return a pointer to a newly-allocated Vector of time series if successful, null if not.
 @param fname Name of file to read.
-@param date1 Starting date to initialize period (NULL to read the entire time
-series).
-@param date2 Ending date to initialize period (NULL to read the entire time
-series).
+@param date1 Starting date to initialize period (NULL to read the entire time series).
+@param date2 Ending date to initialize period (NULL to read the entire time series).
 @param units Units to convert to.
 @param read_data Indicates whether data should be read.
 */
 public static List readTimeSeriesList (	String fname, DateTime date1, DateTime date2,
-						String units, boolean read_data)
+	String units, boolean read_data)
 throws Exception
 {	List tslist = null;
 
@@ -2008,28 +1925,20 @@ throws Exception
 }
 
 /**
-Read one or more time series from a StateCU crop pattern time series format
-file.
+Read one or more time series from a StateCU crop pattern time series format file.
 @return a Vector of time series if successful, null if not.  The calling code
 is responsible for freeing the memory for the time series.
 @param req_tsident Identifier for requested item series.  If null,
-return all new time series in the vector.  If not null, return the matching time
-series.
+return all new time series in the vector.  If not null, return the matching time series.
 @parm full_filename Full path to filename, used for messages.
-@param req_date1 Requested starting date to initialize period (or NULL to read
-the entire time series).
-@param req_date2 Requested ending date to initialize period (or NULL to read
-the entire time series).
+@param req_date1 Requested starting date to initialize period (or null to read the entire time series).
+@param req_date2 Requested ending date to initialize period (or null to read the entire time series).
 @param units Units to convert to (currently ignored).
 @param read_data Indicates whether data should be read.
 @exception Exception if there is an error reading the time series.
 */
-private static List readTimeSeriesList ( String req_tsident,
-						String full_filename,
-						DateTime req_date1,
-						DateTime req_date2,
-						String req_units,
-						boolean read_data )
+private static List readTimeSeriesList ( String req_tsident, String full_filename, DateTime req_date1,
+	DateTime req_date2, String req_units, boolean read_data )
 throws Exception
 {	// TODO - can optimize this later to only read one time series...
 	// First read the whole file...
@@ -2054,89 +1963,74 @@ throws Exception
 		ipy = (StateCU_IrrigationPracticeTS)data_Vector.get(i);
 		if ( req_tsident != null ) {
 			// Check to see if the location match...
-			if (	!ipy.getID().equalsIgnoreCase(
-				tsident.getLocation() ) ) {
+			if ( !ipy.getID().equalsIgnoreCase(tsident.getLocation() ) ) {
 				include_ts = false;
 			}
 		}
 		if ( !include_ts ) {
 			continue;
 		}
-		if (	(req_data_type == null) ||
-			req_data_type.equalsIgnoreCase(TSTYPE_Eff_SurfaceMax) ) {
+		if ( (req_data_type == null) || req_data_type.equalsIgnoreCase(TSTYPE_Eff_SurfaceMax) ) {
 			tslist.add ( ipy.getCeffTS() );
 		}
-		if ( (req_data_type == null) ||
-			req_data_type.equalsIgnoreCase(TSTYPE_Eff_FloodMax) ) {
+		if ( (req_data_type == null) || req_data_type.equalsIgnoreCase(TSTYPE_Eff_FloodMax) ) {
 			tslist.add ( ipy.getFeffTS() );
 		}
-		if ( (req_data_type == null) ||
-			req_data_type.equalsIgnoreCase(TSTYPE_Eff_SprinklerMax) ) {
+		if ( (req_data_type == null) || req_data_type.equalsIgnoreCase(TSTYPE_Eff_SprinklerMax) ) {
 			tslist.add ( ipy.getSeffTS() );
 		}
 		// Check for null time series below and only add the ones
 		// that are not null.  This reflects the fact that version settings
 		// may indicate that some time series should be ignored.
 		/* FIXME SAM 2007-10-18 Remove later when tested out
-		if ( (req_data_type == null) ||
-			req_data_type.equalsIgnoreCase(TSTYPE_CropArea_GroundWaterVersion10)){
+		if ( (req_data_type == null) || req_data_type.equalsIgnoreCase(TSTYPE_CropArea_GroundWaterVersion10)){
 			if ( ipy.getGacreTS() != null ) {
 				tslist.addElement ( ipy.getGacreTS() );
 			}
 		}
-		if ( (req_data_type == null) ||
-			req_data_type.equalsIgnoreCase(TSTYPE_CropArea_SprinklerVersion10)){
+		if ( (req_data_type == null) || req_data_type.equalsIgnoreCase(TSTYPE_CropArea_SprinklerVersion10)){
 			if ( ipy.getSacreTS() != null ) {
 				tslist.addElement ( ipy.getSacreTS() );
 			}
 		}
 		*/
-		if ( (req_data_type == null) ||
-				req_data_type.equalsIgnoreCase(TSTYPE_CropArea_SurfaceWaterOnly)){
-				if ( ipy.getAcswTS() != null ) {
-					tslist.add ( ipy.getAcswTS() );
-				}
+		if ( (req_data_type == null) || req_data_type.equalsIgnoreCase(TSTYPE_CropArea_SurfaceWaterOnly)){
+			if ( ipy.getAcswTS() != null ) {
+				tslist.add ( ipy.getAcswTS() );
 			}
-		if ( (req_data_type == null) ||
-			req_data_type.equalsIgnoreCase(TSTYPE_CropArea_SurfaceWaterOnlyFlood)){
+		}
+		if ( (req_data_type == null) || req_data_type.equalsIgnoreCase(TSTYPE_CropArea_SurfaceWaterOnlyFlood)){
 			if ( ipy.getAcswflTS() != null ) {
 				tslist.add ( ipy.getAcswflTS() );
 			}
 		}
-		if ( (req_data_type == null) ||
-			req_data_type.equalsIgnoreCase(TSTYPE_CropArea_SurfaceWaterOnlySprinkler)){
+		if ( (req_data_type == null) || req_data_type.equalsIgnoreCase(TSTYPE_CropArea_SurfaceWaterOnlySprinkler)){
 			if ( ipy.getAcswsprTS() != null ) {
 				tslist.add ( ipy.getAcswsprTS() );
 			}
 		}
-		if ( (req_data_type == null) ||
-				req_data_type.equalsIgnoreCase(TSTYPE_CropArea_GroundWater)){
-				if ( ipy.getAcgwTS() != null ) {
-					tslist.add ( ipy.getAcgwTS() );
-				}
+		if ( (req_data_type == null) || req_data_type.equalsIgnoreCase(TSTYPE_CropArea_GroundWater)){
+			if ( ipy.getAcgwTS() != null ) {
+				tslist.add ( ipy.getAcgwTS() );
 			}
-		if ( (req_data_type == null) ||
-			req_data_type.equalsIgnoreCase(TSTYPE_CropArea_GroundWaterFlood)){
+		}
+		if ( (req_data_type == null) || req_data_type.equalsIgnoreCase(TSTYPE_CropArea_GroundWaterFlood)){
 			if ( ipy.getAcgwflTS() != null ) {
 				tslist.add ( ipy.getAcgwflTS() );
 			}
 		}
-		if ( (req_data_type == null) ||
-			req_data_type.equalsIgnoreCase(TSTYPE_CropArea_GroundWaterSprinkler)){
+		if ( (req_data_type == null) || req_data_type.equalsIgnoreCase(TSTYPE_CropArea_GroundWaterSprinkler)){
 			if ( ipy.getAcgwsprTS() != null ) {
 				tslist.add ( ipy.getAcgwsprTS() );
 			}
 		}
-		if ( (req_data_type == null) ||
-				req_data_type.equalsIgnoreCase(TSTYPE_PumpingMax)){
+		if ( (req_data_type == null) || req_data_type.equalsIgnoreCase(TSTYPE_PumpingMax)){
 			tslist.add ( ipy.getMprateTS() );
 		}
-		if ( (req_data_type == null) ||
-			req_data_type.equalsIgnoreCase(TSTYPE_GWUseMode)){
+		if ( (req_data_type == null) || req_data_type.equalsIgnoreCase(TSTYPE_GWUseMode)){
 			tslist.add ( ipy.getGmodeTS() );
 		}
-		if ( (req_data_type == null) ||
-			req_data_type.equalsIgnoreCase(	TSTYPE_CropArea_Total)){
+		if ( (req_data_type == null) || req_data_type.equalsIgnoreCase(	TSTYPE_CropArea_Total)){
 			if ( ipy.getTacreTS() != null ) {
 				tslist.add ( ipy.getTacreTS() );
 			}
@@ -2270,8 +2164,7 @@ public void setAcgwspr ( int year, double acgwspr )
 
 /**
 Set acres GWsprinkler and adjust the resulting GWflood data to GWtotal - GWsprinkler.
-Try to maintain the exact value set, except when greater than GWtotal, in which
-case GWtotal will be used.
+Try to maintain the exact value set, except when greater than GWtotal, in which case GWtotal will be used.
 Don't do anything if GWtotal is not set.
 @param Year for data.
 @param acgwspr value to set.
@@ -2316,8 +2209,7 @@ public void setAcswfl ( int year, double acswfl )
 
 /**
 Set acres SWflood and adjust the resulting SWsprinkler data to SWtotal - SWflood.
-Try to maintain the exact value set, except when greater than SWtotal, in which
-case SWtotal will be used.
+Try to maintain the exact value set, except when greater than SWtotal, in which case SWtotal will be used.
 Don't do anything if SWtotal is not set.
 @param Year for data.
 @param acswfl value to set.
@@ -2351,8 +2243,7 @@ public void setAcswspr ( int year, double acswspr )
 
 /**
 Set acres SWsprinkler and adjust the resulting SWflood data to SWtotal - SWsprinkler.
-Try to maintain the exact value set, except ewhen greater than SWtotal, in
-which case SWtotal will be used.
+Try to maintain the exact value set, except ewhen greater than SWtotal, in which case SWtotal will be used.
 Don't do anything if SWtotal is not set.
 @param Year for data.
 @param acswspr value to set.
@@ -2363,24 +2254,21 @@ public void setAcswsprAndAdjust ( int year, double acswspr )
 	// If the surface water total is not available, don't do it.
 	double acsw = __acsw_ts.getDataValue ( __temp_DateTime );
 	if ( acsw < 0.0 ) {
-		Message.printStatus ( 2, routine,
-				"Location \"" + _id + "\" " + year +
+		Message.printStatus ( 2, routine, "Location \"" + _id + "\" " + year +
 				" SWtotal acres is not set.  Unable to set/adjust to SWsprinkler acres.");
 		return;
 	}
 	if ( acswspr > acsw ) {
 		// Just use the total...
 		acswspr = acsw;
-		Message.printStatus ( 2, routine,
-				"Location \"" + _id + "\" " + year +
+		Message.printStatus ( 2, routine, "Location \"" + _id + "\" " + year +
 				" SWsprinkler acres adjusted to SWtotal acres (" + Math.round ( acswspr ) + ")");
 	}
 	__acswspr_ts.setDataValue ( __temp_DateTime, acswspr );
 	// Now set SWflood...
 	double acswfl = acsw - acswspr;
 	__acswfl_ts.setDataValue ( __temp_DateTime, acswfl );
-	Message.printStatus ( 2, routine,
-			"Location \"" + _id + "\" " + year +
+	Message.printStatus ( 2, routine, "Location \"" + _id + "\" " + year +
 			" SWflood adjusted to SWtotal - SWsprinkler (" + Math.round ( acswspr ) + ")" );
 }
 
@@ -2500,10 +2388,8 @@ including the groundwater, sprinkler, and total acreage, and the total of maximu
 If not specified, "DataSet" will be used.  A non-null value should be supplied,
 in particular, if the totals for different data sets will be graphed or manipulated.
 */
-public static List toTSList ( List data_Vector,
-					boolean include_dataset_totals,
-					String dataset_location,
-					String dataset_datasource )
+public static List toTSList ( List data_Vector, boolean include_dataset_totals,
+	String dataset_location, String dataset_datasource )
 {	String routine = "StateCU_IrrigationPracticeTS.toTSVector";
 	List tslist = new Vector();
 	int size = 0;
@@ -2577,123 +2463,108 @@ public static List toTSList ( List data_Vector,
 			
 		// Surface water flood...
 			
-			yts_acswfl = new YearTS ();
-			try {	TSIdent tsident = new TSIdent (
-				dataset_location, dataset_datasource,
-				TSTYPE_CropArea_SurfaceWaterOnlyFlood, "Year", "" );
-				yts_acswfl.setIdentifier ( tsident );
-				yts_acswfl.getIdentifier().setInputType ( "StateCU" );
-			}
-			catch ( Exception e ) {
-				// This should NOT happen because the TSID is
-				// being controlled...
-				Message.printWarning ( 3, routine,
-				"Error adding time series for surface water flood." );
-			}
-			yts_acswfl.setDataUnits ( "ACRE" );
-			yts_acswfl.setDataUnitsOriginal ( "ACRE" );
-			yts_acswfl.setDescription ( dataset_location +
-				" SurfaceWaterOnlyFlood-irrigated area" );
-			yts_acswfl.setDate1(new DateTime(start_DateTime));
-			yts_acswfl.setDate2(new DateTime(end_DateTime));
-			yts_acswfl.setDate1Original(new DateTime(start_DateTime));
-			yts_acswfl.setDate2Original(new DateTime(end_DateTime));
-			yts_acswfl.allocateDataSpace();
-			
-			// Surface water sprinkler...
-			
-			yts_acswspr = new YearTS ();
-			try {	TSIdent tsident = new TSIdent (
-				dataset_location, dataset_datasource,
-				TSTYPE_CropArea_SurfaceWaterOnlySprinkler, "Year", "" );
-				yts_acswspr.setIdentifier ( tsident );
-				yts_acswspr.getIdentifier().setInputType ( "StateCU" );
-			}
-			catch ( Exception e ) {
-				// This should NOT happen because the TSID is
-				// being controlled...
-				Message.printWarning ( 3, routine,
-				"Error adding time series for surface water sprinkler." );
-			}
-			yts_acswspr.setDataUnits ( "ACRE" );
-			yts_acswspr.setDataUnitsOriginal ( "ACRE" );
-			yts_acswspr.setDescription ( dataset_location +
-				" SurfaceWaterOnlySprinkler-irrigated area" );
-			yts_acswspr.setDate1(new DateTime(start_DateTime));
-			yts_acswspr.setDate2(new DateTime(end_DateTime));
-			yts_acswspr.setDate1Original(new DateTime(start_DateTime));
-			yts_acswspr.setDate2Original(new DateTime(end_DateTime));
-			yts_acswspr.allocateDataSpace();
-			
-			// Groundwater flood...
-			
-			yts_acgwfl = new YearTS ();
-			try {	TSIdent tsident = new TSIdent (
-				dataset_location, dataset_datasource,
-				TSTYPE_CropArea_GroundWaterFlood, "Year", "" );
-				yts_acgwfl.setIdentifier ( tsident );
-				yts_acgwfl.getIdentifier().setInputType ( "StateCU" );
-			}
-			catch ( Exception e ) {
-				// This should NOT happen because the TSID is
-				// being controlled...
-				Message.printWarning ( 3, routine,
-				"Error adding time series for groundwater flood." );
-			}
-			yts_acgwfl.setDataUnits ( "ACRE" );
-			yts_acgwfl.setDataUnitsOriginal ( "ACRE" );
-			yts_acgwfl.setDescription ( dataset_location +
-				" GroundwaterFlood-irrigated area" );
-			yts_acgwfl.setDate1(new DateTime(start_DateTime));
-			yts_acgwfl.setDate2(new DateTime(end_DateTime));
-			yts_acgwfl.setDate1Original(new DateTime(start_DateTime));
-			yts_acgwfl.setDate2Original(new DateTime(end_DateTime));
-			yts_acgwfl.allocateDataSpace();
-			
-			// Groundwater sprinkler...
-			
-			yts_acgwspr = new YearTS ();
-			try {	TSIdent tsident = new TSIdent (
-				dataset_location, dataset_datasource,
-				TSTYPE_CropArea_GroundWaterSprinkler, "Year", "" );
-				yts_acgwspr.setIdentifier ( tsident );
-				yts_acgwspr.getIdentifier().setInputType ( "StateCU" );
-			}
-			catch ( Exception e ) {
-				// This should NOT happen because the TSID is
-				// being controlled...
-				Message.printWarning ( 3, routine,
-				"Error adding time series for groundwater sprinkler." );
-			}
-			yts_acgwspr.setDataUnits ( "ACRE" );
-			yts_acgwspr.setDataUnitsOriginal ( "ACRE" );
-			yts_acgwspr.setDescription ( dataset_location +
-				" GroundWaterSprinkler-irrigated area" );
-			yts_acgwspr.setDate1(new DateTime(start_DateTime));
-			yts_acgwspr.setDate2(new DateTime(end_DateTime));
-			yts_acgwspr.setDate1Original(new DateTime(start_DateTime));
-			yts_acgwspr.setDate2Original(new DateTime(end_DateTime));
-			yts_acgwspr.allocateDataSpace();
+		yts_acswfl = new YearTS ();
+		try {
+			TSIdent tsident = new TSIdent (	dataset_location, dataset_datasource,
+			TSTYPE_CropArea_SurfaceWaterOnlyFlood, "Year", "" );
+			yts_acswfl.setIdentifier ( tsident );
+			yts_acswfl.getIdentifier().setInputType ( "StateCU" );
+		}
+		catch ( Exception e ) {
+			// This should NOT happen because the TSID is being controlled...
+			Message.printWarning ( 3, routine, "Error adding time series for surface water flood." );
+		}
+		yts_acswfl.setDataUnits ( "ACRE" );
+		yts_acswfl.setDataUnitsOriginal ( "ACRE" );
+		yts_acswfl.setDescription ( dataset_location + " SurfaceWaterOnlyFlood-irrigated area" );
+		yts_acswfl.setDate1(new DateTime(start_DateTime));
+		yts_acswfl.setDate2(new DateTime(end_DateTime));
+		yts_acswfl.setDate1Original(new DateTime(start_DateTime));
+		yts_acswfl.setDate2Original(new DateTime(end_DateTime));
+		yts_acswfl.allocateDataSpace();
+		
+		// Surface water sprinkler...
+		
+		yts_acswspr = new YearTS ();
+		try {
+			TSIdent tsident = new TSIdent ( dataset_location, dataset_datasource,
+			TSTYPE_CropArea_SurfaceWaterOnlySprinkler, "Year", "" );
+			yts_acswspr.setIdentifier ( tsident );
+			yts_acswspr.getIdentifier().setInputType ( "StateCU" );
+		}
+		catch ( Exception e ) {
+			// This should NOT happen because the TSID is being controlled...
+			Message.printWarning ( 3, routine, "Error adding time series for surface water sprinkler." );
+		}
+		yts_acswspr.setDataUnits ( "ACRE" );
+		yts_acswspr.setDataUnitsOriginal ( "ACRE" );
+		yts_acswspr.setDescription ( dataset_location + " SurfaceWaterOnlySprinkler-irrigated area" );
+		yts_acswspr.setDate1(new DateTime(start_DateTime));
+		yts_acswspr.setDate2(new DateTime(end_DateTime));
+		yts_acswspr.setDate1Original(new DateTime(start_DateTime));
+		yts_acswspr.setDate2Original(new DateTime(end_DateTime));
+		yts_acswspr.allocateDataSpace();
+		
+		// Groundwater flood...
+		
+		yts_acgwfl = new YearTS ();
+		try {
+			TSIdent tsident = new TSIdent ( dataset_location, dataset_datasource,
+			TSTYPE_CropArea_GroundWaterFlood, "Year", "" );
+			yts_acgwfl.setIdentifier ( tsident );
+			yts_acgwfl.getIdentifier().setInputType ( "StateCU" );
+		}
+		catch ( Exception e ) {
+			// This should NOT happen because the TSID is being controlled...
+			Message.printWarning ( 3, routine, "Error adding time series for groundwater flood." );
+		}
+		yts_acgwfl.setDataUnits ( "ACRE" );
+		yts_acgwfl.setDataUnitsOriginal ( "ACRE" );
+		yts_acgwfl.setDescription ( dataset_location + " GroundwaterFlood-irrigated area" );
+		yts_acgwfl.setDate1(new DateTime(start_DateTime));
+		yts_acgwfl.setDate2(new DateTime(end_DateTime));
+		yts_acgwfl.setDate1Original(new DateTime(start_DateTime));
+		yts_acgwfl.setDate2Original(new DateTime(end_DateTime));
+		yts_acgwfl.allocateDataSpace();
+		
+		// Groundwater sprinkler...
+		
+		yts_acgwspr = new YearTS ();
+		try {
+			TSIdent tsident = new TSIdent ( dataset_location, dataset_datasource,
+			TSTYPE_CropArea_GroundWaterSprinkler, "Year", "" );
+			yts_acgwspr.setIdentifier ( tsident );
+			yts_acgwspr.getIdentifier().setInputType ( "StateCU" );
+		}
+		catch ( Exception e ) {
+			// This should NOT happen because the TSID is being controlled...
+			Message.printWarning ( 3, routine, "Error adding time series for groundwater sprinkler." );
+		}
+		yts_acgwspr.setDataUnits ( "ACRE" );
+		yts_acgwspr.setDataUnitsOriginal ( "ACRE" );
+		yts_acgwspr.setDescription ( dataset_location + " GroundWaterSprinkler-irrigated area" );
+		yts_acgwspr.setDate1(new DateTime(start_DateTime));
+		yts_acgwspr.setDate2(new DateTime(end_DateTime));
+		yts_acgwspr.setDate1Original(new DateTime(start_DateTime));
+		yts_acgwspr.setDate2Original(new DateTime(end_DateTime));
+		yts_acgwspr.allocateDataSpace();
 			
 		// Surface water only (flood and sprinkler)...
 		
 		yts_acsw = new YearTS ();
-		try {	TSIdent tsident = new TSIdent (
-				dataset_location, dataset_datasource,
-				TSTYPE_CropArea_SurfaceWaterOnly, "Year", "" );
-				yts_acsw.setIdentifier ( tsident );
-				yts_acsw.getIdentifier().setInputType ( "StateCU" );
+		try {
+			TSIdent tsident = new TSIdent ( dataset_location, dataset_datasource,
+			TSTYPE_CropArea_SurfaceWaterOnly, "Year", "" );
+			yts_acsw.setIdentifier ( tsident );
+			yts_acsw.getIdentifier().setInputType ( "StateCU" );
 		}
 		catch ( Exception e ) {
-				// This should NOT happen because the TSID is
-				// being controlled...
-				Message.printWarning ( 3, routine,
-				"Error adding time series for surface water only supply total." );
+			// This should NOT happen because the TSID is being controlled...
+			Message.printWarning ( 3, routine, "Error adding time series for surface water only supply total." );
 		}
 		yts_acsw.setDataUnits ( "ACRE" );
 		yts_acsw.setDataUnitsOriginal ( "ACRE" );
-		yts_acsw.setDescription ( dataset_location +
-				" SurfaceWaterOnly-irrigated area" );
+		yts_acsw.setDescription ( dataset_location + " SurfaceWaterOnly-irrigated area" );
 		yts_acsw.setDate1(new DateTime(start_DateTime));
 		yts_acsw.setDate2(new DateTime(end_DateTime));
 		yts_acsw.setDate1Original(new DateTime(start_DateTime));
@@ -2703,22 +2574,19 @@ public static List toTSList ( List data_Vector,
 		// Groundwater (flood and sprinkler)...
 
 		yts_acgw = new YearTS ();
-		try {	TSIdent tsident = new TSIdent (
-				dataset_location, dataset_datasource,
+		try {
+			TSIdent tsident = new TSIdent ( dataset_location, dataset_datasource,
 				TSTYPE_CropArea_GroundWater, "Year", "" );
-				yts_acgw.setIdentifier ( tsident );
-				yts_acgw.getIdentifier().setInputType ( "StateCU" );
+			yts_acgw.setIdentifier ( tsident );
+			yts_acgw.getIdentifier().setInputType ( "StateCU" );
 		}
 		catch ( Exception e ) {
-				// This should NOT happen because the TSID is
-				// being controlled...
-				Message.printWarning ( 3, routine,
-				"Error adding time series for groundwater total." );
+			// This should NOT happen because the TSID is being controlled...
+			Message.printWarning ( 3, routine, "Error adding time series for groundwater total." );
 		}
 		yts_acgw.setDataUnits ( "ACRE" );
 		yts_acgw.setDataUnitsOriginal ( "ACRE" );
-		yts_acgw.setDescription ( dataset_location +
-				" Groundwater-irrigated area" );
+		yts_acgw.setDescription ( dataset_location + " Groundwater-irrigated area" );
 		yts_acgw.setDate1(new DateTime(start_DateTime));
 		yts_acgw.setDate2(new DateTime(end_DateTime));
 		yts_acgw.setDate1Original(new DateTime(start_DateTime));
@@ -2728,22 +2596,19 @@ public static List toTSList ( List data_Vector,
 		// Total of all irrigation...
 		
 		yts_tot = new YearTS ();
-		try {	TSIdent tsident = new TSIdent (
-			dataset_location, dataset_datasource,
+		try {
+			TSIdent tsident = new TSIdent ( dataset_location, dataset_datasource,
 			TSTYPE_CropArea_Total, "Year", "" );
 			yts_tot.setIdentifier ( tsident );
 			yts_tot.getIdentifier().setInputType ( "StateCU" );
 		}
 		catch ( Exception e ) {
-			// This should NOT happen because the TSID is
-			// being controlled...
-			Message.printWarning ( 3, routine,
-			"Error adding time series for total acres." );
+			// This should NOT happen because the TSID is being controlled...
+			Message.printWarning ( 3, routine, "Error adding time series for total acres." );
 		}
 		yts_tot.setDataUnits ( "ACRE" );
 		yts_tot.setDataUnitsOriginal ( "ACRE" );
-		yts_tot.setDescription ( dataset_location +
-			" groundwater-irrigated area" );
+		yts_tot.setDescription ( dataset_location + " groundwater-irrigated area" );
 		yts_tot.setDate1(new DateTime(start_DateTime));
 		yts_tot.setDate2(new DateTime(end_DateTime));
 		yts_tot.setDate1Original(new DateTime(start_DateTime));
@@ -2751,22 +2616,18 @@ public static List toTSList ( List data_Vector,
 		yts_tot.allocateDataSpace();
 
 		yts_pump = new YearTS ();
-		try {	TSIdent tsident = new TSIdent (
-			dataset_location, dataset_datasource,
-			TSTYPE_PumpingMax, "Year", "" );
+		try {
+			TSIdent tsident = new TSIdent ( dataset_location, dataset_datasource, TSTYPE_PumpingMax, "Year", "" );
 			yts_pump.setIdentifier ( tsident );
 			yts_pump.getIdentifier().setInputType ( "StateCU" );
 		}
 		catch ( Exception e ) {
-			// This should NOT happen because the TSID is
-			// being controlled...
-			Message.printWarning ( 3, routine,
-			"Error adding time series for total acres." );
+			// This should NOT happen because the TSID is being controlled...
+			Message.printWarning ( 3, routine, "Error adding time series for total acres." );
 		}
 		yts_pump.setDataUnits ( "ACFT" );
 		yts_pump.setDataUnitsOriginal ( "ACFT" );
-		yts_pump.setDescription ( dataset_location +
-			" groundwater-irrigated area" );
+		yts_pump.setDescription ( dataset_location + " groundwater-irrigated area" );
 		yts_pump.setDate1(new DateTime(start_DateTime));
 		yts_pump.setDate2(new DateTime(end_DateTime));
 		yts_pump.setDate1Original(new DateTime(start_DateTime));
@@ -2805,130 +2666,119 @@ public static List toTSList ( List data_Vector,
 		tslist.add ( ipy.__gmode_ts );
 
 		if ( include_dataset_totals ) {
-				// Totals for version 10+ format...
-				if ( (yts_acsw != null) && (ipy.__acsw_ts != null) ) {
-				try {	TSUtil.add ( yts_acsw, ipy.__acsw_ts );
+			// Totals for version 10+ format...
+			if ( (yts_acsw != null) && (ipy.__acsw_ts != null) ) {
+				try {
+					TSUtil.add ( yts_acsw, ipy.__acsw_ts );
 				}
 				catch ( Exception e ) {
-					Message.printWarning ( 2, routine,
-					"Error adding time series." );
+					Message.printWarning ( 3, routine, "Error adding time series." );
 				}
-				}
-				if ( (yts_acgw != null) && (ipy.__acgw_ts != null) ) {
-				try {	TSUtil.add ( yts_acgw, ipy.__acgw_ts );
-				}
-				catch ( Exception e ) {
-					Message.printWarning ( 2, routine,
-					"Error adding time series." );
-				}
-				}
-				// Totals for version 12+ format
-				if ( (yts_acswfl != null) && (ipy.__acswfl_ts != null) ) {
-				try {	TSUtil.add ( yts_acswfl, ipy.__acswfl_ts );
+			}
+			if ( (yts_acgw != null) && (ipy.__acgw_ts != null) ) {
+				try {
+					TSUtil.add ( yts_acgw, ipy.__acgw_ts );
 				}
 				catch ( Exception e ) {
-					Message.printWarning ( 2, routine,
-					"Error adding time series." );
+					Message.printWarning ( 3, routine, "Error adding time series." );
 				}
-				}
-				if ( (yts_acswspr != null) && (ipy.__acswspr_ts != null) ) {
-				try {	TSUtil.add ( yts_acswspr, ipy.__acswspr_ts );
-				}
-				catch ( Exception e ) {
-					Message.printWarning ( 2, routine,
-					"Error adding time series." );
-				}
-				}
-				if ( (yts_acgwfl != null) && (ipy.__acgwfl_ts != null) ) {
-				try {	TSUtil.add ( yts_acgwfl, ipy.__acgwfl_ts );
+			}
+			// Totals for version 12+ format
+			if ( (yts_acswfl != null) && (ipy.__acswfl_ts != null) ) {
+				try {
+					TSUtil.add ( yts_acswfl, ipy.__acswfl_ts );
 				}
 				catch ( Exception e ) {
-					Message.printWarning ( 2, routine,
-					"Error adding time series." );
+					Message.printWarning ( 3, routine, "Error adding time series." );
 				}
-				}
-				if ( (yts_acgwspr != null) && (ipy.__acgwspr_ts != null) ) {
-				try {	TSUtil.add ( yts_acgwspr, ipy.__acgwspr_ts );
+			}
+			if ( (yts_acswspr != null) && (ipy.__acswspr_ts != null) ) {
+				try {
+					TSUtil.add ( yts_acswspr, ipy.__acswspr_ts );
 				}
 				catch ( Exception e ) {
-					Message.printWarning ( 2, routine,
-					"Error adding time series." );
+					Message.printWarning ( 3, routine, "Error adding time series." );
 				}
+			}
+			if ( (yts_acgwfl != null) && (ipy.__acgwfl_ts != null) ) {
+				try {
+					TSUtil.add ( yts_acgwfl, ipy.__acgwfl_ts );
 				}
-			
-				if ( (yts_tot != null) && (ipy.__tacre_ts != null)) {
-					try {	TSUtil.add ( yts_tot, ipy.__tacre_ts );
-					}
-					catch ( Exception e ) {
-						Message.printWarning ( 2, routine,
-						"Error adding total acres time series." );
-					}
+				catch ( Exception e ) {
+					Message.printWarning ( 3, routine, "Error adding time series." );
 				}
-			try {	TSUtil.add ( yts_pump, ipy.__mprate_ts );
+			}
+			if ( (yts_acgwspr != null) && (ipy.__acgwspr_ts != null) ) {
+				try {
+					TSUtil.add ( yts_acgwspr, ipy.__acgwspr_ts );
+				}
+				catch ( Exception e ) {
+					Message.printWarning ( 3, routine, "Error adding time series." );
+				}
+			}
+		
+			if ( (yts_tot != null) && (ipy.__tacre_ts != null)) {
+				try {
+					TSUtil.add ( yts_tot, ipy.__tacre_ts );
+				}
+				catch ( Exception e ) {
+					Message.printWarning ( 3, routine, "Error adding total acres time series." );
+				}
+			}
+			try {
+				TSUtil.add ( yts_pump, ipy.__mprate_ts );
 			}
 			catch ( Exception e ) {
-				Message.printWarning ( 2, routine,
-				"Error adding max pumping time series." );
+				Message.printWarning ( 3, routine, "Error adding max pumping time series." );
 			}
 		}
 	}
 	if ( include_dataset_totals ) {
 		// Add the totals to the list...
 		// And also do for the version 10+ time series...
-		yts_acswfl.setDescription ( dataset_location + " " +
-			yts_acswfl.getDataType() );
+		yts_acswfl.setDescription ( dataset_location + " " + yts_acswfl.getDataType() );
 		tslist.add ( yts_acswfl );
-		yts_acswspr.setDescription ( dataset_location + " " +
-			yts_acswspr.getDataType() );
+		yts_acswspr.setDescription ( dataset_location + " " + yts_acswspr.getDataType() );
 		tslist.add ( yts_acswspr );
-		yts_acgwfl.setDescription ( dataset_location + " " +
-			yts_acgwfl.getDataType() );
+		yts_acgwfl.setDescription ( dataset_location + " " + yts_acgwfl.getDataType() );
 		tslist.add ( yts_acgwfl );
-		yts_acgwspr.setDescription ( dataset_location + " " +
-			yts_acgwspr.getDataType() );
+		yts_acgwspr.setDescription ( dataset_location + " " + yts_acgwspr.getDataType() );
 		tslist.add ( yts_acgwspr );
 		
 		// Do for totals by supply type...
-		yts_acsw.setDescription ( dataset_location + " " +
-			yts_acsw.getDataType() );
+		yts_acsw.setDescription ( dataset_location + " " + yts_acsw.getDataType() );
 		tslist.add ( yts_acsw );
-		yts_acgw.setDescription ( dataset_location + " " +
-		yts_acgw.getDataType() );
+		yts_acgw.setDescription ( dataset_location + " " + yts_acgw.getDataType() );
 			tslist.add ( yts_acgw );
 		
-		yts_pump.setDescription ( dataset_location + " " +
-			yts_pump.getDataType() );
+		yts_pump.setDescription ( dataset_location + " " + yts_pump.getDataType() );
 		tslist.add ( yts_pump );
-		yts_tot.setDescription ( dataset_location + " " +
-			yts_tot.getDataType() );
+		yts_tot.setDescription ( dataset_location + " " + yts_tot.getDataType() );
 		tslist.add ( yts_tot );
 	}
 	return tslist;
 }
 
 /**
-Write a Vector of StateCU_IrrigationPracticeTS to a StateCU file.  The filename
-is adjusted to the working directory if necessary using
-IOUtil.getPathUsingWorkingDir().
+Write a list of StateCU_IrrigationPracticeTS to a StateCU file.  The filename
+is adjusted to the working directory if necessary using IOUtil.getPathUsingWorkingDir().
 @param filename_prev The name of the previous version of the file (for
 processing headers).  Specify as null if no previous file is available.
 @param filename The name of the file to write.
-@param data_Vector A Vector of StateCU_IrrigationPracticeTS to write.
+@param data_Vector A list of StateCU_IrrigationPracticeTS to write.
 @param new_comments Comments to add to the top of the file.  Specify as null 
 if no comments are available.
 @exception IOException if there is an error writing the file.
 */
 public static void writeStateCUFile ( String filename_prev, String filename,
-		List data_Vector, String [] new_comments )
+		List data_Vector, List new_comments )
 throws IOException
-{	writeStateCUFile ( filename_prev, filename, data_Vector, new_comments,
-	null );
+{	writeStateCUFile ( filename_prev, filename, data_Vector, new_comments, null );
 }
 
 /**
 Write a Vector of StateCU_IrrigationPracticeTS to a StateCU file.  The filename
-is adjusted to the working directory if necessary using
-IOUtil.getPathUsingWorkingDir().
+is adjusted to the working directory if necessary using IOUtil.getPathUsingWorkingDir().
 @param filename_prev The name of the previous version of the file (for
 processing headers).  Specify as null if no previous file is available.
 @param filename The name of the file to write.
@@ -2940,15 +2790,17 @@ if no comments are available.
 @exception IOException if there is an error writing the file.
 */
 public static void writeStateCUFile ( String filename_prev, String filename,
-					List data_Vector, String [] new_comments, DateTime start, DateTime end, PropList props )
+	List data_Vector, List new_comments, DateTime start, DateTime end, PropList props )
 throws IOException
-{	String [] comment_str = { "#" };
-	String [] ignore_comment_str = { "#>" };
+{	List commentStr = new Vector(1);
+	commentStr.add ( "#" );
+	List ignoreCommentStr = new Vector(1);
+	ignoreCommentStr.add ( "#>" );
 	PrintWriter out = null;
 	String full_filename_prev = IOUtil.getPathUsingWorkingDir ( filename_prev );
 	String full_filename = IOUtil.getPathUsingWorkingDir ( filename );
 	out = IOUtil.processFileHeaders ( full_filename_prev, full_filename, 
-			new_comments, comment_str, ignore_comment_str, 0 );
+			new_comments, commentStr, ignoreCommentStr, 0 );
 	if ( out == null ) {
 		throw new IOException ( "Error writing to \"" +
 		full_filename + "\"" );
@@ -2960,28 +2812,25 @@ throws IOException
 }
 
 /**
-Write a Vector of StateCU_IrrigationPracticeTS to a StateCU file.  The filename
-is adjusted to the working directory if necessary using
-IOUtil.getPathUsingWorkingDir().
+Write a list of StateCU_IrrigationPracticeTS to a StateCU file.  The filename
+is adjusted to the working directory if necessary using IOUtil.getPathUsingWorkingDir().
 @param filename_prev The name of the previous version of the file (for
 processing headers).  Specify as null if no previous file is available.
 @param filename The name of the file to write.
-@param data_Vector A Vector of StateCU_IrrigationPracticeTS to write.
+@param data_Vector A list of StateCU_IrrigationPracticeTS to write.
 @param new_comments Comments to add to the top of the file.  Specify as null 
 if no comments are available.
 @exception IOException if there is an error writing the file.
 */
 public static void writeStateCUFile ( String filename_prev, String filename,
-					List data_Vector, String [] new_comments, PropList props )
+	List data_Vector, List new_comments, PropList props )
 throws IOException
-{	writeStateCUFile ( filename_prev, filename, data_Vector,
-		new_comments, null, null, props );
+{	writeStateCUFile ( filename_prev, filename, data_Vector, new_comments, null, null, props );
 }
 
 /**
-Write a Vector of StateCU_IrrigationPracticeTS to a DateValue file.  The
-filename is adjusted to the working directory if necessary using
-IOUtil.getPathUsingWorkingDir().
+Write a list of StateCU_IrrigationPracticeTS to a DateValue file.  The
+filename is adjusted to the working directory if necessary using IOUtil.getPathUsingWorkingDir().
 @param filename_prev The name of the previous version of the file (for
 processing headers).  Specify as null if no previous file is available.
 @param filename The name of the file to write.
@@ -2991,8 +2840,7 @@ if no comments are available.
 @exception IOException if there is an error writing the file.
 */
 public static void writeDateValueFile (	String filename_prev, String filename,
-					List dataList,
-					String [] new_comments )
+					List dataList, List new_comments )
 throws Exception
 {	// For now ignore the previous file and new comments.
 	// Create a new Vector with the time series data...
@@ -3003,8 +2851,8 @@ throws Exception
 }
 
 /**
-Write a Vector of StateCU_IrrigationPracticeTS to an opened file.
-@param data_Vector A Vector of StateCU_IrrigationPracticeTS to write.
+Write a list of StateCU_IrrigationPracticeTS to an opened file.
+@param data_Vector A list of StateCU_IrrigationPracticeTS to write.
 @param out output PrintWriter.
 @param start the DateTime for the start of output.
 @param end the DateTime for the end of output.
@@ -3045,13 +2893,12 @@ DateTime start, DateTime end, PropList props ) throws IOException
 	String PrecisionForArea = props.getValue ( "PrecisionForArea" );
 	int PrecisionForArea_int = 0;
 	if ( (PrecisionForArea != null) && (PrecisionForArea.length() != 0) &&
-			StringUtil.isInteger(PrecisionForArea)) {
+		StringUtil.isInteger(PrecisionForArea)) {
 		PrecisionForArea_int = StringUtil.atoi(PrecisionForArea);
 	}
 	
 	// Missing data handled by formatting all as strings...
-	String format0 = "%4.4s %-12.12s%6.6s%6.6s%6.6s%8.8s%8.8s%8.8s%8.8s" + 
-	"%12.12s%3.3s%8.8s%8.8s%8.8s";
+	String format0 = "%4.4s %-12.12s%6.6s%6.6s%6.6s%8.8s%8.8s%8.8s%8.8s%12.12s%3.3s%8.8s%8.8s%8.8s";
 	String format_MaxEfficiency = "%6.2f";
 	String header_format = "(6x,i4,11x,i4,7x,a3)";
 	String record_format = "(i4,1x,a12,3(f6.2),4(f8." + PrecisionForArea_int + "),f12.0,i3,f8." +
@@ -3063,126 +2910,80 @@ DateTime start, DateTime end, PropList props ) throws IOException
 		"AcGWFl  AcGWSpr PumpingMax GMode AcTot  AcSW    AcGW  ";
 	// Update the formats if the version is 10
 	if( version10 ){
-		format0 =
-		"%4.4s %-12.12s  %4.4s  %4.4s  %4.4s%8.8s%8.8s%12.12s%3.3s%8.8s";
+		format0 = "%4.4s %-12.12s  %4.4s  %4.4s  %4.4s%8.8s%8.8s%12.12s%3.3s%8.8s";
 		format_MaxEfficiency = "%4.2f";
 		record_format = "(i4,1x,a12,3(2x,f4.2),2(i8),i12,i3,f8.0)";
 		header_format = "(i5,1x,i4,5x,i5,1x,i4,a5,a5)";
 		header0 = "                 Max  Efficiency";
-		header1 = "Yr  CULocation   Surf  Flood Spr  AcGW   AcSprnk" +
-		" PumpingMax GMode  AcTot";
+		header1 = "Yr  CULocation   Surf  Flood Spr  AcGW   AcSprnk PumpingMax GMode  AcTot";
 	}
 	
 	List v = new Vector(11);	// Reuse for all output lines.
 
 	out.println ( cmnt );
-	out.println ( cmnt +
-	"  StateCU Irrigation Practice Time Series (IPY) File" );
+	out.println ( cmnt + "  StateCU Irrigation Practice Time Series (IPY) File" );
 	out.println ( cmnt );
-	out.println ( cmnt +
-	"  Header format " + header_format );
+	out.println ( cmnt + "  Header format " + header_format );
 	out.println ( cmnt );
 	if ( version10 ) {
-	out.println ( cmnt +
-		"  month1           :  Beginning month of data (always 1)." );
+		out.println ( cmnt + "  month1           :  Beginning month of data (always 1)." );
 	}
-	out.println ( cmnt +
-		"  year1            :  Beginning year of data (calendar year)." );
+	out.println ( cmnt + "  year1            :  Beginning year of data (calendar year)." );
 	if ( version10 ) {
-		out.println ( cmnt +
-		"  month2           :  Ending month of data (always 12)." );
+		out.println ( cmnt + "  month2           :  Ending month of data (always 12)." );
 	}
-	out.println ( cmnt +
-		"  year2            :  Ending year of data (calendar year)." );
+	out.println ( cmnt + "  year2            :  Ending year of data (calendar year)." );
 	if ( version10 ) {
-		out.println ( cmnt +
-		"  units            :  Data units for acreages." );
+		out.println ( cmnt + "  units            :  Data units for acreages." );
 	}
-	out.println ( cmnt +
-		"  yeartype         :  Year type (always CYR for calendar)." );
+	out.println ( cmnt + "  yeartype         :  Year type (always CYR for calendar)." );
 	out.println ( cmnt );
-	out.println ( cmnt +
-	"  Record format " + record_format + " - " +
-	"each year/CULocation." );
+	out.println ( cmnt + "  Record format " + record_format + " - each year/CULocation." );
 	out.println ( cmnt );
-	out.println ( cmnt +
-		"  Yr             yr:  Year for data (calendar year)." );
-	out.println ( cmnt +
-		"  CULocation  aspid:  CU Location ID (e.g., " +
-					"structure/station).");
-	out.println ( cmnt +
-		"  Surf         ceff:  Maximum efficiency for delivering" );
-	out.println ( cmnt +
-		"                      surface water supply to the farm" );
-	out.println ( cmnt +
-		"                      headgage (fraction)." );
-	out.println ( cmnt +
-		"  Flood        feff:  Maximum application efficiency for" );
-	out.println ( cmnt +
-		"                      flood irrigation (fraction)." );
-	out.println ( cmnt +
-		"  Spr          seff:  Maximum application efficiency for" );
-	out.println ( cmnt +
-		"                      sprinkler irrigation (fraction)." );
+	out.println ( cmnt + "  Yr             yr:  Year for data (calendar year)." );
+	out.println ( cmnt + "  CULocation  aspid:  CU Location ID (e.g., structure/station).");
+	out.println ( cmnt + "  Surf         ceff:  Maximum efficiency for delivering" );
+	out.println ( cmnt + "                      surface water supply to the farm" );
+	out.println ( cmnt + "                      headgage (fraction)." );
+	out.println ( cmnt + "  Flood        feff:  Maximum application efficiency for" );
+	out.println ( cmnt + "                      flood irrigation (fraction)." );
+	out.println ( cmnt + "  Spr          seff:  Maximum application efficiency for" );
+	out.println ( cmnt + "                      sprinkler irrigation (fraction)." );
 	if ( version10 ) {
-		out.println ( cmnt +
-			"  AcGW        gacre:  Acres with ground water supply." );
-		out.println ( cmnt +
-			"  AcSprnk     sacre:  Acres irrigated by sprinkler. " +
-			"application." );
+		out.println ( cmnt + "  AcGW        gacre:  Acres with ground water supply." );
+		out.println ( cmnt + "  AcSprnk     sacre:  Acres irrigated by sprinkler application." );
 	}
 	else {
-		out.println ( cmnt +
-			"  AcSwFl      acswfl: Acres with surface water only supply, flood." );
-		out.println ( cmnt +
-			"  AcSwSpr     acswspr:Acres with surface water only supply, sprinkler." );
-		out.println ( cmnt +
-			"  AcGwFl      acgwfl: Acres with groundwater supply, flood." );
-		out.println ( cmnt +
-			"  AcGwSpr     acgwspr:Acres with groundwater supply, sprinkler." );
+		out.println ( cmnt + "  AcSwFl      acswfl: Acres with surface water only supply, flood." );
+		out.println ( cmnt + "  AcSwSpr     acswspr:Acres with surface water only supply, sprinkler." );
+		out.println ( cmnt + "  AcGwFl      acgwfl: Acres with groundwater supply, flood." );
+		out.println ( cmnt + "  AcGwSpr     acgwspr:Acres with groundwater supply, sprinkler." );
 	}
-	out.println ( cmnt +
-		"  PumpingMax mprate:  Maximum pumping volume (AF per month).");
-	out.println ( cmnt +
-		"  GMode       gmode:  Ground water use mode.");
-	out.println ( cmnt +
-		"                      1=surface and GW are used to maximize" +
-		" supply." );
-	out.println ( cmnt +
-		"                      2=surface water is used 1st on all" );
-	out.println ( cmnt +
-		"                      acreage, and then GW." );
-	out.println ( cmnt +
-		"                      3=GW is used first on sprinkler" );
-	out.println ( cmnt +
-		"                      acreage and surface water shares for" );
-	out.println ( cmnt +
-		"                      the same acreage are available for" +
-		"recharge." );
-	out.println ( cmnt +
-		"  AcTot       tacre:  Total acres irrigated - agrees with" );
-	out.println ( cmnt +
-		"                      crop pattern time series file (CDS)." );
+	out.println ( cmnt + "  PumpingMax mprate:  Maximum pumping volume (AF per month).");
+	out.println ( cmnt + "  GMode       gmode:  Ground water use mode.");
+	out.println ( cmnt + "                      1=surface and GW are used to maximize supply." );
+	out.println ( cmnt + "                      2=surface water is used 1st on all" );
+	out.println ( cmnt + "                      acreage, and then GW." );
+	out.println ( cmnt + "                      3=GW is used first on sprinkler" );
+	out.println ( cmnt + "                      acreage and surface water shares for" );
+	out.println ( cmnt + "                      the same acreage are available for recharge." );
+	out.println ( cmnt + "  AcTot       tacre:  Total acres irrigated - agrees with" );
+	out.println ( cmnt + "                      crop pattern time series file (CDS)." );
 	if ( !version10 ) {
 		// Newer put the supply totals on the far right for information only.
-		out.println ( cmnt +
-			"  AcSW       gwacre:  Acres with surface water only supply (not read by StateCU)." );
-		out.println ( cmnt +
-			"  AcGW       swacre:  Acres with ground water supply (not read by StateCU). " );
+		out.println ( cmnt + "  AcSW       gwacre:  Acres with surface water only supply (not read by StateCU)." );
+		out.println ( cmnt + "  AcGW       swacre:  Acres with ground water supply (not read by StateCU). " );
 	}
 	out.println ( cmnt );
 	out.println ( cmnt +	
 		header0 );
 	out.println ( cmnt + header1);
 	if ( version10 ) {
-		out.println ( cmnt +	
-			"-exb----------exxb--exxb--exxb--eb------eb------e" +
-			"b----------eb-eb------e" );
+		out.println ( cmnt + "-exb----------exxb--exxb--exxb--eb------eb------eb----------eb-eb------e" );
 	}
-	else { // New format...
-		out.println ( cmnt +	
-			"-exb----------eb----eb----eb----eb------eb------e" +
-			"b------eb------eb----------eb-eb------eb------eb------e" );
+	else {
+		// New format...
+		out.println ( cmnt + "-exb----------eb----eb----eb----eb------eb------eb------eb------eb----------eb-eb------eb------eb------e" );
 	}
 	out.println ( cmnt + "EndHeader" );
 
@@ -3200,20 +3001,14 @@ DateTime start, DateTime end, PropList props ) throws IOException
 	}
 
 	if( version10 ) {
-		out.println (	"    1/" +
-			StringUtil.formatString(date1.getYear(),"%04d") +
-			"        12/"  +
-			StringUtil.formatString(date2.getYear(),"%04d") +
-			StringUtil.formatString("ACRE","%5.5s") +
-			StringUtil.formatString("CYR","%5.5s") );
+		out.println ( "    1/" + StringUtil.formatString(date1.getYear(),"%04d") +
+			"        12/" + StringUtil.formatString(date2.getYear(),"%04d") +
+			StringUtil.formatString("ACRE","%5.5s") + StringUtil.formatString("CYR","%5.5s") );
 	}
 	else {
-		out.println (	"      " +	
-			StringUtil.formatString(date1.getYear(),"%04d") +
-			"           "  +
-			StringUtil.formatString(date2.getYear(),"%04d") +
-			"       " +
-			StringUtil.formatString("CYR","%3.3s") );
+		out.println ( "      " + StringUtil.formatString(date1.getYear(),"%04d") +
+			"           " + StringUtil.formatString(date2.getYear(),"%04d") +
+			"       " + StringUtil.formatString("CYR","%3.3s") );
 	}
 	
 	// Write the data...
@@ -3270,9 +3065,7 @@ DateTime start, DateTime end, PropList props ) throws IOException
 			v.add(StringUtil.formatString(val, format_MaxEfficiency));
 			
 			if( version10 ) {
-				/* FIXME SAM 2007-10-18 Remove later when tested out
-				gacre_yts = tsp.getGacreTS();
-				*/
+				// FIXME SAM 2007-10-18 Remove later when tested out gacre_yts = tsp.getGacreTS();
 				if ( RecomputeVersion10Acreage_boolean ) {
 					acgwfl_yts = tsp.getAcgwflTS();
 					acgwfl_val = acgwfl_yts.getDataValue ( temp_DateTime );
@@ -3281,7 +3074,8 @@ DateTime start, DateTime end, PropList props ) throws IOException
 					if ( (acgwfl_val < 0.0) || (acgwspr_val < 0.0) ) {
 						val = -999.0;
 					}
-					else {	val = acgwfl_val + acgwspr_val;
+					else {
+						val = acgwfl_val + acgwspr_val;
 					}
 				}
 				/* FIXME SAM 2007-10-18 Remove later when tested out
@@ -3304,7 +3098,8 @@ DateTime start, DateTime end, PropList props ) throws IOException
 					if ( (acswspr_val < 0.0) || (acgwspr_val < 0.0) ) {
 						val = -999.0;
 					}
-					else {	val = acswspr_val + acgwspr_val;
+					else {
+						val = acswspr_val + acgwspr_val;
 					}
 				}
 				/* FIXME SAM 2007-10-18 Remove later when tested out
@@ -3442,4 +3237,4 @@ DateTime start, DateTime end, PropList props ) throws IOException
 	}
 }
 
-} // End StateCU_IrrigationPracticeTS
+}

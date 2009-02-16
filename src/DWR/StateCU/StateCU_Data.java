@@ -1,29 +1,8 @@
-//-----------------------------------------------------------------------------
-// StateCU_Data - base class for all StateCU data objects
-//-----------------------------------------------------------------------------
-// History:
-//
-// 2002-11-07	Steven A. Malers, RTi	Created class.
-// 2003-05-12	SAM, RTi		Add dirty flag.
-// 2003-06-04	SAM, RTi		Rename class from CUData to
-//					StateCU_Data.
-// 2004-02-28	SAM, RTi		Move indexOf(), indexOfName(), match()
-//					into StateCU_Util.
-// 2005-01-17	J. Thomas Sapienza, RTi	* Implements cloneable.
-//					* Added _isClone.
-//					* Added _original.
-//					* Added restoreOriginal().
-// 2005-03-08	SAM, RTi		Add compareTo() and implement
-//					Comparable.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-//-----------------------------------------------------------------------------
-
 package DWR.StateCU;
 
 /**
 This StateCU_Data class can be used as a base class for StateCU data objects.
-Common data like identifier and name is maintained here to simplify access and
-remove redundant code.
+Common data like identifier and name is maintained here to simplify access and remove redundant code.
 */
 public abstract class StateCU_Data 
 implements Cloneable, Comparable {
@@ -43,7 +22,7 @@ For screens that can cancel changes, this stores the original values.
 protected Object _original;
 
 /**
-Consruct the object and set values to empty strings.
+Construct the object and set values to empty strings.
 */
 public StateCU_Data ()
 {
@@ -69,11 +48,9 @@ public Object clone() {
 }
 
 /**
-Compares this object to another StateMod_Data object based on _id and _name,
-in that order.
+Compares this object to another StateMod_Data object based on _id and _name, in that order.
 @param o the object to compare against.
-@return 0 if they are the same, 1 if this object is greater than the other
-object, or -1 if it is less.
+@return 0 if they are the same, 1 if this object is greater than the other object, or -1 if it is less.
 */
 public int compareTo(Object o) {
 	StateCU_Data data = (StateCU_Data)o;
@@ -140,8 +117,7 @@ public boolean isDirty ( boolean is_dirty )
 }
 
 /**
-Restores the values from the _original object into the current object and 
-sets _original to null.
+Restores the values from the _original object into the current object and sets _original to null.
 */
 public void restoreOriginal() {
 	StateCU_Data d = (StateCU_Data)_original;
@@ -172,4 +148,4 @@ public String toString ()
 {	return _id + "," + _name;
 }
 
-} // End StateCU_Data
+}

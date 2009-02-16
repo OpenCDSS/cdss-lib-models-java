@@ -149,14 +149,13 @@ The file that is read, used to set the time series input name.
 private String __filename = "";
 
 /**
-The list of crop time series.  The data type for each time series is the
-crop type.
+The list of crop time series.  The data type for each time series is the crop type.
 */
 private List __tslist = new Vector();
 
 /**
-The list of StateCU_Parcel observations, as an archive of observations to use
-with data filling.
+The list of StateCU_Parcel observations, as an archive of observations to use with data filling.
+These are read from HydroBase.
 */
 private List __parcel_Vector = new Vector();
 
@@ -185,23 +184,18 @@ private DateTime __temp_DateTime = new DateTime();
 
 /**
 List of crop types for the time series.  This is consistent with the data
-sub-types for the time series.  The list is maintained to simplify use at
-output.
+sub-types for the time series.  The list is maintained to simplify use at output.
 */
 private List __crop_name_Vector = null;
 
 /**
-Construct a new StateCU_CropPatternTS object for the specified CU Location
-identifier.
+Construct a new StateCU_CropPatternTS object for the specified CU Location identifier.
 @param id StateCU_Location identifier.
-@param date1 Starting date of period.  Specify with year 0 if an average annual
-data set.
-@param date2 Ending date of period.  Specify with year 0 if an average annual
-data set.
+@param date1 Starting date of period.  Specify with year 0 if an average annual data set.
+@param date2 Ending date of period.  Specify with year 0 if an average annual data set.
 @param units Data units for the acreage.
 */
-public StateCU_CropPatternTS (	String id, DateTime date1, DateTime date2,
-				String units )
+public StateCU_CropPatternTS (	String id, DateTime date1, DateTime date2, String units )
 {	this ( id, date1, date2, units, null );
 }
 
@@ -209,16 +203,12 @@ public StateCU_CropPatternTS (	String id, DateTime date1, DateTime date2,
 Construct a new StateCU_CropPatternTS object for the specified CU Location
 identifier.  This is typically only called by readStateCUFile().
 @param id StateCU_Location identifier.
-@param date1 Starting date of period.  Specify with year 0 if an average annual
-data set.
-@param date2 Ending date of period.  Specify with year 0 if an average annual
-data set.
+@param date1 Starting date of period.  Specify with year 0 if an average annual data set.
+@param date2 Ending date of period.  Specify with year 0 if an average annual data set.
 @param units Data units for the acreage.
-@param filename The name of the file that is being read, or null if created
-in memory.
+@param filename The name of the file that is being read, or null if created in memory.
 */
-public StateCU_CropPatternTS (	String id, DateTime date1, DateTime date2,
-				String units, String filename )
+public StateCU_CropPatternTS ( String id, DateTime date1, DateTime date2, String units, String filename )
 {	super();
 	_id = id;
 	__tslist = new Vector();
@@ -230,7 +220,8 @@ public StateCU_CropPatternTS (	String id, DateTime date1, DateTime date2,
 		__date1 = new DateTime ();
 		__date2 = new DateTime ();
 	}
-	else {	// Use the specified dates...
+	else {
+		// Use the specified dates...
 		__date1 = new DateTime ( date1 );
 		__date2 = new DateTime ( date2 );
 	}
@@ -241,22 +232,22 @@ public StateCU_CropPatternTS (	String id, DateTime date1, DateTime date2,
 }
 
 /**
-Add a parcel containing observations.
+Add a parcel containing observations.  This is used to store raw data (e.g., from HydroBase) so that
+later filling and checks can more easily be performed.
 @param parcel StateCU_Parcel to add.
 */
 public void addParcel ( StateCU_Parcel parcel )
 {	__parcel_Vector.add ( parcel );
+	String routine = "StateCU_CropPatternTS.addParcel";
+	Message.printStatus(2, routine, "Adding parcel " + parcel.toString() );
 }
 
 /**
-Add another crop time series, using the period that was defined in the
-constructor.
+Add another crop time series, using the period that was defined in the constructor.
 @param crop_name Name of crop for this time series (only include the crop name, not the leading "CropArea-").
 @param overwrite If false, the time series is only added if it does not already
-exist.  If true, the time series is added regardless and replaces the existing
-time series.
-@return the position that the time series was added in the list (zero
-reference).
+exist.  If true, the time series is added regardless and replaces the existing time series.
+@return the position that the time series was added in the list (zero reference).
 @exception Exception if there is an error adding the time series.
 */
 public YearTS addTS ( String crop_name, boolean overwrite )
@@ -264,8 +255,8 @@ public YearTS addTS ( String crop_name, boolean overwrite )
 	YearTS yts = null;
 	if ( (pos < 0) || overwrite ) {
 		yts = new YearTS();
-		try {	TSIdent tsident = new TSIdent ( _id, "StateCU",
-			"CropArea-" + crop_name, "Year", "" );
+		try {
+			TSIdent tsident = new TSIdent ( _id, "StateCU", "CropArea-" + crop_name, "Year", "" );
 			yts.setIdentifier ( tsident );
 			yts.getIdentifier().setInputType ( "StateCU" );
 			if ( __filename != null ) {
@@ -273,8 +264,7 @@ public YearTS addTS ( String crop_name, boolean overwrite )
 			}
 		}
 		catch ( Exception e ) {
-			// This should NOT happen because the TSID is being
-			// controlled...
+			// This should NOT happen because the TSID is being controlled...
 			Message.printWarning ( 2, "StateCU_CropPatternTS.addTS",
 			"Error adding time series for \"" + crop_name + "\"" );
 		}
@@ -306,8 +296,7 @@ public YearTS addTS ( String crop_name, boolean overwrite )
 Get the crop acreage for the given year.
 @return the crop acreage for the given year.  Return -999.0 if the crop is not
 found or the requested year is outside the data period.
-@param crop_name Name of the crop, only the crop name without the leading
-"CropArea-".
+@param crop_name Name of the crop, only the crop name without the leading "CropArea-".
 @param year Year to retrieve data.
 @param return_fraction If true, return the acreage as a fraction (0.0 to 1.0) of
 the total.  If false, return the acreage.
@@ -332,7 +321,8 @@ public double getCropArea (String crop_name, int year, boolean return_fraction)
 		else if ( total_area == 0.0 ) {
 			return 0.0;
 		}
-		else {	// Total is an actual value so evaluate the specific value...
+		else {
+			// Total is an actual value so evaluate the specific value...
 			double value = yts.getDataValue ( __temp_DateTime );
 			if ( value < 0.0 ) {
 				// Missing...
@@ -343,7 +333,8 @@ public double getCropArea (String crop_name, int year, boolean return_fraction)
 			}
 		}
 	}
-	else {	// Will return mising value if that is what it is...
+	else {
+		// Will return missing value if that is what it is...
 		return yts.getDataValue ( __temp_DateTime );
 	}
 }
@@ -386,15 +377,13 @@ public static List getCropNames ( List dataList )
 		if ( crop_names != null ) {
 			ncrops = crop_names.size();
 		}
-		// Loop through each crop and add to the main Vector if it is
-		// not already in that list...
+		// Loop through each crop and add to the main Vector if it is not already in that list...
 		for ( j = 0; j < ncrops; j++ ) {
 			crop_name = (String)crop_names.get(j);
 			vsize = v.size();
 			found = false;
 			for ( k = 0; k < vsize; k++ ) {
-				if (	crop_name.equalsIgnoreCase(
-					(String)v.get(k)) ) {
+				if ( crop_name.equalsIgnoreCase((String)v.get(k)) ) {
 					found = true;
 					break;
 				}
@@ -411,23 +400,23 @@ public static List getCropNames ( List dataList )
 	if ( v.size() == 0 ) {
 		return new Vector();
 	}
-	else {	return ( StringUtil.sortStringList ( v ) );
+	else {
+		return ( StringUtil.sortStringList ( v ) );
 	}
 }
 
 /**
 Return the time series for the matching crop.
-@return the time series for the matching crop, or null if the crop does not
-have a time series.
-@param crop_name The name of a crop to check for (just the crop name, without
-the leading "CropArea-").
+@return the time series for the matching crop, or null if the crop does not have a time series.
+@param crop_name The name of a crop to check for (just the crop name, without the leading "CropArea-").
 */
 public YearTS getCropPatternTS ( String crop_name )
 {	int pos = indexOf ( crop_name );
 	if ( pos < 0 ) {
 		return null;
 	}
-	else {	return (YearTS)__tslist.get(pos);
+	else {
+		return (YearTS)__tslist.get(pos);
 	}
 }
 
@@ -448,8 +437,7 @@ public DateTime getDate2()
 }
 
 /**
-Return the parcels for a requested year and crop type.
-These values can be used in data filling.
+Return the parcels for a requested year and crop type.  These values can be used in data filling.
 @param year Parcel year of interest or <= number if all years should be returned.
 @param crop Crop type of interest or null if all crops should be returned.
 @return the list of StateCU_Parcel for a year
@@ -475,8 +463,7 @@ public List getParcelListForYearAndCropName ( int year, String crop )
 
 /**
 Return the total area (acres) for a year.
-@return the total area (acres) for a year or -999.0 if the year is outside the
-period of record.
+@return the total area (acres) for a year or -999.0 if the year is outside the period of record.
 */
 public double getTotalArea ( int year )
 {	if ( (year < __date1.getYear()) || (year > __date2.getYear()) ) {
@@ -494,8 +481,7 @@ public String getUnits()
 }
 
 /**
-Determine the index of a crop time series within the list based on the crop
-name.
+Determine the index of a crop time series within the list based on the crop name.
 @param crop_name Crop to search for (without leading "CropArea-").
 @return index within the list (zero referenced) or -1 if not found.
 */
@@ -527,8 +513,7 @@ public static boolean isCropPatternTSFile ( String filename )
 
 /**
 Checks for the period in the header by reading the first non-comment line.
-If the first 2 characters are spaces, it is assumed that a period header
-is present.
+If the first 2 characters are spaces, it is assumed that a period header is present.
 @param filename Absolute path to filename to check.
 @return true if the file includes a period in the header, false if not.
 @throws IOException if the file cannot be opened.
@@ -549,8 +534,7 @@ private static boolean isPeriodInHeader( String filename ) throws IOException
 		// Not a comment so break out of loop...
 		break;
 	}
-	// The last line read above should be the header line with the
-	// period, or the first line of data.
+	// The last line read above should be the header line with the period, or the first line of data.
 		
 	boolean period_in_header = false;
 	if ( (line.length() > 2) && line.substring(0,2).equals("  ")) {
@@ -569,8 +553,7 @@ private static boolean isPeriodInHeader( String filename ) throws IOException
 /**
 Checks for version 10 by reading the file and checking the length of the first
 data record.  The total length for version 12+ is 55 characters and for version
-10 is 45.  Therefore, a data record length of 50 is considered version 12 (not
-version 10).
+10 is 45.  Therefore, a data record length of 50 is considered version 12 (not version 10).
 @param filename Name of file to check.
 @return true if the file is version 10, false if not (version 12+).
 @throws IOException
@@ -594,8 +577,7 @@ private static boolean isVersion_10( String filename ) throws IOException
 	}
 	// The last line read above should be the header line with the
 	// period.  Ignore it because there is some inconsistency in formatting
-	// and read another line.  For really old files, a header line
-	// will not be used.
+	// and read another line.  For really old files, a header line will not be used.
 	if ( isPeriodInHeader(filename) ) {
 		line = input.readLine();
 	}
@@ -639,8 +621,7 @@ Read the StateCU CDS file and return as a Vector of StateCU_CropPattern.
 <tr>
 <td><b>Version</b></td>
 <td>If "10", the StateCU version 10 format file will be read.  Otherwise, the
-most current format will be read.  This is used for backward
-compatibility.</td>
+most current format will be read.  This is used for backward compatibility.</td>
 <td>True</td>
 </tr>
 
@@ -655,8 +636,7 @@ should only be used when processing older files.</td>
 
 <tr>
 <td><b>AutoAdjust</b></td>
-<td>If "True", automatically adjust the following information when reading the
-file:
+<td>If "True", automatically adjust the following information when reading the file:
 <ol>
 <li>	Crop data types with "." - replace with "-".</li>
 </ol>
@@ -1105,29 +1085,24 @@ The TSID string is specified in addition to the path to the file.  It is
 expected that a TSID in the file
 matches the TSID (and the path to the file, if included in the TSID would not
 properly allow the TSID to be specified).  This method can be used with newer
-code where the I/O path is separate from the TSID that is used to identify the
-time series.
+code where the I/O path is separate from the TSID that is used to identify the time series.
 The IOUtil.getPathUsingWorkingDir() method is applied to the filename.
-@return a pointer to a newly-allocated time series if successful, a NULL pointer
-if not.
+@return a pointer to a newly-allocated time series if successful, a NULL pointer if not.
 @param tsident_string The full identifier for the time series to
 read.  This string can also be the alias for the time series in the file.
 @param filename The name of a file to read
-(in which case the tsident_string must match one of the TSID strings in the
-file).
+(in which case the tsident_string must match one of the TSID strings in the file).
 @param date1 Starting date to initialize period (null to read the entire time
 series).
-@param date2 Ending date to initialize period (null to read the entire time
-series).
+@param date2 Ending date to initialize period (null to read the entire time series).
 @param units Units to convert to.
 @param read_data Indicates whether data should be read (false=no, true=yes).
 */
-public static TS readTimeSeries ( String tsident_string, String filename,
-					DateTime date1, DateTime date2,
-					String units, boolean read_data )
+public static TS readTimeSeries ( String tsident_string, String filename, DateTime date1, DateTime date2,
+	String units, boolean read_data )
 throws Exception
 {	TS ts = null;
-	List v = readTimeSeriesList (	tsident_string, filename, date1, date2, units, read_data );
+	List v = readTimeSeriesList ( tsident_string, filename, date1, date2, units, read_data );
 	if ( (v != null) && (v.size() > 0) ) {
 		ts = (TS)v.get(0);
 	}
@@ -1144,9 +1119,8 @@ The IOUtil.getPathUsingWorkingDir() method is applied to the filename.
 @param units Units to convert to.
 @param read_data Indicates whether data should be read.
 */
-public static List readTimeSeriesList (	String fname,
-						DateTime date1, DateTime date2,
-						String units, boolean read_data)
+public static List readTimeSeriesList (	String fname, DateTime date1, DateTime date2,
+	String units, boolean read_data)
 throws Exception
 {	List tslist = null;
 
@@ -1162,19 +1136,15 @@ Read one or more time series from a StateCU crop pattern time series format file
 is responsible for freeing the memory for the time series.
 @param req_tsident Identifier for requested item series.  If null,
 return all new time series in the vector.  If not null, return the matching time series.
-@parm full_filename Full path to filename, used for messages.
+@param full_filename Full path to filename, used for messages.
 @param req_date1 Requested starting date to initialize period (or NULL to read the entire time series).
 @param req_date2 Requested ending date to initialize period (or NULL to read the entire time series).
 @param units Units to convert to (currently ignored).
 @param read_data Indicates whether data should be read.
 @exception Exception if there is an error reading the time series.
 */
-private static List readTimeSeriesList ( String req_tsident,
-						String full_filename,
-						DateTime req_date1,
-						DateTime req_date2,
-						String req_units,
-						boolean read_data )
+private static List readTimeSeriesList ( String req_tsident, String full_filename, DateTime req_date1,
+	DateTime req_date2, String req_units, boolean read_data )
 throws Exception
 {	// TODO - can optimize this later to only read one time series...
 	// First read the whole file...
@@ -1285,8 +1255,7 @@ public void removeCropName ( String crop_name )
 	}
 	// Remove from the crop names Vector...
 	for ( int i = 0; i < size; i++ ) {
-		if (	((String)__crop_name_Vector.get(i)).
-			equalsIgnoreCase(crop_name) ) {
+		if ( ((String)__crop_name_Vector.get(i)).equalsIgnoreCase(crop_name) ) {
 			// Remove the crop name...
 			__crop_name_Vector.remove(i);
 			--i;
@@ -1301,8 +1270,7 @@ public void removeCropName ( String crop_name )
 	TS ts;
 	for ( int i = 0; i < size; i++ ) {
 		ts = (TS)__tslist.get(i);
-		if (	ts.getIdentifier().getSubType().equalsIgnoreCase(
-			crop_name) ) {
+		if ( ts.getIdentifier().getSubType().equalsIgnoreCase(crop_name) ) {
 			__tslist.remove(i);
 			--i;
 			--size;
@@ -1329,8 +1297,7 @@ throws Exception
 	// First find the time series...
 	YearTS yts = getCropPatternTS ( crop_name );
 	if ( yts == null ) {
-		throw new Exception ( "Unable to find time series for \"" +
-			crop_name + "\"" );
+		throw new Exception ( "Unable to find time series for \"" + crop_name + "\"" );
 	}
 	// Set the data value...
 	__temp_DateTime.setYear ( year );
@@ -1343,9 +1310,9 @@ throws Exception
 		// Set to the new value...
 		__total_area[year - __date1.getYear()] = area;
 	}
-	else {	// Adjust the old value...
-		__total_area[year - __date1.getYear()] =
-			old_total - old_value + area;
+	else {
+		// Adjust the old value...
+		__total_area[year - __date1.getYear()] = old_total - old_value + area;
 	}
 }
 
@@ -1355,8 +1322,7 @@ patterns are being processed from individual records and any record in a year
 should cause other time series to be set to zero for the year.  A later reset
 of the zero can occur without issue.  However, leaving the value as -999 may
 result in unexpected filled values later.
-@param year The year to set data.  If negative, all years with non-missing
-values are processed.
+@param year The year to set data.  If negative, all years with non-missing values are processed.
 @param set_all If true, then all defined time series are set to zero.  If false,
 then only missing values are set to zero.
 */
@@ -1390,8 +1356,7 @@ public void setCropAreasToZero ( int year, boolean set_all )
 		else { // Process each time series...
 			for ( int i = 0; i < size; i++ ) {
 				yts = (YearTS)__tslist.get(i);
-				if (	set_all ||
-						yts.isDataMissing(yts.getDataValue(__temp_DateTime)) ) {
+				if ( set_all || yts.isDataMissing(yts.getDataValue(__temp_DateTime)) ) {
 					yts.setDataValue ( __temp_DateTime, 0.0 );
 					Message.printStatus ( 2, "StateCU_CropPatternTS.setCropAreasToZero",
 						"Setting " + _id + " " + iyear + " crop " + yts.getDataType() + " to zero." );
@@ -1402,16 +1367,13 @@ public void setCropAreasToZero ( int year, boolean set_all )
 }
 
 /**
-Set the pattern for a crop for a given year by specifying the areas for
-each crop.
+Set the pattern for a crop for a given year by specifying the areas for each crop.
 @param year Year for the crop data.
 @param ncrops Number of crops that should be processed.
 @param crop_names List of crops that are planted.
 @param crop_areas Areas planted for each crop, acres.
 */
-public void setPatternUsingAreas (	int year, int ncrops,
-					String [] crop_names,
-					double [] crop_areas ) 
+public void setPatternUsingAreas ( int year, int ncrops, String [] crop_names, double [] crop_areas ) 
 {	if ( (year < __date1.getYear()) || (year > __date2.getYear()) ) {
 		return;
 	}
@@ -1444,7 +1406,8 @@ public void setPatternUsingAreas (	int year, int ncrops,
 			// Set the value (ok even if crop area is missing)...
 			total_area = crop_areas[i];
 		}
-		else {	// Add the value (but only if not missing)...
+		else {
+			// Add the value (but only if not missing)...
 			if ( crop_areas[i] >= 0.0 ) {
 				total_area += crop_areas[i];
 			}
@@ -1455,17 +1418,15 @@ public void setPatternUsingAreas (	int year, int ncrops,
 
 /**
 Set the pattern for crops for a given year by specifying a total area and
-distribution in fractions.  If the year is outside the period, then no action
-occurs.
+distribution in fractions.  If the year is outside the period, then no action occurs.
 @param year Year for the crop data.
 @param ncrops Number of crops that should be processed.
 @param total_area Total area that is cultivated (acres).
 @param crop_names List of crops that are planted.
 @param crop_fractions Fractions for each crop (0.0 to 1.0).
 */
-public void setPatternUsingFractions (	int year, double total_area, int ncrops,
-					String [] crop_names,
-					double [] crop_fractions )
+public void setPatternUsingFractions ( int year, double total_area, int ncrops, String [] crop_names,
+	double [] crop_fractions )
 {	__temp_DateTime.setYear ( year );
 	if ( (year < __date1.getYear()) || (year > __date2.getYear()) ) {
 		return;
@@ -1477,8 +1438,7 @@ public void setPatternUsingFractions (	int year, double total_area, int ncrops,
 	if ( ncrops < size ) {
 		size = ncrops;
 	}
-	//Message.printStatus ( 1, "", "SAMX: Setting " + year + " to " +
-		//total_area + " date1=" + __date1 );
+	//Message.printStatus ( 1, "", "SAMX: Setting " + year + " to " + total_area + " date1=" + __date1 );
 	__total_area[year - __date1.getYear()] = total_area;
 	YearTS yts = null;
 	for ( int i = 0; i < size; i++ ) {
@@ -1510,22 +1470,21 @@ throws Exception
 {	double old_total_area = getTotalArea ( year );
 	int ncrops = __crop_name_Vector.size();
 	if ( old_total_area <= 0.0 ) {
-		// TODO SAM 2007-06-20 Evaluate how to handle when all crops are
-		// zero or missing.
+		// TODO SAM 2007-06-20 Evaluate how to handle when all crops are zero or missing.
 		if ( ncrops > 0 ) {
 			// Do not have crop data to prorate...
 			Message.printWarning ( 2, "StateCU_CropPatternTS.setTotalArea",
-					"No initial crop data for \"" + _id +
-			"\".  Cannot prorate crops to new total " +
+				"No initial crop data for \"" + _id + "\".  Cannot prorate crops to new total " +
 			StringUtil.formatString(total_area,"%.3f") + ".");
-			throw new Exception ( "Unable to set total area for \"" +
-					_id + "\"" );
+			throw new Exception ( "Unable to set total area for \"" + _id + "\"" );
 		}
-		else {	// No previous crops so just set the total (probably zero).
+		else {
+			// No previous crops so just set the total (probably zero).
 			__total_area[year - __date1.getYear()] = total_area;
 		}
 	}
-	else {	// Modify the existing areas by the factor...
+	else {
+		// Modify the existing areas by the factor...
 		double factor = total_area/old_total_area;
 		// Loop through the crops...
 		String crop_name;
@@ -1539,8 +1498,7 @@ throws Exception
 }
 
 /**
-Return a string representation of this object (the crop name Vector as a
-string).
+Return a string representation of this object (the crop name list as a string).
 @return a string representation of this object.
 */
 public String toString()
@@ -1577,11 +1535,8 @@ in particular, if the totals for different data sets will be graphed or manipula
 @param dataset_datasource Data source to be used for the total time series.
 If not specified, "StateCU" will be used.
 */
-public static List toTSList ( List dataList,
-					boolean include_location_totals,
-					boolean include_dataset_totals,
-					String dataset_location,
-					String dataset_datasource )
+public static List toTSList ( List dataList, boolean include_location_totals,
+	boolean include_dataset_totals, String dataset_location, String dataset_datasource )
 {	String routine = "StateCU_CropPatternTS.toTSVector";
 	List tslist = new Vector();
 	int size = 0;
@@ -1637,8 +1592,7 @@ public static List toTSList ( List dataList,
 			yts = new YearTS ();
 			try {
 				TSIdent tsident = new TSIdent (
-				dataset_location, dataset_datasource,
-				"CropArea-" + crop_name, "Year", "" );
+				dataset_location, dataset_datasource, "CropArea-" + crop_name, "Year", "" );
 				yts.setIdentifier ( tsident );
 				yts.getIdentifier().setInputType ( "StateCU" );
 			}
@@ -1697,8 +1651,7 @@ public static List toTSList ( List dataList,
 			yts = new YearTS ();
 			try {
 				TSIdent tsident = new TSIdent (
-				cds.getID(), dataset_datasource,
-				"CropArea-" + crop_name, "Year", "" );
+				cds.getID(), dataset_datasource, "CropArea-" + crop_name, "Year", "" );
 				yts.setIdentifier ( tsident );
 				yts.getIdentifier().setInputType ( "StateCU" );
 			}
@@ -1806,10 +1759,8 @@ throws Exception
 			if ( existing_crop_pos < 0 ) {
 				ts.getIdentifier().setSubType(new_crop_name);
 				ts.addToGenesis ("Translated crop name from \""+
-				old_crop_name + "\" to \"" +
-				new_crop_name + "\"" );
-				ts.setDescription ( ts.getLocation() + " " +
-				new_crop_name + " crop area" );
+				old_crop_name + "\" to \"" + new_crop_name + "\"" );
+				ts.setDescription ( ts.getLocation() + " " + new_crop_name + " crop area" );
 			}
 			// Only allow one rename at a time...
 			break;
@@ -1911,8 +1862,7 @@ throws IOException
 Write a list of StateCU_CropPatternTS to an opened file.
 @param dataList A list of StateCU_CropPatternTS to write.
 @param out output PrintWriter.
-@param add_part_acres If true, then the acreage for each crop is shown in
-addition to the fractions.
+@param add_part_acres If true, then the acreage for each crop is shown in addition to the fractions.
 @param req_date1 Requested output start date.
 @param req_date2 Requested output end date.
 @param props Properties to control the write, as follows:
