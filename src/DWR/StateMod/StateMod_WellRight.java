@@ -368,6 +368,38 @@ public int getParcelYear() {
 	return __parcelYear;
 }
 
+/**
+Create summary comments suitable to add to a file header.
+*/
+private static List getSummaryCommentList(List rightList)
+{
+	List summaryList = new Vector();
+	int size = rightList.size();
+	List parcelMatchClassList = new Vector();
+	StateMod_WellRight right = null;
+	int parcelMatchClass;
+	// Determine the unique list of water right classes - ok to end up with one class of -999
+	// if class match information is not available.
+	for ( int i = 0; i < size; i++ ) {
+		right = (StateMod_WellRight)rightList.get(i);
+		parcelMatchClass = right.getParcelMatchClass();
+		boolean found = false;
+		for ( int j = 0; j < parcelMatchClassList.size(); j++ ) {
+			if ( ((Integer)parcelMatchClassList.get(j)).intValue() == parcelMatchClass ) {
+				found = true;
+				break;
+			}
+		}
+		if ( !found ) {
+			parcelMatchClassList.add ( new Integer(parcelMatchClass));
+		}
+	}
+	// Now summarize information by class
+	int parcelMatchClassListSize = parcelMatchClassList.size();
+	int [] countByClass = new int[parcelMatchClassListSize];
+	return summaryList;
+}
+
 private void initialize() {
 	_smdata_type = StateMod_DataSet.COMP_WELL_RIGHTS;
 	_irtem = "99999";
@@ -625,7 +657,7 @@ public void setParcelYear(int parcel_year) {
 /**
 Write the well rights file.  The comments from the previous
 rights file are transferred into the next one.  Also, a history is maintained
-and printed in the header fo the file.  Additional header comments can be added
+and printed in the header for the file.  Additional header comments can be added
 through the new_comments parameter.
 Comments for each data item will be written if provided - these are being used
 for evaluation during development but are not a part of the standard file.
@@ -648,14 +680,13 @@ throws Exception {
 	}
 	String WriteDataComments = writeProps.getValue ( "WriteDataComments");
 	boolean WriteDataComments_boolean = false;
-	if ( (WriteDataComments != null) &&
-		WriteDataComments.equalsIgnoreCase("True") ) {
+	if ( (WriteDataComments != null) && WriteDataComments.equalsIgnoreCase("True") ) {
 		WriteDataComments_boolean = true;
 	}
 
 	if (outfile == null) {
 		String msg = "Unable to write to null filename";
-		Message.printWarning(2, routine, msg);
+		Message.printWarning(3, routine, msg);
 		throw new Exception(msg);
 	}
 			
@@ -678,7 +709,12 @@ throws Exception {
 
 		out.println(cmnt);
 		out.println(cmnt + "***************************************************");
-		out.println(cmnt + "  StateMod Well Right File");
+		out.println(cmnt + "  StateMod Well Right File (" + theRights.size() + " rights)");
+		out.println(cmnt);
+		List fileSummary = getSummaryCommentList(theRights);
+		for ( int i = 0; i < fileSummary.size(); i++ ) {
+			out.println(cmnt + (String)fileSummary.get(i));
+		}
 		out.println(cmnt);
 		String format_add = "";
 		if ( WriteDataComments_boolean ) {

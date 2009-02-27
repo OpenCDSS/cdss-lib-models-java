@@ -1276,7 +1276,7 @@ can be used when processing rights for a single structure (e.g., when plotting r
 @param date2 Ending date for the time series.  Must not be null.
 */
 public static TS createWaterRightTS ( StateMod_Data smdata, int interval, String units,
-					DateTime date1, DateTime date2)
+					DateTime date1, DateTime date2 )
 {	TS ts = null;
 	String tsid = null;
 	if ( interval == TimeInterval.MONTH ) {
@@ -3260,7 +3260,8 @@ public static List getWaterRightIdentifiersForLocation ( List smrights, String l
 /**
 Get a list of water rights for a location.  The locations are the nodes at which the rights apply.
 @param smrights List of StateMod_Right to search.
-@param loc_id Location identifier to match (case-insensitive).
+@param loc_id Location identifier to match (case-insensitive).  If null, return all water rights for the
+requested parcel year.
 @param req_parcel_year Parcel year for data or -1 to use all (only used with well rights).
 @return a list of locations for water rights, in the order found in the original list.
 */
@@ -3282,7 +3283,7 @@ public static List getWaterRightsForLocation ( List smrights, String loc_id, int
 				continue;
 			}
 		}
-		if ( loc_id.equalsIgnoreCase(right.getLocationIdentifier()) ) {
+		if ( (loc_id == null) || loc_id.equalsIgnoreCase(right.getLocationIdentifier()) ) {
 			matchlist.add ( right );
 		}
 	}
