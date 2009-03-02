@@ -47,8 +47,7 @@ throws Exception {
 }
 
 /**
-Called when the Apply button is pressed. This commits any changes to the data
-objects.
+Called when the Apply button is pressed. This commits any changes to the data objects.
 */
 protected void apply() {
 	StateMod_StreamGage gage = null;
@@ -61,23 +60,19 @@ protected void apply() {
 
 /**
 Creates a JScrollWorksheet for the current data and returns it.
-@return a JScrollWorksheet containing the data Vector passed in to the 
-constructor.
+@return a JScrollWorksheet containing the data Vector passed in to the constructor.
 */
 protected JScrollWorksheet buildJScrollWorksheet() 
 throws Exception {
-	StateMod_StreamGage_Data_TableModel tableModel 
-		= new StateMod_StreamGage_Data_TableModel(_data, _editable);
-	StateMod_StreamGage_Data_CellRenderer cellRenderer 
-		= new StateMod_StreamGage_Data_CellRenderer(tableModel);
+	StateMod_StreamGage_Data_TableModel tableModel = new StateMod_StreamGage_Data_TableModel(_data, _editable);
+	StateMod_StreamGage_Data_CellRenderer cellRenderer = new StateMod_StreamGage_Data_CellRenderer(tableModel);
 
 	// _props is defined in the super class
 	return new JScrollWorksheet(cellRenderer, tableModel, _props);
 }
 
 /**
-Called when the cancel button is pressed.  This discards any changes made to 
-the data objects.
+Called when the cancel button is pressed.  This discards any changes made to the data objects.
 */
 protected void cancel() {
 	StateMod_StreamGage gage = null;
@@ -89,8 +84,7 @@ protected void cancel() {
 }
 
 /**
-Creates backups of all the data objects in the Vector so that changes can 
-later be cancelled if necessary.
+Creates backups of all the data objects in the Vector so that changes can later be cancelled if necessary.
 */
 protected void createDataBackup() {
 	StateMod_StreamGage gage = null;
