@@ -1322,8 +1322,8 @@ is always for calendar year (0=January).
 the control file for a full data set).  Recognized values are:
 <ol>
 <li>	"Calendar", "CYR" (Jan - Dec).</li>
-<li>	"Irrigation", "IYR" (Oct - Sep).</li>
-<li>	"Water", "WYR" (Nov - Oct).</li>
+<li>	"Irrigation", "IYR" (Nov - Oct).</li>
+<li>	"Water", "WYR" (Oct - Sep).</li>
 </ol>
 */
 public double getDiveff ( int index, String yeartype )
@@ -2256,8 +2256,8 @@ The efficiencies are specified with month 0 being January.
 the control file for a full data set).  Recognized values are:
 <ol>
 <li>	"Calendar", "CYR" (Jan - Dec).</li>
-<li>	"Irrigation", "IYR" (Oct - Sep).</li>
-<li>	"Water", "WYR" (Nov - Oct).</li>
+<li>	"Irrigation", "IYR" (Nov - Oct).</li>
+<li>	"Water", "WYR" (Oct - Sep).</li>
 </ol>
 */
 public void setDiveff(int index, double diveff, String yeartype )

@@ -1494,7 +1494,8 @@ Currently this is only enabled for monthly data.
 
 <tr>
 <td><b>CalendarType</b></td>
-<td>The type of calendar, either "WaterYear" or "WYR" (Oct through Sep),
+<td>The type of calendar, either "WaterYear" or "WYR" (Oct through Sep);
+"NovToOct" or "IrrigationYear" or "IYR" (Nov through Oct);
 or "CalendarYear" or "CYR" (Jan through Dec).
 </td>
 <td>CalenderYear (but may be made sensitive to the data type or units in the
@@ -1543,6 +1544,10 @@ throws Exception
 	}
 	else if ( output_format.equalsIgnoreCase("WaterYear") ) {
 		output_format = "WYR";
+	}
+	else if ( output_format.equalsIgnoreCase("IrrigationYear") ||
+		output_format.equalsIgnoreCase("NovToOct")) {
+		output_format = "IYR";
 	}
 
 	String MissingDV = "-999.0"; // Default
@@ -1640,7 +1645,10 @@ throws Exception
 	out.println ( cmnt + " ***********************************" );
 	out.println ( cmnt );
 	if ( output_format.equalsIgnoreCase( "WYR" )) {
-		out.println ( cmnt + " Years Shown = Water Years" );
+		out.println ( cmnt + " Years Shown = Water Years (Oct to Sep)" );
+	}
+	else if ( output_format.equalsIgnoreCase( "IYR" )) {
+		out.println ( cmnt + " Years Shown = Irrigation Years (Nov to Oct)" );
 	}
 	else {
 		// if ( output_format.equalsIgnoreCase ("CYR" ))
@@ -1744,6 +1752,10 @@ throws Exception
 			out.println( cmnt + " Yr ID            Oct     Nov     Dec     Jan" +
 			"     Feb     Mar     Apr     May     Jun     Jul     Aug     Sep     ");
 		}
+		else if ( output_format.equalsIgnoreCase( "IYR" )) {
+			out.println( cmnt + " Yr ID            Nov     Dec     Jan     Feb" +
+			"     Mar     Apr     May     Jun     Jul     Aug     Sep     Oct     ");
+		}
 		else {
 			out.println( cmnt + " Yr ID            Jan" +
 			"     Feb     Mar     Apr     May     Jun     Jul" +
@@ -1806,58 +1818,68 @@ throws Exception
 
 	// If period of record of interest was not requested, find
 	// period of record that covers all time series...
-	String yeartype = "WYR";
+	String yeartype = "WYR"; // Default
 
-		if ( (date1 == null) || (date2 == null) ) {
-			try { TSLimits valid_dates = TSUtil.getPeriodFromTS ( tslist, TSUtil.MAX_POR );
-				if ( (month1==0) || (year1==0) ) {
-					req_date1.setMonth ( valid_dates.getDate1().getMonth());
-					req_date1.setYear ( valid_dates.getDate1().getYear());
-				}
-				if ( (month2==0) || (year2==0) ) {
-					req_date2.setMonth ( valid_dates.getDate2().getMonth());
-					req_date2.setYear ( valid_dates.getDate2().getYear());
-				}
-			} catch ( Exception e ) {
-				Message.printWarning ( 3, rtn, "Unable to determine output period." );
-				throw new Exception ( "Unable to determine output period." );
+	if ( (date1 == null) || (date2 == null) ) {
+		try { TSLimits valid_dates = TSUtil.getPeriodFromTS ( tslist, TSUtil.MAX_POR );
+			if ( (month1==0) || (year1==0) ) {
+				req_date1.setMonth ( valid_dates.getDate1().getMonth());
+				req_date1.setYear ( valid_dates.getDate1().getYear());
 			}
+			if ( (month2==0) || (year2==0) ) {
+				req_date2.setMonth ( valid_dates.getDate2().getMonth());
+				req_date2.setYear ( valid_dates.getDate2().getYear());
+			}
+		} catch ( Exception e ) {
+			Message.printWarning ( 3, rtn, "Unable to determine output period." );
+			throw new Exception ( "Unable to determine output period." );
 		}
+	}
 
-		// Set req_date* to the appropriate month if req_date* doesn't
-		// agree with output_format (e.g., if "WYR" requested but req_date1 != 10)
-		if ( output_format.equalsIgnoreCase ( "WYR" )) {
-			while ( req_date1.getMonth() != 10 ) {
-				req_date1.addMonth ( -1 );
-			}
-			while ( req_date2.getMonth() != 9 ) {
-				req_date2.addMonth ( 1 );
-			}
-			year = req_date1.getYear() + 1;
-			yeartype = "WYR";
+	// Set req_date* to the appropriate month if req_date* doesn't
+	// agree with output_format (e.g., if "WYR" requested but req_date1 != 10)
+	if ( output_format.equalsIgnoreCase ( "WYR" )) {
+		while ( req_date1.getMonth() != 10 ) {
+			req_date1.addMonth ( -1 );
 		}
-		else {
-			// if ( output_format.equalsIgnoreCase ( "CYR" ))
-			while ( req_date1.getMonth() != 1 ) {
-				req_date1.addMonth ( -1 );
-			}
-			while ( req_date2.getMonth() != 12 ) {
-				req_date2.addMonth ( 1 );
-			}
-			year = req_date1.getYear();
-			yeartype = "CYR";
+		while ( req_date2.getMonth() != 9 ) {
+			req_date2.addMonth ( 1 );
 		}
-		format = "   %2d/%4d  -     %2d/%4d%5.5s" + StringUtil.formatString ( yeartype,"%5.5s");
-		// Format for start of line...
-		if ( req_interval_base == TimeInterval.MONTH ) {
-			initial_format = "%4d %-12.12s";
+		year = req_date1.getYear() + 1;
+		yeartype = "WYR";
+	}
+	else if ( output_format.equalsIgnoreCase ( "IYR" )) {
+		while ( req_date1.getMonth() != 11 ) {
+			req_date1.addMonth ( -1 );
 		}
-		/* TODO SAM 2005-05-06 maybe enable daily later
-		else {
-		    // daily...
-			initial_format = "%4d%4d %-12.12s";
+		while ( req_date2.getMonth() != 10 ) {
+			req_date2.addMonth ( 1 );
 		}
-		*/
+		year = req_date1.getYear() + 1;
+		yeartype = "IYR";
+	}
+	else {
+		// if ( output_format.equalsIgnoreCase ( "CYR" ))
+		while ( req_date1.getMonth() != 1 ) {
+			req_date1.addMonth ( -1 );
+		}
+		while ( req_date2.getMonth() != 12 ) {
+			req_date2.addMonth ( 1 );
+		}
+		year = req_date1.getYear();
+		yeartype = "CYR";
+	}
+	format = "   %2d/%4d  -     %2d/%4d%5.5s" + StringUtil.formatString ( yeartype,"%5.5s");
+	// Format for start of line...
+	if ( req_interval_base == TimeInterval.MONTH ) {
+		initial_format = "%4d %-12.12s";
+	}
+	/* TODO SAM 2005-05-06 maybe enable daily later
+	else {
+	    // daily...
+		initial_format = "%4d%4d %-12.12s";
+	}
+	*/
 
 	// Write the header line with the period of record...
 
@@ -2087,7 +2109,10 @@ throws Exception
 	out.println ( cmnt + " ********************" );
 	out.println ( cmnt );
 	if ( output_format.equalsIgnoreCase( "WYR" )) {
-		out.println ( cmnt + " Years Shown = Water Years" );
+		out.println ( cmnt + " Years Shown = Water Years (Oct to Sep)" );
+	}
+	else if ( output_format.equalsIgnoreCase( "IYR" )) {
+		out.println ( cmnt + " Years Shown = Irrigation Years (Nov to Oct)" );
 	}
 	else {
 		// if ( output_format.equalsIgnoreCase ("CYR" ))
@@ -2193,6 +2218,11 @@ throws Exception
 			"     Feb     Mar     Apr     May     Jun     Jul" +
 			"     Aug     Sep     " + year_title );
 		}
+		else if ( output_format.equalsIgnoreCase( "IYR" )) {
+			out.println( cmnt + " Yr ID            Nov     Dec     Jan     Feb" +
+			"     Mar     Apr     May     Jun     Jul     Aug" +
+			"     Sep     Oct     " + year_title );
+		}
 		else {
 			out.println( cmnt + " Yr ID            Jan" +
 			"     Feb     Mar     Apr     May     Jun     Jul" +
@@ -2284,6 +2314,16 @@ throws Exception
 			year = req_date1.getYear() + 1;
 			yeartype = "WYR";
 		}
+		else if ( output_format.equalsIgnoreCase ( "IYR" )) {
+			while ( req_date1.getMonth() != 11 ) {
+				req_date1.addMonth ( -1 );
+			}
+			while ( req_date2.getMonth() != 10 ) {
+				req_date2.addMonth ( 1 );
+			}
+			year = req_date1.getYear() + 1;
+			yeartype = "IYR";
+		}
 		else {
 			// if ( output_format.equalsIgnoreCase ( "CYR" ))
 			while ( req_date1.getMonth() != 1 ) {
@@ -2313,6 +2353,13 @@ throws Exception
 			req_date2.setMonth ( 9 );
 			req_date2.setYear ( 1 );
 			yeartype = "WYR";
+		}
+		else if ( output_format.equalsIgnoreCase ( "IYR" )) {
+			req_date1.setMonth ( 11 );
+			req_date1.setYear ( 0 );
+			req_date2.setMonth ( 10 );
+			req_date2.setYear ( 1 );
+			yeartype = "IYR";
 		}
 		else {
 			// if ( output_format.equalsIgnoreCase ( "CYR" ))
@@ -2584,7 +2631,7 @@ The IOUtil.getPathUsingWorkingDir() method is applied to the filename.
 @param tslist A vector of time series (MonthTS objects).
 @param date1 Start of period to write.
 @param date2 End of period to write.
-@param output_format "CYR" or "WYR".
+@param output_format "CYR", "WYR", or "IYR".
 @param MissingDV Value to be printed when missing values are encountered.
 @param precision Requested precision of output (number of digits after the decimal
 point).  The default is is 2.  This should be set according to the datatype
@@ -2641,7 +2688,8 @@ The IOUtil.getPathUsingWorkingDir() method is applied to the filename.
 
 <tr>
 <td><b>CalendarType</b></td>
-<td>The type of calendar, either "WaterYear" or "WYR" (Oct through Sep),
+<td>The type of calendar, either "WaterYear" or "WYR" (Oct through Sep);
+"IrrigationYear", "NovToOct", or "IYR";
 or "CalendarYear" or "CYR" (Jan through Dec).
 </td>
 <td>CalenderYear (but may be made sensitive to the data type or units in the future).</td>
@@ -2734,6 +2782,9 @@ throws Exception
 	}
 	else if ( output_format.equalsIgnoreCase("WaterYear") ) {
 		output_format = "WYR";
+	}
+	else if ( output_format.equalsIgnoreCase("IrrigationYear") || output_format.equalsIgnoreCase("NovToOct")) {
+		output_format = "IYR";
 	}
 
 	// Get the input file...
