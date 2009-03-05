@@ -777,6 +777,9 @@ throws Exception
 {	TS	ts = null;
 	String routine = "StateMod_TS.readTimeSeries";
 
+	if ( filename == null ) {
+	    throw new IOException ( "Requesting StateMod file with null filename.");
+	}
 	String input_name = filename;
 	String full_fname = IOUtil.getPathUsingWorkingDir ( filename );
 	if ( !IOUtil.fileReadable(full_fname) ) {
@@ -796,8 +799,7 @@ throws Exception
 	// Determine the interval of the file and create a time series that matches...
 	ts = TSUtil.newTimeSeries ( tsident_string, true );
 	if ( ts == null ) {
-		Message.printWarning( 2, routine,
-		"Unable to create time series for \"" + tsident_string + "\"" );
+		Message.printWarning( 2, routine, "Unable to create time series for \"" + tsident_string + "\"" );
 		return ts;
 	}
 	ts.setIdentifier ( tsident_string );
@@ -868,7 +870,7 @@ is responsible for freeing the memory for the time series.
 return all new time series in the vector.  All data are reset, except for the
 identifier, which is assumed to have been set in the calling code.
 @param in Reference to open input stream.
-@parm full_filename Full path to filename, used for messages.
+@param full_filename Full path to filename, used for messages.
 @param reqDate1 Requested starting date to initialize period (or NULL to read the entire time series).
 @param fileInterval Indicates the file type (TimeInterval.DAY or TimeInterval.MONTH).
 @param reqDate2 Requested ending date to initialize period (or NULL to read the entire time series).
@@ -901,8 +903,7 @@ throws Exception
 	if ( req_ts != null ) {
 		req_id = req_ts.getLocation();
 	}
-	try {
-		// General error handler
+	try { // General error handler
 		// read first line of the file
 		++line_count;
 		iline = in.readLine();
@@ -1225,9 +1226,8 @@ throws Exception
 			// so we can check against a requested identifier.  If there is
 			// only one time series in the file, always use it.
 			if ( req_id != null ) {
-				// Have a requested identifier and there are more
-				// than one time series.
-				// Get the ID from the input line.  We don't parse
+				// Have a requested identifier and there are more than one time series.
+				// Get the ID from the input line.  Don't parse
 				// out the remaining lines unless this line is a match...
 				if ( fileInterval == TimeInterval.MONTH ) {
 					chval = iline.substring(5,17);
@@ -1289,8 +1289,7 @@ throws Exception
 	
 			// We are still establishing the list of stations in file
 			if ( Message.isDebugOn ) {
-				Message.printDebug ( dl, routine, "Current year: " +
-				current_year + ", Init year: " + init_year );
+				Message.printDebug ( dl, routine, "Current year: " + current_year + ", Init year: " + init_year );
 			}
 			if ( ((fileInterval == TimeInterval.DAY) && (current_year == init_year) &&
 				(current_month == init_month)) || ((fileInterval == TimeInterval.MONTH) &&
@@ -1401,8 +1400,7 @@ throws Exception
 			// be the last element index.  On the other hand, if we have
 			// already established the list and are filling the rest of the
 			// rows, currentTSindex should be reset to 0.  This assumes that
-			// the number and order of stations is consistent in the file
-			// from year to year.
+			// the number and order of stations is consistent in the file from year to year.
 	
 			if ( currentTSindex >= numts ) {
 				currentTSindex = 0;
@@ -1428,16 +1426,14 @@ throws Exception
 			else {
 				// Monthly data.  The year is for the calendar type and
 				// therefore the starting year may actually need to
-				// be set to the previous year.  Don't do the shift
-				// for average monthly values.
+				// be set to the previous year.  Don't do the shift for average monthly values.
 				if ( standard_ts && (yeartype != StateMod_DataSet.SM_CYR) ) {
 					date.setYear ( current_year - 1 );
 				}
 				else {
 					date.setYear ( current_year );
 				}
-				// Month is assumed from calendar type - it is assumed
-				// that the header is correct...
+				// Month is assumed from calendar type - it is assumed that the header is correct...
 				date.setMonth (m1);
 			}
 			if ( reqDate2 != null ) {
@@ -1498,8 +1494,7 @@ Currently this is only enabled for monthly data.
 "NovToOct" or "IrrigationYear" or "IYR" (Nov through Oct);
 or "CalendarYear" or "CYR" (Jan through Dec).
 </td>
-<td>CalenderYear (but may be made sensitive to the data type or units in the
-future).</td>
+<td>CalenderYear (but may be made sensitive to the data type or units in the future).</td>
 </tr>
 
 <tr>
@@ -1726,8 +1721,7 @@ throws Exception
 				if ( size > 0 ) {
 					out.println ( cmnt + "      Time series creation history:" );
 					for(int igen = 0; igen < size; igen++){
-						out.println( cmnt + "      " + (String)
-						genesis.get(igen) );
+						out.println( cmnt + "      " + (String)genesis.get(igen) );
 					}
 				}
 			}
@@ -2001,7 +1995,7 @@ private static void writeTimeSeriesList ( PrintWriter out, List tslist,
 	int req_precision, boolean print_genesis )
 throws Exception
 {	String rtn	= "StateMod_TS.writeTimeSeriesList";
-	//String cmnt	= "#>"; // nonpermanent comment string
+	//String cmnt	= "#>"; // non-permanent comment string
 	// SAM switch to the following when doing genesis output...
 	String cmnt	= PERMANENT_COMMENT;
 	String iline; // string for use with StringUtil.formatString
@@ -2421,7 +2415,7 @@ throws Exception
 		// file, which results in a little juggling of data...
 		// Print one year at a time for each time series
 
-		year--;	// Decrment because the loop increments it
+		year--;	// Decrement because the loop increments it
 		String units = "";
 		// The basic format for data generally includes a . regardless.
 		// However, implementation of the .ifm file for the RGDSS has
@@ -2503,6 +2497,9 @@ throws Exception
 						}
 					}
 					else {
+					    // FIXME SAM 2009-03-05 Need to make the sum be that of the printed numbers, not the
+					    // in memory numbers.  Otherwise, reading the file later and rewriting will generate a
+					    // different sum, which fouls up testing.
 						annual_sum += value;
 						++annual_count;
 						iline_v.add (new Double(value));
@@ -2849,7 +2846,12 @@ throws Exception
 	List newComments = null;	// Default
 	Object prop_contents = props.getContents ( "NewComments" );
 	if ( prop_contents != null ) {
-		newComments = (List)prop_contents;
+	    if ( prop_contents instanceof List ) {
+	        newComments = (List)prop_contents;
+	    }
+	    else if ( prop_contents instanceof String[] ) {
+	        newComments = StringUtil.toList((String [])prop_contents);
+	    }
 	}
 
 	// Get the output file...
