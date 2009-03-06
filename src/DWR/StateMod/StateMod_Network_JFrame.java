@@ -1576,6 +1576,7 @@ private void setupGUI() {
 	
 	__layoutComboBox = new SimpleJComboBox();
 	__layoutComboBox.addItemListener(this);
+	__layoutComboBox.setToolTipText("Page layout name (e.g., \"11x17 Landscape\")." );
 	
 	__textSizeComboBox = new SimpleJComboBox(true);
 	__textSizeComboBox.add("3");
@@ -1606,6 +1607,8 @@ private void setupGUI() {
 	__textSizeComboBox.add("28");
 	__textSizeComboBox.add("29");
 	__textSizeComboBox.add("30");
+	__textSizeComboBox.setToolTipText("Node label size in points for the printed network, " +
+			"for the specified page layout." );
 	__textSizeComboBox.select("" + __DEFAULT_FONT_SIZE);
 	__textSizeComboBox.addKeyListener(__device);
 	__textSizeComboBox.addItemListener(this);
@@ -1613,6 +1616,8 @@ private void setupGUI() {
 	__orientationComboBox = new SimpleJComboBox();
 	__orientationComboBox.add("Landscape");
 	__orientationComboBox.add("Portrait");
+	__orientationComboBox.setToolTipText("Page orientation (screen and printed network), " +
+			"for the specified page layout.");
 	__orientationComboBox.select(__DEFAULT_PAGE_ORIENTATION);
 	__orientationComboBox.addKeyListener(__device);
 	__orientationComboBox.addItemListener(this);
@@ -1630,6 +1635,8 @@ private void setupGUI() {
 	__nodeSizeComboBox.add("28");
 	__nodeSizeComboBox.add("30");
 	__nodeSizeComboBox.add("48");
+	__nodeSizeComboBox.setToolTipText("Node symbol size in points for the printed network, " +
+			"for the specified page layout." );
 	__nodeSizeComboBox.select("" + __DEFAULT_NODE_SIZE);
 	__nodeSizeComboBox.addKeyListener(__device);
 	__nodeSizeComboBox.addItemListener(this);
@@ -1644,18 +1651,21 @@ private void setupGUI() {
 	__paperSizeComboBox.add("Executive - 7.5x10");
 	__paperSizeComboBox.add("Letter - 8.5x11");
 	__paperSizeComboBox.add("Legal - 8.5x14");
+	__paperSizeComboBox.setToolTipText("Paper size for the printed network, for the specified page layout.");
 	__paperSizeComboBox.select(__DEFAULT_PAPER_SIZE);
 	__paperSizeComboBox.addKeyListener(__device);
 	__paperSizeComboBox.addItemListener(this);
 
 	__defaultLayoutCheckBox = new JCheckBox();
+	__defaultLayoutCheckBox.setToolTipText(
+		"Indicate whether the current layout should be shown when the network is loaded." );
 	__defaultLayoutCheckBox.setSelected(true);
 	__defaultLayoutCheckBox.addItemListener(this);
 
 	int y = 0;
 	JPanel pagePanel = new JPanel();
 	pagePanel.setLayout(new GridBagLayout());
-	JGUIUtil.addComponent(pagePanel, new JLabel("Page Layout: "),
+	JGUIUtil.addComponent(pagePanel, new JLabel("Page layout: "),
 		0, y, 1, 1, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__layoutComboBox.setPrototypeDisplayValue("XXXXXXXXXXXXXXXXXX");
@@ -1672,7 +1682,7 @@ private void setupGUI() {
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	y++;
 
-	JGUIUtil.addComponent(pagePanel, new JLabel("Default Layout? "),
+	JGUIUtil.addComponent(pagePanel, new JLabel("Default layout? "),
 		0, y, 1, 1, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(pagePanel, __defaultLayoutCheckBox,
@@ -1680,7 +1690,7 @@ private void setupGUI() {
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	y++;
 
-	JGUIUtil.addComponent(pagePanel, new JLabel("Paper Size: "),
+	JGUIUtil.addComponent(pagePanel, new JLabel("Paper size: "),
 		0, y, 1, 1, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(pagePanel, __paperSizeComboBox,
@@ -1688,7 +1698,7 @@ private void setupGUI() {
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	y++;
 
-	JGUIUtil.addComponent(pagePanel, new JLabel("Paper Orientation: "),
+	JGUIUtil.addComponent(pagePanel, new JLabel("Paper orientation: "),
 		0, y, 1, 1, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(pagePanel, __orientationComboBox,
@@ -1696,7 +1706,7 @@ private void setupGUI() {
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	y++;
 
-	JGUIUtil.addComponent(pagePanel, new JLabel("Printed Font Size: "),
+	JGUIUtil.addComponent(pagePanel, new JLabel("Printed font size: "),
 		0, y, 1, 1, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(pagePanel, __textSizeComboBox,
@@ -1704,7 +1714,7 @@ private void setupGUI() {
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	y++;
 
-	JGUIUtil.addComponent(pagePanel, new JLabel("Printed Node Size: "),
+	JGUIUtil.addComponent(pagePanel, new JLabel("Printed node size: "),
 		0, y, 1, 1, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(pagePanel, __nodeSizeComboBox,
@@ -1723,23 +1733,26 @@ private void setupGUI() {
 		1, y, 1, 1, 1, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
-	pagePanel.setBorder(
-		BorderFactory.createTitledBorder("Page Properties"));
+	pagePanel.setBorder(BorderFactory.createTitledBorder("Page Properties"));
 	JGUIUtil.addComponent(panel, pagePanel,
 		0, 1, 10, 1, 0, 0,
 		GridBagConstraints.BOTH, GridBagConstraints.CENTER);
 	JPanel nodePanel = new JPanel();
-	nodePanel.setBorder(
-		BorderFactory.createTitledBorder("Node Properties"));
+	nodePanel.setBorder(BorderFactory.createTitledBorder("Node Properties"));
 	JGUIUtil.addComponent(panel, nodePanel,
 		10, 1, 1, 1, 0, 0,
 		GridBagConstraints.BOTH, GridBagConstraints.CENTER);
 
 	__nodeDescriptionTextField = new JTextField(20);
+	__nodeDescriptionTextField.setToolTipText("Longer name for the node (e.g., the station or structure name).");
 	__nodeTypeTextField = new JTextField(20);
+	__nodeTypeTextField.setToolTipText("Node type, enforced by the network editor.");
 	__nodeXYTextField = new JTextField(20);
+	__nodeXYTextField.setToolTipText("Node coordinates in the network, unitless.");
 	__nodeDBXYTextField = new JTextField(20);
-	__nodeCommonIDTextField	 = new JTextField(20);
+	__nodeDBXYTextField.setToolTipText("Alternate node coordinates (e.g., geographic coordinates).");
+	__nodeCommonIDTextField = new JTextField(20);
+	__nodeCommonIDTextField.setToolTipText("Short identifier used in modeling and labelling the network.");
 
 	__nodeDescriptionTextField.setEditable(false);
 	__nodeTypeTextField.setEditable(false);
