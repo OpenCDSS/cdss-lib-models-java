@@ -120,6 +120,7 @@ import RTi.Util.IO.PrintUtil;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
+import javax.swing.RepaintManager;
 
 /**
 This class draws the network that can be printed, viewed and altered.
@@ -715,7 +716,9 @@ public StateMod_Network_JComponent(StateMod_Network_JFrame parent, double scale)
 	super("StateMod_Network_JComponent");
 
 	__parent = parent;
-	__printScale = scale;
+    // A scale of anything less than 1 seems to make it illegible.
+	// __printScale = scale;
+	__printScale = 1;
 
 	// determine the system-dependent DPI for the monitor
 	Toolkit t = Toolkit.getDefaultToolkit();
@@ -2558,7 +2561,7 @@ private int findNodeOrAnnotationAtXY(double x, double y)
 /**
 Forces the display to be completely repainted.
 */
-protected void forceRepaint() {
+public void forceRepaint() {
 	__forceRefresh = true;
 	repaint();
 }
@@ -3398,6 +3401,8 @@ public void paint(Graphics g) {
 	// Multiple calls to print can result in some weirdly-drawing things,
 	// plus they slow it down.  The following check makes sure that when
 	// the network is being printed, it is only drawn to the BufferedImage one time.
+    int dl=5;
+    String routine = "StateMod_Network_JComponenet.paint";
 	if (__printCount > 0) {
 		return;
 	}
@@ -3572,6 +3577,8 @@ public void paint(Graphics g) {
 			scaleUnscalables();
 			clear();
 			__bufferGraphics.setFont(new Font(f.getName(), f.getStyle(), __printFontPointSize));
+            //  Message.printDebug(dl, routine, "dataLimits: " + __drawingArea.getDataLimits().toString());
+            //  Message.printDebug(dl, routine, "drawingLimits: " + __drawingArea.getDrawingLimits().toString());
 		}
 		else if (__savingNetwork) {
 			__holdLimits = __drawingArea.getDataLimits();
@@ -3596,6 +3603,7 @@ public void paint(Graphics g) {
 			clear();
 			__drawingArea.setFont(f.getName(), f.getStyle(), __fontPointSize);			
 		}
+        
 		setAntiAlias(__antiAlias);
 		drawNetworkLines();
 		setAntiAlias(__antiAlias);
@@ -3864,9 +3872,15 @@ public int print(Graphics g, PageFormat pageFormat, int pageIndex) {
 	// Message.printStatus(1, "", "Print Scale: " + __printScale);
 	
 	if (!__printingScreen) {
-		g2d.scale(__printScale, __printScale);
-		paint(g2d);
+		g2d.scale(__printScale, __printScale);  // This doesn't appear to make any difference? - CEN
+		// Not sure RepaintManger is effective in this case
+        RepaintManager currentManager = RepaintManager.currentManager(this);
+        currentManager.setDoubleBufferingEnabled(false);
+        // Don't need? because printNetwork and printScreen both call forceRepaint()
+        //paint(g2d);
+        // __tempBuffer was created for purpose of printing and already has content
 		g2d.drawImage(__tempBuffer, 0, 0, null);
+        currentManager.setDoubleBufferingEnabled(true);
 	}
 	else {
 		double transX = 0;
@@ -3914,6 +3928,8 @@ Prints the entire network.
 */
 protected void printNetwork()
 {	String routine = "StateMod_Network_JComponent.printNetwork";
+    RepaintManager currentManager = RepaintManager.currentManager(this);
+    currentManager.setDoubleBufferingEnabled(false);
 	Message.printStatus( 2, routine, "Printing entire network" );
 	boolean drawMargin = __drawMargin;
 	__drawMargin = false;
@@ -3937,6 +3953,7 @@ protected void printNetwork()
 	print();
 	__tempBuffer = null;
 	__printingNetwork = false;
+    currentManager.setDoubleBufferingEnabled(true);
 	System.gc();
 	__printCount = 0;
 
@@ -4355,7 +4372,7 @@ public void setNetworkChanged ( boolean networkChanged )
 Sets the size of the nodes (in pixels) at the 1:1 zoom level.
 @param size the size of the nodes.
 */
-protected void setNodeSize(double size) {
+public void setNodeSize(double size) {
 	__nodeSize = (int)size;
 	setPrintNodeSize(size);
 }
@@ -4364,7 +4381,7 @@ protected void setNodeSize(double size) {
 Sets the orientation of the paper.
 @param orientation either "Landscape" or "Portrait".
 */
-protected void setOrientation(String orientation) {
+public void setOrientation(String orientation) {
 	if (_graphics == null) {
 		__holdPaperOrientation = orientation;
 		return;
@@ -4401,7 +4418,7 @@ protected void setOrientation(String orientation) {
 Sets the pageformat to use.
 @param pageFormat the pageFormat to use.
 */
-protected void setPageFormat(PageFormat pageFormat) {	
+public void setPageFormat(PageFormat pageFormat) {
 	__pageFormat = pageFormat;
 }
 
@@ -4410,7 +4427,7 @@ Changes the paper size.
 @param size the size to set the paper to (see PrintUtil for a list of 
 supported paper sizes).
 */
-protected void setPaperSize(String size) {
+public void setPaperSize(String size) {
 	if (_graphics == null) {
 		__holdPaperSize = size;
 		return;
@@ -4461,7 +4478,7 @@ private void setPrintingScale(double scale) {
 Sets the size in pixels that fonts should be printed at when printed at 1:1.
 @param size the pixel size of fonts when printed at 1:1.
 */
-protected void setPrintFontSize(int size) {
+public void setPrintFontSize(int size) {
 	if (_graphics == null) {
 		__holdPrintFontSize = size;
 		return;
@@ -4478,7 +4495,7 @@ protected void setPrintFontSize(int size) {
 Sets the size (in data points) that nodes should be printed at.
 @param size the size (in pixels) of nodes when printed at 1:1.
 */
-protected void setPrintNodeSize(double size) {
+public void setPrintNodeSize(double size) {
 	if (_graphics == null) {
 		__holdPrintNodeSize = size;
 		return;
