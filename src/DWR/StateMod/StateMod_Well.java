@@ -168,7 +168,7 @@ private double _primary;	// priority switch
 private GeoRecord _georecord;	// Link to spatial data.
 
 /**
-Vector of parcel data, in particular to allow StateDMI to detect when a diversion had no data.
+List of parcel data, in particular to allow StateDMI to detect when a diversion had no data.
 */
 protected List _parcel_Vector = new Vector();
 
@@ -183,6 +183,7 @@ public static String COLLECTION_TYPE_SYSTEM = "System";
 
 public static String COLLECTION_PART_TYPE_DITCH = "Ditch";
 public static String COLLECTION_PART_TYPE_PARCEL = "Parcel";
+public static String COLLECTION_PART_TYPE_WELL = "Well";
 
 private String __collection_type = StateMod_Util.MISSING_STRING;
 
@@ -1027,19 +1028,18 @@ public List getCollectionPartIDs ( int year )
 {	if ( __collection_Vector.size() == 0 ) {
 			return null;
 	}
-	// Currently always by parcel.
-	//if ( __collection_part_type.equalsIgnoreCase("Well") ) {
+	if ( __collection_part_type.equalsIgnoreCase("Well") ) {
 		// The list of part IDs will be the first and only list...
-		//return (Vector)__collection_Vector.elementAt(0);
-	//}
-	//else if ( __collection_part_type.equalsIgnoreCase("Parcel") ) {
+		return (List)__collection_Vector.get(0);
+	}
+	else if ( __collection_part_type.equalsIgnoreCase("Parcel") ) {
 		// The list of part IDs needs to match the year.
 		for ( int i = 0; i < __collection_year.length; i++ ) {
 			if ( year == __collection_year[i] ) {
 				return (List)__collection_Vector.get(i);
 			}
 		}
-	//}
+	}
 	return null;
 }
 
