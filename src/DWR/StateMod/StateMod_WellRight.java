@@ -83,7 +83,7 @@ import RTi.Util.String.StringUtil;
 This class provides stores all the information associated with a well right.
 */
 public class StateMod_WellRight extends StateMod_Data
-implements Cloneable, Comparable, StateMod_Component, StateMod_Right {
+implements Cloneable, Comparable, StateMod_ComponentValidator, StateMod_Right {
 
 /**
 Administration number.
@@ -125,51 +125,6 @@ Clean up before garbage collection.
 protected void finalize()throws Throwable {
 	_irtem = null;
 	super.finalize();
-}
-
-/**
-Performs specific data checks for StateMod Well Rights.
-@param count position of the StateMod Well Right data Vector.
-@param dataset StateMod dataset.
-@param props List of additional properties for the data test.
-@return List of invalid data.
- */
-public String[] checkComponentData( int count, StateMod_DataSet dataset, PropList props) 
-{
-	//int pos = 0;			// Position in well station vector
-	//String wes_name = null;		// Well station name
-	//String wes_id = null;		// Well station ID
-	double decree = 0.0;
-	StateMod_WellRight wer_i = this;
-	//int index = count;
-	//DataSetComponent wes_comp = dataset.getComponentForComponentType (
-	//		StateMod_DataSet.COMP_WELL_STATIONS );
-	//Vector wes_Vector = ( Vector )wes_comp.getData();
-	// Format to two digits to match StateMod output...
-	decree = StringUtil.atod(StringUtil.formatString( wer_i.getDcrdivw(),"%.2f" ) );
-	if ( decree <= 0.0 ) {
-		// Find associated well station for output to print ID and name...
-		++count;
-//		pos = StateMod_Util.indexOf( wes_Vector, wer_i.getCgoto() );
-//		StateMod_Well wes_i = null;
-//		if ( pos >= 0 ) {
-//			wes_i = ( StateMod_Well )wes_Vector.elementAt( pos );
-//		}
-//		wes_name = "";
-//		if ( wes_i != null ) {
-//			wes_id = wes_i.getID();
-//			wes_name = wes_i.getName();
-//		}
-		// new format for check file
-		String [] data_table = {
-			StringUtil.formatString( count, "%4d" ),
-			StringUtil.formatString( this.getID(), "%-12.12s"),
-			StringUtil.formatString( wer_i.getCgoto(), "%-12.12s" ) };
-			//StringUtil.formatString( wes_name, "%-12.12s" ) };
-		
-		return StateMod_Util.checkForMissingValues( data_table );
-	}
-	return null;
 }
 
 /**
@@ -411,6 +366,21 @@ private void initialize() {
 }
 
 /**
+Determine whether the right is for an estimated well.  Estimated wells are those that are copies of
+real wells, as an estimate of water supply for parcels that are clearly groundwater irrigated but a supply
+well is not physically evident in remote sensing work.
+@return true if the well right is for an estimated well.
+*/
+public boolean isEstimatedWell ()
+{
+	int parcelMatchClass = getParcelMatchClass();
+	if ( (parcelMatchClass == 4) || (parcelMatchClass == 9) ) {
+		return true;
+	}
+	return false;
+}
+
+/**
 Determine whether a file is a well right file.  Currently true is returned if the file extension is ".wer".
 @param filename Name of the file being checked.
 @return true if the file is a StateMod well right file.
@@ -441,10 +411,9 @@ public void restoreOriginal() {
 }
 
 /**
-Read the well rights file.  Add the new rights onto the vector of well
-rights passed in the parameter list.
+Read the well rights file.
 @param filename name of file containing well rights
-@return Vector of well rights
+@return list of well rights
 */
 public static List readStateModFile(String filename)
 throws Exception {
@@ -571,6 +540,14 @@ public void setDcrdivw(String dcrdivw) {
 }
 
 /**
+Set the decree, as per the generic interface.
+@param decree decree, in the units of the data.
+*/
+public void setDecree(double decree)
+{	setDcrdivw(decree);
+}
+
+/**
 Set the administration number
 @param irtem admin number of right
 */
@@ -652,6 +629,50 @@ public void setParcelYear(int parcel_year) {
 			_dataset.setDirty(StateMod_DataSet.COMP_WELL_RIGHTS, true);
 		}
 	}
+}
+
+/**
+Performs specific data checks for StateMod Well Rights.
+@param dataset StateMod dataset.
+@return validation results.
+ */
+public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset ) 
+{
+	/*
+	//int pos = 0;			// Position in well station vector
+	//String wes_name = null;		// Well station name
+	//String wes_id = null;		// Well station ID
+	double decree = 0.0;
+	StateMod_WellRight wer_i = this;
+	//int index = count;
+	//DataSetComponent wes_comp = dataset.getComponentForComponentType (
+	//		StateMod_DataSet.COMP_WELL_STATIONS );
+	//Vector wes_Vector = ( Vector )wes_comp.getData();
+	// Format to two digits to match StateMod output...
+	decree = Double.parseDouble(StringUtil.formatString( wer_i.getDcrdivw(),"%.2f" ) );
+	if ( decree <= 0.0 ) {
+		// Find associated well station for output to print ID and name...
+//		pos = StateMod_Util.indexOf( wes_Vector, wer_i.getCgoto() );
+//		StateMod_Well wes_i = null;
+//		if ( pos >= 0 ) {
+//			wes_i = ( StateMod_Well )wes_Vector.elementAt( pos );
+//		}
+//		wes_name = "";
+//		if ( wes_i != null ) {
+//			wes_id = wes_i.getID();
+//			wes_name = wes_i.getName();
+//		}
+		// new format for check file
+		String [] data_table = {
+			StringUtil.formatString( count, "%4d" ),
+			StringUtil.formatString( this.getID(), "%-12.12s"),
+			StringUtil.formatString( wer_i.getCgoto(), "%-12.12s" ) };
+			//StringUtil.formatString( wes_name, "%-12.12s" ) };
+		
+		return StateMod_Util.checkForMissingValues( data_table );
+	}
+	*/
+	return null;
 }
 
 /**

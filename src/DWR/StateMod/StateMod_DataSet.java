@@ -297,18 +297,22 @@ public final int WAIT = 0;
 public final int READY = 1;
 
 private List __processListeners = null;
-private boolean __tsAreRead = false;		// Should time series be read
-						// when reading the data set?
-private boolean __is_free_format = false;	// Is the response file free
-						// format?
-
-public final String BLANK_FILE_NAME = "";	// String indicating blank file
-						// name - allowed to be a
-						// duplicate.
-
-private final String __ESTIMATED = "Estimated";	// Appended to some daily time
-						// series data types to indicate
-						// an estimated time series.
+/**
+Should time series be read when reading the data set (will be slower)?
+*/
+private boolean __tsAreRead = false;
+/**
+Is the response file free format?
+*/
+private boolean __is_free_format = false;
+/**
+String indicating blank file name - allowed to be a duplicate.
+*/
+public final String BLANK_FILE_NAME = "";
+/**
+Appended to some daily time series data types to indicate an estimated time series.
+*/
+private final String __ESTIMATED = "Estimated";
 
 // TODO - SAM - StateMod data set types are not the same as StateCU and may not be needed at all.
 
@@ -320,21 +324,22 @@ public static final String NAME_UNKNOWN = "Unknown";
 
 // TODO - Start SAM new definitions (indent to illustrate groups).
 
-public final static int COMP_UNKNOWN = -1;	// Use for initialization, if
-						// needed
-public final static int COMP_OTHER_NODE = -5;	// Used when defining other
-						// nodes in the network, via the
-						// GUI.
+/**
+Use for initialization, if needed.
+*/
+public final static int COMP_UNKNOWN = -1;
+/**
+Used when defining other nodes in the network, via the GUI.
+*/
+public final static int COMP_OTHER_NODE = -5;
 
-// The following should be sequential from 0 because they have lookup positions
-// in DataSet arrays.
+// The following should be sequential from 0 because they have lookup positions in DataSet arrays.
 //
 // Some of the following values are for sub-components (e.g., delay table
 // assignment for diversions).  These are typically one-to-many data items that
 // are managed with a component but may need to be displayed separately.  The
 // sub-components have numbers that are the main component*100 + N.  These
-// values are checked in methods like lookupComponentName() but do not have
-// sequential arrays.
+// values are checked in methods like lookupComponentName() but do not have sequential arrays.
 //
 // TODO SAM 2005-01-19 - Evaluate whether sub-components should be handled in the arrays.
 
@@ -434,8 +439,7 @@ public final static int
 		COMP_GEOVIEW = 67;
 
 // The data set component names, including the component groups.  Subcomponent
-// names are defined after this array and are currently treated as special
-// cases.
+// names are defined after this array and are currently treated as special cases.
 private static String[] __component_names = {
 	"Control Data",
 		"Response",
@@ -1227,84 +1231,142 @@ private static String[] __component_ts_data_units = {
 // "no data" values.  Note that after reading the control file, setDirty(false)
 // is called and the new defaults may be ignored if the file is not written.
 
-private String __heading1 = "";			// Heading for output.
+/**
+Heading for output.
+*/
+private String __heading1 = "";
+/**
+Heading for output.
+*/
 private String __heading2 = "";
-						// Heading for output.
-private int __iystr = StateMod_Util.MISSING_INT;// Starting year of the
-						// simulation.  Must be defined.
-private int __iyend = StateMod_Util.MISSING_INT;// Ending year of the
-						// simulation.  Must be defined.
-private int __iresop = 2;			// Switch for output units
-						// Default is ACFT.
-private int __moneva = 0;			// Monthly or avg monthly evap
-						// Default to monthly.
-private int __iopflo = 1;			// Total or gains streamflow
-						// Default to total.
-private int __numpre = 0;			// Number of precipitation
-						// stations - should be set when
-						// the time series are read -
-						// this will be phased out in
-						// the future.
-private int __numeva = 0;			// Number of evaporation
-						// stations - should be set when
-						// the time series are read -
-						// this will be phased out in
-						// the future.
-private int __interv = -1;			// Max number entries in delay
-						// pattern.
-						// Default is variable number as
-						// percents.
-						// The following defaults assume
-						// normal operation...
-private double __factor = 1.9835;		// factor, CFS to AF/D
-private double __rfacto = 1.9835;		// Divisor for streamflow data
-						// units
-private double __dfacto = 1.9835;		// Divisor for diversion data
-						// units
-private double __ffacto = 1.9835;		// Divisor for instreamflow data
-						// units
-private double __cfacto = 1.0;			// Factor, reservoir content
-						// data to AF
-private double __efacto = 1.0;			// Factor, evaporation data to
-						// FT
-private double __pfacto = 1.0;			// Factor, precipitation data
-						// to FT
-private int __cyrl = SM_CYR;			// Calendar/water/irrigation
-						// year - default to calendar.
-private int __icondem = 1;			// Switch for demand type.
-						// Default to historic approach
-private int __ichk = 0;				// Switch for detailed output.
-						// Default is no detailed output
-private int __ireopx = 0;			// Swith for reoperation control
-						// Default is yes reoperate
-						// Unlike most StateMod options
-						// this uses 0 for do it.
-private int __ireach = 1;			// Switch for instream flow
-						// approach
-						// Default to use reaches and
-						// average monthly demands.
-private int __icall = 0;			// Switch for detailed call data
-						// Default to no data.
-private String __ccall = "";			// Default to not used.
-						// Detailed call water right ID
-private int __iday = 0;				// Switch for daily analysis.
-						// Default to no daily analysis.
-private int __iwell = 0;			// Switch for well analysis.
-						// Default to no well analysis.
-private double __gwmaxrc = 0.0;			// Maximum recharge limit
-						// Default to not used.
-private int __isjrip = 0;			// San Juan recovery program.
-						// Default to no SJRIP.
-private int __itsfile = 0;			// Is IPY data used?
-						// Default to no data.
-private int __ieffmax = 0;			// IWR switch - default to no
-						// data.
-private int __isprink = 0;			// Sprinkler switch
-						// Default to no sprinkler data.
-private double __soild = 0.0;			// Soil moisture accounting.
-						// Default to not used.
-private int __isig = 0;				// Significant figures for
-						// output.
+/**
+Starting year of the simulation.  Must be defined.
+*/
+private int __iystr = StateMod_Util.MISSING_INT;
+/**
+Ending year of the simulation.  Must be defined.
+*/
+private int __iyend = StateMod_Util.MISSING_INT;
+/**
+Switch for output units.  Default is ACFT.
+*/
+private int __iresop = 2;
+/**
+Monthly or avg monthly evap.  Default to monthly.
+*/
+private int __moneva = 0;
+/**
+Total or gains streamflow.  Default to total.
+*/
+private int __iopflo = 1;
+/**
+Number of precipitation stations - should be set when the time series are read -
+this will be phased out in the future.
+*/
+private int __numpre = 0;
+/**
+Number of evaporation stations - should be set when the time series are read -
+this will be phased out in the future.
+*/
+private int __numeva = 0;
+/**
+Max number entries in delay pattern.  Default is variable number as percents.
+The following defaults assume normal operation...
+*/
+private int __interv = -1;
+/**
+Factor, CFS to AF/D
+*/
+private double __factor = 1.9835;
+/**
+Divisor for streamflow data units.
+*/
+private double __rfacto = 1.9835;
+/**
+Divisor for diversion data units.
+*/
+private double __dfacto = 1.9835;
+/**
+Divisor for instream flow data units.
+*/
+private double __ffacto = 1.9835;
+/**
+Factor, reservoir content data to AF.
+*/
+private double __cfacto = 1.0;
+/**
+Factor, evaporation data to FT.
+*/
+private double __efacto = 1.0;
+/**
+Factor, precipitation data to FT.
+*/
+private double __pfacto = 1.0;
+/**
+Calendar/water/irrigation year - default to calendar.
+*/
+private int __cyrl = SM_CYR;
+/**
+Switch for demand type.  Default to historic approach.
+*/
+private int __icondem = 1;
+/**
+Switch for detailed output.  Default is no detailed output.
+*/
+private int __ichk = 0;
+/**
+Switch for re-operation control.  Default is yes re-operate.
+Unlike most StateMod options this uses 0 for do it.
+*/
+private int __ireopx = 0;
+/**
+Switch for instream flow approach.  Default to use reaches and average monthly demands.
+*/
+private int __ireach = 1;
+/**
+Switch for detailed call data.  Default to no data.
+*/
+private int __icall = 0;
+/**
+Default to not used.  Detailed call water right ID.
+*/
+private String __ccall = "";
+/**
+Switch for daily analysis.  Default to no daily analysis.
+*/
+private int __iday = 0;
+/**
+Switch for well analysis.  Default to no well analysis.
+*/
+private int __iwell = 0;
+/**
+Maximum recharge limit.  Default to not used.
+*/
+private double __gwmaxrc = 0.0;
+/**
+San Juan recovery program.  Default to no SJRIP.
+*/
+private int __isjrip = 0;
+/**
+Is IPY data used?  Default to no data.
+*/
+private int __itsfile = 0;
+/**
+IWR switch - default to no data.
+*/
+private int __ieffmax = 0;
+/**
+Sprinkler switch.  Default to no sprinkler data.
+*/
+private int __isprink = 0;
+/**
+Soil moisture accounting.  Default to not used.
+*/
+private double __soild = 0.0;
+/**
+Significant figures for output.
+*/
+private int __isig = 0;
 
 /**
 Constructor.  Makes a blank data set.  It is expected that other information 

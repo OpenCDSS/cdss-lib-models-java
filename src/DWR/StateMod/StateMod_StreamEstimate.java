@@ -78,13 +78,12 @@ import RTi.TS.DayTS;
 import RTi.TS.MonthTS;
 import RTi.TS.TS;
 import RTi.Util.IO.IOUtil;
-import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 
 public class StateMod_StreamEstimate 
 extends StateMod_Data
-implements Cloneable, Comparable, StateMod_Component {
+implements Cloneable, Comparable, StateMod_ComponentValidator {
 
 /**
 Monthly base flow time series, for use with the stream estimate station
@@ -160,20 +159,6 @@ public boolean changed() {
 		return false;
 	}
 	return true;
-}
-
-/**
-@param count Number of components checked.
-@param dataset StateMod dataset object.
-@param props Extra properties for specific data checks.
-@return List of data that failed specific checks.
-*/
-public String[] checkComponentData( int count, 
-StateMod_DataSet dataset, PropList props ) 
-{
-	// TODO KAT 2007-04-16
-	// add specific checks here
-	return null;
 }
 
 /**
@@ -625,6 +610,17 @@ This is only used for D&W nodes and should be set to the well component type.
 */
 public void setRelatedSMDataType2 ( int related_smdata_type2 )
 {	_related_smdata_type2 = related_smdata_type2;
+}
+
+/**
+@param dataset StateMod dataset object.
+@return validation results.
+*/
+public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset ) 
+{
+	// TODO KAT 2007-04-16
+	// add specific checks here
+	return null;
 }
 
 /**

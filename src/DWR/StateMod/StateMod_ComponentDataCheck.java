@@ -752,13 +752,12 @@ private List doSpecificDataChecks( List data, PropList props )
 	// checkComponentData() method.  Each component
 	// needs to implement this method and extend from
 	// the StateMod_Component interface.
-	StateMod_Component comp = null;
+	StateMod_ComponentValidator comp = null;
 	for ( int i = 0; i < data.size(); i++ ) {
-		comp = (StateMod_Component)data.get( i );
-		String [] invalid_data = comp.checkComponentData( 
-			i, __dataset, props );
-		if ( invalid_data != null && invalid_data.length > 0 ) {
-			checks.add( invalid_data );
+		comp = (StateMod_ComponentValidator)data.get( i );
+		StateMod_ComponentValidation validation = comp.validateComponent( __dataset );
+		if ( validation.size() > 0 ) {
+			checks.addAll( validation.getAll() );
 		}
 	}
 	return checks;

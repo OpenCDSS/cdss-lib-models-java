@@ -173,7 +173,6 @@ import RTi.GIS.GeoView.GeoRecord;
 import RTi.TS.DayTS;
 import RTi.TS.MonthTS;
 import RTi.Util.IO.IOUtil;
-import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 import RTi.Util.Time.TimeUtil;
@@ -184,7 +183,7 @@ the COMP_DIVERSION_STATIONS flag dirty.  A new object will have empty non-null
 Vectors, null time series, and defaults for all other data.
 */
 public class StateMod_Diversion extends StateMod_Data
-implements Cloneable, Comparable, StateMod_Component
+implements Cloneable, Comparable, StateMod_ComponentValidator
 {
 
 /**
@@ -500,11 +499,6 @@ public boolean changed() {
 		return false;
 	}
 	return true;
-}
-
-public String[] checkComponentData(int count, StateMod_DataSet dataset, PropList props) {
-	// TODO Add data checks here ...
-	return null;
 }
 
 /**
@@ -2477,6 +2471,11 @@ public void setUsername(String username) {
 			_dataset.setDirty(StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
 		}
 	}
+}
+
+public StateMod_ComponentValidation validateComponent ( StateMod_DataSet dataset ) {
+	// TODO Add data checks here ...
+	return null;
 }
 
 /**

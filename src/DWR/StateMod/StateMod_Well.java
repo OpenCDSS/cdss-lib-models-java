@@ -129,9 +129,7 @@ import DWR.StateCU.StateCU_IrrigationPracticeTS;
 import RTi.GIS.GeoView.GeoRecord;
 import RTi.TS.DayTS;
 import RTi.TS.MonthTS;
-import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.IOUtil;
-import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 import RTi.Util.Time.TimeUtil;
@@ -142,30 +140,99 @@ This class stores all relevant data for a StateMod well.
 
 public class StateMod_Well 
 extends StateMod_Data
-implements Cloneable, Comparable, StateMod_Component {
-protected String _cdividyw;	// Well id to use for daily data.
-private double _divcapw;	// Well capacity(cfs)
-private String _idvcow2;	// Diversion this well is tied to ("N/A" if not tied to a diversion)
-private int _idvcomw;	// Demand code
-private double _divefcw;	// System efficiency(%)
-private double _areaw;		// Irrigated area associated with well
-private int _irturnw;	// Use type
-private int _demsrcw;	// Irrig acreage source
-private double _diveff[];	// 12 efficiency values 
-private List _rivret;	// Return flow data
-private List _depl;		// Depletion data
-private MonthTS _pumping_MonthTS;// Historical time series (monthly)
-private double [] __weh_monthly = null;	// 12 monthly and annual average over period, used by StateDMI
-private DayTS _pumping_DayTS;	// Historical time series (daily)
-private MonthTS _demand_MonthTS;// Demand time series
-private DayTS _demand_DayTS;	// Daily demand time series
-private StateCU_IrrigationPracticeTS _ipy_YearTS;	// Irrigation practice time series.
-private MonthTS _cwr_MonthTS;	// Consumptive water requirement
-private double [] __cwr_monthly = null;	// 12 monthly and annual average over period, used by StateDMI
-private DayTS _cwr_DayTS;	// time series - only used when idvcow2 is "N/A".
-private List _rights;	// Well rights
-private double _primary;	// priority switch
-private GeoRecord _georecord;	// Link to spatial data.
+implements Cloneable, Comparable, StateMod_ComponentValidator {
+/**
+Well id to use for daily data.
+*/
+protected String _cdividyw;
+/**
+Well capacity(cfs).
+*/
+private double _divcapw;
+/**
+Diversion this well is tied to ("N/A" if not tied to a diversion).
+*/
+private String _idvcow2;
+/**
+Demand code.
+*/
+private int _idvcomw;
+/**
+System efficiency(%).
+*/
+private double _divefcw;
+/**
+Irrigated area associated with well.
+*/
+private double _areaw;
+/**
+Use type.
+*/
+private int _irturnw;
+/**
+Irrigated acreage source.
+*/
+private int _demsrcw;
+/**
+12 efficiency values. 
+*/
+private double _diveff[];
+/**
+Return flow data.
+*/
+private List _rivret;
+/**
+Depletion data.
+*/
+private List _depl;
+/**
+Historical time series (monthly).
+*/
+private MonthTS _pumping_MonthTS;
+/**
+12 monthly and annual average over period, used by StateDMI.
+*/
+private double [] __weh_monthly = null;
+/**
+Historical time series (daily).
+*/
+private DayTS _pumping_DayTS;
+/**
+Demand time series.
+*/
+private MonthTS _demand_MonthTS;
+/**
+Daily demand time series.
+*/
+private DayTS _demand_DayTS;
+/**
+Irrigation practice time series.
+*/
+private StateCU_IrrigationPracticeTS _ipy_YearTS;
+/**
+Consumptive water requirement.
+*/
+private MonthTS _cwr_MonthTS;
+/**
+12 monthly and annual average over period, used by StateDMI.
+*/
+private double [] __cwr_monthly = null;
+/**
+Time series - only used when idvcow2 is "N/A".
+*/
+private DayTS _cwr_DayTS;
+/**
+Well rights.
+*/
+private List _rights;
+/**
+Priority switch.
+*/
+private double _primary;
+/**
+Link to spatial data.
+*/
+private GeoRecord _georecord;
 
 /**
 List of parcel data, in particular to allow StateDMI to detect when a diversion had no data.
@@ -187,33 +254,36 @@ public static String COLLECTION_PART_TYPE_WELL = "Well";
 
 private String __collection_type = StateMod_Util.MISSING_STRING;
 
+/**
+Used by DMI software - currently no options.
+*/
 private String __collection_part_type = COLLECTION_PART_TYPE_PARCEL;
-					// Used by DMI software - currently no options.
+
+/**
+The identifiers for data that are collected - null if not a collection location.
+This is actually a list of lists where the __collection_year is the first dimension.
+This is ugly but need to use the code to see if it can be made cleaner.
+*/
 private List __collection_Vector = null;
-					// The identifiers for data that are
-					// collected - null if not a collection
-					// location.  This is actually a Vector
-					// of Vector's where the
-					// __collection_year is the first
-					// dimension.  This is ugly but need to
-					// use the code to see if it can be
-					// made cleaner.
 
+/**
+An array of years that correspond to the aggregate/system.  Well collections are defined by year.
+*/
 private int [] __collection_year = null;
-					// An array of years that correspond to
-					// the aggregate/system.  Well
-					// collections are done by year.
-private int __collection_div = StateMod_Util.MISSING_INT;
-					// The division that corresponds
-					// to the aggregate/system.  Currently
-					// it is expected that the same division
-					// number is assigned to all the data.
 
-// The following are used only by StateDMI and do not needed to be handled in
-// comparison, initialization, etc.
-private double []	__calculated_efficiencies = null;
-private double []	__calculated_efficiency_stddevs = null;
-private double []	__model_efficiencies = null;
+/**
+The division that corresponds to the aggregate/system.  Currently it is expected that the same division
+number is assigned to all the data.
+*/
+private int __collection_div = StateMod_Util.MISSING_INT;
+
+/**
+The following are used only by StateDMI and do not needed to be handled in
+comparison, initialization, etc.
+*/
+private double [] __calculated_efficiencies = null;
+private double [] __calculated_efficiency_stddevs = null;
+private double [] __model_efficiencies = null;
 
 /**
 Constructor - initialize to default values.
@@ -334,85 +404,9 @@ public boolean changed() {
 }
 
 /**
-Performs data checks for this component.
-@return String[] - Array of data that has been checked. Returns null if
-there were no problems found.
- */
-public String[] checkComponentData( int count, StateMod_DataSet dataset, PropList props )
-{	
-	StateMod_Parcel parcel = null;	// Parcel associated with a well station
-	String id_i = null;
-	int wes_parcel_count = 0;	// Parcel count for well station
-	double wes_parcel_area = 0.0;	// Area of parcels for well station
-	int wes_well_parcel_count = 0;	// Parcel (with wells) count for well
-					// station.
-	double wes_well_parcel_area = 0.0; // Area of parcels with wells for well station.
-	List parcel_Vector;		// List of parcels for well station.
-								// potential problems.
-	// check proplist for valid values
-	boolean checkRights = false;
-	List wer_Vector = null;
-	if ( props != null ) {
-		// Check if well rights are being evaluated.
-		// Validating Well Station Rights by checking Station data
-		String propRights = props.getValue("checkRights");
-		if ( propRights != null && propRights.equalsIgnoreCase("true")) {
-			checkRights = true;
-			DataSetComponent wer_comp = 
-				dataset.getComponentForComponentType ( StateMod_DataSet.COMP_WELL_RIGHTS );
-			wer_Vector = (List)wer_comp.getData();
-		}
-	}
-	id_i = getID();
-	if ( getAreaw() <= 0.0 ) {
-		if ( checkRights ) {
-			List rights = StateMod_Util.getRightsForStation ( id_i, wer_Vector );
-			if ( rights != null  &&  rights.size() != 0 ) {
-				return null;
-			}
-		}
-		++count;
-		// Check for parcels...
-		wes_parcel_count = 0;
-		wes_parcel_area = 0.0;
-		wes_well_parcel_count = 0;
-		wes_well_parcel_area = 0.0;
-		parcel_Vector = getParcels();
-		if ( parcel_Vector != null ) {
-			wes_parcel_count = parcel_Vector.size();
-			for ( int j = 0; j < wes_parcel_count; j++ ) {
-				parcel = (StateMod_Parcel)parcel_Vector.get(j);
-				if ( parcel.getArea() > 0.0 ) {
-					wes_parcel_area += parcel.getArea();
-				}
-				if ( parcel.getWellCount() > 0 ) {
-					wes_well_parcel_count += parcel.getWellCount();
-					wes_well_parcel_area += parcel.getArea();
-				}
-			}
-		}
-		// new format for check file
-		String [] data_table = {
-			StringUtil.formatString(count,"%4d"),
-			StringUtil.formatString(id_i,"%-12.12s"),
-			getName(),
-			StringUtil.formatString(getCollectionType(),
-			"%-10.10s"),
-			StringUtil.formatString(wes_parcel_count,"%9d"),
-			StringUtil.formatString(wes_parcel_area,"%11.0f"),
-			StringUtil.formatString(wes_well_parcel_count,"%9d"),
-			StringUtil.formatString(wes_well_parcel_area,"%11.0f") };
-		
-		return StateMod_Util.checkForMissingValues( data_table );
-	}
-	return null;
-}
-
-/**
 Performs data checks for the capacity portion of this component.
-@param Vector wer_Vector - Vector of water rights.
-@return String[] - Array of data that has been checked. Returns null if
-there were no problems found.
+@param wer_Vector List of water rights.
+@return String[] array of data that has been checked.  Returns null if there were no problems found.
  */
 public String[] checkComponentData_Capacity( List wer_Vector, int count )
 {
@@ -461,8 +455,7 @@ public String[] checkComponentData_Capacity( List wer_Vector, int count )
 			StringUtil.formatString(++count,"%4d"),
 			StringUtil.formatString(id_i,"%-12.12s"),
 			getName(),
-			StringUtil.formatString(getCollectionType(),
-			"%-10.10s"),
+			StringUtil.formatString(getCollectionType(),"%-10.10s"),
 			StringUtil.formatString(getDivcapw(),"%9.2f"),
 			StringUtil.formatString(decree_sum,"%9.2f"),
 			StringUtil.formatString( size_rights,"%8d"), };
@@ -499,8 +492,7 @@ public Object clone() {
 /**
 Compares this object to another StateMod_Well object.
 @param o the object to compare against.
-@return 0 if they are the same, 1 if this object is greater than the other
-object, or -1 if it is less.
+@return 0 if they are the same, 1 if this object is greater than the other object, or -1 if it is less.
 */
 public int compareTo(Object o) {
 	int res = super.compareTo(o);
@@ -602,8 +594,7 @@ public int compareTo(Object o) {
 }
 
 /**
-Creates a copy of the object for later use in checking to see if it was 
-changed in a GUI.
+Creates a copy of the object for later use in checking to see if it was changed in a GUI.
 */
 public void createBackup() {
 	_original = clone();
@@ -637,17 +628,11 @@ public static void connectAllRights ( List wells, List rights ) {
 /**
 Connect the wells time series to this instance.
 @param wells all wells 
-@param cwr_MonthTS Vector of monthly consumptive water requirement time series, or null.
-@param cwr_DayTS Vector of daily consumptive water requirement time series, or null.
+@param cwr_MonthTS list of monthly consumptive water requirement time series, or null.
+@param cwr_DayTS list of daily consumptive water requirement time series, or null.
 */
-public static void connectAllTS (	List wells,
-		List pumping_MonthTS,
-		List pumping_DayTS,
-		List demand_MonthTS,
-		List demand_DayTS,
-		List ipy_YearTS,
-		List cwr_MonthTS,
-		List cwr_DayTS )
+public static void connectAllTS ( List wells, List pumping_MonthTS, List pumping_DayTS,
+	List demand_MonthTS, List demand_DayTS, List ipy_YearTS, List cwr_MonthTS, List cwr_DayTS )
 {	if (wells == null) {
 		return;
 	}
@@ -898,8 +883,7 @@ public void deleteDepletionAt(int index) {
 }
 
 /**
-Delete return flow node at a specified index.  Also, updates the number of
-return flow nodes variable.
+Delete return flow node at a specified index.  Also, updates the number of return flow nodes variable.
 @param index index of return flow data object to delete
 */
 public void deleteReturnFlowAt(int index) {
@@ -958,8 +942,7 @@ throws Throwable {
 }
 
 /**
-@return the area(This is currently not being used but is provided for
-consistency within this class).
+@return the area(This is currently not being used but is provided for consistency within this class).
 */
 public double getAreaw() {
 	return _areaw;
@@ -985,9 +968,8 @@ public double [] getAverageMonthlyHistoricalPumping ()
 
 /**
 Return the average monthly efficiencies calculated from CWR and historical
-pumping (12 monthly values + annual average), for the
-data set calendar type.  This is ONLY used by StateDMI and does not need
-to be considered in comparison code.
+pumping (12 monthly values + annual average), for the data set calendar type.
+This is ONLY used by StateDMI and does not need to be considered in comparison code.
 */
 public double [] getCalculatedEfficiencies()
 {	return __calculated_efficiencies;
@@ -995,9 +977,8 @@ public double [] getCalculatedEfficiencies()
 
 /**
 Return the standard deviation of monthly efficiencies calculated from CWR and
-historical pumping (12 monthly values + annual average), for the
-data set calendar type.  This is ONLY used by StateDMI and does not need
-to be considered in comparison code.
+historical pumping (12 monthly values + annual average), for the data set calendar type.
+This is ONLY used by StateDMI and does not need to be considered in comparison code.
 */
 public double [] getCalculatedEfficiencyStddevs()
 {	return __calculated_efficiency_stddevs;
@@ -1020,13 +1001,12 @@ public int getCollectionDiv ()
 }
 
 /**
-Return the collection part ID list for the specific year.  For wells,
-collections are by year.
+Return the collection part ID list for the specific year.  For wells, collections are by year.
 @return the list of collection part IDS, or null if not defined.
 */
 public List getCollectionPartIDs ( int year )
 {	if ( __collection_Vector.size() == 0 ) {
-			return null;
+		return null;
 	}
 	if ( __collection_part_type.equalsIgnoreCase("Well") ) {
 		// The list of part IDs will be the first and only list...
@@ -1086,7 +1066,8 @@ Returns the table header for StateMod_Well data tables.
 */
 public static String[] getDataHeader()
 {
-	return new String[] {"Num",
+	return new String[] {
+			"Num",
 			"Well Station ID",
 			"Well Station Name",
 			"Collection Type",
@@ -1120,8 +1101,7 @@ public int getDemsrcw() {
 /**
 @return the depletion at a particular index
 @param index index desired to retrieve
-@exception ArrayIndexOutOfBounds throws exception if unable to retrieve the 
-specified depletion node
+@exception ArrayIndexOutOfBounds throws exception if unable to retrieve the specified depletion node
 */
 public StateMod_ReturnFlow getDepletion(int index) {
 	return (StateMod_ReturnFlow)_depl.get(index);
@@ -1197,7 +1177,8 @@ Returns the table header for capacity data tables.
  */
 public static String[] getCapacityHeader()
 {
-	return new String[] {"Num",
+	return new String[] {
+			"Num",
 			"Well Station ID",
 			"Well Station Name",
 			"Collection Type",
@@ -1207,9 +1188,8 @@ public static String[] getCapacityHeader()
 }
 
 /**
-Return the average monthly efficiencies to be used for modeling
-(12 monthly values + annual average), for the
-data set calendar type.  This is ONLY used by StateDMI and does not need
+Return the average monthly efficiencies to be used for modeling (12 monthly values + annual average),
+for the data set calendar type.  This is ONLY used by StateDMI and does not need
 to be considered in comparison code.
 */
 public double [] getModelEfficiencies()
@@ -1333,7 +1313,7 @@ public List getParcels()
 {	return _parcel_Vector;
 }
 
-/*
+/**
 @return the priority switch
 */
 public double getPrimary() {
@@ -1364,8 +1344,7 @@ public static List getPrimaryChoices ( boolean include_notes )
 }
 
 /**
-Return the default primary switch choice.  This can be used by GUI code
-to pick a default for a new well.
+Return the default primary switch choice.  This can be used by GUI code to pick a default for a new well.
 @return the default primary choice.
 */
 public static String getPrimaryDefault ( boolean include_notes )
@@ -1381,8 +1360,7 @@ public static String getPrimaryDefault ( boolean include_notes )
 /**
 @return the return flow at a particular index
 @param index index desired to retrieve
-@exception ArrayIndexOutOfBounds throws exception if unable to retrieve the 
-specified return flow node
+@exception ArrayIndexOutOfBounds throws exception if unable to retrieve the specified return flow node
 */
 public StateMod_ReturnFlow getReturnFlow(int index) {
 	return (StateMod_ReturnFlow)_rivret.get(index);
@@ -1458,48 +1436,48 @@ Set default values for all arguments
 false, initialize to missing values.
 */
 private void initialize ( boolean initialize_defaults )
-{	_smdata_type 	= StateMod_DataSet.COMP_WELL_STATIONS;
-	_rivret	 	= new Vector(10);
-	_depl	 	= new Vector(10);
-	_pumping_MonthTS= null;
-	_pumping_DayTS	= null;
-	_demand_MonthTS	= null;
-	_demand_DayTS	= null;
+{	_smdata_type = StateMod_DataSet.COMP_WELL_STATIONS;
+	_rivret = new Vector(10);
+	_depl = new Vector(10);
+	_pumping_MonthTS = null;
+	_pumping_DayTS = null;
+	_demand_MonthTS = null;
+	_demand_DayTS = null;
 	_ipy_YearTS = null;
 	_cwr_MonthTS = null;
 	_cwr_DayTS = null;
-	_rights		= new Vector();
-	_georecord	= null;
+	_rights = new Vector();
+	_georecord = null;
 
 	if ( initialize_defaults ) {
-		_cdividyw 	= "0";	// Estimate average daily from monthly data.
-		_idvcow2 	= "N/A";
-		_diveff	 	= new double[12];
+		_cdividyw = "0";	// Estimate average daily from monthly data.
+		_idvcow2 = "N/A";
+		_diveff = new double[12];
 		for ( int i = 0; i < 12; i++ ) {
 			_diveff[i] = 60.0;
 		}
-		_divcapw	= 0;
-		_idvcomw	= 1;
-		_divefcw	= -60.0; // Indicate to use monthly efficiencies
-		_areaw		= 0.0;
-		_irturnw	= 0;
-		_demsrcw	= 1;
-		_primary	= 0;
+		_divcapw = 0;
+		_idvcomw = 1;
+		_divefcw = -60.0; // Indicate to use monthly efficiencies
+		_areaw = 0.0;
+		_irturnw = 0;
+		_demsrcw = 1;
+		_primary = 0;
 	}
 	else {
-		_cdividyw 	= "";
-		_idvcow2 	= "";
-		_diveff	 	= new double[12];
+		_cdividyw = "";
+		_idvcow2 = "";
+		_diveff = new double[12];
 		for (int i=0; i<12; i++) {
 			_diveff[i] = StateMod_Util.MISSING_DOUBLE;
 		}
-		_divcapw	= StateMod_Util.MISSING_DOUBLE;
-		_idvcomw	= StateMod_Util.MISSING_INT;
-		_divefcw	= StateMod_Util.MISSING_DOUBLE;
-		_areaw		= StateMod_Util.MISSING_DOUBLE;
-		_irturnw	= StateMod_Util.MISSING_INT;
-		_demsrcw	= StateMod_Util.MISSING_INT;
-		_primary	= StateMod_Util.MISSING_INT;
+		_divcapw = StateMod_Util.MISSING_DOUBLE;
+		_idvcomw = StateMod_Util.MISSING_INT;
+		_divefcw = StateMod_Util.MISSING_DOUBLE;
+		_areaw = StateMod_Util.MISSING_DOUBLE;
+		_irturnw = StateMod_Util.MISSING_INT;
+		_demsrcw = StateMod_Util.MISSING_INT;
+		_primary = StateMod_Util.MISSING_INT;
 	}
 }
 
@@ -2325,6 +2303,81 @@ public void setReturnFlows(List rivret) {
 // TODO - need to handle dirty flag
 public void setRights(List rights) {
 	_rights = rights;
+}
+
+/**
+Performs validation for this object within a StateMod data set.
+@param dataset a StateMod_DataSet that is managing this object.
+@return validation results, from which information about problems can be extracted.
+*/
+public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset )
+{	StateMod_ComponentValidation validation = new StateMod_ComponentValidation();
+	/*
+	StateMod_Parcel parcel = null;	// Parcel associated with a well station
+	String id_i = null;
+	int wes_parcel_count = 0;	// Parcel count for well station
+	double wes_parcel_area = 0.0;	// Area of parcels for well station
+	int wes_well_parcel_count = 0;	// Parcel (with wells) count for well station.
+	double wes_well_parcel_area = 0.0; // Area of parcels with wells for well station.
+	List parcel_Vector;		// List of parcels for well station.
+
+	// FIXME SAM Evaluate whether to check sum of rights here
+	boolean checkRights = false;
+	/ *
+	List wer_Vector = null;
+	if ( props != null ) {
+		// Check if well rights are being evaluated.
+		// Validating Well Station Rights by checking Station data
+		String propRights = props.getValue("checkRights");
+		if ( propRights != null && propRights.equalsIgnoreCase("true")) {
+			checkRights = true;
+			DataSetComponent wer_comp = dataset.getComponentForComponentType ( StateMod_DataSet.COMP_WELL_RIGHTS );
+			wer_Vector = (List)wer_comp.getData();
+		}
+	}
+	* /
+	id_i = getID();
+	if ( getAreaw() <= 0.0 ) {
+		if ( checkRights ) {
+			List rights = StateMod_Util.getRightsForStation ( id_i, wer_Vector );
+			if ( (rights != null) && (rights.size() != 0) ) {
+				return null;
+			}
+		}
+		// Check for parcels...
+		wes_parcel_count = 0;
+		wes_parcel_area = 0.0;
+		wes_well_parcel_count = 0;
+		wes_well_parcel_area = 0.0;
+		parcel_Vector = getParcels();
+		if ( parcel_Vector != null ) {
+			wes_parcel_count = parcel_Vector.size();
+			for ( int j = 0; j < wes_parcel_count; j++ ) {
+				parcel = (StateMod_Parcel)parcel_Vector.get(j);
+				if ( parcel.getArea() > 0.0 ) {
+					wes_parcel_area += parcel.getArea();
+				}
+				if ( parcel.getWellCount() > 0 ) {
+					wes_well_parcel_count += parcel.getWellCount();
+					wes_well_parcel_area += parcel.getArea();
+				}
+			}
+		}
+		// new format for check file
+		String [] data_table = {
+			StringUtil.formatString(count,"%4d"),
+			StringUtil.formatString(id_i,"%-12.12s"),
+			getName(),
+			StringUtil.formatString(getCollectionType(), "%-10.10s"),
+			StringUtil.formatString(wes_parcel_count,"%9d"),
+			StringUtil.formatString(wes_parcel_area,"%11.0f"),
+			StringUtil.formatString(wes_well_parcel_count,"%9d"),
+			StringUtil.formatString(wes_well_parcel_area,"%11.0f") };
+		
+		return StateMod_Util.checkForMissingValues( data_table );
+	}
+	*/
+	return validation;
 }
 
 /**

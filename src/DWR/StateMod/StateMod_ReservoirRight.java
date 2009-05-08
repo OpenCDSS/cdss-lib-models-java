@@ -90,12 +90,11 @@ import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.IO.IOUtil;
-import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 
 public class StateMod_ReservoirRight extends StateMod_Data 
-implements Cloneable, Comparable, StateMod_Component, StateMod_Right {
+implements Cloneable, Comparable, StateMod_ComponentValidator, StateMod_Right {
 /**
 Administration number
 */
@@ -127,19 +126,6 @@ Constructor.
 public StateMod_ReservoirRight() {
 	super();
 	initialize();
-}
-
-/**
-@param count Number of components checked.
-@param dataset StateMod dataset object.
-@param props Extra properties for specific data checks.
-@return List of data that failed specific checks.
- */
-public String[] checkComponentData( int count, 
-StateMod_DataSet dataset, PropList props ) 
-{
-	// TODO KAT 2007-04-16 add specific checks here
-	return null;
 }
 
 /**
@@ -668,6 +654,14 @@ public void setDcrres(String dcrres) {
 }
 
 /**
+Set the decree, as per the generic interface.
+@param decree decree, in the units of the data.
+*/
+public void setDecree( double decree )
+{	setDcrres(decree);
+}
+
+/**
 Set the filling ratio.
 */
 public void setIresco(int iresco) {
@@ -765,6 +759,16 @@ public void setRtem(String rtem) {
 			_dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_RIGHTS, true);
 		}
 	}
+}
+
+/**
+@param dataset StateMod dataset object.
+@return validation results.
+ */
+public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset ) 
+{
+	// TODO KAT 2007-04-16 add specific checks here
+	return null;
 }
 
 /**

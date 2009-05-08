@@ -99,7 +99,6 @@ import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.IO.IOUtil;
-import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 
@@ -107,7 +106,7 @@ import RTi.Util.String.StringUtil;
 // lists, which can lead to inconsistencies.
 
 public class StateMod_StreamEstimate_Coefficients extends StateMod_Data 
-implements Cloneable, StateMod_Component
+implements Cloneable, StateMod_ComponentValidator
 {
 
 // TODO SAM 2009-01-05 Why is this needed?  Apparently for the table model for setting data?
@@ -223,19 +222,6 @@ public boolean changed() {
 		return false;
 	}
 	return true;
-}
-
-/**
-@param count Number of components checked.
-@param dataset StateMod dataset object.
-@param props Extra properties for specific data checks.
-@return List of data that failed specific checks.
- */
-public String[] checkComponentData( int count, 
-StateMod_DataSet dataset, PropList props ) 
-{
-	// TODO KAT 2007-04-16 add specific checks here
-	return null;
 }
 
 /**
@@ -941,6 +927,16 @@ throws Exception {
 		in = null;
 	}
 	return theBaseflows;
+}
+
+/**
+@param dataset StateMod dataset object.
+@return Validation results.
+ */
+public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset ) 
+{
+	// TODO KAT 2007-04-16 add specific checks here
+	return null;
 }
 
 /**

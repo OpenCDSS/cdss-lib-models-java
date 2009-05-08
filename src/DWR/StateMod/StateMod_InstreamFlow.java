@@ -97,12 +97,11 @@ import RTi.GIS.GeoView.GeoRecord;
 import RTi.TS.DayTS;
 import RTi.TS.MonthTS;
 import RTi.Util.IO.IOUtil;
-import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 
 public class StateMod_InstreamFlow extends StateMod_Data
-implements StateMod_Component
+implements StateMod_ComponentValidator
 {
 
 /**
@@ -195,19 +194,6 @@ public boolean changed() {
 		return false;
 	}
 	return true;
-}
-
-/**
-@param count Number of components checked.
-@param dataset StateMod dataset object.
-@param props Extra properties for specific data checks.
-@return List of data that failed specific checks.
- */
-public String[] checkComponentData( int count, 
-StateMod_DataSet dataset, PropList props ) 
-{
-	// TODO KAT 2007-04-16 add specific checks here
-	return null;
 }
 
 /**
@@ -807,6 +793,16 @@ Set the rights list.
 */
 public void setRights ( List rights )
 {	_rights = rights;
+}
+
+/**
+@param dataset StateMod dataset object.
+@return List of data that failed specific checks.
+ */
+public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset ) 
+{
+	// TODO KAT 2007-04-16 add specific checks here
+	return null;
 }
 
 /**

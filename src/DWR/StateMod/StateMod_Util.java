@@ -737,7 +737,6 @@ public static String[] checkForMissingValues( String[] data )
 	return data;
 }
 
-
 // TODO SAM 2005-03-03 This simple test needs to be evaluated to determine
 // if it should be supported in all the file types.  For example, this code
 // could be moved to each StateMod class.
@@ -3362,10 +3361,10 @@ Get a list of locations from a list of water rights.  The locations are the
 nodes at which the rights apply.
 @param smrights Vector of StateMod_Right to search.
 @param req_parcel_year Specific parcel year to match, or -1 to match all, if input is a
-Vector of StateMod_WellRight.
+list of StateMod_WellRight.
 @return a list of locations for water rights, in the order found in the original list.
 */
-public static List getWaterRightLocationList ( List smrights, int req_parcel_year )
+public static List<String> getWaterRightLocationList ( List smrights, int req_parcel_year )
 {	List loclist = new Vector();	// Returned data
 	int size = 0;
 	if ( smrights != null ) {

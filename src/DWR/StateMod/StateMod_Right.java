@@ -48,4 +48,9 @@ Return the on/off switch.
 */
 public int getSwitch();
 
+/**
+Set the decree amount.
+*/
+public void setDecree(double decree);
+
 }

@@ -73,7 +73,6 @@ import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.IO.IOUtil;
-import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 
@@ -81,7 +80,7 @@ import RTi.Util.String.StringUtil;
 This StateMod_InstreamFlowRight class holds information for StateMod instream flow rights.
 */
 public class StateMod_InstreamFlowRight extends StateMod_Data 
-implements Cloneable, Comparable, StateMod_Component, StateMod_Right {
+implements Cloneable, Comparable, StateMod_ComponentValidator, StateMod_Right {
 
 /**
 Administration number.  The value is stored as a string to allow exact
@@ -110,19 +109,6 @@ suitable for use with StateDMI.
 public StateMod_InstreamFlowRight ( boolean initialize_defaults )
 {	super();
 	initialize ( initialize_defaults );
-}
-
-/**
-@param count Number of components checked.
-@param dataset StateMod dataset object.
-@param props Extra properties for specific data checks.
-@return List of data that failed specific checks.
- */
-public String[] checkComponentData( int count, 
-StateMod_DataSet dataset, PropList props ) 
-{
-	// TODO KAT 2007-04-16 add specific checks here
-	return null;
 }
 
 /**
@@ -425,6 +411,14 @@ public void setDcrifr(String dcrifr) {
 }
 
 /**
+Set the decree, as per the generic interface.
+@param decree, in the units of the data.
+*/
+public void setDecree( double decree )
+{	setDcrifr(decree);
+}
+
+/**
 Set the administration number.
 */
 public void setIrtem(String irtem) {
@@ -447,6 +441,16 @@ Returns a String representation of this object.
 */
 public String toString() {
 	return super.toString() + ", " + _irtem + ", " + _dcrifr;
+}
+
+/**
+@param dataset StateMod dataset object.
+@return validation results.
+ */
+public StateMod_ComponentValidation validateComponent ( StateMod_DataSet dataset ) 
+{
+	// TODO KAT 2007-04-16 add specific checks here
+	return null;
 }
 
 /**

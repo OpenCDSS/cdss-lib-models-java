@@ -77,13 +77,12 @@ import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.IO.IOUtil;
-import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 
 public class StateMod_DelayTable 
 extends StateMod_Data 
-implements Cloneable, Comparable, StateMod_Component {
+implements Cloneable, Comparable, StateMod_ComponentValidator {
 
 /**
 Number of return values.
@@ -164,19 +163,6 @@ public boolean changed() {
 	}
 
 	return true;
-}
-
-/**
-@param count Number of components checked.
-@param dataset StateMod dataset object.
-@param props Extra properties for specific data checks.
-@return List of data that failed specific checks.
- */
-public String[] checkComponentData( int count, 
-StateMod_DataSet dataset, PropList props ) 
-{
-	// TODO KAT 2007-04-16 add specific checks here
-	return null;
 }
 
 /**
@@ -646,6 +632,17 @@ public void scale ( double value )
 {	for ( int i = 0; i < _ndly; i++ ) {
 		setRet_val(i,getRet_val(i)*value);
 	}
+}
+
+/**
+@param count Number of components checked.
+@param dataset StateMod dataset object.
+@return validation results.
+ */
+public StateMod_ComponentValidation validateComponent ( StateMod_DataSet dataset ) 
+{
+	// TODO KAT 2007-04-16 add specific checks here
+	return null;
 }
 
 /**

@@ -37,8 +37,7 @@ import RTi.Util.IO.PropList;
 import RTi.Util.String.StringUtil;
 
 /**
-GUI for displaying, editing, and validating node properties for normal nodes
-and annotations.
+GUI for displaying, editing, and validating node properties for normal nodes and annotations.
 */
 public class StateMod_Network_AnnotationProperties_JDialog 
 extends JFrame 
@@ -148,8 +147,7 @@ public void actionPerformed(ActionEvent event) {
 }
 
 /**
-Saves the changes made in the GUI and applies them to the node in the parent 
-GUI.
+Saves the changes made in the GUI and applies them to the node in the parent GUI.
 */
 private void applyChanges() {
 	if (!validateData()) {
@@ -165,8 +163,7 @@ private void applyChanges() {
 	temp = StringUtil.replaceString(temp, "\"", "'");
 	p.set("Text", temp);
 
-	temp = __xTextField.getText().trim() + ","
-		+ __yTextField.getText().trim();
+	temp = __xTextField.getText().trim() + "," + __yTextField.getText().trim();
 	p.set("Point", temp);
 
 	temp = __textPositionComboBox.getSelected();
@@ -198,8 +195,7 @@ private void closeWindow() {
 }
 
 /**
-Displays the annotation values from the annotation proplist in the components
-in the GUI.
+Displays the annotation values from the annotation proplist in the components in the GUI.
 */
 private void displayPropListValues() {
 	PropList p = (PropList)__node.getAssociatedObject();
@@ -230,8 +226,7 @@ private void displayPropListValues() {
 }
 
 /**
-Responds when users press the enter button in an edit field.  Saves the changes
-and closes the GUI.
+Responds when users press the enter button in an edit field.  Saves the changes and closes the GUI.
 @param event that KeyEvent that happened.
 */
 public void keyPressed(KeyEvent event) {
@@ -244,8 +239,7 @@ public void keyPressed(KeyEvent event) {
 }
 
 /**
-Responds after users presses a key -- tries to validate the data that has
-been entered.
+Responds after users presses a key -- tries to validate the data that has been entered.
 */
 public void keyReleased(KeyEvent event) {
 	validateData();
@@ -414,8 +408,7 @@ private void setupGUI() {
 
 /**
 Validates data entered in the GUI.  If any values are invalid (non-numbers in
-the X and Y fields, blank label field), the OK button is disabled and the
-field is highlighted in red.
+the X and Y fields, blank label field), the OK button is disabled and the field is highlighted in red.
 @return true if all the text is valid.  False if not.
 */
 private boolean validateData() {
@@ -452,7 +445,7 @@ private boolean validateData() {
 	// of the Y values in the data limits
 	try {
 		y = (new Double(__yTextField.getText().trim())).doubleValue();
-		if (y < limits.getBottomY() || x > limits.getTopY()) {
+		if (y < limits.getBottomY() || y > limits.getTopY()) {
 			badY = true;
 		}
 	}
@@ -470,8 +463,7 @@ private boolean validateData() {
 	}
 	
 	// make sure that the text is not an empty string.  If it is, make
-	// its textfield red.  Otherwise, the textfield will have the normal
-	// textfield color.
+	// its textfield red.  Otherwise, the textfield will have the normal textfield color.
 	boolean badText = false;
 	if (text.trim().equals("")) {
 		badText = true;
@@ -482,14 +474,11 @@ private boolean validateData() {
 	}
 
 	// make sure that the font size is an integer greater than 0.  If not,
-	// set its textfield to red.  Otherwise the textfield will have a
-	// normal textfield color.
+	// set its textfield to red.  Otherwise the textfield will have a normal textfield color.
 	boolean badFontSize = false;
 	int size = 0;
 	try {
-		size = (new Integer(
-			__fontSizeTextField.getText().trim()))
-			.intValue();
+		size = (new Integer(__fontSizeTextField.getText().trim())).intValue();
 	}
 	catch (Exception e) {
 		badFontSize = true;
@@ -503,14 +492,12 @@ private boolean validateData() {
 		__fontSizeTextField.setBackground(Color.red);
 	}
 	else {
-		__fontSizeTextField.setBackground(
-			__textFieldBackground);
+		__fontSizeTextField.setBackground(__textFieldBackground);
 	}
 
 	if (!badText && !badX && !badY && !badFontSize) {
-		// if all the data validated properly then mark whether
-		// the data are dirty or not.   OK is only active if 
-		// the data are valid and something is dirty.
+		// if all the data validated properly then mark whether the data are dirty or not.
+		// OK is only active if the data are valid and something is dirty.
 		boolean dirty = false;
 		PropList p = (PropList)__node.getAssociatedObject();
 		
@@ -532,26 +519,22 @@ private boolean validateData() {
 		}
 
 		temp = p.getValue("OriginalFontSize").trim();
-		if (!temp.equals(
-			__fontSizeTextField.getText().trim())) {
+		if (!temp.equals(__fontSizeTextField.getText().trim())) {
 			dirty = true;
 		}
 
 		temp = p.getValue("FontName").trim();
-		if (!temp.equals(
-			__fontNameComboBox.getSelected().trim())) {
+		if (!temp.equals(__fontNameComboBox.getSelected().trim())) {
 			dirty = true;
 		}
 
 		temp = p.getValue("FontStyle").trim();
-		if (!temp.equals(
-			__fontStyleComboBox.getSelected().trim())) {
+		if (!temp.equals(__fontStyleComboBox.getSelected().trim())) {
 			dirty = true;
 		}
 
 		temp = p.getValue("TextPosition").trim();
-		if (!temp.equals(
-			__textPositionComboBox.getSelected().trim())) {
+		if (!temp.equals(__textPositionComboBox.getSelected().trim())) {
 			dirty = true;
 		}
 

@@ -81,12 +81,11 @@ import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.IO.IOUtil;
-import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 
 public class StateMod_DiversionRight extends StateMod_Data 
-implements Cloneable, Comparable, StateMod_Component, StateMod_Right {
+implements Cloneable, Comparable, StateMod_ComponentValidator, StateMod_Right {
 
 /**
 Administration number.
@@ -106,11 +105,6 @@ Constructor.
 public StateMod_DiversionRight() {
 	super();
 	initialize();
-}
-
-public String[] checkComponentData(int count, StateMod_DataSet dataset, PropList props) {
-	// TODO Add checks here ...
-	return null;
 }
 
 /**
@@ -468,6 +462,14 @@ public void setDcrdiv(String dcrdiv) {
 }
 
 /**
+Set the decree, as per the generic interface.
+@param decree decree, in the units of the data.
+*/
+public void setDecree( double decree )
+{	setDcrdiv(decree);
+}
+
+/**
 Set the administration number.
 */
 public void setIrtem(String irtem) {
@@ -481,6 +483,19 @@ public void setIrtem(String irtem) {
 			_dataset.setDirty(StateMod_DataSet.COMP_DIVERSION_RIGHTS, true);
 		}
 	}
+}
+
+/**
+Returns a String representation of this object.
+@return a String representation of this object.
+*/
+public String toString() {
+	return super.toString() + ", " + _irtem + ", " + _dcrdiv;
+}
+
+public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset ) {
+	// TODO Add checks here ...
+	return null;
 }
 
 /**
@@ -585,14 +600,6 @@ throws Exception {
 			out.close();
 		}
 	}
-}
-
-/**
-Returns a String representation of this object.
-@return a String representation of this object.
-*/
-public String toString() {
-	return super.toString() + ", " + _irtem + ", " + _dcrdiv;
 }
 
 /**
