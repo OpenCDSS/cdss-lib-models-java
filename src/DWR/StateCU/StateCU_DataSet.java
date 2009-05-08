@@ -47,6 +47,8 @@
 //-----------------------------------------------------------------------------
 // EndHeader
 
+// FIXME SAM 2009-04-29 Need to remove code related to delay tables since not used by StateCU
+
 package DWR.StateCU;
 
 import java.io.BufferedReader;

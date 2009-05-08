@@ -1,19 +1,3 @@
-//------------------------------------------------------------------------------
-// StateCU_DelayTableAssignment - class to hold StateCU delay table assignment
-//				 data, compatible with StateCU DLA file
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-//
-// 2003-07-09	Steven A. Malers, RTi	Initial version.  Copy and modify
-//					StateCU_Location.
-// 2005-01-24	J. Thomas Sapienza, RTi	* Added createBackup().
-//					* Added restoreOriginal().
-// 2005-04-19	JTS, RTi		Added writeListFile().
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-//------------------------------------------------------------------------------
-
 package DWR.StateCU;
 
 import java.io.BufferedReader;
@@ -24,16 +8,14 @@ import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.IO.IOUtil;
-import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 
 /**
-Class to hold StateCU delay table assignment data for StateCU, compatible with
-the StateCU DLA file.
+Class to hold StateCU delay table assignment data for StateCU, compatible with the StateCU DLA file.
 */
 public class StateCU_DelayTableAssignment extends StateCU_Data
-implements StateCU_Component
+implements StateCU_ComponentValidator
 {
 
 /**
@@ -43,25 +25,10 @@ private String[] __delay_table_ids = null;
 private double[] __delay_table_percents = null;
 
 /**
-Construct a StateCU_DelayTableAssignment instance and set to missing and empty
-data.
+Construct a StateCU_DelayTableAssignment instance and set to missing and empty data.
 */
 public StateCU_DelayTableAssignment()
 {	super();
-}
-
-/**
-Performs specific data checks and returns a list of data
-that failed the data checks.
-@param count Index of the data vector currently being checked.
-@param dataset StateCU dataset currently in memory.
-@param props Extra properties to perform checks with.
-@return List of invalid data.
- */
-public String[] checkComponentData( int count, StateCU_DataSet dataset,
-PropList props ) {
-	// TODO KAT 2007-04-12 Add specific checks here ...
-	return null;
 }
 
 /**
@@ -75,8 +42,7 @@ public void createBackup() {
 
 	int num = ((StateCU_DelayTableAssignment)_original).getNumDelayTables();
 
-	StateCU_DelayTableAssignment dta 
-		= (StateCU_DelayTableAssignment)_original;
+	StateCU_DelayTableAssignment dta = (StateCU_DelayTableAssignment)_original;
 
 	if (dta.__delay_table_ids != null) {
 		__delay_table_ids = new String[num];
@@ -88,8 +54,7 @@ public void createBackup() {
 	if (dta.__delay_table_percents != null) {
 		__delay_table_percents = new double[num];
 		for (int i = 0; i < num; i++) {
-			__delay_table_percents[i] 
-				= dta.getDelayTablePercent(i);
+			__delay_table_percents[i] = dta.getDelayTablePercent(i);
 		}
 	}
 }
@@ -112,26 +77,24 @@ Returns the data column header for the specifically checked data.
 public static String[] getDataHeader()
 {
 	// TODO KAT 2007-04-12 
-	// When specific checks are added to checkComponentData
-	// return the header for that data here
+	// When specific checks are added to checkComponentData return the header for that data here
 	return new String[] {};
 }
 
 /**
 Return the delay table identifier.
-@return the delay table identifier or an empty string if the position is
-invalid.
+@return the delay table identifier or an empty string if the position is invalid.
 @param pos Delay table index (relative to zero).
 */
 public String getDelayTableID ( int pos )
 {	if ( __delay_table_ids == null ) {
 		return "";
 	}
-	if (	(pos >= 0) &&
-		(pos < __delay_table_ids.length) ) {
+	if ( (pos >= 0) && (pos < __delay_table_ids.length) ) {
 		return __delay_table_ids[pos];
 	}
-	else {	return "";
+	else {
+		return "";
 	}
 }
 
@@ -144,11 +107,11 @@ public double getDelayTablePercent ( int pos )
 {	if ( __delay_table_percents == null ) {
 		return 0.0;
 	}
-	if (	(pos >= 0) &&
-		(pos < __delay_table_percents.length) ) {
+	if ( (pos >= 0) && (pos < __delay_table_percents.length) ) {
 		return __delay_table_percents[pos];
 	}
-	else {	return 0.0;
+	else {
+		return 0.0;
 	}
 }
 
@@ -160,13 +123,13 @@ public int getNumDelayTables ()
 {	if ( __delay_table_ids == null ) {
 		return 0;
 	}
-	else {	return __delay_table_ids.length;
+	else {
+		return __delay_table_ids.length;
 	}
 }
 
 /**
-Read the StateCU delay table assignment file and return as a Vector of
-StateCU_DelayTableAssignment.
+Read the StateCU delay table assignment file and return as a list of StateCU_DelayTableAssignment.
 @param filename filename containing delay table assignment records.
 */
 public static List readStateCUFile ( String filename )
@@ -176,21 +139,23 @@ throws IOException
 	List v = new Vector ( 8 );
 	List data_Vector = new Vector ( 100 );	// Data to return.
 	int i;
-	int format_0[] = {	StringUtil.TYPE_STRING,	// CU Location
-				StringUtil.TYPE_STRING};// Num delays
-	int format_0w[] = {	12,	// CU Location
-				2 };	// Num delays
+	int format_0[] = {
+		StringUtil.TYPE_STRING,	// CU Location
+		StringUtil.TYPE_STRING};// Num delays
+	int format_0w[] = {
+		12,	// CU Location
+		2 };	// Num delays
 	// The following used to iteratively read the end of each record.
-	int format_1[] = {	StringUtil.TYPE_STRING,	// Percent
-				StringUtil.TYPE_STRING};// Table ID
-	int format_1w[] = {	8,	// Percent
-				8 };	// Table ID
+	int format_1[] = {
+		StringUtil.TYPE_STRING,	// Percent
+		StringUtil.TYPE_STRING};// Table ID
+	int format_1w[] = {
+		8,	// Percent
+		8 }; // Table ID
 
 	StateCU_DelayTableAssignment data = null;
 	BufferedReader in = null;
-	Message.printStatus ( 1, rtn,
-		"Reading StateCU delay table assignment file: " +
-		filename );
+	Message.printStatus ( 1, rtn, "Reading StateCU delay table assignment file: " + filename );
 
 	// The following throws an IOException if the file cannot be opened...
 	in = new BufferedReader ( new FileReader (filename));
@@ -208,21 +173,15 @@ throws IOException
 		StringUtil.fixedRead ( iline, format_0, format_0w, v );
 		data.setID ( ((String)v.get(0)).trim() ); 
 		num_delay_tables = ((String)v.get(1)).trim();
-		if (	(num_delay_tables.length() != 0) &&
-			StringUtil.isInteger(num_delay_tables)) {
-			data.setNumDelayTables (
-				StringUtil.atoi(num_delay_tables) );
+		if ( (num_delay_tables.length() != 0) && StringUtil.isInteger(num_delay_tables)) {
+			data.setNumDelayTables ( StringUtil.atoi(num_delay_tables) );
 		}
 		ndt = data.getNumDelayTables();
 		for ( i = 0; i < ndt; i++ ) {
-			StringUtil.fixedRead (
-				iline.substring(14 + i*16), format_1,
-				format_1w, v );
+			StringUtil.fixedRead ( iline.substring(14 + i*16), format_1, format_1w, v );
 			percent = ((String)v.get(0)).trim();
-			if (	(percent.length() != 0) &&
-				StringUtil.isDouble(percent)) {
-				data.setDelayTablePercent (
-				StringUtil.atod(percent), i );
+			if ( (percent.length() != 0) && StringUtil.isDouble(percent)) {
+				data.setDelayTablePercent ( StringUtil.atod(percent), i );
 			}
 			data.setDelayTableID ( ((String)v.get(1)).trim(), i ); 
 		}
@@ -241,8 +200,7 @@ Cancels any changes made to this object within a GUI since createBackup()
 was called and sets _original to null.
 */
 public void restoreOriginal() {
-	StateCU_DelayTableAssignment dta 
-		= (StateCU_DelayTableAssignment)_original;
+	StateCU_DelayTableAssignment dta = (StateCU_DelayTableAssignment)_original;
 	super.restoreOriginal();
 
 	__delay_table_percents = dta.__delay_table_percents;
@@ -280,32 +238,39 @@ public void setDelayTablePercent ( double percent, int pos )
 }
 
 /**
-Write a Vector of StateCU_DelayTableAssignment to a file.  The filename is
-adjusted to the working directory if necessary using
-IOUtil.getPathUsingWorkingDir().
+Performs specific data checks and returns a list of data that failed the data checks.
+@param dataset StateCU dataset currently in memory.
+@return validation results.
+*/
+public StateCU_ComponentValidation validateComponent( StateCU_DataSet dataset ) {
+	// TODO KAT 2007-04-12 Add specific checks here ...
+	return null;
+}
+
+/**
+Write a list of StateCU_DelayTableAssignment to a file.  The filename is
+adjusted to the working directory if necessary using IOUtil.getPathUsingWorkingDir().
 @param filename_prev The name of the previous version of the file (for
 processing headers).  Specify as null if no previous file is available.
 @param filename The name of the file to write.
 @param data_Vector A Vector of StateCU_DelayTableAssignment to write.
-@param new_comments Comments to add to the top of the file.  Specify as null 
-if no comments are available.
+@param newComments Comments to add to the top of the file.  Specify as null if no comments are available.
 @exception IOException if there is an error writing the file.
 */
-public static void writeStateCUFile (	String filename_prev, String filename,
-					List data_Vector,
-					String [] new_comments )
+public static void writeStateCUFile ( String filename_prev, String filename,
+	List data_Vector, List newComments )
 throws IOException
-{	String [] comment_str = { "#" };
-	String [] ignore_comment_str = { "#>" };
+{	List commentStr = new Vector(1);
+	commentStr.add ( "#" );
+	List ignoreCommentStr = new Vector(1);
+	ignoreCommentStr.add ( "#>" );
 	PrintWriter out = null;
-	String full_filename_prev = IOUtil.getPathUsingWorkingDir (
-		filename_prev );
+	String full_filename_prev = IOUtil.getPathUsingWorkingDir ( filename_prev );
 	String full_filename = IOUtil.getPathUsingWorkingDir ( filename );
 	out = IOUtil.processFileHeaders ( full_filename_prev, full_filename, 
-		new_comments, comment_str, ignore_comment_str, 0 );
+		newComments, commentStr, ignoreCommentStr, 0 );
 	if ( out == null ) {
-		throw new IOException ( "Error writing to \"" +
-			full_filename + "\"" );
+		throw new IOException ( "Error writing to \"" + full_filename + "\"" );
 	}
 	writeVector ( data_Vector, out );
 	out.flush();
@@ -314,8 +279,8 @@ throws IOException
 }
 
 /**
-Write a Vector of StateCU_DelayTableAssignment to an opened file.
-@param data_Vector A Vector of StateCU_DelayTableAssignment to write.
+Write a list of StateCU_DelayTableAssignment to an opened file.
+@param data_Vector A list of StateCU_DelayTableAssignment to write.
 @param out output PrintWriter.
 @exception IOException if an error occurs.
 */
@@ -329,23 +294,15 @@ throws IOException
 	out.println ( cmnt );
 	out.println ( cmnt + "  StateCU Delay Table Assignment (DLA) File" );
 	out.println ( cmnt );
-	out.println ( cmnt +
-		"  Record format (a12,i2,20(f8.2,i8))");
+	out.println ( cmnt + "  Record format (a12,i2,20(f8.2,i8))");
 	out.println ( cmnt );
-	out.println ( cmnt +
-		"  ID              :  CU Location identifier" );
-	out.println ( cmnt +
-		"  ND              :  Number of delay tables" );
-	out.println ( cmnt +
-		"  Pct             :  Percent of flow that uses the delay" +
-				" table" );
-	out.println ( cmnt +
-		"  DTID            :  Delay table identifier" );
+	out.println ( cmnt + "  ID              :  CU Location identifier" );
+	out.println ( cmnt + "  ND              :  Number of delay tables" );
+	out.println ( cmnt + "  Pct             :  Percent of flow that uses the delay table" );
+	out.println ( cmnt + "  DTID            :  Delay table identifier" );
 	out.println ( cmnt );
-	out.println ( cmnt +
-		"    ID    ND   Pct   DTID" );
-	out.println ( cmnt +
-		"---------ebeb------eb------eb------eb------eb------e..." );
+	out.println ( cmnt + "    ID    ND   Pct   DTID" );
+	out.println ( cmnt + "---------ebeb------eb------eb------eb------eb------e..." );
 	out.println ( cmnt + "EndHeader" );
 
 	int num = 0;
@@ -365,17 +322,15 @@ throws IOException
 		ndt = data.getNumDelayTables();
 		b.append( StringUtil.formatString(ndt,"%2d"));
 		for ( j = 0; j < ndt; j++ ) {
-			b.append ( StringUtil.formatString(
-				data.getDelayTablePercent(j), "%8.2f" ) );
-			b.append ( StringUtil.formatString( StringUtil.atoi(
-				data.getDelayTableID(j)),"%8d"));
+			b.append ( StringUtil.formatString( data.getDelayTablePercent(j), "%8.2f" ) );
+			b.append ( StringUtil.formatString( StringUtil.atoi( data.getDelayTableID(j)),"%8d"));
 		}
 		out.println ( b.toString() );
 	}
 }
 
 /**
-Writes a Vector of StateCU_DelayTableAssignment objects to a list file.  A 
+Writes a list of StateCU_DelayTableAssignment objects to a list file.  A 
 header is printed to the top of the file, containing the commands used to 
 generate the file.  Any strings in the body of the file that contain the field 
 delimiter will be wrapped in "...".  
@@ -383,11 +338,13 @@ delimiter will be wrapped in "...".
 @param delimiter the delimiter to use for separating field values.
 @param update whether to update an existing file, retaining the current 
 header (true) or to create a new file with a new header.
-@param data the Vector of objects to write.  
+@param data the Vector of objects to write.
+@param newComments comments to add to the top of the file (e.g., command file and HydroBase version).
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter, boolean update, List data) 
+public static void writeListFile(String filename, String delimiter, boolean update, List data, List newComments) 
 throws Exception {
+	String routine = "StateCU_DelayTableAssignment.writeListFile";
 	int size = 0;
 	if (data != null) {
 		size = data.size();
@@ -419,24 +376,38 @@ throws Exception {
 	int num = 0;
 	PrintWriter out = null;
 	StateCU_DelayTableAssignment dly = null;
-	String[] commentString = { "#" };
-	String[] ignoreCommentString = { "#>" };
+	List commentString = new Vector(1);
+	commentString.add ( "#" );
+	List ignoreCommentString = new Vector(1);
+	ignoreCommentString.add ("#>");
 	String[] line = new String[fieldCount];
-	String[] newComments = null;
 	String id = null;
 	StringBuffer buffer = new StringBuffer();
 	
-	try {	
+	try {
+		// Add some basic comments at the top of the file.  However, do this to a copy of the
+		// incoming comments so that they are not modified in the calling code.
+		List newComments2 = null;
+		if ( newComments == null ) {
+			newComments2 = new Vector();
+		}
+		else {
+			newComments2 = new Vector(newComments);
+		}
+		newComments2.add(0,"");
+		newComments2.add(1,"StateCU location delay table assignment information as a delimited list file.");
+		newComments2.add(2,"See also the associated CU location file.");
+		newComments2.add(3,"");
 		out = IOUtil.processFileHeaders(
 			oldFile,
 			IOUtil.getPathUsingWorkingDir(filename), 
 			newComments, commentString, ignoreCommentString, 0);
 
 		for (int i = 0; i < fieldCount; i++) {
-			buffer.append("\"" + names[i] + "\"");
-			if (i < (fieldCount - 1)) {
+			if (i > 0) {
 				buffer.append(delimiter);
 			}
+			buffer.append("\"" + names[i] + "\"");
 		}
 
 		out.println(buffer.toString());
@@ -448,24 +419,19 @@ throws Exception {
 			id = dly.getID();
 
 			for (j = 0; j < num; j++) {
-				line[0] = StringUtil.formatString(id,
-					formats[0]).trim();
-				line[1] = StringUtil.formatString(
-					dly.getDelayTableID(j), 
-					formats[1]).trim();
-				line[2] = StringUtil.formatString(
-					dly.getDelayTablePercent(j), 
-					formats[2]).trim();
+				line[0] = StringUtil.formatString(id,formats[0]).trim();
+				line[1] = StringUtil.formatString(dly.getDelayTableID(j),formats[1]).trim();
+				line[2] = StringUtil.formatString(dly.getDelayTablePercent(j),formats[2]).trim();
 
 				buffer = new StringBuffer();	
 				for (k = 0; k < fieldCount; k++) {
 					if (line[k].indexOf(delimiter) > -1) {
 						line[k] = "\"" + line[k] + "\"";
 					}
-					buffer.append(line[k]);
-					if (k < (fieldCount - 1)) {
+					if (k > 0) {
 						buffer.append(delimiter);
 					}
+					buffer.append(line[k]);
 				}
 	
 				out.println(buffer.toString());
@@ -476,13 +442,15 @@ throws Exception {
 		out = null;
 	}
 	catch (Exception e) {
+		Message.printWarning(3, routine, e);
+		throw e;
+	}
+	finally {
 		if (out != null) {
 			out.flush();
 			out.close();
 		}
-		out = null;
-		throw e;
 	}
 }
 
-} // End StateCU_DelayTableAssignment
+}

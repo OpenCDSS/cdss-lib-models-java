@@ -83,7 +83,7 @@ import RTi.Util.String.StringUtil;
 Class to hold StateCU Location data for StateCU/StateDMI, compatible with the StateCU STR file.
 */
 public class StateCU_Location extends StateCU_Data
-implements StateCU_Component
+implements StateCU_ComponentValidator
 {
 
 /**
@@ -178,18 +178,6 @@ Construct a StateCU_Location instance and set to missing and empty data.
 */
 public StateCU_Location()
 {	super();
-}
-
-/**
-Performs specific data checks and returns a list of data that failed the data checks.
-@param count Index of the data vector currently being checked.
-@param dataset StateCU dataset currently in memory.
-@param props Extra properties to perform checks with.
-@return List of invalid data.
-*/
-public String[] checkComponentData( int count, StateCU_DataSet dataset, PropList props ) {
-	// TODO KAT 2007-04-12 Add specific checks here ...
-	return null;
 }
 
 /**
@@ -866,6 +854,16 @@ public void setTemperatureStationWeight ( double wt, int pos )
 }
 
 /**
+Performs specific data checks and returns a list of data that failed the data checks.
+@param dataset StateCU dataset currently in memory.
+@return Validation results.
+*/
+public StateCU_ComponentValidation validateComponent( StateCU_DataSet dataset ) {
+	// TODO KAT 2007-04-12 Add specific checks here ...
+	return null;
+}
+
+/**
 Write a list of StateCU_Location to a file using default properties.  The filename is adjusted to the
 working directory if necessary using IOUtil.getPathUsingWorkingDir().
 @param filenamePrev The name of the previous version of the file (for
@@ -1149,10 +1147,10 @@ throws Exception {
 			newComments2, commentString, ignoreCommentString, 0);
 
 		for (int i = 0; i < fieldCount; i++) {
-			buffer.append("\"" + names.get(i) + "\"");
-			if (i < (fieldCount - 1)) {
+			if ( i > 0 ) {
 				buffer.append(delimiter);
 			}
+			buffer.append("\"" + names.get(i) + "\"");
 		}
 
 		out.println(buffer.toString());
@@ -1174,10 +1172,10 @@ throws Exception {
 				if (line[j].indexOf(delimiter) > -1) {
 					line[j] = "\"" + line[j] + "\"";
 				}
-				buffer.append(line[j]);
-				if (j < (fieldCount - 1)) {
+				if (j > 0) {
 					buffer.append(delimiter);
 				}
+				buffer.append(line[j]);
 			}
 
 			out.println(buffer.toString());

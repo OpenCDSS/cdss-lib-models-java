@@ -61,14 +61,13 @@ Class to hold StateCU Blaney-Criddle crop data for StateCU/StateDMI, compatible
 with the StateCU KBC file.
 */
 public class StateCU_BlaneyCriddle extends StateCU_Data
-implements StateCU_Component
+implements StateCU_ComponentValidator
 {
 
 // List data in the same order as in the StateCU documentation...
 
 // Cropn (Crop name) is stored in the base class name.
-// kcey (crop number) is stored in the base class ID, if necessary (currently
-// not used).
+// kcey (crop number) is stored in the base class ID, if necessary (currently not used).
 
 /**
 Growth curve type (Day=perennial crop, Percent=annual crop).
@@ -149,19 +148,6 @@ public StateCU_BlaneyCriddle ( String curve_type )
 		__nckcp[23] = 349;
 		__nckcp[24] = 366;
 	}
-}
-
-/**
-Performs specific data checks and returns a list of data that failed the data checks.
-@param count Index of the data vector currently being checked.
-@param dataset StateCU dataset currently in memory.
-@param props Extra properties to perform checks with.
-@return List of invalid data.
- */
-public String[] checkComponentData( int count, StateCU_DataSet dataset,
-PropList props ) {
-	// TODO KAT 2007-04-12 Add specific checks here ...
-	return null;
 }
 
 /**
@@ -528,12 +514,24 @@ public void setKtsw( int ktsw )
 }
 
 /**
-Write a Vector of StateCU_BlaneyCriddle to a file.  The filename is adjusted to
+Performs specific data checks and returns a list of data that failed the data checks.
+@param count Index of the data vector currently being checked.
+@param dataset StateCU dataset currently in memory.
+@param props Extra properties to perform checks with.
+@return List of invalid data.
+ */
+public StateCU_ComponentValidation validateComponent ( StateCU_DataSet dataset ) {
+	// TODO KAT 2007-04-12 Add specific checks here ...
+	return null;
+}
+
+/**
+Write a list of StateCU_BlaneyCriddle to a file.  The filename is adjusted to
 the working directory if necessary using IOUtil.getPathUsingWorkingDir().
 @param filename_prev The name of the previous version of the file (for
 processing headers).  Specify as null if no previous file is available.
 @param filename The name of the file to write.
-@param data_Vector A Vector of StateCU_BlaneyCriddle to write.
+@param data_Vector A list of StateCU_BlaneyCriddle to write.
 @param new_comments Comments to add to the top of the file.  Specify as null 
 if no comments are available.
 @exception IOException if there is an error writing the file.

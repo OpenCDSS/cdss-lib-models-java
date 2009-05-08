@@ -404,7 +404,7 @@ intelligence and checks are stored in the component itself.
 @param data List of data objects to check.
 @return List of data that failed the data checks.
  */
-private List doSpecificDataChecks( List data, PropList props )
+private List doSpecificDataChecks( List<StateCU_ComponentValidator> data, PropList props )
 {
 	List checks = new Vector();
 	if ( data == null ) {
@@ -414,13 +414,12 @@ private List doSpecificDataChecks( List data, PropList props )
 	// checkComponentData() method.  Each component
 	// needs to implement this method and extend from
 	// the StateMod_Component interface
-	StateCU_Component comp = null;
+	StateCU_ComponentValidator comp = null;
 	for ( int i = 0; i < data.size(); i++ ) {
-		comp = (StateCU_Component)data.get( i );
-		String [] invalid_data = comp.checkComponentData( 
-			i, __dataset, props );
-		if ( invalid_data != null && invalid_data.length > 0 ) {
-			checks.add( invalid_data );
+		comp = data.get( i );
+		StateCU_ComponentValidation validation = comp.validateComponent(__dataset );
+		if ( validation.size() > 0 ) {
+			checks.add( validation.getAll() );
 		}
 	}
 	return checks;

@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.IO.IOUtil;
-import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 
@@ -37,7 +36,7 @@ describe with more general conventions.  The unique identifier for an object
 is the climate station identifier.
 */
 public class StateCU_ClimateStation 
-extends StateCU_Data implements StateCU_Component {
+extends StateCU_Data implements StateCU_ComponentValidator {
 
 // List data in the same order as in the StateCU documentation.
 
@@ -55,18 +54,6 @@ Construct a StateCU_ClimateStation instance and set to missing and empty data.
 */
 public StateCU_ClimateStation()
 {	super();
-}
-
-/**
-Performs specific data checks and returns a list of data that failed the data checks.
-@param count Index of the data vector currently being checked.
-@param dataset StateCU dataset currently in memory.
-@param props Extra properties to perform checks with.
-@return List of invalid data.
- */
-public String[] checkComponentData( int count, StateCU_DataSet dataset, PropList props ) {
-	// TODO KAT 2007-04-12 Add specific checks here ...
-	return null;
 }
 
 /**
@@ -247,6 +234,17 @@ Set Region 2.
 */
 public void setRegion2(String region2) {
 	__region2 = region2;
+}
+
+/**
+Performs specific data checks and returns a list of data that failed the data checks.
+@param dataset StateCU dataset currently in memory.
+@return Validation results.
+ */
+public StateCU_ComponentValidation validateComponent( StateCU_DataSet dataset )
+{
+	// TODO KAT 2007-04-12 Add specific checks here ...
+	return null;
 }
 
 /**
