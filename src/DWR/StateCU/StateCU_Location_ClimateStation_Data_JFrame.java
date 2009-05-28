@@ -36,12 +36,11 @@ the data can be edited, if false they can not.
 public StateCU_Location_ClimateStation_Data_JFrame(List data, String titleString, boolean editable)
 throws Exception {
 	super(data, titleString, editable);
-	setSize(410, getHeight());
+	setSize(610, getHeight());
 }
 
 /**
-Called when the Apply button is pressed. This commits any changes to the data
-objects.
+Called when the Apply button is pressed. This commits any changes to the data objects.
 */
 protected void apply() {
 	StateCU_Location station = null;

@@ -31,7 +31,7 @@ StateCU_Location_ClimateStation_TableModel tableModel) {
 
 /**
 Returns the format for a given column.
-@param column the colum for which to return the format.
+@param column the column for which to return the format.
 @return the format (as used by StringUtil.format) for a column.
 */
 public String getFormat(int column) {

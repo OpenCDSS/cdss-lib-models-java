@@ -76,6 +76,7 @@ import RTi.TS.TS;
 import RTi.TS.TSIdent;
 import RTi.TS.TSUtil;
 import RTi.TS.YearTS;
+import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
@@ -89,7 +90,7 @@ match a CULocation identifier, and a list of time series for various parameters
 that are associated with the CU Location for a period of time.  If an average
 annual analysis is done, the period may consist of one zero year.
 */
-public class StateCU_IrrigationPracticeTS extends StateCU_Data
+public class StateCU_IrrigationPracticeTS extends StateCU_Data implements StateCU_ComponentValidator
 {
 
 /**
@@ -2760,14 +2761,160 @@ public static List toTSList ( List data_Vector, boolean include_dataset_totals,
 }
 
 /**
+Performs specific data checks and returns a list of data that failed the data checks.
+@param count Index of the data vector currently being checked.
+@param dataset StateCU dataset currently in memory.
+@param props Extra properties to perform checks with.
+@return List of invalid data.
+*/
+public StateCU_ComponentValidation validateComponent ( StateCU_DataSet dataset ) {
+	StateCU_ComponentValidation validation = new StateCU_ComponentValidation();
+	// Get the CDS component if available.
+	List cdsList = null;
+	YearTS cds_yts = null;
+	if ( dataset != null ) {
+		DataSetComponent comp = dataset.getComponentForComponentType(StateCU_DataSet.COMP_CROP_PATTERN_TS_YEARLY);
+		if ( comp != null ) {
+			cdsList = (List)comp.getData();
+			if ( cdsList != null ) {
+				int pos = StateCU_Util.indexOf ( cdsList, getID() );
+				if ( pos >= 0 ) {
+					cds_yts = (YearTS)cdsList.get(pos);
+				}
+			}
+		}
+	}
+	String id = getID();
+	// Check major issues
+	int year1 = __date1.getYear();
+	int year2 = __date2.getYear();
+	boolean problemFound = false;
+	if ( (year1 <= 0) || (year2 <= 0) ) {
+		validation.add(new StateCU_ComponentValidationProblem(this,
+			"Location \"" + id + "\" period for irrigation practice time series is not set.",
+			"Verify that the time series are properly defined.") );
+		problemFound = true;
+	}
+	if ( !problemFound ) {
+		// Did not find a major problem above so can continue checking time series
+		double ceff, feff, seff, acswfl, acswspr, acgwfl, acgwspr, mprate, gmode, tacre, acSum, cds;
+		YearTS ceff_yts = getCeffTS(), feff_yts = getFeffTS(), seff_yts = getSeffTS(),
+			acswfl_yts = getAcswflTS(), acswspr_yts = getAcswsprTS(),
+			acgwfl_yts = getAcgwflTS(), acgwspr_yts = getAcgwsprTS(),
+			mprate_yts = getMprateTS(), gmode_yts = getGmodeTS(), tacre_yts = getTacreTS();
+		String acSumFormatted, cdsFormatted, tacreFormatted = null;
+		
+		DateTime temp_DateTime = new DateTime();
+		for ( int year = year1; year <= year2; year++ ) {
+			temp_DateTime.setYear ( year );
+			ceff = ceff_yts.getDataValue(temp_DateTime);
+			feff = feff_yts.getDataValue(temp_DateTime);
+			seff = seff_yts.getDataValue(temp_DateTime);
+			acswfl = acswfl_yts.getDataValue(temp_DateTime);
+			acswspr = acswspr_yts.getDataValue(temp_DateTime);
+			acgwfl = acgwfl_yts.getDataValue(temp_DateTime);
+			acgwspr = acgwspr_yts.getDataValue(temp_DateTime);
+			mprate = mprate_yts.getDataValue(temp_DateTime);
+			gmode = gmode_yts.getDataValue(temp_DateTime);
+			int gmodeInt = (int)(gmode + .01);
+			tacre = tacre_yts.getDataValue(temp_DateTime);
+			if ( !((ceff >= 0.0) && (ceff <= 1.0)) ) {
+				validation.add(new StateCU_ComponentValidationProblem(this,
+					"Location \"" + id + "\" year " + year + " maximum surface efficiency (" + ceff + ") is invalid.",
+					"Verify that the efficiency is in range 0 to 1.") );
+			}
+			if ( !((feff >= 0.0) && (feff <= 1.0)) ) {
+				validation.add(new StateCU_ComponentValidationProblem(this,
+					"Location \"" + id + "\" year " + year + " maximum flood efficiency (" + feff + ") is invalid.",
+					"Verify that the efficiency is in range 0 to 1.") );
+			}
+			if ( !((seff >= 0.0) && (seff <= 1.0)) ) {
+				validation.add(new StateCU_ComponentValidationProblem(this,
+					"Location \"" + id + "\" year " + year + " maximum sprinkler efficiency (" + seff + ") is invalid.",
+					"Verify that the efficiency is in range 0 to 1.") );
+			}
+			if ( !(acswfl >= 0.0) ) {
+				validation.add(new StateCU_ComponentValidationProblem(this,
+					"Location \"" + id + "\" year " + year + " acres surface flood (" + acswfl + ") is invalid.",
+					"Verify that the acres value is >= 0.") );
+				problemFound = true;
+			}
+			if ( !(acswspr >= 0.0) ) {
+				validation.add(new StateCU_ComponentValidationProblem(this,
+					"Location \"" + id + "\" year " + year + " acres surface sprinkler (" + acswspr + ") is invalid.",
+					"Verify that the acres value is >= 0.") );
+				problemFound = true;
+			}
+			if ( !(acgwfl >= 0.0) ) {
+				validation.add(new StateCU_ComponentValidationProblem(this,
+					"Location \"" + id + "\" year " + year + " acres groundwater flood (" + acgwfl + ") is invalid.",
+					"Verify that the acres value is >= 0.") );
+				problemFound = true;
+			}
+			if ( !(acgwspr >= 0.0) ) {
+				validation.add(new StateCU_ComponentValidationProblem(this,
+					"Location \"" + id + "\" year " + year + " acres groundwater sprinkler (" + acgwspr + ") is invalid.",
+					"Verify that the acres value is >= 0.") );
+				problemFound = true;
+			}
+			if ( !(mprate >= 0.0) ) {
+				validation.add(new StateCU_ComponentValidationProblem(this,
+					"Location \"" + id + "\" year " + year + " maximum pumping rate (" + mprate + ") is invalid.",
+					"Verify that the maximum pumping value is >= 0.") );
+			}
+			if ( !((gmodeInt >= 1) && (gmodeInt <= 3)) ) {
+				validation.add(new StateCU_ComponentValidationProblem(this,
+					"Location \"" + id + "\" year " + year + " groundwater mode (" + gmodeInt + ") is invalid.",
+					"Verify that the efficiency is in range 1 to 3.") );
+			}
+			if ( !(tacre >= 0.0) ) {
+				validation.add(new StateCU_ComponentValidationProblem(this,
+					"Location \"" + id + "\" year " + year + " total acres (" + tacre + ") is invalid.",
+					"Verify that the total acres value is >= 0.") );
+			}
+			if ( !problemFound || (cds_yts != null) ) {
+				// Need the following...
+				tacreFormatted = StringUtil.formatString(tacre,"%.1f");
+			}
+			if ( !problemFound ) {
+				// Verify that the acreage totals add to the overall total
+				acSum = (acswfl + acswspr + acgwfl + acgwspr);
+				acSumFormatted = StringUtil.formatString(acSum,"%.1f");
+				if ( !acSumFormatted.equals(tacreFormatted) ) {
+					validation.add(new StateCU_ComponentValidationProblem(this,
+						"Location \"" + id + "\" year " + year + " total acres (" + tacreFormatted +
+						") does not match total of acreage parts (" + acSumFormatted + ").",
+						"Verify that commands to set parts are consistent with total.") );
+				}
+			}
+			// Verify that the totals agree to .1 with the CDS total since .1 precision is what the
+			// IPY file acreage is written to
+			if ( cds_yts != null ) {
+				cds = cds_yts.getDataValue(temp_DateTime);
+				cdsFormatted = StringUtil.formatString(cds,"%.1f");
+				if ( !cdsFormatted.equals(tacreFormatted) ) {
+					validation.add(new StateCU_ComponentValidationProblem(this,
+						"Location \"" + id + "\" year " + year + " total acres (" + tacreFormatted +
+						") does not match crop pattern time series total acreage (" + cdsFormatted + ").",
+						"Verify that irrigation practice time series total acreage is set to the crop pattern " +
+						"time series total with SetIrrigationPracticeTSTotalAcreateToCropPatternTSTotalAcreage() " +
+						"command before other acreage commands.") );
+				}
+			}
+		}
+	}
+	// TODO SAM 2009-05-11 Evaluate whether need check for zero values for whole period
+	return validation;
+}
+
+/**
 Write a list of StateCU_IrrigationPracticeTS to a StateCU file.  The filename
 is adjusted to the working directory if necessary using IOUtil.getPathUsingWorkingDir().
 @param filename_prev The name of the previous version of the file (for
 processing headers).  Specify as null if no previous file is available.
 @param filename The name of the file to write.
 @param data_Vector A list of StateCU_IrrigationPracticeTS to write.
-@param new_comments Comments to add to the top of the file.  Specify as null 
-if no comments are available.
+@param new_comments Comments to add to the top of the file.  Specify as null if no comments are available.
 @exception IOException if there is an error writing the file.
 */
 public static void writeStateCUFile ( String filename_prev, String filename,
@@ -2818,8 +2965,7 @@ is adjusted to the working directory if necessary using IOUtil.getPathUsingWorki
 processing headers).  Specify as null if no previous file is available.
 @param filename The name of the file to write.
 @param data_Vector A list of StateCU_IrrigationPracticeTS to write.
-@param new_comments Comments to add to the top of the file.  Specify as null 
-if no comments are available.
+@param new_comments Comments to add to the top of the file.  Specify as null if no comments are available.
 @exception IOException if there is an error writing the file.
 */
 public static void writeStateCUFile ( String filename_prev, String filename,
@@ -2835,8 +2981,7 @@ filename is adjusted to the working directory if necessary using IOUtil.getPathU
 processing headers).  Specify as null if no previous file is available.
 @param filename The name of the file to write.
 @param dataList A list of StateCU_IrrigationPracticeTS to write.
-@param new_comments Comments to add to the top of the file.  Specify as null 
-if no comments are available.
+@param new_comments Comments to add to the top of the file.  Specify as null if no comments are available.
 @exception IOException if there is an error writing the file.
 */
 public static void writeDateValueFile (	String filename_prev, String filename,
@@ -3024,11 +3169,8 @@ DateTime start, DateTime end, PropList props ) throws IOException
 	DateTime temp_DateTime = new DateTime ();	// Use for data access.
 	int year = 0;
 	double val, acgw_val, acgwfl_val, acgwspr_val, acsw_val, acswfl_val, acswspr_val;
-	//int check_tolerance = 1;	// Tolerance when checking integer acreage terms
-	//long parts_total = 0;	// Total of acreage parts
-	//long tacre;			// total acres
 	double area_big = 1000000.0;	// Needs to use lower precision output
-	YearTS	ceff_yts, feff_yts, seff_yts, //gacre_yts, sacre_yts,
+	YearTS ceff_yts, feff_yts, seff_yts, //gacre_yts, sacre_yts,
 	    mprate_yts,
 		gmode_yts, tacre_yts, acgw_yts, acgwfl_yts, acgwspr_yts, acsw_yts, acswfl_yts, acswspr_yts;
 	// This is not real efficient but is relatively fast...
@@ -3047,21 +3189,12 @@ DateTime start, DateTime end, PropList props ) throws IOException
 			v.add(tsp._id);
 			ceff_yts = tsp.getCeffTS();
 			val = ceff_yts.getDataValue ( temp_DateTime );
-			//if ( val < 0.0 ) {
-			//	val = 0.0;
-			//}
 			v.add(StringUtil.formatString(val, format_MaxEfficiency));
 			feff_yts = tsp.getFeffTS();
 			val = feff_yts.getDataValue ( temp_DateTime );
-			//if ( val < 0.0 ) {
-			//	val = 0.0;
-			//}
 			v.add(StringUtil.formatString(val, format_MaxEfficiency));
 			seff_yts = tsp.getSeffTS();
 			val = seff_yts.getDataValue ( temp_DateTime );
-			//if ( val < 0.0 ) {
-			//	val = 0.0;
-			//}
 			v.add(StringUtil.formatString(val, format_MaxEfficiency));
 			
 			if( version10 ) {
@@ -3078,18 +3211,7 @@ DateTime start, DateTime end, PropList props ) throws IOException
 						val = acgwfl_val + acgwspr_val;
 					}
 				}
-				/* FIXME SAM 2007-10-18 Remove later when tested out
-				else {
-					val = gacre_yts.getDataValue ( temp_DateTime );
-				}
-				*/
-				//if ( val < 0.0 ) {
-				//	val = 0.0;
-				//}
 				v.add(StringUtil.formatString(val,area_format));
-				/* FIXME SAM 2007-10-18 Remove later when tested out
-				sacre_yts = tsp.getSacreTS();
-				*/
 				if ( RecomputeVersion10Acreage_boolean ) {
 					acswspr_yts = tsp.getAcswsprTS();
 					acswspr_val = acswspr_yts.getDataValue ( temp_DateTime );
@@ -3102,23 +3224,12 @@ DateTime start, DateTime end, PropList props ) throws IOException
 						val = acswspr_val + acgwspr_val;
 					}
 				}
-				/* FIXME SAM 2007-10-18 Remove later when tested out
-				else {
-					val = sacre_yts.getDataValue ( temp_DateTime );
-				}
-				*/
-				//if ( val < 0.0 ) {
-				//	val = 0.0;
-				//}
 				v.add(StringUtil.formatString(val,area_format));
 			}
 			else {
 				// add the new land acreage
 				acswfl_yts = tsp.getAcswflTS();
 				acswfl_val = acswfl_yts.getDataValue ( temp_DateTime );
-				//if ( val < 0.0 ) {
-				//	val = 0.0;
-				//}
 				if ( acswfl_val >= area_big ) {
 					v.add(StringUtil.formatString(acswfl_val,area_format0));
 				}
@@ -3128,9 +3239,6 @@ DateTime start, DateTime end, PropList props ) throws IOException
 								
 				acswspr_yts = tsp.getAcswsprTS();
 				acswspr_val = acswspr_yts.getDataValue ( temp_DateTime );
-				//if ( val < 0.0 ) {
-				//	val = 0.0;
-				//}
 				if ( acswspr_val >= area_big ) {
 					v.add(StringUtil.formatString(acswspr_val,area_format0));
 				}
@@ -3140,9 +3248,6 @@ DateTime start, DateTime end, PropList props ) throws IOException
 				
 				acgwfl_yts = tsp.getAcgwflTS();
 				acgwfl_val = acgwfl_yts.getDataValue ( temp_DateTime );
-				//if ( val < 0.0 ) {
-				//	val = 0.0;
-				//}
 				if ( acgwfl_val >= area_big ) {
 					v.add(StringUtil.formatString(acgwfl_val,area_format0));
 				}
@@ -3152,55 +3257,31 @@ DateTime start, DateTime end, PropList props ) throws IOException
 				
 				acgwspr_yts = tsp.getAcgwsprTS();
 				acgwspr_val = acgwspr_yts.getDataValue ( temp_DateTime );
-				//if ( val < 0.0 ) {
-				//	val = 0.0;
-				//}
 				if ( acgwspr_val >= area_big ) {
 					v.add(StringUtil.formatString(acgwspr_val,area_format0));
 				}
 				else {
 					v.add(StringUtil.formatString(acgwspr_val,area_format));
 				}
-				/*
-				if ( (acswfl_val >= 0.0) && (acswspr_val >= 0.0) && (acgwfl_val >= 0.0) && (acgwspr_val >= 0.0) ) {
-					parts_total = Math.round(acswfl_val + acswspr_val + acgwfl_val + acgwspr_val);
-				}
-				else {
-				    parts_total = -999;
-				}
-				*/
 			}
 			mprate_yts = tsp.getMprateTS();
 			val = mprate_yts.getDataValue ( temp_DateTime );
-			//if ( val < 0.0 ) {
-			//	val = 0.0;
-			//}
 			v.add(StringUtil.formatString(val,"%12.0f"));
 			gmode_yts = tsp.getGmodeTS();
 			val = gmode_yts.getDataValue ( temp_DateTime );
-			//if ( val < 0.0 ) {
-			//	val = 2.0;
-			//}
 			v.add(StringUtil.formatString((int)(val + .1),"%3d"));
 			tacre_yts = tsp.getTacreTS();
 			val = tacre_yts.getDataValue ( temp_DateTime );
-			//if ( val < 0.0 ) {
-			//	val = 0.0;
-			//}
 			if ( val >= area_big ) {
 				v.add(StringUtil.formatString(val,area_format0));
 			}
 			else {
 				v.add(StringUtil.formatString(val,area_format));
 			}
-			//tacre = Math.round(val);
 			if ( !version10 ) {
 				// Add the new supply type acreage
 				acsw_yts = tsp.getAcswTS();
 				acsw_val = acsw_yts.getDataValue ( temp_DateTime );
-				//if ( val < 0.0 ) {
-				//	val = 0.0;
-				//}
 				if ( acsw_val >= area_big ) {
 					v.add(StringUtil.formatString(acsw_val,area_format0));
 				}
@@ -3210,9 +3291,6 @@ DateTime start, DateTime end, PropList props ) throws IOException
 				// Add the new supply type acreage
 				acgw_yts = tsp.getAcgwTS();
 				acgw_val = acgw_yts.getDataValue ( temp_DateTime );
-				//if ( val < 0.0 ) {
-				//	val = 0.0;
-				//}
 				if ( acgw_val >= area_big ) {
 					v.add(StringUtil.formatString(acgw_val,area_format0));
 				}
@@ -3222,17 +3300,6 @@ DateTime start, DateTime end, PropList props ) throws IOException
 			}
 			iline = StringUtil.formatString ( v, format0 );
 			out.println ( iline );
-
-			// Do a check on the acreage parts vs the total.
-			// TODO SAM 2007-06-18 Move to data checks.  Remove when code checked.
-			/*
-			if( !version10 && (parts_total > 0) &&
-					((Math.abs(parts_total - tacre)) > check_tolerance) ) {
-				Message.printWarning(2, routine, "Acreage parts total (" +
-						parts_total + ") is not equal to total acreage ("  +
-						tacre + ") - check data processing steps." );
-			}
-			*/
 		}
 	}
 }

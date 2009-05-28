@@ -858,9 +858,95 @@ Performs specific data checks and returns a list of data that failed the data ch
 @param dataset StateCU dataset currently in memory.
 @return Validation results.
 */
-public StateCU_ComponentValidation validateComponent( StateCU_DataSet dataset ) {
-	// TODO KAT 2007-04-12 Add specific checks here ...
-	return null;
+public StateCU_ComponentValidation validateComponent( StateCU_DataSet dataset )
+{
+	StateCU_ComponentValidation validation = new StateCU_ComponentValidation();
+	String id = getID();
+	double latitude = getLatitude();
+	if ( !((latitude >= -90.0) && (latitude <= 90.0)) ) {
+		validation.add(new StateCU_ComponentValidationProblem(this,"CU location \"" + id + "\" latitude (" +
+			latitude + ") is invalid.", "Specify a latitude -90 to 90.") );
+	}
+	double elevation = getElevation();
+	if ( !((elevation >= 0.0) && (elevation <= 15000.00)) ) {
+		validation.add(new StateCU_ComponentValidationProblem(this,"CU location \"" + id + "\" elevation (" +
+			elevation + ") is invalid.", "Specify an elevation 0 to 15000 FT (maximum varies by location).") );
+	}
+	String name = getName();
+	if ( (name == null) || name.trim().length() == 0 ) {
+		validation.add(new StateCU_ComponentValidationProblem(this,"CU location \"" + id +
+			"\" name is blank - may cause confusion.",
+			"Specify the station name or use the ID for the name.") );
+	}
+	String region1 = getRegion1();
+	if ( (region1 == null) || region1.trim().length() == 0 ) {
+		validation.add(new StateCU_ComponentValidationProblem(this,"CU location \"" + id +
+			"\" region1 is blank - may cause region lookups to fail for other data.",
+			"Specify as county or other region indicator.") );
+	}
+	int ncli = getNumClimateStations();
+	if ( !(ncli >= 0) ) {
+		validation.add(new StateCU_ComponentValidationProblem(this,"CU location \"" + id +
+			"\" number of climate stations (" + ncli + ") is invalid.",
+			"Specify as >= 0.") );
+	}
+	if ( ncli > 0 ) {
+		// Check each climate station and the total...
+		double totalPrecipWeight = 0.0;
+		double totalTempWeight = 0.0;
+		for ( int i = 0; i < ncli; i++ ) {
+			String cliStationID = getClimateStationID(i);
+			if ( cliStationID.trim().length() == 0 ) {
+				validation.add(new StateCU_ComponentValidationProblem(this,"CU location \"" + id +
+					"\" climate station ID is invalid (blank).",
+					"Specify the climate station ID.") );
+			}
+			double tempWeight = getTemperatureStationWeight(i);
+			if ( !((tempWeight >= 0.0) && (tempWeight <= 1.0)) ) {
+				validation.add(new StateCU_ComponentValidationProblem(this,"CU location \"" + id +
+					"\" climate station \"" + cliStationID + "\" temperature station weight (" + tempWeight +
+					") is invalid.", "Specify as fraction 0 - 1.") );
+			}
+			double precipWeight = getPrecipitationStationWeight(i);
+			if ( !((precipWeight >= 0.0) && (precipWeight <= 1.0)) ) {
+				validation.add(new StateCU_ComponentValidationProblem(this,"CU location \"" + id +
+					"\" climate station \"" + cliStationID + "\" precipitation station weight (" + precipWeight +
+					") is invalid.", "Specify as fraction 0 - 1.") );
+			}
+			totalPrecipWeight += precipWeight;
+			totalTempWeight += tempWeight;
+			double oroTemppAdj = getOrographicTemperatureAdjustment(i);
+			// Adjustment is always positive
+			if ( !((oroTemppAdj >= 0.0) && (oroTemppAdj <= 5.0)) ) {
+				validation.add(new StateCU_ComponentValidationProblem(this,"CU location \"" + id +
+					"\" climate station \"" + cliStationID + "\" orographic temperature adjustment (" +
+					oroTemppAdj + ") is invalid.", "Specify as DEGF/1000 FT 0 to 5.") );
+			}
+			double oroPrecipAdj = getOrographicPrecipitationAdjustment(i);
+			if ( !((oroPrecipAdj >= 0.0) && (oroPrecipAdj <= 1.0)) ) {
+				validation.add(new StateCU_ComponentValidationProblem(this,"CU location \"" + id +
+					"\" climate station \"" + cliStationID + "\" orographic precipitation adjustment (" +
+					oroPrecipAdj + ") is invalid.", "Specify as fraction 0 - 1.") );
+			}
+		}
+		if ( !((totalTempWeight >= .9999999) && (totalTempWeight <= 1.0000001)) ) {
+			validation.add(new StateCU_ComponentValidationProblem(this,"CU location \"" + id +
+				"\" total of temperature station weights (" +
+				totalTempWeight + ") is invalid.", "Weights should add up to 1.") );
+		}
+		if ( !((totalPrecipWeight >= .9999999) && (totalPrecipWeight <= 1.0000001)) ) {
+			validation.add(new StateCU_ComponentValidationProblem(this,"CU location \"" + id +
+				"\" total of precipitation station weights (" +
+				totalPrecipWeight + ") is invalid.", "Weights should add up to 1.") );
+		}
+	}
+	double awc = getAwc();
+	if ( !((awc >= 0.0) && (awc <= 1.0)) ) {
+		validation.add(new StateCU_ComponentValidationProblem(this,"CU location \"" + id +
+			"\" available water content (AWC) (" + awc + ") is invalid.",
+			"Specify as fraction 0 - 1.") );
+	}
+	return validation;
 }
 
 /**
@@ -886,8 +972,7 @@ working directory if necessary using IOUtil.getPathUsingWorkingDir().
 processing headers).  Specify as null if no previous file is available.
 @param filename The name of the file to write.
 @param dataList A list of StateCU_Location to write.
-@param newComments Comments to add to the top of the file.  Specify as null 
-if no comments are available.
+@param newComments Comments to add to the top of the file.  Specify as null if no comments are available.
 @param props Properties to control the write.  Currently only the following
 property is supported:  Version=True|False.  If the version is "10", then the
 file format will match that for version 10.  Otherwise, the newest format is

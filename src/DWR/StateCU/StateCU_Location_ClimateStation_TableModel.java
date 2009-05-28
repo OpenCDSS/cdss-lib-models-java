@@ -27,7 +27,7 @@ extends JWorksheet_AbstractRowTableModel implements StateCU_Data_TableModel {
 /**
 Number of columns in the table model.
 */
-private int __COLUMNS = 4;
+private int __COLUMNS = 6;
 
 /**
 Column references.
@@ -35,8 +35,10 @@ Column references.
 private final int 
 	__COL_ID = 0,
 	__COL_STA_ID = 1,
-	__COL_PRECIP_WT = 2,
-	__COL_TEMP_WT = 3;
+	__COL_TEMP_WT = 2,
+	__COL_PRECIP_WT = 3,
+	__COL_ORO_TEMP_ADJ = 4,
+	__COL_ORO_PRECIP_ADJ = 5;
 
 /**
 Whether the data are editable or not.
@@ -86,8 +88,10 @@ public Class getColumnClass (int columnIndex) {
 	switch (columnIndex) {
 		case __COL_ID:		return String.class;
 		case __COL_STA_ID:	return String.class;
-		case __COL_PRECIP_WT:	return Double.class;
 		case __COL_TEMP_WT:	return Double.class;
+		case __COL_PRECIP_WT:	return Double.class;
+		case __COL_ORO_TEMP_ADJ:	return Double.class;
+		case __COL_ORO_PRECIP_ADJ:	return Double.class;
 	}
 	return String.class;
 }
@@ -106,17 +110,16 @@ From AbstractTableMode.  Returns the name of the column at the given position.
 */
 public String getColumnName(int columnIndex) {
 	switch (columnIndex) {
-		case __COL_ID:		return "\nCU\nLOCATION\nID";
-		case __COL_STA_ID:	return "\nCLIMATE\nSTATION\nID";
-		case __COL_PRECIP_WT:	
-			return "PRECIPITATION\nSTATION\nWEIGHT\n(FRACTION)";
-		case __COL_TEMP_WT:	
-			return "TEMPERATURE\nSTATION\nWEIGHT\n(FRACTION)";
+		case __COL_ID:  return "\nCU\nLOCATION\nID";
+		case __COL_STA_ID:  return "\nCLIMATE\nSTATION\nID";
+		case __COL_TEMP_WT:  return "TEMPERATURE\nSTATION\nWEIGHT\n(FRACTION)";
+		case __COL_PRECIP_WT:  return "PRECIPITATION\nSTATION\nWEIGHT\n(FRACTION)";
+		case __COL_ORO_TEMP_ADJ:  return "OROGRAPHIC\nTEMPERATURE\nADJUSTMENT\n(DEGF/1000 FT)";
+		case __COL_ORO_PRECIP_ADJ:  return "OROGRAPHIC\nPRECIPITATION\nADJUSTMENT\n(FRACTION)";
 	}
 
 	return " ";
 }
-
 
 /**
 Returns the format that the specified column should be displayed in when
@@ -127,10 +130,12 @@ column.
 */
 public String getFormat(int column) {
 	switch (column) {
-		case __COL_ID:		return "%-20.20s";
-		case __COL_STA_ID:	return "%-20.20s";
-		case __COL_PRECIP_WT:	return "%8.2f";
-		case __COL_TEMP_WT:	return "%8.2f";
+		case __COL_ID:  return "%-20.20s";
+		case __COL_STA_ID:  return "%-20.20s";
+		case __COL_TEMP_WT:  return "%8.2f";
+		case __COL_PRECIP_WT:  return "%8.2f";
+		case __COL_ORO_TEMP_ADJ:  return "%8.2f";
+		case __COL_ORO_PRECIP_ADJ:  return "%8.2f";
 	}
 	return "%-8s";	
 }
@@ -179,10 +184,12 @@ public int[] getColumnWidths() {
 	for (int i = 0; i < __COLUMNS; i++) {
 		widths[i] = 0;
 	}
-	widths[__COL_ID] =		7;
-	widths[__COL_STA_ID] =		6;
-	widths[__COL_PRECIP_WT] =	10;
-	widths[__COL_TEMP_WT] =		10;
+	widths[__COL_ID] = 7;
+	widths[__COL_STA_ID] = 6;
+	widths[__COL_TEMP_WT] = 10;
+	widths[__COL_PRECIP_WT] = 10;
+	widths[__COL_ORO_TEMP_ADJ] = 10;
+	widths[__COL_ORO_PRECIP_ADJ] = 10;
 	return widths;
 }
 
@@ -190,8 +197,7 @@ public int[] getColumnWidths() {
 Returns whether the cell is editable or not.  In this model, all the cells in
 columns 3 and greater are editable.
 @param rowIndex unused.
-@param columnIndex the index of the column to check whether it is editable
-or not.
+@param columnIndex the index of the column to check whether it is editable or not.
 @return whether the cell is editable or not.
 */
 public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -203,8 +209,7 @@ public boolean isCellEditable(int rowIndex, int columnIndex) {
 }
 
 /**
-Sets up the data Vectors to display the location climate station data in the
-GUI.
+Sets up the data Vectors to display the location climate station data in the GUI.
 */
 private void setupData() {
 	int num = 0;
@@ -226,8 +231,10 @@ private void setupData() {
 		for (int j = 0; j < num; j++ ) {
 			__data[__COL_ID].add(id);
 			__data[__COL_STA_ID].add(l.getClimateStationID(j));
-			__data[__COL_PRECIP_WT].add(new Double(l.getPrecipitationStationWeight(j)));
 			__data[__COL_TEMP_WT].add(new Double(l.getTemperatureStationWeight(j)));
+			__data[__COL_PRECIP_WT].add(new Double(l.getPrecipitationStationWeight(j)));
+			__data[__COL_ORO_TEMP_ADJ].add(new Double(l.getOrographicTemperatureAdjustment(j)));
+			__data[__COL_ORO_PRECIP_ADJ].add(new Double(l.getOrographicPrecipitationAdjustment(j)));
 			rows++;
 		}
 	}

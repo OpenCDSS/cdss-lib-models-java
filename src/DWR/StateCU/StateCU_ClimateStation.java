@@ -242,9 +242,31 @@ Performs specific data checks and returns a list of data that failed the data ch
 @return Validation results.
  */
 public StateCU_ComponentValidation validateComponent( StateCU_DataSet dataset )
-{
-	// TODO KAT 2007-04-12 Add specific checks here ...
-	return null;
+{	StateCU_ComponentValidation validation = new StateCU_ComponentValidation();
+	String id = getID();
+	double latitude = getLatitude();
+	if ( !((latitude >= -90.0) && (latitude <= 90.0)) ) {
+		validation.add(new StateCU_ComponentValidationProblem(this,"Climate station \"" + id + "\" latitude (" +
+			latitude + ") is invalid.", "Specify a latitude -90 to 90.") );
+	}
+	double elevation = getElevation();
+	if ( !((elevation >= 0.0) && (elevation <= 15000.00)) ) {
+		validation.add(new StateCU_ComponentValidationProblem(this,"Climate station \"" + id + "\" elevation (" +
+			elevation + ") is invalid.", "Specify an elevation 0 to 15000 FT (maximum varies by location).") );
+	}
+	String name = getName();
+	if ( (name == null) || name.trim().length() == 0 ) {
+		validation.add(new StateCU_ComponentValidationProblem(this,"Climate station \"" + id +
+			"\" name is blank - may cause confusion.",
+			"Specify the station name or use the ID for the name.") );
+	}
+	String region1 = getRegion1();
+	if ( (region1 == null) || region1.trim().length() == 0 ) {
+		validation.add(new StateCU_ComponentValidationProblem(this,"Climate station \"" + id +
+			"\" region1 is blank - may cause region lookups to fail for other data.",
+			"Specify as county or other region indicator.") );
+	}
+	return validation;
 }
 
 /**

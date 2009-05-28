@@ -75,12 +75,12 @@ Growth curve type (Day=perennial crop, Percent=annual crop).
 private String __flag = StateCU_Util.MISSING_STRING;
 
 /**
-Day of year for annual crop types.
+Day of year for annual crop types, null if perennial crop.
 */
 private int [] __nckca = null;
 
 /**
-Crop coefficient for annual crop types.
+Crop coefficient for annual crop types, null if annual crop.
 */
 private double [] __ckca = null;
 
@@ -268,6 +268,19 @@ public int getNckcp(int index) {
 	return __nckcp[index];
 }
 
+/**
+Indicate whether the crop is an annual crop (has coefficients specified for percent of growing season) or
+perennial crop (has coefficients specified for day of year).
+@return the day of year for an annual crop.
+*/
+public boolean isAnnualCrop ()
+{	if ( __nckca != null ) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
 
 /**
 Checks for version 10 by reading the file
@@ -513,16 +526,65 @@ public void setKtsw( int ktsw )
 	__ktsw = ktsw;
 }
 
+// TODO SAM 2009-05-08 Evaluate whether to allow passing in max coefficient value for check
 /**
 Performs specific data checks and returns a list of data that failed the data checks.
 @param count Index of the data vector currently being checked.
 @param dataset StateCU dataset currently in memory.
 @param props Extra properties to perform checks with.
 @return List of invalid data.
- */
+*/
 public StateCU_ComponentValidation validateComponent ( StateCU_DataSet dataset ) {
-	// TODO KAT 2007-04-12 Add specific checks here ...
-	return null;
+	StateCU_ComponentValidation validation = new StateCU_ComponentValidation();
+	String id = getName(); // Name is used for ID because ID used to be numeric
+	int [] nckca = getNckca();
+	int [] nckcp = getNckcp();
+	if ( ((nckca == null) || (nckca.length == 0)) && ((nckcp == null) || (nckcp.length == 0)) ) {
+		validation.add(new StateCU_ComponentValidationProblem(this,"Crop \"" + id +
+			"\" data are neither specified as day of year or percent of season.",
+			"Specify coefficients for day of year OR percent of season.") );
+	}
+	else if ( ((nckca != null) && (nckca.length > 0)) && ((nckcp != null) && (nckcp.length > 0)) ) {
+		validation.add(new StateCU_ComponentValidationProblem(this,"Crop \"" + id +
+			"\" data are specified as day of year and percent of season.",
+			"Specify coefficients for day of year OR percent of season.") );
+	}
+	else if ( isAnnualCrop() ) {
+		// Annual - percent of season
+		double [] ckca = getCkca();
+		for ( int i = 0; i < nckca.length; i++ ) {
+			if ( (nckca[i] < 0) || (nckca[i] > 100)) {
+				validation.add(new StateCU_ComponentValidationProblem(this,"Crop \"" + id + "\" percent of season (" +
+					nckca[i] + ") is invalid.", "Specify as 0 to 100.") );
+			}
+			if ( (ckca[i] < 0) || (ckca[i] > 3.0)) {
+				validation.add(new StateCU_ComponentValidationProblem(this,"Crop \"" + id + "\" coefficient (" +
+					ckca[i] + ") is invalid.", "Specify as 0 to 3.0 (upper limit may vary by location).") );
+			}
+		}
+	}
+	else {
+		// Perennial - day of year
+		double [] ckcp = getCkcp();
+		for ( int i = 0; i < nckcp.length; i++ ) {
+			if ( (nckcp[i] < 1) || (nckcp[i] > 366)) {
+				validation.add(new StateCU_ComponentValidationProblem(this,"Crop \"" + id + "\" day of year (" +
+					nckcp[i] + ") is invalid.", "Specify as 1 to 366.") );
+			}
+			if ( (ckcp[i] < 0) || (ckcp[i] > 3.0)) {
+				validation.add(new StateCU_ComponentValidationProblem(this,"Crop \"" + id + "\" coefficient (" +
+					ckcp[i] + ") is invalid.", "Specify as 0 to 3.0 (upper limit may vary by location).") );
+			}
+		}
+	}
+	// Check method
+	int ktsw = getKtsw();
+	if ( (ktsw < 0) || (ktsw > 4)) {
+		validation.add(new StateCU_ComponentValidationProblem(this,"Crop \"" + id + "\" Blaney-Criddle method (" +
+			ktsw + ") is invalid.", "Specify as 0 to 4 (refer to StateCU documentation).") );
+	}
+
+	return validation;
 }
 
 /**
@@ -691,8 +753,15 @@ throws IOException
 			id = "-999";
 		}
 		if ( !StateCU_Util.isMissing(kbc.getID()) ) {
-			// Use the actual value...
-			id = kbc.getID();
+			// Changes elsewhere impact this so also use -999 unless it is a number
+			if ( StringUtil.isInteger(kbc.getID())) {
+				id = "" + kbc.getID();
+			}
+			else {
+				id = "-999";
+			}
+			// Can't use the crop name because StateCU expects a number (?)
+			//id = kbc.getID();
 		}
 		// Output based on the version because file comparisons may be done when verifying files.
 		if ( version10 ) {

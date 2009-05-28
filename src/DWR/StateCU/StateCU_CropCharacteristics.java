@@ -772,6 +772,7 @@ For now don't check for missing data individually - just check for invalid data.
 public StateCU_ComponentValidation validateComponent ( StateCU_DataSet dataset )
 {
 	StateCU_ComponentValidation validation = new StateCU_ComponentValidation();
+	String id = getName(); // Name is used for ID because ID used to be numeric
 	// Crop number (not used by StateCU - not checked)
 	int gdate1 = getGdate1();
 	int gdate2 = getGdate2();
@@ -781,45 +782,45 @@ public StateCU_ComponentValidation validateComponent ( StateCU_DataSet dataset )
 	int gdates = getGdates();
 	// TODO SAM 2009-05-05 Evaluate whether day check should use month
 	if ( !TimeUtil.isValidMonth(gdate1) ) {
-		validation.add(new StateCU_ComponentValidationProblem(this,"Planting month (" +
+		validation.add(new StateCU_ComponentValidationProblem(this,"Crop \"" + id + "\" planting month (" +
 			gdate1 + ") is invalid.", "Specify a month 1-12.") );
 	}
 	if ( !TimeUtil.isValidDay(gdate2) ) {
-		validation.add(new StateCU_ComponentValidationProblem(this,"Planting day (" +
+		validation.add(new StateCU_ComponentValidationProblem(this,"Crop \"" + id + "\" planting day (" +
 			gdate2 + ") is invalid.", "Specify a day 1-31.") );
 	}
 	if ( !TimeUtil.isValidMonth(gdate3) ) {
-		validation.add(new StateCU_ComponentValidationProblem(this,"Harvest month (" +
+		validation.add(new StateCU_ComponentValidationProblem(this,"Crop \"" + id + "\" harvest month (" +
 			gdate3 + ") is invalid.", "Specify a month 1-12.") );
 	}
 	if ( !TimeUtil.isValidDay(gdate4) ) {
-		validation.add(new StateCU_ComponentValidationProblem(this,"Planting day (" +
+		validation.add(new StateCU_ComponentValidationProblem(this,"Crop \"" + id + "\" planting day (" +
 			gdate4 + ") is invalid.", "Specify a day 1-31.") );
 	}
 	if ( (gdate5 < 0) || (gdate5 > 365) ) {
-		validation.add(new StateCU_ComponentValidationProblem(this,"Days to full cover (" +
+		validation.add(new StateCU_ComponentValidationProblem(this,"Crop \"" + id + "\" days to full cover (" +
 			gdate5 + ") is invalid.", "Specify a day 0 - 365.") );
 	}
 	if ( (gdates <= 0) || (gdate5 > 365) ) {
-		validation.add(new StateCU_ComponentValidationProblem(this,"Days in season (" +
+		validation.add(new StateCU_ComponentValidationProblem(this,"Crop \"" + id + "\" days in season (" +
 			gdates + ") is invalid.", "Specify days 1 - 365.") );
 	}
 	double tmois1 = getTmois1();
 	double tmois2 = getTmois2();
 	// Somewhat arbitrary
 	if ( (tmois1 < 0) || (tmois1 > 100) ) {
-		validation.add(new StateCU_ComponentValidationProblem(this,"Temperature early moisture (" +
+		validation.add(new StateCU_ComponentValidationProblem(this,"Crop \"" + id + "\" temperature early moisture (" +
 			tmois1 + ") is invalid.", "Specify degrees F.") );
 	}
 	if ( (tmois2 < 0) || (tmois2 > 100) ) {
-		validation.add(new StateCU_ComponentValidationProblem(this,"Temperature late moisture (" +
+		validation.add(new StateCU_ComponentValidationProblem(this,"Crop \"" + id + "\" temperature late moisture (" +
 			tmois2 + ") is invalid.", "Specify degrees F.") );
 	}
 	// Management allowable deficit (not used by StateCU - not checked)
 	// Initial root zone depth (not used by StateCU - not checked)
 	double frx = getFrx();
 	if ( frx <= 0 ) {
-		validation.add(new StateCU_ComponentValidationProblem(this,"Maximum root zone depth (" +
+		validation.add(new StateCU_ComponentValidationProblem(this,"Crop \"" + id + "\" maximum root zone depth (" +
 			frx + ") is invalid.", "Specify inches > 0.") );
 	}
 	// AWC often missing so don't check
@@ -827,27 +828,27 @@ public StateCU_ComponentValidation validateComponent ( StateCU_DataSet dataset )
 	double apd = getApd();
 	// Somewhat arbitrary
 	if ( (apd < 0) || (apd > 100) ) {
-		validation.add(new StateCU_ComponentValidationProblem(this,"Maximum application depth (" +
+		validation.add(new StateCU_ComponentValidationProblem(this,"Crop \"" + id + "\" maximum application depth (" +
 			apd + ") is invalid.", "Specify inches > 0.") );
 	}
 	int tflg1 = getTflg1();
 	int tflg2 = getTflg2();
 	if ( (tflg1 < 0) || (tflg1 > 2) ) {
-		validation.add(new StateCU_ComponentValidationProblem(this,"Spring frost flag (" +
+		validation.add(new StateCU_ComponentValidationProblem(this,"Crop \"" + id + "\" spring frost flag (" +
 			tflg1 + ") is invalid.", "Specify 0, 1, 2.") );
 	}
 	if ( (tflg2 < 0) || (tflg2 > 2) ) {
-		validation.add(new StateCU_ComponentValidationProblem(this,"Fall frost flag (" +
+		validation.add(new StateCU_ComponentValidationProblem(this,"Crop \"" + id + "\" fall frost flag (" +
 			tflg2 + ") is invalid.", "Specify 0, 1, 2.") );
 	}
 	int cut2 = getCut2();
 	int cut3 = getCut3();
 	if ( cut2 > 365 ) {
-		validation.add(new StateCU_ComponentValidationProblem(this,"Days to 2nd cut (" +
+		validation.add(new StateCU_ComponentValidationProblem(this,"Crop \"" + id + "\" days to 2nd cut (" +
 			cut2 + ") is invalid.", "Specify days < 365.") );
 	}
 	if ( cut3 > 365 ) {
-		validation.add(new StateCU_ComponentValidationProblem(this,"Days to 3rd cut (" +
+		validation.add(new StateCU_ComponentValidationProblem(this,"Crop \"" + id + "\" days to 3rd cut (" +
 			cut3 + ") is invalid.", "Specify days < 365.") );
 	}
 	return validation;
@@ -865,17 +866,16 @@ adjusted to the working directory if necessary using IOUtil.getPathUsingWorkingD
 public static void writeStateCUFile ( String filename_prev, String filename,
 	List data_Vector, List new_comments )
 throws IOException
-{	writeStateCUFile ( filename_prev, filename, data_Vector, new_comments,
-	null );
+{	writeStateCUFile ( filename_prev, filename, data_Vector, new_comments, null );
 }
 
 /**
-Write a Vector of StateCU_CropCharacteristics to a file.  The filename is adjusted to
+Write a list of StateCU_CropCharacteristics to a file.  The filename is adjusted to
 the working directory if necessary using IOUtil.getPathUsingWorkingDir().
 @param filename_prev The name of the previous version of the file (for
 processing headers).  Specify as null if no previous file is available.
 @param filename The name of the file to write.
-@param data_Vector A Vector of StateCU_CropCharacteristics to write.
+@param data_Vector A list of StateCU_CropCharacteristics to write.
 @param new_comments Comments to add to the top of the file.  Specify as null 
 if no comments are available.
 @param props Properties to control output.
@@ -927,8 +927,7 @@ Write a list of StateCU_CropCharacteristics to an opened file.
 @param props Properties to control output (see writeStateCUFile).
 @exception IOException if an error occurs.
 */
-private static void writeVector ( List data_Vector, PrintWriter out, 
-		PropList props )
+private static void writeVector ( List data_Vector, PrintWriter out, PropList props )
 throws IOException
 {	int i;
 	String iline;

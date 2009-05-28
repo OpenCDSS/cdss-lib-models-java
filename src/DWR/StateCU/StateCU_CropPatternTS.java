@@ -140,7 +140,7 @@ which will match a StateCU_Location identifier, and a list of time series for
 various crops that are associated with the CU Location for a period of time.
 If an average annual analysis is done, the period may consist of one zero year.
 */
-public class StateCU_CropPatternTS extends StateCU_Data
+public class StateCU_CropPatternTS extends StateCU_Data implements StateCU_ComponentValidator
 {
 
 /**
@@ -186,7 +186,7 @@ private DateTime __temp_DateTime = new DateTime();
 List of crop types for the time series.  This is consistent with the data
 sub-types for the time series.  The list is maintained to simplify use at output.
 */
-private List __crop_name_Vector = null;
+private List<String> __crop_name_Vector = null;
 
 /**
 Construct a new StateCU_CropPatternTS object for the specified CU Location identifier.
@@ -342,18 +342,18 @@ public double getCropArea (String crop_name, int year, boolean return_fraction)
 /**
 Return the list of crops for this CU Location.
 */
-public List getCropNames ()
+public List<String> getCropNames ()
 {	return __crop_name_Vector;
 }
 
 /**
-Return the list of distinct crop names for a Vector of StateCU_CropPatternTS.
+Return the list of distinct crop names for a list of StateCU_CropPatternTS.
 The list will be sorted alphabetically.
-@param dataList A Vector of StateCU_CropPatternTS to process.
-@return a Vector of distinct crop names, determined from data_Vector.  A
-non-null Vector is guaranteed, but may be empty.
+@param dataList A list of StateCU_CropPatternTS to process.
+@return a list of distinct crop names, determined from data_Vector.  A
+non-null list is guaranteed, but may be empty.
 */
-public static List getCropNames ( List dataList )
+public static List<String> getCropNames ( List dataList )
 {	List v = new Vector ( 10 );
 	int size = 0;
 	StateCU_CropPatternTS cds = null;
@@ -579,7 +579,19 @@ private static boolean isVersion_10( String filename ) throws IOException
 	// period.  Ignore it because there is some inconsistency in formatting
 	// and read another line.  For really old files, a header line will not be used.
 	if ( isPeriodInHeader(filename) ) {
-		line = input.readLine();
+		while ( true ) {
+			line = input.readLine();
+			if ( line == null ) {
+				line = ""; // No data
+				break;
+			}
+			else if ( line.startsWith("#") ) {
+				continue; // Have read a comment so read another line
+			}
+			else {
+				break; // Will use the line below
+			}
+		}
 	}
 		
 	boolean version10 = false;
@@ -1720,7 +1732,7 @@ throws Exception
 		}
 	}
 
-	// Reset in the crop names Vector...
+	// Reset in the crop names list...
 
 	int old_crop_pos = -1;	// The position of the old crop time series, before changing its name.
 	boolean found = false;
@@ -1742,7 +1754,7 @@ throws Exception
 		return;
 	}
 
-	// Reset in the time series Vector...
+	// Reset in the time series list...
 
 	size = 0;
 	if ( __tslist != null ) {
@@ -1752,13 +1764,12 @@ throws Exception
 	// Search for and modify the time series...
 	for ( int i = 0; i < size; i++ ) {
 		ts = (TS)__tslist.get(i);
-		if (	ts.getIdentifier().getSubType().
-			equalsIgnoreCase( old_crop_name) ) {
+		if ( ts.getIdentifier().getSubType().equalsIgnoreCase( old_crop_name) ) {
 			// This crop needs to be renamed, but only do so if
 			// not merging.  If merging keep the same name so the add comments make sense
 			if ( existing_crop_pos < 0 ) {
 				ts.getIdentifier().setSubType(new_crop_name);
-				ts.addToGenesis ("Translated crop name from \""+
+				ts.addToGenesis ("Translated \"" + ts.getLocation() + "\" crop name from \""+
 				old_crop_name + "\" to \"" + new_crop_name + "\"" );
 				ts.setDescription ( ts.getLocation() + " " + new_crop_name + " crop area" );
 			}
@@ -1776,6 +1787,60 @@ throws Exception
 		__tslist.remove ( old_crop_pos );
 		__crop_name_Vector.remove ( old_crop_pos );
 	}
+}
+
+/**
+Performs specific data checks and returns a list of data that failed the data checks.
+@param count Index of the data vector currently being checked.
+@param dataset StateCU dataset currently in memory.
+@param props Extra properties to perform checks with.
+@return List of invalid data.
+*/
+public StateCU_ComponentValidation validateComponent ( StateCU_DataSet dataset ) {
+	StateCU_ComponentValidation validation = new StateCU_ComponentValidation();
+	String id = getID();
+	// Check major issues
+	int year1 = __date1.getYear();
+	int year2 = __date2.getYear();
+	boolean problemFound = false;
+	if ( (year1 <= 0) || (year2 <= 0) ) {
+		validation.add(new StateCU_ComponentValidationProblem(this,
+			"Location \"" + id + "\" period for crop pattern time series is not set.",
+			"Verify that the time series are properly defined.") );
+		problemFound = true;
+	}
+	if ( !problemFound ) {
+		// Did not find a major problem above so can continue checking time series
+		double areaTotal;
+		double area;
+		String crop;
+		YearTS yts = null;
+		int size = __tslist.size();
+		for ( int year = year1; year <= year2; year++ ) {
+			__temp_DateTime.setYear ( year );
+			areaTotal = getTotalArea ( year );
+			if ( !(areaTotal >= 0.0) ) {
+				validation.add(new StateCU_ComponentValidationProblem(this,
+					"Location \"" + id + "\" year " + year + " total area (" + areaTotal + ") is invalid.",
+					"Verify that crop areas are >= 0 for year.") );
+			}
+			for ( int i = 0; i < size; i++ ) {
+				yts = (YearTS)__tslist.get(i);
+				area = yts.getDataValue ( __temp_DateTime );
+				crop = getCropNames().get(i);
+				if ( !(area >= 0.0) ) {
+					validation.add(new StateCU_ComponentValidationProblem(this,
+						"Location \"" + id + "\" crop \"" + crop + "\" year " + year +
+						" area (" + area + ") is invalid.",
+						"Verify that crop area is >= 0 for year.") );
+				}
+			}
+			// Don't check fraction since that is really an artifact for output
+		}
+	}
+	// TODO SAM 2009-05-11 Evaluate whether need check for zero area/crops for whole period
+	// Can non-agricultural crops be in file?
+	return validation;
 }
 
 /**
