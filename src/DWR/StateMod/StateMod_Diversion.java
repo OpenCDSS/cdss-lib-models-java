@@ -172,6 +172,7 @@ import DWR.StateCU.StateCU_IrrigationPracticeTS;
 import RTi.GIS.GeoView.GeoRecord;
 import RTi.TS.DayTS;
 import RTi.TS.MonthTS;
+import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
@@ -1408,7 +1409,7 @@ The options are of the form "1" if include_notes is false and
 @return a list of monthly demand type option strings, for use in GUIs.
 @param include_notes Indicate whether notes should be included.
 */
-public static List getIdvcomChoices ( boolean include_notes )
+public static List<String> getIdvcomChoices ( boolean include_notes )
 {	List v = new Vector(5);
 	v.add ( "1 - Monthly total demand" );
 	v.add ( "2 - Annual total demand" );
@@ -1453,8 +1454,8 @@ The options are of the form "0" if include_notes is false and
 @return a list of reservoir replacement option strings, for use in GUIs.
 @param include_notes Indicate whether notes should be included.
 */
-public static List getIreptypeChoices ( boolean include_notes )
-{	List v = new Vector(3);
+public static List<String> getIreptypeChoices ( boolean include_notes )
+{	List<String> v = new Vector(3);
 	v.add ( "0 - Do not provide replacement res. benefits" );
 	v.add ( "1 - Provide 100% replacement" );
 	v.add ( "-1 - Provide depletion replacement" );
@@ -1462,7 +1463,7 @@ public static List getIreptypeChoices ( boolean include_notes )
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.set(i, StringUtil.getToken((String)v.get(i), " ", 0, 0) );
+			v.set(i, StringUtil.getToken(v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
@@ -2473,9 +2474,161 @@ public void setUsername(String username) {
 	}
 }
 
-public StateMod_ComponentValidation validateComponent ( StateMod_DataSet dataset ) {
-	// TODO Add data checks here ...
-	return null;
+public StateMod_ComponentValidation validateComponent ( StateMod_DataSet dataset )
+{
+	StateMod_ComponentValidation validation = new StateMod_ComponentValidation();
+	String id = getID();
+	String name = getName();
+	String riverID = getCgoto();
+	double capacity = getDivcap();
+	int ireptyp = getIreptype();
+	String dailyID = getCdividy();
+	String userName = getUsername();
+	int idvcom = getIdvcom();
+	int nrtn = getNrtn();
+	double divefc = getDivefc();
+	double area = getArea();
+	int irturn = getIrturn();
+	int demsrc = getDemsrc();
+	// Make sure that basic information is not empty
+	if ( StateMod_Util.isMissing(id) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Diversion identifier is blank.",
+			"Specify a station identifier.") );
+	}
+	if ( StateMod_Util.isMissing(name) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Diversion \"" + id + "\" name is blank.",
+			"Specify a diversion name to clarify data.") );
+	}
+	// Get the network list if available for checks below
+	DataSetComponent comp = null;
+	List rinList = null;
+	if ( dataset != null ) {
+		comp = dataset.getComponentForComponentType(StateMod_DataSet.COMP_RIVER_NETWORK);
+		rinList = (List)comp.getData();
+		if ( (rinList != null) && (rinList.size() == 0) ) {
+			// Set to null to simplify checks below
+			rinList = null;
+		}
+	}
+	if ( StateMod_Util.isMissing(riverID) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Diversion \"" + id + "\" river ID is blank.",
+			"Specify a river ID to associate the diversion with a river network node.") );
+	}
+	else {
+		// Verify that the river node is in the data set, if the network is available
+		if ( rinList != null ) {
+			if ( StateMod_Util.indexOf(rinList, riverID) < 0 ) {
+				validation.add(new StateMod_ComponentValidationProblem(this,"Diversion \"" + id +
+					"\" river network ID (" + riverID + ") is not found in the list of river network nodes.",
+					"Specify a valid river network ID to associate the diversion with a river network node.") );
+			}
+		}
+	}
+	if ( !(capacity >= 0.0) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Diversion \"" + id + "\" capacity (" +
+			StringUtil.formatString(capacity,"%.2f") + ") is invalid.",
+			"Specify the capacity as a number >= 0.") );
+	}
+	List<String> choices = getIreptypeChoices(false);
+	if ( StringUtil.indexOfIgnoreCase(choices,"" + ireptyp) < 0 ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Diversion \"" + id +
+			"\" replacement reservoir option (" + ireptyp + ") is invalid.",
+			"Specify the data type as one of " + choices) );
+	}
+	// Verify that the daily ID is in the data set (daily ID is allowed to be missing)
+	if ( (dataset != null) && !StateMod_Util.isMissing(dailyID) ) {
+		DataSetComponent comp2 = dataset.getComponentForComponentType(StateMod_DataSet.COMP_DIVERSION_STATIONS);
+		List ddsList = (List)comp2.getData();
+		if ( !dailyID.equals("0") && !dailyID.equals("3") && !dailyID.equals("4") ) {
+			// OK
+		}
+		else if ( (ddsList != null) && (ddsList.size() > 0) ) {
+			// Check the diversion station list
+			if ( StateMod_Util.indexOf(ddsList, dailyID) < 0 ) {
+				validation.add(new StateMod_ComponentValidationProblem(this,"Diversion \"" + id + "\" daily ID (" + dailyID +
+				") is not 0, 3, or 4 and is not found in the list of diversion stations.",
+				"Specify the daily ID as 0, 3, 4, or a matching diversion ID.") );
+			}
+		}
+	}
+	if ( StateMod_Util.isMissing(userName) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Diversion \"" + id + "\" user name is blank.",
+			"Specify a diversion user name to clarify data.") );
+	}
+	choices = getIdvcomChoices(false);
+	if ( StringUtil.indexOfIgnoreCase(choices,"" + idvcom) < 0 ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Diversion \"" + id + "\" data type (" +
+			idvcom + ") is invalid.",
+			"Specify the data type as one of " + choices) );
+	}
+	if ( !(nrtn >= 0) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Diversion \"" + id +
+			"\" number of return flow locations (" + nrtn + ") is invalid.",
+			"Specify the number of return flow locations as >= 0.") );
+	}
+	if ( !((divefc >= -100.0) && (divefc <= 100.0)) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Diversion \"" + id +
+			"\" annual system efficiency (" +
+			StringUtil.formatString(divefc,"%.2f") + ") is invalid.",
+			"Specify the efficiency as 0 to 100 for annual (negative if monthly values are provided)." ) );
+	}
+	else if ( divefc < 0.0 ) {
+		// Check that each monthly efficiency is in the range 0 to 100
+		double diveff;
+		for ( int i = 0; i < 12; i++ ) {
+			diveff = getDiveff(i);
+			if ( !((diveff >= 0.0) && (diveff <= 100.0)) ) {
+				validation.add(new StateMod_ComponentValidationProblem(this,"Diversion \"" + id +
+					"\" system efficiency for month " + (i + 1) + " (" +
+					StringUtil.formatString(diveff,"%.2f") + ") is invalid.",
+					"Specify the efficiency as 0 to 100." ) );
+			}
+		}
+	}
+	if ( !(area >= 0.0) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Diversion \"" + id + "\" area (" +
+			StringUtil.formatString(area,"%.2f") + ") is invalid.",
+			"Specify the area as a number >= 0.") );
+	}
+	choices = getIrturnChoices(false);
+	if ( StringUtil.indexOfIgnoreCase(choices,"" + irturn) < 0 ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Diversion \"" + id + "\" use type (" +
+			irturn + ") is invalid.",
+			"Specify the use type as one of " + choices) );
+	}
+	choices = getDemsrcChoices(false);
+	if ( StringUtil.indexOfIgnoreCase(choices,"" + demsrc) < 0 ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Diversion \"" + id + "\" demand source (" +
+			demsrc + ") is invalid.",
+			"Specify the demand source as one of " + choices) );
+	}
+	// Check return flow locations...
+	StateMod_ReturnFlow ret;
+	double pcttot;
+	String crtnid;
+	for ( int i = 0; i < nrtn; i++ ) {
+		ret = getReturnFlow ( i );
+		pcttot = ret.getPcttot();
+		crtnid = ret.getCrtnid();
+		if ( rinList != null ) {
+			// Make sure that the return location is in the network list
+			if ( StateMod_Util.indexOf(rinList, crtnid) < 0 ) {
+				validation.add(new StateMod_ComponentValidationProblem(this,"Diversion \"" + id +
+					"\" return " + (i + 1) + " location (" + crtnid +
+					") is not found in the list of river network nodes.",
+					"Specify a valid river network ID to associate the return location with a river network node.") );
+			}
+		}
+		if ( !((pcttot >= 0.0) && (pcttot <= 100.0)) ) {
+			validation.add(new StateMod_ComponentValidationProblem(this,"Diversion \"" + id + "\" return " +
+				(i + 1) + " percent (" +
+				StringUtil.formatString(pcttot,"%.2f") + ") is invalid.",
+				"Specify the return percent as a number 0 to 100.") );
+		}
+	}
+	// TODO SAM 2009-06-01) evaluate how to check rights (with getRights() or checking the rights data
+	// set component).
+	return validation;
 }
 
 /**

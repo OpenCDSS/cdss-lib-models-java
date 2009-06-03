@@ -72,6 +72,7 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.Vector;
 
+import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
@@ -163,9 +164,9 @@ public int compareTo(Object o) {
 }
 
 /**
-Compare two rights Vectors and see if they are the same.
-@param v1 the first Vector of StateMod_DiversionRights to check.  Cannot be null.
-@param v2 the second Vector of StateMod_DiversionRights to check.  Cannot be null.
+Compare two rights lists and see if they are the same.
+@param v1 the first list of StateMod_InstreamFlowRights to check.  Cannot be null.
+@param v2 the second list of StateMod_InstreamFlowRights to check.  Cannot be null.
 @return true if they are the same, false if not.
 */
 public static boolean equals(List v1, List v2) {
@@ -200,7 +201,7 @@ public static boolean equals(List v1, List v2) {
 }
 
 /**
-Tests to see if two diversion rights are equal.  Strings are compared with case sensitivity.
+Tests to see if two instream flow rights are equal.  Strings are compared with case sensitivity.
 @param right the right to compare.
 @return true if they are equal, false otherwise.
 */
@@ -449,8 +450,62 @@ public String toString() {
  */
 public StateMod_ComponentValidation validateComponent ( StateMod_DataSet dataset ) 
 {
-	// TODO KAT 2007-04-16 add specific checks here
-	return null;
+	StateMod_ComponentValidation validation = new StateMod_ComponentValidation();
+	String id = getID();
+	String name = getName();
+	String cgoto = getCgoto();
+	String irtem = getIrtem();
+	double dcrifr = getDcrifr();
+	// Make sure that basic information is not empty
+	if ( StateMod_Util.isMissing(id) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Instream flow right identifier is blank.",
+			"Specify a instream flow right identifier.") );
+	}
+	if ( StateMod_Util.isMissing(name) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Instream flow right \"" + id + "\" name is blank.",
+			"Specify an instream flow right name to clarify data.") );
+	}
+	if ( StateMod_Util.isMissing(cgoto) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Instream flow right \"" + id +
+			"\" station ID is blank.",
+			"Specify an instream flow station to associate with the instream flow right.") );
+	}
+	else {
+		// Verify that the instream flow station is in the data set, if the network is available
+		DataSetComponent comp2 = dataset.getComponentForComponentType(StateMod_DataSet.COMP_INSTREAM_STATIONS);
+		List ifsList = (List)comp2.getData();
+		if ( (ifsList != null) && (ifsList.size() > 0) ) {
+			if ( StateMod_Util.indexOf(ifsList, cgoto) < 0 ) {
+				validation.add(new StateMod_ComponentValidationProblem(this,"Instream flow right \"" + id +
+					"\" associated instream flow (" + cgoto + ") is not found in the list of instream flow stations.",
+					"Specify a valid instream flow station ID to associate with the instream flow right.") );
+			}
+		}
+	}
+	if ( StateMod_Util.isMissing(irtem) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Instream flow right \"" + id +
+			"\" administration number is blank.",
+			"Specify an administration number NNNNN.NNNNN.") );
+	}
+	else if ( !StringUtil.isDouble(irtem) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Instream flow right \"" + id +
+			"\" administration number (" + irtem + ") is invalid.",
+			"Specify an administration number NNNNN.NNNNN.") );
+	}
+	else {
+		double irtemd = Double.parseDouble(irtem);
+		if ( irtemd < 0 ) {
+			validation.add(new StateMod_ComponentValidationProblem(this,"Instream flow right \"" + id +
+				"\" administration number (" + irtem + ") is invalid.",
+				"Specify an administration number NNNNN.NNNNN.") );
+		}
+	}
+	if ( !(dcrifr >= 0.0) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Instream flow right \"" + id + "\" decree (" +
+			StringUtil.formatString(dcrifr,"%.2f") + ") is invalid.",
+			"Specify the decree as a number >= 0.") );
+	}
+	return validation;
 }
 
 /**

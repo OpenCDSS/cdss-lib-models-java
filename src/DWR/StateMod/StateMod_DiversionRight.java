@@ -80,6 +80,7 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.Vector;
 
+import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
@@ -176,7 +177,7 @@ public static boolean equals(List v1, List v2) {
 		return false;
 	}
 	else {
-		// sort the Vectors and compare item-by-item.  Any differences
+		// Sort the lists and compare item-by-item.  Any differences
 		// and data will need to be saved back into the dataset.
 		int size = v1.size();
 		//Message.printStatus(2, routine, "Lists are of size: " + size);
@@ -493,9 +494,64 @@ public String toString() {
 	return super.toString() + ", " + _irtem + ", " + _dcrdiv;
 }
 
-public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset ) {
-	// TODO Add checks here ...
-	return null;
+public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset )
+{
+	StateMod_ComponentValidation validation = new StateMod_ComponentValidation();
+	String id = getID();
+	String name = getName();
+	String cgoto = getCgoto();
+	String irtem = getIrtem();
+	double dcrdiv = getDcrdiv();
+	// Make sure that basic information is not empty
+	if ( StateMod_Util.isMissing(id) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Diversion right identifier is blank.",
+			"Specify a diversion right identifier.") );
+	}
+	if ( StateMod_Util.isMissing(name) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Diversion right \"" + id + "\" name is blank.",
+			"Specify a diversion right name to clarify data.") );
+	}
+	if ( StateMod_Util.isMissing(cgoto) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Diversion right \"" + id +
+			"\" diversion station ID is blank.",
+			"Specify a diversion station to associate the diversion right.") );
+	}
+	else {
+		// Verify that the diversion station is in the data set, if the network is available
+		DataSetComponent comp2 = dataset.getComponentForComponentType(StateMod_DataSet.COMP_DIVERSION_STATIONS);
+		List ddsList = (List)comp2.getData();
+		if ( (ddsList != null) && (ddsList.size() > 0) ) {
+			if ( StateMod_Util.indexOf(ddsList, cgoto) < 0 ) {
+				validation.add(new StateMod_ComponentValidationProblem(this,"Diversion right \"" + id +
+					"\" associated diversion (" + cgoto + ") is not found in the list of diversion stations.",
+					"Specify a valid diversion station ID to associate the diversion right.") );
+			}
+		}
+	}
+	if ( StateMod_Util.isMissing(irtem) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Diversion right \"" + id +
+			"\" administration number is blank.",
+			"Specify an administration number NNNNN.NNNNN.") );
+	}
+	else if ( !StringUtil.isDouble(irtem) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Diversion right \"" + id +
+			"\" administration number (" + irtem + ") is invalid.",
+			"Specify an administration number NNNNN.NNNNN.") );
+	}
+	else {
+		double irtemd = Double.parseDouble(irtem);
+		if ( irtemd < 0 ) {
+			validation.add(new StateMod_ComponentValidationProblem(this,"Diversion right \"" + id +
+				"\" administration number (" + irtem + ") is invalid.",
+				"Specify an administration number NNNNN.NNNNN.") );
+		}
+	}
+	if ( !(dcrdiv >= 0.0) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Diversion right \"" + id + "\" decree (" +
+			StringUtil.formatString(dcrdiv,"%.2f") + ") is invalid.",
+			"Specify the decree as a number >= 0.") );
+	}
+	return validation;
 }
 
 /**

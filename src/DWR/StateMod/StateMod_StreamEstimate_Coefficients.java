@@ -98,6 +98,7 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.Vector;
 
+import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
@@ -935,8 +936,65 @@ throws Exception {
  */
 public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset ) 
 {
-	// TODO KAT 2007-04-16 add specific checks here
-	return null;
+	StateMod_ComponentValidation validation = new StateMod_ComponentValidation();
+	String id = getID();
+	// Make sure that basic information is not empty
+	if ( StateMod_Util.isMissing(id) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Stream estimate station identifier is blank.",
+			"Specify a station identifier.") );
+	}
+	List rinList = null;
+	if ( dataset != null ) {
+		DataSetComponent comp = dataset.getComponentForComponentType(StateMod_DataSet.COMP_RIVER_NETWORK);
+		rinList = (List)comp.getData();
+	}
+
+	double coefn;
+	String upper;
+	for (int j = 0; j < getN(); j++) {
+		coefn = getCoefn(j);
+		if ( !((coefn >= 0.0) && (coefn <= 1.0)) ) {
+			validation.add(new StateMod_ComponentValidationProblem(this,"Stream estimate \"" + id + "\" estimate coefficient (" +
+				coefn + ") is out of normal range 0 to 1.0 (limits may vary).",
+				"Verify the area and precipitation information for subareas used in coefficient calculations.") );
+		}
+		upper = getUpper(j);
+		// Make sure that node is in the network.
+		if ( (rinList != null) && (rinList.size() > 0) ) {
+			if ( StateMod_Util.indexOf(rinList, upper) < 0 ) {
+				validation.add(new StateMod_ComponentValidationProblem(this,"Stream estimate station \"" + id +
+					"\" estimate station ID (" + upper + ") is not found in the list of river network nodes.",
+					"Verify that stream estimate coefficient file is consistent with network information.") );
+			}
+		}
+	}
+	
+	double proratnf = getProratnf();
+	if ( !((proratnf >= 0.0) && (proratnf <= 1.5)) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Stream estimate \"" + id + "\" proration factor (" +
+			proratnf + ") is out of normal range 0 to 1.5 (limits may vary).",
+			"Verify the area and precipitation information for subareas used in coefficient calculations.") );
+	}
+	double coefm;
+	String flowm;
+	for (int j = 0; j < getM(); j++) {
+		coefm = getCoefm(j);
+		if ( !((coefm >= -1.5) && (coefm <= 1.5)) ) {
+			validation.add(new StateMod_ComponentValidationProblem(this,"Stream estimate \"" + id + "\" gain coefficient (" +
+				coefm + ") is out of normal range -1.5 to 1.5 (limits may vary).",
+				"Verify the area and precipitation information for subareas used in coefficient calculations.") );
+		}
+		flowm = getFlowm(j);
+		// Make sure that node is in the network.
+		if ( (rinList != null) && (rinList.size() > 0) ) {
+			if ( StateMod_Util.indexOf(rinList, flowm) < 0 ) {
+				validation.add(new StateMod_ComponentValidationProblem(this,"Stream estimate station \"" + id +
+					"\" gain station ID (" + flowm + ") is not found in the list of river network nodes.",
+					"Verify that stream estimate coefficient file is consistent with network information.") );
+			}
+		}
+	}
+	return validation;
 }
 
 /**

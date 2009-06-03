@@ -129,8 +129,11 @@ import DWR.StateCU.StateCU_IrrigationPracticeTS;
 import RTi.GIS.GeoView.GeoRecord;
 import RTi.TS.DayTS;
 import RTi.TS.MonthTS;
+import RTi.Util.IO.CommandStatus;
+import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.Message.Message;
+import RTi.Util.Message.MessageUtil;
 import RTi.Util.String.StringUtil;
 import RTi.Util.Time.TimeUtil;
 
@@ -235,7 +238,7 @@ Link to spatial data.
 private GeoRecord _georecord;
 
 /**
-List of parcel data, in particular to allow StateDMI to detect when a diversion had no data.
+List of parcel data, in particular to allow StateDMI to detect when a well had no data.
 */
 protected List _parcel_Vector = new Vector();
 
@@ -1099,6 +1102,18 @@ public int getDemsrcw() {
 }
 
 /**
+Return a list of demand source option strings, for use in GUIs.
+The options are of the form "1" if include_notes is false and
+"1 - Irrigated acres from GIS", if include_notes is true.
+@return a list of demand source option strings, for use in GUIs.
+@param includeNotes Indicate whether notes should be included.
+*/
+public static List getDemsrcwChoices ( boolean includeNotes )
+{
+	return StateMod_Diversion.getDemsrcChoices(includeNotes);
+}
+
+/**
 @return the depletion at a particular index
 @param index index desired to retrieve
 @exception ArrayIndexOutOfBounds throws exception if unable to retrieve the specified depletion node
@@ -1139,7 +1154,7 @@ public double getDiveff(int index) {
 Return the system efficiency for the specified month index, where the month
 is always for calendar year (0=January).
 @param index 0-based monthly index (0=January).
-@param yeartype The year type for the diversion stations file (consistent with
+@param yeartype The year type for the well stations file (consistent with
 the control file for a full data set).  Recognized values are:
 <ol>
 <li>	"Calendar", "CYR" (Jan - Dec).</li>
@@ -1275,6 +1290,18 @@ public StateCU_IrrigationPracticeTS getIrrigationPracticeYearTS() {
 */
 public int getIrturnw() {
 	return _irturnw;
+}
+
+/**
+Return a list of use type option strings, for use in GUIs.
+The options are of the form "1" if include_notes is false and
+"1 - Irrigation", if include_notes is true.
+@return a list of use type option strings, for use in GUIs.
+@param includeNotes Indicate whether notes should be included.
+*/
+public static List getIrturnwChoices ( boolean includeNotes )
+{
+	return StateMod_Diversion.getIrturnChoices(includeNotes);
 }
 
 /**
@@ -2311,8 +2338,206 @@ Performs validation for this object within a StateMod data set.
 @return validation results, from which information about problems can be extracted.
 */
 public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset )
-{	StateMod_ComponentValidation validation = new StateMod_ComponentValidation();
-	/*
+{
+	StateMod_ComponentValidation validation = new StateMod_ComponentValidation();
+	String id = getID();
+	String name = getName();
+	String riverID = getCgoto();
+	double capacity = getDivcapw();
+	String dailyID = getCdividyw();
+	double primary = getPrimary();
+	
+	String idvcow2 = getIdvcow2();
+	int idvcomw = getIdvcomw();
+	int nrtnw = getNrtnw();
+	int nrtnw2 = getNrtnw2();
+	double divefcw = getDivefcw();
+	double areaw = getAreaw();
+	int irturnw = getIrturnw();
+	int demsrcw = getDemsrcw();
+	// Make sure that basic information is not empty
+	if ( StateMod_Util.isMissing(id) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Well identifier is blank.",
+			"Specify a station identifier.") );
+	}
+	if ( StateMod_Util.isMissing(name) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Well \"" + id + "\" name is blank.",
+			"Specify a well name to clarify data.") );
+	}
+	// Get the network list if available for checks below
+	DataSetComponent comp = null;
+	List rinList = null;
+	if ( dataset != null ) {
+		comp = dataset.getComponentForComponentType(StateMod_DataSet.COMP_RIVER_NETWORK);
+		rinList = (List)comp.getData();
+		if ( (rinList != null) && (rinList.size() == 0) ) {
+			// Set to null to simplify checks below
+			rinList = null;
+		}
+	}
+	if ( StateMod_Util.isMissing(riverID) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Well \"" + id + "\" river ID is blank.",
+			"Specify a river ID to associate the well with a river network node.") );
+	}
+	else {
+		// Verify that the river node is in the data set, if the network is available
+		if ( rinList != null ) {
+			if ( StateMod_Util.indexOf(rinList, riverID) < 0 ) {
+				validation.add(new StateMod_ComponentValidationProblem(this,"Well \"" + id +
+					"\" river network ID (" + riverID + ") is not found in the list of river network nodes.",
+					"Specify a valid river network ID to associate the well with a river network node.") );
+			}
+		}
+	}
+	if ( !(capacity >= 0.0) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Well \"" + id + "\" capacity (" +
+			StringUtil.formatString(capacity,"%.2f") + ") is invalid.",
+			"Specify the capacity as a number >= 0.") );
+	}
+	// Verify that the daily ID is in the data set (daily ID is allowed to be missing)
+	if ( (dataset != null) && !StateMod_Util.isMissing(dailyID) ) {
+		DataSetComponent comp2 = dataset.getComponentForComponentType(StateMod_DataSet.COMP_WELL_STATIONS);
+		List wesList = (List)comp2.getData();
+		if ( !dailyID.equals("0") && !dailyID.equals("3") && !dailyID.equals("4") ) {
+			// OK
+		}
+		else if ( (wesList != null) && (wesList.size() > 0) ) {
+			// Check the diversion station list
+			if ( StateMod_Util.indexOf(wesList, dailyID) < 0 ) {
+				validation.add(new StateMod_ComponentValidationProblem(this,"Well \"" + id + "\" daily ID (" + dailyID +
+				") is not 0, 3, or 4 and is not found in the list of well stations.",
+				"Specify the daily ID as 0, 3, 4, or a matching well ID.") );
+			}
+		}
+	}
+	if ( !(primary >= 0.0) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Well \"" + id +
+			"\" primary switch (" +
+			StringUtil.formatString(primary,"%.2f") + ") is invalid.",
+			"Specify the primary switch as >= 0." ) );
+	}
+	// Verify that the diversion ID is in the data set (diversion ID is allowed to be missing)
+	if ( (dataset != null) && !StateMod_Util.isMissing(idvcow2) ) {
+		DataSetComponent comp2 = dataset.getComponentForComponentType(StateMod_DataSet.COMP_DIVERSION_STATIONS);
+		List ddsList = (List)comp2.getData();
+		if ( !dailyID.equals("NA") && !dailyID.equals("N/A") ) {
+			// OK
+		}
+		else if ( (ddsList != null) && (ddsList.size() > 0) ) {
+			// Check the diversion station list
+			if ( StateMod_Util.indexOf(ddsList, idvcow2) < 0 ) {
+				validation.add(new StateMod_ComponentValidationProblem(this,"Well \"" + id + "\" diversion ID (" +
+				idvcow2 + ") is not \"NA\" and is not found in the list of diversion stations.",
+				"Specify the diversion ID as \"NA\" or a matching diversion ID.") );
+			}
+		}
+	}
+	List<String> choices = getIdvcomwChoices(false);
+	if ( StringUtil.indexOfIgnoreCase(choices,"" + idvcomw) < 0 ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Well \"" + id + "\" data type (" +
+			idvcomw + ") is invalid.",
+			"Specify the data type as one of " + choices) );
+	}
+	if ( !(nrtnw >= 0) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Well \"" + id +
+			"\" number of return flow locations (" + nrtnw + ") is invalid.",
+			"Specify the number of return flow locations as >= 0.") );
+	}
+	if ( !((divefcw >= -100.0) && (divefcw <= 100.0)) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Well \"" + id +
+			"\" annual system efficiency (" +
+			StringUtil.formatString(divefcw,"%.2f") + ") is invalid.",
+			"Specify the efficiency as 0 to 100 for annual (negative if monthly values are provided)." ) );
+	}
+	else if ( divefcw < 0.0 ) {
+		// Check that each monthly efficiency is in the range 0 to 100
+		double diveffw;
+		for ( int i = 0; i < 12; i++ ) {
+			diveffw = getDiveff(i);
+			if ( !((diveffw >= 0.0) && (diveffw <= 100.0)) ) {
+				validation.add(new StateMod_ComponentValidationProblem(this,"Well \"" + id +
+					"\" system efficiency for month " + (i + 1) + " (" +
+					StringUtil.formatString(diveffw,"%.2f") + ") is invalid.",
+					"Specify the efficiency as 0 to 100." ) );
+			}
+		}
+	}
+	if ( !(areaw >= 0.0) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Well \"" + id + "\" area (" +
+			StringUtil.formatString(areaw,"%.2f") + ") is invalid.",
+			"Specify the area as a number >= 0.") );
+	}
+	choices = getIrturnwChoices(false);
+	if ( StringUtil.indexOfIgnoreCase(choices,"" + irturnw) < 0 ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Well \"" + id + "\" use type (" +
+			irturnw + ") is invalid.",
+			"Specify the use type as one of " + choices) );
+	}
+	choices = getDemsrcwChoices(false);
+	if ( StringUtil.indexOfIgnoreCase(choices,"" + demsrcw) < 0 ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Well \"" + id + "\" demand source (" +
+			demsrcw + ") is invalid.",
+			"Specify the demand source as one of " + choices) );
+	}
+	// Check return flow locations...
+	StateMod_ReturnFlow ret;
+	double pcttot;
+	String crtnid;
+	for ( int i = 0; i < nrtnw; i++ ) {
+		ret = getReturnFlow ( i );
+		pcttot = ret.getPcttot();
+		crtnid = ret.getCrtnid();
+		if ( rinList != null ) {
+			// Make sure that the return location is in the network list
+			if ( StateMod_Util.indexOf(rinList, crtnid) < 0 ) {
+				validation.add(new StateMod_ComponentValidationProblem(this,"Well \"" + id +
+					"\" return " + (i + 1) + " location (" + crtnid +
+					") is not found in the list of river network nodes.",
+					"Specify a valid river network ID to associate the return location with a river network node.") );
+			}
+		}
+		if ( !((pcttot >= 0.0) && (pcttot <= 100.0)) ) {
+			validation.add(new StateMod_ComponentValidationProblem(this,"Well \"" + id + "\" return " +
+				(i + 1) + " percent (" +
+				StringUtil.formatString(pcttot,"%.2f") + ") is invalid.",
+				"Specify the return percent as a number 0 to 100.") );
+		}
+	}
+	// Check depletion locations...
+	StateMod_ReturnFlow depl;
+	double pcttot2;
+	String crtnid2;
+	for ( int i = 0; i < nrtnw2; i++ ) {
+		depl = getDepletion ( i );
+		pcttot2 = depl.getPcttot();
+		crtnid2 = depl.getCrtnid();
+		if ( rinList != null ) {
+			// Make sure that the return location is in the network list
+			if ( StateMod_Util.indexOf(rinList, crtnid2) < 0 ) {
+				validation.add(new StateMod_ComponentValidationProblem(this,"Well \"" + id +
+					"\" depletion " + (i + 1) + " location (" + crtnid2 +
+					") is not found in the list of river network nodes.",
+					"Specify a valid river network ID to associate the depletion location with a river network node.") );
+			}
+		}
+		if ( !((pcttot2 >= 0.0) && (pcttot2 <= 100.0)) ) {
+			validation.add(new StateMod_ComponentValidationProblem(this,"Well \"" + id + "\" depletion " +
+				(i + 1) + " percent (" +
+				StringUtil.formatString(pcttot2,"%.2f") + ") is invalid.",
+				"Specify the depletion percent as a number 0 to 100.") );
+		}
+	}
+	// TODO SAM 2009-06-01) evaluate how to check rights (with getRights() or checking the rights data
+	// set component).
+	boolean checkRights = false;
+	List wer_Vector = null;
+	if ( dataset != null ) {
+		DataSetComponent wer_comp = dataset.getComponentForComponentType ( StateMod_DataSet.COMP_WELL_RIGHTS );
+		wer_Vector = (List)wer_comp.getData();
+	}
+	
+	// Check to see if any parcels were associated with wells
+
 	StateMod_Parcel parcel = null;	// Parcel associated with a well station
 	String id_i = null;
 	int wes_parcel_count = 0;	// Parcel count for well station
@@ -2321,21 +2546,6 @@ public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset 
 	double wes_well_parcel_area = 0.0; // Area of parcels with wells for well station.
 	List parcel_Vector;		// List of parcels for well station.
 
-	// FIXME SAM Evaluate whether to check sum of rights here
-	boolean checkRights = false;
-	/ *
-	List wer_Vector = null;
-	if ( props != null ) {
-		// Check if well rights are being evaluated.
-		// Validating Well Station Rights by checking Station data
-		String propRights = props.getValue("checkRights");
-		if ( propRights != null && propRights.equalsIgnoreCase("true")) {
-			checkRights = true;
-			DataSetComponent wer_comp = dataset.getComponentForComponentType ( StateMod_DataSet.COMP_WELL_RIGHTS );
-			wer_Vector = (List)wer_comp.getData();
-		}
-	}
-	* /
 	id_i = getID();
 	if ( getAreaw() <= 0.0 ) {
 		if ( checkRights ) {
@@ -2364,7 +2574,7 @@ public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset 
 			}
 		}
 		// new format for check file
-		String [] data_table = {
+		/*String [] data_table = {
 			StringUtil.formatString(count,"%4d"),
 			StringUtil.formatString(id_i,"%-12.12s"),
 			getName(),
@@ -2372,12 +2582,209 @@ public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset 
 			StringUtil.formatString(wes_parcel_count,"%9d"),
 			StringUtil.formatString(wes_parcel_area,"%11.0f"),
 			StringUtil.formatString(wes_well_parcel_count,"%9d"),
-			StringUtil.formatString(wes_well_parcel_area,"%11.0f") };
+			StringUtil.formatString(wes_well_parcel_area,"%11.0f") };*/
+		if ( (capacity <= 0.0) && (wes_parcel_count == 0) ) {
+			validation.add(new StateMod_ComponentValidationProblem(this,"Well \"" + id +
+				"\" capacity is zero and no parcels are associated with well station.",
+				"Verify well input data (this check only applies when data are processed from HydroBase).") );
+		}
 		
-		return StateMod_Util.checkForMissingValues( data_table );
 	}
-	*/
 	return validation;
+}
+
+/**
+FIXME SAM 2009-06-03 Evaluate how to call from above to add more specific checks.
+Check the well stations.
+*/
+private void validateComponent2 ( List werList, List wesList, String idpattern_Java,
+	int warningCount, int warningLevel, String commandTag, CommandStatus status )
+{	String routine = getClass().getName() + ".checkWellRights";
+	String message;
+	int matchCount = 0;
+	/*
+	StateMod_Well wes_i = null;
+	StateMod_Parcel parcel = null; // Parcel associated with a well station
+	int wes_parcel_count = 0; // Parcel count for well station
+	double wes_parcel_area = 0.0; // Area of parcels for well station
+	int wes_well_parcel_count = 0; // Parcel (with wells) count for well station.
+	double wes_well_parcel_area = 0.0; // Area of parcels with wells for well station.
+	List parcel_Vector; // List of parcels for well station.
+	int count = 0; // Count of well stations with potential problems.
+	String id_i = null;
+	List rightList = null;
+	int welListSize = wesList.size();
+	for ( int i = 0; i < welListSize; i++ ) {
+		wes_i = (StateMod_Well)wesList.get(i);
+		if ( wes_i == null ) {
+			continue;
+		}
+		id_i = wes_i.getID();
+		rightList = StateMod_Util.getRightsForStation ( id_i, werList );
+		// TODO SAM 2007-01-02 Evaluate how to put this code in a separate method and share between rights and stations.
+		if ( (rightList == null) || (rightList.size() == 0) ) {
+			// The following is essentially a copy of code for well
+			// stations. Keep the code consistent.  Note that the
+			// following assumes that when reading well rights from
+			// HydroBase that lists of parcels are saved with well
+			// stations.  This will clobber any parcel data that
+			// may have been saved at the time that well stations
+			// were processed (if processed in the same commands file).
+			++count;
+			// Check for parcels...
+			wes_parcel_count = 0;
+			wes_parcel_area = 0.0;
+			wes_well_parcel_count = 0;
+			wes_well_parcel_area = 0.0;
+			parcel_Vector = wes_i.getParcels();
+			if ( parcel_Vector != null ) {
+				wes_parcel_count = parcel_Vector.size();
+				for ( int j = 0; j < wes_parcel_count; j++ ) {
+					parcel = (StateMod_Parcel)parcel_Vector.get(j);
+					if ( parcel.getArea() > 0.0 ) {
+						wes_parcel_area += parcel.getArea();
+					}
+					if ( parcel.getWellCount() > 0 ) {
+						wes_well_parcel_count += parcel.getWellCount();
+						wes_well_parcel_area += parcel.getArea();
+					}
+				}
+			}
+			// Format suitable for output in a list that can be copied to a spreadsheet or table.
+			message_list.add (
+				StringUtil.formatString(count,"%4d") +
+				", " +
+				StringUtil.formatString(id_i,"%-12.12s") +
+				", " +
+				StringUtil.formatString(
+				wes_i.getCollectionType(),"%-10.10s") +
+				", " +
+				StringUtil.formatString(wes_parcel_count,"%9d")+
+				", " +
+				StringUtil.formatString(
+				wes_parcel_area,"%11.0f")+
+				", " +
+				StringUtil.formatString(
+				wes_well_parcel_count,"%9d")+
+				", " +
+				StringUtil.formatString(
+				wes_well_parcel_area,"%11.0f")
+				+ ", \"" + wes_i.getName() + "\"" );
+		}
+	}
+	if ( message_list.size() > 0 ) {
+		int line = 0;		// Line number for output (zero index).
+		// Prepend introduction to the specific warnings...
+		message_list.add ( line++, "" );
+		message_list.add ( line++,
+		"The following well stations (" + count + " out of " + size +
+		") have no water rights (no irrigated parcels served by " +
+		"wells)." );
+		message_list.add ( line++,
+		"Data may be OK if the station has no wells." );
+		message_list.add ( line++, "" );
+		message_list.add ( line++,
+		"Parcel count and area in the following table are available " +
+		"only if well rights are read from HydroBase." );
+		message_list.add ( line++, "" );
+		message_list.add ( line++,
+		"    ,             ,           , # PARCELS, TOTAL      , # PARCELS, PARCELS    , WELL" );
+		message_list.add (line++,
+		"    , WELL        , COLLECTION, FOR WELL , PARCEL     , WITH     , WITH WELLS , STATION" );
+		message_list.add (line++,
+		"NUM., STATION ID  , TYPE      , STATION  , AREA (ACRE), WELLS    , AREA (ACRE), NAME" );
+		message_list.add (line++,
+		"----,-------------,-----------,----------,------------,----------,------------,-------------------------" );
+	}
+
+	// Check to make sure the sum of well rights equals the well station capacity...
+
+	checkComponentData_WellRights_Capacity ( message_list );
+	*/
+
+	// Return values
+	int [] retVals = new int[2];
+	retVals[0] = matchCount;
+	retVals[1] = warningCount;
+	//return retVals;
+}
+
+/**
+FIXME SAM 2009-06-03 Evaluate how to integrate into checks.
+Helper method to check that well rights sum to the well station capacity.  This
+is called by the well right and well station checks.  The check is performed
+by formatting the capacity and decree sum to .NN precision.
+@param message_list Vector of string to be printed to the check file, which will
+be added to in this method.
+*/
+private int validateComponent_checkWellRights_SumToCapacity ( List wesList, List werList,
+	int warningCount, int warningLevel, String commandTag, CommandStatus status  )
+{	String routine = getClass().getName() + "checkWellRights_SumToCapacity";
+	String message;
+	StateMod_WellRight wer_i = null;
+	StateMod_Well wes_i = null;
+	int size = 0;
+	if ( wesList != null ) {
+		size = wesList.size();
+	}
+	double decree;
+	double decree_sum;
+	int onoff = 0;		// On/off switch for right
+	int size_rights = 0;
+	String id_i = null;
+	List rights = null;
+	for ( int i = 0; i < size; i++ ) {
+		wes_i = (StateMod_Well)wesList.get(i);
+		if ( wes_i == null ) {
+			continue;
+		}
+		id_i = wes_i.getID();
+		rights = StateMod_Util.getRightsForStation ( id_i, werList );
+		size_rights = 0;
+		if ( rights != null ) {
+			size_rights = rights.size();
+		}
+		if ( size_rights == 0 ) {
+			continue;
+		}
+		// Get the sum of the rights, assuming that all should be
+		// compared against the capacity (i.e., sum of rights at the
+		// end of the period will be compared with the current well capacity)...
+		decree_sum = 0.0;
+		for ( int iright = 0; iright < size_rights; iright++ ) {
+			wer_i = (StateMod_WellRight)rights.get(iright);
+			decree = wer_i.getDcrdivw();
+			onoff = wer_i.getSwitch();
+			if ( decree < 0.0 ) {
+				// Ignore - missing values will cause a bad sum.
+				continue;
+			}
+			if ( onoff <= 0 ) {
+				// Subtract the decree...
+				decree_sum -= decree;
+			}
+			else {
+				// Add the decree...
+				decree_sum += decree;
+			}
+		}
+		// Compare to a whole number, which is the greatest precision for documented files.
+		String decree_sum_formatted = StringUtil.formatString(decree_sum,"%.2f");
+		String capacity_formatted = StringUtil.formatString(wes_i.getDivcapw(),"%.2f");
+		if ( !decree_sum_formatted.equals(capacity_formatted) ) {
+			message = "Well station \"" + id_i + " capacity (" + capacity_formatted +
+			") does not sum to rights (" + decree_sum_formatted + ")";
+			Message.printWarning(warningLevel,
+				MessageUtil.formatMessageTag( commandTag, ++warningCount), routine, message );
+			/*
+			status.addToLog ( CommandPhaseType.RUN,
+				new WellRightValidation(CommandStatusType.FAILURE,
+					message, "Check that the StateDMI command parameters used to process " +
+					"well stations and rights are consistent." ) );
+					*/
+		}
+	}
+	return warningCount;
 }
 
 /**

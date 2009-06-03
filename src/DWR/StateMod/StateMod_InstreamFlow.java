@@ -96,6 +96,7 @@ import java.util.Vector;
 import RTi.GIS.GeoView.GeoRecord;
 import RTi.TS.DayTS;
 import RTi.TS.MonthTS;
+import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
@@ -173,7 +174,7 @@ public void acceptChanges() {
 }
 
 /**
-Adds a right for the diversion.
+Adds a right for the instream flow station.
 */
 public void addRight ( StateMod_InstreamFlowRight right )
 {	if (right == null) {
@@ -406,7 +407,7 @@ public void createBackup() {
 /**
 Remove right from list.  A comparison on the ID is made.
 @param right Right to remove.  Note that the right is only removed from the
-list for this diversion and must also be removed from the main diversion right list.
+list for this instream flow station and must also be removed from the main instream flow right list.
 */
 public void disconnectRight ( StateMod_InstreamFlowRight right )
 {	if (right == null) {
@@ -485,8 +486,8 @@ public MonthTS getDemandMonthTS() {
 }
 
 /**
-Get the geographical data associated with the diversion.
-@return the GeoRecord for the diversion.
+Get the geographical data associated with the instream flow station.
+@return the GeoRecord for the instream flow station.
 */
 public GeoRecord getGeoRecord() {
 	return _georecord;
@@ -745,8 +746,8 @@ public void setDemandMonthTS(MonthTS demand_MonthTS) {
 }
 
 /**
-Set the geographic information object associated with the diversion.
-@param georecord Geographic record associated with the diversion.
+Set the geographic information object associated with the instream flow station.
+@param georecord Geographic record associated with the instream flow station.
 */
 public void setGeoRecord ( GeoRecord georecord ) {
 	_georecord = georecord;
@@ -801,8 +802,91 @@ public void setRights ( List rights )
  */
 public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset ) 
 {
-	// TODO KAT 2007-04-16 add specific checks here
-	return null;
+	StateMod_ComponentValidation validation = new StateMod_ComponentValidation();
+	String id = getID();
+	String name = getName();
+	String riverID = getCgoto();
+	String downstreamRiverID = getIfrrdn();
+	String dailyID = getCifridy();
+	int iifcom = getIifcom();
+	// Make sure that basic information is not empty
+	if ( StateMod_Util.isMissing(id) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Instream flow station identifier is blank.",
+			"Specify a station identifier.") );
+	}
+	if ( StateMod_Util.isMissing(name) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Instream flow station \"" + id + "\" name is blank.",
+			"Specify an instream flow station name to clarify data.") );
+	}
+	// Get the network list if available for checks below
+	DataSetComponent comp = null;
+	List rinList = null;
+	if ( dataset != null ) {
+		comp = dataset.getComponentForComponentType(StateMod_DataSet.COMP_RIVER_NETWORK);
+		rinList = (List)comp.getData();
+		if ( (rinList != null) && (rinList.size() == 0) ) {
+			// Set to null to simplify checks below
+			rinList = null;
+		}
+	}
+	if ( StateMod_Util.isMissing(riverID) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Instream flow station \"" + id +
+			"\" river node ID is blank.",
+			"Specify a river node ID to associate the instream flow station with a river network node.") );
+	}
+	else {
+		// Verify that the river node is in the data set, if the network is available
+		if ( rinList != null ) {
+			if ( StateMod_Util.indexOf(rinList, riverID) < 0 ) {
+				validation.add(new StateMod_ComponentValidationProblem(this,"Instream flow station \"" + id +
+					"\" river network ID (" + riverID + ") is not found in the list of river network nodes.",
+					"Specify a valid river network ID to associate the instream flow station.") );
+			}
+		}
+	}
+	if ( StateMod_Util.isMissing(downstreamRiverID) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Instream flow station \"" + id +
+			"\" downstream river node ID is blank.",
+			"Specify a downstream river node ID to associate the instream flow station with a river network node.") );
+	}
+	else {
+		// Verify that the river node is in the data set, if the network is available
+		if ( rinList != null ) {
+			if ( StateMod_Util.indexOf(rinList, downstreamRiverID) < 0 ) {
+				validation.add(new StateMod_ComponentValidationProblem(this,"Instream flow station \"" + id +
+					"\" downstream river network ID (" + riverID +
+					") is not found in the list of river network nodes.",
+					"Specify a valid river network ID to associate the instream flow station downstream node.") );
+			}
+		}
+	}
+	// Verify that the daily ID is in the data set (daily ID is allowed to be missing)
+	if ( (dataset != null) && !StateMod_Util.isMissing(dailyID) ) {
+		DataSetComponent comp2 = dataset.getComponentForComponentType(StateMod_DataSet.COMP_INSTREAM_STATIONS);
+		List ifsList = (List)comp2.getData();
+		if ( !dailyID.equals("0") && !dailyID.equals("3") && !dailyID.equals("4") ) {
+			// OK
+		}
+		else if ( (ifsList != null) && (ifsList.size() > 0) ) {
+			// Check the instream flow station list
+			if ( StateMod_Util.indexOf(ifsList, dailyID) < 0 ) {
+				validation.add(new StateMod_ComponentValidationProblem(this,"Instream flow station \"" + id +
+				"\" daily ID (" + dailyID +
+				") is not 0, 3, or 4 and is not found in the list of instream flow stations.",
+				"Specify the daily ID as 0, 3, 4, or a matching instream flow station ID.") );
+			}
+		}
+	}
+	List<String> choices = getIifcomChoices(false);
+	if ( StringUtil.indexOfIgnoreCase(choices,"" + iifcom) < 0 ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Instream flow station \"" + id +
+			"\" data type (" +
+			iifcom + ") is invalid.",
+			"Specify the data type as one of " + choices) );
+	}
+	// TODO SAM 2009-06-01) evaluate how to check rights (with getRights() or checking the rights data
+	// set component).
+	return validation;
 }
 
 /**

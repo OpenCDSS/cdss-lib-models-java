@@ -91,6 +91,8 @@ import RTi.Util.Time.DateTime;
 import RTi.Util.Time.TimeInterval;
 import RTi.Util.Time.TimeUtil;
 
+// TODO SAM 2009-06-02 Evaluate renaming StateMod_TSUtil to be consistent with other static utility classes
+// and avoid confusion with the StateMod_TimeSeries class, which may be implemented to wrap normal time series.
 /**
 The StateMod_TS class provides static input/output methods and general utilities
 for StateMod time series.  Methods are provided to read/write from daily and

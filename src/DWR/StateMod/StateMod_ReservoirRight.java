@@ -89,6 +89,7 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.Vector;
 
+import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
@@ -239,7 +240,7 @@ public static boolean equals(List v1, List v2)
 }
 
 /**
-Tests to see if two diversion rights are equal.  Strings are compared with case sensitivity.
+Tests to see if two reservoir rights are equal.  Strings are compared with case sensitivity.
 @param right the right to compare.
 @return true if they are equal, false otherwise.
 */
@@ -372,8 +373,7 @@ public static String getIrescoDefault ( boolean include_notes )
 
 /**
 Return a list of on/off switch option strings, for use in GUIs.
-The options are of the form "0" if include_notes is false and
-"0 - Off", if include_notes is true.
+The options are of the form "0" if include_notes is false and "0 - Off", if include_notes is true.
 @return a list of on/off switch option strings, for use in GUIs.
 @param include_notes Indicate whether notes should be added after the parameter values.
 */
@@ -383,7 +383,7 @@ public static List getIrsrswChoices ( boolean include_notes )
 
 /**
 Return the default on/off switch choice.  This can be used by GUI code
-to pick a default for a new diversion.
+to pick a default for a new reservoir.
 @return the default reservoir on/off choice.
 */
 public static String getIrsrswDefault ( boolean include_notes )
@@ -420,7 +420,7 @@ public static List getItyrsrChoices ( boolean include_notes )
 
 /**
 Return the default right type choice.  This can be used by GUI code
-to pick a default for a new diversion.
+to pick a default for a new reservoir.
 @return the default right type choice.
 */
 public static String getItyrsrDefault ( boolean include_notes )
@@ -470,7 +470,7 @@ public static List getN2fillChoices ( boolean include_notes )
 }
 
 /**
-Return the default fill type choice.  This can be used by GUI code to pick a default for a new diversion.
+Return the default fill type choice.  This can be used by GUI code to pick a default for a new reservoir.
 @return the default fill type choice.
 */
 public static String getN2fillDefault ( boolean include_notes )
@@ -767,8 +767,91 @@ public void setRtem(String rtem) {
  */
 public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset ) 
 {
-	// TODO KAT 2007-04-16 add specific checks here
-	return null;
+	StateMod_ComponentValidation validation = new StateMod_ComponentValidation();
+	String id = getID();
+	String name = getName();
+	String cgoto = getCgoto();
+	String irtem = getRtem();
+	double dcrres = getDcrres();
+	int iresco = getIresco();
+	int ityrsr = getItyrstr();
+	int n2fill = getN2fill();
+	String copid = getCopid();
+	// Make sure that basic information is not empty
+	if ( StateMod_Util.isMissing(id) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir right identifier is blank.",
+			"Specify a reservoir right identifier.") );
+	}
+	if ( StateMod_Util.isMissing(name) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir right \"" + id + "\" name is blank.",
+			"Specify a reservoir right name to clarify data.") );
+	}
+	if ( StateMod_Util.isMissing(cgoto) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir right \"" + id +
+			"\" reservoir station ID is blank.",
+			"Specify a reservoir station to associate with the reservoir right.") );
+	}
+	else {
+		// Verify that the reservoir station is in the data set, if the network is available
+		DataSetComponent comp2 = dataset.getComponentForComponentType(StateMod_DataSet.COMP_RESERVOIR_STATIONS);
+		List resList = (List)comp2.getData();
+		if ( (resList != null) && (resList.size() > 0) ) {
+			if ( StateMod_Util.indexOf(resList, cgoto) < 0 ) {
+				validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir right \"" + id +
+					"\" associated reservoir (" + cgoto + ") is not found in the list of reservoir stations.",
+					"Specify a valid reservoir station ID to associate with the reservoir right.") );
+			}
+		}
+	}
+	if ( StateMod_Util.isMissing(irtem) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir right \"" + id +
+			"\" administration number is blank.",
+			"Specify an administration number NNNNN.NNNNN.") );
+	}
+	else if ( !StringUtil.isDouble(irtem) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir right \"" + id +
+			"\" administration number (" + irtem + ") is invalid.",
+			"Specify an administration number NNNNN.NNNNN.") );
+	}
+	else {
+		double irtemd = Double.parseDouble(irtem);
+		if ( irtemd < 0 ) {
+			validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir right \"" + id +
+				"\" administration number (" + irtem + ") is invalid.",
+				"Specify an administration number NNNNN.NNNNN.") );
+		}
+	}
+	if ( !(dcrres >= 0.0) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir right \"" + id + "\" decree (" +
+			StringUtil.formatString(dcrres,"%.2f") + ") is invalid.",
+			"Specify the decree as a number >= 0.") );
+	}
+	List<String> choices = getIrescoChoices(false);
+	if ( StringUtil.indexOfIgnoreCase(choices,"" + iresco) < 0 ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir \"" + id +
+			"\" ownership code (" + iresco + ") is invalid.",
+			"Specify the ownership code as one of " + choices) );
+	}
+	choices = getItyrsrChoices(false);
+	if ( StringUtil.indexOfIgnoreCase(choices,"" + ityrsr) < 0 ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir \"" + id +
+			"\" right type (" + ityrsr + ") is invalid.",
+			"Specify the right type as one of " + choices) );
+	}
+	choices = getN2fillChoices(false);
+	if ( StringUtil.indexOfIgnoreCase(choices,"" + n2fill) < 0 ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir \"" + id +
+			"\" first fill type (" + n2fill + ") is invalid.",
+			"Specify the first fill type as one of " + choices) );
+	}
+	if ( ityrsr == -1 ) {
+		if ( StateMod_Util.isMissing(copid) ) {
+			validation.add(new StateMod_ComponentValidationProblem(this,
+				"Reservoir right out-of-priority associated operational right identifier is blank.",
+				"Specify an operational right identifier.") );
+		}
+	}
+	return validation;
 }
 
 /**

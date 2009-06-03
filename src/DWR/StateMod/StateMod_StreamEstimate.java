@@ -77,6 +77,7 @@ import RTi.GIS.GeoView.GeoRecord;
 import RTi.TS.DayTS;
 import RTi.TS.MonthTS;
 import RTi.TS.TS;
+import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
@@ -344,8 +345,8 @@ public static String[] getDataHeader()
 }
 
 /**
-Get the geographical data associated with the diversion.
-@return the GeoRecord for the diversion.
+Get the geographical data associated with the station.
+@return the GeoRecord for the station.
 */
 public GeoRecord getGeoRecord()
 {	return _georecord;
@@ -588,8 +589,8 @@ public void setCrunidy ( String crunidy )
 }
 
 /**
-Set the geographic information object associated with the diversion.
-@param georecord Geographic record associated with the diversion.
+Set the geographic information object associated with the station.
+@param georecord Geographic record associated with the station.
 */
 public void setGeoRecord ( GeoRecord georecord )
 {	_georecord = georecord;
@@ -618,9 +619,54 @@ public void setRelatedSMDataType2 ( int related_smdata_type2 )
 */
 public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset ) 
 {
-	// TODO KAT 2007-04-16
-	// add specific checks here
-	return null;
+	StateMod_ComponentValidation validation = new StateMod_ComponentValidation();
+	String id = getID();
+	String name = getName();
+	String riverID = getCgoto();
+	String dailyID = getCrunidy();
+	// Make sure that basic information is not empty
+	if ( StateMod_Util.isMissing(id) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Stream estimate identifier is blank.",
+			"Specify a station identifier.") );
+	}
+	if ( StateMod_Util.isMissing(name) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Stream estimate \"" + id + "\" name is blank.",
+			"Specify a station name to clarify data.") );
+	}
+	if ( StateMod_Util.isMissing(riverID) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Stream estimate \"" + id + "\" river ID is blank.",
+			"Specify a river ID to associate the station with a river network node.") );
+	}
+	else {
+		// Verify that the river node is in the data set, if the network is available
+		if ( dataset != null ) {
+			DataSetComponent comp = dataset.getComponentForComponentType(StateMod_DataSet.COMP_RIVER_NETWORK);
+			List rinList = (List)comp.getData();
+			if ( (rinList != null) && (rinList.size() > 0) ) {
+				if ( StateMod_Util.indexOf(rinList, riverID) < 0 ) {
+					validation.add(new StateMod_ComponentValidationProblem(this,"Stream estimate \"" + id +
+						"\" river network ID (" + riverID + ") is not found in the list of river network nodes.",
+						"Specify a valid river network ID to associate the station with a river network node.") );
+				}
+			}
+		}
+	}
+	// Verify that the daily ID is in the data set
+	if ( !StateMod_Util.isMissing(dailyID) ) {
+		if ( dataset != null ) {
+			DataSetComponent comp = dataset.getComponentForComponentType(StateMod_DataSet.COMP_STREAMGAGE_STATIONS);
+			List risList = (List)comp.getData();
+			if ( (risList != null) && (risList.size() > 0) ) {
+				if ( !dailyID.equals("0") && !dailyID.equals("3") && !dailyID.equals("4") &&
+					(StateMod_Util.indexOf(risList, dailyID) < 0) ) {
+					validation.add(new StateMod_ComponentValidationProblem(this,"Stream estimate \"" + id + "\" daily ID (" + dailyID +
+						") is not 0, 3, or 4 and is not found in the list of stream gages.",
+						"Specify the daily ID as 0, 3, 4, or that matches a stream gage ID.") );
+				}
+			}
+		}
+	}
+	return validation;
 }
 
 /**

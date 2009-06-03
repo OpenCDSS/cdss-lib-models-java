@@ -156,6 +156,7 @@ import RTi.TS.DayTS;
 import RTi.TS.MonthTS;
 import RTi.TS.TS;
 import RTi.TS.TSUtil;
+import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
@@ -210,7 +211,7 @@ protected List _climate_Vector;
 /**
 List of area capacity values
 */
-protected List _areacapvals;
+protected List<StateMod_ReservoirAreaCap> _areacapvals;
 
 /**
 List of reservoir rights
@@ -719,7 +720,7 @@ public void deleteAccountAt(int index) {
 /**
 Remove right from list.  A comparison on the ID is made.
 @param right Right to remove.  Note that the right is only removed from the
-list for this diversion and must also be removed from the main diversion right list.
+list for this reservoir and must also be removed from the main reservoir right list.
 */
 public void disconnectRight ( StateMod_ReservoirRight right )
 {	if (right == null) {
@@ -908,8 +909,8 @@ public double getFlomax() {
 }
 
 /**
-Get the geographical data associated with the diversion.
-@return the GeoRecord for the diversion.
+Get the geographical data associated with the reservoir.
+@return the GeoRecord for the reservoir.
 */
 public GeoRecord getGeoRecord() {
 	return _georecord;
@@ -939,7 +940,7 @@ public static List getIresswChoices ( boolean include_notes )
 
 /**
 Return the default on/off switch choice.  This can be used by GUI code
-to pick a default for a new diversion.
+to pick a default for a new reservoir.
 @return the default reservoir replacement choice.
 */
 public static String getIresswDefault ( boolean include_notes )
@@ -953,7 +954,7 @@ public static String getIresswDefault ( boolean include_notes )
 }
 
 /**
-Get the last right associated with diversion.
+Get the last right associated with reservoir.
 */
 public StateMod_ReservoirRight getLastRight()
 {	if ( (_rights == null) || (_rights.size() == 0) ) {
@@ -1138,7 +1139,7 @@ public static List getRdateChoices ( boolean include_notes )
 
 /**
 Return the default one fill rule switch choice.  This can be used by GUI code
-to pick a default for a new diversion.
+to pick a default for a new reservoir.
 @return the default reservoir replacement choice.
 */
 public static String getRdateDefault ( boolean include_notes )
@@ -1636,8 +1637,8 @@ public void setFlomax(String flomax) {
 }
 
 /**
-Set the geographic information object associated with the diversion.
-@param georecord Geographic record associated with the diversion.
+Set the geographic information object associated with the reservoir.
+@param georecord Geographic record associated with the reservoir.
 */
 public void setGeoRecord(GeoRecord georecord) {
 	_georecord = georecord;
@@ -1781,8 +1782,267 @@ public void setVolmin(String volmin) {
 */
 public StateMod_ComponentValidation validateComponent ( StateMod_DataSet dataset ) 
 {
-	// TODO KAT 2007-04-16 add specific checks here
-	return null;
+	StateMod_ComponentValidation validation = new StateMod_ComponentValidation();
+	String id = getID();
+	String name = getName();
+	String riverID = getCgoto();
+	int iressw = getSwitch();
+	double rdate = getRdate();
+	String dailyID = getCresdy();
+	double volmin = getVolmin();
+	double volmax = getVolmax();
+	double flomax = getFlomax();
+	double deadst = getDeadst();
+	int nowner = getNowner();
+	// Make sure that basic information is not empty
+	if ( StateMod_Util.isMissing(id) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir identifier is blank.",
+			"Specify a reservoir station identifier.") );
+	}
+	if ( StateMod_Util.isMissing(name) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir \"" + id + "\" name is blank.",
+			"Specify a reservoir name to clarify data.") );
+	}
+	// Get the network list if available for checks below
+	DataSetComponent comp = null;
+	List rinList = null;
+	if ( dataset != null ) {
+		comp = dataset.getComponentForComponentType(StateMod_DataSet.COMP_RIVER_NETWORK);
+		rinList = (List)comp.getData();
+		if ( (rinList != null) && (rinList.size() == 0) ) {
+			// Set to null to simplify checks below
+			rinList = null;
+		}
+	}
+	if ( StateMod_Util.isMissing(riverID) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir \"" + id + "\" river node ID is blank.",
+			"Specify a river node ID to associate the reservoir with a river network node.") );
+	}
+	else {
+		// Verify that the river node is in the data set, if the network is available
+		if ( rinList != null ) {
+			if ( StateMod_Util.indexOf(rinList, riverID) < 0 ) {
+				validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir \"" + id +
+					"\" river network ID (" + riverID + ") is not found in the list of river network nodes.",
+					"Specify a valid river network ID to associate the reservoir with a river network node.") );
+			}
+		}
+	}
+	List<String> choices = getIresswChoices(false);
+	if ( StringUtil.indexOfIgnoreCase(choices,"" + iressw) < 0 ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir \"" + id +
+			"\" switch (" + iressw + ") is invalid.",
+			"Specify the switch as one of " + choices) );
+	}
+	if ( !((rdate >= -1.01) && (rdate <= 12.01)) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir \"" + id +
+			"\" date for one fill rule administration (" +
+			StringUtil.formatString(rdate,"%.0f") + ") is invalid.",
+			"Specify the value as -1 to not administer, or 0 - 12 for the month for reoperation." ) );
+	}
+	// Verify that the daily ID is in the data set (daily ID is allowed to be missing)
+	if ( (dataset != null) && !StateMod_Util.isMissing(dailyID) ) {
+		DataSetComponent comp2 = dataset.getComponentForComponentType(StateMod_DataSet.COMP_RESERVOIR_STATIONS);
+		List resList = (List)comp2.getData();
+		if ( !dailyID.equals("0") && !dailyID.equals("3") && !dailyID.equals("4") && !dailyID.equals("5") ) {
+			// OK
+		}
+		else if ( (resList != null) && (resList.size() > 0) ) {
+			// Check the reservoir station list
+			if ( StateMod_Util.indexOf(resList, dailyID) < 0 ) {
+				validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir \"" + id + "\" daily ID (" + dailyID +
+				") is not 0, 3, or 4 and is not found in the list of reservoir stations.",
+				"Specify the daily ID as 0, 3, 4, 5, or a matching reservoir ID.") );
+			}
+		}
+	}
+	if ( !((volmin >= 0.0)) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir \"" + id +
+			"\" minimum volume (" + StringUtil.formatString(volmin,"%.1f") + ") is invalid.",
+			"Specify the value as >= 0." ) );
+	}
+	if ( !((volmax >= 0.0)) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir \"" + id +
+			"\" maximum volume (" + StringUtil.formatString(volmax,"%.1f") + ") is invalid.",
+			"Specify the value as >= 0." ) );
+	}
+	if ( !((volmax >= volmin)) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir \"" + id +
+			"\" maximum volume (" + StringUtil.formatString(volmax,"%.1f") + ") is < the minimum volume (" +
+			StringUtil.formatString(volmin,"%.1f") + ").",
+			"Specify the maximum volumen >= the minimum volume." ) );
+	}
+	if ( !((flomax >= 0.0)) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir \"" + id +
+			"\" maximum release (" + StringUtil.formatString(flomax,"%.1f") + ") is invalid.",
+			"Specify the value as >= 0." ) );
+	}
+	if ( !((deadst >= 0.0)) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir \"" + id +
+			"\" dead storage (" + StringUtil.formatString(deadst,"%.1f") + ") is invalid.",
+			"Specify the value as >= 0." ) );
+	}
+	if ( !(nowner >= 0) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir \"" + id +
+			"\" number of owners (" + nowner + ") is invalid.",
+			"Specify the number of owners as >= 0.") );
+	}
+	else {
+		// Check owner information
+		List<StateMod_ReservoirAccount> accounts = getAccounts();
+		StateMod_ReservoirAccount account;
+		String ownnam;
+		double ownmax;
+		double curown;
+		double pcteva;
+		int n2own;
+		List<String> n2ownChoices = StateMod_ReservoirAccount.getN2ownChoices(false);
+		for ( int i = 0; i < nowner; i++ ) {
+			account = accounts.get(i);
+			ownnam = account.getName();
+			ownmax = account.getOwnmax();
+			curown = account.getCurown();
+			pcteva = account.getPcteva();
+			n2own = account.getN2own();
+			if ( StateMod_Util.isMissing(ownnam) ) {
+				validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir \"" + id + "\" account " +
+					(i + 1) + " name is blank.",
+					"Specify a reservoir account name to clarify data.") );
+			}
+			if ( !((ownmax >= 0.0) && (ownmax <= volmax)) ) {
+				validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir \"" + id +
+					"\" account " + (i + 1) + " maximum (" +
+					StringUtil.formatString(ownmax,"%.2f") + ") is invalid.",
+					"Specify the account maximum as >= 0 and less than the reservoir maximum (" +
+					StringUtil.formatString(volmax,"%.2f") + ").") );
+			}
+			if ( !((curown >= 0.0) && (curown <= volmax)) ) {
+				validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir \"" + id +
+					"\" account " + (i + 1) + " initial value (" +
+					StringUtil.formatString(curown,"%.2f") + ") is invalid.",
+					"Specify the account initial value >= 0 and less than the reservoir maximum (" +
+					StringUtil.formatString(volmax,"%.2f") + ").") );
+			}
+			if ( !((curown <= ownmax)) ) {
+				validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir \"" + id +
+					"\" account " + (i + 1) + " initial value (" +
+					StringUtil.formatString(curown,"%.2f") + ") is greater than the account maximum volume (" +
+					StringUtil.formatString(ownmax,"%.2f") + ").",
+					"Specify the account initial value as less than the account maximum." ) );
+			}
+			if ( !((pcteva >= -1.01) && (pcteva <= 100.0)) ) {
+				validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir \"" + id +
+					"\" account " + (i + 1) + " evaporation distribution parameter (" +
+					StringUtil.formatString(pcteva,"%.2f") + ") is invalid.",
+					"Specify the evaporation distribution parameter as -1 or 0 to 100." ) );
+			}
+			if ( StringUtil.indexOfIgnoreCase(choices,"" + n2own) < 0 ) {
+				validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir \"" + id +
+					"\" owernership switch (" + n2own + ") is invalid.",
+					"Specify as one of " + n2ownChoices) );
+			}
+		}
+	}
+	// Check the climate information
+	// TODO SAM 2009-06-01 Evaluate whether to cross check with time series identifiers
+	List<StateMod_ReservoirClimate> climatev = getClimates();
+	StateMod_ReservoirClimate clmt = null;
+	int nclmt = climatev.size();
+	double weight;
+	String staType = null;
+	for ( int i = 0; i < nclmt; i++) {
+		clmt =(StateMod_ReservoirClimate)climatev.get(i);
+		if (clmt == null) {
+			continue;
+		}
+		else if ( clmt.getType()== StateMod_ReservoirClimate.CLIMATE_EVAP) {
+			staType = "evaportation";
+		}
+		else if ( clmt.getType()== StateMod_ReservoirClimate.CLIMATE_PTPX) {
+			staType = "precipitation";
+		}
+		weight = clmt.getWeight();
+		if ( !((weight >= 0) && (weight <= 100.0)) ) {
+			validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir \"" + id +
+				"\" " + staType + " station \"" + clmt.getID() + " weight (" +
+				StringUtil.formatString(weight,"%.2f") + ") is invalid.",
+				"Specify the weight as 0 to 100." ) );
+		}
+	}
+	// Check the area capacity data.
+	List<StateMod_ReservoirAreaCap> areacapv = getAreaCaps();
+	StateMod_ReservoirAreaCap ac = null;
+	int nareacap = areacapv.size();
+	double content;
+	double area;
+	double seepage;
+	double contentPrev = -1.0;
+	double areaPrev = -1.0;
+	double seepagePrev = -1.0;
+	for ( int i = 0; i < nareacap; i++) {
+		ac = areacapv.get(i);
+		if (ac == null) {
+			continue;
+		}
+		content = ac.getConten();
+		area = ac.getSurarea();
+		seepage = ac.getSeepage();
+		if ( !((content >= 0.0) ) ) {
+			validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir \"" + id +
+				"\" area/cap/seepage " + (i + 1) + " content (" +
+				StringUtil.formatString(content,"%.2f") + ") is invalid.",
+				"Specify the content >= 0." ) );
+		}
+		if ( !((content > contentPrev) ) ) {
+			validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir \"" + id +
+				"\" area/cap/seepage " + (i + 1) + " content (" +
+				StringUtil.formatString(content,"%.2f") + ") is not increasing.",
+				"Specify the content > the previous content value." ) );
+		}
+		if ( !((area >= 0.0) ) ) {
+			validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir \"" + id +
+				"\" area/cap/seepage " + (i + 1) + " area (" +
+				StringUtil.formatString(area,"%.2f") + ") is invalid.",
+				"Specify the area >= 0." ) );
+		}
+		if ( i == nareacap - 1 ) {
+			// Last one allowed to be the same
+			if ( !((area >= areaPrev) ) ) {
+				validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir \"" + id +
+					"\" area/cap/seepage " + (i + 1) + " area (" +
+					StringUtil.formatString(area,"%.2f") + ") is not increasing.",
+					"Specify the area > the previous area value (= allowed on last point)." ) );
+			}
+		}
+		else {
+			// Must be increasing
+			if ( !((area > areaPrev) ) ) {
+				validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir \"" + id +
+					"\" area/cap/seepage " + (i + 1) + " area (" +
+					StringUtil.formatString(area,"%.2f") + ") is not increasing.",
+					"Specify the area > the previous area value." ) );
+			}
+		}
+		if ( !((seepage >= 0.0) ) ) {
+			validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir \"" + id +
+				"\" area/cap/seepage " + (i + 1) + " seepage (" +
+				StringUtil.formatString(seepage,"%.2f") + ") is invalid.",
+				"Specify the seepage >= 0." ) );
+		}
+		// Seepage might be zero so allow same as previous
+		if ( !((seepage >= seepagePrev) ) ) {
+			validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir \"" + id +
+				"\" area/cap/seepage " + (i + 1) + " seepage (" +
+				StringUtil.formatString(seepage,"%.2f") + ") is decreasing.",
+				"Specify the seepage >= the previous seepage value." ) );
+		}
+		contentPrev = content;
+		areaPrev = area;
+		seepagePrev = seepage;
+	}
+	// TODO SAM 2009-06-01) evaluate how to check rights (with getRights() or checking the rights data
+	// set component).
+	return validation;
 }
 
 /**
@@ -1869,7 +2129,18 @@ throws Exception {
 		out.println(cmnt + "  ID       cresid:  Reservoir Id");
 		out.println(cmnt + "  Name     resnam:  Reservoir name");
 		out.println(cmnt + "  Riv ID    cgoto:  Node where Reservoir is located");
-		out.println(cmnt + "  On/Off   iressw:  Switch 0 = off, 1 = on");
+		out.println(cmnt + "  On/Off   iressw:  Switch 0 = off");
+		out.println(cmnt + "                           1 = on, do not adjust for dead storage");
+		out.println(cmnt + "                               do not store above rervoir targets");
+		out.println(cmnt + "                           2 = do not store above rervoir targets");
+		out.println(cmnt + "                               adjust maximum ownership and initial");
+		out.println(cmnt + "                               storage of the last account by the");
+		out.println(cmnt + "                               dead storage volume");
+		out.println(cmnt + "                           3 = on, do not adjust for dead storage");
+		out.println(cmnt + "                               do store above rervoir targets");
+		out.println(cmnt + "                               (Note: in conjunction with an");
+		out.println(cmnt + "                               operational release for targets this");
+		out.println(cmnt + "                               results in a 'paper fill' activity.)");
 		out.println(cmnt + "  Admin #   rdate:  Administration date for 1 fill rule");
 		out.println(cmnt + "  Daily ID cresdy:  Identifier for daily time series.");
 		out.println(cmnt);

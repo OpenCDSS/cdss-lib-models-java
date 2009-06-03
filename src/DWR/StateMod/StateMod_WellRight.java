@@ -74,9 +74,12 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.Vector;
 
+import RTi.Util.IO.CommandStatus;
+import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
+import RTi.Util.Message.MessageUtil;
 import RTi.Util.String.StringUtil;
 
 /**
@@ -350,8 +353,8 @@ private static List getSummaryCommentList(List rightList)
 		}
 	}
 	// Now summarize information by class
-	int parcelMatchClassListSize = parcelMatchClassList.size();
-	int [] countByClass = new int[parcelMatchClassListSize];
+	//int parcelMatchClassListSize = parcelMatchClassList.size();
+	//int [] countByClass = new int[parcelMatchClassListSize];
 	return summaryList;
 }
 
@@ -638,41 +641,196 @@ Performs specific data checks for StateMod Well Rights.
  */
 public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset ) 
 {
-	/*
-	//int pos = 0;			// Position in well station vector
-	//String wes_name = null;		// Well station name
-	//String wes_id = null;		// Well station ID
-	double decree = 0.0;
-	StateMod_WellRight wer_i = this;
-	//int index = count;
-	//DataSetComponent wes_comp = dataset.getComponentForComponentType (
-	//		StateMod_DataSet.COMP_WELL_STATIONS );
-	//Vector wes_Vector = ( Vector )wes_comp.getData();
-	// Format to two digits to match StateMod output...
-	decree = Double.parseDouble(StringUtil.formatString( wer_i.getDcrdivw(),"%.2f" ) );
-	if ( decree <= 0.0 ) {
-		// Find associated well station for output to print ID and name...
-//		pos = StateMod_Util.indexOf( wes_Vector, wer_i.getCgoto() );
-//		StateMod_Well wes_i = null;
-//		if ( pos >= 0 ) {
-//			wes_i = ( StateMod_Well )wes_Vector.elementAt( pos );
-//		}
-//		wes_name = "";
-//		if ( wes_i != null ) {
-//			wes_id = wes_i.getID();
-//			wes_name = wes_i.getName();
-//		}
-		// new format for check file
-		String [] data_table = {
-			StringUtil.formatString( count, "%4d" ),
-			StringUtil.formatString( this.getID(), "%-12.12s"),
-			StringUtil.formatString( wer_i.getCgoto(), "%-12.12s" ) };
-			//StringUtil.formatString( wes_name, "%-12.12s" ) };
-		
-		return StateMod_Util.checkForMissingValues( data_table );
+	StateMod_ComponentValidation validation = new StateMod_ComponentValidation();
+	String id = getID();
+	String name = getName();
+	String cgoto = getCgoto();
+	String irtem = getIrtem();
+	double dcrdivw = getDcrdivw();
+	// Make sure that basic information is not empty
+	if ( StateMod_Util.isMissing(id) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Well right identifier is blank.",
+			"Specify a well right identifier.") );
 	}
-	*/
-	return null;
+	if ( StateMod_Util.isMissing(name) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Well right \"" + id + "\" name is blank.",
+			"Specify a well right name to clarify data.") );
+	}
+	if ( StateMod_Util.isMissing(cgoto) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Well right \"" + id +
+			"\" well station ID is blank.",
+			"Specify a well station to associate the well right.") );
+	}
+	else {
+		// Verify that the well station is in the data set, if the network is available
+		DataSetComponent comp2 = dataset.getComponentForComponentType(StateMod_DataSet.COMP_WELL_STATIONS);
+		List wesList = (List)comp2.getData();
+		if ( (wesList != null) && (wesList.size() > 0) ) {
+			if ( StateMod_Util.indexOf(wesList, cgoto) < 0 ) {
+				validation.add(new StateMod_ComponentValidationProblem(this,"Well right \"" + id +
+					"\" associated well (" + cgoto + ") is not found in the list of well stations.",
+					"Specify a valid well station ID to associate with the well right.") );
+			}
+		}
+	}
+	if ( StateMod_Util.isMissing(irtem) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Well right \"" + id +
+			"\" administration number is blank.",
+			"Specify an administration number NNNNN.NNNNN.") );
+	}
+	else if ( !StringUtil.isDouble(irtem) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Well right \"" + id +
+			"\" administration number (" + irtem + ") is invalid.",
+			"Specify an administration number NNNNN.NNNNN.") );
+	}
+	else {
+		double irtemd = Double.parseDouble(irtem);
+		if ( irtemd < 0 ) {
+			validation.add(new StateMod_ComponentValidationProblem(this,"Well right \"" + id +
+				"\" administration number (" + irtem + ") is invalid.",
+				"Specify an administration number NNNNN.NNNNN.") );
+		}
+	}
+	if ( !(dcrdivw >= 0.0) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"Well right \"" + id + "\" decree (" +
+			StringUtil.formatString(dcrdivw,"%.2f") + ") is invalid.",
+			"Specify the decree as a number >= 0.") );
+	}
+
+	return validation;
+}
+
+/**
+FIXME SAM 2009-06-03 Evaluate how to call from main validate method
+Check the well rights.
+*/
+private void validateComponent2 ( List werList, List wesList, String idpattern_Java,
+	int warningCount, int warningLevel, String commandTag, CommandStatus status )
+{	String routine = getClass().getName() + ".checkWellRights";
+	String message;
+	
+	StateMod_Well wes_i = null;
+
+	StateMod_Parcel parcel = null; // Parcel associated with a well station
+	int wes_parcel_count = 0; // Parcel count for well station
+	double wes_parcel_area = 0.0; // Area of parcels for well station
+	int wes_well_parcel_count = 0; // Parcel (with wells) count for well station.
+	double wes_well_parcel_area = 0.0; // Area of parcels with wells for well station.
+	List parcel_Vector; // List of parcels for well station.
+	int count = 0; // Count of well stations with potential problems.
+	String id_i = null;
+	List rightList = null;
+	int welListSize = wesList.size();
+	for ( int i = 0; i < welListSize; i++ ) {
+		wes_i = (StateMod_Well)wesList.get(i);
+		if ( wes_i == null ) {
+			continue;
+		}
+		id_i = wes_i.getID();
+		rightList = StateMod_Util.getRightsForStation ( id_i, werList );
+		// TODO SAM 2007-01-02 Evaluate how to put this code in a separate method and share between rights and stations.
+		if ( (rightList == null) || (rightList.size() == 0) ) {
+			// The following is essentially a copy of code for well
+			// stations. Keep the code consistent.  Note that the
+			// following assumes that when reading well rights from
+			// HydroBase that lists of parcels are saved with well
+			// stations.  This will clobber any parcel data that
+			// may have been saved at the time that well stations
+			// were processed (if processed in the same commands file).
+			++count;
+			// Check for parcels...
+			wes_parcel_count = 0;
+			wes_parcel_area = 0.0;
+			wes_well_parcel_count = 0;
+			wes_well_parcel_area = 0.0;
+			// Parcels associated with the well station
+			parcel_Vector = wes_i.getParcels();
+			if ( parcel_Vector != null ) {
+				// Number of parcels associated with the well station
+				wes_parcel_count = parcel_Vector.size();
+				for ( int j = 0; j < wes_parcel_count; j++ ) {
+					parcel = (StateMod_Parcel)parcel_Vector.get(j);
+					// Increment parcel area associated with the well station
+					if ( parcel.getArea() > 0.0 ) {
+						wes_parcel_area += parcel.getArea();
+					}
+					if ( parcel.getWellCount() > 0 ) {
+						// Count and area of parcels that have wells
+						wes_well_parcel_count += parcel.getWellCount();
+						wes_well_parcel_area += parcel.getArea();
+					}
+				}
+			}
+			message = "The following well station has no water rights (no irrigated parcels served by " +
+				"wells) well station ID=" + id_i +
+				", well name=" + wes_i.getName() +
+				", collection type=" + wes_i.getCollectionType() +
+				", parcels for well station=" + wes_parcel_count +
+				", parcel area for well station (acres)=" + StringUtil.formatString(wes_parcel_area,"%.3f") +
+				", count of wells on parcels=" + wes_well_parcel_count +
+				", area of parcels with wells (acres)=" + StringUtil.formatString(wes_well_parcel_area,"%.3f");
+			Message.printWarning(warningLevel,
+				MessageUtil.formatMessageTag( commandTag, ++warningCount), routine, message );
+			/*
+			status.addToLog ( CommandPhaseType.RUN,
+				new WellRightValidation(CommandStatusType.WARNING,
+					message, "Data may be OK if the station has no wells.  " +
+						"Parcel count and area in the following table are available " +
+						"only if well rights are read from HydroBase." ) );
+						*/
+		}
+	}
+
+	// Since well rights are determined from parcel data, print a list of
+	// well rights that do not have associated yield (decree)...
+
+	int werListSize = werList.size();
+	int pos = 0; // Position in well station vector
+	String wes_name = null; // Well station name
+	String wes_id = null; // Well station ID
+	String wer_id = null; // Well right identifier
+	double decree = 0.0;
+	StateMod_WellRight wer_i = null;
+	int matchCount = 0;
+	for ( int i = 0; i < werListSize; i++ ) {
+		wer_i = (StateMod_WellRight)werList.get(i);
+		wer_id = wer_i.getID();
+		if ( !wer_id.matches(idpattern_Java)) {
+			continue;
+		}
+		++matchCount;
+		// Format to two digits to match StateMod output...
+		decree = StringUtil.atod(StringUtil.formatString(wer_i.getDcrdivw(),"%.2f") );
+		if ( decree <= 0.0 ) {
+			// Find associated well station for output to print ID and name...
+			pos = StateMod_Util.indexOf(wesList,wer_i.getCgoto() );
+			wes_i = null;
+			if ( pos >= 0 ) {
+				wes_i = (StateMod_Well)wesList.get(pos);
+			}
+			wes_name = "";
+			if ( wes_i != null ) {
+				wes_id = wes_i.getID();
+				wes_name = wes_i.getName();
+			}
+			// Format suitable for output in a list that can be copied to a spreadsheet or table.
+			message = "Well right \"" + wer_id + "\" (well station " + wes_id + " \"" + wes_name +
+				"\") has decree (" + decree + ") <= 0.";
+			Message.printWarning(warningLevel,
+				MessageUtil.formatMessageTag( commandTag, ++warningCount), routine, message );
+			/*
+			status.addToLog ( CommandPhaseType.RUN,
+				new WellRightValidation(CommandStatusType.FAILURE,
+					message, "Verify that parcels are available for wells and check that well " +
+						"right at 2-digit precision is > 0." ) );
+						*/
+		}
+	}
+	// Return values
+	int [] retVals = new int[2];
+	retVals[0] = matchCount;
+	retVals[1] = warningCount;
+	//return retVals;
 }
 
 /**

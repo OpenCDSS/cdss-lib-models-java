@@ -132,7 +132,9 @@ import javax.swing.JFrame;
 import RTi.TS.DayTS;
 import RTi.TS.MonthTS;
 import RTi.TS.TS;
+import RTi.TS.TSData;
 import RTi.TS.TSIdent;
+import RTi.TS.TSIterator;
 import RTi.TS.TSLimits;
 import RTi.TS.TSUtil;
 import RTi.TS.YearTS;
@@ -6678,6 +6680,62 @@ public static void setTSDescriptions (List theData, List theTS, int mult) {
 	}
 	smdata = null;
 	ts = null;
+}
+
+/**
+Validate a time series, similar to validating other components.  This method is needed because time series
+objects do not themselves include a validation method like StateMod components.  The following checks are
+performed:
+<ol>
+<li>	
+</ol>
+@param validation if non null, validation results will be appended.  If null, a validation object will be
+created for returned information.
+@param ts time series to validate
+@param stationList List of stations, to make sure that time series matches a station (if null or empty the
+cross check is ignored).
+@return validation results
+*/
+public static StateMod_ComponentValidation validateTimeSeries ( StateMod_ComponentValidation validation,
+	boolean checkForMissing, boolean checkForNegative, TS ts, List<StateMod_Data> stationList )
+throws Exception
+{
+	if ( validation == null ) {
+		validation = new StateMod_ComponentValidation();
+	}
+	TSIterator tsi = ts.iterator();
+	TSData tsdata;
+	double value;
+	String id = "" + ts.getIdentifier();
+	while ( (tsdata = tsi.next()) != null ) {
+		value = tsdata.getData();
+		if ( ts.isDataMissing(value) ) {
+			if ( checkForMissing ) {
+				// TODO Evaluate whether to create StateMod_TimeSeries or similar class to wrap TS, and
+				// implement StateMod_ComponentValidator so that null does not need to be passed below.
+				validation.add(new StateMod_ComponentValidationProblem(null,"Time series \"" + id +
+					"\" has missing value at " + tsi.getDate(),
+					"Check input data and processing to fill the value.") );
+			}
+		}
+		else {
+			if ( checkForNegative && (value < 0.0) ) {
+				validation.add(new StateMod_ComponentValidationProblem(null,"Time series \"" + id +
+					"\" value (" + StringUtil.formatString(value,"%.4f") + ") is negative at " + tsi.getDate(),
+					"Check input data and processing.") );
+			}
+		}
+	}
+	// Check to make sure the time series matches a station, using only the location ID
+	if ( (stationList != null) && (stationList.size() > 0) ) {
+		String loc = ts.getLocation();
+		if ( indexOf(stationList,loc) < 0 ) {
+			validation.add(new StateMod_ComponentValidationProblem(null,"Time series \"" + id +
+				"\" location does not match any stations.",
+				"Verify that the time series is being created for a valid station.") );
+		}
+	}
+	return validation;
 }
 
 }

@@ -126,6 +126,7 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.Vector;
 
+import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
@@ -510,8 +511,53 @@ public void setRelatedSMDataType2 ( int related_smdata_type2 )
  */
 public StateMod_ComponentValidation validateComponent ( StateMod_DataSet dataset ) 
 {
-	// TODO KAT 2007-04-16 add specific checks here
-	return null;
+	StateMod_ComponentValidation validation = new StateMod_ComponentValidation();
+	String id = getID();
+	String name = getName();
+	String donwstreamRiverID = getCstadn();
+	double gwmaxr = getGwmaxr();
+	// Make sure that basic information is not empty
+	if ( StateMod_Util.isMissing(id) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"River node identifier is blank.",
+			"Specify a river node identifier.") );
+	}
+	if ( StateMod_Util.isMissing(name) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"River node \"" + id + "\" name is blank.",
+			"Specify a river node name to clarify data.") );
+	}
+	// Get the network list if available for checks below
+	DataSetComponent comp = null;
+	List rinList = null;
+	if ( dataset != null ) {
+		comp = dataset.getComponentForComponentType(StateMod_DataSet.COMP_RIVER_NETWORK);
+		rinList = (List)comp.getData();
+		if ( (rinList != null) && (rinList.size() == 0) ) {
+			// Set to null to simplify checks below
+			rinList = null;
+		}
+	}
+	if ( StateMod_Util.isMissing(donwstreamRiverID) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"River node \"" + id + "\" downstream node ID is blank.",
+			"Specify a downstream node ID.") );
+	}
+	else {
+		// Verify that the downstream river node is in the data set, if the network is available - skip this
+		// check for the end node.
+		if ( (rinList != null) && !name.equalsIgnoreCase("END") ) {
+			if ( StateMod_Util.indexOf(rinList, donwstreamRiverID) < 0 ) {
+				validation.add(new StateMod_ComponentValidationProblem(this,"River node \"" + id +
+					"\" downstream node ID (" + donwstreamRiverID + ") is not found in the list of river network nodes.",
+					"Specify a valid river network ID for the downstream node.") );
+			}
+		}
+	}
+	if ( !StateMod_Util.isMissing(gwmaxr) && !(gwmaxr >= 0.0) ) {
+		validation.add(new StateMod_ComponentValidationProblem(this,"River node \"" + id +
+			"\" maximum groundwater recharge (" +
+			StringUtil.formatString(gwmaxr,"%.2f") + ") is invalid.",
+			"Specify the maximum groundwater recharge as a number >= 0.") );
+	}
+	return validation;
 }
 
 /**
