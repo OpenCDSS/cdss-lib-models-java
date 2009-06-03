@@ -236,15 +236,15 @@ The options are of the form "1" if include_notes is false and
 @return a list of N2own option strings, for use in GUIs.
 @param include_notes Indicate whether notes should be added after the parameter values.
 */
-public static List getN2ownChoices ( boolean include_notes )
-{	List v = new Vector(2);
+public static List<String> getN2ownChoices ( boolean include_notes )
+{	List<String> v = new Vector(2);
 	v.add ( "1 - Ownership is tied to first fill right(s)" );
 	v.add ( "2 - Ownership is tied to second fill right(s)" );
 	if ( !include_notes ) {
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.set(i,StringUtil.getToken((String)v.get(i), " ", 0, 0) );
+			v.set(i,StringUtil.getToken(v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
@@ -272,14 +272,14 @@ public double getPcteva() {
 }
 
 /**
-Return a list of Pcteva option strings, for use in GUIs.
+Return a list of Pcteva option strings, for use in GUIs, with integer percents.
 The options are of the form "0" if include_notes is false and
 "0 - Prorate evaporation based on current storage", if include_notes is true.
 @return a list of Pcteva option strings, for use in GUIs.
 @param include_notes Indicate whether notes should be added after the parameter values.
 */
-public static List getPctevaChoices ( boolean include_notes )
-{	List v = new Vector(2);
+public static List<String> getPctevaChoices ( boolean include_notes )
+{	List<String> v = new Vector(2);
 	v.add ( "0 - Prorate evaporation based on current storage" );
 	for ( int i = 100; i >= 1; i-- ) {
 		v.add ( "" + i + " - Apply " + i + " % of evaporation to account" );
@@ -289,7 +289,7 @@ public static List getPctevaChoices ( boolean include_notes )
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.set(i,StringUtil.getToken((String)v.get(i), " ", 0, 0) );
+			v.set(i,StringUtil.getToken(v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
