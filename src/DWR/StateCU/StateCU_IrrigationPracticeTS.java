@@ -1480,8 +1480,7 @@ throws Exception
 	// If early versions (earlier than 10?), the period is not in the header
 	// so determine by reading the first and last part of the file...
 	// TODO SAM 2007-04-16 Need to figure out what version the addition
-	// of period to the header occurred.  It seems to have been in version 10
-	// and later?
+	// of period to the header occurred.  It seems to have been in version 10 and later?
 	boolean period_in_header = isPeriodInHeader ( full_filename );
 	String Version = props.getValue ( "Version" );
 	boolean Version_10 = false;
@@ -1498,6 +1497,8 @@ throws Exception
 		//	Message.printStatus ( 2, routine, "File has been determined to be version 10.");
 		//}
 	}
+	
+	// Current format.
 	
 	int format_0[] = {
 			StringUtil.TYPE_STRING,	// year
@@ -1554,7 +1555,8 @@ throws Exception
 		if ( Version_10 ) {
 			format_0w = new int[11];
 		}
-		else { // No total...
+		else {
+			// No total...
 			format_0w = new int[10];
 		}
 		format_0w[0] = 4;	// Year
@@ -1578,8 +1580,7 @@ throws Exception
 
 	// First get the period of record from the file.  The TSP file does not
 	// currently have a header record with the period (this is being
-	// considered).  Therefore, read the last records to get the end of the
-	// period...
+	// considered).  Therefore, read the last records to get the end of the period...
 
 	DateTime date1 = null, date2 = null;
 	DateTime date1_file = null;
@@ -2820,56 +2821,65 @@ public StateCU_ComponentValidation validateComponent ( StateCU_DataSet dataset )
 			tacre = tacre_yts.getDataValue(temp_DateTime);
 			if ( !((ceff >= 0.0) && (ceff <= 1.0)) ) {
 				validation.add(new StateCU_ComponentValidationProblem(this,
-					"Location \"" + id + "\" year " + year + " maximum surface efficiency (" + ceff + ") is invalid.",
+					"Location \"" + id + "\" year " + year + " maximum surface efficiency (" +
+					StringUtil.formatString(ceff,"%.2f") + ") is invalid.",
 					"Verify that the efficiency is in range 0 to 1.") );
 			}
 			if ( !((feff >= 0.0) && (feff <= 1.0)) ) {
 				validation.add(new StateCU_ComponentValidationProblem(this,
-					"Location \"" + id + "\" year " + year + " maximum flood efficiency (" + feff + ") is invalid.",
+					"Location \"" + id + "\" year " + year + " maximum flood efficiency (" +
+					StringUtil.formatString(feff,"%.2f") + ") is invalid.",
 					"Verify that the efficiency is in range 0 to 1.") );
 			}
 			if ( !((seff >= 0.0) && (seff <= 1.0)) ) {
 				validation.add(new StateCU_ComponentValidationProblem(this,
-					"Location \"" + id + "\" year " + year + " maximum sprinkler efficiency (" + seff + ") is invalid.",
+					"Location \"" + id + "\" year " + year + " maximum sprinkler efficiency (" +
+					StringUtil.formatString(seff,"%.2f") + ") is invalid.",
 					"Verify that the efficiency is in range 0 to 1.") );
 			}
 			if ( !(acswfl >= 0.0) ) {
 				validation.add(new StateCU_ComponentValidationProblem(this,
-					"Location \"" + id + "\" year " + year + " acres surface flood (" + acswfl + ") is invalid.",
+					"Location \"" + id + "\" year " + year + " acres surface flood (" +
+					StringUtil.formatString(acswfl,"%.1f") + ") is invalid.",
 					"Verify that the acres value is >= 0.") );
 				problemFound = true;
 			}
 			if ( !(acswspr >= 0.0) ) {
 				validation.add(new StateCU_ComponentValidationProblem(this,
-					"Location \"" + id + "\" year " + year + " acres surface sprinkler (" + acswspr + ") is invalid.",
+					"Location \"" + id + "\" year " + year + " acres surface sprinkler (" +
+					StringUtil.formatString(acswspr,"%.1f") + ") is invalid.",
 					"Verify that the acres value is >= 0.") );
 				problemFound = true;
 			}
 			if ( !(acgwfl >= 0.0) ) {
 				validation.add(new StateCU_ComponentValidationProblem(this,
-					"Location \"" + id + "\" year " + year + " acres groundwater flood (" + acgwfl + ") is invalid.",
+					"Location \"" + id + "\" year " + year + " acres groundwater flood (" +
+					StringUtil.formatString(acgwfl,"%.1f") + ") is invalid.",
 					"Verify that the acres value is >= 0.") );
 				problemFound = true;
 			}
 			if ( !(acgwspr >= 0.0) ) {
 				validation.add(new StateCU_ComponentValidationProblem(this,
-					"Location \"" + id + "\" year " + year + " acres groundwater sprinkler (" + acgwspr + ") is invalid.",
+					"Location \"" + id + "\" year " + year + " acres groundwater sprinkler (" +
+					StringUtil.formatString(acgwspr,"%.1f") + ") is invalid.",
 					"Verify that the acres value is >= 0.") );
 				problemFound = true;
 			}
 			if ( !(mprate >= 0.0) ) {
 				validation.add(new StateCU_ComponentValidationProblem(this,
-					"Location \"" + id + "\" year " + year + " maximum pumping rate (" + mprate + ") is invalid.",
+					"Location \"" + id + "\" year " + year + " maximum pumping rate (" +
+					StringUtil.formatString(mprate,"%.1f") + ") is invalid.",
 					"Verify that the maximum pumping value is >= 0.") );
 			}
 			if ( !((gmodeInt >= 1) && (gmodeInt <= 3)) ) {
 				validation.add(new StateCU_ComponentValidationProblem(this,
 					"Location \"" + id + "\" year " + year + " groundwater mode (" + gmodeInt + ") is invalid.",
-					"Verify that the efficiency is in range 1 to 3.") );
+					"Verify that the groundwater mode is in range 1 to 3.") );
 			}
 			if ( !(tacre >= 0.0) ) {
 				validation.add(new StateCU_ComponentValidationProblem(this,
-					"Location \"" + id + "\" year " + year + " total acres (" + tacre + ") is invalid.",
+					"Location \"" + id + "\" year " + year + " total acres (" +
+					StringUtil.formatString(tacre,"%.1f") + ") is invalid.",
 					"Verify that the total acres value is >= 0.") );
 			}
 			if ( !problemFound || (cds_yts != null) ) {
