@@ -149,23 +149,18 @@ The file and format is determined based on the file extension and/or the
 requested parameter and data interval.  Typically the readTimeSeries() or
 readTimeSeriesList() methods are used, which open a file, read one or more
 time series, and close the file.
-All the methods in this class that use time series index numbers use 0 for the
-first time series.
+All the methods in this class that use time series index numbers use 0 for the first time series.
 The format of the file is described in StateMod documentation.  Each file has
-essentially the same header information, followed by data records.   Relevent
-notes:
+essentially the same header information, followed by data records.  Relevant notes:
 <ol>
 <li>	The individual station lists are used to look up a station identifier.
-	The river node number is then used to find the position in the main
-	river node list.</li>
+	The river node number is then used to find the position in the main river node list.</li>
 <li>	The time series are written in one month blocks, with time series
 	within the block listed in the order of the river nodes for stream/
-	diversion/ISF and in the order of the specific list for reservoirs
-	and wells.</li>
+	diversion/ISF and in the order of the specific list for reservoirs and wells.</li>
 <li>	For reservoirs, a station's time series consist of a total, and one for
-	each account (therefore the reservoir file has a total number of
-	time series that is the reservoir count (for totals) plus the number
-	of accounts.</li>
+	each account (therefore the reservoir file has a total number of time series that is the
+	reservoir count (for totals) plus the number of accounts.</li>
 </ol>
 */
 public class StateMod_BTS
@@ -180,7 +175,7 @@ private final float CFS_TO_ACFT = (float)1.9835;
 File format version as a String (e.g., "9.62").  Before version 11.0 there was no version in the binary file
 so the code just reflects the documented format for the 9.62 version, especially
 since no documentation exists for earlier versions of the binary files.
- */
+*/
 private String __version = null;
 
 /**
@@ -206,7 +201,7 @@ private String __tsfileFull;
 Pointer to random access file (StateMod binary files are assumed to be little endian since they are written
 by Lahey FORTRAN code on a PC).  If necessary, the year value can be examined to determine the file endian-ness.
 */
-private EndianRandomAccessFile 	__fp;
+private EndianRandomAccessFile __fp;
 /**
 A hashtable for the file pointers (instances of StateMod_BTS).  This is used to increase performance.
 */
@@ -857,12 +852,12 @@ throws IOException
 		    Message.printDebug ( 1, routine, "Reading daily data." );
 		}
 		Message.printDebug ( 1, routine, "Length of 1 record (bytes) = " + __recordLength );
-		Message.printDebug ( 1, routine,	"Header length (bytes) = " + __headerLength );
+		Message.printDebug ( 1, routine, "Header length (bytes) = " + __headerLength );
 		if ( __comp_type == StateMod_DataSet.COMP_DIVERSION_STATIONS ) {
 			Message.printDebug ( 1, "", "Number of stations in data set = " + __numsta );
 		}
 		else if ( __comp_type == StateMod_DataSet.COMP_RESERVOIR_STATIONS ) {
-			Message.printDebug ( 1, routine,	"Number of reservoirs in data set = " + __numres);
+			Message.printDebug ( 1, routine, "Number of reservoirs in data set = " + __numres);
 			Message.printDebug ( 1, routine,
 			"Total number of reservoir accounts (does not include "+
 			"total accounts, does include inactive) = " + __numown);
