@@ -920,13 +920,15 @@ public StateCU_ComponentValidation validateComponent( StateCU_DataSet dataset )
 			if ( !((oroTemppAdj >= 0.0) && (oroTemppAdj <= 5.0)) ) {
 				validation.add(new StateCU_ComponentValidationProblem(this,"CU location \"" + id +
 					"\" climate station \"" + cliStationID + "\" orographic temperature adjustment (" +
-					oroTemppAdj + ") is invalid.", "Specify as DEGF/1000 FT 0 to 5.") );
+					oroTemppAdj + ") is invalid.  May default on output but should be explicitly set.",
+					"Specify as DEGF/1000 FT 0 to 5.") );
 			}
 			double oroPrecipAdj = getOrographicPrecipitationAdjustment(i);
 			if ( !((oroPrecipAdj >= 0.0) && (oroPrecipAdj <= 1.0)) ) {
 				validation.add(new StateCU_ComponentValidationProblem(this,"CU location \"" + id +
 					"\" climate station \"" + cliStationID + "\" orographic precipitation adjustment (" +
-					oroPrecipAdj + ") is invalid.", "Specify as fraction 0 - 1.") );
+					oroPrecipAdj + ") is invalid.  May default on output but should be explicitly set.",
+					"Specify as fraction 0 - 1.") );
 			}
 		}
 		if ( !((totalTempWeight >= .9999999) && (totalTempWeight <= 1.0000001)) ) {
