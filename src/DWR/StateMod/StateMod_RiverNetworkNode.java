@@ -514,7 +514,7 @@ public StateMod_ComponentValidation validateComponent ( StateMod_DataSet dataset
 	StateMod_ComponentValidation validation = new StateMod_ComponentValidation();
 	String id = getID();
 	String name = getName();
-	String donwstreamRiverID = getCstadn();
+	String downstreamRiverID = getCstadn();
 	double gwmaxr = getGwmaxr();
 	// Make sure that basic information is not empty
 	if ( StateMod_Util.isMissing(id) ) {
@@ -536,17 +536,18 @@ public StateMod_ComponentValidation validateComponent ( StateMod_DataSet dataset
 			rinList = null;
 		}
 	}
-	if ( StateMod_Util.isMissing(donwstreamRiverID) ) {
+	if ( StateMod_Util.isMissing(downstreamRiverID) && !name.equalsIgnoreCase("END") &&
+		!name.endsWith("_END")) {
 		validation.add(new StateMod_ComponentValidationProblem(this,"River node \"" + id + "\" downstream node ID is blank.",
 			"Specify a downstream node ID.") );
 	}
 	else {
 		// Verify that the downstream river node is in the data set, if the network is available - skip this
 		// check for the end node.
-		if ( (rinList != null) && !name.equalsIgnoreCase("END") ) {
-			if ( StateMod_Util.indexOf(rinList, donwstreamRiverID) < 0 ) {
+		if ( (rinList != null) && !name.equalsIgnoreCase("END") && !name.endsWith("_END")) {
+			if ( StateMod_Util.indexOf(rinList, downstreamRiverID) < 0 ) {
 				validation.add(new StateMod_ComponentValidationProblem(this,"River node \"" + id +
-					"\" downstream node ID (" + donwstreamRiverID + ") is not found in the list of river network nodes.",
+					"\" downstream node ID (" + downstreamRiverID + ") is not found in the list of river network nodes.",
 					"Specify a valid river network ID for the downstream node.") );
 			}
 		}
