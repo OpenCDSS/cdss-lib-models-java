@@ -864,7 +864,7 @@ public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset 
 	if ( (dataset != null) && !StateMod_Util.isMissing(dailyID) ) {
 		DataSetComponent comp2 = dataset.getComponentForComponentType(StateMod_DataSet.COMP_INSTREAM_STATIONS);
 		List ifsList = (List)comp2.getData();
-		if ( !dailyID.equals("0") && !dailyID.equals("3") && !dailyID.equals("4") ) {
+		if ( dailyID.equals("0") || dailyID.equals("3") || dailyID.equals("4") ) {
 			// OK
 		}
 		else if ( (ifsList != null) && (ifsList.size() > 0) ) {
