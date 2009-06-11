@@ -1844,14 +1844,14 @@ public StateMod_ComponentValidation validateComponent ( StateMod_DataSet dataset
 	if ( (dataset != null) && !StateMod_Util.isMissing(dailyID) ) {
 		DataSetComponent comp2 = dataset.getComponentForComponentType(StateMod_DataSet.COMP_RESERVOIR_STATIONS);
 		List resList = (List)comp2.getData();
-		if ( !dailyID.equals("0") && !dailyID.equals("3") && !dailyID.equals("4") && !dailyID.equals("5") ) {
+		if ( dailyID.equals("0") || dailyID.equals("3") || dailyID.equals("4") || dailyID.equals("5") ) {
 			// OK
 		}
 		else if ( (resList != null) && (resList.size() > 0) ) {
 			// Check the reservoir station list
 			if ( StateMod_Util.indexOf(resList, dailyID) < 0 ) {
 				validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir \"" + id + "\" daily ID (" + dailyID +
-				") is not 0, 3, or 4 and is not found in the list of reservoir stations.",
+				") is not 0, 3, 4, or 5 and is not found in the list of reservoir stations.",
 				"Specify the daily ID as 0, 3, 4, 5, or a matching reservoir ID.") );
 			}
 		}
