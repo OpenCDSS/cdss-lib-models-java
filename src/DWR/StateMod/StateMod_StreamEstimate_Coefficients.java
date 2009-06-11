@@ -955,7 +955,7 @@ public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset 
 		coefn = getCoefn(j);
 		if ( !((coefn >= 0.0) && (coefn <= 1.0)) ) {
 			validation.add(new StateMod_ComponentValidationProblem(this,"Stream estimate \"" + id + "\" estimate coefficient (" +
-				coefn + ") is out of normal range 0 to 1.0 (limits may vary).",
+				StringUtil.formatString(coefn,"%.3f") + ") is out of normal range 0 to 1.0 (limits may vary).",
 				"Verify the area and precipitation information for subareas used in coefficient calculations.") );
 		}
 		upper = getUpper(j);
@@ -972,7 +972,7 @@ public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset 
 	double proratnf = getProratnf();
 	if ( !((proratnf >= 0.0) && (proratnf <= 1.5)) ) {
 		validation.add(new StateMod_ComponentValidationProblem(this,"Stream estimate \"" + id + "\" proration factor (" +
-			proratnf + ") is out of normal range 0 to 1.5 (limits may vary).",
+			StringUtil.formatString(proratnf,"%.3f") + ") is out of normal range 0 to 1.5 (limits may vary).",
 			"Verify the area and precipitation information for subareas used in coefficient calculations.") );
 	}
 	double coefm;
@@ -981,7 +981,7 @@ public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset 
 		coefm = getCoefm(j);
 		if ( !((coefm >= -1.5) && (coefm <= 1.5)) ) {
 			validation.add(new StateMod_ComponentValidationProblem(this,"Stream estimate \"" + id + "\" gain coefficient (" +
-				coefm + ") is out of normal range -1.5 to 1.5 (limits may vary).",
+				StringUtil.formatString(coefm,"%.3f") + ") is out of normal range -1.5 to 1.5 (limits may vary).",
 				"Verify the area and precipitation information for subareas used in coefficient calculations.") );
 		}
 		flowm = getFlowm(j);
