@@ -750,7 +750,7 @@ private static String[] __statemod_file_properties = {
 		"Diversion_Demand_Monthly",
 		"Diversion_DemandOverride_Monthly",
 		"Diversion_Demand_AverageMonthly",
-		"Divesion_Demand_Daily",
+		"Diversion_Demand_Daily",
 		"IrrigationPractice_Yearly",
 		"ConsumptiveWaterRequirement_Monthly",
 		"ConsumptiveWaterRequirement_Daily",
@@ -9260,11 +9260,9 @@ If false, the old-style fixed-format will be used.
 @exception Exception if an error occurs.
 */
 public static void writeStateModFile (	StateMod_DataSet dataset,
-					String instrfile,
-					String outstrfile,
-					String[] newComments,
-					boolean free_format )
-throws Exception {
+					String instrfile, String outstrfile, String[] newComments, boolean free_format )
+throws Exception
+{	String routine = "StateMod_DataSet.writeStateModFile";
 	String [] comment_str = { "#" };
 	String [] ignore_comment_str = { "#>" };
 	PrintWriter out = null;
@@ -9281,16 +9279,19 @@ throws Exception {
 		out.println(cmnt + "  See other component write code like in "
 			+ "StateMod_Diversion for heading information.");
 		out.println(cmnt + "> The start of the comment indicates "
-			+ "whether the comment can be disposed if the file "
-			+ "is updated.");
+			+ "whether the comment can be disposed if the file is updated.");
 		out.println(cmnt);
 
 		for (int i = 0; i < __component_names.length; i++) {
-			comp = dataset.getComponentForComponentType(i);	
+			comp = dataset.getComponentForComponentType(i);
+			if ( comp == null ) {
+				Message.printStatus ( 3, routine, "Component type " + i + "(" +
+						dataset.lookupComponentName(i) + ") is null - not writing." );
+				continue;
+			}
 			
 			if (comp.isGroup()) {
-				out.println(cmnt 
-					+ dataset.getStateModFileProperty(i));
+				out.println(cmnt + dataset.getStateModFileProperty(i));
 			}
 			else {
 				out.println(dataset.getStateModFileProperty(i) 
