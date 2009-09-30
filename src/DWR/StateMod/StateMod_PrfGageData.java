@@ -159,13 +159,14 @@ public static boolean isSetprfSource ( String id, List prfGageData)
 }
 
 /**
-Checks to see if the node is a node that is to receive information.
+Checks to see if the requested node is the target of a "set proration factor gage" (see StateDMI
+SetStreamEstimateCoefficientsPFGage() command).
 @param commonID the id of the node to check
-@param prfGageData Vector of proration gage data
-@return the number of the node if it is to receive information, or -1 if
-the node wasn't found or is not to receive information.
+@param prfGageData list of proration gage data
+@return the index of in the PrfGageData that has a node ID that matches the specified commonID, or -1 if
+the node wasn't found.
 */
-public static int isSetprfTarget ( String commonID, List prfGageData)
+public static int isSetprfTarget ( String commonID, List<StateMod_PrfGageData> prfGageData )
 {	String routine = "StateMod_NodeNetwork.isSetprfTarget";
 	int dl = 10;
 
@@ -174,19 +175,15 @@ public static int isSetprfTarget ( String commonID, List prfGageData)
 		numPrfGageData = prfGageData.size();
 	}
 	if (Message.isDebugOn) {
-		Message.printDebug(dl, routine,
-			"Looking through " + numPrfGageData 
-			+ " prfGageData's for " + commonID);
+		Message.printDebug(dl, routine, "Looking through " + numPrfGageData + " prfGageData's for " + commonID);
 	}
 
 	StateMod_PrfGageData prfGageData_j = null;
 	for (int j = 0; j < numPrfGageData; j++) {
-		prfGageData_j = (StateMod_PrfGageData)prfGageData.get(j);
-		if (prfGageData_j.getNodeID().equalsIgnoreCase(commonID)) {
+		prfGageData_j = prfGageData.get(j);
+		if (prfGageData_j.getNodeID().equalsIgnoreCase(commonID) ) {
 			if (Message.isDebugOn) {
-				Message.printDebug(dl, routine,
-					"Found a prfGageData target "
-					+ "structure \"" + commonID + "\".");
+				Message.printDebug(dl, routine, "Found a prfGageData target structure \"" + commonID + "\".");
 			}
 			return j;
 		}

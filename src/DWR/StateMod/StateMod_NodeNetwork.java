@@ -481,53 +481,6 @@ throws Throwable
 }
 
 /**
-Finds the two most-downstream consecutive nodes on the main stem that have valid locations.
-@return the two most-downstream consecutive nodes with valid locations.  The
-array is a two-element array.  The first element is the most-downstream node
-with a valid location and the second element is the node immediately upstream
-from that node, but still on the main stem.  If the second element is null
-then there is only one node in the main stem with a valid location.
-*/
-private HydrologyNode[] findLastMainStemValidNodes() {
-	HydrologyNode node = getMostUpstreamNode();
-	HydrologyNode prehold = null;
-	HydrologyNode holdValid = null;
-	HydrologyNode holdNode = null;
-
-	boolean done = false;
-	while (!done) {
-		if (node.getReachLevel() != 1) {
-			// ignore node
-		}
-		else {
-			if (node.getX() >= 0 && node.getY() >= 0) {
-				// prehold holds the value of the node
-				// with a valid location immediately upstream
-				// of the last node found.
-				prehold = holdValid;
-
-				// holdValid holds the last node found with
-				// a valid location
-				holdValid = node;
-			}
-		}
-		node = getDownstreamNode(node, POSITION_RELATIVE);
-
-	// REVISIT -- eliminate the need for hold nodes -- they signify an
-	// error in the network.
-		if (holdNode == node) {
-			done = true;
-		}
-		holdNode = node;			
-	}
-
-	HydrologyNode[] nodes = new HydrologyNode[2];
-	nodes[0] = holdValid;
-	nodes[1] = prehold;
-	return nodes;
-}
-
-/**
 Initialize data.
 */
 private void initialize() {
@@ -1438,8 +1391,7 @@ throws Exception {
 		else if (name.equalsIgnoreCase("ID")) {
 			hnode.setCommonID(value);
 		}
-		// FIXME SAM 2008-12-10 Support both in the code: legacy "IsBaseflow" and new
-		// "IsNaturalFlow"
+		// FIXME SAM 2008-12-10 Support both in the code: legacy "IsBaseflow" and new "IsNaturalFlow"
 		else if (name.equalsIgnoreCase("IsBaseflow") || name.equalsIgnoreCase("IsNaturalFlow")) {
 			if (value.equalsIgnoreCase("true")) {
 				hnode.setIsNaturalFlow(true);
