@@ -1501,7 +1501,8 @@ throws Exception
 		if ( spatial_aggregation == BYPARCEL ) {
 			loc_rights = getWaterRightsForParcel ( smrights, loc_id, parcel_year );
 		}
-		else { // Process by location or individual rights...
+		else {
+		    // Process by location or individual rights...
 			loc_rights = getWaterRightsForLocation ( smrights, loc_id, parcel_year );
 		}
 		size = 0;
@@ -3266,8 +3267,8 @@ requested parcel year.
 @param req_parcel_year Parcel year for data or -1 to use all (only used with well rights).
 @return a list of locations for water rights, in the order found in the original list.
 */
-public static List getWaterRightsForLocation ( List smrights, String loc_id, int req_parcel_year )
-{	List matchlist = new Vector();	// Returned data
+public static List<StateMod_Right> getWaterRightsForLocation ( List<StateMod_Right> smrights, String loc_id, int req_parcel_year )
+{	List<StateMod_Right> matchlist = new Vector();	// Returned data
 	int size = 0;
 	if ( smrights != null ) {
 		size = smrights.size();
@@ -3275,7 +3276,7 @@ public static List getWaterRightsForLocation ( List smrights, String loc_id, int
 	StateMod_Right right = null;
 	int parcel_year;
 	for ( int i = 0; i < size; i++ ) {
-		right = (StateMod_Right)smrights.get(i);
+		right = smrights.get(i);
 		if ( (req_parcel_year != -1) && right instanceof StateMod_WellRight ) {
 			// Allow the year to filter.
 			parcel_year = ((StateMod_WellRight)right).getParcelYear();
