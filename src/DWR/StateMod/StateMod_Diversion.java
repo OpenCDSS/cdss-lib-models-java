@@ -365,12 +365,12 @@ intermingled lands and/or diversions that divert from the SAME
 TRIBUTARY.  Only the primary structure should be included in the
 network.  The Divsystem(x,x) command will combine historic diversions,
 capacities, and acreages for use in the Historic model and to create
-Baseflows.  Water rights for all structures will be assigned explicitely
+Baseflows.  Water rights for all structures will be assigned explicitly
 to the primary structure.  No operating rules or set efficiency commands
 are required.
 
 3)  Aggregates.  The only difference between Divsystems and Aggregates
-is that the water rights are not necessarily assigned explicitely, but
+is that the water rights are not necessarily assigned explicitly, but
 are generally grouped into water rights classes.
 </pre>
 */
@@ -390,7 +390,7 @@ The identifiers for data that are collected - null if not a collection location.
 This is a list of lists where the __collection_year is the first dimension.
 This is ugly but need to use the code to see if it can be made cleaner.
  */
-private List __collection_Vector = null;
+private List<List<String>> __collection_Vector = null;
 
 /**
 An array of years that correspond to the aggregate/system.  Ditches currently only have one year.
@@ -1136,13 +1136,13 @@ aggregate/system list is currently supported so the same information is returned
 regardless of the year value.
 @return the list of collection part IDS, or null if not defined.
 */
-public List getCollectionPartIDs ( int year )
+public List<String> getCollectionPartIDs ( int year )
 {	if ( __collection_Vector.size() == 0 ) {
 		return null;
 	}
 	//if ( __collection_part_type.equalsIgnoreCase("Ditch") ) {
 		// The list of part IDs will be the first and only list...
-		return (List)__collection_Vector.get(0);
+		return __collection_Vector.get(0);
 	//}
 	/* Not supported
 	else if ( __collection_part_type.equalsIgnoreCase("Parcel") ) {
