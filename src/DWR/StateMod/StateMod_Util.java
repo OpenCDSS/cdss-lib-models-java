@@ -3587,6 +3587,9 @@ identifier.  The position for the first match is returned.
 */
 public static int indexOf ( List data, String id )
 {	int size = 0;
+	if ( id == null ) {
+		return -1;
+	}
 	if ( data != null ) {
 		size = data.size();
 	}
