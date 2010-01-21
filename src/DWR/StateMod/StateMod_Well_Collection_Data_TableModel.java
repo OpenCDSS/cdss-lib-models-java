@@ -182,7 +182,7 @@ public boolean isCellEditable(int rowIndex, int columnIndex) {
 }
 
 /**
-Sets up the data Vectors to display the reservoir collection data in the GUI.
+Sets up the data lists to display the reservoir collection data in the GUI.
 */
 private void setupData() {
 	int[] years = null;
