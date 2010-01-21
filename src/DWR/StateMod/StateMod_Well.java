@@ -1011,7 +1011,7 @@ public List getCollectionPartIDs ( int year )
 {	if ( __collection_Vector.size() == 0 ) {
 		return null;
 	}
-	if ( __collection_part_type.equalsIgnoreCase("Well") ) {
+	if ( __collection_part_type.equalsIgnoreCase("Ditch") || __collection_part_type.equalsIgnoreCase("Well") ) {
 		// The list of part IDs will be the first and only list...
 		return (List)__collection_Vector.get(0);
 	}
