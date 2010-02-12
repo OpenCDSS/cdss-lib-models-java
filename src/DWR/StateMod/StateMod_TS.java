@@ -70,6 +70,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.security.InvalidParameterException;
 import java.util.List;
 import java.util.Vector;
 
@@ -77,7 +78,6 @@ import RTi.TS.DayTS;
 import RTi.TS.MonthTS;
 import RTi.TS.StringMonthTS;
 import RTi.TS.TS;
-import RTi.TS.TSException;
 import RTi.TS.TSIdent;
 import RTi.TS.TSLimits;
 import RTi.TS.TSUtil;
@@ -156,26 +156,12 @@ public static int getFileDataInterval ( String filename )
 		ifp = new BufferedReader ( new FileReader ( full_filename));
 	}
 	catch ( Exception e ) {
-		message = "Unable to open file \"" + full_filename +
-			"\" to determine data interval.";
+		message = "Unable to open file \"" + full_filename + "\" to determine data interval.";
 		Message.printWarning ( 2, routine, message );
 		return -999;
 	}
 	try {
-		iline = ifp.readLine();
-		if ( iline == null ) {
-			ifp.close();
-			message = "Incomplete file \"" + full_filename + "\"";
-			Message.printWarning ( 2, routine, message );
-			// Throw and catch internally...
-			throw new TSException ( message );
-		}
-		// Handle comment in first line...
-		iline = iline.trim();
-		if ( (iline.length() != 0) && (iline.charAt(0) != '#')){
-			return -999;
-		}
-		// Now read while not a comment or blank line...
+		// Read while a comment or blank line...
 		while ( true ) {
 			iline = ifp.readLine();
 			if ( iline == null ) {
@@ -183,29 +169,26 @@ public static int getFileDataInterval ( String filename )
 			}
 			iline = iline.trim();
 			if ( (iline.length() != 0) && (iline.charAt(0) != '#')){
-				break;
+				break; // iline should be the header line
 			}
 		}
-		// Now should have the header.  Read one more to get to the data...
+		// Now should have the header.  Read one more to get to a data line...
 		iline = ifp.readLine();
 		if ( iline == null ) {
 			throw new Exception ( "end of file" );
 		}
 		// Should be first data line.  If longer than the threshold, assume daily.
 		if ( iline.length() > 150 ) {
-			iline = null;
-			full_filename = null;
 			ifp.close();
 			return TimeInterval.DAY;
 		}
 		else {
-			iline = null;
-			full_filename = null;
 			ifp.close();
 			return TimeInterval.MONTH;
 		}
 	}
 	catch ( Exception e ) {
+		// Could not determine file interval
 		return -999;
 	}
 	finally {
@@ -894,8 +877,11 @@ throws Exception
 		date = new DateTime ( DateTime.PRECISION_DAY );
 		doffset = 3; // Used when setting data to skip the leading fields on the data line
 	}
-	else {
+	else if ( fileInterval == TimeInterval.MONTH ){
 	    date = new DateTime ( DateTime.PRECISION_MONTH );
+	}
+	else {
+		throw new InvalidParameterException( "Requested file interval is invalid." );
 	}
 	boolean	req_id_found = false; // Indicates if we have found the requested TS in the file.
 	boolean standard_ts = true; // Non-standard indicates 12 monthly averages in file.
@@ -1180,9 +1166,7 @@ throws Exception
 					String line2_id = second_iline.substring(5,17).trim();
 					if ( line1_id.equals(line2_id) && (line1_year != line2_year) ) {
 						single_ts = true;
-						if ( Message.isDebugOn ) {
-							Message.printDebug ( 1, routine, "Single TS detected - reading all." );
-						}
+						Message.printStatus ( 2, routine, "Single TS detected - reading all." );
 						if ( (req_id != null) && !line1_id.equalsIgnoreCase(req_id) ) {
 							Message.printStatus ( 2, routine,
 							"Reading StateMod file, the requested ID is \"" +
@@ -1221,7 +1205,8 @@ throws Exception
 			}
 	
 			if ( Message.isDebugOn ) {
-				Message.printDebug ( dl, routine, "Parsing line: \"" + iline + "\"" );
+				Message.printDebug ( dl, routine, "Parsing line: \"" + iline + "\" line_count=" + line_count +
+					" data_line_count=" + data_line_count );
 			}
 	
 			// The first thing that we do is get the time series identifier
