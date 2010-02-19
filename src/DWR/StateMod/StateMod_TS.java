@@ -204,6 +204,55 @@ public static int getFileDataInterval ( String filename )
 }
 
 /**
+Get the total for a line as a Double.  This computes the total based on what will be printed, not what
+is in memory.  In this way the printed total will agree with the printed monthly or daily values.
+*/
+private static Double getLineTotal ( TS ts, boolean standardTS, int nvals, List lineObjects,
+	List<String> formatObjects,	int reqIntervalBase, boolean do_total, double sum, int count,
+	boolean doSumToPrinted )
+{
+	if ( doSumToPrinted ) {
+		// The total needs to sum to the printed values on the line
+		// Loop through the original values and format each.  Then add them and format the total
+		int i1 = 2; // Start and end indices for looping through values, year, ID, first value
+		if ( !standardTS ) {
+			--i1; // Average annual so no year
+		}
+		int i2 = i1 + nvals - 1; // always 12 values
+		if ( reqIntervalBase == TimeInterval.DAY ) {
+			i1 = 3; // Year, month, ID, first value
+			i2 = i1 + nvals - 1; // actual number of values (may be less than 31 for daily)
+		}
+		String formattedString;
+		sum = 0.0;
+		count = 0;
+		double val;
+		for ( int i = i1; i <= i2; i++ ) {
+			formattedString = StringUtil.formatString ( lineObjects.get(i), formatObjects.get(i) );
+			val = Double.parseDouble(formattedString);
+			if ( !ts.isDataMissing(val) ) {
+				sum += val;
+				++count;
+			}
+		}
+	}
+
+	// Legacy code where the total sums to the in-memory values
+	if ( count == 0 ) {
+		// Missing
+		return new Double(ts.getMissing());
+	}
+	else if ( do_total ) {
+		// Sum of whatever is available
+		return new Double(sum);
+	}
+	else {
+		// Mean of whatever is available
+		return new Double(sum/count);
+	}
+}
+
+/**
 Static data for the following routine to improve performance.
 */
 private static int _exp_saved = -999;
@@ -891,7 +940,7 @@ throws Exception
 	if ( req_ts != null ) {
 		req_id = req_ts.getLocation();
 	}
-	try { // General error handler
+	try {// General error handler
 		// read first line of the file
 		++line_count;
 		iline = in.readLine();
@@ -2261,6 +2310,9 @@ throws Exception
 	// iline_format_buffer is created on the fly (it depends on precision and initial_format)
 	// These are set in the following section
 	String initial_format;
+	String year_format = "%4d"; // Only used when formatting total to printed
+	String month_format = "%4d"; // Only used when formatting total to printed
+	String id_format = " %-12.12s"; // Only used when formatting total to printed
 
 	// If period of record of interest was not requested, find
 	// period of record that covers all time series...
@@ -2277,7 +2329,8 @@ throws Exception
 					req_date2.setMonth ( valid_dates.getDate2().getMonth());
 					req_date2.setYear ( valid_dates.getDate2().getYear());
 				}
-			} catch ( Exception e ) {
+			}
+			catch ( Exception e ) {
 				Message.printWarning ( 3, rtn, "Unable to determine output period." );
 				throw new Exception ( "Unable to determine output period." );
 			}
@@ -2380,22 +2433,27 @@ throws Exception
 	date.setMonth ( req_date1.getMonth());
 	date.setYear ( req_date1.getYear());
 	int precision = PRECISION_DEFAULT;
-	List iline_v = null; // Vector for output lines.
+	List iline_v = null; // Vector for output lines (objects to be formatted).
+	List iline_format_v = null; // Vector for formats for objects.
 	int	ndays; // Number of days in a month.
 	int	mon, day, j; // counters
 	Double DoubleMissingDV = new Double ( MissingDV );
 
 	if ( req_interval_base == TimeInterval.MONTH ) {
 		iline_v = new Vector(15,1);
+		iline_format_v = new Vector(15,1);
 	}
 	else {
 		// Daily...
 		iline_v = new Vector(36,1);
+		iline_format_v = new Vector(36,1);
 	}
 
 	// Buffer that is used to format each line...
 
 	StringBuffer iline_format_buffer = new StringBuffer();
+	
+	boolean doSumToPrinted = true; // Current default is for total to sum to printed values, not in-memory
 
 	if ( req_interval_base == TimeInterval.MONTH ) {
 		// Monthly data file.  Need to output in the calendar for the
@@ -2456,13 +2514,16 @@ throws Exception
 				annual_sum = 0;
 				annual_count = 0;
 				iline_v.clear();
+				iline_format_v.clear();
 				iline_format_buffer.setLength(0);
 				iline_format_buffer.append ( initial_format );
 				if ( standard_ts ) {
 					iline_v.add( new Integer (year));
+					iline_format_v.add (year_format);
 				}
 				iline_v.add(tsptr.getIdentifier().getLocation());
-	
+				iline_format_v.add(id_format);
+				
 				for (mon=0; mon <12; mon++) {
 					value = tsptr.getDataValue (cdate);
 					if ( req_precision == PRECISION_USE_UNITS ) {
@@ -2472,6 +2533,7 @@ throws Exception
 						precision = getPrecision ( req_precision, 8,value);
 					}
 					iline_format_buffer.append ( format8_for_precision[precision] );
+					iline_format_v.add(format8_for_precision[precision]);
 	
 					if (tsptr.isDataMissing (value)) {
 						// Missing data so don't add to the annual value.  Print
@@ -2484,9 +2546,6 @@ throws Exception
 						}
 					}
 					else {
-					    // FIXME SAM 2009-03-05 Need to make the sum be that of the printed numbers, not the
-					    // in memory numbers.  Otherwise, reading the file later and rewriting will generate a
-					    // different sum, which fouls up testing.
 						annual_sum += value;
 						++annual_count;
 						iline_v.add (new Double(value));
@@ -2502,18 +2561,15 @@ throws Exception
 					precision = getPrecision ( req_precision, 10, annual_sum );
 				}
 				iline_format_buffer.append ( format10_for_precision[precision] );
-				if ( do_total || (annual_count == 0) ) {
-					iline_v.add (new Double(annual_sum));
-				}
-				else {
-					iline_v.add (new Double(annual_sum/annual_count));
-				}
+				// Total value at the end of the line...
+				iline_v.add ( getLineTotal(tsptr,standard_ts,12,iline_v,iline_format_v,req_interval_base,do_total,
+					annual_sum,annual_count,doSumToPrinted));
 				iline = StringUtil.formatString (iline_v, iline_format_buffer.toString());
 				out.println ( iline );
 			}
 		}
 	}
-	else {
+	else if ( req_interval_base == TimeInterval.DAY ) {
 		// Daily format files.  Because the output is always in calendar
 		// date and because counts are slightly different, include separate code,
 		// rather than trying to merge with monthly output.
@@ -2552,11 +2608,15 @@ throws Exception
 				monthly_sum = 0;
 				monthly_count = 0;
 				iline_v.clear();
+				iline_format_v.clear();
 				iline_format_buffer.setLength(0);
 				iline_format_buffer.append ( initial_format );
 				iline_v.add ( new Integer (cdate.getYear()));
+				iline_format_v.add(year_format);
 				iline_v.add( new Integer(cdate.getMonth()));
+				iline_format_v.add(month_format);
 				iline_v.add(tsptr.getIdentifier().getLocation());
+				iline_format_v.add(id_format);
 	
 				// StateMod daily time series contain 31 values for every month (months containing
 				// fewer than 31 days use 0s as fillers).
@@ -2567,10 +2627,12 @@ throws Exception
 						value = tsptr.getDataValue (cdate);
 					}
 					else {
+						// Extra non-existent days up to 31 days...
 						value = 0.0;
 					}
 					precision = getPrecision ( req_precision,8,value );
 					iline_format_buffer.append(format8_for_precision[precision]);
+					iline_format_v.add(format8_for_precision[precision]);
 					if (tsptr.isDataMissing (value)) {
 						// Missing data so don't add to the annual value.  Print
 						// using the same format as for other data...
@@ -2591,12 +2653,9 @@ throws Exception
 				// Add total onto format line, format, and print
 				precision = getPrecision ( req_precision, 10, monthly_sum );
 				iline_format_buffer.append (format10_for_precision[precision] );
-				if ( do_total || (monthly_count == 0) ) {
-					iline_v.add (new Double(monthly_sum));
-				}
-				else {
-					iline_v.add (new Double(monthly_sum/monthly_count));
-				}
+				// Total value at the end of the line...
+				iline_v.add ( getLineTotal(tsptr,standard_ts,ndays,iline_v,iline_format_v,
+					req_interval_base,do_total,monthly_sum,monthly_count,doSumToPrinted));
 				iline = StringUtil.formatString ( iline_v,iline_format_buffer.toString());
 				out.println ( iline );
 			}
