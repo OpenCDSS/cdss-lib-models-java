@@ -3568,13 +3568,17 @@ public static boolean isVersionAtLeast ( String version, String knownVersion )
         return false;
     }   
     if ( version.compareTo(knownVersion) >= 0 ) {
-        //Message.printStatus(2,"isVersionAtLeast","Checking version \"" + version + "\" against known version \"" +
-        //        knownVersion + "\" - returning true" );
+        if ( Message.isDebugOn ) {
+            Message.printDebug(1,"isVersionAtLeast","Checking version \"" + version + "\" against known version \"" +
+            knownVersion + "\" - returning true because it is at least " + knownVersion );
+        }
 		return true;
 	}
 	else {
-        //Message.printStatus(2,"isVersionAtLeast","Checking version \"" + version + "\" against known version \"" +
-        //        knownVersion + "\" - returning false" );
+	    if ( Message.isDebugOn ) {
+	        Message.printStatus(1,"isVersionAtLeast","Checking version \"" + version + "\" against known version \"" +
+                knownVersion + "\" - returning false because it is not at least " + knownVersion );
+	    }
 	    return false;
 	}
 }
