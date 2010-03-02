@@ -665,7 +665,8 @@ public String getVersion ()
 /**
 Initialize the binary file.  The file is opened and the header is read.
 @param tsfile Name of binary file.
-@param fileVersion Version of StateMod that wrote the file.
+@param fileVersion Version of StateMod that wrote the file.  Used to be a double like "9.01" but can now
+be a three-part version like "10.01.01".
 @exception IOException If the file cannot be opened or read.
 */
 private void initialize ( String tsfile, String fileVersion )
@@ -673,6 +674,13 @@ throws IOException
 {	String routine = "StateMod_BTS.initialize";
 	__tsfile = tsfile;
 	__version = "";
+	if ( (fileVersion != null) && !fileVersion.equals("") ) {
+	    __version = fileVersion;
+	    if ( __version.startsWith("9.") ) {
+	        // Add a leading 0 so that version string comparisons work
+	        __version = "0" + __version;
+	    }
+	}
 
 	// TODO SAM 2003? - for different file extensions, change the
 	// interval to TimeInterval.DAY if necessary.
@@ -692,7 +700,9 @@ throws IOException
 
 	// Read the file header version...
 
-	readHeaderVersion ();
+	if ( __version.equals("") ) {
+	    readHeaderVersion ();
+	}
 
 	if ( extension.equalsIgnoreCase("b43") ) {
 		// Diversions, instream flow, stream (monthly)...
@@ -1053,8 +1063,7 @@ throws Exception
 
 /**
 Read the header from the opened binary file and save the information in
-memory for fast lookups.  The header is the same for all of the binary output
-files.
+memory for fast lookups.  The header is the same for all of the binary output files.
 @exception IOException if there is an error reading from the file.
 */
 private void readHeader ()
@@ -1604,6 +1613,7 @@ throws IOException
 		__headerProgram = __fp.readLittleEndianString1(8).trim();
 		// Program version...
 		if ( newestFormat ) {
+		    // NN.NN.NN but OK to have remainder
 		    __version = __fp.readLittleEndianString1(8).trim();
 		}
 		else {
