@@ -206,6 +206,16 @@ public static int getFileDataInterval ( String filename )
 /**
 Get the total for a line as a Double.  This computes the total based on what will be printed, not what
 is in memory.  In this way the printed total will agree with the printed monthly or daily values.
+@param ts time series being written
+@param standardTS if false, it is an annual average so no year
+@param nvals number of values possible in the line of data (12 for monthly or the number of days in the month
+for daily)
+@param lineObjects data values to print as objects of the appropriate type
+@param formatObjects formats that are used to print each value
+@param reqIntervalBase indicates whether monthly or daily time series are being printed
+@param do_total if true then the total is calculated for the end of the line, if false the average is calculated
+@param sum the sum of the values to be considered for the total
+@param count the count of the values to be considered for the average (includes only non-missing values)
 */
 private static Double getLineTotal ( TS ts, boolean standardTS, int nvals, List lineObjects,
 	List<String> formatObjects,	int reqIntervalBase, boolean do_total, double sum, int count,
@@ -2628,6 +2638,7 @@ throws Exception
 					}
 					else {
 						// Extra non-existent days up to 31 days...
+					    // TODO SAM 2010-02-25 Should this be set to missing?  How does StateMod use it?
 						value = 0.0;
 					}
 					precision = getPrecision ( req_precision,8,value );
@@ -2645,7 +2656,10 @@ throws Exception
 					}
 					else {
 						monthly_sum += value;
-						++monthly_count;
+						if ( day <= ndays ) {
+						    // Don't add to the count for days outside actual days.
+						    ++monthly_count;
+						}
 						iline_v.add (new Double(value));
 					}
 				}
