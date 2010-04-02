@@ -35,11 +35,10 @@ Constructor.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateCU_BlaneyCriddle_Data_JFrame(List data, String titleString,
-boolean editable)
+public StateCU_BlaneyCriddle_Data_JFrame(List data, String titleString, boolean editable)
 throws Exception {
 	super(data, titleString, editable);
-	setSize(450, 600);
+	setSize(500, 600);
 }
 
 /**
@@ -60,10 +59,8 @@ Creates a JScrollWorksheet for the current data and returns it.
 */
 protected JScrollWorksheet buildJScrollWorksheet() 
 throws Exception {
-	StateCU_BlaneyCriddle_TableModel tableModel 
-		= new StateCU_BlaneyCriddle_TableModel(_data, _editable);
-	StateCU_BlaneyCriddle_CellRenderer cellRenderer 
-		= new StateCU_BlaneyCriddle_CellRenderer(tableModel);
+	StateCU_BlaneyCriddle_TableModel tableModel = new StateCU_BlaneyCriddle_TableModel(_data, _editable);
+	StateCU_BlaneyCriddle_CellRenderer cellRenderer = new StateCU_BlaneyCriddle_CellRenderer(tableModel);
 	// _props is defined in the super class
 	return new JScrollWorksheet(cellRenderer, tableModel, _props);
 }
@@ -81,7 +78,7 @@ protected void cancel() {
 }
 
 /**
-Creates backups of all the data objects in the Vector so that changes can later be cancelled if necessary.
+Creates backups of all the data objects in the Vector so that changes can later be canceled if necessary.
 */
 protected void createDataBackup() {
 	StateCU_BlaneyCriddle station = null;

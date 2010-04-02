@@ -38,10 +38,10 @@ private final int __COLUMNS = 4;
 Columns
 */
 private final int 
-	__COL_CROP_NAME = 	0,
-	__COL_DAY_PCT = 	1,
-	__COL_COEFF =   	2,
-	__COL_BCM = 		3;
+	__COL_CROP_NAME = 0,
+	__COL_DAY_PCT = 1,
+	__COL_COEFF = 2,
+	__COL_BCM = 3;
 
 /**
 This array stores, for each StateCU_BlaneyCriddle object in the _data 
@@ -56,8 +56,7 @@ private boolean __editable = true;
 
 /**
 An array that stores the number of the first row of data for each 
-StateCU_BlaneyCriddle object to that object's position in the _data
-Vector.
+StateCU_BlaneyCriddle object to that object's position in the _data list.
 */
 private int[] __firstRows = null;
 
@@ -95,10 +94,10 @@ Returns the class of the data stored in a given column.
 */
 public Class getColumnClass (int columnIndex) {
 	switch (columnIndex) {
-		case __COL_CROP_NAME:	return String.class;
-		case __COL_DAY_PCT: 	return Integer.class;
-		case __COL_COEFF:		return Double.class;
-		case __COL_BCM: 		return Integer.class;
+		case __COL_CROP_NAME: return String.class;
+		case __COL_DAY_PCT: return Integer.class;
+		case __COL_COEFF: return Double.class;
+		case __COL_BCM: return Integer.class;
 	}
 	return String.class;
 }
@@ -118,10 +117,10 @@ Returns the name of the column at the given position.
 */
 public String getColumnName(int columnIndex) {
 	switch (columnIndex) {
-		case __COL_CROP_NAME:	return "CROP\nNAME";
-		case __COL_DAY_PCT:		return "DAY OR\nPERCENT";
-		case __COL_COEFF:		return "COEFFICIENT";
-		case __COL_BCM:			return "BLANEY\nCRIDDLE\nMETHOD";
+		case __COL_CROP_NAME: return "CROP\nNAME";
+		case __COL_DAY_PCT: return "DAY OR\nPERCENT";
+		case __COL_COEFF: return "COEFFICIENT";
+		case __COL_BCM: return "BLANEY\nCRIDDLE\nMETHOD";
 	}
 	return " ";
 }
@@ -137,8 +136,7 @@ public String[] getColumnToolTips() {
 	}
 
 	tips[__COL_CROP_NAME] = "Crop name";
-	tips[__COL_DAY_PCT] = 
-		"<html>Day of year if Perennial (start, middle, end of month)."
+	tips[__COL_DAY_PCT] = "<html>Day of year if Perennial (start, middle, end of month)."
 		+ "<br>Percent of year if annual (5% increments).</html>";
 	tips[__COL_COEFF] = "Crop coefficient";
 	tips[__COL_BCM] = "Blaney-Criddle Method";
@@ -150,15 +148,14 @@ public String[] getColumnToolTips() {
 Returns the format that the specified column should be displayed in when
 the table is being displayed in the given table format. 
 @param column column for which to return the format.
-@return the format (as used by StringUtil.formatString() in which to display the
-column.
+@return the format (as used by StringUtil.formatString() in which to display the column.
 */
 public String getFormat(int column) {
 	switch (column) {
-		case __COL_CROP_NAME:	return "%-30.30s";
-		case __COL_DAY_PCT:		return "%8d";
-		case __COL_COEFF:		return "%10.2f";
-		case __COL_BCM:			return "%1d";
+		case __COL_CROP_NAME: return "%-30.30s";
+		case __COL_DAY_PCT: return "%8d";
+		case __COL_COEFF: return "%10.2f";
+		case __COL_BCM: return "%1d";
 	}
 	return "%8d";
 }
@@ -190,11 +187,11 @@ public Validator[] getValidators(int col) {
 		Validators.or( KTSW ) };
 	
 	switch ( col ) {
-	case __COL_CROP_NAME:	return blank;
-	case __COL_DAY_PCT:		return nums;
-	case __COL_COEFF:		return nums;
-	case __COL_BCM:			return ktswValidators;
-	default: 				return no_checks;
+		case __COL_CROP_NAME: return blank;
+		case __COL_DAY_PCT: return nums;
+		case __COL_COEFF: return nums;
+		case __COL_BCM: return ktswValidators;
+		default: return no_checks;
 	}
 }
 
@@ -218,7 +215,8 @@ public Object getValueAt(int row, int col) {
 	int num = row - __firstRows[dataPos];
 
 	switch (col) {
-		case __COL_CROP_NAME:	 return bc.getName();
+		case __COL_CROP_NAME:
+			return bc.getName();
 		case __COL_DAY_PCT:
 			if (__day[dataPos]) {
 				return new Integer(bc.getNckcp(num));
@@ -233,7 +231,8 @@ public Object getValueAt(int row, int col) {
 			else {
 				return new Double(bc.getCkca(num));
 			}
-		case __COL_BCM:		return new Integer(bc.getKtsw());
+		case __COL_BCM:
+			return new Integer(bc.getKtsw());
 	}
 	return "";
 }
@@ -248,7 +247,7 @@ public int[] getColumnWidths() {
 	for (int i = 0; i < __COLUMNS; i++) {
 		widths[i] = 0;
 	}
-	widths[__COL_CROP_NAME] = 16;	
+	widths[__COL_CROP_NAME] = 22;	
 	widths[__COL_DAY_PCT] = 6;	
 	widths[__COL_COEFF] = 10;
 	widths[__COL_BCM] = 6;
