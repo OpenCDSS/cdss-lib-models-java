@@ -428,6 +428,9 @@ public static String lookupPropValue(int componentType, String propType, String 
 	else if (componentType == StateCU_DataSet.COMP_DELAY_TABLE_ASSIGNMENT_MONTHLY) {
 	    return lookupDelayTableAssignmentPropValue(propType, field);
 	}
+	if (componentType == StateCU_DataSet.COMP_PENMAN_MONTEITH) {
+		return lookupPenmanMonteithPropValue(propType, field);
+	}
 
 	return null;
 }
@@ -450,8 +453,7 @@ public static boolean isVersionAtLeast ( double version, double known_version )
 
 /**
 Returns the property value for Blaney-Criddle data.
-@param propType the property to look up.  One of "FieldName", 
-"FieldNameHeader", "ToolTip", or "Format".  
+@param propType the property to look up.  One of "FieldName", "FieldNameHeader", "ToolTip", or "Format".  
 @param field the field for which to return the property.  
 @return the property, or if it could not be found null will be returned.
 */
@@ -1201,6 +1203,72 @@ String field) {
 		}
 	}
 
+	return null;
+}
+
+/**
+Returns the property value for Penman-Monteith data.
+@param propType the property to look up.  One of "FieldName", "FieldNameHeader", "ToolTip", or "Format".  
+@param field the field for which to return the property.  
+@return the property, or if it could not be found null will be returned.
+*/
+private static String lookupPenmanMonteithPropValue(String propType, String field) {
+	if (propType.equalsIgnoreCase("FieldName")) {
+		if (field.equalsIgnoreCase("Name")) {
+			return "CROP NAME";
+		}
+		else if (field.equalsIgnoreCase("GrowthStage")) {
+			return "GROWTH STAGE";
+		}
+		else if (field.equalsIgnoreCase("Percent")) {
+			return "PERCENT";
+		}
+		else if (field.equalsIgnoreCase("Coefficient")) {
+			return "COEFFICIENT";
+		}
+	}
+	else if (propType.equalsIgnoreCase("FieldNameHeader")) {	
+		if (field.equalsIgnoreCase("Name")) {
+			return "CROP\nNAME";
+		}
+		else if (field.equalsIgnoreCase("GrowthStage")) {
+			return "GROWTH\nSTAGE";
+		}
+		else if (field.equalsIgnoreCase("Percent")) {
+			return "\nPERCENT";
+		}
+		else if (field.equalsIgnoreCase("Coefficient")) {
+			return "\nCOEFFICIENT";
+		}	
+	}	
+	else if (propType.equalsIgnoreCase("ToolTip")) {
+		if (field.equalsIgnoreCase("Name")) {
+			return "Crop name";
+		}
+		else if (field.equalsIgnoreCase("GrowthStage")) {
+			return "<html>Growth stage, 1+.</html>";
+		}
+		else if (field.equalsIgnoreCase("Percent")) {
+			return "<html>Time within growth stage 0, 10, ..., 90, 100%.</html>";
+		}
+		else if (field.equalsIgnoreCase("Coefficient")) {	
+			return "Crop coefficient";
+		}
+	}
+	else if (propType.equalsIgnoreCase("Format")) {
+		if (field.equalsIgnoreCase("Name")) {
+			return "%-20.20s";
+		}
+		else if (field.equalsIgnoreCase("GrowthStage")) {
+			return "%1d";
+		}
+		else if (field.equalsIgnoreCase("Percent")) {
+			return "%5.3f";
+		}
+		else if (field.equalsIgnoreCase("Coefficient")) {	
+			return "%10.3f";
+		}
+	}
 	return null;
 }
 

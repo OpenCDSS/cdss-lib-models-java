@@ -100,22 +100,20 @@ private static String NAME_STRUCTURES = "Structures";
 The StateCU data set is for water supply limited (level 3).
 */
 public static final int TYPE_WATER_SUPPLY_LIMITED = 3;
-private static String NAME_WATER_SUPPLY_LIMITED =
-				"Structures (Water Supply Limited)";
+private static String NAME_WATER_SUPPLY_LIMITED = "Structures (Water Supply Limited)";
 
 /**
 The StateCU data set is for water supply limited by water rights (level 4).
 */
 public static final int TYPE_WATER_SUPPLY_LIMITED_BY_WATER_RIGHTS = 4;
 private static String NAME_WATER_SUPPLY_LIMITED_BY_WATER_RIGHTS =
-			"Structures (Water Supply Limited by Water Rights)";
+	"Structures (Water Supply Limited by Water Rights)";
 
 /**
 The StateCU data set is for river depletion (level 5).
 */
 public static final int TYPE_RIVER_DEPLETION = 5;
-private static String NAME_RIVER_DEPLETION =
-			"Structures (River Depletion)";
+private static String NAME_RIVER_DEPLETION = "Structures (River Depletion)";
 
 /**
 The StateCU data set is for other uses (use -100 to identify).
@@ -142,33 +140,21 @@ public static final int
 	COMP_CROP_CHARACTERISTICS_GROUP = 8,	// Crop characteristic files
 		COMP_CROP_CHARACTERISTICS = 9,
 		COMP_BLANEY_CRIDDLE = 10,
+		COMP_PENMAN_MONTEITH = 31,
 
-	COMP_DELAY_TABLES_GROUP = 11,		// This group supports the
-						// River Depletion data set but
-						// it does not have a one to
-						// one assignment with CU
-						// Locations so put in a
-						// separate group
+	COMP_DELAY_TABLES_GROUP = 11, // This group supports the River Depletion data set but
+						// it does not have a one to one assignment with CU
+						// Locations so put in a separate group
 		COMP_DELAY_TABLES_MONTHLY = 12,
 
 	COMP_CU_LOCATIONS_GROUP = 13,	// CU Location files
 		COMP_CU_LOCATIONS = 14,	// Climate and structures...
 			//COMP_CU_LOCATION_CLIMATE_STATIONS = 1401,
-					// Climate station assignment (one to
-					// many).
+					// Climate station assignment (one to many).
 			//COMP_CU_LOCATION_COLLECTIONS = 1402,
 					// Collection information (one to many).
-		// TODO KAT 2007-04-12 Find out if changing these
-		// values affects any command processing
-		// had to change these values because of a check in the
-		// parent class that dissallows the use of any type with
-		// an integer number greater than the number of elements
-		// in this array.  Since the numbers were 1401 and 1402
-		// The parent code would always throw an exception.  Changed
-		// to 29 and 30.
 		COMP_CU_LOCATION_CLIMATE_STATIONS = 29,
-			// Climate station assignment (one to
-			// many).
+			// Climate station assignment (one to many).
 		COMP_CU_LOCATION_COLLECTIONS = 30,
 		// Collection information (one to many).
 		COMP_CROP_PATTERN_TS_YEARLY = 15,
@@ -207,7 +193,8 @@ private static int [] __component_types = {
 				COMP_CROP_CHARACTERISTICS_GROUP,
 				  COMP_CROP_CHARACTERISTICS,
 				  COMP_BLANEY_CRIDDLE,
-                                COMP_DELAY_TABLES_GROUP,
+				  COMP_PENMAN_MONTEITH,
+                COMP_DELAY_TABLES_GROUP,
 				  COMP_DELAY_TABLES_MONTHLY,
 				COMP_CU_LOCATIONS_GROUP,
 				  COMP_CU_LOCATIONS,
@@ -235,7 +222,7 @@ private static int [] __component_groups = {
 				COMP_CONTROL_GROUP,
 				COMP_CLIMATE_STATIONS_GROUP,
 				COMP_CROP_CHARACTERISTICS_GROUP,
-                                COMP_DELAY_TABLES_GROUP,
+                COMP_DELAY_TABLES_GROUP,
 				COMP_CU_LOCATIONS_GROUP,
 				COMP_GIS_GROUP,
 				COMP_OTHER_GROUP };
@@ -251,7 +238,7 @@ private static int [] __component_group_primaries = {
 					// COMP_CLIMATE_STATIONS_GROUP
 				COMP_CROP_CHARACTERISTICS,
 					// COMP_CROP_CHARACTERISTICS_GROUP
-                                COMP_DELAY_TABLES_MONTHLY,
+                COMP_DELAY_TABLES_MONTHLY,
 					// COMP_DELAY_TABLES_GROUP
 				COMP_CU_LOCATIONS,
 					// COMP_CU_LOCATIONS_GROUP
@@ -273,7 +260,8 @@ private static int [] __component_group_assignments = {
 				COMP_CROP_CHARACTERISTICS_GROUP,
 				  COMP_CROP_CHARACTERISTICS_GROUP,
 				  COMP_CROP_CHARACTERISTICS_GROUP,
-                                COMP_DELAY_TABLES_GROUP,
+				  COMP_CROP_CHARACTERISTICS_GROUP,
+                COMP_DELAY_TABLES_GROUP,
 				  COMP_DELAY_TABLES_GROUP,
 				COMP_CU_LOCATIONS_GROUP,
 				  COMP_CU_LOCATIONS_GROUP,
@@ -307,6 +295,7 @@ private static String [] __component_names = {
 				"Crop Characteristics/Coefficient Data",
 				  "Crop Characteristics",
 				  "Blaney-Criddle Crop Coefficients",
+				  "Penman-Monteith Crop Coefficients",
 				"Delay Table Data",
 				  "Delay Tables",
 				"CU Location Data and Crops",
@@ -330,10 +319,8 @@ private static String [] __component_names = {
 // cases for labels and displays but the data are managed with a component
 // listed above.  Make private to force handling through lookup methods.
 private final static String
-	__COMPNAME_CU_LOCATION_CLIMATE_STATIONS =
-		"CU Location Climate Station Assignment",
-	__COMPNAME_CU_LOCATION_COLLECTIONS =
-		"CU Location Collection Definitions";
+	__COMPNAME_CU_LOCATION_CLIMATE_STATIONS = "CU Location Climate Station Assignment",
+	__COMPNAME_CU_LOCATION_COLLECTIONS = "CU Location Collection Definitions";
 
 /**
 Component names matching the above numbers, to use for XML tags.
@@ -351,6 +338,7 @@ private static String [] __xml_component_names = {
 				"CropCharacteristicsData",
 				  "CropCharacteristics",
 				  "Blaney-CriddleCropCoefficients",
+				  "Penman-MonteithCropCoefficients",
 				"DelayTables",
 				  "DelayTables",
 				"CULocations",
@@ -371,8 +359,7 @@ private static String [] __xml_component_names = {
 				  "Other" };
 				  */
 /**
-Component type indicators (from response file) - group tags should never be
-used.
+Component type indicators (from response file) - group tags should never be used.
 */
 private static String [] __component_tags = {
 				"Control",
@@ -386,6 +373,7 @@ private static String [] __component_tags = {
 				"Crop Characteristics",
 				  "cch",
 				  "kbc",
+				  "kpm",
 				"Delay Tables",
 				  "dly",
 				"CU Locations",
@@ -464,8 +452,7 @@ private double __admin_num = StateCU_Util.MISSING_DOUBLE;
 
 /**
 Construct a blank data set.  It is expected that other information will be set
-during further processing.  Component groups are not initialized until a data
-set type is set.
+during further processing.  Component groups are not initialized until a data set type is set.
 */
 public StateCU_DataSet ()
 throws Exception
@@ -517,11 +504,9 @@ throws Exception
 	try {	initializeComponentGroups();
 
 		getComponentForComponentType (
-			COMP_CONTROL_GROUP ).addComponent (
-			new DataSetComponent ( this, COMP_RESPONSE ) );
+			COMP_CONTROL_GROUP ).addComponent (	new DataSetComponent ( this, COMP_RESPONSE ) );
 		getComponentForComponentType (
-			COMP_CONTROL_GROUP ).addComponent (
-			new DataSetComponent ( this, COMP_CONTROL ) );
+			COMP_CONTROL_GROUP ).addComponent (	new DataSetComponent ( this, COMP_CONTROL ) );
 	}
 	catch ( Exception e ) {
 		// Should not happen...
@@ -531,33 +516,25 @@ throws Exception
 	// Other uses
 
 	if ( type == TYPE_OTHER_USES ) {
-		// REVISIT - add later.
+		// TODO - add later.
 	}
-	else {	// Every data set has...
-		try {	getComponentForComponentType (
-			COMP_CLIMATE_STATIONS_GROUP ).addComponent (
-			new DataSetComponent ( this, COMP_CLIMATE_STATIONS ) );
-			getComponentForComponentType (
-			COMP_CLIMATE_STATIONS_GROUP ).addComponent (
-			new DataSetComponent ( this,
-			COMP_TEMPERATURE_TS_MONTHLY_AVERAGE ));
-			getComponentForComponentType (
-			COMP_CLIMATE_STATIONS_GROUP ).addComponent (
-			new DataSetComponent ( this,
-			COMP_FROST_DATES_TS_YEARLY ) );
-			getComponentForComponentType (
-			COMP_CLIMATE_STATIONS_GROUP ).addComponent (
-			new DataSetComponent ( this,
-			COMP_PRECIPITATION_TS_MONTHLY) );
-
-			getComponentForComponentType (
-			COMP_CROP_CHARACTERISTICS_GROUP ).addComponent (
-			new DataSetComponent ( this,
-			COMP_CROP_CHARACTERISTICS ));
-			getComponentForComponentType (
-			COMP_CROP_CHARACTERISTICS_GROUP ).addComponent (
-			new DataSetComponent ( this,
-			COMP_BLANEY_CRIDDLE ) );
+	else {
+		// Every data set has...
+		try {
+			getComponentForComponentType ( COMP_CLIMATE_STATIONS_GROUP ).addComponent (
+			    new DataSetComponent ( this, COMP_CLIMATE_STATIONS ) );
+			getComponentForComponentType ( COMP_CLIMATE_STATIONS_GROUP ).addComponent (
+			    new DataSetComponent ( this, COMP_TEMPERATURE_TS_MONTHLY_AVERAGE ));
+			getComponentForComponentType ( COMP_CLIMATE_STATIONS_GROUP ).addComponent (
+			    new DataSetComponent ( this, COMP_FROST_DATES_TS_YEARLY ) );
+			getComponentForComponentType ( COMP_CLIMATE_STATIONS_GROUP ).addComponent (
+			    new DataSetComponent ( this, COMP_PRECIPITATION_TS_MONTHLY) );
+			getComponentForComponentType ( COMP_CROP_CHARACTERISTICS_GROUP ).addComponent (
+			    new DataSetComponent ( this, COMP_CROP_CHARACTERISTICS ));
+			getComponentForComponentType ( COMP_CROP_CHARACTERISTICS_GROUP ).addComponent (
+			    new DataSetComponent ( this, COMP_BLANEY_CRIDDLE ) );
+			getComponentForComponentType ( COMP_CROP_CHARACTERISTICS_GROUP ).addComponent (
+				new DataSetComponent ( this, COMP_PENMAN_MONTEITH ) );
 		}
 		catch ( Exception e ) {
 			// Should not happen...
@@ -567,10 +544,9 @@ throws Exception
 
 	if ( type == TYPE_RIVER_DEPLETION ) {
 		// Want this before CU Locations...
-		try {	getComponentForComponentType (
-			COMP_DELAY_TABLES_GROUP ).addComponent (
-			new DataSetComponent ( this,
-			COMP_DELAY_TABLES_MONTHLY ) );
+		try {
+			getComponentForComponentType ( COMP_DELAY_TABLES_GROUP ).addComponent (
+			    new DataSetComponent ( this, COMP_DELAY_TABLES_MONTHLY ) );
 		}
 		catch ( Exception e ) {
 			// Should not happen...
@@ -580,10 +556,9 @@ throws Exception
 
 	if ( type != TYPE_OTHER_USES ) {
 		// Add CU Locations...
-		try {	getComponentForComponentType (
-			COMP_CU_LOCATIONS_GROUP ).addComponent (
-			new DataSetComponent ( this,
-			COMP_CU_LOCATIONS ) );
+		try {
+			getComponentForComponentType ( COMP_CU_LOCATIONS_GROUP ).addComponent (
+			    new DataSetComponent ( this, COMP_CU_LOCATIONS ) );
 		}
 		catch ( Exception e ) {
 			// Should not happen...
@@ -592,10 +567,9 @@ throws Exception
 	}
 
 	if ( type >= TYPE_STRUCTURES ) {
-		try {	getComponentForComponentType (
-			COMP_CU_LOCATIONS_GROUP ).addComponent (
-			new DataSetComponent ( this,
-			COMP_CROP_PATTERN_TS_YEARLY ) );
+		try {
+			getComponentForComponentType ( COMP_CU_LOCATIONS_GROUP ).addComponent (
+			    new DataSetComponent ( this, COMP_CROP_PATTERN_TS_YEARLY ) );
 		}
 		catch ( Exception e ) {
 			// Should not happen...
@@ -603,18 +577,13 @@ throws Exception
 		}
 	}
 	if ( type >= TYPE_WATER_SUPPLY_LIMITED ) {
-		try {	getComponentForComponentType (
-			COMP_CU_LOCATIONS_GROUP ).addComponent (
-			new DataSetComponent ( this,
-			COMP_IRRIGATION_PRACTICE_TS_YEARLY ) );
-			getComponentForComponentType (
-			COMP_CU_LOCATIONS_GROUP ).addComponent (
-			new DataSetComponent ( this,
-			COMP_DIVERSION_TS_MONTHLY ) );
-			getComponentForComponentType (
-			COMP_CU_LOCATIONS_GROUP ).addComponent (
-			new DataSetComponent ( this,
-			COMP_WELL_PUMPING_TS_MONTHLY ) );
+		try {
+			getComponentForComponentType ( COMP_CU_LOCATIONS_GROUP ).addComponent (
+			    new DataSetComponent ( this, COMP_IRRIGATION_PRACTICE_TS_YEARLY ) );
+			getComponentForComponentType ( COMP_CU_LOCATIONS_GROUP ).addComponent (
+			    new DataSetComponent ( this, COMP_DIVERSION_TS_MONTHLY ) );
+			getComponentForComponentType ( COMP_CU_LOCATIONS_GROUP ).addComponent (
+			    new DataSetComponent ( this, COMP_WELL_PUMPING_TS_MONTHLY ) );
 		}
 		catch ( Exception e ) {
 			// Should not happen...
@@ -622,10 +591,9 @@ throws Exception
 		}
 	}
 	if ( type >= TYPE_WATER_SUPPLY_LIMITED_BY_WATER_RIGHTS ) {
-		try {	getComponentForComponentType (
-			COMP_CU_LOCATIONS_GROUP ).addComponent (
-			new DataSetComponent ( this,
-			COMP_DIVERSION_RIGHTS ) );
+		try {
+			getComponentForComponentType ( COMP_CU_LOCATIONS_GROUP ).addComponent (
+			    new DataSetComponent ( this, COMP_DIVERSION_RIGHTS ) );
 		}
 		catch ( Exception e ) {
 			// Should not happen...
@@ -633,10 +601,9 @@ throws Exception
 		}
 	}
 	if ( type == TYPE_RIVER_DEPLETION ) {
-		try {	getComponentForComponentType (
-			COMP_DELAY_TABLES_GROUP ).addComponent (
-			new DataSetComponent ( this,
-			COMP_DELAY_TABLE_ASSIGNMENT_MONTHLY ) );
+		try {
+			getComponentForComponentType ( COMP_DELAY_TABLES_GROUP ).addComponent (
+			    new DataSetComponent ( this, COMP_DELAY_TABLE_ASSIGNMENT_MONTHLY ) );
 		}
 		catch ( Exception e ) {
 			// Should not happen...
@@ -676,8 +643,7 @@ public String getComment ( int pos )
 }
 
 /**
-Return the data set type name.  This method calls lookupDataSetName() for the
-instance.
+Return the data set type name.  This method calls lookupDataSetName() for the instance.
 @return the data set type name.
 */
 public String getDataSetName ()
@@ -765,8 +731,7 @@ public int getNyr2 ()
 }
 
 /**
-Return the initial soil moisture content for junior parcels (fraction of
-capacity).
+Return the initial soil moisture content for junior parcels (fraction of capacity).
 @return the initial soil moisture content for junior parcels.
 */
 public double getPjunmo ()
@@ -774,8 +739,7 @@ public double getPjunmo ()
 }
 
 /**
-Return the initial soil moisture content for other parcels (fraction of
-capacity).
+Return the initial soil moisture content for other parcels (fraction of capacity).
 @return the initial soil moisture content for other parcels.
 */
 public double getPothmo ()
@@ -783,8 +747,7 @@ public double getPothmo ()
 }
 
 /**
-Return the initial soil moisture content for senior parcels (fraction of
-capacity).
+Return the initial soil moisture content for senior parcels (fraction of capacity).
 @return the initial soil moisture content for senior parcels.
 */
 public double getPsenmo ()
@@ -818,111 +781,104 @@ public int getTypout ()
 /**
 Initialize the component groups.  This is usually done immediately after
 the data set type is known (the data set type must be set).
-The list source for each group is set to
-DataSetComponent.LIST_SOURCE_PRIMARY_COMPONENT.
- * @throws Exception 
+The list source for each group is set to DataSetComponent.LIST_SOURCE_PRIMARY_COMPONENT.
 @exception Exception if there is an error initializing the component groups.
 */
 private void initializeComponentGroups ()
-{	
+{	String routine = getClass().getName() + ".initializeComponentGroups";
 	// Always add the control group...
 	DataSetComponent comp,subcomp = null;
 	try {
 		comp = new DataSetComponent ( this, COMP_CONTROL_GROUP );
 	
-	comp.setListSource ( DataSetComponent.LIST_SOURCE_PRIMARY_COMPONENT );
-	addComponent ( comp );
-	int type = getDataSetType();
-	if ( type == TYPE_OTHER_USES ) {
-		comp = new DataSetComponent ( this, COMP_OTHER_GROUP );
-		comp.setListSource (
-		DataSetComponent.LIST_SOURCE_PRIMARY_COMPONENT );
+		comp.setListSource ( DataSetComponent.LIST_SOURCE_PRIMARY_COMPONENT );
 		addComponent ( comp );
-	}
-	else {
-		// TODO KAT 2007-04-12
-		// Need to evaluate whether these are subgroups or not
-		comp = new DataSetComponent( this, COMP_BLANEY_CRIDDLE );
-		comp.setListSource( DataSetComponent.LIST_SOURCE_PRIMARY_COMPONENT );
-		addComponent( comp );
-		comp = new DataSetComponent( this, COMP_CROP_PATTERN_TS_YEARLY );
-		comp.setListSource( DataSetComponent.LIST_SOURCE_PRIMARY_COMPONENT );
-		addComponent( comp );
-		comp = new DataSetComponent( this, COMP_IRRIGATION_PRACTICE_TS_YEARLY );
-		comp.setListSource( DataSetComponent.LIST_SOURCE_PRIMARY_COMPONENT );
-		addComponent( comp );
-		comp = new DataSetComponent( this, COMP_DELAY_TABLES_MONTHLY );
-		comp.setListSource( DataSetComponent.LIST_SOURCE_PRIMARY_COMPONENT );
-		addComponent( comp );
-		comp = new DataSetComponent( this, COMP_DELAY_TABLE_ASSIGNMENT_MONTHLY );
-		comp.setListSource( DataSetComponent.LIST_SOURCE_PRIMARY_COMPONENT );
-		addComponent( comp );
-		/////////////////
-		
-		comp = new DataSetComponent (this,COMP_CLIMATE_STATIONS_GROUP );
-		comp.setListSource (
-			DataSetComponent.LIST_SOURCE_PRIMARY_COMPONENT );
-		addComponent ( comp );
-		subcomp = new DataSetComponent( this, COMP_CLIMATE_STATIONS );
-		subcomp.setData ( new Vector() );
-		comp.addComponent( subcomp );
-		// TODO KAT 2007-04-12 
-		// add extra subcomponents for climate stations here
-		// need to figure out all which components go here
-		
-		comp = new DataSetComponent( this,
-			COMP_CROP_CHARACTERISTICS_GROUP);
-		comp.setListSource (
-		DataSetComponent.LIST_SOURCE_PRIMARY_COMPONENT );
-		addComponent ( comp );
-		addComponent ( comp );
-		subcomp = new DataSetComponent( this, COMP_CROP_CHARACTERISTICS );
-		subcomp.setData ( new Vector() );
-		comp.addComponent( subcomp );
-		// TODO KAT 2007-04-12 
-		// need to figure out all subcomponents which go here
-		
-		if ( type == TYPE_RIVER_DEPLETION ) {
-			comp = new DataSetComponent( this,
-				COMP_DELAY_TABLES_GROUP);
+		int type = getDataSetType();
+		if ( type == TYPE_OTHER_USES ) {
+			comp = new DataSetComponent ( this, COMP_OTHER_GROUP );
 			comp.setListSource (
 			DataSetComponent.LIST_SOURCE_PRIMARY_COMPONENT );
 			addComponent ( comp );
-			subcomp = new DataSetComponent( this, COMP_DELAY_TABLES_MONTHLY );
+		}
+		else {
+			// TODO KAT 2007-04-12
+			// Need to evaluate whether these are subgroups or not
+			comp = new DataSetComponent( this, COMP_BLANEY_CRIDDLE );
+			comp.setListSource( DataSetComponent.LIST_SOURCE_PRIMARY_COMPONENT );
+			addComponent( comp );
+			comp = new DataSetComponent( this, COMP_PENMAN_MONTEITH );
+			comp.setListSource( DataSetComponent.LIST_SOURCE_PRIMARY_COMPONENT );
+			addComponent( comp );
+			comp = new DataSetComponent( this, COMP_CROP_PATTERN_TS_YEARLY );
+			comp.setListSource( DataSetComponent.LIST_SOURCE_PRIMARY_COMPONENT );
+			addComponent( comp );
+			comp = new DataSetComponent( this, COMP_IRRIGATION_PRACTICE_TS_YEARLY );
+			comp.setListSource( DataSetComponent.LIST_SOURCE_PRIMARY_COMPONENT );
+			addComponent( comp );
+			comp = new DataSetComponent( this, COMP_DELAY_TABLES_MONTHLY );
+			comp.setListSource( DataSetComponent.LIST_SOURCE_PRIMARY_COMPONENT );
+			addComponent( comp );
+			comp = new DataSetComponent( this, COMP_DELAY_TABLE_ASSIGNMENT_MONTHLY );
+			comp.setListSource( DataSetComponent.LIST_SOURCE_PRIMARY_COMPONENT );
+			addComponent( comp );
+			/////////////////
+			
+			comp = new DataSetComponent (this,COMP_CLIMATE_STATIONS_GROUP );
+			comp.setListSource ( DataSetComponent.LIST_SOURCE_PRIMARY_COMPONENT );
+			addComponent ( comp );
+			subcomp = new DataSetComponent( this, COMP_CLIMATE_STATIONS );
 			subcomp.setData ( new Vector() );
 			comp.addComponent( subcomp );
-			subcomp = new DataSetComponent( this, 
-				COMP_DELAY_TABLE_ASSIGNMENT_MONTHLY );
+			// TODO KAT 2007-04-12 
+			// add extra subcomponents for climate stations here
+			// need to figure out all which components go here
+			
+			comp = new DataSetComponent( this, COMP_CROP_CHARACTERISTICS_GROUP);
+			comp.setListSource ( DataSetComponent.LIST_SOURCE_PRIMARY_COMPONENT );
+			addComponent ( comp );
+			addComponent ( comp );
+			subcomp = new DataSetComponent( this, COMP_CROP_CHARACTERISTICS );
+			subcomp.setData ( new Vector() );
+			comp.addComponent( subcomp );
+			// TODO KAT 2007-04-12 need to figure out all subcomponents which go here
+			
+			if ( type == TYPE_RIVER_DEPLETION ) {
+				comp = new DataSetComponent( this, COMP_DELAY_TABLES_GROUP);
+				comp.setListSource ( DataSetComponent.LIST_SOURCE_PRIMARY_COMPONENT );
+				addComponent ( comp );
+				subcomp = new DataSetComponent( this, COMP_DELAY_TABLES_MONTHLY );
+				subcomp.setData ( new Vector() );
+				comp.addComponent( subcomp );
+				subcomp = new DataSetComponent( this, COMP_DELAY_TABLE_ASSIGNMENT_MONTHLY );
+				subcomp.setData ( new Vector() );
+				comp.addComponent( subcomp );
+			}
+			comp = new DataSetComponent( this, COMP_CU_LOCATIONS_GROUP);
+			comp.setListSource ( DataSetComponent.LIST_SOURCE_PRIMARY_COMPONENT );
+			addComponent ( comp );
+			subcomp = new DataSetComponent( this, COMP_CU_LOCATIONS );
+			subcomp.setData ( new Vector() );
+			comp.addComponent( subcomp );
+			subcomp = new DataSetComponent( this, COMP_CU_LOCATION_CLIMATE_STATIONS );
+			subcomp.setData ( new Vector() );
+			comp.addComponent( subcomp );
+			subcomp = new DataSetComponent( this, COMP_CU_LOCATION_COLLECTIONS );
 			subcomp.setData ( new Vector() );
 			comp.addComponent( subcomp );
 		}
-		comp = new DataSetComponent( this, COMP_CU_LOCATIONS_GROUP);
-		comp.setListSource (
-		DataSetComponent.LIST_SOURCE_PRIMARY_COMPONENT );
+		// Always add GIS a separate group...
+		comp = new DataSetComponent(this, COMP_GIS_GROUP);
+		comp.setListSource ( DataSetComponent.LIST_SOURCE_PRIMARY_COMPONENT );
 		addComponent ( comp );
-		subcomp = new DataSetComponent( this, COMP_CU_LOCATIONS );
-		subcomp.setData ( new Vector() );
-		comp.addComponent( subcomp );
-		subcomp = new DataSetComponent( this, COMP_CU_LOCATION_CLIMATE_STATIONS );
-		subcomp.setData ( new Vector() );
-		comp.addComponent( subcomp );
-		subcomp = new DataSetComponent( this, COMP_CU_LOCATION_COLLECTIONS );
-		subcomp.setData ( new Vector() );
-		comp.addComponent( subcomp );
 	}
-	// Always add GIS a separate group...
-	comp = new DataSetComponent(this, COMP_GIS_GROUP);
-	comp.setListSource ( DataSetComponent.LIST_SOURCE_PRIMARY_COMPONENT );
-	addComponent ( comp );
-	} catch (Exception e) {
-		e.printStackTrace();
+	catch (Exception e) {
+		Message.printWarning(3, routine, e);
 	}
 }
 
 /**
 Returns the name of the specified component.  Subcomponents (e.g., CU location
-climate station assignment) are specifically checked and then the base class
-method is called.
+climate station assignment) are specifically checked and then the base class method is called.
 @param comp_type the component type integer.
 @return the name of the specified component.
 */
@@ -933,7 +889,8 @@ public String lookupComponentName ( int comp_type )
 	else if ( comp_type == COMP_CU_LOCATION_COLLECTIONS ) {
 		return __COMPNAME_CU_LOCATION_COLLECTIONS;
 	}
-	else {	return super.lookupComponentName(comp_type);
+	else {
+		return super.lookupComponentName(comp_type);
 	}
 }
 
@@ -965,13 +922,13 @@ public static int lookupDataSetType ( String type )
 	else if ( type.equalsIgnoreCase( NAME_OTHER_USES) ) {
 		return TYPE_OTHER_USES;
 	}
-	else {	return -1;
+	else {
+		return -1;
 	}
 }
 
 /**
-Return the data set type name.  This is suitable for warning messages and
-simple output.
+Return the data set type name.  This is suitable for warning messages and simple output.
 @param dataset_type Data set type (see TYPE_*).
 @return the data set type name.
 */
@@ -997,7 +954,8 @@ public static String lookupDataSetName ( int dataset_type )
 	else if ( dataset_type == TYPE_OTHER_USES ) {
 		return NAME_OTHER_USES;
 	}
-	else {	return "";
+	else {
+		return "";
 	}
 }
 
@@ -1017,8 +975,7 @@ public static int lookupComponentTypeFromTag ( String component_tag )
 }
 
 /**
-Construct a DataSetComponent object from a response file string.  The string
-should be of the form:
+Construct a DataSetComponent object from a response file string.  The string should be of the form:
 <pre>
 file.ext, type
 </pre>
@@ -1026,10 +983,9 @@ file.ext, type
 @param line Non-comment data line from response file.
 @exception Exception if there is an error creating the object.
 */
-public static DataSetComponent parseDataSetComponent (	StateCU_DataSet dataset,
-							String line )
+public static DataSetComponent parseDataSetComponent ( StateCU_DataSet dataset, String line )
 throws Exception
-{	List v = StringUtil.breakStringList ( line, ", \t", StringUtil.DELIM_SKIP_BLANKS );
+{	List<String> v = StringUtil.breakStringList ( line, ", \t", StringUtil.DELIM_SKIP_BLANKS );
 	if ( (v == null) || (v.size() < 2) ) {
 		throw new Exception ( "Bad StateCU data (\"" + line +"\"");
 	}
@@ -1039,7 +995,7 @@ throws Exception
 		throw new Exception ( "Unrecognized type in (\"" + line +"\"");
 	}
 	DataSetComponent comp = new DataSetComponent ( dataset, comptype );
-	comp.setDataFileName ( (String)v.get(0) );
+	comp.setDataFileName ( v.get(0) );
 	return comp;
 }
 
@@ -1050,22 +1006,19 @@ Process an XML Document node during the read process.
 @exception Exception if there is an error processing the node.
 */
 /* TODO SAM 2007-03-01 Evaluate if in the base class
-private static void processDocumentNodeForRead (	StateCU_DataSet dataset,
-							Node node )
+private static void processDocumentNodeForRead ( StateCU_DataSet dataset, Node node )
 throws Exception
 {	String routine = "StateCU_DataSet.processDocumentNodeForRead";
 	/ * REVISIT - need to figure out if this is in the base class
 	switch ( node.getNodeType() ) {
 		case Node.DOCUMENT_NODE:
 			// The main data set node.  Get the data set type, etc.
-			processDocumentNodeForRead( dataset,
-				((Document)node).getDocumentElement() );
+			processDocumentNodeForRead( dataset, ((Document)node).getDocumentElement() );
 			break;
 		case Node.ELEMENT_NODE:
 			// Data set components.  Print the basic information...
 			String element_name = node.getNodeName();
-			Message.printStatus ( 1, routine, "Element name: " +
-				element_name );
+			Message.printStatus ( 1, routine, "Element name: " + element_name );
 			NamedNodeMap attributes;
 			Node attribute_Node;
 			String attribute_name, attribute_value;
@@ -1075,86 +1028,60 @@ throws Exception
 				int nattributes = attributes.getLength();
 				for ( int i = 0; i < nattributes; i++ ) {
 					attribute_Node = attributes.item(i);
-					attribute_name =
-						attribute_Node.getNodeName();
-					if (	attribute_name.equalsIgnoreCase(
-						"Type" ) ) {
-						try {	dataset.setType (
-							attribute_Node.
-							getNodeValue(), true );
+					attribute_name = attribute_Node.getNodeName();
+					if ( attribute_name.equalsIgnoreCase( "Type" ) ) {
+						try {
+							dataset.setType ( attribute_Node.getNodeValue(), true );
 						}
 						catch ( Exception e ) {
-							Message.printWarning (
-							2, routine,
-							"Data set type \"" +
-							attribute_name + "\" is"
+							Message.printWarning ( 2, routine, "Data set type \"" + attribute_name + "\" is"
 							+ " not recognized." );
-							throw new Exception (
-							"Error processing data "
-							+ "set" );
+							throw new Exception ( "Error processing data set" );
 						}
 					}
 					else if (
-						attribute_name.equalsIgnoreCase(
-						"BaseName" ) ) {
-						dataset.setBaseName (
-						attribute_Node.getNodeValue() );
+						attribute_name.equalsIgnoreCase( "BaseName" ) ) {
+						dataset.setBaseName ( attribute_Node.getNodeValue() );
 					}
 				}
 			}
-			else if ( element_name.equalsIgnoreCase(
-				"DataSetComponent") ) {
+			else if ( element_name.equalsIgnoreCase("DataSetComponent") ) {
 				attributes = node.getAttributes();
 				int nattributes = attributes.getLength();
-				String	comptype = "", compdatafile = "",
-					complistfile = "", compcommandsfile ="";
+				String comptype = "", compdatafile = "", complistfile = "", compcommandsfile ="";
 				for ( int i = 0; i < nattributes; i++ ) {
 					attribute_Node = attributes.item(i);
-					attribute_name =
-						attribute_Node.getNodeName();
-					attribute_value =
-						attribute_Node.getNodeValue();
-					if (	attribute_name.equalsIgnoreCase(
-						"Type" ) ) {
+					attribute_name = attribute_Node.getNodeName();
+					attribute_value = attribute_Node.getNodeValue();
+					if ( attribute_name.equalsIgnoreCase( "Type" ) ) {
 						comptype = attribute_value;
 					}
-					else if(attribute_name.equalsIgnoreCase(
-						"DataFile" ) ) {
+					else if(attribute_name.equalsIgnoreCase( "DataFile" ) ) {
 						compdatafile = attribute_value;
 					}
-					else if(attribute_name.equalsIgnoreCase(
-						"ListFile" ) ) {
+					else if(attribute_name.equalsIgnoreCase( "ListFile" ) ) {
 						complistfile = attribute_value;
 					}
-					else if(attribute_name.equalsIgnoreCase(
-						"CommandsFile" ) ) {
-						compcommandsfile =
-						attribute_value;
+					else if(attribute_name.equalsIgnoreCase( "CommandsFile" ) ) {
+						compcommandsfile = attribute_value;
 					}
-					else {	Message.printWarning ( 2,
-						routine, "Unrecognized " +
-						"attribute \"" + attribute_name+
-						" for \"" + element_name +"\"");
+					else {
+						Message.printWarning ( 2, routine, "Unrecognized " +
+						"attribute \"" + attribute_name + " for \"" + element_name +"\"");
 					}
 				}
-				int component_type =
-				DataSetComponent.lookupComponentType(
-							comptype );
+				int component_type = DataSetComponent.lookupComponentType( comptype );
 				if ( component_type < 0 ) {
 					Message.printWarning ( 2, routine,
-					"Unrecognized data set component \"" +
-					comptype + "\".  Skipping." );
+					"Unrecognized data set component \"" + comptype + "\".  Skipping." );
 					return;
 				}
 				// Add the component...
-				DataSetComponent comp = 
-				new DataSetComponent ( this, component_type );
+				DataSetComponent comp = new DataSetComponent ( this, component_type );
 				comp.setDataFileName ( compdatafile );
 				comp.setListFileName ( complistfile );
 				comp.setCommandsFileName ( compcommandsfile );
-				Message.printStatus ( 1, routine,
-				"Adding new component for data \"" +
-				compdatafile + "\" \"" );
+				Message.printStatus ( 1, routine, "Adding new component for data \"" + compdatafile + "\" \"" );
 				dataset.addComponent ( comp );
 			}
 			// The main document node will have a list of children
@@ -1164,8 +1091,7 @@ throws Exception
 			if ( children != null ) {
 				int len = children.getLength();
 				for ( int i = 0; i < len; i++ ) {
-					processDocumentNodeForRead (
-						dataset, children.item(i) );
+					processDocumentNodeForRead ( dataset, children.item(i) );
 				}
 			}
 			break;
@@ -1175,8 +1101,7 @@ throws Exception
 
 /**
 Read the StateCU control file and handle data in the StateCU_DataSet instance.
-This method is usually only called by readStateCUFile(), which reads the StateCU
-response file.
+This method is usually only called by readStateCUFile(), which reads the StateCU response file.
 @param filename filename containing StateCU control data.
 */
 private void readStateCUControlFile ( String filename )
@@ -1185,14 +1110,13 @@ throws IOException
 	String iline = null;
 	BufferedReader in = null;
 
-	Message.printStatus ( 1, rtn,
-		"Reading StateCU control file: \"" + filename + "\"" );
+	Message.printStatus ( 1, rtn, "Reading StateCU control file: \"" + filename + "\"" );
 	// The following throws an IOException if the file cannot be opened...
 	in = new BufferedReader ( new FileReader (filename));
 	String string;
 	String token1;		// First token on a line
 	int datarec = -1;	// Counter for data records (not comments).
-	List v = null;
+	List<String> v = null;
 	// Use a while to check for comments.
 	while ( (iline = in.readLine()) != null ) {
 		// check for comments
@@ -1201,26 +1125,18 @@ throws IOException
 		}
 		++datarec;
 		string = iline.trim();
-		token1 = StringUtil.getToken ( string, " \t",
-			StringUtil.DELIM_SKIP_BLANKS, 0 );
+		token1 = StringUtil.getToken ( string, " \t", StringUtil.DELIM_SKIP_BLANKS, 0 );
 		if ( (datarec >= 0) && (datarec <= 2) ) {
 			setComment ( string, datarec );
 		}
 		else if ( datarec == 3 ) {
-			v = StringUtil.breakStringList ( string, " \t",
-				StringUtil.DELIM_SKIP_BLANKS );
+			v = StringUtil.breakStringList ( string, " \t", StringUtil.DELIM_SKIP_BLANKS );
 			if ( v != null ) {
-				if (	(v.size() >= 1) &&
-					StringUtil.isInteger(
-					(String)v.get(0)) ) {
-					setNyr1 ( StringUtil.atoi (
-					(String)v.get(0)) );
+				if ( (v.size() >= 1) && StringUtil.isInteger(v.get(0)) ) {
+					setNyr1 ( StringUtil.atoi  (v.get(0)) );
 				}
-				if (	(v.size() >= 2) &&
-					StringUtil.isInteger(
-					(String)v.get(1)) ) {
-					setNyr2 ( StringUtil.atoi (
-					(String)v.get(1)) );
+				if ( (v.size() >= 2) && StringUtil.isInteger(v.get(1)) ) {
+					setNyr2 ( StringUtil.atoi(v.get(1)) );
 				}
 			}
 		}
@@ -1245,23 +1161,14 @@ throws IOException
 		else if ( datarec == 10 ) {
 			v = StringUtil.fixedRead ( iline, "s5s5s5" );
 			if ( v != null ) {
-				if (	(v.size() >= 1) &&
-					StringUtil.isDouble(
-					((String)v.get(0)).trim()) ) {
-					setPsenmo ( StringUtil.atod (
-					((String)v.get(0)).trim()) );
+				if ( (v.size() >= 1) && StringUtil.isDouble(((String)v.get(0)).trim()) ) {
+					setPsenmo ( StringUtil.atod ( (v.get(0)).trim()) );
 				}
-				if (	(v.size() >= 2) &&
-					StringUtil.isDouble(
-					((String)v.get(1)).trim()) ) {
-					setPjunmo ( StringUtil.atod (
-					((String)v.get(1)).trim()) );
+				if ( (v.size() >= 2) && StringUtil.isDouble((v.get(1)).trim()) ) {
+					setPjunmo ( StringUtil.atod ( ((String)v.get(1)).trim()) );
 				}
-				if (	(v.size() >= 3) &&
-					StringUtil.isDouble(
-					((String)v.get(2)).trim()) ) {
-					setPothmo ( StringUtil.atod (
-					((String)v.get(2)).trim()) );
+				if ( (v.size() >= 3) && StringUtil.isDouble((v.get(2)).trim()) ) {
+					setPothmo ( StringUtil.atod ((v.get(2)).trim()) );
 				}
 			}
 		}
@@ -1281,8 +1188,7 @@ throws IOException
 			setIdaily ( StringUtil.atoi(token1) );
 		}
 		else if ( datarec == 16 ) {
-			setAdminNumForCUByPriority (
-			StringUtil.atod(token1) );
+			setAdminNumForCUByPriority ( StringUtil.atod(token1) );
 		}
 	}
 	if ( in != null ) {
@@ -1301,11 +1207,9 @@ throws Exception
 {	String routine = "StateCU_DataSet.readStateCUFile";
 	String iline = null;
 	BufferedReader in = null;
-	Message.printStatus ( 1, routine, "Reading StateCU response file: " +
-		filename );
+	Message.printStatus ( 1, routine, "Reading StateCU response file: " + filename );
 
-	// Set the data set directory to be used when opening the component
-	// files...
+	// Set the data set directory to be used when opening the component files...
 
 	String full_filename = IOUtil.getPathUsingWorkingDir ( filename );
 	File f = new File ( full_filename );
@@ -1319,8 +1223,7 @@ throws Exception
 
 	// Add a data set component for the response and control files...
 
-	DataSetComponent 
-		response_comp = new DataSetComponent ( dataset, COMP_RESPONSE );
+	DataSetComponent response_comp = new DataSetComponent ( dataset, COMP_RESPONSE );
 	response_comp.setDataFileName ( f.getName() );
 
 	// The following throws an IOException if the file cannot be opened...
@@ -1336,11 +1239,10 @@ throws Exception
 
 	// First read in the entire response file.  This allows the control
 	// file to be determined and read at once, which then allows the data
-	// set to be intialized properly (groups, etc.).  This is also necessary
-	// because the control file is not guaranteed to be the first file
-	// specified.
+	// set to be initialized properly (groups, etc.).  This is also necessary
+	// because the control file is not guaranteed to be the first file specified.
 
-	List rcu_strings = new Vector();
+	List<String> rcu_strings = new Vector();
 	while ( (iline = in.readLine()) != null ) {
 		// check for comments
 		iline = iline.trim();
@@ -1356,8 +1258,8 @@ throws Exception
 	int dataset_type = TYPE_UNKNOWN;
 	DataSetComponent control_comp = null;
 	for ( int i = 0; i < size; i++ ) {
-		try {	comp = parseDataSetComponent ( dataset,
-				(String)rcu_strings.get(i) );
+		try {
+			comp = parseDataSetComponent ( dataset, rcu_strings.get(i) );
 			// The following are set in the above parse method...
 			comptype = comp.getComponentType ();
 			compfile = comp.getDataFileName();
@@ -1367,76 +1269,47 @@ throws Exception
 			// Else, read the control file...
 			// Save to add to the data set below...
 			control_comp = comp;
-			// Always read this because it specifies
-			// configuration information...
+			// Always read this because it specifies configuration information...
 			f = new File(compfile);
 			if ( !f.isAbsolute() ) {
-				compfile = dataset.getDataSetDirectory() +
-					File.separator + compfile;
+				compfile = dataset.getDataSetDirectory() + File.separator + compfile;
 			}
-			try {	// Previously, the StateCU_Control
-				// object was used to store the control
-				// data but now the data are in the
-				// StateCU_DataSet object itself so declare
+			try {
+				// Previously, the StateCU_Control object was used to store the control
+				// data but now the data are in the StateCU_DataSet object itself so declare
 				// the dataset object here...
 
 				// Now read the control file.
 				comp.setData ( dataset );
-				dataset.readStateCUControlFile (
-					compfile );
+				dataset.readStateCUControlFile ( compfile );
 				iclim = dataset.getIclim();
 				isupply = dataset.getIsupply();
-				Message.printStatus ( 1, routine,
-				"iclim=" + iclim + " isupply=" +
-				isupply );
+				Message.printStatus ( 1, routine, "iclim=" + iclim + " isupply=" + isupply );
 				if ( iclim == 0 ) {
-					dataset_type =
-					TYPE_CLIMATE_STATIONS;
-					Message.printStatus ( 1,
-					routine,
-					"Reading climate stations " +
-					"data set" );
+					dataset_type = TYPE_CLIMATE_STATIONS;
+					Message.printStatus ( 1, routine, "Reading climate stations data set" );
 				}
-				// A structures data set - check the
-				// supply flag to know what type of data
-				// set...
+				// A structures data set - check the supply flag to know what type of data set...
 				else if ( isupply == 0 ) {
 					dataset_type = TYPE_STRUCTURES;
-					Message.printStatus ( 1,
-					routine,
-					"Reading structures data set" );
+					Message.printStatus ( 1, routine, "Reading structures data set" );
 				}
 				else if ( isupply == 1 ) {
-					dataset_type =
-					TYPE_WATER_SUPPLY_LIMITED;
-					Message.printStatus ( 1,
-					routine,
-					"Reading structures " +
-					"(water supply limited) data " +
-					"set" );
+					dataset_type = TYPE_WATER_SUPPLY_LIMITED;
+					Message.printStatus ( 1, routine, "Reading structures (water supply limited) data set" );
 				}
 				else if ( isupply == 2 ) {
-					dataset_type =
-					TYPE_WATER_SUPPLY_LIMITED_BY_WATER_RIGHTS;
-					Message.printStatus ( 1,
-					routine,
-					"Reading structures " +
-					"(water supply limited by water"
-					+ " rights) data set" );
+					dataset_type = TYPE_WATER_SUPPLY_LIMITED_BY_WATER_RIGHTS;
+					Message.printStatus ( 1, routine,
+					"Reading structures (water supply limited by water rights) data set" );
 				}
 				else if ( isupply == 3 ) {
-					dataset_type =
-					TYPE_RIVER_DEPLETION;
-					Message.printStatus ( 1,
-					routine,
-					"Reading structures " +
-					"(river depletion) data set" );
+					dataset_type = TYPE_RIVER_DEPLETION;
+					Message.printStatus ( 1, routine, "Reading structures (river depletion) data set" );
 				}
 			}
 			catch ( Exception e2 ) {
-				Message.printWarning ( 1, routine,
-				"Error reading data for:\n" +
-				"\"" + compfile + "\"" );
+				Message.printWarning ( 1, routine, "Error reading data for:\n" + "\"" + compfile + "\"" );
 				Message.printWarning ( 2, routine, e2 );
 			}
 		}
@@ -1454,50 +1327,45 @@ throws Exception
 
 	// Add the response and control file components...
 
-	dataset.getComponentForComponentType ( COMP_CONTROL_GROUP ).
-		addComponent( response_comp );
-	dataset.getComponentForComponentType ( COMP_CONTROL_GROUP ).
-		addComponent( control_comp );
+	dataset.getComponentForComponentType ( COMP_CONTROL_GROUP ).addComponent( response_comp );
+	dataset.getComponentForComponentType ( COMP_CONTROL_GROUP ).addComponent( control_comp );
 
 	// Now loop through the remaining components...
 
 	for ( int i = 0; i < size; i++ ) {
 		iline = (String)rcu_strings.get(i);
 		// Allocate new DataSetComponent instance...
-		try {	try {	comp = parseDataSetComponent(dataset,iline);
+		try {
+			try {
+				comp = parseDataSetComponent(dataset,iline);
 			}
 			catch ( Exception e2 ) {
 				Message.printWarning ( 1, routine,
-				"Unrecognized StateCU data component for:\n\"" +
-				iline + "\"" );
+				"Unrecognized StateCU data component for:\n\"" + iline + "\"" );
 				Message.printWarning ( 2, routine, e2 );
 				continue;
 			}
-			// The following are set in the constructor for
-			// DataSetComponent...
+			// The following are set in the constructor for DataSetComponent...
 			comptype = comp.getComponentType ();
 			compfile = comp.getDataFileName();
-			// Checks to not read in unneeded data (REVISIT - take
-			// this out or keep the code so that unneeded data are
-			// filtered out)?
+			// Checks to not read in unneeded data (TODO - take
+			// this out or keep the code so that unneeded data are filtered out)?
 			if ( comptype == COMP_CONTROL ) {
 				// Already read it above...
 				continue;
 			}
-			if (	(dataset.getDataSetType() == TYPE_OTHER_USES) &&
-				(comptype != COMP_OTHER) ) {
+			if ( (dataset.getDataSetType() == TYPE_OTHER_USES) && (comptype != COMP_OTHER) ) {
 				unneeded_warning += "\n" + iline;
 				comp.setVisible ( false );
 			}
-			else if ((dataset.getDataSetType() ==
-				TYPE_CLIMATE_STATIONS) &&
+			else if ((dataset.getDataSetType() == TYPE_CLIMATE_STATIONS) &&
 				(comptype != COMP_CU_LOCATIONS) &&
 				(comptype != COMP_BLANEY_CRIDDLE) &&
+				(comptype != COMP_PENMAN_MONTEITH) &&
 				(comptype != COMP_CROP_CHARACTERISTICS)&&
 				(comptype != COMP_CLIMATE_STATIONS) &&
-				(comptype !=
-					COMP_TEMPERATURE_TS_MONTHLY_AVERAGE) &&
-				(comptype!= COMP_FROST_DATES_TS_YEARLY)&&
+				(comptype != COMP_TEMPERATURE_TS_MONTHLY_AVERAGE) &&
+				(comptype != COMP_FROST_DATES_TS_YEARLY)&&
 				(comptype != COMP_PRECIPITATION_TS_MONTHLY)&&
 				(comptype != COMP_GIS_STATE) &&
 				(comptype != COMP_GIS_DIVISIONS) &&
@@ -1509,11 +1377,11 @@ throws Exception
 			else if ((dataset.getDataSetType() == TYPE_STRUCTURES)&&
 				(comptype != COMP_CU_LOCATIONS) &&
 				(comptype != COMP_BLANEY_CRIDDLE) &&
+				(comptype != COMP_PENMAN_MONTEITH) &&
 				(comptype != COMP_CROP_CHARACTERISTICS)&&
 				(comptype != COMP_CLIMATE_STATIONS) &&
-				(comptype !=
-					COMP_TEMPERATURE_TS_MONTHLY_AVERAGE) &&
-				(comptype!= COMP_FROST_DATES_TS_YEARLY)&&
+				(comptype != COMP_TEMPERATURE_TS_MONTHLY_AVERAGE) &&
+				(comptype != COMP_FROST_DATES_TS_YEARLY)&&
 				(comptype != COMP_PRECIPITATION_TS_MONTHLY)&&
 				(comptype != COMP_GIS_STATE) &&
 				(comptype != COMP_GIS_DIVISIONS) &&
@@ -1525,15 +1393,14 @@ throws Exception
 				unneeded_warning += "\n" + iline;
 				comp.setVisible ( false );
 			}
-			else if ((dataset.getDataSetType() ==
-				TYPE_WATER_SUPPLY_LIMITED)&&
+			else if ((dataset.getDataSetType() == TYPE_WATER_SUPPLY_LIMITED)&&
 				(comptype != COMP_CU_LOCATIONS) &&
-				(comptype != COMP_BLANEY_CRIDDLE) &&
 				(comptype != COMP_CROP_CHARACTERISTICS)&&
+				(comptype != COMP_BLANEY_CRIDDLE) &&
+				(comptype != COMP_PENMAN_MONTEITH) &&
 				(comptype != COMP_CLIMATE_STATIONS) &&
-				(comptype !=
-					COMP_TEMPERATURE_TS_MONTHLY_AVERAGE) &&
-				(comptype!= COMP_FROST_DATES_TS_YEARLY)&&
+				(comptype != COMP_TEMPERATURE_TS_MONTHLY_AVERAGE) &&
+				(comptype != COMP_FROST_DATES_TS_YEARLY)&&
 				(comptype != COMP_PRECIPITATION_TS_MONTHLY)&&
 				(comptype != COMP_GIS_STATE) &&
 				(comptype != COMP_GIS_DIVISIONS) &&
@@ -1548,14 +1415,13 @@ throws Exception
 				unneeded_warning += "\n" + iline;
 				comp.setVisible ( false );
 			}
-			else if ((dataset.getDataSetType() ==
-				TYPE_WATER_SUPPLY_LIMITED_BY_WATER_RIGHTS)&&
+			else if ((dataset.getDataSetType() == TYPE_WATER_SUPPLY_LIMITED_BY_WATER_RIGHTS)&&
 				(comptype != COMP_CU_LOCATIONS) &&
-				(comptype != COMP_BLANEY_CRIDDLE) &&
 				(comptype != COMP_CROP_CHARACTERISTICS)&&
+				(comptype != COMP_BLANEY_CRIDDLE) &&
+				(comptype != COMP_PENMAN_MONTEITH) &&
 				(comptype != COMP_CLIMATE_STATIONS) &&
-				(comptype !=
-					COMP_TEMPERATURE_TS_MONTHLY_AVERAGE) &&
+				(comptype != COMP_TEMPERATURE_TS_MONTHLY_AVERAGE) &&
 				(comptype != COMP_FROST_DATES_TS_YEARLY)&&
 				(comptype != COMP_PRECIPITATION_TS_MONTHLY)&&
 				(comptype != COMP_GIS_STATE) &&
@@ -1566,21 +1432,19 @@ throws Exception
 				(comptype != COMP_CROP_PATTERN_TS_YEARLY) &&
 				(comptype != COMP_DIVERSION_TS_MONTHLY)&&
 				(comptype != COMP_WELL_PUMPING_TS_MONTHLY)&&
-				(comptype !=
-					COMP_IRRIGATION_PRACTICE_TS_YEARLY)&&
+				(comptype != COMP_IRRIGATION_PRACTICE_TS_YEARLY)&&
 				// Add...
 				(comptype != COMP_DIVERSION_RIGHTS)){
 				unneeded_warning += "\n" + iline;
 				comp.setVisible ( false );
 			}
-			else if ((dataset.getDataSetType() ==
-				TYPE_RIVER_DEPLETION)&&
+			else if ((dataset.getDataSetType() == TYPE_RIVER_DEPLETION)&&
 				(comptype != COMP_CU_LOCATIONS) &&
-				(comptype != COMP_BLANEY_CRIDDLE) &&
 				(comptype != COMP_CROP_CHARACTERISTICS)&&
+				(comptype != COMP_BLANEY_CRIDDLE) &&
+				(comptype != COMP_PENMAN_MONTEITH) &&
 				(comptype != COMP_CLIMATE_STATIONS) &&
-				(comptype !=
-					COMP_TEMPERATURE_TS_MONTHLY_AVERAGE) &&
+				(comptype != COMP_TEMPERATURE_TS_MONTHLY_AVERAGE) &&
 				(comptype != COMP_FROST_DATES_TS_YEARLY)&&
 				(comptype != COMP_PRECIPITATION_TS_MONTHLY)&&
 				(comptype != COMP_GIS_STATE) &&
@@ -1591,13 +1455,11 @@ throws Exception
 				(comptype != COMP_CROP_PATTERN_TS_YEARLY)&&
 				(comptype != COMP_DIVERSION_TS_MONTHLY)&&
 				(comptype != COMP_WELL_PUMPING_TS_MONTHLY)&&
-				(comptype !=
-					COMP_IRRIGATION_PRACTICE_TS_YEARLY) &&
+				(comptype != COMP_IRRIGATION_PRACTICE_TS_YEARLY) &&
 				(comptype != COMP_DIVERSION_RIGHTS) &&
 				// Add...
 				(comptype != COMP_DELAY_TABLES_MONTHLY)&&
-				(comptype !=
-					COMP_DELAY_TABLE_ASSIGNMENT_MONTHLY)){
+				(comptype != COMP_DELAY_TABLE_ASSIGNMENT_MONTHLY)){
 				unneeded_warning += "\n" + iline;
 				comp.setVisible ( false );
 			}
@@ -1611,8 +1473,7 @@ throws Exception
 			// components are added and the data can be read later.
 			f = new File(compfile);
 			if ( !f.isAbsolute() ) {
-				compfile =	dataset.getDataSetDirectory() +
-						File.separator + compfile;
+				compfile =	dataset.getDataSetDirectory() + File.separator + compfile;
 			}
 			// List these in the order that they are normally
 			// processed/listed in StateDMI and other software...
@@ -1620,29 +1481,20 @@ throws Exception
 			// Climate Stations...
 			//
 			if ( comptype == COMP_CLIMATE_STATIONS ) {
-				try {	comp.setData (
-					StateCU_ClimateStation.readStateCUFile
-						( compfile ) );
-					dataset.getComponentForComponentType (
-					COMP_CLIMATE_STATIONS_GROUP ).
-					addComponent( comp );
+				try {
+					comp.setData ( StateCU_ClimateStation.readStateCUFile ( compfile ) );
+					dataset.getComponentForComponentType ( COMP_CLIMATE_STATIONS_GROUP ).addComponent( comp );
 				}
 				catch ( Exception e2 ) {
 					read_warning += "\n" + iline;
 					Message.printWarning ( 2, routine, e2 );
 				}
 			}
-			else if (	(comptype ==
-					COMP_TEMPERATURE_TS_MONTHLY_AVERAGE) ||
-					(comptype == 
-					COMP_PRECIPITATION_TS_MONTHLY) ) {
-				try {	comp.setData (
-					StateMod_TS.readTimeSeriesList
-						( compfile, null, null, null,
-						true ) );
-					dataset.getComponentForComponentType (
-					COMP_CLIMATE_STATIONS_GROUP ).
-					addComponent( comp );
+			else if ( (comptype == COMP_TEMPERATURE_TS_MONTHLY_AVERAGE) ||
+					(comptype == COMP_PRECIPITATION_TS_MONTHLY) ) {
+				try {
+					comp.setData ( StateMod_TS.readTimeSeriesList ( compfile, null, null, null, true ) );
+					dataset.getComponentForComponentType ( COMP_CLIMATE_STATIONS_GROUP ).addComponent( comp );
 				}
 				catch ( Exception e2 ) {
 					read_warning += "\n" + iline;
@@ -1651,15 +1503,12 @@ throws Exception
 			}
 			else if ( comptype == COMP_FROST_DATES_TS_YEARLY ) {
 				try {	
-// REVISIT (JTS - 2005-01-17)
-// throwing compile errors
+// TODO (JTS - 2005-01-17) throwing compile errors
 //					comp.setData (
 //					StateCU_FrostDatesTS.readTimeSeriesList
 //						( compfile, null, null,
 //						null, null, true ) );
-					dataset.getComponentForComponentType (
-					COMP_CLIMATE_STATIONS_GROUP ).
-					addComponent( comp );
+					dataset.getComponentForComponentType ( COMP_CLIMATE_STATIONS_GROUP ).addComponent( comp );
 				}
 				catch ( Exception e2 ) {
 					read_warning += "\n" + iline;
@@ -1670,12 +1519,9 @@ throws Exception
 			// Crop Characteristics...
 			//
 			else if ( comptype == COMP_CROP_CHARACTERISTICS ) {
-				try {	comp.setData (
-					StateCU_CropCharacteristics.
-					readStateCUFile ( compfile ) );
-					dataset.getComponentForComponentType (
-					COMP_CROP_CHARACTERISTICS_GROUP ).
-					addComponent( comp );
+				try {
+					comp.setData ( StateCU_CropCharacteristics.readStateCUFile ( compfile ) );
+					dataset.getComponentForComponentType ( COMP_CROP_CHARACTERISTICS_GROUP ).addComponent( comp );
 				}
 				catch ( Exception e2 ) {
 					read_warning += "\n" + iline;
@@ -1683,12 +1529,19 @@ throws Exception
 				}
 			}
 			else if ( comptype == COMP_BLANEY_CRIDDLE ) {
-				try {	comp.setData (
-					StateCU_BlaneyCriddle.readStateCUFile
-						( compfile ) );
-					dataset.getComponentForComponentType (
-					COMP_CROP_CHARACTERISTICS_GROUP ).
-					addComponent( comp );
+				try {
+					comp.setData ( StateCU_BlaneyCriddle.readStateCUFile ( compfile ) );
+					dataset.getComponentForComponentType ( COMP_CROP_CHARACTERISTICS_GROUP ).addComponent( comp );
+				}
+				catch ( Exception e2 ) {
+					read_warning += "\n" + iline;
+					Message.printWarning ( 2, routine, e2 );
+				}
+			}
+			else if ( comptype == COMP_PENMAN_MONTEITH ) {
+				try {
+					comp.setData ( StateCU_PenmanMonteith.readStateCUFile ( compfile ) );
+					dataset.getComponentForComponentType ( COMP_CROP_CHARACTERISTICS_GROUP ).addComponent( comp );
 				}
 				catch ( Exception e2 ) {
 					read_warning += "\n" + iline;
@@ -1699,15 +1552,11 @@ throws Exception
 			// Delay tables...
 			//
 			else if ( comptype == COMP_DELAY_TABLES_MONTHLY ) {
-				try {	// StateCU assumes percent (0-100) for
-					// values, which is indicated by the
-					// -1 flag...
+				try {
+					// StateCU assumes percent (0-100) for values, which is indicated by the -1 flag...
 					comp.setData (
-					StateMod_DelayTable.readStateModFile
-						( compfile, true, -1 ) );
-					dataset.getComponentForComponentType (
-					COMP_DELAY_TABLES_GROUP ).
-					addComponent( comp );
+					StateMod_DelayTable.readStateModFile ( compfile, true, -1 ) );
+					dataset.getComponentForComponentType ( COMP_DELAY_TABLES_GROUP ).addComponent( comp );
 				}
 				catch ( Exception e2 ) {
 					read_warning += "\n" + iline;
@@ -1718,12 +1567,9 @@ throws Exception
 			// CU Locations...
 			//
 			else if ( comptype == COMP_CU_LOCATIONS ) {
-				try {	comp.setData (
-					StateCU_Location.readStateCUFile
-						( compfile ) );
-					dataset.getComponentForComponentType (
-					COMP_CU_LOCATIONS_GROUP ).addComponent(
-					comp );
+				try {
+					comp.setData ( StateCU_Location.readStateCUFile( compfile ) );
+					dataset.getComponentForComponentType ( COMP_CU_LOCATIONS_GROUP ).addComponent( comp );
 				}
 				catch ( Exception e2 ) {
 					read_warning += "\n" + iline;
@@ -1731,27 +1577,19 @@ throws Exception
 				}
 			}
 			else if ( comptype == COMP_CROP_PATTERN_TS_YEARLY ) {
-				try {	comp.setData (
-					StateCU_CropPatternTS.readStateCUFile
-						( compfile, null, null ) );
-					dataset.getComponentForComponentType (
-					COMP_CU_LOCATIONS_GROUP ).
-					addComponent( comp );
+				try {
+					comp.setData ( StateCU_CropPatternTS.readStateCUFile ( compfile, null, null ) );
+					dataset.getComponentForComponentType ( COMP_CU_LOCATIONS_GROUP ).addComponent( comp );
 				}
 				catch ( Exception e2 ) {
 					read_warning += "\n" + iline;
 					Message.printWarning ( 2, routine, e2 );
 				}
 			}
-			else if (	comptype == 
-					COMP_IRRIGATION_PRACTICE_TS_YEARLY ) {
-				try {	comp.setData (
-					StateCU_IrrigationPracticeTS.
-						readStateCUFile
-						( compfile, null, null ) );
-					dataset.getComponentForComponentType (
-					COMP_CU_LOCATIONS_GROUP ).
-					addComponent( comp );
+			else if ( comptype == COMP_IRRIGATION_PRACTICE_TS_YEARLY ) {
+				try {
+					comp.setData ( StateCU_IrrigationPracticeTS.readStateCUFile ( compfile, null, null ) );
+					dataset.getComponentForComponentType ( COMP_CU_LOCATIONS_GROUP ).addComponent( comp );
 				}
 				catch ( Exception e2 ) {
 					read_warning += "\n" + iline;
@@ -1759,13 +1597,9 @@ throws Exception
 				}
 			}
 			else if ( comptype == COMP_DIVERSION_TS_MONTHLY ) {
-				try {	comp.setData (
-					StateMod_TS.readTimeSeriesList
-						( compfile, null, null, null,
-						true ) );
-					dataset.getComponentForComponentType (
-					COMP_CU_LOCATIONS_GROUP ).
-					addComponent( comp );
+				try {
+					comp.setData ( StateMod_TS.readTimeSeriesList ( compfile, null, null, null, true ) );
+					dataset.getComponentForComponentType ( COMP_CU_LOCATIONS_GROUP ).addComponent( comp );
 				}
 				catch ( Exception e2 ) {
 					read_warning += "\n" + iline;
@@ -1773,13 +1607,9 @@ throws Exception
 				}
 			}
 			else if ( comptype == COMP_WELL_PUMPING_TS_MONTHLY ) {
-				try {	comp.setData (
-					StateMod_TS.readTimeSeriesList
-						( compfile, null, null, null,
-						true ) );
-					dataset.getComponentForComponentType (
-					COMP_CU_LOCATIONS_GROUP ).
-					addComponent( comp );
+				try {
+					comp.setData ( StateMod_TS.readTimeSeriesList ( compfile, null, null, null, true ) );
+					dataset.getComponentForComponentType ( COMP_CU_LOCATIONS_GROUP ).addComponent( comp );
 				}
 				catch ( Exception e2 ) {
 					read_warning += "\n" + iline;
@@ -1787,12 +1617,9 @@ throws Exception
 				}
 			}
 			else if ( comptype == COMP_DIVERSION_RIGHTS ) {
-				try {	comp.setData (
-					StateMod_DiversionRight.readStateModFile
-						( compfile ) );
-					dataset.getComponentForComponentType (
-					COMP_CU_LOCATIONS_GROUP ).
-					addComponent( comp );
+				try {
+					comp.setData ( StateMod_DiversionRight.readStateModFile( compfile ) );
+					dataset.getComponentForComponentType ( COMP_CU_LOCATIONS_GROUP ).addComponent( comp );
 				}
 				catch ( Exception e2 ) {
 					read_warning += "\n" + iline;
@@ -1800,12 +1627,9 @@ throws Exception
 				}
 			}
 			else if (comptype==COMP_DELAY_TABLE_ASSIGNMENT_MONTHLY){
-				try {	comp.setData (
-					StateCU_DelayTableAssignment.
-						readStateCUFile ( compfile ) );
-					dataset.getComponentForComponentType (
-					COMP_CU_LOCATIONS_GROUP ).
-					addComponent( comp );
+				try {
+					comp.setData ( StateCU_DelayTableAssignment.readStateCUFile ( compfile ) );
+					dataset.getComponentForComponentType ( COMP_CU_LOCATIONS_GROUP ).addComponent( comp );
 				}
 				catch ( Exception e2 ) {
 					read_warning += "\n" + iline;
@@ -1813,35 +1637,27 @@ throws Exception
 				}
 			}
 			// Files not specifically handled (e.g., GIS)...
-			else {	// Add to the component group but don't read in
-				// the data...
-				int gtype = dataset.
-					lookupComponentGroupTypeForComponent
-					( comptype );
+			else {
+				// Add to the component group but don't read in the data...
+				int gtype = dataset.lookupComponentGroupTypeForComponent ( comptype );
 				if ( gtype < 0 ) {
 					Message.printWarning ( 2, routine,
-					"Group for component is unknown.  Not" +
-					" adding: " + comp.getComponentName() );
+					"Group for component is unknown.  Not adding: " + comp.getComponentName() );
 				}
-				dataset.getComponentForComponentType ( gtype ).
-					addComponent( comp );
+				dataset.getComponentForComponentType ( gtype ).addComponent( comp );
 			}
 		}
 		catch ( Exception e ) {
-			Message.printWarning ( 1, routine,
-			"Unexpected error for:\n\"" + iline + "\"" );
+			Message.printWarning ( 1, routine, "Unexpected error for:\n\"" + iline + "\"" );
 			Message.printWarning ( 2, routine, e );
 		}
 	}
 	if ( unneeded_warning.length() > 0 ) {
-		Message.printWarning ( 2, routine,
-		lookupDataSetName(dataset.getDataSetType()) +
-		" data set.  Unnecessary data files will not be visible:" +
-		unneeded_warning );
+		Message.printWarning ( 2, routine, lookupDataSetName(dataset.getDataSetType()) +
+		" data set.  Unnecessary data files will not be visible:" + unneeded_warning );
 	}
 	if ( read_warning.length() > 0 ) {
-		Message.printWarning ( 1, routine,
-		"Error reading data files:" + read_warning );
+		Message.printWarning ( 1, routine, "Error reading data files:" + read_warning );
 	}
 	if ( in != null ) {
 		in.close();
@@ -1865,15 +1681,14 @@ throws Exception
 	need to figure out if this is in the base class.
 
 	DOMParser parser = null;
-	try {	parser = new DOMParser();
+	try {
+		parser = new DOMParser();
 		parser.parse ( full_filename );
 	}
 	catch ( Exception e ) {
-		Message.printWarning ( 2, routine, 
-			"Error reading StateCU Data set \"" + filename + "\"" );
+		Message.printWarning ( 2, routine, "Error reading StateCU Data set \"" + filename + "\"" );
 		Message.printWarning ( 2, routine, e );
-		throw new Exception ( "Error reading StateCU Data set \"" +
-			filename + "\"" );
+		throw new Exception ( "Error reading StateCU Data set \"" + filename + "\"" );
 	}
 
 	// Create a new data set object...
@@ -1888,27 +1703,23 @@ throws Exception
 
 	Document doc = parser.getDocument();
 
-	// Loop through and process the document nodes, starting with the root
-	// node...
+	// Loop through and process the document nodes, starting with the root node...
 
 	processDocumentNodeForRead ( dataset, doc );
 
 	// Synchronize the response file with the control file (for now just
 	// check - need to decide how to make bulletproof)...
 
-	// REVISIT
-	//DataSetComponent comp = dataset.getComponentForComponentType (
-	//	COMP_RESPONSE );
+	// TODO
+	//DataSetComponent comp = dataset.getComponentForComponentType ( COMP_RESPONSE );
 	//if ( comp != null ) {
-	//	StateCU_DataSet ds2 = readStateCUFile (
-	//	comp.getDataFile(), false );
+	//	StateCU_DataSet ds2 = readStateCUFile ( comp.getDataFile(), false );
 	//}
 
 	// Compare components and response file.  Need to REVISIT this.
 
 	// Now just read the components - the assumption is that the data set
-	// components are correct for the data set but need to tighten this
-	// down
+	// components are correct for the data set but need to tighten this down
 
 	String read_warning = "";
 	if ( read_all ) {
@@ -1917,37 +1728,27 @@ throws Exception
 		String datafile = "";
 		DataSetComponent comp;
 		for ( int i = 0; i < size; i++ ) {
-			comp = (DataSetComponent)
-				components.elementAt(i);
-			try {	datafile = comp.getDataFileName();
+			comp = (DataSetComponent)components.elementAt(i);
+			try {
+				datafile = comp.getDataFileName();
 				f = new File(datafile);
 				if ( !f.isAbsolute() ) {
-					datafile =	dataset.getDirectory() +
-							File.separator +
-							datafile;
+					datafile =	dataset.getDirectory() + File.separator + datafile;
 				}
 				if ( comp.getComponentType() == COMP_CU_LOCATIONS ) {
-					comp.setData (
-					StateCU_Location.readStateCUFile(
-					datafile));
+					comp.setData (StateCU_Location.readStateCUFile(datafile));
 				}
-				else if (comp.getType() ==
-					COMP_CROP_CHARACTERISTICS) {
-					comp.setData (
-					StateCU_CropCharacteristics.
-					readStateCUFile( datafile));
+				else if (comp.getType() == COMP_CROP_CHARACTERISTICS) {
+					comp.setData ( StateCU_CropCharacteristics.readStateCUFile( datafile));
 				}
-				else if (comp.getType() ==
-					COMP_BLANEY_CRIDDLE) {
-					comp.setData (
-					StateCU_BlaneyCriddle.readStateCUFile(
-					datafile));
+				else if (comp.getType() == COMP_BLANEY_CRIDDLE) {
+					comp.setData ( StateCU_BlaneyCriddle.readStateCUFile(datafile));
 				}
-				else if (comp.getType() ==
-					COMP_CLIMATE_STATIONS) {
-					comp.setData (
-					StateCU_ClimateStation.readStateCUFile(
-					datafile));
+				else if (comp.getType() == COMP_PENMAN_MONTEITH) {
+					comp.setData ( StateCU_PenmanMonteith.readStateCUFile(datafile));
+				}
+				else if (comp.getType() == COMP_CLIMATE_STATIONS) {
+					comp.setData ( StateCU_ClimateStation.readStateCUFile(datafile));
 				}
 			}
 			catch ( Exception e ) {
@@ -1956,11 +1757,11 @@ throws Exception
 			}
 		}
 	}
-	else {	// Read the control file???
+	else {
+		// Read the control file???
 	}
 	if ( read_warning.length() > 0 ) {
-		Message.printWarning ( 1, routine,
-		"Error reading data files:" + read_warning );
+		Message.printWarning ( 1, routine, "Error reading data files:" + read_warning );
 	}
 
 	return dataset;
@@ -1974,25 +1775,22 @@ the check file to the list in the GUI.  If problems are encountered when
 running data checks are added to the check file.
 @param int type - StateModComponent type.
 */
-public String runComponentChecks( int type, String fname, 
-String commands, String header )
+public String runComponentChecks( int type, String fname, String commands, String header )
 {
 	String check_file = "";
 	CheckFile chk = new CheckFile( fname, commands );
 	chk.addToHeader( header );
-	StateCU_ComponentDataCheck check = new StateCU_ComponentDataCheck(
-	type, chk, this);
-	// Run the data checks for the component and retrieve the
-	// finalized check file
+	StateCU_ComponentDataCheck check = new StateCU_ComponentDataCheck(type, chk, this);
+	// Run the data checks for the component and retrieve the finalized check file
 	CheckFile final_check = check.checkComponentType( null );
 	try {
 		final_check.finalizeCheckFile();
 		check_file = final_check.toString();
-	} catch (Exception e) {
+	}
+	catch (Exception e) {
 		Message.printWarning(2, "StateDMI_Processor.runComponentChecks",
 		"Check file: " +  final_check.toString() + " couldn't be finalized.");
-		Message.printWarning(3, "StateDMI_Processor.runComponentChecks",
-		e);
+		Message.printWarning(3, "StateDMI_Processor.runComponentChecks", e);
 	}
 	return check_file;
 }
@@ -2157,21 +1955,17 @@ comments are available.
 @exception IOException if there is an error writing the file.
 */
 /* TODO SAM Evaluate whether needed
-private void writeStateCUControlFile (	String filename_prev,
-					String filename,
-					String [] new_comments )
+private void writeStateCUControlFile ( String filename_prev, String filename, String [] new_comments )
 throws IOException
 {	String [] comment_str = { "#" };
 	String [] ignore_comment_str = { "#>" };
 	PrintWriter out = null;
-	String full_filename_prev = IOUtil.getPathUsingWorkingDir (
-		filename_prev );
+	String full_filename_prev = IOUtil.getPathUsingWorkingDir ( filename_prev );
 	String full_filename = IOUtil.getPathUsingWorkingDir ( filename );
 	out = IOUtil.processFileHeaders ( full_filename_prev, full_filename, 
 		new_comments, comment_str, ignore_comment_str, 0 );
 	if ( out == null ) {
-		throw new IOException ( "Error writing to \"" +
-			full_filename + "\"" );
+		throw new IOException ( "Error writing to \"" + full_filename + "\"" );
 	}
 	String cmnt = "#>";
 	// Missing data handled by formatting all as strings...
@@ -2179,144 +1973,72 @@ throws IOException
 	out.println ( cmnt );
 	out.println ( cmnt + "  StateCU Control File" );
 	out.println ( cmnt );
-	out.println ( cmnt +
-		"  Values are free-format except where noted." );
+	out.println ( cmnt + "  Values are free-format except where noted." );
 	out.println ( cmnt );
-	out.println ( cmnt +
-		"  Notes       comment:  First three non-comment lines are "+
-					" general notes");
-	out.println ( cmnt +
-		"  Begin/End nyr1,nyr2:  4-digit years for simulation period.");
-	out.println ( cmnt +
-		"                        The time series files can be longer.");
-	out.println ( cmnt +
-		"  CUMethod      flag1:  CU Method" );
-	out.println ( cmnt +
-		"                        1 = Blaney-Criddle" );
-	out.println ( cmnt +
-		"                        2 = Other uses (non-agriculture)" );
-	out.println ( cmnt +
-		"                        3 = Penman-Monteith" );
-	out.println ( cmnt +
-		"                        4 = Hargreaves" );
-	out.println ( cmnt +
-		"  PrecipMeth   RN_XCO:  Monthly precipitation method." );
-	out.println ( cmnt +
-		"                        1 = Soil Conservation Service" );
-	out.println ( cmnt +
-		"                        2 = United States Bureau of Rec." );
-	out.println ( cmnt +
-		"  DataSetType   iclim:  Data set type." );
-	out.println ( cmnt +
-		"                        0 = CU at climate stations (unit" +
-					"of area)" );
-	out.println ( cmnt +
-		"                        1 = CU at structures (ditches/wells)");
-	out.println ( cmnt +
-		"  WaterSupply isupply:  Water supply option (levels are" +
-		"incremental)." );
-	out.println ( cmnt +
-		"                        0 = none");
-	out.println ( cmnt +
-		"                        1 = supply limited");
-	out.println ( cmnt +
-		"                        2 = water rights considered");
-	out.println ( cmnt +
-		"                        3 = return flows considered");
-	out.println ( cmnt +
-		"                        4 = groundwater considered");
-	out.println ( cmnt +
-		"  InputSummary   sout:  Input summary flag." );
-	out.println ( cmnt +
-		"                        0 = output basic summary" );
-	out.println ( cmnt +
-		"                        1 = output detailed summary" );
-	out.println ( cmnt +
-		"  SoilMoisture   isim:  Soil moisture flag." );
-	out.println ( cmnt +
-		"                        0 = do not consider soil moisture" );
-	out.println ( cmnt +
-		"                        1 = consider user-initialized soil" +
-					" moisture" );
-	out.println ( cmnt +
-		"                        2 = consider run presimulation to" +
-					" initialize" );
-	out.println ( cmnt +
-		"  SoilMoist0   p***mo:  Initial soil moisture content for." );
-	out.println ( cmnt +
-		"                        senior, junior, other parcels" );
-	out.println ( cmnt +
-		"                        (fraction of capacity), format " +
-					"3f5.0.");
-	out.println ( cmnt +
-		"  SMProrate   iprtysm:  0 = operate soil moisture by " +
-					"proration");
-	out.println ( cmnt +
-		"                        1 = operate by priority" );
-	out.println ( cmnt +
-		"                        sprinkler separately." );
-	out.println ( cmnt +
-		"                        (REVISIT possible values?)" );
-	out.println ( cmnt +
-		" Output        typout:  Output summary flag (format i5).");
-	out.println ( cmnt +
-		"                        0 = output basic summary" );
-	out.println ( cmnt +
-		"                        1 = +irrigation water requirement" );
-	out.println ( cmnt +
-		"                            +water supply limited" );
-	out.println ( cmnt +
-		"                        2 = +water budget" );
-	out.println ( cmnt +
-		"                        3 = +water budget by structure" );
-	out.println ( cmnt +
-		"  IrrigMethod  iflood:  Output groundwater use by flood and" );
-	out.println ( cmnt +
-		"                        sprinkler separately." );
-	out.println ( cmnt +
-		"                        (REVISIT possible values?)" );
-	out.println ( cmnt +
-		"  StateMod      ddcsw:  StateMod output format switch" );
-	out.println ( cmnt +
-		"                        0 = no" );
-	out.println ( cmnt +
-		"                        1 = yes" );
-	out.println ( cmnt +
-		"  Daily        idaily:  Daily data switch" );
-	out.println ( cmnt +
-		"                        0 = (REVISIT what is zero?)" );
-	out.println ( cmnt +
-		"                        1 = daily diversions with daily" +
-					" admin" );
-	out.println ( cmnt +
-		"                        2 = daily diversions with monthly" +
-					" admin" );
-	out.println ( cmnt +
-		"                        3 = daily diversions with single" +
-					" admin" );
-	out.println ( cmnt +
-		"                        4 = monthly diversions with monthly"+
-					" admin" );
-	out.println ( cmnt +
-		"                        5 = monthly diversions with single"+
-					" admin" );
-	out.println ( cmnt +
-		"  AdminNum           :  Administration number for CU by" +
-					" priority." );
+	out.println ( cmnt + "  Notes       comment:  First three non-comment lines are general notes");
+	out.println ( cmnt + "  Begin/End nyr1,nyr2:  4-digit years for simulation period.");
+	out.println ( cmnt + "                        The time series files can be longer.");
+	out.println ( cmnt + "  CUMethod      flag1:  CU Method" );
+	out.println ( cmnt + "                        1 = Blaney-Criddle" );
+	out.println ( cmnt + "                        2 = Other uses (non-agriculture)" );
+	out.println ( cmnt + "                        3 = Penman-Monteith" );
+	out.println ( cmnt + "                        4 = Hargreaves" );
+	out.println ( cmnt + "  PrecipMeth   RN_XCO:  Monthly precipitation method." );
+	out.println ( cmnt + "                        1 = Soil Conservation Service" );
+	out.println ( cmnt + "                        2 = United States Bureau of Rec." );
+	out.println ( cmnt + "  DataSetType   iclim:  Data set type." );
+	out.println ( cmnt + "                        0 = CU at climate stations (unit of area)" );
+	out.println ( cmnt + "                        1 = CU at structures (ditches/wells)");
+	out.println ( cmnt + "  WaterSupply isupply:  Water supply option (levels are incremental)." );
+	out.println ( cmnt + "                        0 = none");
+	out.println ( cmnt + "                        1 = supply limited");
+	out.println ( cmnt + "                        2 = water rights considered");
+	out.println ( cmnt + "                        3 = return flows considered");
+	out.println ( cmnt + "                        4 = groundwater considered");
+	out.println ( cmnt + "  InputSummary   sout:  Input summary flag." );
+	out.println ( cmnt + "                        0 = output basic summary" );
+	out.println ( cmnt + "                        1 = output detailed summary" );
+	out.println ( cmnt + "  SoilMoisture   isim:  Soil moisture flag." );
+	out.println ( cmnt + "                        0 = do not consider soil moisture" );
+	out.println ( cmnt + "                        1 = consider user-initialized soil moisture" );
+	out.println ( cmnt + "                        2 = consider run presimulation to initialize" );
+	out.println ( cmnt + "  SoilMoist0   p***mo:  Initial soil moisture content for." );
+	out.println ( cmnt + "                        senior, junior, other parcels" );
+	out.println ( cmnt + "                        (fraction of capacity), format 3f5.0.");
+	out.println ( cmnt + "  SMProrate   iprtysm:  0 = operate soil moisture by proration");
+	out.println ( cmnt + "                        1 = operate by priority" );
+	out.println ( cmnt + "                        sprinkler separately." );
+	out.println ( cmnt + "                        (REVISIT possible values?)" );
+	out.println ( cmnt + " Output        typout:  Output summary flag (format i5).");
+	out.println ( cmnt + "                        0 = output basic summary" );
+	out.println ( cmnt + "                        1 = +irrigation water requirement" );
+	out.println ( cmnt + "                            +water supply limited" );
+	out.println ( cmnt + "                        2 = +water budget" );
+	out.println ( cmnt + "                        3 = +water budget by structure" );
+	out.println ( cmnt + "  IrrigMethod  iflood:  Output groundwater use by flood and" );
+	out.println ( cmnt + "                        sprinkler separately." );
+	out.println ( cmnt + "                        (REVISIT possible values?)" );
+	out.println ( cmnt + "  StateMod      ddcsw:  StateMod output format switch" );
+	out.println ( cmnt + "                        0 = no" );
+	out.println ( cmnt + "                        1 = yes" );
+	out.println ( cmnt + "  Daily        idaily:  Daily data switch" );
+	out.println ( cmnt + "                        0 = (REVISIT what is zero?)" );
+	out.println ( cmnt + "                        1 = daily diversions with daily admin" );
+	out.println ( cmnt + "                        2 = daily diversions with monthly admin" );
+	out.println ( cmnt + "                        3 = daily diversions with single admin" );
+	out.println ( cmnt + "                        4 = monthly diversions with monthly admin" );
+	out.println ( cmnt + "                        5 = monthly diversions with single admin" );
+	out.println ( cmnt + "  AdminNum           :  Administration number for CU by priority." );
 	out.println ( cmnt );
-	out.println ( cmnt +	
-	" StationID  Lat   Elev            Region1      Region2  " +
-	"      StationName" );
-	out.println ( cmnt +	
-	"--------------------------------------------------------------------" +
-	"--------------------" );
+	out.println ( cmnt + " StationID  Lat   Elev            Region1      Region2        StationName" );
+	out.println ( cmnt + "----------------------------------------------------------------------------------------" );
 	out.println ( cmnt + "EndHeader" );
 
 	out.println ( getComment(0) );
 	out.println ( getComment(1) );
 	out.println ( getComment(2) );
 	// Just print all, even if missing...
-	out.println (	StringUtil.formatString( getNyr1(),"%4d") + " " +
+	out.println ( StringUtil.formatString( getNyr1(),"%4d") + " " +
 		StringUtil.formatString(getNyr2(),"%4d") );
 	out.println ( getFlag1() );
 	out.println ( getRn_xco() );
@@ -2324,7 +2046,7 @@ throws IOException
 	out.println ( getIsupply() );
 	out.println ( getSout() );
 	out.println ( getIsm() );
-	out.println (	StringUtil.formatString( getPsenmo(),"%5.0f") +
+	out.println ( StringUtil.formatString( getPsenmo(),"%5.0f") +
 			StringUtil.formatString( getPjunmo(),"%5.0f") +
 			StringUtil.formatString( getPothmo(),"%5.0f") );
 	out.println ( getTypout() );
@@ -2332,8 +2054,7 @@ throws IOException
 	out.println ( getIflood() );
 	out.println ( getDdcsw() );
 	out.println ( getIdaily() );
-	out.println ( StringUtil.formatString(
-			getAdminNumForCUByPriority(),"%11.0f"));
+	out.println ( StringUtil.formatString(getAdminNumForCUByPriority(),"%11.0f"));
 	out.flush();
 	out.close();
 	out = null;
@@ -2351,14 +2072,12 @@ processing headers).  Specify as null if no previous file is available.
 comments are available.
 @exception IOException if there is an error writing the file.
 */
-public static void writeXMLFile (	String filename_prev, String filename,
-					StateCU_DataSet dataset,
-					String [] new_comments )
+public static void writeXMLFile ( String filename_prev, String filename,
+					StateCU_DataSet dataset, String [] new_comments )
 throws IOException
-{	/* REVISIT - need to figure out if this is in the base class
+{	/* TODO - need to figure out if this is in the base class
 	PrintWriter out = null;
-	String full_filename_prev = IOUtil.getPathUsingWorkingDir (
-		filename_prev );
+	String full_filename_prev = IOUtil.getPathUsingWorkingDir ( filename_prev );
 	if ( !StringUtil.endsWithIgnoreCase(filename,".xml") ) {
 		filename = filename + ".xml";
 	}
@@ -2366,8 +2085,7 @@ throws IOException
 	out = IOUtil.processFileHeaders ( full_filename_prev, full_filename, 
 		new_comments, comment_str, ignore_comment_str, 0 );
 	if ( out == null ) {
-		throw new IOException ( "Error writing to \"" +
-			full_filename + "\"" );
+		throw new IOException ( "Error writing to \"" + full_filename + "\"" );
 	}
 	writeDataSetToXMLFile ( dataset, out );
 	out.flush();
@@ -2383,8 +2101,7 @@ Write a data set to an opened XML file.
 @exceptoin IOException if an error occurs.
 */
 /* TODO SAM 2007-03-01 Evaluate whether needed
-private static void writeDataSetToXMLFile (	StateCU_DataSet dataset,
-						PrintWriter out )
+private static void writeDataSetToXMLFile (	StateCU_DataSet dataset, PrintWriter out )
 throws IOException
 {	// Start XML tag...
 	out.println ("<!--" );
@@ -2396,8 +2113,7 @@ throws IOException
 
 	out.println ("<StateCU_DataSet " +
 		"Type=\"" + lookupTypeName(dataset.getDataSetType()) + "\"" +
-		"BaseName=\"" + dataset.getBaseName() + "\"" +
-		">" );
+		"BaseName=\"" + dataset.getBaseName() + "\"" + ">" );
 
 	int num = 0;
 	Vector data_Vector = dataset.getComponents();
@@ -2413,15 +2129,10 @@ throws IOException
 		}
 		out.println ( indent1 + "<DataSetComponent" );
 
-		out.println ( indent2 + "Type=\"" +
-			DataSetComponent.lookupComponentName(
-			comp.getType()) + "\"" );
-		out.println ( indent2 + "DataFile=\"" +
-			comp.getDataFileName() + "\"" );
-		out.println ( indent2 + "ListFile=\"" +
-			comp.getListFileName() + "\"" );
-		out.println ( indent2 + "CommandsFile=\"" +
-			comp.getCommandsFileName() + "\"" );
+		out.println ( indent2 + "Type=\"" + DataSetComponent.lookupComponentName(comp.getType()) + "\"" );
+		out.println ( indent2 + "DataFile=\"" + comp.getDataFileName() + "\"" );
+		out.println ( indent2 + "ListFile=\"" + comp.getListFileName() + "\"" );
+		out.println ( indent2 + "CommandsFile=\"" + comp.getCommandsFileName() + "\"" );
 		out.println ( indent2 + ">" );
 
 		out.println ( indent1 + "</DataSetComponent>");
@@ -2430,4 +2141,4 @@ throws IOException
 }
 */
 
-} // End StateCU_DataSet
+}
