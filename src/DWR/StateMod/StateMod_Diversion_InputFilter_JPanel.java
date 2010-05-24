@@ -1,13 +1,3 @@
-//------------------------------------------------------------------------------
-// StateMod_Diversion_InputFilter_JPanel - input filter panel diversion data
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-//
-// 2004-10-25	Steven A. Malers, RTi	Implement for StateMod GUI query tool.
-//------------------------------------------------------------------------------
-
 package DWR.StateMod;
 
 import java.util.List;
@@ -15,9 +5,11 @@ import java.util.Vector;
 
 import RTi.Util.GUI.InputFilter;
 import RTi.Util.GUI.InputFilter_JPanel;
-import RTi.Util.IO.PropList;
 import RTi.Util.String.StringUtil;
 
+/**
+Input filter panel for StateMod diversion data.
+*/
 public class StateMod_Diversion_InputFilter_JPanel extends InputFilter_JPanel
 {
 
@@ -25,13 +17,13 @@ public class StateMod_Diversion_InputFilter_JPanel extends InputFilter_JPanel
 Create an InputFilter_JPanel for creating where clauses
 for StateMod diversion station queries.  This is used by the StateMod GUI.
 @param dataset StateMod_DataSet instance.
-@return a JPanel containing InputFilter instances for StateMod_Diversion
-queries.
+@return a JPanel containing InputFilter instances for StateMod_Diversion queries.
 @exception Exception if there is an error.
 */
 public StateMod_Diversion_InputFilter_JPanel ( StateMod_DataSet dataset )
 throws Exception
-{	List input_filters = new Vector(15);
+{	super();
+    List input_filters = new Vector(15);
 	InputFilter filter = null;
 	input_filters.add ( new InputFilter (
 		"", "",
@@ -110,17 +102,10 @@ throws Exception
 		StateMod_Diversion.getDemsrcChoices(false), true );
 	filter.setTokenInfo ( " ", 0 );
 	input_filters.add ( filter );
-	/* REVISIT SAM 2004-10-25 monthly efficiencies?
-		Returns?
-	*/
+	// TODO SAM 2004-10-25 monthly efficiencies? Returns?
 
-	PropList filter_props = new PropList ( "InputFilter" );
-	filter_props.set ( "NumFilterGroups=3" );
-	setToolTipText (
-		"<HTML>HydroBase queries can be filtered" +
-		"<BR>based on station data." +
-		"</HTML>" );
-	setInputFilters ( input_filters, filter_props );
+	setToolTipText ( "<html>HydroBase queries can be filtered<br>based on station data.</html>" );
+	setInputFilters ( input_filters, 3, -1 );
 }
 
 }
