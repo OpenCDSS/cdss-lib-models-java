@@ -90,6 +90,7 @@ import RTi.Util.String.StringUtil;
 import RTi.Util.Time.DateTime;
 import RTi.Util.Time.TimeInterval;
 import RTi.Util.Time.TimeUtil;
+import RTi.Util.Time.YearType;
 
 // TODO SAM 2009-06-02 Evaluate renaming StateMod_TSUtil to be consistent with other static utility classes
 // and avoid confusion with the StateMod_TimeSeries class, which may be implemented to wrap normal time series.
@@ -1536,9 +1537,8 @@ Currently this is only enabled for monthly data.
 
 <tr>
 <td><b>CalendarType</b></td>
-<td>The type of calendar, either "WaterYear" or "WYR" (Oct through Sep);
-"NovToOct" or "IrrigationYear" or "IYR" (Nov through Oct);
-or "CalendarYear" or "CYR" (Jan through Dec).
+<td>The type of calendar, either "Water" (Oct through Sep), "NovToOct" (Nov through Oct),
+or "Calendar" (Jan through Dec), consistent with the YearType enumeration.
 </td>
 <td>CalenderYear (but may be made sensitive to the data type or units in the future).</td>
 </tr>
@@ -1577,17 +1577,17 @@ throws Exception
 	}
 	String prop_value = props.getValue ( "CalendarType" );
 	String output_format = "CYR"; // Default
-	if ( prop_value != null ) {
-		output_format = prop_value;
+	if ( prop_value == null ) {
+		prop_value = "" + YearType.CALENDAR;
 	}
-	if ( output_format.equalsIgnoreCase("CalendarYear") ) {
+	YearType yearType = YearType.valueOfIgnoreCase(prop_value);
+	if ( yearType == YearType.CALENDAR ) {
 		output_format = "CYR";
 	}
-	else if ( output_format.equalsIgnoreCase("WaterYear") ) {
+	else if ( yearType == YearType.WATER ) {
 		output_format = "WYR";
 	}
-	else if ( output_format.equalsIgnoreCase("IrrigationYear") ||
-		output_format.equalsIgnoreCase("NovToOct")) {
+	else if ( yearType == YearType.NOV_TO_OCT ) {
 		output_format = "IYR";
 	}
 
@@ -2695,12 +2695,12 @@ point).  The default is is 2.  This should be set according to the datatype
 in calling routines and is not automatically set here.  The full width for time series is 8 characters.
 @exception Exception if there is an error writing the file.
 */
-public static void writeTimeSeriesList ( String infile, String outfile, List newcomments, List tslist, 
+public static void writeTimeSeriesList ( String infile, String outfile, List<String> newcomments, List<TS> tslist, 
 	DateTime date1, DateTime date2, String output_format, double MissingDV, int precision )
 throws Exception
-{	List commentIndicators = new Vector(1);
+{	List<String> commentIndicators = new Vector(1);
 	commentIndicators.add ( "#" );
-	List ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector(1);
 	ignoredCommentIndicators.add ( "#>");
 	String rtn = "StateMod_TS.writeTimeSeriesList";
 
@@ -2745,9 +2745,8 @@ The IOUtil.getPathUsingWorkingDir() method is applied to the filename.
 
 <tr>
 <td><b>CalendarType</b></td>
-<td>The type of calendar, either "WaterYear" or "WYR" (Oct through Sep);
-"IrrigationYear", "NovToOct", or "IYR";
-or "CalendarYear" or "CYR" (Jan through Dec).
+<td>The type of calendar, either "Water" (Oct through Sep);
+"NovToOct", or "Calendar" (Jan through Dec), consistent with the YearType enumeration.
 </td>
 <td>CalenderYear (but may be made sensitive to the data type or units in the future).</td>
 </tr>
@@ -2822,7 +2821,7 @@ then -1 would be used for the precision.
 </table>
 @throws Exception if there is an error writing the file.
 */
-public static void writeTimeSeriesList ( List tslist, PropList props )
+public static void writeTimeSeriesList ( List<TS> tslist, PropList props )
 throws Exception
 {	String prop_value = null;
 	String routine = "StateMod_TS.writeTimeSeriesList";
@@ -2831,16 +2830,17 @@ throws Exception
 
 	prop_value = props.getValue ( "CalendarType" );
 	String output_format = "CYR";	// Default
-	if ( prop_value != null ) {
-		output_format = prop_value;
+	if ( prop_value == null ) {
+		prop_value = "" + YearType.CALENDAR;
 	}
-	if ( output_format.equalsIgnoreCase("CalendarYear") ) {
+	YearType yearType = YearType.valueOfIgnoreCase(prop_value);
+	if ( yearType == YearType.CALENDAR ) {
 		output_format = "CYR";
 	}
-	else if ( output_format.equalsIgnoreCase("WaterYear") ) {
+	else if ( yearType == YearType.WATER ) {
 		output_format = "WYR";
 	}
-	else if ( output_format.equalsIgnoreCase("IrrigationYear") || output_format.equalsIgnoreCase("NovToOct")) {
+	else if ( yearType == YearType.NOV_TO_OCT ) {
 		output_format = "IYR";
 	}
 
