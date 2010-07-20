@@ -1013,4 +1013,4 @@ private void showPopupMenu(MouseEvent e)
 	__popup_JPopupMenu.show(e.getComponent(), pt.x, pt.y);
 }
 
-} // End of StateMod_DataSet_JTree
+}
