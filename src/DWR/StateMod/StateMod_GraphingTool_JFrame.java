@@ -158,6 +158,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
+import RTi.GRTS.TSGraphType;
 import RTi.GRTS.TSProduct;
 import RTi.TS.DateValueTS;
 import RTi.TS.TS;
@@ -1304,22 +1305,17 @@ private void setupGUI() {
 	__autoLineCopyJCheckBox = new JCheckBox("Automatically fill "
 		+ "initial line content on \"Add a Row\".", true);
 	__autoLineCopyJCheckBox.setToolTipText (
-		"<HTML>Causes new rows to be a copy of the previous " +
-		"row.</HTML>" );
+		"<html>Causes new rows to be a copy of the previous row.</html>" );
 
 	__graphType_JComboBox = new SimpleJComboBox();
 	__graphType_JComboBox.setToolTipText (
-		"<HTML>The graph type indicates how to format in-memory " +
-		"time series.<BR>" +
-		"Multiple graphs can be displayed from the same time series."+
-		"</HTML" );
-	// First one is "Unknown"
-	for (int i = 1; i < TSProduct.GRAPH_TYPE_NAMES.length; i++) {
-		if (TSProduct.GRAPH_TYPE_NAMES[i].equalsIgnoreCase(
-			"DoubleMass")) {
-			continue;
-		}
-		__graphType_JComboBox.add(TSProduct.GRAPH_TYPE_NAMES[i]);
+		"<html>The graph type indicates how to format in-memory time series.<BR>" +
+		"Multiple graphs can be displayed from the same time series.</html>" );
+    for ( TSGraphType graphType: TSGraphType.values() ) {
+        if ( (graphType == TSGraphType.DOUBLE_MASS) || (graphType == TSGraphType.UNKNOWN) )  {
+            continue;
+        }
+		__graphType_JComboBox.add("" + graphType);
 	}
 	__graphType_JComboBox.select("Line");
 	__graphType_JComboBox.addItemListener(this);
