@@ -235,8 +235,7 @@ IntreamFlow     *.B43
 Use getTimeSeriesDataTypes() to get the list of parameters to use
 for graphical interfaces, etc.  Important:  the lists are in the order of the
 StateMod binary file parameters, with no gaps.  If the lists need to be
-alphabetized, this should be done separately, not by reordering the arrays
-below.
+alphabetized, this should be done separately, not by reordering the arrays below.
 */
 
 /**
@@ -298,7 +297,6 @@ the *.xrg file by StateMod's -report module.  The raw monthly data are in the
 *.B44 (monthly) binary output file.  The raw daily data are in the
 *.B50 (daily) binary output file.
 */
-
 private static final String[] __output_ts_data_types_reservoir_0100 = {
 	"General - InitialStorage",
 	"Supply From River by - RiverPriority",
@@ -368,11 +366,9 @@ private static final String[] __output_ts_data_types_reservoir_0969 = {
 /**
 The instream flow station parameters are written to
 the *.xdg file by StateMod's -report module.  The raw monthly data are in the
-*.B43 (monthly) binary output file.  The raw daily data are in the *.B49
-(daily) binary output file.
+*.B43 (monthly) binary output file.  The raw daily data are in the *.B49 (daily) binary output file.
 As per Ray Bennett 2003-11-05 email, all parameters are valid for output.
 */
-
 private static final String[] __output_ts_data_types_instream_0100 = {
 	"Demand - ConsDemand",
 	"Water Supply - FromRiverByPriority",
@@ -435,8 +431,7 @@ private static final String[] __output_ts_data_types_instream_0969 = {
 
 /**
 The diversion station parameters are written to
-the *.xdg file by StateMod's -report module.  The raw data are in the *.B43
-(monthly) binary output file.
+the *.xdg file by StateMod's -report module.  The raw data are in the *.B43 (monthly) binary output file.
 As per Ray Bennett 2003-11-05 email, all parameters are valid for output.
 */
 private static final String[] __output_ts_data_types_diversion_0100 = {
@@ -526,7 +521,6 @@ the *.wdg file by StateMod's -report module.  The raw monthly data are in the
 *.B42 (monthly) binary output file.  The raw daily data are in the *.B65 (daily)
 binary output file.
 */
-
 private static final String[] __output_ts_data_types_well_0901 = {
 	"Demand - Demand",
 	"Water Supply - FromWell",
@@ -637,8 +631,7 @@ throws Exception
 			// Just add to the list...
 			yts = (YearTS)tsArray[its];
 		}
-		else if (tsArray[its].getDataIntervalBase() 
-			== TimeInterval.MONTH) {
+		else if (tsArray[its].getDataIntervalBase() == TimeInterval.MONTH) {
 			// Create a new time series and accumulate...
 			tsident = new TSIdent(tsArray[its].getIdentifier());
 			tsident.setInterval("Year");
@@ -693,8 +686,7 @@ throws Exception
 	while (dt1.lessThanOrEqualTo(dt2)) {
 		value1 = ytsArray[0].getDataValue(dt1);
 		value2 = ytsArray[1].getDataValue(dt1);
-		if (!ytsArray[0].isDataMissing(value1)
-			&& !ytsArray[1].isDataMissing(value2)) {
+		if (!ytsArray[0].isDataMissing(value1) && !ytsArray[1].isDataMissing(value2)) {
 			total1 += value1;
 			total2 += value2;
 			count++;
@@ -724,8 +716,7 @@ to show a blank value and not an empty cell.
  */
 public static String[] checkForMissingValues( String[] data )
 {
-	if( data != null)
-	{
+	if( data != null) {
 		for( int i = 0; i < data.length; i++ ) {
 			String element = data[i].trim();
 			if( element == null || element.length() == 0 ) {
@@ -764,9 +755,9 @@ throws Exception
 		n1 = data1_Vector.size();
 		data2_Vector = StateMod_WellRight.readStateModFile(full_path2 );
 		n2 = data2_Vector.size();
-		List allids_Vector = new Vector(n1*3/2);	// guess at size
+		List allids_Vector = new Vector(n1*3/2); // guess at size
 		double decree;
-		double decree1_alltotal = 0.0;	// All decrees in file
+		double decree1_alltotal = 0.0; // All decrees in file
 		double decree2_alltotal = 0.0;
 		int missing_n1 = 0;
 		int missing_n2 = 0;
@@ -1387,13 +1378,11 @@ Create a list of time series from a list of water rights.  A non-null list is gu
 TimeInterval.DAY, TimeInterval.MONTH, TimeInterval.YEAR, or TimeInterval.IRREGULAR
 (smaller interval is slower).
 @param spatial_aggregation If 0, create a time series for the location,
-which is the sum of the water rights at that location.
-If 1, time series will
+which is the sum of the water rights at that location.  If 1, time series will
 be created by parcel (requires parcel information in right - only for well rights).
 If 2, individual time series will be created (essentially step functions with one step).
 @param parcel_year If spatial_aggregation = 1, include the year to specify the years for parcel identifiers.
-@param include_dataset_totals If true, create a time series including a total
-of all time series.
+@param include_dataset_totals If true, create a time series including a total of all time series.
 @param start Start DateTime for the time series.  If not specified, the date
 corresponding to the first right for a location will be used.
 @param end End DateTime for the time series.  If not specified, the date
@@ -1664,7 +1653,7 @@ throws Exception
 					}
 					else {
 						ts.setDescription ( smright.getLocationIdentifier() + " Total " + nodetype + " Rights for Parcel" );
-										}
+					}
 				}
 				else {
 					// Individual rights
@@ -2011,8 +2000,7 @@ dataset.  Note that this is always a calendar date.  The time series that are ch
 <li>StateMod_DataSet.COMP_STREAMGAGE_HISTORICAL_TS_MONTHLY</li>
 </ol>
 @param dataset the dataset in which to check for the latest POR
-@return a DateTime object with the latest date in the period, or null if no
-data are available.
+@return a DateTime object with the latest date in the period, or null if no data are available.
 */
 public static DateTime findLatestDateInPOR(StateMod_DataSet dataset)
 {	DateTime newDate = null;
@@ -2250,7 +2238,8 @@ public static String formatDataLabel ( String id, String name )
 	else if ( name.equals("") ) {
 		return id;
 	}
-	else {	return id + " (" + name + ")";
+	else {
+		return id + " (" + name + ")";
 	}
 }
 
@@ -2302,14 +2291,12 @@ public static DayTS getDailyTimeSeries ( String ID, String dailyID,
 		double avgValue;
 		DateTime ddate;
 		for ( DateTime date = new DateTime ( date1 ); date.lessThanOrEqualTo ( date2 );
-			date.addInterval ( TimeInterval.MONTH, 1 )) 
-		{
+			date.addInterval ( TimeInterval.MONTH, 1 )) {
 			numDaysInMonth = TimeUtil.numDaysInMonth ( date );
 			avgValue = monthTS.getDataValue ( date )* convertAFtoCFS / numDaysInMonth;
 
 			ddate = new DateTime ( date );
-			for ( int i=0; i<numDaysInMonth; i++ ) 
-			{
+			for ( int i=0; i<numDaysInMonth; i++ ) {
 				newDayTS.setDataValue ( ddate, avgValue );
 				ddate.addInterval ( TimeInterval.DAY, 1 );
 			}
@@ -2327,8 +2314,7 @@ public static DayTS getDailyTimeSeries ( String ID, String dailyID,
 	}
 
 	// if dailyID != ID and pattern is desired
-	else if ( !calculate )
-	{
+	else if ( !calculate ) {
 		if ( dayTS == null ) {
 			Message.printWarning ( 1, "StateMod_GUIUtil.getDailyTimeSeries", "Daily time series pattern is null." );
 			return null;
@@ -2336,8 +2322,7 @@ public static DayTS getDailyTimeSeries ( String ID, String dailyID,
 		return dayTS;
 	}
 	// if dailyID != dayTS identifier and calculation is desired
-	else
-	{
+	else {
 		if ( dayTS == null ) {
 			Message.printWarning ( 1, "StateMod_GUIUtil.getDailyTimeSeries", "Daily time series pattern is null." );
 			return null;
@@ -2373,48 +2358,48 @@ public static DayTS getDailyTimeSeries ( String ID, String dailyID,
 
 		// check for units we can handle
 
-
 		Message.printStatus ( 1, rtn, "Looking through dates " + dayTS.getDate1() + " " + dayTS.getDate2());
 		for ( DateTime date = new DateTime ( dayTS.getDate1() );
 			date.lessThanOrEqualTo ( dayTS.getDate2() );
-			date.addInterval ( TimeInterval.MONTH, 1 )) 
-		{
+			date.addInterval ( TimeInterval.MONTH, 1 )) {
 			try {
-			enddate = new DateTime ( date );
-			enddate.addInterval ( TimeInterval.MONTH, 1 );
-
-			numValuesInMonth = 0;
-			sum = 0;
-			for ( ddate = new DateTime ( date ); ddate.lessThan( enddate ); ddate.addInterval ( TimeInterval.DAY, 1 ) )
-			{
-				value = dayTS.getDataValue(ddate);
-				if ( !dayTS.isDataMissing ( value )) {
-					numValuesInMonth++;
-					// value is CFS, need AF/D
-					sum += value;
+				enddate = new DateTime ( date );
+				enddate.addInterval ( TimeInterval.MONTH, 1 );
+	
+				numValuesInMonth = 0;
+				sum = 0;
+				for ( ddate = new DateTime ( date ); ddate.lessThan( enddate ); ddate.addInterval ( TimeInterval.DAY, 1 ) ) {
+					value = dayTS.getDataValue(ddate);
+					if ( !dayTS.isDataMissing ( value )) {
+						numValuesInMonth++;
+						// value is CFS, need AF/D
+						sum += value;
+					}
 				}
-			}
-
-			if ( Message.isDebugOn ) {
-				Message.printDebug ( 30, rtn, "Sum for month " + date.getMonth() + " is " + sum );
-				Message.printDebug ( 30, rtn, "monthTS data value is " + monthTS.getDataValue(date));
-				Message.printDebug ( 30, rtn, "numDaysInMonth is " + TimeUtil.numDaysInMonth ( date ) );
-				Message.printDebug ( 30, rtn, "numValuesInMonth is " + numValuesInMonth );
-			}
-				
-			// to accomodate for missing, create a ratio as follows
-			//   monthly value / numDaysInMonth divided by sum / numValuesInMonth
-			if ( isFlow )
-				ratio = ( monthTS.getDataValue(date)*convertAFtoCFS / 
-				TimeUtil.numDaysInMonth ( date)) / ( sum / numValuesInMonth );
-			else
-				ratio = monthTS.getDataValue(date) / ( sum / numValuesInMonth );
-			if ( Message.isDebugOn )
-				Message.printDebug ( 30, "StateMod_GUIUtil.getDailyTimeSeries", "Ratio is " + ratio );
-
-			for ( ddate = new DateTime ( date ); ddate.lessThan( enddate ); ddate.addInterval ( TimeInterval.DAY, 1 ) ){
-				newDayTS.setDataValue ( ddate, dayTS.getDataValue (ddate) * ratio );
-			}
+	
+				if ( Message.isDebugOn ) {
+					Message.printDebug ( 30, rtn, "Sum for month " + date.getMonth() + " is " + sum );
+					Message.printDebug ( 30, rtn, "monthTS data value is " + monthTS.getDataValue(date));
+					Message.printDebug ( 30, rtn, "numDaysInMonth is " + TimeUtil.numDaysInMonth ( date ) );
+					Message.printDebug ( 30, rtn, "numValuesInMonth is " + numValuesInMonth );
+				}
+					
+				// to accomodate for missing, create a ratio as follows
+				//   monthly value / numDaysInMonth divided by sum / numValuesInMonth
+				if ( isFlow ) {
+					ratio = ( monthTS.getDataValue(date)*convertAFtoCFS / 
+					TimeUtil.numDaysInMonth ( date)) / ( sum / numValuesInMonth );
+				}
+				else {
+					ratio = monthTS.getDataValue(date) / ( sum / numValuesInMonth );
+				}
+				if ( Message.isDebugOn ) {
+					Message.printDebug ( 30, "StateMod_GUIUtil.getDailyTimeSeries", "Ratio is " + ratio );
+				}
+	
+				for ( ddate = new DateTime ( date ); ddate.lessThan( enddate ); ddate.addInterval ( TimeInterval.DAY, 1 ) ){
+					newDayTS.setDataValue ( ddate, dayTS.getDataValue (ddate) * ratio );
+				}
 			} catch ( Exception e ) {
 				Message.printWarning ( 2, rtn, e);
 			}
@@ -2459,7 +2444,7 @@ Return the list of water rights for a station.  The "cgoto" value in the water
 rights is compared with the supplied station identifier.
 @param station_id Station identifier to match.
 @param rights_Vector The full list of water rights to search.
-@return the list of water rights that match the station identifer.  A non-null
+@return the list of water rights that match the station identifier.  A non-null
 list is guaranteed (but may have zero length).
 */
 public static List getRightsForStation ( String station_id, List rights_Vector )
@@ -2559,8 +2544,8 @@ public static String getStateModExecutable ()
 }
 
 /**
-Return the StateMod executable.  This can be a full path or if not, the PATH
-environment variable is relied on to find the executable.
+Return the StateMod executable that is by default used with the GUI.
+This can be a full path or if not, the PATH environment variable is relied on to find the executable.
 By default this is expanded if any ${property} tokens are used (e.g., ${Home} for
 the software installation home).
 @return the StateMod executable name.
@@ -6582,8 +6567,7 @@ public static void setSmDeltaExecutable ( String smdeltaExecutable )
 
 /**
 Set the program to use when running StateMod.  In general, this should just be
-the program name and rely on the PATH to find.  However, a full path can be
-specified to override the PATH.
+the program name and rely on the PATH to find.  However, a full path can be specified to override the PATH.
 @param statemodExecutable name of StateMod executable to run.
 */
 public static void setStateModExecutable ( String statemodExecutable )
