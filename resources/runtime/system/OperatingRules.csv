@@ -1,0 +1,73 @@
+# Operating Rule Summary,,,,,,,,,,,
+# Exported from OperatingRules.xls:
+#   * These comments were added
+#   * The header values were enclosed in double quotes
+#   * For the Carrier Allowed column - see footnote (1)
+#   * For the Transit and Conveyance Loss Allowed column - see footnote (3)
+# Any row that starts with a number is treated as an operating rule
+"Rule","Description","Source 1","Source 2","Destination","Destination Location","Delivery Method","Carrier Allowed","Associated Plan Allowed","Diversion Type","Transit and Conveyance Loss Allowed","Comment"
+General Reservoir Rules,,,,,,,,,,,Data
+1,Reservoir to Instream Flow,Reservoir,NA,Instream Flow,Downstream,River,No,No,Diversion,No,None
+2,Reserovir to Diversion or Reservoir,Reservoir,NA,Diversion or Reservoir,Downstream,River,Yes,No,Diversion,No,None
+3,Reservoir to Carrier,Reservoir,NA,Carrier,Downstream,River,Yes,No,Diversion,No,None
+4,Reservoir to a Diversion by Exchange,Reservoir,NA,Diversion,Upstream,River,No,No,Diversion,No,None
+5,Reservoir to a Reservoir by Exchange,Reservoir,NA,Reservoir,Downstream,River,No,No,Diversion,No,None
+6,Reservoir Paper Exchange,Reservoir,NA,Reservoir,Source,Bookover,No,No,Diversion,No,None
+7,Reservoir to a Carrier by Exchange,Reservoir,NA,Carrier,Upstream,River,Yes,No,Diversion,No,None
+8,Out-of-Priority Bookover,Reservoir,NA,Reservoir,Downstream,River,No,No,Diversion,No,None
+9,Reservoir Release to Target,Reservoir,NA,NA,Downstream,River,No,No,Diversion,No,None
+10,General Reservoir Replacement,Reservoir,NA,Diversion,Downstream,River,No,No,Diversion or Depletion,No,StateMod determines if the supply is River or by exchange
+11,Carrier to a Ditch or Reservoir,Water Right,NA,Diversion or Reservoir,Downstream,Carrier,Yes,No,Diversion,No,Same as type 32 but does not allow Reuse and Loss
+12,Reoperation,NA,NA,NA,Downstream,River,No,No,NA,No,None
+13,La Plata Compact (Index Flow),River,NA,Instream Flow,Downstream,River,No,No,Diversion,No,None
+14,Carrier with Constrained Demand,Diversion,NA,Diversion or Reservoir,Downstream,River,Yes,No,Diversion,No,None
+15,Interruptable Supply,Diversion Water Right,NA,Instream Flow,Downstream,River,No,No,Diversion,No,None
+,,,,,,,,,,,
+Generic rules originally developed for the Rio Grande,,,,,,,,,,,
+16,Direct Flow Storage,Diversion Water Right,NA,Reservoir,Upstream,River,No,No,Diversion,No,None
+17,Rio Grande Compact - Rio Grande,Stream Gage_1,Stream Gage_2 Required,Instream Flow,Downstream,River,No,No,Diversion,No,Compact Data
+18,Rio Grande Compact - Conejos,Stream Gage_1+C7,Stream Gage_2 Required,Instream Flow,Downstream,River,No,No,Diversion,No,Compact Data
+19,Split Channel Operations,River,NA,Diversion,Downstream,River,No,No,Diversion,No,None
+,,,,,,,,,,,
+,,,,,,,,,,,
+,,,,,,,,,,,
+San Juan Rules,,,,,,,,,,,
+20,San Juan Recovery,Reservoir,NA,NA,Source,River,No,No,NA,No,None
+,,,,,,,,,,,
+Generic rules originally developed for the Rio Grande,,,,,,,,,,,
+21,Wells with Sprinkler Use,NA,NA,Well,Source,River,No,No,NA,No,None
+22,Soil Moisture Use,NA,NA,Diversion and Well,Source,River,No,No,NA,No,None
+,,,,,,,,,,,
+Generic Rules originally developed for the South Platte,,,,,,,,,,,
+23,Downstream Call,River,NA,Downstream Call,Downstream,River,No,No,NA,No,None
+24,River Flow Exchange,Water Right % Owned,T&C Plan Allowed,"Div, Res, or Carrier",Upstream,River,Yes,T&C,Diversion or Depletion,Yes,Exchange Limit
+25,River Flow Bypass,Water Right % Owned,T&C Plan Allowed,"Div, Res, or Carrier",Downstream,River,Yes,T&C,Diversion or Depletion,Yes,Exchange Limit
+26,Not Currently Used,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+27,Plan or Reservoir Reuse - River,"Reuse Plan, Acct Plan or Reuse Reservoir",T&C Plan Allowed,"Div, Res, or Carrier",Downstream,River,Yes,Reuse,Diversion or Depletion,Yes,None
+28,Plan or Reservoir Reuse - Exchange,Reservoir or Reuse Plan or Acct Plan,T&C Plan Allowed,"Div, Res, or Carrier",Upstream,River,Yes,Reuse,Diversion or Depletion,Yes,None
+29,Plan - Spill,Reuse or Acct Plan,T&C Plan Allowed,River,Source,River,No,No,NA,No,None
+30,Reservoir Re Diversion,Opr Right,NA,Reservoir,Source,River,Yes,No,NA,No,None
+31,Carrier to a Ditch or Reservoir with Reuse Exchange,Diversion Water Right,Reuse Plan Allowed,"Div, Res, or Carrier",Downstream,Carrier,Yes,Reuse,Diversion or Depletion,Yes,None
+32,Plan to a Ditch or Reservoir with Reuse Direct,Reservoir,Reuse Plan Allowed,"Div, Res, or Carrier",Downstream,River,Yes,Reuse or Account,Diversion or Depletion,Yes,Same as type 11 but allows Reuse and Loss
+33,Plan to a Ditch or Reservoir with Reuse Exchange,Reservoir,Reuse Plan Allowed,"Div, Res, or Carrier",Upstream,River,Yes,Reuse,Diversion or Depletion,Yes,None
+34,Reservoir Bookover with Reuse,Reservoir,Reuse or OOP Plan Allowed,"Div, Res, or Carrier",Source,Bookover,Yes,Reuse or OOP,Diversion,No,None
+35,Import with Reuse,Import Plan,NA,"Div, Res, or Carrier",Downstream,River,Yes,Reuse,Diversion,No,None
+,,,,,,,,,,,
+36,Seasonal (Meadow) Right,Div Right,NA,Diversion,Source,River,Yes,No,Diversion,No,Limits a diversion to part of the year (season)
+37,Augmentation Well,Well Right,Aug Plan Allowed,Plan,Downstream,River,Yes,No,Diversion,No,None
+38,Out of Priority Diversion,Res Right,Junior Right Required,Div or Res,Source,River,Yes,Reuse,Diversion,No,None
+39,Alternate Point,Div Right,Alt Point Required,Diversion,Upstream or Downstream,River,Yes,No,Diversion,No,None
+40,South Platte Compact,Upstream Gage,Downstream Gage Required,Instream,Downstream,River,No,No,Diversion,No,Compact Water Right
+41,Reservoir Storage with Special Limits,Res Right,NA,Reservoir,Source,River,No,No,Diversion,No,OOP Plan Limits
+42,Plan Reset,Plan,NA,NA,Source,River,No,No,NA,No,None
+43,In-Priority Supply,NA,NA,Plan,Source,River,No,Aug.,Diversion,No,None
+44,Recharge Well,Well Right,NA,Reservoir,Source,River,Yes,Aug.,Diversion,No,None
+45,Carrier with Loss,Div Right,NA,Div or Res,Downstream,River,Yes,Rech.,Diversion,Yes,None
+46,Multiple Ownership,Acct Plan,NA,Plan - Acc,Source,River,Yes,No,Diversion,No,Multiple Ownership
+47,Administrative Plan Limits,Acct Plan,NA,"Div, Res, or Carrier",Source,River,Yes,No,Diversion,No,None
+48,Plan or Reservoir Reuse to a Plan - River,Rese Plan or Acct Plan or Reservoir,T&C Plan Allowed,"Plan (T&C, Aug or Special)",Downstream,River,No,Yes,Diversion,No,None
+49,Plan or Reservoir Reuse to a Plan - Exchange,Rese Plan or Acct Plan or Reservoir,T&C Plan Allowed,"Plan (T&C, Aug or Special)",Upstream,River,No,Yes,Diversion,No,None
+
+"(1) If a carrier is allowed, the variable 'dumx' should be non zero in the operating rule file input",,,,,,,,,,,
+"(2) If a plan is not allowed, enter NA in the operating rule file input",,,,,,,,,,,
+"(3) If conveyance loss is modeled, the variable 'dumx' should be non zero in the operating rule file input",,,,,,,,,,,
