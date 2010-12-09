@@ -163,68 +163,126 @@ public static final String[] NAMES = {
 };
 
 /**
- * Maximum handled operational right type (those that the software has been
- * coded to handle).
- */
+Maximum handled operational right type (those that the software has been coded to handle).
+*/
 public static int MAX_HANDLED_TYPE = 23;
 /**
- * Maximum known operational right type (those that are know from documentation but
- * whose syntax is not specifically handled.
- */
+Maximum known operational right type (those that are know from documentation but
+whose syntax is not specifically handled.
+*/
 public static int MAX_KNOWN_TYPE = 49;
-
-protected String	_rtem;		// Administration number.
-protected int		_dumx;		// Typically the number of intervening
-					// structures or the number of monthly
-					// switches, depending on the right
-					// number
-protected String 	_ciopde;	// Typically the destination ID
-protected String	_iopdes;	// Typically the destination account
-protected String 	_ciopso1;	// Typically the supply ID
-protected String 	_iopsou1;	// Typically the supply account
-protected String 	_ciopso2;	// Definition varies by right type.
-protected String 	_iopsou2;	// Definition varies by right type.
-protected String 	_ciopso3;	// Definition varies by right type.
-protected String 	_iopsou3;	// Definition varies by right type.
-protected String 	_ciopso4;	// Used with type 17, 18
-protected String 	_iopsou4;	// Used with type 17, 18
-protected String 	_ciopso5;	// Used with type 17, 18
-protected String 	_iopsou5;	// Used with type 17, 18
-protected int 		_ityopr;	// Operational right type > 1.
-protected String 	_intern[];	// Intervening structure IDs (up to 10
-					// in StateMod doc but no limit here) -
-					// used by some rights.
-protected int		_imonsw[];	// Monthly switch, for some rights
-protected List	_comments;	// Comments provided by user - # comments before each right
-
-protected double	_qdebt;		// used with operational right 17, 18
-protected double	_qdebtx;	// used with operational right 17, 18
-
-protected double	_sjmina;	// used with operational right 20
-protected double	_sjrela;	// used with operational right 20
 /**
- * Plan ID.
- */
+Administration number.
+*/
+protected String _rtem;
+/**
+Typically the number of intervening structures or the number of monthly
+switches, depending on the right number
+*/
+protected int _dumx;
+/**
+Typically the destination ID.
+*/
+protected String _ciopde;
+/**
+Typically the destination account.
+*/
+protected String _iopdes;
+/**
+Typically the supply ID.
+*/
+protected String _ciopso1;
+/**
+Typically the supply account.
+*/
+protected String _iopsou1;
+/**
+Definition varies by right type.
+*/
+protected String _ciopso2;
+/**
+Definition varies by right type.
+*/
+protected String _iopsou2;
+/**
+Definition varies by right type.
+*/
+protected String _ciopso3;
+/**
+Definition varies by right type.
+*/
+protected String _iopsou3;
+/**
+Used with type 17, 18.
+*/
+protected String _ciopso4;
+/**
+Used with type 17, 18.
+*/
+protected String _iopsou4;
+/**
+Used with type 17, 18.
+*/
+protected String _ciopso5;
+/**
+Used with type 17, 18.
+*/
+protected String _iopsou5;
+/**
+Operational right type > 1.
+*/
+protected int _ityopr;
+/**
+Intervening structure IDs (up to 10 in StateMod doc but no limit here) - used by some rights.
+*/
+protected String _intern[];
+/**
+Monthly switch, for some rights.
+*/
+protected int _imonsw[];
+/**
+Comments provided by user - # comments before each right.
+*/
+protected List _comments;
+/**
+Used with operational right 17, 18.
+*/
+protected double _qdebt;
+/**
+used with operational right 17, 18.
+*/
+protected double _qdebtx;
+/**
+Used with operational right 20.
+*/
+protected double _sjmina;
+/**
+Used with operational right 20.
+*/
+protected double _sjrela;
+/**
+Plan ID.
+*/
 private String __creuse;
 /**
- * Diversion type.
- */
+Diversion type.
+*/
 private String __cdivtyp;
 /**
- * Convenyance loss.
- */
+Conveyance loss.
+*/
 private double __oprLoss;
 /**
- * Miscellaneous limits.
- */
+Miscellaneous limits.
+*/
 private double __oprLimit;
 /**
- * Beginning year of operation.
- */
+Beginning year of operation.
+*/
 private int __ioBeg;
 /**
- * Ending year of operation.
- */
+Ending year of operation.
+*/
 private int __ioEnd;
 
 private List __rightStringsVector = null;
@@ -507,8 +565,7 @@ public int compareTo(Object o) {
 }
 
 /**
-Creates a copy of the object for later use in checking to see if it was 
-changed in a GUI.
+Creates a copy of the object for later use in checking to see if it was changed in a GUI.
 */
 public void createBackup() {
 	_original = clone();
@@ -757,7 +814,7 @@ public void setupImonsw() {
 }
 
 /**
-Read operational right information in and store in a Vector.
+Read operational right information in and store in a list.
 @param filename Name of file to read.
 @exception Exception if there is an error reading the file.
 */
@@ -898,7 +955,7 @@ throws Exception {
 				reading_unknown_right = true;
 				right_strings_Vector = new Vector();
 				right_strings_Vector.add ( iline );
-				// Add Vector and continue to add if more lines are read.  Since using a reference
+				// Add list and continue to add if more lines are read.  Since using a reference
 				// this will ensure that all lines are set for the right.
 				anOprit.setRightStrings ( right_strings_Vector );
 				Message.printWarning ( 2, routine, "Unknown right type " + type + " at line " + linecount +
@@ -991,7 +1048,7 @@ throws Exception {
 			// Don't read for the Rio Grande types
 			if ( (ninterv > 0) && (type != 17) && (type != 18) ) {
 				linecount += readStateModFile_InterveningStructures (
-						ninterv, routine, linecount, in, anOprit );
+					ninterv, routine, linecount, in, anOprit );
 			}
 			
 			// ...end reading monthly and intervening structure data.
@@ -1014,31 +1071,15 @@ throws Exception {
 		}
 	}
 	catch (Exception e) {
-		routine = null;
-		v = null;
-		comment_vector = null;
-		format_0 = null;
+		Message.printWarning(3, routine, "Error reading near line " + linecount + ": " + iline);
+		Message.printWarning(3, routine, e);
+		throw e;
+	}
+	finally {
 		if (in != null) {
 			in.close();
 		}
-		in = null;
-		anOprit = null;
-		Message.printWarning(2, routine, "Error reading near line " + linecount + ": " + iline);
-		iline = null;
-		Message.printWarning(2, routine, e);
-		throw e;
 	}
-
-	routine = null;
-	iline = null;
-	v = null;
-	comment_vector = null;
-	format_0 = null;
-	if (in != null) {
-		in.close();
-	}
-	in = null;
-	anOprit = null;
 	return theOprits;
 }
 
@@ -1073,7 +1114,7 @@ throws IOException
 }
 
 /**
- * Read the statemod operational rights file monthly switches.
+ * Read the StateMod operational rights file monthly switches.
  * @param nmonsw Monthly switch
  * @param routine to use for logging.
  * @param linecount Line count (1+) before reading in this method.
@@ -1104,7 +1145,7 @@ throws IOException
 
 /**
 Cancels any changes made to this object within a GUI since createBackup()
-was caled and sets _original to null.
+was called and sets _original to null.
 */
 public void restoreOriginal() {
 	StateMod_OperationalRight op = (StateMod_OperationalRight)_original;
@@ -1385,16 +1426,12 @@ public void setIntern(int index, String intern) {
 		}
 		if (Message.isDebugOn)
 			Message.printDebug(30, 
-				"StateMod_OperationalRight.setIntern",
-				"Old Dumx: " + getDumx()+ ", New Dumx: " 
-				+ index+1);
+				"StateMod_OperationalRight.setIntern", "Old Dumx: " + getDumx()+ ", New Dumx: " + index+1);
 		if (index+1 > getDumx()) {
 			setDumx(index+1);
 		}
 		if (Message.isDebugOn) {
-			Message.printDebug(30, 
-				"StateMod_OperationalRight.setInter",
-				"Dumx: " + getDumx());
+			Message.printDebug(30, "StateMod_OperationalRight.setInter", "Dumx: " + getDumx());
 		}
 	}
 }
@@ -1687,121 +1724,83 @@ is also maintained by calling this routine.
 @param newComments addition comments which should be included in history
 @exception Exception if an error occurs.
 */
-public static void writeStateModFile(String infile, String outfile, List theOpr, String[] newComments)
+public static void writeStateModFile(String infile, String outfile, List theOpr, List<String> newComments)
 throws Exception {
 	PrintWriter	out = null;
-	String [] comment_str = { "#" };
-	String [] ignore_str = { "#>" };
+	List commentIndicators = new Vector(1);
+	commentIndicators.add ( "#" );
+	List ignoredCommentIndicators = new Vector(1);
+	ignoredCommentIndicators.add ( "#>");
 	String routine = "StateMod_OperationalRight.writeStateModFile";
 
-	Message.printStatus(1, routine, 
-		"Writing new operational rights to file \""
+	Message.printStatus(1, routine, "Writing new operational rights to file \""
 		+ outfile + "\" using \"" + infile + "\" header...");
 
-	out = IOUtil.processFileHeaders(infile, outfile,
-		newComments, comment_str, ignore_str, 0);
+	out = IOUtil.processFileHeaders(infile, outfile, newComments, commentIndicators, ignoredCommentIndicators, 0);
 	try {
-	String cmnt = "#>";
-	String iline = null;
-	String format = "%-12.12s%-36.36s%16.16s%7d.%8d "
-			+ "%-12.12s%8d %-12.12s%8d %-12.12s%8d%8d";
-	String formatS = "         %d %d %d %d %d %d %d %d %d %d %d %d";
-	String formatsp = "%36.36s";
-	String formatI = "%-12.12s";
-	StateMod_OperationalRight opr = null;
-	List v = new Vector(12);
-	List vS = new Vector(12);
-	List vsp = new Vector(1);
-	List vI = new Vector(1);
-	List comments_vector = null;
-
+		String cmnt = "#>";
+		String iline = null;
+		String format = "%-12.12s%-36.36s%16.16s%7d.%8d %-12.12s%8d %-12.12s%8d %-12.12s%8d%8d";
+		String formatS = "         %d %d %d %d %d %d %d %d %d %d %d %d";
+		String formatsp = "%36.36s";
+		String formatI = "%-12.12s";
+		StateMod_OperationalRight opr = null;
+		List v = new Vector(12);
+		List vS = new Vector(12);
+		List vsp = new Vector(1);
+		List vI = new Vector(1);
+		List comments_vector = null;
+	
 		out.println(cmnt);
-		out.println(cmnt + " *************************************"
-			+ "******************");
+		out.println(cmnt + " *******************************************************");
  		out.println(cmnt + " Operational Right File");
  		out.println(cmnt);
 		out.println(cmnt + "     Card 1   Control");
-		out.println(cmnt + "     format:  (a12, a24, 12x, 2i4, i8, "
-			+ "f8.0, i8, 3 (i8,a12), 20i8)");
+		out.println(cmnt + "     format:  (a12, a24, 12x, 2i4, i8, f8.0, i8, 3 (i8,a12), 20i8)");
  		out.println(cmnt);
-		out.println(cmnt + "     ID       cidvri:          "
-			+ "Operational Right ID");
-		out.println(cmnt + "     Name     nameo:           "
-			+ "Operational Right name");
-		out.println(cmnt + "     AdminDat iodat (1-2,k):    "
-			+ "Effective priority date");
-		out.println(cmnt + "     Admin #  irtem:           "
-			+ "Priority Number (smaller is most senior)");
-		out.println(cmnt + "     # Str    dumx:             "
-			+ "Number of intervenging structures ");
-		out.println(cmnt + "     On/Off   ioprsw (k):       "
-			+ "Switch 0 = off,1 = on");
-		out.println(cmnt + "     Dest ID  ciopde:          "
-			+ "Destination reservoir or structure ID");
-		out.println(cmnt + "     Dest Ac  iopdes (2,k):     "
-			+ "Destination reservoir or structure account # "
-			+ "(enter 1 for a diversion)");
-		out.println(cmnt + "     Sou1 ID  ciopso (1)       "
-			+ "Supply reservoir #1 or structure ID");
-		out.println(cmnt + "     Sou1 Ac  iopsou (2,k):     "
-			+ "Supply reservoir #1 or structure account # "
-			+ "(enter 1 for a diversion)");
-		out.println(cmnt + "     Sou2 ID  ciopso (2):       "
-			+ "Supply reservoir #2 ID");
-		out.println(cmnt + "     Sou1 Ac  iopsou (4,k):     "
-			+ "Supply reservoir #2 account");
-		out.println(cmnt + "     Type     ityopr (k):       Switch");
-		out.println(cmnt + "                        1 = Reservoir "
-			+ "Release to an instream demand");
-		out.println(cmnt + "                        2 = Reservoir "
-			+ "Release to a direct diversion demand");
-		out.println(cmnt + "                        3 = Reservoir "
-			+ "Release to a direct diversion demand by a carrier");
-		out.println(cmnt + "                        4 = Reservoir "
-			+ "Release to a direct diversion demand by exchange");
-		out.println(cmnt + "                        5 = Reservoir "
-			+ "Release to a reservoir by exchange");
-		out.println(cmnt + "                        6 = Reservoir "
-			+ "to reservoir bookover");
-		out.println(cmnt + "                        7 = Reservoir "
-			+ "Release to a carrier exchange");
-		out.println(cmnt + "                        8 = Out-of-"
-			+ "Priority Reservoir Storage");
-		out.println(cmnt + "                        9 = Reservoir "
-			+ "Release for target contents");
-		out.println(cmnt + "                        10 = General "
-			+ "Replacement Reservoir");
-		out.println(cmnt + "                        11 = Direct "
-			+ "flow demand thru intervening structures");
-		out.println(cmnt + "                        12 = Reoperate");
-		out.println(cmnt + "                        13 = Index Flow");
-		out.println(cmnt + "                        14 = "
-			+ "Similar to 11 but diversions are constrained by "
-			+ "demand at carrier structure");
-		out.println(cmnt + "                        15 = "
-			+ "Interruptible Supply");
-		out.println(cmnt + "                        16 = Direct "
-			+ "Flow Storage");
+		out.println(cmnt + "     ID       cidvri:          Operational Right ID");
+		out.println(cmnt + "     Name     nameo:           Operational Right name");
+		out.println(cmnt + "     AdminDat iodat (1-2,k):   Effective priority date");
+		out.println(cmnt + "     Admin #  irtem:           Priority Number (smaller is most senior)");
+		out.println(cmnt + "     # Str    dumx:            Number of intervenging structures ");
+		out.println(cmnt + "     On/Off   ioprsw (k):      Switch 0 = off,1 = on");
+		out.println(cmnt + "     Dest ID  ciopde:          Destination reservoir or structure ID");
+		out.println(cmnt + "     Dest Ac  iopdes (2,k):    Destination reservoir or structure account # (1 for a diversion)");
+		out.println(cmnt + "     Sou1 ID  ciopso (1)       Supply reservoir #1 or structure ID");
+		out.println(cmnt + "     Sou1 Ac  iopsou (2,k):    Supply reservoir #1 or structure account # (1 for a diversion)");
+		out.println(cmnt + "     Sou2 ID  ciopso (2):      Supply reservoir #2 ID");
+		out.println(cmnt + "     Sou1 Ac  iopsou (4,k):    Supply reservoir #2 account");
+		out.println(cmnt + "     Type     ityopr (k):      Switch");
+		out.println(cmnt + "              1 = Reservoir Release to an instream demand");
+		out.println(cmnt + "              2 = Reservoir Release to a direct diversion demand");
+		out.println(cmnt + "              3 = Reservoir Release to a direct diversion demand by a carrier");
+		out.println(cmnt + "              4 = Reservoir Release to a direct diversion demand by exchange");
+		out.println(cmnt + "              5 = Reservoir Release to a reservoir by exchange");
+		out.println(cmnt + "              6 = Reservoir to reservoir bookover");
+		out.println(cmnt + "              7 = Reservoir Release to a carrier exchange");
+		out.println(cmnt + "              8 = Out-of-Priority Reservoir Storage");
+		out.println(cmnt + "              9 = Reservoir Release for target contents");
+		out.println(cmnt + "              10 = General Replacement Reservoir");
+		out.println(cmnt + "              11 = Direct flow demand thru intervening structures");
+		out.println(cmnt + "              12 = Reoperate");
+		out.println(cmnt + "              13 = Index Flow");
+		out.println(cmnt + "              14 = Similar to 11 but diversions are constrained by demand at carrier structure");
+		out.println(cmnt + "              15 = Interruptible Supply");
+		out.println(cmnt + "              16 = Direct Flow Storage");
 
 		out.println(cmnt);
-		out.println(cmnt + " *************************"
-			+ "************************************************");
-		out.println(cmnt + "     Card 2   Carrier Ditch data "
-			+ "(include only if dumx > 0)");
+		out.println(cmnt + " *************************************************************************");
+		out.println(cmnt + "     Card 2   Carrier Ditch data (include only if dumx > 0)");
 		out.println(cmnt + "     format:  (free)");
 		out.println(cmnt);
-		out.println(cmnt + "     Inter    itern (1,j)     "
-			+ "intervening direct diversion structure id's");
-		out.println(cmnt + "                              "
-			+ "Enter # Str values");
+		out.println(cmnt + "     Inter    itern (1,j)     intervening direct diversion structure id's");
+		out.println(cmnt + "                              Enter # Str values");
 		out.println(cmnt);
 		out.println(cmnt + " ID        Name                    "
 			+ "NA          AdminDat  Admin#   # Str  On/Off Dest "
-			+ "Id     Dest Ac  Sou1 Id     Sou1 Ac  Sou2 Id     "
-			+ "Sou2 Ac     Type");
+			+ "Id     Dest Ac  Sou1 Id     Sou1 Ac  Sou2 Id     Sou2 Ac     Type");
 		out.println(cmnt + "---------eb----------------------e"
-			+ "b----------eb------eb------eb------eb------e-b-"
-			+ "---------eb------e-b----------eb------e-b------"
+			+ "b----------eb------eb------eb------eb------e-b----------eb------e-b----------eb------e-b------"
 			+ "----eb------eb------e");
 		out.println(cmnt + "EndHeader");
 		out.println(cmnt);
@@ -1854,7 +1853,7 @@ throws Exception {
 
 			if ((dumx == 12) || (dumx < -12)) {
 				if (Message.isDebugOn) {
-					Message.printDebug(50, routine, 
+					Message.printDebug(50, routine,
 						"in area 1: getDumx = " + opr.getDumx()+ "getItyopr = " + opr.getItyopr());
 				}
 				vS.clear();
@@ -1866,8 +1865,7 @@ throws Exception {
 			}
 
 			if (Message.isDebugOn) {
-				Message.printDebug(50, routine, 
-					"in area 3 (" + opr.getID() + "): getDumx = " + opr.getDumx()
+				Message.printDebug(50, routine, "in area 3 (" + opr.getID() + "): getDumx = " + opr.getDumx()
 					+ ", getItyopr = " + opr.getItyopr());
 			}
 			if ((dumx > 0 && dumx <= 10)|| dumx < -12) {
@@ -1896,26 +1894,17 @@ throws Exception {
 				out.println();
 			}
 		}
-
-	out.flush();
-	out.close();
-	out = null;
-	comment_str = null;
-	ignore_str = null;
-	routine = null;
 	} 
 	catch (Exception e) {
+		Message.printWarning(3, routine, e);
+		throw e;
+	}
+	finally {
 		if (out != null) {
 			out.flush();
 			out.close();
 		}
-		out = null;
-		comment_str = null;
-		ignore_str = null;
-		routine = null;
-		Message.printWarning(2, routine, e);
-		throw e;
 	}
 }
 
-} // End StateMod_OperationalRight
+}
