@@ -326,6 +326,7 @@ protected StateCU_IrrigationPracticeTS _ipy_YearTS;
 /**
 Soil available water content, from StateCU file.
 */
+// FIXME SAM 2009-06-22 Does not seem to be used anymore - is not read or written to file - need to evaluate
 protected double _awc;
 
 /**

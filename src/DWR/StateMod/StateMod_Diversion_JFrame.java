@@ -353,8 +353,7 @@ private JCheckBox
 	__ts_cwr_est_daily_JCheckBox;
 
 /**
-Array of JComponents that should be disabled when nothing is selected 
-from the list.
+Array of JComponents that should be disabled when nothing is selected from the list.
 */
 private JComponent[] __all_JComponents;
 
@@ -433,13 +432,11 @@ private List __diversionsVector;
 /**
 Constructor.
 @param dataset StateMod_DataSet containing diversion data.
-@param dataset_wm the dataset window manager or null if the data set windows
-are not being managed.
+@param dataset_wm the dataset window manager or null if the data set windows are not being managed.
 @param editable whether the data values on the form can be edited or not.
 */
-public StateMod_Diversion_JFrame (	StateMod_DataSet dataset,
-					StateMod_DataSet_WindowManager
-					dataset_wm, boolean editable )
+public StateMod_Diversion_JFrame ( StateMod_DataSet dataset, StateMod_DataSet_WindowManager
+	dataset_wm, boolean editable )
 {	
 	StateMod_GUIUtil.setTitle(this, dataset, "Diversions", null);
 	JGUIUtil.setIcon(this, JGUIUtil.getIconImage());
@@ -464,23 +461,18 @@ public StateMod_Diversion_JFrame (	StateMod_DataSet dataset,
 /**
 Constructor.
 @param dataset StateMod data set being displayed.
-@param dataset_wm the dataset window manager or null if the data set windows
-are not being managed.
+@param dataset_wm the dataset window manager or null if the data set windows are not being managed.
 @param diversion the diversion to select and show in the list of diversion
 @param editable whether the data values on the form can be edited or not.
 */
-public StateMod_Diversion_JFrame (	StateMod_DataSet dataset, 
-					StateMod_DataSet_WindowManager
-					dataset_wm,
-					StateMod_Diversion diversion,
-					boolean editable)
+public StateMod_Diversion_JFrame ( StateMod_DataSet dataset, StateMod_DataSet_WindowManager dataset_wm,
+	StateMod_Diversion diversion, boolean editable)
 {	
 	StateMod_GUIUtil.setTitle(this, dataset, "Diversions", null);
 	JGUIUtil.setIcon(this, JGUIUtil.getIconImage());
 	__dataset = dataset;
 	__dataset_wm = dataset_wm;
-	__diversionsComponent = __dataset.getComponentForComponentType(
-		StateMod_DataSet.COMP_DIVERSION_STATIONS);
+	__diversionsComponent = __dataset.getComponentForComponentType(StateMod_DataSet.COMP_DIVERSION_STATIONS);
 
 	__diversionsVector = (List)__diversionsComponent.getData();	
 	int size = __diversionsVector.size();
@@ -531,22 +523,20 @@ public void actionPerformed(ActionEvent e) {
 		StateMod_Diversion div = null;
 		boolean changed = false;
 		for (int i = 0; i < size; i++) {
-			div = (StateMod_Diversion)__diversionsVector.get(
-				i);
+			div = (StateMod_Diversion)__diversionsVector.get(i);
 			if (!changed && div.changed()) {
 				changed = true;
 			}
 			div.acceptChanges();
 		}		
 		if (changed) {
-			__dataset.setDirty(StateMod_DataSet.COMP_DIVERSION_STATIONS,
-				true);
+			__dataset.setDirty(StateMod_DataSet.COMP_DIVERSION_STATIONS,true);
 		}
 		if ( __dataset_wm != null ) {
-			__dataset_wm.closeWindow (
-			StateMod_DataSet_WindowManager.WINDOW_DIVERSION );
+			__dataset_wm.closeWindow (StateMod_DataSet_WindowManager.WINDOW_DIVERSION );
 		}
-		else {	JGUIUtil.close ( this );
+		else {
+			JGUIUtil.close ( this );
 		}
 	}
 	else if ( source == __apply_JButton ) {
@@ -555,39 +545,35 @@ public void actionPerformed(ActionEvent e) {
 		StateMod_Diversion div = null;
 		boolean changed = false;
 		for (int i = 0; i < size; i++) {
-			div = (StateMod_Diversion)__diversionsVector.get(
-				i);
+			div = (StateMod_Diversion)__diversionsVector.get(i);
 			if (!changed && div.changed()) {
 				changed = true;
 			}
 			div.createBackup();
 		}
 		if (changed) {			
-			__dataset.setDirty(StateMod_DataSet.COMP_DIVERSION_STATIONS,
-				true);
+			__dataset.setDirty(StateMod_DataSet.COMP_DIVERSION_STATIONS,true);
 		}		
 	}
 	else if ( source == __cancel_JButton ) {
 		int size = __diversionsVector.size();
 		StateMod_Diversion div = null;
 		for (int i = 0; i < size; i++) {
-			div = (StateMod_Diversion)__diversionsVector.get(
-				i);
+			div = (StateMod_Diversion)__diversionsVector.get(i);
 			div.restoreOriginal();
 		}
 
 		if ( __dataset_wm != null ) {
-			__dataset_wm.closeWindow (
-			StateMod_DataSet_WindowManager.WINDOW_DIVERSION );
+			__dataset_wm.closeWindow (StateMod_DataSet_WindowManager.WINDOW_DIVERSION );
 		}
-		else {	JGUIUtil.close ( this );
+		else {
+			JGUIUtil.close ( this );
 		}
 	}
 	else if (source == __findNextDiv_JButton) {
 		searchWorksheet(__worksheet.getSelectedRow() + 1);
 	}
-	else if (source == __searchID_JTextField ||
-		source == __searchID_JTextField) {	
+	else if (source == __searchID_JTextField || source == __searchID_JTextField) {	
 		searchWorksheet();
 	}	
 	else if (e.getSource() == __searchID_JRadioButton) {
@@ -600,35 +586,27 @@ public void actionPerformed(ActionEvent e) {
 	}		
 	else if (source == __waterRights_JButton) {
 		if (__currentDiversionIndex == -1) {
-			new ResponseJDialog(this, "You must first select a "
-				+ "diversion from the list.",
+			new ResponseJDialog(this, "You must first select a diversion from the list.",
 			ResponseJDialog.OK);
 			return;
 		}
 
 		// set placeholder to current diversion
-		StateMod_Diversion div = 
-			(StateMod_Diversion)__diversionsVector
-			.get(__currentDiversionIndex);
+		StateMod_Diversion div = (StateMod_Diversion)__diversionsVector.get(__currentDiversionIndex);
 	
-		new StateMod_Diversion_Right_JFrame(
-			__dataset, div, __editable);
+		new StateMod_Diversion_Right_JFrame(__dataset, div, __editable);
 	}
 	else if (source == __returnFlow_JButton) {
 		if (__currentDiversionIndex == -1) {
-			new ResponseJDialog(this, "You must first select a "
-				+ "diversion from the list.",
+			new ResponseJDialog(this, "You must first select a diversion from the list.",
 			ResponseJDialog.OK);
 			return;
 		}
 
 		// set placeholder to current diversion
-		StateMod_Diversion div = 
-			(StateMod_Diversion)__diversionsVector.get(
-			__currentDiversionIndex);
+		StateMod_Diversion div = (StateMod_Diversion)__diversionsVector.get(__currentDiversionIndex);
 	
-		new StateMod_Diversion_ReturnFlow_JFrame(
-			__dataset, div, __editable);
+		new StateMod_Diversion_ReturnFlow_JFrame(__dataset, div, __editable);
 	}
 	}
 	catch (Exception ex) {
@@ -638,10 +616,8 @@ public void actionPerformed(ActionEvent e) {
 }
 
 /**
-Checks the text fields for validity before they are saved back into the
-data object.
-@return 0 if the text fields are okay, 1 if fatal errors exist, and -1 if only
-non-fatal errors exist.
+Checks the text fields for validity before they are saved back into the data object.
+@return 0 if the text fields are okay, 1 if fatal errors exist, and -1 if only non-fatal errors exist.
 */
 private int checkInput()
 {	String routine = "StateMod_Diversion_JFrame.checkInput";
@@ -668,8 +644,7 @@ private int checkInput()
 		++fatal_count;
 	}
 	if ( !acres.equals("") && !StringUtil.isDouble(acres) ) {
-		warning += "\nIrrigated acreage (" + acres +
-			") is not a number.";
+		warning += "\nIrrigated acreage (" + acres + ") is not a number.";
 		++fatal_count;
 	}
 	if ( !awc.equals("") && !StringUtil.isDouble(awc) ) {
@@ -678,56 +653,45 @@ private int checkInput()
 	}
 	// Non-fatal errors (need to be corrected somehow)...
 	if ( __dataset != null ) {
-		DataSetComponent comp = __dataset.getComponentForComponentType (
-			StateMod_DataSet.COMP_RIVER_NETWORK );
+		DataSetComponent comp = __dataset.getComponentForComponentType (StateMod_DataSet.COMP_RIVER_NETWORK );
 		List data = (List)comp.getData();
-		if (	!rivernode.equals("") &&
-			(StateMod_Util.indexOf(data,rivernode) < 0) ) {
-			warning += "\nRiver node ID (" + rivernode +
-			") is not in the network.";
+		if ( !rivernode.equals("") && (StateMod_Util.indexOf(data,rivernode) < 0) ) {
+			warning += "\nRiver node ID (" + rivernode + ") is not in the network.";
 			++nonfatal_count;
 		}
 	}
-	if (	__effConstant_JRadioButton.isSelected() &&
-		!StringUtil.isDouble(eff_constant) ) {
-		warning += "\nConstant efficiency (" + eff_constant +
-		") is not a number.";
+	if ( __effConstant_JRadioButton.isSelected() && !StringUtil.isDouble(eff_constant) ) {
+		warning += "\nConstant efficiency (" + eff_constant + ") is not a number.";
 		++fatal_count;
 	}
 	else if ( __effMonthly_JRadioButton.isSelected() ) {
 		for ( int i = 0; i < 12; i++ ) {
 			if ( !StringUtil.isDouble(eff_monthly[i]) ) {
-				warning += "\nMonthly efficiency (" +
-					eff_monthly[i] + ") is not a number.";
+				warning += "\nMonthly efficiency (" + eff_monthly[i] + ") is not a number.";
 				++fatal_count;
 			}
 		}
 	}
-	// REVISIT - if daily time series are supplied, check for time series
-	// and allow creation if not available.
+	// TODO - if daily time series are supplied, check for time series and allow creation if not available.
 	if ( warning.length() > 0 ) {
-		StateMod_Diversion div = 
-			(StateMod_Diversion)__diversionsVector
-			.get(__currentDiversionIndex);
+		StateMod_Diversion div = (StateMod_Diversion)__diversionsVector.get(__currentDiversionIndex);
 		warning = "\nDiversion:  " +
-		StateMod_Util.formatDataLabel ( div.getID(), div.getName() ) +
-		warning + "\nCorrect or Cancel.";
+		StateMod_Util.formatDataLabel ( div.getID(), div.getName() ) + warning + "\nCorrect or Cancel.";
 		Message.printWarning ( 1, routine, warning, this );
 		if ( fatal_count > 0 ) {
 			// Fatal errors...
-			Message.printStatus ( 1, routine,
-				"Returning 1 from checkInput()" );
+			Message.printStatus ( 1, routine, "Returning 1 from checkInput()" );
 			return 1;
 		}
-		else {	// Nonfatal errors...
-			Message.printStatus ( 1, routine,
-				"Returning -1 from checkInput()" );
+		else {
+			// Nonfatal errors...
+			Message.printStatus ( 1, routine, "Returning -1 from checkInput()" );
 			return -1;
 		}
 	}
-	else {	// No errors...
-		Message.printStatus ( 1, routine,
-			"Returning 0 from checkInput()" );
+	else {
+		// No errors...
+		Message.printStatus ( 1, routine, "Returning 0 from checkInput()" );
 		return 0;
 	}
 }
@@ -737,42 +701,27 @@ Checks the states of the time series check boxes and appropriately enables or
 disables the graphing/table/summary buttons.
 */
 private void checkTimeSeriesButtonsStates() {
-	if (	(__ts_diversion_monthly_JCheckBox.isEnabled() &&
-		__ts_diversion_monthly_JCheckBox.isSelected()) ||
-		(__ts_diversion_daily_JCheckBox.isEnabled() &&
-		__ts_diversion_daily_JCheckBox.isSelected()) ||
-		(__ts_diversion_est_daily_JCheckBox.isEnabled() &&
-		__ts_diversion_est_daily_JCheckBox.isSelected()) ||
-		(__ts_water_right_monthly_JCheckBox.isEnabled() &&
-		__ts_water_right_monthly_JCheckBox.isSelected()) ||
-		(__ts_water_right_daily_JCheckBox.isEnabled() &&
-		__ts_water_right_daily_JCheckBox.isSelected()) ||
-		(__ts_demand_monthly_JCheckBox.isEnabled() &&
-		__ts_demand_monthly_JCheckBox.isSelected()) ||
-		(__ts_demand_override_monthly_JCheckBox.isEnabled() &&
-		__ts_demand_override_monthly_JCheckBox.isSelected()) ||
-		(__ts_demand_ave_monthly_JCheckBox.isEnabled() &&
-		__ts_demand_ave_monthly_JCheckBox.isSelected()) ||
-		(__ts_demand_daily_JCheckBox.isEnabled() &&
-		__ts_demand_daily_JCheckBox.isSelected() ) ||
-		(__ts_demand_est_daily_JCheckBox.isEnabled() &&
-		__ts_demand_est_daily_JCheckBox.isSelected()) ||
-		(__ts_ipy_yearly_JCheckBox.isEnabled() &&
-		__ts_ipy_yearly_JCheckBox.isSelected()) ||
-		(__ts_cwr_monthly_JCheckBox.isEnabled() &&
-		__ts_cwr_monthly_JCheckBox.isSelected()) ||
-		(__ts_cwr_daily_JCheckBox.isEnabled() &&
-		__ts_cwr_daily_JCheckBox.isSelected()) ||
-		(__ts_cwr_est_daily_JCheckBox.isEnabled() &&
-		__ts_cwr_est_daily_JCheckBox.isSelected()) ) {
-		// One or more time series is selected and enabled so
-		// enable the view buttons...
+	if ( (__ts_diversion_monthly_JCheckBox.isEnabled() && __ts_diversion_monthly_JCheckBox.isSelected()) ||
+		(__ts_diversion_daily_JCheckBox.isEnabled() && __ts_diversion_daily_JCheckBox.isSelected()) ||
+		(__ts_diversion_est_daily_JCheckBox.isEnabled() && __ts_diversion_est_daily_JCheckBox.isSelected()) ||
+		(__ts_water_right_monthly_JCheckBox.isEnabled() && __ts_water_right_monthly_JCheckBox.isSelected()) ||
+		(__ts_water_right_daily_JCheckBox.isEnabled() && __ts_water_right_daily_JCheckBox.isSelected()) ||
+		(__ts_demand_monthly_JCheckBox.isEnabled() && __ts_demand_monthly_JCheckBox.isSelected()) ||
+		(__ts_demand_override_monthly_JCheckBox.isEnabled() && __ts_demand_override_monthly_JCheckBox.isSelected()) ||
+		(__ts_demand_ave_monthly_JCheckBox.isEnabled() && __ts_demand_ave_monthly_JCheckBox.isSelected()) ||
+		(__ts_demand_daily_JCheckBox.isEnabled() && __ts_demand_daily_JCheckBox.isSelected() ) ||
+		(__ts_demand_est_daily_JCheckBox.isEnabled() && __ts_demand_est_daily_JCheckBox.isSelected()) ||
+		(__ts_ipy_yearly_JCheckBox.isEnabled() && __ts_ipy_yearly_JCheckBox.isSelected()) ||
+		(__ts_cwr_monthly_JCheckBox.isEnabled() && __ts_cwr_monthly_JCheckBox.isSelected()) ||
+		(__ts_cwr_daily_JCheckBox.isEnabled() && __ts_cwr_daily_JCheckBox.isSelected()) ||
+		(__ts_cwr_est_daily_JCheckBox.isEnabled() && __ts_cwr_est_daily_JCheckBox.isSelected()) ) {
+		// One or more time series is selected and enabled so enable the view buttons...
 		__graph_JButton.setEnabled(true);
 		__table_JButton.setEnabled(true);
 		__summary_JButton.setEnabled(true);	
 	}
-	else {	// No time series are enabled and selected so disable
-		// the time series view buttons...
+	else {
+		// No time series are enabled and selected so disable the time series view buttons...
 		__graph_JButton.setEnabled(false);
 		__table_JButton.setEnabled(false);
 		__summary_JButton.setEnabled(false);	
@@ -782,7 +731,7 @@ private void checkTimeSeriesButtonsStates() {
 /**
 Display the efficiency values from the data object to the GUI.
 @param monthly_data If true, then the monthly efficiencies are enabled and the
-constant efficiency is disabled.  If false, the monthly efficiences are
+constant efficiency is disabled.  If false, the monthly efficiencies are
 disabled and the constant efficiency is enabled.
 @param reset_data If true, the display values are reset from the data object -
 suitable for when a new diversion is picked.  If false, the old values remain,
@@ -793,17 +742,16 @@ private void displayEff ( boolean monthly_data, boolean reset_data )
 		return;
 	}
 	
-	StateMod_Diversion div = (StateMod_Diversion)
-		__diversionsVector.get(__currentDiversionIndex);
+	StateMod_Diversion div = (StateMod_Diversion)__diversionsVector.get(__currentDiversionIndex);
 	// Set this because setting 
 	__ignoreNextStateChange = true;
-	// This is only really needed when needed when the data are initially
-	// being populated.
+	// This is only really needed when needed when the data are initially being populated.
 	if ( monthly_data ) {
 		JGUIUtil.setEnabled ( __effConstant_JTextField, false );
 		__effMonthly_JRadioButton.setSelected(true);
 	}
-	else {	JGUIUtil.setEnabled ( __effConstant_JTextField, true );
+	else {
+		JGUIUtil.setEnabled ( __effConstant_JTextField, true );
 		__effConstant_JRadioButton.setSelected(true);
 	}
 	if ( reset_data ) {
@@ -816,14 +764,14 @@ private void displayEff ( boolean monthly_data, boolean reset_data )
 
 	for (int i = 0; i < 12; i++) {
 		if ( reset_data ) {
-			StateMod_GUIUtil.checkAndSet ( div.getDiveff(i),
-			__effMonthly_JTextField[i]);
+			StateMod_GUIUtil.checkAndSet ( div.getDiveff(i),__effMonthly_JTextField[i]);
 		}
 		if ( monthly_data ) {
 			// Enable all the monthly efficiency text fields...
 			JGUIUtil.setEnabled (__effMonthly_JTextField[i], true );
 		}
-		else {	// Disable all the monthly efficiency text fields...
+		else {
+			// Disable all the monthly efficiency text fields...
 			JGUIUtil.setEnabled (__effMonthly_JTextField[i], false);
 		}
 	}
@@ -838,19 +786,16 @@ public void displayTSViewJFrame(String type)
 {	String routine = "StateMod_Diversion_JFrame.displayTSViewJFRame";
 	__currentDiversionIndex = __worksheet.getSelectedRow();
 	if (__currentDiversionIndex == -1) {
-		new ResponseJDialog(this, "You must first select a "
-			+ "diversion from the list.",
+		new ResponseJDialog(this, "You must first select a diversion from the list.",
 		ResponseJDialog.OK);
 		return;
 	}
-	StateMod_Diversion div = (StateMod_Diversion)__diversionsVector
-		.get(__currentDiversionIndex);
+	StateMod_Diversion div = (StateMod_Diversion)__diversionsVector.get(__currentDiversionIndex);
 
 	PropList display_props = new PropList("TSView");
 
 	display_props.set("InitialView", type);
-	display_props.set("TSViewTitleString",
-		StateMod_Util.createDataLabel(div,true) + " Time Series");
+	display_props.set("TSViewTitleString", StateMod_Util.createDataLabel(div,true) + " Time Series");
 	display_props.set("DisplayFont", "Courier");
 	display_props.set("DisplaySize", "11");
 	display_props.set("PrintFont", "Courier");
@@ -869,149 +814,118 @@ public void displayTSViewJFrame(String type)
 
 	// For all the tests, can initially see whether the checkboxes are
 	// enabled AND selected - don't need to check for time series because
-	// this would have been determined when the checkboxes were enabled in
-	// processTableSelection().
+	// this would have been determined when the checkboxes were enabled in processTableSelection().
 
 	// Irrigated acres...
 
-	if (	__ts_ipy_yearly_JCheckBox.isSelected() &&
-		__ts_ipy_yearly_JCheckBox.isEnabled() ) {
+	if ( __ts_ipy_yearly_JCheckBox.isSelected() && __ts_ipy_yearly_JCheckBox.isEnabled() ) {
 		// Do the yearly graph for crops...
 		++sub;
 		its = 0;
 		props.set ( "SubProduct " + sub + ".GraphType=Line" );
-		props.set ( "SubProduct " + sub +
-			".SubTitleString=Irrigated Acres for Diversion "
+		props.set ( "SubProduct " + sub + ".SubTitleString=Irrigated Acres for Diversion "
 			+ div.getID() + " (" + div.getName() + ")" );
 		props.set ( "SubProduct " + sub + ".SubTitleFontSize=12" );
         /* FIXME SAM 2007-11-12 Need to use irrigation parts, not total.
 		ts = div.getIrrigationPracticeYearTS().getSacreTS();
 		if ( ts != null ) {
-			props.set ( "Data " + sub + "." + (++its) +
-				".TSID=" + ts.getIdentifierString() );
+			props.set ( "Data " + sub + "." + (++its) + ".TSID=" + ts.getIdentifierString() );
 			tslist.add ( ts );
 		}
 		ts = div.getIrrigationPracticeYearTS().getGacreTS();
 		if ( ts != null ) {
-			props.set ( "Data " + sub + "." + (++its) +
-				".TSID=" + ts.getIdentifierString() );
+			props.set ( "Data " + sub + "." + (++its) + ".TSID=" + ts.getIdentifierString() );
 			tslist.add ( ts );
 		}
         */
 		ts = div.getIrrigationPracticeYearTS().getTacreTS();
 		if ( ts != null ) {
-			props.set ( "Data " + sub + "." + (++its) +
-				".TSID=" + ts.getIdentifierString() );
+			props.set ( "Data " + sub + "." + (++its) + ".TSID=" + ts.getIdentifierString() );
 			tslist.add ( ts );
 		}
 	}
 
 	// Efficiencies...
 
-	if (	__ts_ipy_yearly_JCheckBox.isSelected() &&
-		__ts_ipy_yearly_JCheckBox.isEnabled() ) {
+	if ( __ts_ipy_yearly_JCheckBox.isSelected() && __ts_ipy_yearly_JCheckBox.isEnabled() ) {
 		// Do the yearly graph for efficiencies...
 		++sub;
 		its = 0;
 		props.set ( "SubProduct " + sub + ".GraphType=Line" );
-		props.set ( "SubProduct " + sub +
-			".SubTitleString=Efficiencies for Diversion "
+		props.set ( "SubProduct " + sub + ".SubTitleString=Efficiencies for Diversion "
 			+ div.getID() + " (" + div.getName() + ")" );
 		props.set ( "SubProduct " + sub + ".SubTitleFontSize=12" );
 		ts = div.getIrrigationPracticeYearTS().getCeffTS();
 		if ( ts != null ) {
-			props.set ( "Data " + sub + "." + (++its) +
-				".TSID=" + ts.getIdentifierString() );
+			props.set ( "Data " + sub + "." + (++its) + ".TSID=" + ts.getIdentifierString() );
 			tslist.add ( ts );
 		}
 		ts = div.getIrrigationPracticeYearTS().getFeffTS();
 		if ( ts != null ) {
-			props.set ( "Data " + sub + "." + (++its) +
-				".TSID=" + ts.getIdentifierString() );
+			props.set ( "Data " + sub + "." + (++its) + ".TSID=" + ts.getIdentifierString() );
 			tslist.add ( ts );
 		}
 		ts = div.getIrrigationPracticeYearTS().getSeffTS();
 		if ( ts != null ) {
-			props.set ( "Data " + sub + "." + (++its) +
-				".TSID=" + ts.getIdentifierString() );
+			props.set ( "Data " + sub + "." + (++its) + ".TSID=" + ts.getIdentifierString() );
 			tslist.add ( ts );
 		}
 	}
 
 	// Monthly data (ACFT)...
 
-	if (	(__ts_diversion_monthly_JCheckBox.isSelected() &&
-		__ts_diversion_monthly_JCheckBox.isEnabled() ) ||
-		(__ts_diversion_monthly_JCheckBox.isSelected() &&
-		__ts_diversion_monthly_JCheckBox.isEnabled() ) ||
-		(__ts_demand_monthly_JCheckBox.isSelected() &&
-		__ts_demand_monthly_JCheckBox.isEnabled() ) ||
-		(__ts_demand_override_monthly_JCheckBox.isSelected() &&
-		__ts_demand_override_monthly_JCheckBox.isEnabled() ) ||
-		(__ts_cwr_monthly_JCheckBox.isSelected() &&
-		__ts_cwr_monthly_JCheckBox.isEnabled() ) ||
-		(__ts_water_right_monthly_JCheckBox.isSelected() &&
-		__ts_water_right_monthly_JCheckBox.isEnabled() ) ) {
+	if ( (__ts_diversion_monthly_JCheckBox.isSelected() && __ts_diversion_monthly_JCheckBox.isEnabled() ) ||
+		(__ts_diversion_monthly_JCheckBox.isSelected() && __ts_diversion_monthly_JCheckBox.isEnabled() ) ||
+		(__ts_demand_monthly_JCheckBox.isSelected() && __ts_demand_monthly_JCheckBox.isEnabled() ) ||
+		(__ts_demand_override_monthly_JCheckBox.isSelected() && __ts_demand_override_monthly_JCheckBox.isEnabled() ) ||
+		(__ts_cwr_monthly_JCheckBox.isSelected() && __ts_cwr_monthly_JCheckBox.isEnabled() ) ||
+		(__ts_water_right_monthly_JCheckBox.isSelected() && __ts_water_right_monthly_JCheckBox.isEnabled() ) ) {
 		// Do the monthly graph...
 		++sub;
 		its = 0;
 		props.set ( "SubProduct " + sub + ".GraphType=Line" );
 		props.set ( "SubProduct " + sub +
-			".SubTitleString=Monthly Data for Diversion "
-			+ div.getID() + " (" + div.getName() + ")" );
+			".SubTitleString=Monthly Data for Diversion " + div.getID() + " (" + div.getName() + ")" );
 		props.set ( "SubProduct " + sub + ".SubTitleFontSize=12" );
-		if (	__ts_diversion_monthly_JCheckBox.isSelected() &&
-			__ts_diversion_monthly_JCheckBox.isEnabled() ) {
+		if ( __ts_diversion_monthly_JCheckBox.isSelected() && __ts_diversion_monthly_JCheckBox.isEnabled() ) {
 			ts = div.getDiversionMonthTS();
 			if ( ts != null ) {
-				props.set ( "Data " + sub + "." + (++its) +
-					".TSID=" + ts.getIdentifierString() );
+				props.set ( "Data " + sub + "." + (++its) + ".TSID=" + ts.getIdentifierString() );
 				tslist.add ( ts );
 			}
 		}
-		if (	__ts_demand_monthly_JCheckBox.isSelected() &&
-			__ts_demand_monthly_JCheckBox.isEnabled() ) {
+		if ( __ts_demand_monthly_JCheckBox.isSelected() && __ts_demand_monthly_JCheckBox.isEnabled() ) {
 			ts = div.getDemandMonthTS();
 			if ( ts != null ) {
-				props.set ( "Data " + sub + "." + (++its) +
-					".TSID=" + ts.getIdentifierString() );
+				props.set ( "Data " + sub + "." + (++its) + ".TSID=" + ts.getIdentifierString() );
 				tslist.add ( ts );
 			}
 		}
-		if (	__ts_demand_override_monthly_JCheckBox.isSelected() &&
+		if ( __ts_demand_override_monthly_JCheckBox.isSelected() &&
 			__ts_demand_override_monthly_JCheckBox.isEnabled() ) {
 			ts = div.getDemandOverrideMonthTS();
 			if ( ts != null ) {
-				props.set ( "Data " + sub + "." + (++its) +
-					".TSID=" + ts.getIdentifierString() );
+				props.set ( "Data " + sub + "." + (++its) + ".TSID=" + ts.getIdentifierString() );
 				tslist.add ( ts );
 			}
 		}
-		if (	__ts_cwr_monthly_JCheckBox.isSelected() &&
-			__ts_cwr_monthly_JCheckBox.isEnabled() ) {
+		if ( __ts_cwr_monthly_JCheckBox.isSelected() && __ts_cwr_monthly_JCheckBox.isEnabled() ) {
 			ts = div.getConsumptiveWaterRequirementMonthTS();
 			if ( ts != null ) {
-				props.set ( "Data " + sub + "." + (++its) +
-				".TSID=" + ts.getIdentifierString() );
+				props.set ( "Data " + sub + "." + (++its) + ".TSID=" + ts.getIdentifierString() );
 				tslist.add ( ts );
 			}
 		}
-		if (	__ts_water_right_monthly_JCheckBox.isSelected() &&
+		if ( __ts_water_right_monthly_JCheckBox.isSelected() &&
 			__ts_water_right_monthly_JCheckBox.isEnabled() ) {
 			if ( div.getRights().size() > 0 ) {
-				// Create a monthly time series to illustrate
-				// the water right volume...
-				ts =	StateMod_Util.createWaterRightTS ( div,
-					TimeInterval.MONTH,
+				// Create a monthly time series to illustrate the water right volume...
+				ts = StateMod_Util.createWaterRightTS ( div, TimeInterval.MONTH,
 					StateMod_DataSet.lookupTimeSeriesDataUnits(
-					StateMod_DataSet.
-					COMP_DIVERSION_TS_MONTHLY),
-					__dataset.getDataStart(),
-					__dataset.getDataEnd() );
+					StateMod_DataSet.COMP_DIVERSION_TS_MONTHLY),
+					__dataset.getDataStart(), __dataset.getDataEnd() );
 				if ( ts != null ) {
-					props.set ( "Data " + sub + "." +
-					(++its) +
-					".TSID=" + ts.getIdentifierString() );
+					props.set ( "Data " + sub + "." + (++its) + ".TSID=" + ts.getIdentifierString() );
 					tslist.add ( ts );
 				}
 			}
@@ -1020,202 +934,154 @@ public void displayTSViewJFrame(String type)
 
 	// Monthly average (ACFT)...
 
-	if (	__ts_demand_ave_monthly_JCheckBox.isSelected() &&
-		__ts_demand_ave_monthly_JCheckBox.isEnabled() ) {
+	if ( __ts_demand_ave_monthly_JCheckBox.isSelected() && __ts_demand_ave_monthly_JCheckBox.isEnabled() ) {
 		// Do the monthly average graph...
 		++sub;
 		its = 0;
 		props.set ( "SubProduct " + sub + ".GraphType=Line" );
-		props.set ( "SubProduct " + sub +
-			".SubTitleString=Monthly Average Data for Diversion "
+		props.set ( "SubProduct " + sub + ".SubTitleString=Monthly Average Data for Diversion "
 			+ div.getID() + " (" + div.getName() + ")" );
 		props.set ( "SubProduct " + sub + ".SubTitleFontSize=12" );
 		ts = div.getDemandAverageMonthTS();
 		if ( ts != null ) {
-			props.set ( "Data " + sub + "." + (++its) +
-				".TSID=" + ts.getIdentifierString() );
+			props.set ( "Data " + sub + "." + (++its) + ".TSID=" + ts.getIdentifierString() );
 			tslist.add ( ts );
 		}
 	}
 
 	// Daily (CFS)...
 
-	String cdividy = StringUtil.getToken (
-		__diversionDailyID_JComboBox.getSelected(), " -",0,0 );
+	String cdividy = StringUtil.getToken ( __diversionDailyID_JComboBox.getSelected(), " -",0,0 );
 	DayTS dayts = null;
 	int pos;
 	DataSetComponent comp;
 	List data;
-	if (	(__ts_diversion_daily_JCheckBox.isSelected() &&
-		__ts_diversion_daily_JCheckBox.isEnabled()) ||
-		(__ts_diversion_est_daily_JCheckBox.isSelected() &&
-		__ts_diversion_est_daily_JCheckBox.isEnabled()) ||
-		(__ts_demand_daily_JCheckBox.isSelected() &&
-		__ts_demand_daily_JCheckBox.isEnabled() ) ||
-		(__ts_demand_est_daily_JCheckBox.isSelected() &&
-		__ts_demand_est_daily_JCheckBox.isEnabled() ) ||
-		(__ts_cwr_daily_JCheckBox.isSelected() &&
-		__ts_cwr_daily_JCheckBox.isEnabled() ) ||
-		(__ts_cwr_est_daily_JCheckBox.isSelected() &&
-		__ts_cwr_est_daily_JCheckBox.isEnabled() ) ||
-		(__ts_water_right_daily_JCheckBox.isSelected() &&
-		__ts_water_right_daily_JCheckBox.isEnabled() ) ) {
+	if ( (__ts_diversion_daily_JCheckBox.isSelected() && __ts_diversion_daily_JCheckBox.isEnabled()) ||
+		(__ts_diversion_est_daily_JCheckBox.isSelected() && __ts_diversion_est_daily_JCheckBox.isEnabled()) ||
+		(__ts_demand_daily_JCheckBox.isSelected() && __ts_demand_daily_JCheckBox.isEnabled() ) ||
+		(__ts_demand_est_daily_JCheckBox.isSelected() && __ts_demand_est_daily_JCheckBox.isEnabled() ) ||
+		(__ts_cwr_daily_JCheckBox.isSelected() && __ts_cwr_daily_JCheckBox.isEnabled() ) ||
+		(__ts_cwr_est_daily_JCheckBox.isSelected() && __ts_cwr_est_daily_JCheckBox.isEnabled() ) ||
+		(__ts_water_right_daily_JCheckBox.isSelected() && __ts_water_right_daily_JCheckBox.isEnabled() ) ) {
 		// Do the daily graph...
 		++sub;
 		its = 0;
 		props.set ( "SubProduct " + sub + ".GraphType=Line" );
-		props.set ( "SubProduct " + sub +
-			".SubTitleString=Daily Data for Diversion "
+		props.set ( "SubProduct " + sub + ".SubTitleString=Daily Data for Diversion "
 			+ div.getID() + " (" + div.getName() + ")" );
 		props.set ( "SubProduct " + sub + ".SubTitleFontSize=12" );
-		if (	__ts_diversion_daily_JCheckBox.isSelected() &&
-			__ts_diversion_daily_JCheckBox.isEnabled() ) {
+		if ( __ts_diversion_daily_JCheckBox.isSelected() && __ts_diversion_daily_JCheckBox.isEnabled() ) {
 			ts = div.getDiversionDayTS();
 			if ( ts != null ) {
-				props.set ( "Data " + sub + "." + (++its) +
-					".TSID=" + ts.getIdentifierString() );
+				props.set ( "Data " + sub + "." + (++its) + ".TSID=" + ts.getIdentifierString() );
 				tslist.add ( ts );
 			}
 		}
-		if (	__ts_diversion_est_daily_JCheckBox.isSelected() &&
-			__ts_diversion_est_daily_JCheckBox.isEnabled() ) {
+		if ( __ts_diversion_est_daily_JCheckBox.isSelected() && __ts_diversion_est_daily_JCheckBox.isEnabled() ) {
 			// Need to estimate the daily diversion...
 			dayts = null;
 			if ( cdividy.equalsIgnoreCase(div.getID()) ) {
-				// The daily time series is from this
-				// diversion...
+				// The daily time series is from this diversion...
 				dayts = div.getDiversionDayTS();
 			}
 			else if(!cdividy.equals("0") && !cdividy.equals("4") ) {
-				// Get the daily time series from another
-				// diversion...
-				comp = __dataset.getComponentForComponentType(
-					StateMod_DataSet.
-					COMP_DIVERSION_TS_DAILY );
+				// Get the daily time series from another diversion...
+				comp = __dataset.getComponentForComponentType( StateMod_DataSet.COMP_DIVERSION_TS_DAILY );
 				data = (List)comp.getData();
-				pos = TSUtil.indexOf ((List)comp.getData(),
-					cdividy, "Location", 0 );
+				pos = TSUtil.indexOf ((List)comp.getData(), cdividy, "Location", 0 );
 				if ( pos >= 0 ) {
 					dayts = (DayTS)data.get(pos);
 				}
 			}
-			ts = StateMod_Util.createDailyEstimateTS (
-				div.getID(), div.getName(), "Diversion", "CFS",
+			ts = StateMod_Util.createDailyEstimateTS ( div.getID(), div.getName(), "Diversion", "CFS",
 				cdividy, div.getDiversionMonthTS(), dayts );
 			if ( ts != null ) {
-				props.set ( "Data " + sub + "." + (++its) +
-					".TSID=" + ts.getIdentifierString() );
+				props.set ( "Data " + sub + "." + (++its) + ".TSID=" + ts.getIdentifierString() );
 				tslist.add ( ts );
 			}
 		}
-		if (	__ts_demand_daily_JCheckBox.isSelected() &&
-			__ts_demand_daily_JCheckBox.isEnabled() ) {
+		if ( __ts_demand_daily_JCheckBox.isSelected() && __ts_demand_daily_JCheckBox.isEnabled() ) {
 			ts = div.getDemandDayTS();
 			if ( ts != null ) {
-				props.set ( "Data " + sub + "." + (++its) +
-					".TSID=" + ts.getIdentifierString() );
+				props.set ( "Data " + sub + "." + (++its) + ".TSID=" + ts.getIdentifierString() );
 				tslist.add ( ts );
 			}
 		}
-		if (	__ts_demand_est_daily_JCheckBox.isSelected() &&
-			__ts_demand_est_daily_JCheckBox.isEnabled() ) {
+		if ( __ts_demand_est_daily_JCheckBox.isSelected() && __ts_demand_est_daily_JCheckBox.isEnabled() ) {
 			// Need to estimate the daily demand...
 			dayts = null;
 			if ( cdividy.equalsIgnoreCase(div.getID()) ) {
-				// The daily time series is from this
-				// diversion...
+				// The daily time series is from this diversion...
 				dayts = div.getDemandDayTS();
 			}
 			else if(!cdividy.equals("0") && !cdividy.equals("4") ) {
-				// Get the daily time series from another
-				// diversion...
-				comp = __dataset.getComponentForComponentType(
-					StateMod_DataSet.COMP_DEMAND_TS_DAILY );
+				// Get the daily time series from another diversion...
+				comp = __dataset.getComponentForComponentType(StateMod_DataSet.COMP_DEMAND_TS_DAILY );
 				data = (List)comp.getData();
-				pos = TSUtil.indexOf ((List)comp.getData(),
-					cdividy, "Location", 0 );
+				pos = TSUtil.indexOf ((List)comp.getData(),	cdividy, "Location", 0 );
 				if ( pos >= 0 ) {
 					dayts = (DayTS)data.get(pos);
 				}
 			}
 			ts = StateMod_Util.createDailyEstimateTS (
-				div.getID(), div.getName(), "Demand", "CFS",
-				cdividy, div.getDemandMonthTS(), dayts );
+				div.getID(), div.getName(), "Demand", "CFS", cdividy, div.getDemandMonthTS(), dayts );
 			if ( ts != null ) {
-				props.set ( "Data " + sub + "." + (++its) +
-					".TSID=" + ts.getIdentifierString() );
+				props.set ( "Data " + sub + "." + (++its) + ".TSID=" + ts.getIdentifierString() );
 				tslist.add ( ts );
 			}
 		}
-		if (	__ts_cwr_daily_JCheckBox.isSelected() &&
-			__ts_cwr_daily_JCheckBox.isEnabled() ) {
+		if ( __ts_cwr_daily_JCheckBox.isSelected() && __ts_cwr_daily_JCheckBox.isEnabled() ) {
 			ts = div.getConsumptiveWaterRequirementDayTS();
 			if ( ts != null ) {
-				props.set ( "Data " + sub + "." + (++its) +
-					".TSID=" + ts.getIdentifierString() );
+				props.set ( "Data " + sub + "." + (++its) + ".TSID=" + ts.getIdentifierString() );
 				tslist.add ( ts );
 			}
 		}
-		if (	__ts_cwr_est_daily_JCheckBox.isSelected() &&
-			__ts_cwr_est_daily_JCheckBox.isEnabled() ) {
+		if ( __ts_cwr_est_daily_JCheckBox.isSelected() && __ts_cwr_est_daily_JCheckBox.isEnabled() ) {
 			// Need to estimate the daily cwr...
 			dayts = null;
 			if ( cdividy.equalsIgnoreCase(div.getID()) ) {
-				// The daily time series is from this
-				// diversion...
+				// The daily time series is from this diversion...
 				dayts=div.getConsumptiveWaterRequirementDayTS();
 			}
 			else if(!cdividy.equals("0") && !cdividy.equals("4") ) {
-				// Get the daily time series from another
-				// diversion...
+				// Get the daily time series from another diversion...
 				comp = __dataset.getComponentForComponentType(
-					StateMod_DataSet.
-				COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_DAILY );
+					StateMod_DataSet.COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_DAILY );
 				data = (List)comp.getData();
-				pos = TSUtil.indexOf ((List)comp.getData(),
-					cdividy, "Location", 0 );
+				pos = TSUtil.indexOf ((List)comp.getData(), cdividy, "Location", 0 );
 				if ( pos >= 0 ) {
 					dayts = (DayTS)data.get(pos);
 				}
 			}
 			ts = StateMod_Util.createDailyEstimateTS (
-				div.getID(), div.getName(), "CWR", "CFS",
-				cdividy, div.getDemandMonthTS(), dayts );
+				div.getID(), div.getName(), "CWR", "CFS", cdividy, div.getDemandMonthTS(), dayts );
 			if ( ts != null ) {
-				props.set ( "Data " + sub + "." + (++its) +
-					".TSID=" + ts.getIdentifierString() );
+				props.set ( "Data " + sub + "." + (++its) + ".TSID=" + ts.getIdentifierString() );
 				tslist.add ( ts );
 			}
 		}
-		if (	__ts_water_right_daily_JCheckBox.isSelected() &&
-			__ts_water_right_daily_JCheckBox.isEnabled() ) {
+		if ( __ts_water_right_daily_JCheckBox.isSelected() && __ts_water_right_daily_JCheckBox.isEnabled() ) {
 			if ( div.getRights().size() > 0 ) {
-				// Create a daily time series to illustrate
-				// the water right volume...
-				ts =	StateMod_Util.createWaterRightTS ( div,
-					TimeInterval.DAY,
-					StateMod_DataSet.lookupTimeSeriesDataUnits(
-					StateMod_DataSet.
-					COMP_DIVERSION_TS_DAILY),
-					__dataset.getDataStart(),
-					__dataset.getDataEnd() );
+				// Create a daily time series to illustrate the water right volume...
+				ts = StateMod_Util.createWaterRightTS ( div, TimeInterval.DAY,
+					StateMod_DataSet.lookupTimeSeriesDataUnits( StateMod_DataSet.COMP_DIVERSION_TS_DAILY),
+					__dataset.getDataStart(), __dataset.getDataEnd() );
 				if ( ts != null ) {
-					props.set ( "Data " + sub + "." +
-					(++its) +
-					".TSID=" + ts.getIdentifierString() );
+					props.set ( "Data " + sub + "." + (++its) + ".TSID=" + ts.getIdentifierString() );
 					tslist.add ( ts );
 				}
 			}
 		}
 	}
 	
-	try {	TSProduct tsproduct = new TSProduct ( props, display_props );
+	try {
+		TSProduct tsproduct = new TSProduct ( props, display_props );
 		tsproduct.setTSList ( tslist );
 		new TSViewJFrame ( tsproduct );
 	}
 	catch (Exception e) {
-		Message.printWarning(1,routine,
-		"Error displaying time series.", this);
+		Message.printWarning(1,routine,"Error displaying time series (" + e + ").", this);
 		Message.printWarning(2, routine, e);
 	}
 }
@@ -1258,8 +1124,7 @@ throws Throwable {
 
 /**
 Initializes the arrays that are used when items are selected and deselected.
-This should be called from setupGUI() before the a call is made to 
-selectTableIndex().
+This should be called from setupGUI() before the a call is made to selectTableIndex().
 */
 private void initializeJComponents()
 {	__all_JComponents = new JComponent[47];
@@ -1308,17 +1173,14 @@ private void initializeJComponents()
 	
 	// Indicate components that are never enabled.
 	// The ID and the node ID are disabled in all cases.
-	// Other components are disabled because the control data indicate that
-	// some data are not used.
+	// Other components are disabled because the control data indicate that some data are not used.
 	// All time series are enabled because it may be useful to compare
 	// time series, regardless of the control settings.
 
 	__disabled_JComponents = new int[5];
 	__disabled_JComponents[0] = 0;	//__diversionStationID_JTextField
 	__disabled_JComponents[1] = 1;	// __riverNodeID_JTextField
-	__disabled_JComponents[2] = 2;	// __demandSource_JComboBox
-					// Disabled because only used
-					// by DMIs - may phase out
+	__disabled_JComponents[2] = 2;	// __demandSource_JComboBox Disabled because only used by DMIs - may phase out
 	__disabled_JComponents[3] = -1;	// For daily data ID
 	__disabled_JComponents[4] = -1;	// For soil switch below
 
@@ -1417,14 +1279,14 @@ private void populateDiversionDailyID()
 {	__diversionDailyID_JComboBox.removeAllItems();
 
 	// Get a list of all the diversions with "ID - Name"...
-	List idNameVector = StateMod_Util.createDataList(__diversionsVector, 
-		true);
+	List idNameVector = StateMod_Util.createDataList(__diversionsVector, true);
 	List static_choices = StateMod_Diversion.getCdividyChoices ( true );
 	// Take special care if no diversions are in the list...
 	if ( idNameVector.size() == 0 ) {
 		idNameVector.add( (String)static_choices.get(0) );
 	}
-	else {	idNameVector.add(0,(String)static_choices.get(0) );
+	else {
+		idNameVector.add(0,(String)static_choices.get(0) );
 	}
 	int size = static_choices.size();
 	for ( int i = 1; i < size; i++ ) {
@@ -1437,8 +1299,7 @@ private void populateDiversionDailyID()
 /**
 Processes a table selection (either via a mouse press or programmatically 
 from selectTableIndex()) by writing the old data back to the data set component
-and getting the next selection's data out of the data and displaying it 
-on the form.
+and getting the next selection's data out of the data and displaying it on the form.
 @param index the index of the reservoir to display on the form.
 @param try_to_save Indicates whether the current data should try to be saved.
 false should be specified if the call is being made after checkInput() fails.
@@ -1446,16 +1307,13 @@ false should be specified if the call is being made after checkInput() fails.
 private void processTableSelection(int index, boolean try_to_save )
 {	String routine = "processTableSelection";	
 
- 	// First save the previous information before displaying the new
-	// information...
+ 	// First save the previous information before displaying the new information...
 
-	Message.printStatus ( 1, "", "processTableSelection index " + index +
-		" save flag: " + try_to_save );
+	Message.printStatus ( 1, "", "processTableSelection index " + index + " save flag: " + try_to_save );
 /*
 	if ( try_to_save && !saveCurrentDiversion() ) {
 		// Save was unsuccessful.  Revert to the previous index.  This
-		// will eventually end up being a recursive call back to here
-		// but try_to_save will be false.
+		// will eventually end up being a recursive call back to here but try_to_save will be false.
 		Message.printStatus ( 1, "", "processTableSelection index " +
 			index + " save flag: " + try_to_save +
 			" Error saving so display old index: " +
@@ -1474,13 +1332,11 @@ private void processTableSelection(int index, boolean try_to_save )
 		return;
 	}
 
-	JGUIUtil.enableComponents ( __all_JComponents, __disabled_JComponents, 
-		__editable);
+	JGUIUtil.enableComponents ( __all_JComponents, __disabled_JComponents, __editable);
 	
 	// List these in the order of the GUI...
 
-	StateMod_Diversion div = (StateMod_Diversion)
-		__diversionsVector.get(__currentDiversionIndex);
+	StateMod_Diversion div = (StateMod_Diversion)__diversionsVector.get(__currentDiversionIndex);
 
 	// Diversion identifier...
 
@@ -1491,31 +1347,26 @@ private void processTableSelection(int index, boolean try_to_save )
 	__diversionName_JTextField.setText(div.getName());
 
 	// River node...
-	// REVISIT - if river node is made editable, change to a JComboBox...
+	// TODO - if river node is made editable, change to a JComboBox...
 
 	__riverNodeID_JTextField.setText(div.getCgoto());
 
 	// Capacity...
 
-	StateMod_GUIUtil.checkAndSet(div.getDivcap(),
-		__diversionCapacity_JTextField );
+	StateMod_GUIUtil.checkAndSet(div.getDivcap(), __diversionCapacity_JTextField );
 
 	// On/off switch...
 
 	String idivsw = "" + div.getSwitch();
-	// Select the switch that matches the first token in the available
-	// choices...
-	try {	JGUIUtil.selectTokenMatches (	__diversionSwitch_JComboBox,
-						true, " ", 0, 0, idivsw, null );
+	// Select the switch that matches the first token in the available choices...
+	try {
+		JGUIUtil.selectTokenMatches ( __diversionSwitch_JComboBox, true, " ", 0, 0, idivsw, null );
 	}
 	catch ( Exception e ) {
 		// Default...
-		Message.printWarning ( 2, routine,
-		"Using default value idivsw = \"" + 
-		StateMod_Diversion.getIdivswDefault(true) +
-		"\" because data value " + idivsw + " is unknown." );
-		__diversionSwitch_JComboBox.select(
-			StateMod_Diversion.getIdivswDefault(true) );
+		Message.printWarning ( 2, routine, "Using default value idivsw = \"" + 
+		StateMod_Diversion.getIdivswDefault(true) + "\" because data value " + idivsw + " is unknown." );
+		__diversionSwitch_JComboBox.select(StateMod_Diversion.getIdivswDefault(true) );
 	}
 
 	// User name...
@@ -1525,73 +1376,57 @@ private void processTableSelection(int index, boolean try_to_save )
 	// Replacement reservoir...
 
 	String ireptype = "" + div.getIreptype();
-	try {	JGUIUtil.selectTokenMatches (
-				__replacementReservoirOption_JComboBox,
-				true, " ", 0, 0, ireptype, null );
+	try {
+		JGUIUtil.selectTokenMatches ( __replacementReservoirOption_JComboBox, true, " ", 0, 0, ireptype, null );
 	}
 	catch ( Exception e ) {
 		// Default...
-		Message.printWarning ( 2, routine,
-		"Using default value ireptype = \"" +
-		StateMod_Diversion.getIreptypeDefault(true) +
-		"\" because data value " + ireptype + " is unknown." );
-		__replacementReservoirOption_JComboBox.select(
-			StateMod_Diversion.getIreptypeDefault(true) );
+		Message.printWarning ( 2, routine, "Using default value ireptype = \"" +
+		StateMod_Diversion.getIreptypeDefault(true) + "\" because data value " + ireptype + " is unknown." );
+		__replacementReservoirOption_JComboBox.select(StateMod_Diversion.getIreptypeDefault(true) );
 	}
 
 	// Use type...
 
 	String irturn = "" + div.getIrturn();
-	try {	JGUIUtil.selectTokenMatches ( __useType_JComboBox,
-				true, " ", 0, 0, irturn, null );
+	try {
+		JGUIUtil.selectTokenMatches ( __useType_JComboBox, true, " ", 0, 0, irturn, null );
 	}
 	catch ( Exception e ) {
 		// Default...
-		Message.printWarning ( 2, routine,
-		"Using default value irturn = \"" +
-		StateMod_Diversion.getIrturnDefault(true) +
-		"\" because data value " + irturn + " is unknown." );
-		__useType_JComboBox.select(
-		StateMod_Diversion.getIrturnDefault(true) );
+		Message.printWarning ( 2, routine, "Using default value irturn = \"" +
+		StateMod_Diversion.getIrturnDefault(true) + "\" because data value " + irturn + " is unknown." );
+		__useType_JComboBox.select( StateMod_Diversion.getIrturnDefault(true) );
 	}
 
 	// Irrigated acreage...
 
-	StateMod_GUIUtil.checkAndSet(div.getArea(),
-		__irrigatedAcreage_JTextField);
+	StateMod_GUIUtil.checkAndSet(div.getArea(), __irrigatedAcreage_JTextField);
 
 	// Monthly demand type switch..
 
 	String idvcom = "" + div.getIdvcom();
-	try {	JGUIUtil.selectTokenMatches (
-				__demandType_JComboBox,
-				true, " ", 0, 0, idvcom, null );
+	try {
+		JGUIUtil.selectTokenMatches ( __demandType_JComboBox, true, " ", 0, 0, idvcom, null );
 	}
 	catch ( Exception e ) {
 		// Default...
-		Message.printWarning ( 2, routine,
-		"Using default value idvcom = \"" +
-		StateMod_Diversion.getIdvcomChoices(true) +
-		"\" because data value " + idvcom + " is unknown." );
-		__useType_JComboBox.select(
-			StateMod_Diversion.getIdvcomDefault(true) );
+		Message.printWarning ( 2, routine, "Using default value idvcom = \"" +
+		StateMod_Diversion.getIdvcomChoices(true) + "\" because data value " + idvcom + " is unknown." );
+		__useType_JComboBox.select(	StateMod_Diversion.getIdvcomDefault(true) );
 	}
 
 	// Demand source used by DMIs...
 
 	String demsrc = "" + div.getDemsrc();
-	try {	JGUIUtil.selectTokenMatches (
-				__demandSource_JComboBox,
-				true, " ", 0, 0, demsrc, null );
+	try {
+		JGUIUtil.selectTokenMatches (__demandSource_JComboBox,true, " ", 0, 0, demsrc, null );
 	}
 	catch ( Exception e ) {
 		// Default...
-		Message.printWarning ( 2, routine,
-		"Using default value demsrc = \"" +
-		StateMod_Diversion.getDemsrcDefault(true) +
-		" because data value " + demsrc + " is unknown." );
-		__demandSource_JComboBox.select (
-			StateMod_Diversion.getDemsrcDefault(true) );
+		Message.printWarning ( 2, routine, "Using default value demsrc = \"" +
+			StateMod_Diversion.getDemsrcDefault(true) + " because data value " + demsrc + " is unknown." );
+		__demandSource_JComboBox.select (StateMod_Diversion.getDemsrcDefault(true) );
 	}
 
 	// Daily ID...
@@ -1603,8 +1438,7 @@ private void processTableSelection(int index, boolean try_to_save )
 	// previous item from the list if necessary)...
 
 	if (__lastDiversionIndex != -1) {
-		// Remove the previous diversion as the first structure in the
-		// choice...
+		// Remove the previous diversion as the first structure in the choice...
 		String s = __diversionDailyID_JComboBox.getStringAt(3);
 		__diversionDailyID_JComboBox.removeAt(3);
 		// Add alphabetically in the list...
@@ -1615,26 +1449,23 @@ private void processTableSelection(int index, boolean try_to_save )
 	__diversionDailyID_JComboBox.remove(s);
 	// Now add as the first structure in the list...
 	__diversionDailyID_JComboBox.addAt(s, 3);
-	// For now do not remove any "Unknown" items as added below.  Hopefully
-	// there will not be any...
+	// For now do not remove any "Unknown" items as added below.  Hopefully there will not be any...
 
 	// Now select the item that matches the data...
 
 	String cdividy = div.getCdividy();
 	if (cdividy.equals("")) {
 		// Default to using monthly values...
-		__diversionDailyID_JComboBox.select(
-			StateMod_Diversion.getCdividyDefault(true) );
+		__diversionDailyID_JComboBox.select(StateMod_Diversion.getCdividyDefault(true) );
 	}
-	else {	// A value has been specified...
-		try {	JGUIUtil.selectTokenMatches (
-			__diversionDailyID_JComboBox, true, " -", 0, 0,
-			cdividy, null);
+	else {
+		// A value has been specified...
+		try {
+			JGUIUtil.selectTokenMatches (__diversionDailyID_JComboBox, true, " -", 0, 0, cdividy, null);
 		}
 		catch ( Exception e ) {
-			Message.printWarning(2, routine, "No dividy value "
-				+ "matching '" + div.getID() + "' found in "
-				+ "combo box.  Adding as Unknown.");
+			Message.printWarning(2, routine, "No dividy value matching '" + div.getID() +
+				"' found in combo box.  Adding as Unknown.");
 			s = cdividy + " - Unknown";
 			// Add at the end...
 			__diversionDailyID_JComboBox.add(s);
@@ -1646,17 +1477,16 @@ private void processTableSelection(int index, boolean try_to_save )
 
 	StateMod_GUIUtil.checkAndSet(div.getAWC(), __awc_JTextField);
 
-	// Return flows and water rights are accessed only when those windows
-	// are opened.
+	// Return flows and water rights are accessed only when those windows are opened.
 
 	// Efficiency switch...
 
-	if (	!StateMod_Util.isMissing(div.getDivefc()) &&
-		(div.getDivefc() < 0) ) {
+	if ( !StateMod_Util.isMissing(div.getDivefc()) && (div.getDivefc() < 0) ) {
 		// Display monthly efficiencies...
 		displayEff ( true, true );
 	}
-	else {	// Display constant efficiencies...
+	else {
+		// Display constant efficiencies...
 		displayEff ( false, true );
 	}
 
@@ -1669,21 +1499,21 @@ private void processTableSelection(int index, boolean try_to_save )
 	if ( div.getDiversionMonthTS() != null ) {
 		__ts_diversion_monthly_JCheckBox.setEnabled(true);
 	}
-	else {	__ts_diversion_monthly_JCheckBox.setEnabled(false);
+	else {
+		__ts_diversion_monthly_JCheckBox.setEnabled(false);
 	}
 
 	// This will be used if cdividy == 3...
 	if ( div.getDiversionDayTS() != null ) {
 		__ts_diversion_daily_JCheckBox.setEnabled(true);
 	}
-	else {	__ts_diversion_daily_JCheckBox.setEnabled(false);
+	else {
+		__ts_diversion_daily_JCheckBox.setEnabled(false);
 	}
 
-	// Get this from the display because some default may have been
-	// assigned...
+	// Get this from the display because some default may have been assigned...
 
-	cdividy = StringUtil.getToken (
-		__diversionDailyID_JComboBox.getSelected(), " -",0,0 );
+	cdividy = StringUtil.getToken (__diversionDailyID_JComboBox.getSelected(), " -",0,0 );
 	int pos_d = 0, pos_m;		// Daily and monthly index positions
 	DataSetComponent comp_d, comp_m;// Daily and monthly components
 	if ( !cdividy.equals("3") ) {
@@ -1693,56 +1523,58 @@ private void processTableSelection(int index, boolean try_to_save )
 		}
 		// Enable if the monthly time series for this diversion is
 		// available (and daily if an identifier is specified)...
-		comp_m = __dataset.getComponentForComponentType (
-			StateMod_DataSet.COMP_DIVERSION_TS_MONTHLY );
-		pos_m = TSUtil.indexOf ( (List)comp_m.getData(), monthid,
-				"Location", 0 );
+		comp_m = __dataset.getComponentForComponentType ( StateMod_DataSet.COMP_DIVERSION_TS_MONTHLY );
+		pos_m = TSUtil.indexOf ( (List)comp_m.getData(), monthid, "Location", 0 );
 		if ( cdividy.equalsIgnoreCase(div.getID()) ) {
-			// The daily time series for this diversion must also
-			// be available...
-			comp_d = __dataset.getComponentForComponentType (
-				StateMod_DataSet.COMP_DIVERSION_TS_DAILY );
-			pos_d = TSUtil.indexOf ((List)comp_d.getData(),
-				cdividy, "Location", 0 );
+			// The daily time series for this diversion must also be available...
+			comp_d = __dataset.getComponentForComponentType (StateMod_DataSet.COMP_DIVERSION_TS_DAILY );
+			pos_d = TSUtil.indexOf ((List)comp_d.getData(), cdividy, "Location", 0 );
 		}
-		else {	// Set so the following logic will pass...
+		else {
+			// Set so the following logic will pass...
 			pos_d = 0;
 		}
 		if ( (pos_m >= 0) && (pos_d >= 0) ) {
 			__ts_diversion_est_daily_JCheckBox.setEnabled(true);
 		}
-		else {	__ts_diversion_est_daily_JCheckBox.setEnabled(false);
+		else {
+			__ts_diversion_est_daily_JCheckBox.setEnabled(false);
 		}
 	}
 
 	if ( div.getRights().size() > 0 ) {
 		__ts_water_right_monthly_JCheckBox.setEnabled(true);
 	}
-	else {	__ts_water_right_monthly_JCheckBox.setEnabled(false);
+	else {
+		__ts_water_right_monthly_JCheckBox.setEnabled(false);
 	}
 
 	if ( div.getDemandMonthTS() != null ) {
 		__ts_demand_monthly_JCheckBox.setEnabled(true);
 	}
-	else {	__ts_demand_monthly_JCheckBox.setEnabled(false);
+	else {
+		__ts_demand_monthly_JCheckBox.setEnabled(false);
 	}
 
 	if ( div.getDemandOverrideMonthTS() != null ) {
 		__ts_demand_override_monthly_JCheckBox.setEnabled(true);
 	}
-	else {	__ts_demand_override_monthly_JCheckBox.setEnabled(false);
+	else {
+		__ts_demand_override_monthly_JCheckBox.setEnabled(false);
 	}
 
 	if ( div.getDemandAverageMonthTS() != null ) {
 		__ts_demand_ave_monthly_JCheckBox.setEnabled(true);
 	}
-	else {	__ts_demand_ave_monthly_JCheckBox.setEnabled(false);
+	else {
+		__ts_demand_ave_monthly_JCheckBox.setEnabled(false);
 	}
 
 	if ( div.getDemandDayTS() != null ) {
 		__ts_demand_daily_JCheckBox.setEnabled(true);
 	}
-	else {	__ts_demand_daily_JCheckBox.setEnabled(false);
+	else {
+		__ts_demand_daily_JCheckBox.setEnabled(false);
 	}
 
 	if ( !cdividy.equals("3") ) {
@@ -1752,44 +1584,45 @@ private void processTableSelection(int index, boolean try_to_save )
 		}
 		// Enable if the monthly time series for this diversion is
 		// available (and daily if an identifier is specified)...
-		comp_m = __dataset.getComponentForComponentType (
-			StateMod_DataSet.COMP_DEMAND_TS_MONTHLY );
+		comp_m = __dataset.getComponentForComponentType ( StateMod_DataSet.COMP_DEMAND_TS_MONTHLY );
 		pos_m = TSUtil.indexOf ( (List)comp_m.getData(), monthid,
 				"Location", 0 );
 		if ( cdividy.equalsIgnoreCase(div.getID()) ) {
-			// The daily time series for this diversion must also
-			// be available...
-			comp_d = __dataset.getComponentForComponentType (
-				StateMod_DataSet.COMP_DEMAND_TS_DAILY );
-			pos_d = TSUtil.indexOf ((List)comp_d.getData(),
-				cdividy, "Location", 0 );
+			// The daily time series for this diversion must also be available...
+			comp_d = __dataset.getComponentForComponentType ( StateMod_DataSet.COMP_DEMAND_TS_DAILY );
+			pos_d = TSUtil.indexOf ((List)comp_d.getData(), cdividy, "Location", 0 );
 		}
-		else {	// Set so the following logic will pass...
+		else {
+			// Set so the following logic will pass...
 			pos_d = 0;
 		}
 		if ( (pos_m >= 0) && (pos_d >= 0) ) {
 			__ts_demand_est_daily_JCheckBox.setEnabled(true);
 		}
-		else {	__ts_demand_est_daily_JCheckBox.setEnabled(false);
+		else {
+			__ts_demand_est_daily_JCheckBox.setEnabled(false);
 		}
 	}
 
 	if ( div.getRights().size() > 0 ) {
 		__ts_water_right_daily_JCheckBox.setEnabled(true);
 	}
-	else {	__ts_water_right_daily_JCheckBox.setEnabled(false);
+	else {
+		__ts_water_right_daily_JCheckBox.setEnabled(false);
 	}
 
 	if ( div.getIrrigationPracticeYearTS() != null ) {
 		__ts_ipy_yearly_JCheckBox.setEnabled(true);
 	}
-	else {	__ts_ipy_yearly_JCheckBox.setEnabled(false);
+	else {
+		__ts_ipy_yearly_JCheckBox.setEnabled(false);
 	}
 
 	if ( div.getConsumptiveWaterRequirementMonthTS() != null ) {
 		__ts_cwr_monthly_JCheckBox.setEnabled(true);
 	}
-	else {	__ts_cwr_monthly_JCheckBox.setEnabled(false);
+	else {
+		__ts_cwr_monthly_JCheckBox.setEnabled(false);
 	}
 
 	if ( div.getConsumptiveWaterRequirementDayTS() != null ) {
@@ -1806,26 +1639,23 @@ private void processTableSelection(int index, boolean try_to_save )
 		// Enable if the monthly time series for this diversion is
 		// available (and daily if an identifier is specified)...
 		comp_m = __dataset.getComponentForComponentType (
-			StateMod_DataSet.
-			COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_MONTHLY );
-		pos_m = TSUtil.indexOf ( (List)comp_m.getData(), monthid,
-				"Location", 0 );
+			StateMod_DataSet.COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_MONTHLY );
+		pos_m = TSUtil.indexOf ( (List)comp_m.getData(), monthid, "Location", 0 );
 		if ( cdividy.equalsIgnoreCase(div.getID()) ) {
-			// The daily time series for this diversion must also
-			// be available...
+			// The daily time series for this diversion must also be available...
 			comp_d = __dataset.getComponentForComponentType (
-				StateMod_DataSet.
-				COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_DAILY );
-			pos_d = TSUtil.indexOf ((List)comp_d.getData(),
-				cdividy, "Location", 0 );
+				StateMod_DataSet.COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_DAILY );
+			pos_d = TSUtil.indexOf ((List)comp_d.getData(), cdividy, "Location", 0 );
 		}
-		else {	// Set so the following logic will pass...
+		else {
+			// Set so the following logic will pass...
 			pos_d = 0;
 		}
 		if ( (pos_m >= 0) && (pos_d >= 0) ) {
 			__ts_cwr_est_daily_JCheckBox.setEnabled(true);
 		}
-		else {	__ts_cwr_est_daily_JCheckBox.setEnabled(false);
+		else {
+			__ts_cwr_est_daily_JCheckBox.setEnabled(false);
 		}
 	}
 
@@ -1857,18 +1687,15 @@ private boolean saveData(int record) {
 
 	if ( checkInput() > 0 ) {
 		// Fatal errors so cannot save...
-		Message.printStatus ( 1, "", "saveData detected error " +
-		"in checkInput - returning false" );
+		Message.printStatus ( 1, "", "saveData detected error in checkInput - returning false" );
 		return false;
 	}
 
-	StateMod_Diversion div = (StateMod_Diversion)
-		__diversionsVector.get(record);
+	StateMod_Diversion div = (StateMod_Diversion)__diversionsVector.get(record);
 
 	// Save in the order of the GUI.  Save all the items, even if not
 	// currently editable/enabled (like ID and river node ID) because later
-	// these fields may be made editable and checkInput() will warn the
-	// user about issues
+	// these fields may be made editable and checkInput() will warn the user about issues
 
 	div.setID ( __diversionStationID_JTextField.getText().trim() );
 
@@ -1894,8 +1721,7 @@ private boolean saveData(int record) {
 
 	// On/off switch...
 
-	String idivsw = StringUtil.getToken(
-		__diversionSwitch_JComboBox.getSelected()," ",0,0);
+	String idivsw = StringUtil.getToken(__diversionSwitch_JComboBox.getSelected()," ",0,0);
 	div.setSwitch(StringUtil.atoi(idivsw));
 
 	// User name...
@@ -1904,8 +1730,7 @@ private boolean saveData(int record) {
 
 	// Replacement reservoir...
 
-	String ireptype = StringUtil.getToken(
-		__replacementReservoirOption_JComboBox.getSelected()," ",0,0);
+	String ireptype = StringUtil.getToken(__replacementReservoirOption_JComboBox.getSelected()," ",0,0);
 	div.setIreptype(StringUtil.atoi(ireptype));
 
 	// Use type...
@@ -1926,8 +1751,7 @@ private boolean saveData(int record) {
 
 	// Monthly demand type switch...
 
-	String idvcom = StringUtil.getToken(
-		__demandType_JComboBox.getSelected()," ",0,0);
+	String idvcom = StringUtil.getToken(__demandType_JComboBox.getSelected()," ",0,0);
 	div.setIdvcom(StringUtil.atoi(idvcom));
 
 	// Demand source...
@@ -1937,8 +1761,7 @@ private boolean saveData(int record) {
 
 	// Daily data ID...
 
-	String cdividy = StringUtil.getToken (
-		__diversionDailyID_JComboBox.getSelected(), " -", 0, 0 );
+	String cdividy = StringUtil.getToken (__diversionDailyID_JComboBox.getSelected(), " -", 0, 0 );
 	div.setCdividy(cdividy);
 
 	// AWC...
@@ -1953,19 +1776,16 @@ private boolean saveData(int record) {
 		div.setAWC(awc);
 	}
 
-	// Return flows and water rights are saved when those individual screens
-	// are accessed.
+	// Return flows and water rights are saved when those individual screens are accessed.
 
 	// Efficiencies...
 
 	saveEfficiencies(div);
 
-	// Update the main interface - if the data set is dirty, the File...Save
-	// menu will be enabled...
+	// Update the main interface - if the data set is dirty, the File...Save menu will be enabled...
 
 	if ( __dataset_wm != null ) {
-		__dataset_wm.updateWindowStatus (
-		StateMod_DataSet_WindowManager.WINDOW_MAIN );
+		__dataset_wm.updateWindowStatus ( StateMod_DataSet_WindowManager.WINDOW_MAIN );
 	}
 
 	return true;
@@ -1988,7 +1808,8 @@ private void saveEfficiencies(StateMod_Diversion div)
 		// indicate that monthly efficiencies will be used...
 		div.setDivefc ( "-"+__effConstant_JTextField.getText().trim() );
 	}
-	else {	// Save the constant efficiency as is...
+	else {
+		// Save the constant efficiency as is...
 		div.setDivefc ( __effConstant_JTextField.getText().trim() );
 	}
 }
@@ -2028,8 +1849,7 @@ public void searchWorksheet(int row) {
 
 /**
 Selects the desired ID in the table and displays the appropriate data
-in the remainder of the window.  This method is called when the network is
-edited.
+in the remainder of the window.  This method is called when the network is edited.
 @param id the identifier to select in the list.
 */
 public void selectID(String id) {
@@ -2046,8 +1866,7 @@ public void selectID(String id) {
 }
 
 /**
-Selects the desired index in the table, but also displays the appropriate data
-in the remainder of the window.
+Selects the desired index in the table, but also displays the appropriate data in the remainder of the window.
 @param index the index to select in the list.
 @param try_to_save Indicates whether the current contents should be saved before
 selecting the new row.  A value of false should be passed only at startup or
@@ -2059,8 +1878,7 @@ the previous contents are retained - this should be the case if checkInput()
 detects an error, in which case we want the previous (and erroneous)
 user-supplied to be shown because they need to correct the data.
 */
-public void selectTableIndex (	int index, boolean try_to_save,
-				boolean process_selection )
+public void selectTableIndex ( int index, boolean try_to_save, boolean process_selection )
 {	int rowCount = __worksheet.getRowCount();
 	if (rowCount == 0) {
 		return;
@@ -2074,8 +1892,7 @@ public void selectTableIndex (	int index, boolean try_to_save,
 	__worksheet.scrollToRow(index);
 	__worksheet.selectRow(index);
 	//__currentDiversionIndex = __worksheet.getSelectedRow();
-	Message.printStatus ( 1, "", "selectTableIndex index " + index +
-		" save flag: " + try_to_save );
+	Message.printStatus ( 1, "", "selectTableIndex index " + index + " save flag: " + try_to_save );
 	if ( process_selection ) {
 		processTableSelection(index, try_to_save);
 	}
@@ -2108,11 +1925,9 @@ private void setupGUI(int index)
 	
 	int[] widths = null;
 	JScrollWorksheet jsw = null;
-	try {	StateMod_Diversion_TableModel tmd = new
-			StateMod_Diversion_TableModel(__diversionsVector, 
-			__editable, true);
-		StateMod_Diversion_CellRenderer crd = new
-			StateMod_Diversion_CellRenderer(tmd);
+	try {
+		StateMod_Diversion_TableModel tmd = new StateMod_Diversion_TableModel(__diversionsVector, __editable, true);
+		StateMod_Diversion_CellRenderer crd = new StateMod_Diversion_CellRenderer(tmd);
 	
 		jsw = new JScrollWorksheet(crd, tmd, p);
 		__worksheet = jsw.getJWorksheet();
@@ -2138,8 +1953,7 @@ private void setupGUI(int index)
 
 	JPanel search_JPanel = new JPanel();
 	search_JPanel.setLayout(gbl);
-	search_JPanel.setBorder(BorderFactory.createTitledBorder(
-		"Search above list for:"));
+	search_JPanel.setBorder(BorderFactory.createTitledBorder("Search above list for:"));
 	int y = 0;
 	ButtonGroup searchCriteriaGroup = new ButtonGroup();
 	__searchID_JRadioButton = new JRadioButton("ID", true);
@@ -2194,27 +2008,25 @@ private void setupGUI(int index)
 	__diversionStationID_JTextField = new JTextField(12);
 	__diversionStationID_JTextField.setEditable(false);
 	__diversionStationID_JTextField.setToolTipText (
-		"<HTML>The diversion ID is the primary identifier for the " +
-		"diversion.<BR>"+
+		"<HTML>The diversion ID is the primary identifier for the diversion.<BR>"+
 		"The ID is used to relate data in various data files.</HTML>");
 	JGUIUtil.addComponent(param_JPanel, __diversionStationID_JTextField,
 		1, y, 2, 1, 0, 0,
 		1, 0, 0, 1, 
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
-	JGUIUtil.addComponent(param_JPanel, new JLabel("Diversion Name:"),
+	JGUIUtil.addComponent(param_JPanel, new JLabel("Diversion name:"),
 		0, ++y, 1, 1, 0, 0, 
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__diversionName_JTextField = new JTextField(24);
 	__diversionName_JTextField.setToolTipText (
-		"<HTML>The diversion name is used for labels and output." +
-		"</HTML>" );
+		"<HTML>The diversion name is used for labels and output.</HTML>" );
 	JGUIUtil.addComponent(param_JPanel, __diversionName_JTextField,
 		1, y, 2, 1, 0, 0,
 		1, 0, 0, 1, 
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
-	JGUIUtil.addComponent(param_JPanel, new JLabel("River Node ID:"),
+	JGUIUtil.addComponent(param_JPanel, new JLabel("River node ID:"),
 		0, ++y, 1, 1, 0, 0, 
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__riverNodeID_JTextField = new JTextField(12);
@@ -2222,8 +2034,7 @@ private void setupGUI(int index)
 	__riverNodeID_JTextField.setToolTipText (
 		"<HTML>The river node is used in the network file.<BR>" +
 		"In most cases the river node ID is the same as the diversion "+
-		"ID,<BR>although StateMod internally uses two identifiers."+
-		"</HTML>" );
+		"ID,<BR>although StateMod internally uses two identifiers.</HTML>" );
 	JGUIUtil.addComponent(param_JPanel, __riverNodeID_JTextField,
 		1, y, 2, 1, 0, 0,
 		1, 0, 0, 1, 
@@ -2234,42 +2045,37 @@ private void setupGUI(int index)
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__diversionCapacity_JTextField = new JTextField(11);
 	__diversionCapacity_JTextField.setToolTipText (
-		"<HTML>The capacity is a physical limit above which water" +
-		" cannot be diverted.</HTML>" );
+		"<HTML>The capacity is a physical limit above which water cannot be diverted.</HTML>" );
 	JGUIUtil.addComponent(param_JPanel, __diversionCapacity_JTextField,
 		1, y, 2, 1, 0, 0,
 		1, 0, 0, 1, 
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
-	JGUIUtil.addComponent(param_JPanel, new JLabel("On/Off Switch:"),
+	JGUIUtil.addComponent(param_JPanel, new JLabel("On/off Switch:"),
 		0, ++y, 1, 1, 0, 0, 
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__diversionSwitch_JComboBox = new SimpleJComboBox();
-	__diversionSwitch_JComboBox.setData (
-		StateMod_Diversion.getIdivswChoices(true) );
+	__diversionSwitch_JComboBox.setData (StateMod_Diversion.getIdivswChoices(true) );
 	__diversionSwitch_JComboBox.addItemListener(this);
 	__diversionSwitch_JComboBox.setToolTipText (
-		"<HTML>The on/off switch tells StateMod whether to include" +
-		" the diversion in the analysis.</HTML>" );
+		"<HTML>The on/off switch tells StateMod whether to include the diversion in the analysis.</HTML>" );
 	JGUIUtil.addComponent(param_JPanel, __diversionSwitch_JComboBox,
 		1, y, 2, 1, 0, 0,
 		1, 0, 0, 1, 
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
-	JGUIUtil.addComponent(param_JPanel, new JLabel("User Name:"),
+	JGUIUtil.addComponent(param_JPanel, new JLabel("User name:"),
 		0, ++y, 1, 1, 0, 0, 
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__userName_JTextField = new JTextField(24);
 	__userName_JTextField.setToolTipText (
-		"<HTML>The user name is the owner for the ditch and is often" +
-		" set to the diversion name.</HTML>" );
+		"<HTML>The user name is the owner for the ditch and is often set to the diversion name.</HTML>" );
 	JGUIUtil.addComponent(param_JPanel, __userName_JTextField,
 		1, y, 2, 1, 0, 0,
 		1, 0, 0, 1, 
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
-	JGUIUtil.addComponent(param_JPanel,
-		new JLabel("Replacement Reservoir:"),
+	JGUIUtil.addComponent(param_JPanel, new JLabel("Replacement reservoir:"),
 		0, ++y, 1, 1, 0, 0, 
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__replacementReservoirOption_JComboBox = new SimpleJComboBox();
@@ -2277,13 +2083,12 @@ private void setupGUI(int index)
 	__replacementReservoirOption_JComboBox.setData (
 		StateMod_Diversion.getIreptypeChoices ( true ) );
 	__replacementReservoirOption_JComboBox.setToolTipText (
-		"<HTML>Used with operational right type 10 (Replacement " +
-		"Reservoir) (see operational rights data).</HTML>" );
+		"<HTML>Used with operational right type 10 (Replacement Reservoir) (see operational rights data).</HTML>" );
 	JGUIUtil.addComponent(param_JPanel,
 		__replacementReservoirOption_JComboBox,
 		1, y, 2, 1, 0, 0,
 		1, 0, 0, 1, 
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
 	JGUIUtil.addComponent(param_JPanel, new JLabel("Use type:"),
 		0, ++y, 1, 1, 0, 0, 
@@ -2292,12 +2097,11 @@ private void setupGUI(int index)
 	__useType_JComboBox.setData (StateMod_Diversion.getIrturnChoices(true));
 	__useType_JComboBox.addActionListener(this);
 	__useType_JComboBox.setToolTipText (
-		"<HTML>The use type indicates how the diverted water will be" +
-		" used.</HTML>" );
+		"<HTML>The use type indicates how the diverted water will be used.</HTML>" );
 	JGUIUtil.addComponent(param_JPanel, __useType_JComboBox,
 		1, y, 2, 1, 0, 0,
 		1, 0, 0, 1, 
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
 	JGUIUtil.addComponent(param_JPanel, new JLabel("Irrigated acreage:"),
 		0, ++y, 1, 1, 0, 0, 
@@ -2310,56 +2114,48 @@ private void setupGUI(int index)
 		1, y, 2, 1, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
-	JGUIUtil.addComponent(param_JPanel, new JLabel(
-		"Monthly demand type:"),
+	JGUIUtil.addComponent(param_JPanel, new JLabel("Monthly demand type:"),
 		0, ++y, 1, 1, 0, 0, 
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__demandType_JComboBox = new SimpleJComboBox();
-	__demandType_JComboBox.setData (
-		StateMod_Diversion.getIdvcomChoices(true) );
+	__demandType_JComboBox.setData (StateMod_Diversion.getIdvcomChoices(true) );
 	__demandType_JComboBox.addItemListener(this);
 	__demandType_JComboBox.setToolTipText (
 		"<HTML>The monthly demand type indicates which " +
 		" time series should be used for monthly demands.</HTML>" );
 	JGUIUtil.addComponent(param_JPanel, __demandType_JComboBox,
 		1, y, 2, 1, 0, 0,
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
 	// May be able to phase this out...
-	JGUIUtil.addComponent(param_JPanel, new JLabel("Demand Source:"),
+	JGUIUtil.addComponent(param_JPanel, new JLabel("Demand source:"),
 		0, ++y, 1, 1, 0, 0, 
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__demandSource_JComboBox = new SimpleJComboBox();
-	__demandSource_JComboBox.setData(
-		StateMod_Diversion.getDemsrcChoices(true) );
+	__demandSource_JComboBox.setData(StateMod_Diversion.getDemsrcChoices(true) );
 	__demandSource_JComboBox.addActionListener(this);
 	__demandSource_JComboBox.setToolTipText (
 		"<HTML>The demand source is not used by StateMod.<BR>" +
-		"It is used by CDSS DMI software to automate data processing." +
-		"</HTML>" );
+		"It is used by CDSS DMI software to automate data processing.</HTML>" );
 	JGUIUtil.addComponent(param_JPanel, __demandSource_JComboBox,
 		1, y, 2, 1, 0, 0,
 		1, 0, 0, 1, 
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
-	JGUIUtil.addComponent(param_JPanel, new JLabel("Daily Data ID:"),
+	JGUIUtil.addComponent(param_JPanel, new JLabel("Daily data ID:"),
 		0, ++y, 1, 1, 0, 0, 
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__diversionDailyID_JComboBox = new SimpleJComboBox();
 	__diversionDailyID_JComboBox.setToolTipText (
-		"<HTML>The daily ID is used with a daily time step (see " +
-		"control data).<BR>" +
-		"Specify 3 if daily time series are available for the " +
-		"diversion.<BR>" +
-		"All other cases use the monthly amount distributed to daily."+
-		"</HTML>" );
+		"<HTML>The daily ID is used with a daily time step (see control data).<BR>" +
+		"Specify 3 if daily time series are available for the diversion.<BR>" +
+		"All other cases use the monthly amount distributed to daily.</HTML>" );
 	JGUIUtil.addComponent(param_JPanel, __diversionDailyID_JComboBox,
 		1, y, 2, 1, 0, 0,
 		1, 0, 0, 1, 
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
-	JGUIUtil.addComponent(param_JPanel,
-		new JLabel("Available Water Content:"),
+	JGUIUtil.addComponent(param_JPanel, new JLabel("Available water content (AWC):"),
 		0, ++y, 1, 1, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__awc_JTextField = new JTextField(12);
@@ -2380,14 +2176,12 @@ private void setupGUI(int index)
 	middle_JPanel.setLayout(gbl);		// efficiency text fields from
 	JPanel eff_JPanel = new JPanel();	// resizing in weird ways.
 	eff_JPanel.setLayout(gbl);
-	eff_JPanel.setBorder(BorderFactory.createTitledBorder(
-		"System Efficiency"));
+	eff_JPanel.setBorder(BorderFactory.createTitledBorder("System Efficiency"));
 	ButtonGroup effButtonGroup = new ButtonGroup();
 	__effConstant_JRadioButton=new JRadioButton("Constant efficiency",true);
 	__effConstant_JRadioButton.addActionListener(this);
 	__effConstant_JRadioButton.setToolTipText (
-	"<HTML>A constant efficiency is used if monthly or variable " +
-	"efficiencies are not specified.</HTML>" );
+	"<HTML>A constant efficiency is used if monthly or variable efficiencies are not specified.</HTML>" );
 	effButtonGroup.add(__effConstant_JRadioButton);
 	JGUIUtil.addComponent(eff_JPanel, __effConstant_JRadioButton,
 		0, 0, 1, 1, 0, 0, 
@@ -2400,12 +2194,10 @@ private void setupGUI(int index)
 		1, 0, 1, 1, 0, 0, 
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
-	__effMonthly_JRadioButton =
-		new JRadioButton("Monthly efficiency  ", false);
+	__effMonthly_JRadioButton = new JRadioButton("Monthly efficiency  ", false);
 	__effMonthly_JRadioButton.addActionListener(this);
 	__effMonthly_JRadioButton.setToolTipText (
-	"<HTML>Monthly efficiencies are used if variable " +
-	"efficiencies are not used<BR>" +
+	"<HTML>Monthly efficiencies are used if variable efficiencies are not used<BR>" +
 	"(see variable effiency control data).</HTML>" );
 	effButtonGroup.add(__effMonthly_JRadioButton);
 	JGUIUtil.addComponent(eff_JPanel, __effMonthly_JRadioButton,
@@ -2416,8 +2208,7 @@ private void setupGUI(int index)
 	for (int i = 0; i < 12; i++) {
 		__effMonthly_JTextField[i] = new JTextField(4);
 		__effMonthly_JTextField[i].setToolTipText (
-		"<HTML>Monthly efficiencies are used if variable " +
-		"efficiencies are not used<BR>" +
+		"<HTML>Monthly efficiencies are used if variable efficiencies are not used<BR>" +
 		"(see variable effiency control data).</HTML>" );
 	}
 	// first 6 months' efficiency
@@ -2485,8 +2276,7 @@ private void setupGUI(int index)
 			++x, y, 1, 1, 0, 0, 
 			GridBagConstraints.NONE, GridBagConstraints.CENTER);
 	}
-	// Efficiencies are assumed to be in the order of the calendar type,
-	// as per StateMod documentation.
+	// Efficiencies are assumed to be in the order of the calendar type, as per StateMod documentation.
 	x = -1;
 	++y;
 	for (int i = 0; i < 6; i++) {
@@ -2560,8 +2350,7 @@ private void setupGUI(int index)
 	x = -1;
 	++y;
 	for (int i = 6; i < 12; i++) {
-		JGUIUtil.addComponent(moneff_JPanel,
-			__effMonthly_JTextField[i],
+		JGUIUtil.addComponent(moneff_JPanel, __effMonthly_JTextField[i],
 			++x, y, 1, 1, 0, 0, 
 			GridBagConstraints.NONE,
 			GridBagConstraints.WEST);
@@ -2577,8 +2366,7 @@ private void setupGUI(int index)
 
 	JPanel relatedData_JPanel = new JPanel();
 	relatedData_JPanel.setLayout(gbl);
-	relatedData_JPanel.setBorder(BorderFactory.createTitledBorder(
-		"Related Data"));
+	relatedData_JPanel.setBorder(BorderFactory.createTitledBorder("Related Data"));
 	int y2 = 0;
 	__returnFlow_JButton = new SimpleJButton("Return Flow ...", this);
 	__returnFlow_JButton.setToolTipText (
@@ -2610,17 +2398,15 @@ private void setupGUI(int index)
 	JPanel ts_JPanel = new JPanel();
 	ts_JPanel.setLayout(gbl);
 	if ( (__dataset != null) && !__dataset.areTSRead() ) {
-		ts_JPanel.setBorder(BorderFactory.createTitledBorder(
-		"Time Series (time series were not read)"));
+		ts_JPanel.setBorder(BorderFactory.createTitledBorder("Time Series (time series were not read)"));
 	}
-	else {	ts_JPanel.setBorder(BorderFactory.createTitledBorder(
-		"Time Series"));
+	else {
+		ts_JPanel.setBorder(BorderFactory.createTitledBorder("Time Series"));
 	}
 
 	y2 = 0;
 	x = 0;
-	__ts_diversion_monthly_JCheckBox =new JCheckBox(
-		"Historical Diversion (Monthly)");
+	__ts_diversion_monthly_JCheckBox =new JCheckBox("Historical Diversion (Monthly)");
 	__ts_diversion_monthly_JCheckBox.addItemListener(this);
 	__ts_diversion_monthly_JCheckBox.setToolTipText (
 		"<HTML>The diversion time series is used to estimate base " +
@@ -2629,8 +2415,7 @@ private void setupGUI(int index)
 		x, y2, 1, 1, 0, 0, 
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
-	__ts_diversion_daily_JCheckBox =new JCheckBox(
-		"Historical Diversion (Daily)");
+	__ts_diversion_daily_JCheckBox =new JCheckBox("Historical Diversion (Daily)");
 	__ts_diversion_daily_JCheckBox.addItemListener(this);
 	__ts_diversion_daily_JCheckBox.setToolTipText (
 		"<HTML>The diversion time series is used to estimate base " +
@@ -2646,8 +2431,7 @@ private void setupGUI(int index)
 		"<HTML>This time series is calculated from other data " +
 		"based on the Daily Data ID.<BR>" +
 		"StateMod will compute the time series at run time.<BR>" +
-		"If available here, it is for information only and cannot be " +
-		"edited.</HTML>" );
+		"If available here, it is for information only and cannot be edited.</HTML>" );
 	JGUIUtil.addComponent(ts_JPanel, __ts_diversion_est_daily_JCheckBox, 
 		x, ++y2, 1, 1, 0, 0, 
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -2678,31 +2462,26 @@ private void setupGUI(int index)
 	__ts_demand_monthly_JCheckBox = new JCheckBox("Demands (Monthly)");
 	__ts_demand_monthly_JCheckBox.addItemListener(this);
 	__ts_demand_monthly_JCheckBox.setToolTipText (
-		"<HTML>This demand time series is used if the Monthly" +
-		"demand type is 1 or 3.</HTML>" );
+		"<HTML>This demand time series is used if the Monthly demand type is 1 or 3.</HTML>" );
 	JGUIUtil.addComponent(ts_JPanel, __ts_demand_monthly_JCheckBox, 
 		++x, y2, 1, 1, 0, 0, 
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
-	__ts_demand_override_monthly_JCheckBox =new JCheckBox(
-		"Demands, Override (Monthly)");
+	__ts_demand_override_monthly_JCheckBox =new JCheckBox("Demands, Override (Monthly)");
 	__ts_demand_override_monthly_JCheckBox.addItemListener(this);
 	__ts_demand_override_monthly_JCheckBox.setToolTipText (
-		"<HTML>This demand time series overrides the above data " +
-		"and is useful for scenario analysis.</HTML>" );
+		"<HTML>This demand time series overrides the above data and is useful for scenario analysis.</HTML>" );
 	JGUIUtil.addComponent(ts_JPanel,
 		__ts_demand_override_monthly_JCheckBox, 
 		x, ++y2, 1, 1, 0, 0, 
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
-	__ts_demand_ave_monthly_JCheckBox =
-		new JCheckBox("Demands, Average (Monthly)");
+	__ts_demand_ave_monthly_JCheckBox = new JCheckBox("Demands, Average (Monthly)");
 	__ts_demand_ave_monthly_JCheckBox.addItemListener(this);
 	__ts_demand_ave_monthly_JCheckBox.setToolTipText (
 		"<HTML>This demand time series is used if the Monthly" +
 		"demand type is 2 or 4.</HTML>" );
-	JGUIUtil.addComponent(ts_JPanel,
-		__ts_demand_ave_monthly_JCheckBox, 
+	JGUIUtil.addComponent(ts_JPanel, __ts_demand_ave_monthly_JCheckBox, 
 		x, ++y2, 1, 1, 0, 0, 
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
@@ -2716,58 +2495,47 @@ private void setupGUI(int index)
 		"Demands, Estimated (Daily)");
 	__ts_demand_est_daily_JCheckBox.addItemListener(this);
 	__ts_demand_est_daily_JCheckBox.setToolTipText (
-		"<HTML>This time series is calculated from other data " +
-		"based on the Daily Data ID.<BR>" +
+		"<HTML>This time series is calculated from other data based on the Daily Data ID.<BR>" +
 		"StateMod will compute the time series at runtime.<BR>" +
-		"If available here, it is for information only and cannot be " +
-		"edited.</HTML>" );
+		"If available here, it is for information only and cannot be edited.</HTML>" );
 	JGUIUtil.addComponent(ts_JPanel, __ts_demand_est_daily_JCheckBox, 
 		x, ++y2, 1, 1, 0, 0, 
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
 	y2 = 0;
-	__ts_ipy_yearly_JCheckBox =new JCheckBox(
-		"Irrigation Practice (Yearly)");
+	__ts_ipy_yearly_JCheckBox =new JCheckBox("Irrigation Practice (Yearly)");
 	__ts_ipy_yearly_JCheckBox.addItemListener(this);
 	__ts_ipy_yearly_JCheckBox.setToolTipText (
 		"<HTML>The irrigation practice data have yearly values " +
-		"for maximum efficiency, irrigation method and acres " +
-		"irrigated.</HTML>" );
+		"for maximum efficiency, irrigation method and acres irrigated.</HTML>" );
 	JGUIUtil.addComponent(ts_JPanel, __ts_ipy_yearly_JCheckBox, 
 		++x, y2, 1, 1, 0, 0, 
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
-	__ts_cwr_monthly_JCheckBox =new JCheckBox(
-		"Consumptive Water Requirement (Monthly)");
+	__ts_cwr_monthly_JCheckBox =new JCheckBox("Consumptive Water Requirement (Monthly)");
 	__ts_cwr_monthly_JCheckBox.addItemListener(this);
 	__ts_cwr_monthly_JCheckBox.setToolTipText (
 		"<HTML>This requirement time series is used in place of " +
-		"monthly demands<BR>if the control data indicate to use " +
-		"variable efficiency.</HTML>" );
+		"monthly demands<BR>if the control data indicate to use variable efficiency.</HTML>" );
 	JGUIUtil.addComponent(ts_JPanel, __ts_cwr_monthly_JCheckBox, 
 		x, ++y2, 1, 1, 0, 0, 
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
-	__ts_cwr_daily_JCheckBox = new JCheckBox(
-		"Consumptive Water Requirement (Daily)");
+	__ts_cwr_daily_JCheckBox = new JCheckBox("Consumptive Water Requirement (Daily)");
 	__ts_cwr_daily_JCheckBox.addItemListener(this); 
 	__ts_cwr_daily_JCheckBox.setToolTipText (
 		"<HTML>This requirement time series is used in place of " +
-		"daily demands<BR>if the control data indicate to use " +
-		"variable efficiency.</HTML>" );
+		"daily demands<BR>if the control data indicate to use variable efficiency.</HTML>" );
 	JGUIUtil.addComponent(ts_JPanel, __ts_cwr_daily_JCheckBox, 
 		x, ++y2, 1, 1, 0, 0, 
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
-	__ts_cwr_est_daily_JCheckBox = new JCheckBox(
-		"Consumptive Water Requirement, Estimated (Daily)");
+	__ts_cwr_est_daily_JCheckBox = new JCheckBox("Consumptive Water Requirement, Estimated (Daily)");
 	__ts_cwr_est_daily_JCheckBox.addItemListener(this); 
 	__ts_cwr_est_daily_JCheckBox.setToolTipText (
-		"<HTML>This time series is calculated from other data " +
-		"based on the Daily Data ID.<BR>" +
+		"<HTML>This time series is calculated from other data based on the Daily Data ID.<BR>" +
 		"StateMod will compute the time series at runtime.<BR>" +
-		"If available here, it is for information only and cannot be " +
-		"edited.</HTML>" );
+		"If available here, it is for information only and cannot be edited.</HTML>" );
 	JGUIUtil.addComponent(ts_JPanel, __ts_cwr_est_daily_JCheckBox, 
 		x, ++y2, 1, 1, 0, 0, 
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -2783,8 +2551,7 @@ private void setupGUI(int index)
 	__summary_JButton = new SimpleJButton("Summary", this );
 	__summary_JButton.setEnabled ( false );
 	tsb_JPanel.add ( __summary_JButton );
-	// Put under CWR because there is space and we need to save vertical
-	// space...
+	// Put under CWR because there is space and we need to save vertical space...
 	JGUIUtil.addComponent(ts_JPanel, tsb_JPanel,
 		x, ++y2, 1, 1, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -2869,8 +2636,7 @@ Responds to Window closed events; does nothing.
 public void windowClosed(WindowEvent e) {}
 
 /**
-Responds to Window closing events; closes the window and marks it closed
-in StateMod_GUIUtil.
+Responds to Window closing events; closes the window and marks it closed in StateMod_GUIUtil.
 @param e the WindowEvent that happened.
 */
 public void windowClosing(WindowEvent e) {
@@ -2927,26 +2693,22 @@ Responds to Window opening events; does nothing.
 public void windowOpening(WindowEvent e) {}
 
 /**
-Called just before the worksheet is sorted.  Stores the index of the record
-that is selected.
+Called just before the worksheet is sorted.  Stores the index of the record that is selected.
 @param worksheet the worksheet being sorted.
 @param sort the type of sort being performed.
 */
 public void worksheetSortAboutToChange(JWorksheet worksheet, int sort) {
-	__sortSelectedRow = __worksheet.getOriginalRowNumber(
-		__worksheet.getSelectedRow());
+	__sortSelectedRow = __worksheet.getOriginalRowNumber(__worksheet.getSelectedRow());
 }
 
 /**
-Called when the worksheet is sorted.  Reselects the record that was selected
-prior to the sort.
+Called when the worksheet is sorted.  Reselects the record that was selected prior to the sort.
 @param worksheet the worksheet being sorted.
 @param sort the type of sort being performed.
 */
 public void worksheetSortChanged(JWorksheet worksheet, int sort) {
 	__worksheet.deselectAll();
-	__worksheet.selectRow(__worksheet.getSortedRowNumber(
-		__sortSelectedRow));
+	__worksheet.selectRow(__worksheet.getSortedRowNumber(__sortSelectedRow));
 }
 
 }
