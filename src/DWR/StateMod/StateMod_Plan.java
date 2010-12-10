@@ -28,7 +28,7 @@ import RTi.Util.String.StringUtil;
 /**
 Object used to store plan information.  All set routines set
 the COMP_PLANS flag dirty.  A new object will have empty non-null
-Vectors, null time series, and defaults for all other data.
+lists, null time series, and defaults for all other data.
 */
 public class StateMod_Plan extends StateMod_Data
 implements Cloneable, Comparable
@@ -39,33 +39,33 @@ implements Cloneable, Comparable
 /**
 Plan type.
 */
-protected int 		_iPlnTyp;
+protected int _iPlnTyp;
 
 /**
 Plan efficiency.
 */
-protected double 	_Peff;
+protected double _Peff;
 
 /**
 Return flow table.
 */
-protected int		_iPrf;
+protected int _iPrf;
 
 /**
 Plan failure switch.
 */
-protected int		_iPfail;
+protected int _iPfail;
 
 /**
 Initial plan storage value (AF).
 */
-protected double 	_Psto1;
+protected double _Psto1;
 
 /**
 Source ID of structure where reuse water became available or a T&C condition
 originated (for reporting only).
 */
-protected String 	_Psource;
+protected String _Psource;
 
 /**
 Reference to spatial data for this plan -- currently NOT cloned.
@@ -100,7 +100,7 @@ been made to data on the main screen.
 public StateMod_Plan ( StateMod_Plan plan, boolean deep_copy )
 {	this();
 	// Base class...
-	// REVISIT
+	// TODO
 	// Local data members...
 	_iPlnTyp = plan._iPlnTyp;
 	_Peff = plan._Peff;
@@ -158,8 +158,7 @@ public int compareTo(Object o) {
 	// TODO SAM 2007-03-01 Need to enable
 	//StateMod_Plan p = (StateMod_Plan)o;
 
-/* REVISIT SAM 2006-08-22
-Need to review
+/* TODO SAM 2006-08-22 need to review
 	if (_divcap < d._divcap) {
 		return -1;
 	}
@@ -255,8 +254,7 @@ Need to review
 }
 
 /**
-Creates a copy of the object for later use in checking to see if it was 
-changed in a GUI.
+Creates a copy of the object for later use in checking to see if it was changed in a GUI.
 */
 public void createBackup() {
 	_original = clone();
@@ -301,8 +299,7 @@ Return a list of failure flag option strings, for use in GUIs.
 The options are of the form "0" if include_notes is false and
 "0 - Do not turn plan off if it fails", if include_notes is true.
 @return a list of plan type switch option strings, for use in GUIs.
-@param include_notes Indicate whether notes should be added after the parameter
-values.
+@param include_notes Indicate whether notes should be added after the parameter values.
 */
 public static List getIPfailChoices ( boolean include_notes )
 {	List v = new Vector(2);
@@ -328,7 +325,8 @@ public static String getIPfailDefault ( boolean include_notes )
 	if ( include_notes ) {
 		return "0 - Do not turn plan off if it fails";
 	}
-	else {	return "0";
+	else {
+		return "0";
 	}
 }
 
@@ -344,8 +342,7 @@ Return a list of plan type option strings, for use in GUIs.
 The options are of the form "1" if include_notes is false and
 "1 - Terms and Conditions (T&C)", if include_notes is true.
 @return a list of plan type switch option strings, for use in GUIs.
-@param include_notes Indicate whether notes should be added after the parameter
-values.
+@param include_notes Indicate whether notes should be added after the parameter values.
 */
 public static List getIPlnTypChoices ( boolean include_notes )
 {	List v = new Vector(9);
@@ -362,8 +359,7 @@ public static List getIPlnTypChoices ( boolean include_notes )
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.set(i,StringUtil.getToken(
-				(String)v.get(i), " ", 0, 0) );
+			v.set(i,StringUtil.getToken( (String)v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
@@ -379,7 +375,8 @@ public static String getIPlnTypDefault ( boolean include_notes )
 	if ( include_notes ) {
 		return ( "1 - Terms and Conditions (T&C)" );
 	}
-	else {	return "1";
+	else {
+		return "1";
 	}
 }
 
@@ -388,8 +385,7 @@ Return a list of on/off switch option strings, for use in GUIs.
 The options are of the form "0" if include_notes is false and
 "0 - Off", if include_notes is true.
 @return a list of on/off switch option strings, for use in GUIs.
-@param include_notes Indicate whether notes should be added after the parameter
-values.
+@param include_notes Indicate whether notes should be added after the parameter values.
 */
 public static List getPonChoices ( boolean include_notes )
 {	List v = new Vector(2);
@@ -399,8 +395,7 @@ public static List getPonChoices ( boolean include_notes )
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.set(i,StringUtil.getToken(
-				(String)v.get(i), " ", 0, 0) );
+			v.set(i,StringUtil.getToken( (String)v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
@@ -416,7 +411,8 @@ public static String getPonDefault ( boolean include_notes )
 	if ( include_notes ) {
 		return ( "1 - On" );
 	}
-	else {	return "1";
+	else {
+		return "1";
 	}
 }
 
@@ -457,7 +453,8 @@ private void initialize ( boolean initialize_defaults )
 		_Psto1 = 0.0;
 		_Psource = "";
 	}
-	else {	// Use missing data...
+	else {
+		// Use missing data...
 		_iPlnTyp = StateMod_Util.MISSING_INT;
 		_Peff = StateMod_Util.MISSING_DOUBLE;
 		_iPrf = StateMod_Util.MISSING_INT;
@@ -501,8 +498,7 @@ throws Exception
 	Message.printStatus(2, routine, "Reading plan file: " + filename);
 	int size = 0;
 	try {	
-		in = new BufferedReader(new FileReader(
-			IOUtil.getPathUsingWorkingDir(filename)));
+		in = new BufferedReader(new FileReader(IOUtil.getPathUsingWorkingDir(filename)));
 		while ((iline = in.readLine()) != null) {
 			++linecount;
 			// check for comments
@@ -514,22 +510,18 @@ throws Exception
 			aPlan = new StateMod_Plan();
 
 			if (Message.isDebugOn) {
-				Message.printDebug(50, routine, 
-				"line: " + iline);
+				Message.printDebug(50, routine, "line: " + iline);
 			}
 			// Break the line using whitespace...
 			v = StringUtil.breakStringList (
-				iline, " \t", StringUtil.DELIM_ALLOW_STRINGS|
-				StringUtil.DELIM_SKIP_BLANKS );
+				iline, " \t", StringUtil.DELIM_ALLOW_STRINGS|StringUtil.DELIM_SKIP_BLANKS );
 			size = 0;
 			if ( v != null ) {
 				size = v.size();
 			}
 			if ( size < 10 ) {
-				Message.printStatus ( 2, routine,
-				"Ignoring line " + linecount +
-				" not enough data values.  Have " + size +
-				" expecting " + 10 );
+				Message.printStatus ( 2, routine, "Ignoring line " + linecount +
+				" not enough data values.  Have " + size + " expecting " + 10 );
 				continue;
 			}
 			// Uncomment if testing...
@@ -545,12 +537,11 @@ throws Exception
 			aPlan.setPsto1(((String)v.get(8)).trim());
 			aPlan.setPsource(((String)v.get(9)).trim());
 
-			// Set the diversion to not dirty because it was just
-			// initialized...
+			// Set the diversion to not dirty because it was just initialized...
 
 			aPlan.setDirty ( false );
 
-			// add the diversion to the vector of diversions
+			// add the plan to the vector of plans
 			thePlans.add(aPlan);
 		}
 	} 
@@ -562,8 +553,7 @@ throws Exception
 			in.close();
 		}
 		in = null;
-		Message.printWarning(2, routine, "Error reading line " +
-			linecount + " \"" + iline + "\"" );
+		Message.printWarning(2, routine, "Error reading line " + linecount + " \"" + iline + "\"" );
 		Message.printWarning(2, routine, e);
 		throw e;
 	}
@@ -581,7 +571,7 @@ throws Exception
 
 /**
 Cancels any changes made to this object within a GUI since createBackup()
-was caled and sets _original to null.
+was called and sets _original to null.
 */
 public void restoreOriginal() {
 	StateMod_Plan plan = (StateMod_Plan)_original;
@@ -712,19 +702,16 @@ public void setPeff(double Peff) {
 	if (_Peff != Peff) {
 		_Peff = Peff;
 		setDirty(true);
-		// REVISIT SAM 2006-08-22
-		// Take out after initial troubleshooting is complete
+		// TODO SAM 2006-08-22 Take out after initial troubleshooting is complete
 		Message.printStatus ( 2, "", "Setting object dirty = true" );
 		String s = "not null";
 		if ( _dataset == null ) {
 			s = "null";
 		}
-		Message.printStatus ( 2, "", "_isClone=" + _isClone +
-			" _dataset="+s );
+		Message.printStatus ( 2, "", "_isClone=" + _isClone + " _dataset="+s );
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty( StateMod_DataSet.COMP_PLANS, true);
-			Message.printStatus ( 2, "", "Is data set dirt?"  +
-			_dataset.isDirty() );
+			Message.printStatus ( 2, "", "Is data set dirt?"  + _dataset.isDirty() );
 		}
 	}
 }
@@ -808,90 +795,62 @@ is also maintained by calling this routine.
 @exception Exception if an error occurs.
 */
 public static void writeStateModFile(String instrfile, String outstrfile,
-		List thePlans, String[] new_comments )
-throws Exception {
-	String [] comment_str = { "#" };
-	String [] ignore_comment_str = { "#>" };
+		List<StateMod_Plan> thePlans, List<String> new_comments )
+throws Exception
+{	String routine = "StateMod_Plan.writeStateModFile";
+	List commentIndicators = new Vector(1);
+	commentIndicators.add ( "#" );
+	List ignoredCommentIndicators = new Vector(1);
+	ignoredCommentIndicators.add ( "#>");
 	PrintWriter out = null;
-	try {	out = IOUtil.processFileHeaders(
+	try {
+		out = IOUtil.processFileHeaders(
 			IOUtil.getPathUsingWorkingDir(instrfile),
 			IOUtil.getPathUsingWorkingDir(outstrfile), 
-			new_comments, comment_str, ignore_comment_str, 0);
+			new_comments, commentIndicators, ignoredCommentIndicators, 0);
 
 		int i;
 		String iline;
 		String cmnt = "#>";
-		String format =
-		"%-12.12s %-24.24s %-12.12s %8d %8d% #8.2F %8d %8d %8.2F %-12.12s";
+		String format = "%-12.12s %-24.24s %-12.12s %8d %8d% #8.2F %8d %8d %8.2F %-12.12s";
 		StateMod_Plan plan = null;
-		List v = new Vector(10);	// Reuse for all output lines.
+		List v = new Vector(10); // Reuse for all output lines.
 
 		out.println(cmnt);
-		out.println(cmnt
-			+ "*************************************************");
-		out.println(cmnt +
-			"  Plan (Augmentation and Terms and Conditions Data)");
+		out.println(cmnt + "*************************************************");
+		out.println(cmnt + "  Plan (Augmentation and Terms and Conditions Data)");
 		out.println(cmnt);
-		out.println(cmnt
-			+ "  Card 1 format (a12, a24, 1x, 3i8, 6(1x,a12)" );
+		out.println(cmnt + "  Card 1 format (a12, a24, 1x, 3i8, 6(1x,a12)" );
 		out.println(cmnt);
-		out.println(cmnt
-			+ "  Plan ID           Pid:  Plan ID");
-		out.println(cmnt
-			+ "  Plan Name       PName:  Plan name");
-		out.println(cmnt
-			+ "  Plan Location   iPsta:  River node for plan");
-		out.println(cmnt
-			+ "  Plan On/Off       Pon:  Switch 0=off, 1=on");
-		out.println(cmnt
-			+ "  Plan Type     iPlnTyp:  Plan type");
-		out.println(cmnt
-			+ "                          1=Terms and Conditions (T&C)");
-		out.println(cmnt
-			+ "                          2=Well Augmentation");
-		out.println(cmnt
-			+ "                          3=CU Reuse to a Reservoir");
-		out.println(cmnt
-			+ "                          4=CU Reuse to a Diversion");
-		out.println(cmnt
-			+ "                          5=CU Reuse to a Reservoir from Tmtn");
-		out.println(cmnt
-			+ "                          6=CU Reuse to a Diversion from Tmtn");
-		out.println(cmnt
-			+ "                          7=Tmtn Reuse");
-		out.println(cmnt
-			+ "                          8=Recharge Plan");
-		out.println(cmnt
-			+ "                          9=OOP Plan");
-		out.println(cmnt
-			+ "  Plan Eff.        Peff:  Plan efficiency (%)");
-		out.println(cmnt
-			+ "  Plan Rtn. Flow ID iPrf: Return flow table." );
-		out.println(cmnt
-			+ "                          999 to use source structure's" );
-		out.println(cmnt
-			+ "  Plan Failure Switch iPfail:  Failure switch" );
-		out.println(cmnt
-			+ "                          0=Do not stop for failure");
-		out.println(cmnt
-			+ "                          1=Stop for failure");
-		out.println(cmnt
-			+ "  Plan Init. Sto. Psto1:  Initial storage (AF)" );
-		out.println(cmnt
-			+ "  Plan source   PSource:  A reference (comment) typically used to describe" );
-		out.println(cmnt
-			+ "                          the source this plan is associated with.");
-		out.println(cmnt
-			+ "                          Note this is currently used only in reporting.");
+		out.println(cmnt + "  Plan ID           Pid:  Plan ID");
+		out.println(cmnt + "  Plan Name       PName:  Plan name");
+		out.println(cmnt + "  Plan Location   iPsta:  River node for plan");
+		out.println(cmnt + "  Plan On/Off       Pon:  Switch 0=off, 1=on");
+		out.println(cmnt + "  Plan Type     iPlnTyp:  Plan type");
+		out.println(cmnt + "                          1=Terms and Conditions (T&C)");
+		out.println(cmnt + "                          2=Well Augmentation");
+		out.println(cmnt + "                          3=CU Reuse to a Reservoir");
+		out.println(cmnt + "                          4=CU Reuse to a Diversion");
+		out.println(cmnt + "                          5=CU Reuse to a Reservoir from Tmtn");
+		out.println(cmnt + "                          6=CU Reuse to a Diversion from Tmtn");
+		out.println(cmnt + "                          7=Tmtn Reuse");
+		out.println(cmnt + "                          8=Recharge Plan");
+		out.println(cmnt + "                          9=OOP Plan");
+		out.println(cmnt + "  Plan Eff.        Peff:  Plan efficiency (%)");
+		out.println(cmnt + "  Plan Rtn. Flow ID iPrf: Return flow table." );
+		out.println(cmnt + "                          999 to use source structure's" );
+		out.println(cmnt + "  Plan Failure Switch iPfail:  Failure switch" );
+		out.println(cmnt + "                          0=Do not stop for failure");
+		out.println(cmnt + "                          1=Stop for failure");
+		out.println(cmnt + "  Plan Init. Sto. Psto1:  Initial storage (AF)" );
+		out.println(cmnt + "  Plan source   PSource:  A reference (comment) typically used to describe" );
+		out.println(cmnt + "                          the source this plan is associated with.");
+		out.println(cmnt + "                          Note this is currently used only in reporting.");
 
-		out.println(cmnt
-			+ " ID               Name                 RivLoc   "
-			+ "  On/Off  iPlnTyp    Peff    iPrf     iPfail "
-			+ " Psto1       Psource");
-		out.println(cmnt 
-			+ "---------exb----------------------exb----------e"
-			+ "xb------exb------exb------exb------exe------e"
-			+ "xb------exb----------e");
+		out.println(cmnt + " ID               Name                 RivLoc   "
+			+ "  On/Off  iPlnTyp    Peff    iPrf     iPfail  Psto1       Psource");
+		out.println(cmnt + "---------exb----------------------exb----------e"
+			+ "xb------exb------exb------exb------exe------exb------exb----------e");
 		out.println(cmnt + "EndHeader");
 
 		int num = 0;
@@ -919,32 +878,25 @@ throws Exception {
 			iline = StringUtil.formatString(v, format);
 			out.println(iline);
 		}
-		
-	out.flush();
-	out.close();
-	comment_str = null;
-	ignore_comment_str = null;
-	out = null;
 	} 
 	catch (Exception e) {
-		comment_str = null;
-		ignore_comment_str = null;
+		Message.printWarning(3, routine, e);
+		throw e;
+	}
+	finally {
 		if (out != null) {
 			out.flush();
 			out.close();
 		}
-		out = null;
-		throw e;
 	}
 }
 
-// REVISIT SAM 2006-08-22
+// TODO SAM 2006-08-22
 // Enable when plan stations are enabled in StateDMI
 /**
 Writes a Vector of StateMod_Plan objects to a list file.  A header is 
 printed to the top of the file, containing the commands used to generate the 
-file.  Any strings in the body of the file that contain the field delimiter 
-will be wrapped in "...".
+file.  Any strings in the body of the file that contain the field delimiter will be wrapped in "...".
 @param filename the name of the file to which the data will be written.
 @param delimiter the delimiter to use for separating field values.
 @param update whether to update an existing file, retaining the current 
@@ -1137,4 +1089,4 @@ throws Exception {
 }
 	*/
 
-} // End StateMod_Plan
+}

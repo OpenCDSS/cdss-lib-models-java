@@ -95,8 +95,7 @@ private static final String
 
 /**
 Whether itemStateChanged() should ignore next state change that occurs.
-This is to prevent endless loops caused by the setMonthlyEff and setConstantEff
-methods.
+This is to prevent endless loops caused by the setMonthlyEff and setConstantEff methods.
 */
 private boolean __ignoreNextStateChange = false;
 
@@ -107,8 +106,7 @@ item state change events prior to the GUI being ready.
 private boolean __initialized = false;
 
 /**
-The index in __all_JComponents[] of textfields that should NEVER be made
-editable (e.g., ID fields).
+The index in __all_JComponents[] of textfields that should NEVER be made editable (e.g., ID fields).
 */
 private int[] __disabled_JComponents;
 
@@ -134,8 +132,7 @@ private JButton
 	__apply_JButton = null;
 
 /**
-Array of JComponents that should be disabled when nothing is selected 
-from the list.
+Array of JComponents that should be disabled when nothing is selected from the list.
 */
 private JComponent[] __all_JComponents;
 
@@ -182,7 +179,7 @@ private SimpleJComboBox
 	__iPfail_JComboBox = null;
 
 /**
-The StateMod_DataSet that contains the statemod data.
+The StateMod_DataSet that contains the StateMod data.
 */
 private StateMod_DataSet __dataset;
 
@@ -204,20 +201,16 @@ private List __plansVector;
 /**
 Constructor.
 @param dataset StateMod_DataSet containing plan data.
-@param dataset_wm the dataset window manager or null if the data set windows
-are not being managed.
+@param dataset_wm the dataset window manager or null if the data set windows are not being managed.
 @param editable whether the data values on the form can be edited or not.
 */
-public StateMod_Plan_JFrame (	StateMod_DataSet dataset,
-					StateMod_DataSet_WindowManager
-					dataset_wm, boolean editable )
+public StateMod_Plan_JFrame ( StateMod_DataSet dataset, StateMod_DataSet_WindowManager dataset_wm, boolean editable )
 {	
 	StateMod_GUIUtil.setTitle(this, dataset, "Plans", null);
 	JGUIUtil.setIcon(this, JGUIUtil.getIconImage());
 	__dataset = dataset;
 	__dataset_wm = dataset_wm;
-	__plansComponent = __dataset.getComponentForComponentType(
-		StateMod_DataSet.COMP_PLANS);
+	__plansComponent = __dataset.getComponentForComponentType(StateMod_DataSet.COMP_PLANS);
 
 	__plansVector = (List)__plansComponent.getData();	
 	int size = __plansVector.size();
@@ -235,23 +228,18 @@ public StateMod_Plan_JFrame (	StateMod_DataSet dataset,
 /**
 Constructor.
 @param dataset StateMod data set being displayed.
-@param dataset_wm the dataset window manager or null if the data set windows
-are not being managed.
+@param dataset_wm the dataset window manager or null if the data set windows are not being managed.
 @param plan_sel the plan to select and show in the list of plans
 @param editable whether the data values on the form can be edited or not.
 */
-public StateMod_Plan_JFrame (	StateMod_DataSet dataset, 
-				StateMod_DataSet_WindowManager
-				dataset_wm,
-				StateMod_Plan plan_sel,
-				boolean editable)
+public StateMod_Plan_JFrame ( StateMod_DataSet dataset, StateMod_DataSet_WindowManager dataset_wm,
+	StateMod_Plan plan_sel, boolean editable)
 {	
 	StateMod_GUIUtil.setTitle(this, dataset, "Plans", null);
 	JGUIUtil.setIcon(this, JGUIUtil.getIconImage());
 	__dataset = dataset;
 	__dataset_wm = dataset_wm;
-	__plansComponent = __dataset.getComponentForComponentType(
-		StateMod_DataSet.COMP_PLANS);
+	__plansComponent = __dataset.getComponentForComponentType( StateMod_DataSet.COMP_PLANS);
 
 	__plansVector = (List)__plansComponent.getData();	
 	int size = __plansVector.size();
@@ -281,7 +269,7 @@ public void actionPerformed(ActionEvent e) {
 	try {
 
 	if ( source == __help_JButton ) {
-		// REVISIT HELP (JTS 2003-06-09)
+		// TODO HELP (JTS 2003-06-09)
 	}
 	else if ( source == __close_JButton ) {
 		saveCurrentPlan();
@@ -299,10 +287,10 @@ public void actionPerformed(ActionEvent e) {
 			__dataset.setDirty(StateMod_DataSet.COMP_PLANS, true);
 		}
 		if ( __dataset_wm != null ) {
-			__dataset_wm.closeWindow (
-			StateMod_DataSet_WindowManager.WINDOW_PLAN );
+			__dataset_wm.closeWindow ( StateMod_DataSet_WindowManager.WINDOW_PLAN );
 		}
-		else {	JGUIUtil.close ( this );
+		else {
+			JGUIUtil.close ( this );
 		}
 	}
 	else if ( source == __apply_JButton ) {
@@ -330,10 +318,10 @@ public void actionPerformed(ActionEvent e) {
 		}
 
 		if ( __dataset_wm != null ) {
-			__dataset_wm.closeWindow (
-			StateMod_DataSet_WindowManager.WINDOW_PLAN );
+			__dataset_wm.closeWindow ( StateMod_DataSet_WindowManager.WINDOW_PLAN );
 		}
-		else {	JGUIUtil.close ( this );
+		else {
+			JGUIUtil.close ( this );
 		}
 	}
 	else if (source == __findNextPlan_JButton) {
@@ -359,10 +347,8 @@ public void actionPerformed(ActionEvent e) {
 }
 
 /**
-Checks the text fields for validity before they are saved back into the
-data object.
-@return 0 if the text fields are okay, 1 if fatal errors exist, and -1 if only
-non-fatal errors exist.
+Checks the text fields for validity before they are saved back into the data object.
+@return 0 if the text fields are okay, 1 if fatal errors exist, and -1 if only non-fatal errors exist.
 */
 private int checkInput()
 {	String routine = "StateMod_Plan_JFrame.checkInput";
@@ -377,7 +363,7 @@ private int checkInput()
 	int fatal_count = 0;
 	int nonfatal_count = 0;
 
-	/* REVISIT SAM 2006-08-22 No constraint
+	/* TODO SAM 2006-08-22 No constraint
 	if ( name.length() > 24 ) {
 		warning += "\nPlan name is > 24 characters.";
 		++fatal_count;
@@ -388,8 +374,7 @@ private int checkInput()
 		++fatal_count;
 	}
 	if ( !StringUtil.isInteger(iPrf) ) {
-		warning += "\nReturn flow table (" + iPrf +
-			") is not an integer.";
+		warning += "\nReturn flow table (" + iPrf + ") is not an integer.";
 		++fatal_count;
 	}
 	if ( !StringUtil.isDouble(Psto1) ) {
@@ -398,39 +383,32 @@ private int checkInput()
 	}
 	// Non-fatal errors (need to be corrected somehow)...
 	if ( __dataset != null ) {
-		DataSetComponent comp = __dataset.getComponentForComponentType (
-			StateMod_DataSet.COMP_RIVER_NETWORK );
+		DataSetComponent comp = __dataset.getComponentForComponentType ( StateMod_DataSet.COMP_RIVER_NETWORK );
 		List data = (List)comp.getData();
-		if (	!rivernode.equals("") &&
-			(StateMod_Util.indexOf(data,rivernode) < 0) ) {
-			warning += "\nRiver node ID (" + rivernode +
-			") is not in the network.";
+		if ( !rivernode.equals("") && (StateMod_Util.indexOf(data,rivernode) < 0) ) {
+			warning += "\nRiver node ID (" + rivernode + ") is not in the network.";
 			++nonfatal_count;
 		}
 	}
 	if ( warning.length() > 0 ) {
-		StateMod_Plan plan = 
-			(StateMod_Plan)__plansVector
-			.get(__currentPlanIndex);
+		StateMod_Plan plan = (StateMod_Plan)__plansVector.get(__currentPlanIndex);
 		warning = "\nPlan:  " +
-		StateMod_Util.formatDataLabel ( plan.getID(), plan.getName() ) +
-		warning + "\nCorrect or Cancel.";
+		StateMod_Util.formatDataLabel ( plan.getID(), plan.getName() ) + warning + "\nCorrect or Cancel.";
 		Message.printWarning ( 1, routine, warning, this );
 		if ( fatal_count > 0 ) {
 			// Fatal errors...
-			Message.printStatus ( 2, routine,
-				"Returning 1 from checkInput()" );
+			Message.printStatus ( 2, routine, "Returning 1 from checkInput()" );
 			return 1;
 		}
-		else {	// Nonfatal errors...
-			Message.printStatus ( 2, routine,
-				"Returning -1 from checkInput()" );
+		else {
+			// Nonfatal errors...
+			Message.printStatus ( 2, routine, "Returning -1 from checkInput()" );
 			return -1;
 		}
 	}
-	else {	// No errors...
-		Message.printStatus ( 1, routine,
-			"Returning 0 from checkInput()" );
+	else {
+		// No errors...
+		Message.printStatus ( 1, routine, "Returning 0 from checkInput()" );
 		return 0;
 	}
 }
@@ -487,8 +465,7 @@ private void initializeJComponents()
 	
 	// Indicate components that are never enabled.
 	// The ID and the node ID are disabled in all cases.
-	// Other components are disabled because the control data indicate that
-	// some data are not used.
+	// Other components are disabled because the control data indicate that some data are not used.
 	// All time series are enabled because it may be useful to compare
 	// time series, regardless of the control settings.
 
@@ -518,8 +495,7 @@ public void itemStateChanged(ItemEvent e)
 
 	// set placeholder to current plan
 	// TODO SAM 2007-03-01 Evaluate logic
-	//StateMod_Plan plan = (StateMod_Plan)
-		//__plansVector.elementAt(__currentPlanIndex);
+	//StateMod_Plan plan = (StateMod_Plan)__plansVector.elementAt(__currentPlanIndex);
 }
 
 /**
@@ -562,8 +538,7 @@ Responds to mouse pressed events; does nothing.
 public void mousePressed(MouseEvent e) {}
 
 /**
-Responds to mouse released events; calls 'processTableSelection' with the 
-newly-selected index in the table.
+Responds to mouse released events; calls 'processTableSelection' with the newly-selected index in the table.
 @param e the MouseEvent that happened.
 */
 public void mouseReleased(MouseEvent e) {
@@ -573,8 +548,7 @@ public void mouseReleased(MouseEvent e) {
 /**
 Processes a table selection (either via a mouse press or programmatically 
 from selectTableIndex()) by writing the old data back to the data set component
-and getting the next selection's data out of the data and displaying it 
-on the form.
+and getting the next selection's data out of the data and displaying it on the form.
 @param index the index of the reservoir to display on the form.
 @param try_to_save Indicates whether the current data should try to be saved.
 false should be specified if the call is being made after checkInput() fails.
@@ -582,21 +556,17 @@ false should be specified if the call is being made after checkInput() fails.
 private void processTableSelection(int index, boolean try_to_save )
 {	String routine = "processTableSelection";	
 
- 	// First save the previous information before displaying the new
-	// information...
+ 	// First save the previous information before displaying the new information...
 
-	Message.printStatus ( 1, "", "processTableSelection index " + index +
-		" save flag: " + try_to_save );
+	Message.printStatus ( 1, "", "processTableSelection index " + index + " save flag: " + try_to_save );
 
 /*
 	if ( try_to_save && !saveCurrentPlan() ) {
 		// Save was unsuccessful.  Revert to the previous index.  This
 		// will eventually end up being a recursive call back to here
 		// but try_to_save will be false.
-		Message.printStatus ( 2, "", "processTableSelection index " +
-			index + " save flag: " + try_to_save +
-			" Error saving so display old index: " +
-			__currentPlanIndex );
+		Message.printStatus ( 2, "", "processTableSelection index " + index + " save flag: " + try_to_save +
+			" Error saving so display old index: " + __currentPlanIndex );
 		selectTableIndex(__currentPlanIndex, false, false);
 		return;
 	}
@@ -613,13 +583,11 @@ private void processTableSelection(int index, boolean try_to_save )
 		return;
 	}
 
-	JGUIUtil.enableComponents ( __all_JComponents, __disabled_JComponents, 
-		__editable);
+	JGUIUtil.enableComponents ( __all_JComponents, __disabled_JComponents, __editable);
 	
 	// List these in the order of the GUI...
 
-	StateMod_Plan plan = (StateMod_Plan)
-		__plansVector.get(__currentPlanIndex);
+	StateMod_Plan plan = (StateMod_Plan)__plansVector.get(__currentPlanIndex);
 
 	// Plan identifier...
 
@@ -630,44 +598,36 @@ private void processTableSelection(int index, boolean try_to_save )
 	__planName_JTextField.setText(plan.getName());
 
 	// River node...
-	// REVISIT - if river node is made editable, change to a JComboBox...
+	// TODO - if river node is made editable, change to a JComboBox...
 
 	__riverNodeID_JTextField.setText(plan.getCgoto());
 
 	// On/off switch...
 
 	String Pon = "" + plan.getSwitch();
-	// Select the switch that matches the first token in the available
-	// choices...
-	try {	JGUIUtil.selectTokenMatches (	__planSwitch_JComboBox,
-						true, " ", 0, 0, Pon, null );
+	// Select the switch that matches the first token in the available choices...
+	try {
+		JGUIUtil.selectTokenMatches ( __planSwitch_JComboBox, true, " ", 0, 0, Pon, null );
 	}
 	catch ( Exception e ) {
 		// Default...
-		Message.printWarning ( 2, routine,
-		"Using default value Pon = \"" + 
-		StateMod_Plan.getPonDefault(true) +
-		"\" because data value " + Pon + " is unknown." );
-		__planSwitch_JComboBox.select(
-			StateMod_Plan.getPonDefault(true) );
+		Message.printWarning ( 2, routine, "Using default value Pon = \"" + 
+		StateMod_Plan.getPonDefault(true) + "\" because data value " + Pon + " is unknown." );
+		__planSwitch_JComboBox.select( StateMod_Plan.getPonDefault(true) );
 	}
 
 	// Plan type...
 
 	String iPlnTyp = "" + plan.getIPlnTyp();
-	// Select the switch that matches the first token in the available
-	// choices...
-	try {	JGUIUtil.selectTokenMatches (	__iPlnTyp_JComboBox,
-						true, " ", 0, 0, iPlnTyp, null);
+	// Select the switch that matches the first token in the available choices...
+	try {
+		JGUIUtil.selectTokenMatches ( __iPlnTyp_JComboBox, true, " ", 0, 0, iPlnTyp, null);
 	}
 	catch ( Exception e ) {
 		// Default...
-		Message.printWarning ( 2, routine,
-		"Using default value iPlnTyp = \"" + 
-		StateMod_Plan.getIPlnTypDefault(true) +
-		"\" because data value " + iPlnTyp + " is unknown." );
-		__iPlnTyp_JComboBox.select(
-			StateMod_Plan.getIPlnTypDefault(true) );
+		Message.printWarning ( 2, routine, "Using default value iPlnTyp = \"" + 
+		StateMod_Plan.getIPlnTypDefault(true) + "\" because data value " + iPlnTyp + " is unknown." );
+		__iPlnTyp_JComboBox.select(	StateMod_Plan.getIPlnTypDefault(true) );
 	}
 
 	// Efficiency...
@@ -681,19 +641,15 @@ private void processTableSelection(int index, boolean try_to_save )
 	// Fail switch...
 
 	String iPfail = "" + plan.getIPfail();
-	// Select the switch that matches the first token in the available
-	// choices...
-	try {	JGUIUtil.selectTokenMatches (	__iPfail_JComboBox,
-						true, " ", 0, 0, iPfail, null);
+	// Select the switch that matches the first token in the available choices...
+	try {
+		JGUIUtil.selectTokenMatches ( __iPfail_JComboBox, true, " ", 0, 0, iPfail, null);
 	}
 	catch ( Exception e ) {
 		// Default...
-		Message.printWarning ( 2, routine,
-		"Using default value iPfail = \"" + 
-		StateMod_Plan.getIPfailDefault(true) +
-		"\" because data value " + iPfail + " is unknown." );
-		__iPfail_JComboBox.select(
-			StateMod_Plan.getIPfailDefault(true) );
+		Message.printWarning ( 2, routine, "Using default value iPfail = \"" + 
+		StateMod_Plan.getIPfailDefault(true) + "\" because data value " + iPfail + " is unknown." );
+		__iPfail_JComboBox.select( StateMod_Plan.getIPfailDefault(true) );
 	}
 
 	// Initial storage...
@@ -730,8 +686,7 @@ private boolean saveData(int record) {
 
 	if ( checkInput() > 0 ) {
 		// Fatal errors so cannot save...
-		Message.printStatus ( 1, "", "saveData detected error " +
-		"in checkInput - returning false" );
+		Message.printStatus ( 1, "", "saveData detected error in checkInput - returning false" );
 		return false;
 	}
 
@@ -739,8 +694,7 @@ private boolean saveData(int record) {
 
 	// Save in the order of the GUI.  Save all the items, even if not
 	// currently editable/enabled (like ID and river node ID) because later
-	// these fields may be made editable and checkInput() will warn the
-	// user about issues
+	// these fields may be made editable and checkInput() will warn the user about issues
 
 	plan.setID ( __planStationID_JTextField.getText().trim() );
 
@@ -754,14 +708,12 @@ private boolean saveData(int record) {
 
 	// On/off switch...
 
-	String Pon = StringUtil.getToken(
-		__planSwitch_JComboBox.getSelected()," ",0,0);
+	String Pon = StringUtil.getToken(__planSwitch_JComboBox.getSelected()," ",0,0);
 	plan.setSwitch(StringUtil.atoi(Pon));
 
 	// Plan type...
 
-	String iPlnTyp = StringUtil.getToken(
-		__iPlnTyp_JComboBox.getSelected()," ",0,0);
+	String iPlnTyp = StringUtil.getToken(__iPlnTyp_JComboBox.getSelected()," ",0,0);
 	plan.setIPlnTyp(StringUtil.atoi(iPlnTyp));
 
 	// Efficiency...
@@ -790,8 +742,7 @@ private boolean saveData(int record) {
 
 	// Fail switch...
 
-	String iPfail = StringUtil.getToken(
-		__iPfail_JComboBox.getSelected()," ",0,0);
+	String iPfail = StringUtil.getToken(__iPfail_JComboBox.getSelected()," ",0,0);
 	plan.setIPfail(StringUtil.atoi(iPfail));
 
 	// Initial storage...
@@ -849,15 +800,14 @@ public void searchWorksheet(int row) {
 		JWorksheet.FIND_EQUAL_TO | JWorksheet.FIND_CONTAINS |
 		JWorksheet.FIND_CASE_INSENSITIVE | JWorksheet.FIND_WRAPAROUND);
 	if (index != -1) {
-		// REVISIT - how to handle the last parameter...
+		// TODO - how to handle the last parameter...
 		selectTableIndex(index, true, true);
 	}
 }
 
 /**
 Selects the desired ID in the table and displays the appropriate data
-in the remainder of the window.  This method is called when the network is
-edited.
+in the remainder of the window.  This method is called when the network is edited.
 @param id the identifier to select in the list.
 */
 public void selectID(String id) {
@@ -887,8 +837,7 @@ the previous contents are retained - this should be the case if checkInput()
 detects an error, in which case we want the previous (and erroneous)
 user-supplied to be shown because they need to correct the data.
 */
-public void selectTableIndex (	int index, boolean try_to_save,
-				boolean process_selection )
+public void selectTableIndex (	int index, boolean try_to_save, boolean process_selection )
 {	int rowCount = __worksheet.getRowCount();
 	if (rowCount == 0) {
 		return;
@@ -901,11 +850,9 @@ public void selectTableIndex (	int index, boolean try_to_save,
 	}
 	__worksheet.scrollToRow(index);
 	__worksheet.selectRow(index);
-	// REVISIT SAM 2006-08-22
-	// Was commented out for diversions also
+	// TODO SAM 2006-08-22 Was commented out for diversions also
 	//__currentPlanIndex = __worksheet.getSelectedRow();
-	Message.printStatus ( 1, "", "selectTableIndex index " + index +
-		" save flag: " + try_to_save );
+	Message.printStatus ( 1, "", "selectTableIndex index " + index + " save flag: " + try_to_save );
 	if ( process_selection ) {
 		processTableSelection(index, try_to_save);
 	}
@@ -938,11 +885,9 @@ private void setupGUI(int index)
 	
 	int[] widths = null;
 	JScrollWorksheet jsw = null;
-	try {	StateMod_Plan_TableModel tmd = new
-			StateMod_Plan_TableModel(__plansVector, 
-			__editable, true);
-		StateMod_Plan_CellRenderer crd = new
-			StateMod_Plan_CellRenderer(tmd);
+	try {
+		StateMod_Plan_TableModel tmd = new StateMod_Plan_TableModel(__plansVector, __editable, true);
+		StateMod_Plan_CellRenderer crd = new StateMod_Plan_CellRenderer(tmd);
 	
 		jsw = new JScrollWorksheet(crd, tmd, p);
 		__worksheet = jsw.getJWorksheet();
@@ -968,8 +913,7 @@ private void setupGUI(int index)
 
 	JPanel search_JPanel = new JPanel();
 	search_JPanel.setLayout(gbl);
-	search_JPanel.setBorder(BorderFactory.createTitledBorder(
-		"Search above list for:"));
+	search_JPanel.setBorder(BorderFactory.createTitledBorder("Search above list for:"));
 	int y = 0;
 	ButtonGroup searchCriteriaGroup = new ButtonGroup();
 	__searchID_JRadioButton = new JRadioButton("ID", true);
@@ -1024,8 +968,7 @@ private void setupGUI(int index)
 	__planStationID_JTextField = new JTextField(12);
 	__planStationID_JTextField.setEditable(false);
 	__planStationID_JTextField.setToolTipText (
-		"<HTML>The plan ID is the primary identifier for the " +
-		"plan.<BR>"+
+		"<HTML>The plan ID is the primary identifier for the plan.<BR>"+
 		"The ID is used to relate data in various data files.</HTML>");
 	JGUIUtil.addComponent(param_JPanel, __planStationID_JTextField,
 		1, y, 2, 1, 0, 0,
@@ -1037,8 +980,7 @@ private void setupGUI(int index)
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__planName_JTextField = new JTextField(24);
 	__planName_JTextField.setToolTipText (
-		"<HTML>The plan name is used for labels and output." +
-		"</HTML>" );
+		"<HTML>The plan name is used for labels and output.</HTML>" );
 	JGUIUtil.addComponent(param_JPanel, __planName_JTextField,
 		1, y, 2, 1, 0, 0,
 		1, 0, 0, 1, 
@@ -1052,14 +994,13 @@ private void setupGUI(int index)
 	__riverNodeID_JTextField.setToolTipText (
 		"<HTML>The river node is used in the network file.<BR>" +
 		"In most cases the river node ID is the same as the plan "+
-		"ID,<BR>although StateMod internally uses two identifiers."+
-		"</HTML>" );
+		"ID,<BR>although StateMod internally uses two identifiers.</HTML>" );
 	JGUIUtil.addComponent(param_JPanel, __riverNodeID_JTextField,
 		1, y, 2, 1, 0, 0,
 		1, 0, 0, 1, 
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
-	JGUIUtil.addComponent(param_JPanel, new JLabel("On/Off Switch:"),
+	JGUIUtil.addComponent(param_JPanel, new JLabel("On/off switch:"),
 		0, ++y, 1, 1, 0, 0, 
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__planSwitch_JComboBox = new SimpleJComboBox();
@@ -1067,12 +1008,11 @@ private void setupGUI(int index)
 		StateMod_Plan.getPonChoices(true) );
 	__planSwitch_JComboBox.addItemListener(this);
 	__planSwitch_JComboBox.setToolTipText (
-		"<HTML>The on/off switch tells StateMod whether to include" +
-		" the plan in the analysis.</HTML>" );
+		"<HTML>The on/off switch tells StateMod whether to include the plan in the analysis.</HTML>" );
 	JGUIUtil.addComponent(param_JPanel, __planSwitch_JComboBox,
 		1, y, 2, 1, 0, 0,
 		1, 0, 0, 1, 
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
 	JGUIUtil.addComponent(param_JPanel, new JLabel("Plan type:"),
 		0, ++y, 1, 1, 0, 0, 
@@ -1082,19 +1022,17 @@ private void setupGUI(int index)
 		StateMod_Plan.getIPlnTypChoices(true) );
 	__iPlnTyp_JComboBox.addItemListener(this);
 	__iPlnTyp_JComboBox.setToolTipText (
-		"<HTML>The on/off switch tells StateMod whether to include" +
-		" the plan in the analysis.</HTML>" );
+		"<HTML>The on/off switch tells StateMod whether to include the plan in the analysis.</HTML>" );
 	JGUIUtil.addComponent(param_JPanel, __iPlnTyp_JComboBox,
 		1, y, 2, 1, 0, 0,
 		1, 0, 0, 1, 
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
 	JGUIUtil.addComponent(param_JPanel, new JLabel("Efficiency (%):"),
 		0, ++y, 1, 1, 0, 0, 
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__Peff_JTextField = new JTextField(11);
-	__Peff_JTextField.setToolTipText (
-		"<HTML>The plan efficiency.</HTML>" );
+	__Peff_JTextField.setToolTipText ( "<HTML>The plan efficiency.</HTML>" );
 	JGUIUtil.addComponent(param_JPanel, __Peff_JTextField,
 		1, y, 2, 1, 0, 0,
 		1, 0, 0, 1, 
@@ -1104,8 +1042,7 @@ private void setupGUI(int index)
 		0, ++y, 1, 1, 0, 0, 
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__iPrf_JTextField = new JTextField(11);
-	__iPrf_JTextField.setToolTipText (
-		"<HTML>The return flow table for the plan.</HTML>" );
+	__iPrf_JTextField.setToolTipText ("<HTML>The return flow table for the plan.</HTML>" );
 	JGUIUtil.addComponent(param_JPanel, __iPrf_JTextField,
 		1, y, 2, 1, 0, 0,
 		1, 0, 0, 1, 
@@ -1118,12 +1055,11 @@ private void setupGUI(int index)
 	__iPfail_JComboBox.setData (
 		StateMod_Plan.getIPfailChoices(true) );
 	__iPfail_JComboBox.addItemListener(this);
-	__iPfail_JComboBox.setToolTipText (
-		"<HTML>Plan failure switch.</HTML>" );
+	__iPfail_JComboBox.setToolTipText ( "<HTML>Plan failure switch.</HTML>" );
 	JGUIUtil.addComponent(param_JPanel, __iPfail_JComboBox,
 		1, y, 2, 1, 0, 0,
 		1, 0, 0, 1, 
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
 	// Put in blanks to have better spacing in layout...
 	JGUIUtil.addComponent(param_JPanel,
@@ -1131,8 +1067,7 @@ private void setupGUI(int index)
 		0, ++y, 1, 1, 0, 0, 
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__Psto1_JTextField = new JTextField(11);
-	__Psto1_JTextField.setToolTipText (
-		"<HTML>The plan initial storage (for types 3 & 5).</HTML>" );
+	__Psto1_JTextField.setToolTipText ( "<HTML>The plan initial storage (for types 3 & 5).</HTML>" );
 	JGUIUtil.addComponent(param_JPanel, __Psto1_JTextField,
 		1, y, 2, 1, 0, 0,
 		1, 0, 0, 1, 
@@ -1204,8 +1139,7 @@ private void setupGUI(int index)
 	getContentPane().add ("South", bottom_JPanel);	
 	
 	if ( __dataset_wm != null ) {
-		__dataset_wm.setWindowOpen (
-		StateMod_DataSet_WindowManager.WINDOW_PLAN, this );
+		__dataset_wm.setWindowOpen ( StateMod_DataSet_WindowManager.WINDOW_PLAN, this );
 	}
 
 	pack();
@@ -1254,8 +1188,7 @@ public void windowClosing(WindowEvent e) {
 		__dataset.setDirty(StateMod_DataSet.COMP_PLANS, true);
 	}	
 	if ( __dataset_wm != null ) {
-		__dataset_wm.closeWindow (
-		StateMod_DataSet_WindowManager.WINDOW_PLAN );
+		__dataset_wm.closeWindow ( StateMod_DataSet_WindowManager.WINDOW_PLAN );
 	}
 }
 
@@ -1292,26 +1225,22 @@ Responds to Window opening events; does nothing.
 public void windowOpening(WindowEvent e) {}
 
 /**
-Called just before the worksheet is sorted.  Stores the index of the record
-that is selected.
+Called just before the worksheet is sorted.  Stores the index of the record that is selected.
 @param worksheet the worksheet being sorted.
 @param sort the type of sort being performed.
 */
 public void worksheetSortAboutToChange(JWorksheet worksheet, int sort) {
-	__sortSelectedRow = __worksheet.getOriginalRowNumber(
-		__worksheet.getSelectedRow());
+	__sortSelectedRow = __worksheet.getOriginalRowNumber(__worksheet.getSelectedRow());
 }
 
 /**
-Called when the worksheet is sorted.  Reselects the record that was selected
-prior to the sort.
+Called when the worksheet is sorted.  Reselects the record that was selected prior to the sort.
 @param worksheet the worksheet being sorted.
 @param sort the type of sort being performed.
 */
 public void worksheetSortChanged(JWorksheet worksheet, int sort) {
 	__worksheet.deselectAll();
-	__worksheet.selectRow(__worksheet.getSortedRowNumber(
-		__sortSelectedRow));
+	__worksheet.selectRow(__worksheet.getSortedRowNumber(__sortSelectedRow));
 }
 
 }
