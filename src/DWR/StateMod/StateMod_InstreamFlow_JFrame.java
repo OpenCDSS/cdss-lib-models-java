@@ -151,8 +151,7 @@ The button group for the search radio buttons.
 private ButtonGroup __searchCriteriaGroup;
 
 /**
-The index in __disables[] of textfields that should NEVER be made
-editable (e.g., ID fields).
+The index in __disables[] of textfields that should NEVER be made editable (e.g., ID fields).
 */
 private int[] __textUneditables;
 
@@ -192,8 +191,7 @@ private JCheckBox
 	__demandsEstDailyTS;
 
 /**
-Array of JComponents that should be disabled when nothing is selected 
-from the list.
+Array of JComponents that should be disabled when nothing is selected from the list.
 */
 private JComponent[] __disables;
 
@@ -264,28 +262,25 @@ The DataSetComponent containing the instream flow data.
 private DataSetComponent __instreamFlowComponent;
 
 /**
-The Vector of instream flows to be displayed.
+The list of instream flows to be displayed.
 */
 private List __instreamFlowsVector;
 
 /**
 Constructor.
 @param dataset the dataset containing the instream flow information
-@param dataset_wm the dataset window manager or null if the data set windows
-are not being managed.
+@param dataset_wm the dataset window manager or null if the data set windows are not being managed.
 @param editable whether the data are editable or not.
 */
-public StateMod_InstreamFlow_JFrame (	StateMod_DataSet dataset, 
-					StateMod_DataSet_WindowManager
-					dataset_wm, boolean editable)
+public StateMod_InstreamFlow_JFrame ( StateMod_DataSet dataset, StateMod_DataSet_WindowManager
+		dataset_wm, boolean editable)
 {	
 	StateMod_GUIUtil.setTitle(this, dataset, "Instream Flows", null);
 	JGUIUtil.setIcon(this, JGUIUtil.getIconImage());	
 
 	__dataset = dataset;
 	__dataset_wm = dataset_wm;
-	__instreamFlowComponent = __dataset.getComponentForComponentType(
-		StateMod_DataSet.COMP_INSTREAM_STATIONS);
+	__instreamFlowComponent = __dataset.getComponentForComponentType(StateMod_DataSet.COMP_INSTREAM_STATIONS);
 
 	__instreamFlowsVector = (List)__instreamFlowComponent.getData();
 	int size = __instreamFlowsVector.size();
@@ -303,23 +298,18 @@ public StateMod_InstreamFlow_JFrame (	StateMod_DataSet dataset,
 /**
 Constructor.
 @param dataset the dataset containing the instream flow information
-@param dataset_wm the dataset window manager or null if the data set windows
-are not being managed.
+@param dataset_wm the dataset window manager or null if the data set windows are not being managed.
 @param instreamFlow the instreamFlow to select from the list
 @param editable whether the gui data is editable or not
 */
-public StateMod_InstreamFlow_JFrame (	StateMod_DataSet dataset,
-					StateMod_DataSet_WindowManager
-					dataset_wm,
-					StateMod_InstreamFlow instreamFlow,
-					boolean editable)
+public StateMod_InstreamFlow_JFrame ( StateMod_DataSet dataset, StateMod_DataSet_WindowManager dataset_wm,
+	StateMod_InstreamFlow instreamFlow, boolean editable)
 {	
 	StateMod_GUIUtil.setTitle(this, dataset, "Instream Flows", null);
 	JGUIUtil.setIcon(this, JGUIUtil.getIconImage());
 	__dataset = dataset;
 	__dataset_wm = dataset_wm;
-	__instreamFlowComponent = __dataset.getComponentForComponentType(
-		StateMod_DataSet.COMP_INSTREAM_STATIONS);
+	__instreamFlowComponent = __dataset.getComponentForComponentType(StateMod_DataSet.COMP_INSTREAM_STATIONS);
 
 	__instreamFlowsVector = (List)__instreamFlowComponent.getData();
 	int size = __instreamFlowsVector.size();
@@ -346,8 +336,7 @@ public void actionPerformed(ActionEvent e) {
 
 	try {
 	if (Message.isDebugOn) {	
-		Message.printDebug(1, routine, 
-			"In actionPerformed: " + e.getActionCommand());
+		Message.printDebug(1, routine, "In actionPerformed: " + e.getActionCommand());
 	}
 
 	String action = e.getActionCommand();
@@ -367,11 +356,10 @@ public void actionPerformed(ActionEvent e) {
 		searchWorksheet();
 	}
 	else if (action.equals(__BUTTON_HELP)) {
-		// REVISIT HELP (JTS - 2003-06-09)
+		// TODO HELP (JTS - 2003-06-09)
 	}
 	// Time series buttons...
-	else if ( (e.getSource() == __graph_JButton) 
-		|| (e.getSource() == __table_JButton)
+	else if ( (e.getSource() == __graph_JButton) || (e.getSource() == __table_JButton)
 		|| (e.getSource() == __summary_JButton) ) {
 		displayTSViewJFrame(e.getSource());
 	}	
@@ -381,22 +369,20 @@ public void actionPerformed(ActionEvent e) {
 		StateMod_InstreamFlow isf = null;
 		boolean changed = false;
 		for (int i = 0; i < size; i++) {
-			isf = (StateMod_InstreamFlow)
-				__instreamFlowsVector.get(i);
+			isf = (StateMod_InstreamFlow)__instreamFlowsVector.get(i);
 			if (!changed && isf.changed()) {
 				changed = true;
 			}
 			isf.acceptChanges();
 		}
 		if (changed) {		
-			__dataset.setDirty(StateMod_DataSet.COMP_INSTREAM_STATIONS, 
-				true);
+			__dataset.setDirty(StateMod_DataSet.COMP_INSTREAM_STATIONS, true);
 		}		
 		if ( __dataset_wm != null ) {
-			__dataset_wm.closeWindow(
-			StateMod_DataSet_WindowManager.WINDOW_INSTREAM );
+			__dataset_wm.closeWindow(StateMod_DataSet_WindowManager.WINDOW_INSTREAM );
 		}
-		else {	JGUIUtil.close ( this );
+		else {
+			JGUIUtil.close ( this );
 		}
 	}
 	else if (action.equals(__BUTTON_APPLY)) {
@@ -405,49 +391,41 @@ public void actionPerformed(ActionEvent e) {
 		StateMod_InstreamFlow isf = null;
 		boolean changed = false;
 		for (int i = 0; i < size; i++) {
-			isf = (StateMod_InstreamFlow)
-				__instreamFlowsVector.get(i);
+			isf = (StateMod_InstreamFlow)__instreamFlowsVector.get(i);
 			if (!changed && isf.changed()) {
 				changed = true;
 			}
 			isf.createBackup();
 		}		
 		if (changed) {
-			__dataset.setDirty(StateMod_DataSet.COMP_INSTREAM_STATIONS, 
-				true);
+			__dataset.setDirty(StateMod_DataSet.COMP_INSTREAM_STATIONS, true);
 		}		
 	}
 	else if (action.equals(__BUTTON_CANCEL)) {
 		int size = __instreamFlowsVector.size();
 		StateMod_InstreamFlow isf = null;
 		for (int i = 0; i < size; i++) {
-			isf = (StateMod_InstreamFlow)
-				__instreamFlowsVector.get(i);
+			isf = (StateMod_InstreamFlow)__instreamFlowsVector.get(i);
 			isf.restoreOriginal();
 		}			
 		if ( __dataset_wm != null ) {
-			__dataset_wm.closeWindow (
-			StateMod_DataSet_WindowManager.WINDOW_INSTREAM);
+			__dataset_wm.closeWindow ( StateMod_DataSet_WindowManager.WINDOW_INSTREAM);
 		}
-		else {	JGUIUtil.close ( this );
+		else {
+			JGUIUtil.close ( this );
 		}		
 	}
 	else {
 		if (__currentInstreamFlowIndex == -1) {
-			new ResponseJDialog(this, "You must first select an "
-				+ "instream flow from the list.",
-				ResponseJDialog.OK);
+			new ResponseJDialog(this, "You must first select an instream flow from the list.", ResponseJDialog.OK);
 			return;
 		}
 
 		// set placeholder to current instream flow
-		StateMod_InstreamFlow insf = (StateMod_InstreamFlow)
-			__instreamFlowsVector.get(
-			__currentInstreamFlowIndex);
+		StateMod_InstreamFlow insf = (StateMod_InstreamFlow)__instreamFlowsVector.get(__currentInstreamFlowIndex);
 
 		if (e.getSource() == __waterRightsJButton) {
-			new StateMod_InstreamFlow_Right_JFrame(
-				__dataset, insf, __editable);
+			new StateMod_InstreamFlow_Right_JFrame(__dataset, insf, __editable);
 		}
 	}
 	}
@@ -458,8 +436,7 @@ public void actionPerformed(ActionEvent e) {
 }
 
 /**
-Checks the text fields for validity before they are saved back into the
-data object.
+Checks the text fields for validity before they are saved back into the data object.
 @return true if the text fields are okay, false if not.
 */
 private boolean checkInput() {
@@ -468,8 +445,7 @@ private boolean checkInput() {
 
 	// for each field, check if it contains valid input.  If not,
 	// create a string of the format "fieldname -- reason why it
-	// is not correct" and add it to the errors vector.  also
-	// increment error count
+	// is not correct" and add it to the errors vector.  also increment error count
 	
 	if (errorCount == 0) {
 		return true;
@@ -479,32 +455,25 @@ private boolean checkInput() {
 	if (errorCount > 1) {
 		plural = "s were ";
 	}
-	String label = "The following error" + plural + "encountered "
-		+ "trying to save the record:\n";
+	String label = "The following error" + plural + "encountered trying to save the record:\n";
 	for (int i = 0; i < errorCount; i++) {
 		label += errors.get(i) + "\n";
 	}
-	new ResponseJDialog(this, 
-		"Errors encountered", label, ResponseJDialog.OK);
+	new ResponseJDialog(this, "Errors encountered", label, ResponseJDialog.OK);
 	return false;
 }
 
 /**
-Checks the states of the time series checkboxes and enables/disables the
-time series buttons appropriately.
+Checks the states of the time series checkboxes and enables/disables the time series buttons appropriately.
 */
 private void checkTimeSeriesButtonsStates() {
 	boolean enabled = false;
 
 	if(
-		(__demandsMonthlyTS.isSelected() 
-			&& __demandsMonthlyTS.isEnabled()) 
-		|| (__demandsAveMonthlyTS.isSelected()
-			&& __demandsAveMonthlyTS.isEnabled())
-		|| (__demandsDailyTS.isSelected()
-			&& __demandsDailyTS.isEnabled())
-		|| (__demandsEstDailyTS.isSelected()
-			&& __demandsDailyTS.isEnabled())) {
+		(__demandsMonthlyTS.isSelected() && __demandsMonthlyTS.isEnabled()) 
+		|| (__demandsAveMonthlyTS.isSelected() && __demandsAveMonthlyTS.isEnabled())
+		|| (__demandsDailyTS.isSelected() && __demandsDailyTS.isEnabled())
+		|| (__demandsEstDailyTS.isSelected() && __demandsDailyTS.isEnabled())) {
 		enabled = true;
 	}
 
@@ -533,12 +502,10 @@ private void displayTSViewJFrame(Object o)
 		display_props.set("InitialView", "Summary");
 	}
 
-	StateMod_InstreamFlow insf = (StateMod_InstreamFlow)
-		__instreamFlowsVector.get(__currentInstreamFlowIndex);
+	StateMod_InstreamFlow insf = (StateMod_InstreamFlow)__instreamFlowsVector.get(__currentInstreamFlowIndex);
 
 	// display_props.set("HelpKey", "TSTool.ExportMenu");
-	display_props.set("TSViewTitleString",
-		StateMod_Util.createDataLabel(insf,true) + " Time Series");
+	display_props.set("TSViewTitleString", StateMod_Util.createDataLabel(insf,true) + " Time Series");
 	display_props.set("DisplayFont", "Courier");
 	display_props.set("DisplaySize", "11");
 	display_props.set("PrintFont", "Courier");
@@ -555,67 +522,59 @@ private void displayTSViewJFrame(Object o)
 	int its = 0;
 	TS ts = null;
 
-	if (	(__demandsMonthlyTS.isSelected() &&
-		(insf.getDemandMonthTS() != null) )  ) {
+	if ( (__demandsMonthlyTS.isSelected() && (insf.getDemandMonthTS() != null) )  ) {
 		// Do the monthly graph...
 		++sub;
 		its = 0;
 		props.set ( "SubProduct " + sub + ".GraphType=Line" );
-		props.set ( "SubProduct " + sub +
-			".SubTitleString=Monthly Data for Instream Flow "
+		props.set ( "SubProduct " + sub + ".SubTitleString=Monthly Data for Instream Flow "
 			+ insf.getID() + " (" + insf.getName() + ")" );
 		props.set ( "SubProduct " + sub + ".SubTitleFontSize=12" );
 		ts = insf.getDemandMonthTS();
 		if ( ts != null ) {
-			props.set ( "Data " + sub + "." + (++its) +
-				".TSID=" + ts.getIdentifierString() );
+			props.set ( "Data " + sub + "." + (++its) + ".TSID=" + ts.getIdentifierString() );
 			tslist.add ( ts );
 		}
 	}
 
-	if (	(__demandsAveMonthlyTS.isSelected() &&
-		(insf.getDemandAverageMonthTS() != null) ) ) {
+	if ( (__demandsAveMonthlyTS.isSelected() && (insf.getDemandAverageMonthTS() != null) ) ) {
 		// Do the monthly average graph...
 		++sub;
 		its = 0;
 		props.set ( "SubProduct " + sub + ".GraphType=Line" );
-		props.set ( "SubProduct " + sub +
-		".SubTitleString=Monthly Average Data for Instream Flow "
+		props.set ( "SubProduct " + sub + ".SubTitleString=Monthly Average Data for Instream Flow "
 			+ insf.getID() + " (" + insf.getName() + ")" );
 		props.set ( "SubProduct " + sub + ".SubTitleFontSize=12" );
 		ts = insf.getDemandAverageMonthTS();
 		if ( ts != null ) {
-			props.set ( "Data " + sub + "." + (++its) +
-				".TSID=" + ts.getIdentifierString() );
+			props.set ( "Data " + sub + "." + (++its) + ".TSID=" + ts.getIdentifierString() );
 			tslist.add ( ts );
 		}
 	}
 
-	// REVISIT - need to add estimated daily demands...
-	if (	(__demandsDailyTS.isSelected() &&
-		(insf.getDemandDayTS() != null) ) ) {
+	// TODO - need to add estimated daily demands...
+	if ( (__demandsDailyTS.isSelected() && (insf.getDemandDayTS() != null) ) ) {
 		// Do the daily graph...
 		++sub;
 		its = 0;
 		props.set ( "SubProduct " + sub + ".GraphType=Line" );
-		props.set ( "SubProduct " + sub +
-			".SubTitleString=Daily Data for Instream Flow "
+		props.set ( "SubProduct " + sub + ".SubTitleString=Daily Data for Instream Flow "
 			+ insf.getID() + " (" + insf.getName() + ")" );
 		props.set ( "SubProduct " + sub + ".SubTitleFontSize=12" );
 		ts = insf.getDemandDayTS();
 		if ( ts != null ) {
-			props.set ( "Data " + sub + "." + (++its) +
-				".TSID=" + ts.getIdentifierString() );
+			props.set ( "Data " + sub + "." + (++its) + ".TSID=" + ts.getIdentifierString() );
 			tslist.add ( ts );
 		}
 	}
 	
-	try {	TSProduct tsproduct = new TSProduct ( props, display_props );
+	try {
+		TSProduct tsproduct = new TSProduct ( props, display_props );
 		tsproduct.setTSList ( tslist );
 		new TSViewJFrame ( tsproduct );
 	}
 	catch (Exception e) {
-		Message.printWarning(1,routine,"Error displaying time series.");
+		Message.printWarning(1,routine,"Error displaying time series (" + e + ").");
 		Message.printWarning(2, routine, e);
 	}
 }
@@ -657,8 +616,7 @@ throws Throwable {
 
 /**
 Initializes the arrays that are used when items are selected and deselected.
-This should be called from setupGUI() before the a call is made to 
-selectTableIndex().
+This should be called from setupGUI() before the a call is made to selectTableIndex().
 */
 private void initializeDisables() {
 	__disables = new JComponent[16];
@@ -699,8 +657,7 @@ Responds to key pressed events; does nothing.
 public void keyPressed(KeyEvent e) {}
 
 /**
-Responds to key released events; calls 'processTableSelection' with the 
-newly-selected index in the table.
+Responds to key released events; calls 'processTableSelection' with the newly-selected index in the table.
 @param e the KeyEvent that happened.
 */
 public void keyReleased(KeyEvent e) {
@@ -735,8 +692,7 @@ Responds to mouse pressed events; does nothing.
 public void mousePressed(MouseEvent e) {}
 
 /**
-Responds to mouse released events; calls 'processTableSelection' with the 
-newly-selected index in the table.
+Responds to mouse released events; calls 'processTableSelection' with the newly-selected index in the table.
 @param e the MouseEvent that happened.
 */
 public void mouseReleased(MouseEvent e) {
@@ -749,14 +705,11 @@ Populates the diversion daily id combo box.
 private void populateInstreamDailyID() {
 	__instreamDailyID.removeAllItems();
 
-	__instreamDailyID.add("0 - Use average daily value from monthly time "
-		+ "series");
+	__instreamDailyID.add("0 - Use average daily value from monthly time series");
 	__instreamDailyID.add("3 - Daily time series are supplied");
-	__instreamDailyID.add("4 - Daily time series interpolated from "
-		+ "midpoints of monthly data");
+	__instreamDailyID.add("4 - Daily time series interpolated from midpoints of monthly data");
 
-	List idNameVector = StateMod_Util.createDataList(
-		__instreamFlowsVector, true);
+	List idNameVector = StateMod_Util.createDataList(__instreamFlowsVector, true);
 	int size = idNameVector.size();
 
 	String s = null;
@@ -769,8 +722,7 @@ private void populateInstreamDailyID() {
 /**
 Processes a table selection (either via a mouse press or programmatically 
 from selectTableIndex() by writing the old data back to the data set component
-and getting the next selection's data out of the data and displaying it 
-on the form.
+and getting the next selection's data out of the data and displaying it on the form.
 @param index the index of the instream flow to display on the form.
 */
 private void processTableSelection(int index) {
@@ -785,12 +737,10 @@ private void processTableSelection(int index) {
 		return;
 	}
 
-	JGUIUtil.enableComponents(__disables, __textUneditables,
-		__editable);
+	JGUIUtil.enableComponents(__disables, __textUneditables, __editable);
 	checkTimeSeriesButtonsStates();
 
-	StateMod_InstreamFlow insf = (StateMod_InstreamFlow)
-		__instreamFlowsVector.get(__currentInstreamFlowIndex);
+	StateMod_InstreamFlow insf = (StateMod_InstreamFlow)__instreamFlowsVector.get(__currentInstreamFlowIndex);
 		
 	__instreamFlowStationID.setText(insf.getID());
 	__instreamFlowName.setText(insf.getName());
@@ -806,22 +756,25 @@ private void processTableSelection(int index) {
 	if ( insf.getDemandMonthTS() != null ) {
 		__demandsMonthlyTS.setEnabled(true);
 	}
-	else {	__demandsMonthlyTS.setEnabled(false);
+	else {
+		__demandsMonthlyTS.setEnabled(false);
 	}
 
 	if ( insf.getDemandAverageMonthTS() != null ) {
 		__demandsAveMonthlyTS.setEnabled(true);
 	}
-	else {	__demandsAveMonthlyTS.setEnabled(false);
+	else {
+		__demandsAveMonthlyTS.setEnabled(false);
 	}
 
 	if ( insf.getDemandDayTS() != null ) {
 		__demandsDailyTS.setEnabled(true);
 	}
-	else {	__demandsDailyTS.setEnabled(false);
+	else {
+		__demandsDailyTS.setEnabled(false);
 	}
 
-	// REVISIT - need to enable pattern logic based on daily ID.
+	// TODO - need to enable pattern logic based on daily ID.
 
 	__demandsEstDailyTS.setEnabled(false);
 	
@@ -845,18 +798,14 @@ private void processTableSelection(int index) {
 	String c = insf.getCifridy();
 	if (c.trim().equals("")) {
 		if (!__instreamDailyID.setSelectedPrefixItem(insf.getID())) {
-			Message.printWarning(2, routine, "No cifridy value "
-				+ "matching '" + insf.getID() + "' found in "
-				+ "combo box.");
+			Message.printWarning(2, routine, "No cifridy value matching '" + insf.getID() + "' found in combo box.");
 			__instreamDailyID.select(0);
 		}
 		setOriginalCifridy(insf, "" + insf.getID());
 	}
 	else {
 		if (!__instreamDailyID.setSelectedPrefixItem(c)) {
-			Message.printWarning(2, routine, "No cifridy value "
-				+ "matching '" + insf.getID() + "' found in "
-				+ "combo box.");
+			Message.printWarning(2, routine, "No cifridy value matching '" + insf.getID() + "' found in combo box.");
 			__instreamDailyID.select(0);
 		}
 	}
@@ -866,8 +815,7 @@ private void processTableSelection(int index) {
 }
 
 /**
-Saves the prior record selected in the table; called when moving to a new 
-record by a table selection.
+Saves the prior record selected in the table; called when moving to a new record by a table selection.
 */
 private void saveLastRecord() {
 	saveInformation(__lastInstreamFlowIndex);
@@ -884,8 +832,7 @@ private void saveCurrentRecord() {
 /**
 Saves the information associated with the currently-selected instream flow.
 The user doesn't need to hit the return key for the gui to recognize changes.
-The info is saved each time the user selects a differents tation or pressed
-the close button.
+The info is saved each time the user selects a different station or pressed the close button.
 */
 private void saveInformation(int record) {
 	if (!__editable || record == -1) {
@@ -897,8 +844,7 @@ private void saveInformation(int record) {
 	}
 
 	// set placeholder to last instream flow
-	StateMod_InstreamFlow insf = (StateMod_InstreamFlow)
-		__instreamFlowsVector.get(record);
+	StateMod_InstreamFlow insf = (StateMod_InstreamFlow)__instreamFlowsVector.get(record);
 
 	insf.setID(__instreamFlowStationID.getText().trim());
 	insf.setName(__instreamFlowName.getText().trim());
@@ -915,7 +861,7 @@ private void saveInformation(int record) {
 	if (!cifridy.equalsIgnoreCase(insf.getCifridy())) {
 		insf.setCifridy(cifridy);
 		/*
-		REVISIT TS (JTS - 2003-06-19)
+		TODO TS (JTS - 2003-06-19)
 		connect the daily ts to the linked list
 		insf.connectDailyDemandTS(__dailyInsfTSVector);
 		*/
@@ -957,8 +903,7 @@ public void searchWorksheet(int row) {
 }
 
 /**
-Selects the desired ID in the table and displays the appropriate data
-in the remainder of the window.
+Selects the desired ID in the table and displays the appropriate data in the remainder of the window.
 @param id the identifier to select in the list.
 */
 public void selectID(String id) {
@@ -974,8 +919,7 @@ public void selectID(String id) {
 }
 
 /**
-Selects the desired index in the and also displays the appropriate data in the
-remainder of the window.
+Selects the desired index in the and also displays the appropriate data in the remainder of the window.
 @param index the index to select.
 */
 public void selectTableIndex(int index) {
@@ -1070,8 +1014,7 @@ private void setupGUI(int index) {
 
 	int y;
 
-	PropList p =
-		new PropList("StateMod_InstreamFlow_JFrame.JWorksheet");
+	PropList p = new PropList("StateMod_InstreamFlow_JFrame.JWorksheet");
 	p.add("JWorksheet.ShowPopupMenu=true");
 	p.add("JWorksheet.AllowCopy=true");
 	p.add("JWorksheet.SelectionMode=SingleRowSelection");
@@ -1079,11 +1022,8 @@ private void setupGUI(int index) {
 	int[] widths = null;
 	JScrollWorksheet jsw = null;
 	try {
-		StateMod_InstreamFlow_TableModel tmi = new
-			StateMod_InstreamFlow_TableModel(
-			__instreamFlowsVector, __editable);
-		StateMod_InstreamFlow_CellRenderer cri = new
-			StateMod_InstreamFlow_CellRenderer(tmi);
+		StateMod_InstreamFlow_TableModel tmi = new StateMod_InstreamFlow_TableModel(__instreamFlowsVector, __editable);
+		StateMod_InstreamFlow_CellRenderer cri = new StateMod_InstreamFlow_CellRenderer(tmi);
 
 		jsw = new JScrollWorksheet(cri, tmi, p);
 		__worksheet = jsw.getJWorksheet();
@@ -1130,7 +1070,7 @@ private void setupGUI(int index) {
 	JGUIUtil.addComponent(p3, __instreamDailyID,
 		1, y, 1, 1, 0, 0, 
 		1, 0, 0, 1,
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 	y++;
 	JGUIUtil.addComponent(p3, new JLabel("Upstream river node:"),
 		0, y, 1, 1, 0, 0, 
@@ -1159,7 +1099,7 @@ private void setupGUI(int index) {
 	JGUIUtil.addComponent(p3, __insflowSwitch,
 		1, y, 1, 1, 0, 0, 
 		1, 0, 0, 1,
-		GridBagConstraints.NONE, GridBagConstraints.WEST);		
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);		
 	y++;
 	JGUIUtil.addComponent(p3, new JLabel("Data Type:"),
 		0, y, 1, 1, 0, 0,
@@ -1168,23 +1108,20 @@ private void setupGUI(int index) {
 	JGUIUtil.addComponent(p3, __dataType,
 		1, y, 1, 1, 0, 0,
 		1, 0, 0, 1,
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
 	JPanel subformsPanel = new JPanel();
 	subformsPanel.setLayout(gb);
-	subformsPanel.setBorder(BorderFactory.createTitledBorder(
-		"Related Data"));
+	subformsPanel.setBorder(BorderFactory.createTitledBorder("Related Data"));
 
 	JGUIUtil.addComponent(subformsPanel, __waterRightsJButton,
 		1, 0, 1, 1, 0, 0, 
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.NORTHWEST);
 
-
 	JPanel tsPanel = new JPanel();
 	tsPanel.setLayout(gb);
-	tsPanel.setBorder(BorderFactory.createTitledBorder(
-		"Time Series"));
+	tsPanel.setBorder(BorderFactory.createTitledBorder("Time Series"));
 
 	y++;		
 
@@ -1225,8 +1162,7 @@ private void setupGUI(int index) {
 	// add search areas
 	JPanel searchPanel = new JPanel();
 	searchPanel.setLayout(gb);
-	searchPanel.setBorder(BorderFactory.createTitledBorder(
-		"Search above list for:"));	
+	searchPanel.setBorder(BorderFactory.createTitledBorder("Search above list for:"));	
 
 	int y2 = 0;
 	JGUIUtil.addComponent(searchPanel, __searchIDJRadioButton,
@@ -1369,8 +1305,7 @@ public void windowClosing(WindowEvent e) {
 	StateMod_InstreamFlow isf = null;
 	boolean changed = false;
 	for (int i = 0; i < size; i++) {
-		isf = (StateMod_InstreamFlow)
-			__instreamFlowsVector.get(i);
+		isf = (StateMod_InstreamFlow)__instreamFlowsVector.get(i);
 		if (!changed && isf.changed()) {
 			changed = true;
 		}
@@ -1383,7 +1318,8 @@ public void windowClosing(WindowEvent e) {
 		__dataset_wm.closeWindow(
 		StateMod_DataSet_WindowManager.WINDOW_INSTREAM );
 	}
-	else {	JGUIUtil.close ( this );
+	else {
+		JGUIUtil.close ( this );
 	}
 }
 
@@ -1430,26 +1366,22 @@ private void setOriginalCifridy(StateMod_InstreamFlow i, String cifridy) {
 }
 
 /**
-Called just before the worksheet is sorted.  Stores the index of the record
-that is selected.
+Called just before the worksheet is sorted.  Stores the index of the record that is selected.
 @param worksheet the worksheet being sorted.
 @param sort the type of sort being performed.
 */
 public void worksheetSortAboutToChange(JWorksheet worksheet, int sort) {
-	__sortSelectedRow = __worksheet.getOriginalRowNumber(
-		__worksheet.getSelectedRow());
+	__sortSelectedRow = __worksheet.getOriginalRowNumber(__worksheet.getSelectedRow());
 }
 
 /**
-Called when the worksheet is sorted.  Reselects the record that was selected
-prior to the sort.
+Called when the worksheet is sorted.  Reselects the record that was selected prior to the sort.
 @param worksheet the worksheet being sorted.
 @param sort the type of sort being performed.
 */
 public void worksheetSortChanged(JWorksheet worksheet, int sort) {
 	__worksheet.deselectAll();
-	__worksheet.selectRow(__worksheet.getSortedRowNumber(
-		__sortSelectedRow));
+	__worksheet.selectRow(__worksheet.getSortedRowNumber(__sortSelectedRow));
 }
 
 }

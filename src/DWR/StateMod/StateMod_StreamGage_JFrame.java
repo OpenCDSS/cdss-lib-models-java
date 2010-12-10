@@ -238,28 +238,23 @@ Vector of stream gage station data to display in the form.
 private List __streamGageStationsVector;
 
 /**
-The index in __disables[] of textfields and other components that should NEVER
-be made editable (e.g., ID fields).
+The index in __disables[] of textfields and other components that should NEVER be made editable (e.g., ID fields).
 */
 private int[] __textUneditables;
 
 /**
-Array of JComponents that should be disabled when nothing is selected 
-from the list.
+Array of JComponents that should be disabled when nothing is selected from the list.
 */
 private JComponent[] __disables;
 
 /**
 Constructor.
 @param dataset the dataset containing the data to show in the form.
-@param dataset_wm the dataset window manager or null if the data set windows
-are not being managed.
+@param dataset_wm the dataset window manager or null if the data set windows are not being managed.
 @param editable Indicates whether the data in the display should be editable.
 */
-public StateMod_StreamGage_JFrame (	StateMod_DataSet dataset,
-					StateMod_DataSet_WindowManager
-					dataset_wm,
-					boolean editable)
+public StateMod_StreamGage_JFrame (	StateMod_DataSet dataset, StateMod_DataSet_WindowManager dataset_wm,
+	boolean editable)
 {	
 	StateMod_GUIUtil.setTitle(this, dataset, "Stream Gage Stations", null);
 	JGUIUtil.setIcon(this, JGUIUtil.getIconImage());
@@ -268,8 +263,7 @@ public StateMod_StreamGage_JFrame (	StateMod_DataSet dataset,
 	__dataset_wm = dataset_wm;
 	__streamGageStationComponent = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_STREAMGAGE_STATIONS);
-	__streamGageStationsVector =
-		(List)__streamGageStationComponent.getData();
+	__streamGageStationsVector = (List)__streamGageStationComponent.getData();
 	int size = __streamGageStationsVector.size();
 	StateMod_StreamGage s = null;
 	for (int i = 0; i < size; i++) {
@@ -295,8 +289,7 @@ StateMod_StreamGage station, boolean editable) {
 	__dataset = dataset;
 	__streamGageStationComponent = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_STREAMGAGE_STATIONS);
-	__streamGageStationsVector =
-		(List)__streamGageStationComponent.getData();
+	__streamGageStationsVector = (List)__streamGageStationComponent.getData();
 	int size = __streamGageStationsVector.size();
 	StateMod_StreamGage s = null;
 	for (int i = 0; i < size; i++) {
@@ -305,8 +298,7 @@ StateMod_StreamGage station, boolean editable) {
 	}
 
 	String id = station.getID();
-	int index = StateMod_Util.locateIndexFromID(
-		id, __streamGageStationsVector);
+	int index = StateMod_Util.locateIndexFromID(id, __streamGageStationsVector);
 
 	__editable = editable;
 
@@ -320,15 +312,13 @@ Responds to action performed events.
 public void actionPerformed(ActionEvent e) {
 	String routine="StateMod_StreamGage_JFrame.actionPerformed"; 
 	if (Message.isDebugOn) {
-		Message.printDebug(1, routine, 
-		"In actionPerformed: " + e.getActionCommand());
+		Message.printDebug(1, routine, "In actionPerformed: " + e.getActionCommand());
 	}
 
 	String action = e.getActionCommand();
 	Object o = e.getSource();
 
-	if ( (o == __graph_JButton) || (o == __table_JButton) ||
-		(o == __summary_JButton) ) {
+	if ( (o == __graph_JButton) || (o == __table_JButton) || (o == __summary_JButton) ) {
 		displayTSViewJFrame(o);
 	}	
 	else if (action.equals(__BUTTON_APPLY)) {
@@ -337,30 +327,25 @@ public void actionPerformed(ActionEvent e) {
 		StateMod_StreamGage s = null;
 		boolean changed = false;
 		for (int i = 0; i < size; i++) {
-			s = (StateMod_StreamGage)
-				__streamGageStationsVector.get(i);
+			s = (StateMod_StreamGage)__streamGageStationsVector.get(i);
 			if (!changed && s.changed()) {
 				changed = true;
 			}
 			s.createBackup();
 		}		
 		if (changed) {
-			__dataset.setDirty(
-				StateMod_DataSet.COMP_STREAMGAGE_STATIONS,
-				true);
+			__dataset.setDirty(StateMod_DataSet.COMP_STREAMGAGE_STATIONS,true);
 		}		
 	}
 	else if (action.equals(__BUTTON_CANCEL)) {
 		int size = __streamGageStationsVector.size();
 		StateMod_StreamGage s = null;
 		for (int i = 0; i < size; i++) {
-			s = (StateMod_StreamGage)
-				__streamGageStationsVector.get(i);
+			s = (StateMod_StreamGage)__streamGageStationsVector.get(i);
 			s.restoreOriginal();
 		}			
 		if (__dataset_wm != null) {
-			__dataset_wm.closeWindow(
-				StateMod_DataSet_WindowManager.WINDOW_STREAMGAGE);
+			__dataset_wm.closeWindow(StateMod_DataSet_WindowManager.WINDOW_STREAMGAGE);
 		}
 		else {
 			JGUIUtil.close(this);
@@ -372,27 +357,24 @@ public void actionPerformed(ActionEvent e) {
 		StateMod_StreamGage s = null;
 		boolean changed = false;
 		for (int i = 0; i < size; i++) {
-			s = (StateMod_StreamGage)
-				__streamGageStationsVector.get(i);
+			s = (StateMod_StreamGage)__streamGageStationsVector.get(i);
 			if (!changed && s.changed()) {
 				changed = true;
 			}
 			s.acceptChanges();
 		}				
 		if (changed) {
-			__dataset.setDirty(
-				StateMod_DataSet.COMP_STREAMGAGE_STATIONS,
-				true);
+			__dataset.setDirty(StateMod_DataSet.COMP_STREAMGAGE_STATIONS,true);
 		}		
 		if ( __dataset_wm != null ) {
-			__dataset_wm.closeWindow (
-			StateMod_DataSet_WindowManager.WINDOW_STREAMGAGE );
+			__dataset_wm.closeWindow (StateMod_DataSet_WindowManager.WINDOW_STREAMGAGE );
 		}
-		else {	JGUIUtil.close ( this );
+		else {
+			JGUIUtil.close ( this );
 		}
 	}
 	else if (action.equals(__BUTTON_HELP)) {
-		// REVISIT HELP (JTS - 2003-08-18)
+		// TODO HELP (JTS - 2003-08-18)
 	}
 	else if (e.getSource() == __searchIDJRadioButton) {
 		__searchName.setEditable(false);
@@ -411,8 +393,7 @@ public void actionPerformed(ActionEvent e) {
 }
  
 /**
-Checks the text fields for validity before they are saved back into the
-data object.
+Checks the text fields for validity before they are saved back into the data object.
 @return true if the text fields are okay, false if not.
 */
 private boolean checkInput() {
@@ -421,8 +402,7 @@ private boolean checkInput() {
 
 	// for each field, check if it contains valid input.  If not,
 	// create a string of the format "fieldname -- reason why it
-	// is not correct" and add it to the errors vector.  also
-	// increment error count
+	// is not correct" and add it to the errors vector.  Also increment error count
 	
 	if (errorCount == 0) {
 		return true;
@@ -432,36 +412,27 @@ private boolean checkInput() {
 	if (errorCount > 1) {
 		plural = "s were ";
 	}
-	String label = "The following error" + plural + "encountered "
-		+ "trying to save the record:\n";
+	String label = "The following error" + plural + "encountered trying to save the record:\n";
 	for (int i = 0; i < errorCount; i++) {
 		label += errors.get(i) + "\n";
 	}
-	new ResponseJDialog(this, 
-		"Errors encountered", label, ResponseJDialog.OK);
+	new ResponseJDialog(this, "Errors encountered", label, ResponseJDialog.OK);
 	return false;
 }
 
 /**
-Checks whether the time series display buttons need to be enabled or not based
-on the JCheckBoxes.
+Checks whether the time series display buttons need to be enabled or not based on the JCheckBoxes.
 */
 private void checkTimeSeriesButtonsStates() {
 	boolean enabled = false;
 
 	if (
-		(__ts_streamflow_hist_monthly_JCheckBox.isSelected()
-			&& __ts_streamflow_hist_monthly_JCheckBox.isEnabled())
-		|| (__ts_streamflow_hist_daily_JCheckBox.isSelected()
-			&& __ts_streamflow_hist_daily_JCheckBox.isEnabled())
-		|| (__ts_streamflow_est_hist_daily_JCheckBox.isSelected()
-			&& __ts_streamflow_est_hist_daily_JCheckBox.isEnabled())
-		|| (__ts_streamflow_base_monthly_JCheckBox.isSelected()
-			&& __ts_streamflow_base_monthly_JCheckBox.isEnabled())
-		|| (__ts_streamflow_base_daily_JCheckBox.isSelected()
-			&& __ts_streamflow_base_daily_JCheckBox.isEnabled())
-		|| (__ts_streamflow_est_base_daily_JCheckBox.isSelected()
-			&& __ts_streamflow_est_base_daily_JCheckBox.isEnabled())
+		(__ts_streamflow_hist_monthly_JCheckBox.isSelected() && __ts_streamflow_hist_monthly_JCheckBox.isEnabled())
+		|| (__ts_streamflow_hist_daily_JCheckBox.isSelected() && __ts_streamflow_hist_daily_JCheckBox.isEnabled())
+		|| (__ts_streamflow_est_hist_daily_JCheckBox.isSelected() && __ts_streamflow_est_hist_daily_JCheckBox.isEnabled())
+		|| (__ts_streamflow_base_monthly_JCheckBox.isSelected() && __ts_streamflow_base_monthly_JCheckBox.isEnabled())
+		|| (__ts_streamflow_base_daily_JCheckBox.isSelected() && __ts_streamflow_base_daily_JCheckBox.isEnabled())
+		|| (__ts_streamflow_est_base_daily_JCheckBox.isSelected() && __ts_streamflow_est_base_daily_JCheckBox.isEnabled())
 	) {
 		enabled = true;
 	}
@@ -472,8 +443,7 @@ private void checkTimeSeriesButtonsStates() {
 }
 
 /**
-Display the time series.  Create two graphs as needed, one with ACFT monthly
-data, and one with CFS daily data.
+Display the time series.  Create two graphs as needed, one with ACFT monthly data, and one with CFS daily data.
 @param action Event action that initiated the display.
 */
 private void displayTSViewJFrame(Object o)
@@ -492,12 +462,10 @@ private void displayTSViewJFrame(Object o)
 		display_props.set("InitialView", "Summary");
 	}
 
-	StateMod_StreamGage sta = (StateMod_StreamGage)
-		__streamGageStationsVector.get(__currentStationIndex);
+	StateMod_StreamGage sta = (StateMod_StreamGage)__streamGageStationsVector.get(__currentStationIndex);
 
 	// display_props.set("HelpKey", "TSTool.ExportMenu");
-	display_props.set("TSViewTitleString",
-		StateMod_Util.createDataLabel(sta,true) + " Time Series");
+	display_props.set("TSViewTitleString", StateMod_Util.createDataLabel(sta,true) + " Time Series");
 	display_props.set("DisplayFont", "Courier");
 	display_props.set("DisplaySize", "11");
 	display_props.set("PrintFont", "Courier");
@@ -514,62 +482,49 @@ private void displayTSViewJFrame(Object o)
 	int its = 0;
 	TS ts = null;
 
-	if (	(__ts_streamflow_hist_monthly_JCheckBox.isSelected() &&
-		(sta.getHistoricalMonthTS() != null) ) ||
-		(__ts_streamflow_base_monthly_JCheckBox.isSelected() &&
-		(sta.getBaseflowMonthTS() != null) ) ) {
+	if ( (__ts_streamflow_hist_monthly_JCheckBox.isSelected() && (sta.getHistoricalMonthTS() != null) ) ||
+		(__ts_streamflow_base_monthly_JCheckBox.isSelected() && (sta.getBaseflowMonthTS() != null) ) ) {
 		// Do the monthly graph...
 		++sub;
 		props.set ( "SubProduct " + sub + ".GraphType=Line" );
-		props.set ( "SubProduct " + sub +
-			".SubTitleString=Monthly Data for Stream Gage Station "
+		props.set ( "SubProduct " + sub + ".SubTitleString=Monthly Data for Stream Gage Station "
 			+ sta.getID() + " (" + sta.getName() + ")" );
 		props.set ( "SubProduct " + sub + ".SubTitleFontSize=12" );
 		ts = sta.getHistoricalMonthTS();
-		if (	(ts != null) &&
-			__ts_streamflow_hist_monthly_JCheckBox.isSelected() ) {
-			props.set ( "Data " + sub + "." + (++its) +
-				".TSID=" + ts.getIdentifierString() );
+		if ( (ts != null) && __ts_streamflow_hist_monthly_JCheckBox.isSelected() ) {
+			props.set ( "Data " + sub + "." + (++its) + ".TSID=" + ts.getIdentifierString() );
 			tslist.add ( ts );
 		}
 		ts = sta.getBaseflowMonthTS();
-		if (	(ts != null) &&
-			__ts_streamflow_base_monthly_JCheckBox.isSelected() ) {
-			props.set ( "Data " + sub + "." + (++its) +
-				".TSID=" + ts.getIdentifierString() );
+		if ( (ts != null) && __ts_streamflow_base_monthly_JCheckBox.isSelected() ) {
+			props.set ( "Data " + sub + "." + (++its) + ".TSID=" + ts.getIdentifierString() );
 			tslist.add ( ts );
 		}
 	}
 
-	if (	(__ts_streamflow_hist_daily_JCheckBox.isSelected() &&
-		(sta.getHistoricalDayTS() != null) ) ||
-		(__ts_streamflow_base_daily_JCheckBox.isSelected() &&
-		(sta.getBaseflowDayTS() != null) ) ) {
+	if ( (__ts_streamflow_hist_daily_JCheckBox.isSelected() && (sta.getHistoricalDayTS() != null) ) ||
+		(__ts_streamflow_base_daily_JCheckBox.isSelected() && (sta.getBaseflowDayTS() != null) ) ) {
 		// Do the daily graph...
 		++sub;
 		its = 0;
 		props.set ( "SubProduct " + sub + ".GraphType=Line" );
-		props.set ( "SubProduct " + sub +
-			".SubTitleString=Daily Data for Stream Gage Station "
+		props.set ( "SubProduct " + sub + ".SubTitleString=Daily Data for Stream Gage Station "
 			+ sta.getID() + " (" + sta.getName() + ")" );
 		props.set ( "SubProduct " + sub + ".SubTitleFontSize=12" );
 		ts = sta.getHistoricalDayTS();
-		if (	(ts != null) &&
-			__ts_streamflow_hist_daily_JCheckBox.isSelected() ) {
-			props.set ( "Data " + sub + "." + (++its) +
-				".TSID=" + ts.getIdentifierString() );
+		if ( (ts != null) && __ts_streamflow_hist_daily_JCheckBox.isSelected() ) {
+			props.set ( "Data " + sub + "." + (++its) + ".TSID=" + ts.getIdentifierString() );
 			tslist.add ( ts );
 		}
 		ts = sta.getBaseflowDayTS();
-		if (	(ts != null) &&
-			__ts_streamflow_base_daily_JCheckBox.isSelected() ) {
-			props.set ( "Data " + sub + "." + (++its) +
-				".TSID=" + ts.getIdentifierString() );
+		if ( (ts != null) && __ts_streamflow_base_daily_JCheckBox.isSelected() ) {
+			props.set ( "Data " + sub + "." + (++its) + ".TSID=" + ts.getIdentifierString() );
 			tslist.add ( ts );
 		}
 	}
 	
-	try {	TSProduct tsproduct = new TSProduct ( props, display_props );
+	try {
+		TSProduct tsproduct = new TSProduct ( props, display_props );
 		tsproduct.setTSList ( tslist );
 		new TSViewJFrame ( tsproduct );
 	}
@@ -606,8 +561,7 @@ throws Throwable {
 
 /**
 Initializes the arrays that are used when items are selected and deselected.
-This should be called from setupGUI() before the a call is made to 
-selectTableIndex().
+This should be called from setupGUI() before the a call is made to selectTableIndex().
 */
 private void initializeDisables() {
 	__disables = new JComponent[14];
@@ -650,8 +604,7 @@ Responds to key pressed events; does nothing.
 public void keyPressed(KeyEvent e) {}
 
 /**
-Responds to key released events; calls 'processTableSelection' with the 
-newly-selected index in the table.
+Responds to key released events; calls 'processTableSelection' with the newly-selected index in the table.
 @param e the KeyEvent that happened.
 */
 public void keyReleased(KeyEvent e) {
@@ -689,8 +642,7 @@ Responds to mouse pressed events; does nothing.
 public void mousePressed(MouseEvent e) {}
 
 /**
-Responds to mouse released events; calls 'processTableSelection' with the 
-newly-selected index in the table.
+Responds to mouse released events; calls 'processTableSelection' with the newly-selected index in the table.
 @param e the MouseEvent that happened.
 */
 public void mouseReleased(MouseEvent e) {
@@ -705,14 +657,11 @@ excluded from the list of stream gage stations in the crunidy combo box.
 private void populateCrunidyComboBox() {
 	__crunidyComboBox.removeAllItems();
 
-	__crunidyComboBox.add("0 - Use average daily value from monthly time "
-		+ "series");
+	__crunidyComboBox.add("0 - Use average daily value from monthly time series");
 	__crunidyComboBox.add("3 - Daily time series are supplied");
-	__crunidyComboBox.add("4 - Daily time series interpolated from "
-		+ "midpoints of monthly data");
+	__crunidyComboBox.add("4 - Daily time series interpolated from midpoints of monthly data");
 
-	List idNameVector = StateMod_Util.createDataList(
-		__streamGageStationsVector, true);
+	List idNameVector = StateMod_Util.createDataList(__streamGageStationsVector, true);
 	int size = idNameVector.size();
 
 	String s = null;
@@ -725,8 +674,7 @@ private void populateCrunidyComboBox() {
 /**
 Processes a table selection (either via a mouse press or programmatically 
 from selectTableIndex() by writing the old data back to the data set component
-and getting the next selection's data out of the data and displaying it 
-on the form.
+and getting the next selection's data out of the data and displaying it on the form.
 @param index the index of the reservoir to display on the form.
 */
 private void processTableSelection(int index) {
@@ -742,11 +690,9 @@ private void processTableSelection(int index) {
 	// If a time series is available, enable the time series button...
 	saveLastRecord();
 
-	StateMod_StreamGage r = (StateMod_StreamGage)
-		__streamGageStationsVector.get(__currentStationIndex);
+	StateMod_StreamGage r = (StateMod_StreamGage)__streamGageStationsVector.get(__currentStationIndex);
 
-	JGUIUtil.enableComponents(__disables, __textUneditables,
-		__editable);	
+	JGUIUtil.enableComponents(__disables, __textUneditables, __editable);	
 	checkTimeSeriesButtonsStates();
 	
 	// For checkboxes, do not change the state of the checkbox, only
@@ -758,25 +704,29 @@ private void processTableSelection(int index) {
 	if ( r.getHistoricalMonthTS() != null ) {
 		__ts_streamflow_hist_monthly_JCheckBox.setEnabled(true);
 	}
-	else {	__ts_streamflow_hist_monthly_JCheckBox.setEnabled(false);
+	else {
+		__ts_streamflow_hist_monthly_JCheckBox.setEnabled(false);
 	}
 
 	if ( r.getHistoricalDayTS() != null ) {
 		__ts_streamflow_hist_daily_JCheckBox.setEnabled(true);
 	}
-	else {	__ts_streamflow_hist_daily_JCheckBox.setEnabled(false);
+	else {
+		__ts_streamflow_hist_daily_JCheckBox.setEnabled(false);
 	}
 
 	if ( r.getBaseflowMonthTS() != null ) {
 		__ts_streamflow_base_monthly_JCheckBox.setEnabled(true);
 	}
-	else {	__ts_streamflow_base_monthly_JCheckBox.setEnabled(false);
+	else {
+		__ts_streamflow_base_monthly_JCheckBox.setEnabled(false);
 	}
 
 	if ( r.getBaseflowDayTS() != null ) {
 		__ts_streamflow_base_daily_JCheckBox.setEnabled(true);
 	}
-	else {	__ts_streamflow_base_daily_JCheckBox.setEnabled(false);
+	else {
+		__ts_streamflow_base_daily_JCheckBox.setEnabled(false);
 	}
 
 	__idJTextField.setText(r.getID());
@@ -795,9 +745,7 @@ private void processTableSelection(int index) {
 	String c = r.getCrunidy();
 	if (c.trim().equals("")) {
 		if (!__crunidyComboBox.setSelectedPrefixItem(r.getID())) {
-			Message.printWarning(2, routine, "No Crunidy value "
-				+ "matching '" + r.getID() + "' found in "
-				+ "combo box.");
+			Message.printWarning(2, routine, "No Crunidy value matching '" + r.getID() + "' found in combo box.");
 			__crunidyComboBox.select(0);
 		}
 		else {
@@ -806,25 +754,21 @@ private void processTableSelection(int index) {
 	}
 	else {
 		if (!__crunidyComboBox.setSelectedPrefixItem(c)) {
-			Message.printWarning(2, routine, "No Crunidy value "
-				+ "matching '" + c + "' found in "
-				+ "combo box.");
+			Message.printWarning(2, routine, "No Crunidy value matching '" + c + "' found in combo box.");
 			__crunidyComboBox.select(0);
 		}		
 	}	
 }
 
 /**
-Saves the prior record selected in the table; called when moving to a new 
-record by a table selection.
+Saves the prior record selected in the table; called when moving to a new record by a table selection.
 */
 private void saveLastRecord() {
 	saveInformation(__lastStationIndex);
 }
 
 /**
-Saves the current record selected in the table; called when the window is closed
-or minimized or apply is pressed.
+Saves the current record selected in the table; called when the window is closed or minimized or apply is pressed.
 */
 private void saveCurrentRecord() {	
 	saveInformation(__currentStationIndex);
@@ -833,8 +777,7 @@ private void saveCurrentRecord() {
 /**
 Saves the information associated with the currently-selected stream gage
 station.  The user doesn't need to hit the return key for the gui to recognize
-changes.  The info is saved each time the user selects a differents tation or
-pressed the close button.
+changes.  The info is saved each time the user selects a different station or pressed the close button.
 */
 private void saveInformation(int record) {
 	if (!__editable || record == -1) {
@@ -845,8 +788,7 @@ private void saveInformation(int record) {
 		return;
 	}
 
-	StateMod_StreamGage r = (StateMod_StreamGage)
-		__streamGageStationsVector.get(record);
+	StateMod_StreamGage r = (StateMod_StreamGage)__streamGageStationsVector.get(record);
 
 	r.setName(__nameJTextField.getText());
 	r.setCgoto(__cgotoJTextField.getText());
@@ -893,8 +835,7 @@ public void searchWorksheet(int row) {
 }
 
 /**
-Selects the desired ID in the table and displays the appropriate data
-in the remainder of the window.
+Selects the desired ID in the table and displays the appropriate data in the remainder of the window.
 @param id the identifier to select in the list.
 */
 public void selectID(String id) {
@@ -910,8 +851,7 @@ public void selectID(String id) {
 }
 
 /**
-Selects the desired index in the table, but also displays the appropriate data
-in the remainder of the window.
+Selects the desired index in the table, but also displays the appropriate data in the remainder of the window.
 @param index the index to select in the list.
 */
 public void selectTableIndex(int index) {
@@ -978,10 +918,8 @@ private void setupGUI(int index) {
 	int[] widths = null;
 	try {
 		StateMod_StreamGage_TableModel tmr = new
-			StateMod_StreamGage_TableModel(
-			__streamGageStationsVector);
-		StateMod_StreamGage_CellRenderer crr = new
-			StateMod_StreamGage_CellRenderer(tmr);
+			StateMod_StreamGage_TableModel(__streamGageStationsVector);
+		StateMod_StreamGage_CellRenderer crr = new StateMod_StreamGage_CellRenderer(tmr);
 	
 		__worksheet = new JWorksheet(crr, tmr, p);
 
@@ -1006,7 +944,7 @@ private void setupGUI(int index) {
 		6, y++, 1, 1, 0, 0,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
-	JGUIUtil.addComponent(param_JPanel, new JLabel("Station Name:"),
+	JGUIUtil.addComponent(param_JPanel, new JLabel("Station name:"),
 		5, y, 1, 1, 0, 0,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -1014,7 +952,7 @@ private void setupGUI(int index) {
 		6, y++, 1, 1, 0, 0,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
-	JGUIUtil.addComponent(param_JPanel, new JLabel("River Node ID:"),
+	JGUIUtil.addComponent(param_JPanel, new JLabel("River node ID:"),
 		5, y, 1, 1, 0, 0,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -1022,7 +960,7 @@ private void setupGUI(int index) {
 		6, y++, 1, 1, 0, 0,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
-	JGUIUtil.addComponent(param_JPanel,new JLabel("Daily Data Identifier:"),
+	JGUIUtil.addComponent(param_JPanel,new JLabel("Daily data ID:"),
 		5, y, 1, 1, 0, 0,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -1034,55 +972,47 @@ private void setupGUI(int index) {
 	JPanel tsPanel = new JPanel();
 	tsPanel.setLayout(gb);
 
-	tsPanel.setBorder(BorderFactory.createTitledBorder("Time Series"));
+	tsPanel.setBorder(BorderFactory.createTitledBorder("Time series"));
 
-	__ts_streamflow_hist_monthly_JCheckBox = new JCheckBox(
-		"Streamflow (Historical Monthly)");
+	__ts_streamflow_hist_monthly_JCheckBox = new JCheckBox("Streamflow (Historical Monthly)");
 	__ts_streamflow_hist_monthly_JCheckBox.addItemListener(this);
 	if (!__dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_STREAMGAGE_HISTORICAL_TS_MONTHLY).hasData()) {
 		__ts_streamflow_hist_monthly_JCheckBox.setEnabled(false);
 	}
-	__ts_streamflow_hist_daily_JCheckBox = new JCheckBox(
-		"Streamflow (Historical Daily)");		
+	__ts_streamflow_hist_daily_JCheckBox = new JCheckBox("Streamflow (Historical Daily)");		
 	__ts_streamflow_hist_daily_JCheckBox.addItemListener(this);
 	if (!__dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_STREAMGAGE_HISTORICAL_TS_DAILY).hasData()) {
 		__ts_streamflow_hist_daily_JCheckBox.setEnabled(false);
 	}
 
-	// REVISIT SAM 2006-08-31
+	// TODO SAM 2006-08-31
 	// Need to enable - for now always disabled...
 	// This checkbox needs to be enabled when the daily identifier
-	// indicates using another time series to estimate the daily
-	// time series.
-	__ts_streamflow_est_hist_daily_JCheckBox = new JCheckBox(
-		"Streamflow (Estimated Historical Daily)");
+	// indicates using another time series to estimate the daily time series.
+	__ts_streamflow_est_hist_daily_JCheckBox = new JCheckBox("Streamflow (Estimated Historical Daily)");
 	__ts_streamflow_est_hist_daily_JCheckBox.addItemListener(this);
 	__ts_streamflow_est_hist_daily_JCheckBox.setEnabled ( false );
 
-	__ts_streamflow_base_monthly_JCheckBox = new JCheckBox(
-		"Streamflow (Baseflow Monthly)");
+	__ts_streamflow_base_monthly_JCheckBox = new JCheckBox("Streamflow (Baseflow Monthly)");
 	__ts_streamflow_base_monthly_JCheckBox.addItemListener(this);
 	if (!__dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_STREAMGAGE_BASEFLOW_TS_MONTHLY).hasData()) {
 		__ts_streamflow_base_monthly_JCheckBox.setEnabled(false);
 	}
-	__ts_streamflow_base_daily_JCheckBox = new JCheckBox(
-		"Streamflow (Baseflow Daily)");
+	__ts_streamflow_base_daily_JCheckBox = new JCheckBox("Streamflow (Baseflow Daily)");
 	__ts_streamflow_base_daily_JCheckBox.addItemListener(this);
 	if (!__dataset.getComponentForComponentType(	
 		StateMod_DataSet.COMP_STREAMGAGE_BASEFLOW_TS_DAILY).hasData()) {
 		__ts_streamflow_base_daily_JCheckBox.setEnabled(false);
 	}
-	// REVISIT SAM 2006-08-31
+	// TODO SAM 2006-08-31
 	// Need to enable - for now always disabled...
 	// This checkbox needs to be enabled when the daily identifier
 	// indicates using another time series to estimate the daily
-	// time series.  Need to support all the StateMod options for computing
-	// the time series.
-	__ts_streamflow_est_base_daily_JCheckBox = new JCheckBox(
-		"Streamflow (Estimated Baseflow Daily)");
+	// time series.  Need to support all the StateMod options for computing the time series.
+	__ts_streamflow_est_base_daily_JCheckBox = new JCheckBox("Streamflow (Estimated Baseflow Daily)");
 	__ts_streamflow_est_base_daily_JCheckBox.addItemListener(this);
 	__ts_streamflow_est_base_daily_JCheckBox.setEnabled ( false );
 
@@ -1133,8 +1063,7 @@ private void setupGUI(int index) {
 		1, 0, 0, 1,
 		GridBagConstraints.NONE, GridBagConstraints.CENTER);
 
-	// based on whether there are any components with data for the
-	// given checkboxes
+	// Based on whether there are any components with data for the given checkboxes
 	
 	//
 	// add search areas
@@ -1144,8 +1073,7 @@ private void setupGUI(int index) {
 	
 	JPanel searchPanel = new JPanel();
 	searchPanel.setLayout(gb);
-	searchPanel.setBorder(BorderFactory.createTitledBorder("Search above "
-		+ "list for:"));
+	searchPanel.setBorder(BorderFactory.createTitledBorder("Search above list for:"));
 	JGUIUtil.addComponent(searchPanel, __searchIDJRadioButton,
 		0, ++y, 1, 1, 0, 0,
 		5, 0, 0, 0,
@@ -1170,7 +1098,6 @@ private void setupGUI(int index) {
 		10, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	__findNext.addActionListener(this);
-
 
 	JGUIUtil.addComponent(p1, new JScrollPane(__worksheet),
 		0, 0, 1, 1, 1, 1,
@@ -1229,8 +1156,7 @@ private void setupGUI(int index) {
 	selectTableIndex(index);
 
 	if ( __dataset_wm != null ) {
-		__dataset_wm.setWindowOpen (
-		StateMod_DataSet_WindowManager.WINDOW_STREAMGAGE, this );
+		__dataset_wm.setWindowOpen ( StateMod_DataSet_WindowManager.WINDOW_STREAMGAGE, this );
 	}
 
 	pack();
@@ -1261,8 +1187,7 @@ Responds to Window closed events; does nothing.
 public void windowClosed(WindowEvent e) {}
 
 /**
-Responds to Window closing events; closes the window and marks it closed
-in StateMod_GUIUtil.
+Responds to Window closing events; closes the window and marks it closed in StateMod_GUIUtil.
 @param e the WindowEvent that happened.
 */
 public void windowClosing(WindowEvent e)
@@ -1271,22 +1196,20 @@ public void windowClosing(WindowEvent e)
 	StateMod_StreamGage s = null;
 	boolean changed = false;
 	for (int i = 0; i < size; i++) {
-		s = (StateMod_StreamGage)
-			__streamGageStationsVector.get(i);
+		s = (StateMod_StreamGage)__streamGageStationsVector.get(i);
 		if (!changed && s.changed()) {
 			changed = true;
 		}
 		s.acceptChanges();
 	}				
 	if (changed) {
-		__dataset.setDirty(StateMod_DataSet.COMP_STREAMGAGE_STATIONS,
-			true);
+		__dataset.setDirty(StateMod_DataSet.COMP_STREAMGAGE_STATIONS,true);
 	}	
 	if ( __dataset_wm != null ) {
-		__dataset_wm.closeWindow (
-		StateMod_DataSet_WindowManager.WINDOW_STREAMGAGE );
+		__dataset_wm.closeWindow (StateMod_DataSet_WindowManager.WINDOW_STREAMGAGE );
 	}
-	else {	JGUIUtil.close ( this );
+	else {
+		JGUIUtil.close ( this );
 	}
 }
 
@@ -1327,26 +1250,22 @@ private void setOriginalCrunidy(StateMod_StreamGage r, String crunidy) {
 }
 
 /**
-Called just before the worksheet is sorted.  Stores the index of the record
-that is selected.
+Called just before the worksheet is sorted.  Stores the index of the record that is selected.
 @param worksheet the worksheet being sorted.
 @param sort the type of sort being performed.
 */
 public void worksheetSortAboutToChange(JWorksheet worksheet, int sort) {
-	__sortSelectedRow = __worksheet.getOriginalRowNumber(
-		__worksheet.getSelectedRow());
+	__sortSelectedRow = __worksheet.getOriginalRowNumber(__worksheet.getSelectedRow());
 }
 
 /**
-Called when the worksheet is sorted.  Reselects the record that was selected
-prior to the sort.
+Called when the worksheet is sorted.  Reselects the record that was selected prior to the sort.
 @param worksheet the worksheet being sorted.
 @param sort the type of sort being performed.
 */
 public void worksheetSortChanged(JWorksheet worksheet, int sort) {
 	__worksheet.deselectAll();
-	__worksheet.selectRow(__worksheet.getSortedRowNumber(
-		__sortSelectedRow));
+	__worksheet.selectRow(__worksheet.getSortedRowNumber(__sortSelectedRow));
 }
 
-} // End StateMod_StreamGage_JFrame
+}

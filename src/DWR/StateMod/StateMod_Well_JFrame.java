@@ -148,46 +148,40 @@ WindowListener {
 Data types for the data type combo box.
 */
 private final String 
-	__DATA_TYPE_MONTHLY = 		"1 - Monthly",
-	__DATA_TYPE_ANNUAL = 		"2 - Annual",
-	__DATA_TYPE_ESTIMATE_ZERO = 	"5 - Zero",
-	__DATA_TYPE_DIRECT_DIV = 	"6 - Direct Diversion";
+	__DATA_TYPE_MONTHLY = "1 - Monthly",
+	__DATA_TYPE_ANNUAL = "2 - Annual",
+	__DATA_TYPE_ESTIMATE_ZERO = "5 - Zero",
+	__DATA_TYPE_DIRECT_DIV = "6 - Direct Diversion";
 
 /**
 Strings for the supply type combo box.
 */
 private final String
-	__SUPPLY_0 = "0 - Water right priorities determine diversion "
-		+ "(SW primary)",
+	__SUPPLY_0 = "0 - Water right priorities determine diversion (SW primary)",
 	__SUPPLY_ELSE = "Adjust well water rights by ...";
 
 /**
 Use type values
 */
 private final String
-	__USE_INBASIN1 = 	"1 - In Basin",
-	__USE_INBASIN2 = 	"2 - In Basin",
-	__USE_INBASIN3 = 	"3 - In Basin",
-	__USE_TRANSMOUNTAIN = 	"4 - Transmountain";
+	__USE_INBASIN1 = "1 - In Basin",
+	__USE_INBASIN2 = "2 - In Basin",
+	__USE_INBASIN3 = "3 - In Basin",
+	__USE_TRANSMOUNTAIN = "4 - Transmountain";
 
 /**
 Demsrc option strings
 */
 private final String
-	__DEMSRC_IRR_GIS = 		"1 - Irr. acr. from GIS DB",
-	__DEMSRC_IRR_TIA = 		"2 - Irr. acr. from structure file "
-					+ "(tia)",
-	__DEMSRC_IRR_MULT_GIS = 	"3 - Irr. acr. from GIS DB, primary"
-					+ " comp. served by mult. structs",
-	__DEMSRC_GIS_TIA = 		"4 - Same as 3 but data from struct."
-					+ " file (tia)",
-	__DEMSRC_IRR_MULT_GIS_SEC = 	"5 - Irr. acr. from GIS DB, second."
-					+ " comp. served by mult. structs",
-	__DEMSRC_MUNI_IND_XMTN = 	"6 - Municipal, industrial, or "
-					+ "transmountain structure",
-	__DEMSRC_CARRIER = 		"7 - Carrier structure",
-	__DEMSRC_USER = 		"8 - Acreage data provided by user",
-	__DEMSRC_UNKNOWN = 		"-999 -  Acreage data unknown";	
+	__DEMSRC_IRR_GIS = "1 - Irr. acr. from GIS DB",
+	__DEMSRC_IRR_TIA = "2 - Irr. acr. from structure file (tia)",
+	__DEMSRC_IRR_MULT_GIS = "3 - Irr. acr. from GIS DB, primary comp. served by mult. structs",
+	__DEMSRC_GIS_TIA = "4 - Same as 3 but data from struct. file (tia)",
+	__DEMSRC_IRR_MULT_GIS_SEC = "5 - Irr. acr. from GIS DB, second. comp. served by mult. structs",
+	__DEMSRC_MUNI_IND_XMTN = "6 - Municipal, industrial, or transmountain structure",
+	__DEMSRC_CARRIER = "7 - Carrier structure",
+	__DEMSRC_USER = "8 - Acreage data provided by user",
+	__DEMSRC_UNKNOWN = "-999 -  Acreage data unknown";	
 
 /**
 Button labels.
@@ -219,8 +213,7 @@ Button group for selecting what to search the jworksheet for.
 private ButtonGroup __searchCriteriaGroup;
 
 /**
-The index in __disables[] of textfields that should NEVER be made
-editable (e.g., ID fields).
+The index in __disables[] of textfields that should NEVER be made editable (e.g., ID fields).
 */
 private int[] __textUneditables;
 
@@ -267,8 +260,7 @@ private JCheckBox
 	__demandsEstDailyTS;
 
 /**
-Array of JComponents that should be disabled when nothing is selected 
-from the list.
+Array of JComponents that should be disabled when nothing is selected from the list.
 */
 private JComponent[] __disables;
 
@@ -299,9 +291,9 @@ GUI data radio buttons for selecting among efficiencies.
 private JRadioButton 
 	__effConstant,
 	__effMonthly;
+
 /**
-Radio buttons for selecting the field on which to search through the
-JWorksheet.
+Radio buttons for selecting the field on which to search through the JWorksheet.
 */
 private JRadioButton
 	__searchIDJRadioButton,
@@ -354,20 +346,17 @@ DataSetComponent containing well data.
 private DataSetComponent __wellComponent;
 
 /**
-Vector of wells data in the DataSetComponent.
+List of wells data in the DataSetComponent.
 */
 private List __wellsVector;
 
 /**
 Constructor.
 @param dataset dataset containing the well data
-@param dataset_wm the dataset window manager or null if the data set windows
-are not being managed.
+@param dataset_wm the dataset window manager or null if the data set windows are not being managed.
 @param editable whether the gui is editable or not
 */
-public StateMod_Well_JFrame (	StateMod_DataSet dataset,
-				StateMod_DataSet_WindowManager dataset_wm,
-				boolean editable)
+public StateMod_Well_JFrame ( StateMod_DataSet dataset, StateMod_DataSet_WindowManager dataset_wm, boolean editable)
 {	
 	StateMod_GUIUtil.setTitle(this, dataset, "Wells", null);
 	JGUIUtil.setIcon(this, JGUIUtil.getIconImage());	
@@ -375,8 +364,7 @@ public StateMod_Well_JFrame (	StateMod_DataSet dataset,
 
 	__dataset = dataset;
 	__dataset_wm = dataset_wm;
-	__wellComponent = __dataset.getComponentForComponentType(
-		StateMod_DataSet.COMP_WELL_STATIONS);
+	__wellComponent = __dataset.getComponentForComponentType(StateMod_DataSet.COMP_WELL_STATIONS);
 	__wellsVector = (List)__wellComponent.getData();
 
 	int size = __wellsVector.size();
@@ -394,22 +382,19 @@ public StateMod_Well_JFrame (	StateMod_DataSet dataset,
 /**
 Constructor.
 @param dataset dataset containing the well data.
-@param dataset_wm the dataset window manager or null if the data set windows
-are not being managed.
+@param dataset_wm the dataset window manager or null if the data set windows are not being managed.
 @param well the well to select from the list.
 @param editable whether the data are editable or not.
 */
-public StateMod_Well_JFrame (	StateMod_DataSet dataset,
-				StateMod_DataSet_WindowManager dataset_wm,
-				StateMod_Well well, boolean editable )
+public StateMod_Well_JFrame ( StateMod_DataSet dataset, StateMod_DataSet_WindowManager dataset_wm,
+		StateMod_Well well, boolean editable )
 {	JGUIUtil.setIcon(this, JGUIUtil.getIconImage());	
 	StateMod_GUIUtil.setTitle(this, dataset, "Wells", null);
 	__currentWellIndex = -1;
 
 	__dataset = dataset;
 	__dataset_wm = dataset_wm;
-	__wellComponent = __dataset.getComponentForComponentType(
-		StateMod_DataSet.COMP_WELL_STATIONS);
+	__wellComponent = __dataset.getComponentForComponentType(StateMod_DataSet.COMP_WELL_STATIONS);
 	__wellsVector = (List)__wellComponent.getData();
 
 	int size = __wellsVector.size();
@@ -442,7 +427,7 @@ public void actionPerformed(ActionEvent e) {
 		setConstantEff(__currentWellIndex);
 	}
 	if (action.equals(__BUTTON_HELP)) {
-		// REVISIT HELP (JTS - 2003-06-10
+		// TODO HELP (JTS - 2003-06-10
 	}
 	else if (action.equals(__BUTTON_CLOSE)) {
 		saveCurrentRecord();
@@ -462,10 +447,10 @@ public void actionPerformed(ActionEvent e) {
 		}
 		
 		if ( __dataset_wm != null ) {
-			__dataset_wm.closeWindow (
-			StateMod_DataSet_WindowManager.WINDOW_WELL );
+			__dataset_wm.closeWindow ( StateMod_DataSet_WindowManager.WINDOW_WELL );
 		}
-		else {	JGUIUtil.close ( this );
+		else {
+			JGUIUtil.close ( this );
 		}
 	}
 	else if (action.equals(__BUTTON_APPLY)) {
@@ -493,15 +478,14 @@ public void actionPerformed(ActionEvent e) {
 		}
 
 		if ( __dataset_wm != null ) {
-			__dataset_wm.closeWindow (
-			StateMod_DataSet_WindowManager.WINDOW_WELL );
+			__dataset_wm.closeWindow ( StateMod_DataSet_WindowManager.WINDOW_WELL );
 		}
-		else {	JGUIUtil.close ( this );
+		else {
+			JGUIUtil.close ( this );
 		}
 	}
 	// Time series buttons...
-	else if ( (e.getSource() == __graph_JButton) 
-		|| (e.getSource() == __table_JButton)
+	else if ( (e.getSource() == __graph_JButton) || (e.getSource() == __table_JButton)
 		|| (e.getSource() == __summary_JButton) ) {
 		displayTSViewJFrame(e.getSource());
 	}		
@@ -532,34 +516,27 @@ public void actionPerformed(ActionEvent e) {
 	}
 	else {
 		if (__currentWellIndex == -1) {
-			new ResponseJDialog(this, "You must first select a "
-				+ "well from the list.",
-				ResponseJDialog.OK);
+			new ResponseJDialog(this, "You must first select a well from the list.", ResponseJDialog.OK);
 			return;
 		}
 		// set placeholder to current well
-		StateMod_Well well = (StateMod_Well)
-			__wellsVector.get(__currentWellIndex);
+		StateMod_Well well = (StateMod_Well)__wellsVector.get(__currentWellIndex);
 
 		// spreadsheet requests ...
 		if (action.equals(__BUTTON_WATER_RIGHTS)) {
-			new StateMod_Well_Right_JFrame(
-				__dataset, well,__editable);
+			new StateMod_Well_Right_JFrame(	__dataset, well,__editable);
 		}
 		else if (action.equals(__BUTTON_RETURN_FLOW)) {
-			new StateMod_Well_ReturnFlow_JFrame(
-				__dataset, well, __editable);
+			new StateMod_Well_ReturnFlow_JFrame(__dataset, well, __editable);
 		}
 		else if (action.equals(__BUTTON_DEPLETION)) {
-			new StateMod_Well_Depletion_JFrame(
-				__dataset, well, __editable);
+			new StateMod_Well_Depletion_JFrame( __dataset, well, __editable);
 		}
 	}
 }
 
 /**
-Checks the text fields for validity before they are saved back into the
-data object.
+Checks the text fields for validity before they are saved back into the data object.
 @return true if the text fields are okay, false if not.
 */
 private boolean checkInput() {
@@ -568,8 +545,7 @@ private boolean checkInput() {
 
 	// for each field, check if it contains valid input.  If not,
 	// create a string of the format "fieldname -- reason why it
-	// is not correct" and add it to the errors vector.  also
-	// increment error count
+	// is not correct" and add it to the errors vector.  also increment error count
 	
 	if (errorCount == 0) {
 		return true;
@@ -579,13 +555,11 @@ private boolean checkInput() {
 	if (errorCount > 1) {
 		plural = "s were ";
 	}
-	String label = "The following error" + plural + "encountered "
-		+ "trying to save the record:\n";
+	String label = "The following error" + plural + " encountered trying to save the record:\n";
 	for (int i = 0; i < errorCount; i++) {
 		label += errors.get(i) + "\n";
 	}
-	new ResponseJDialog(this, 
-		"Errors encountered", label, ResponseJDialog.OK);
+	new ResponseJDialog(this, "Errors encountered", label, ResponseJDialog.OK);
 	return false;
 }
 
@@ -597,19 +571,12 @@ private void checkTimeSeriesButtonsStates() {
 	boolean enabled = false;
 
 	if (
-		(__wellPumpMonthlyTS.isSelected()
-			&& __wellPumpMonthlyTS.isEnabled())
-		|| (__wellPumpDailyTS.isSelected()
-			&& __wellPumpDailyTS.isEnabled())
-		|| (__wellPumpEstDailyTS.isSelected()
-			&& __wellPumpEstDailyTS.isEnabled())
-		|| (__demandsMonthlyTS.isSelected()
-			&& __demandsMonthlyTS.isEnabled())
-		|| (__demandsDailyTS.isSelected()
-			&& __demandsDailyTS.isEnabled())
-		|| (__demandsEstDailyTS.isSelected()
-			&& __demandsEstDailyTS.isEnabled())
-	) {
+		(__wellPumpMonthlyTS.isSelected() && __wellPumpMonthlyTS.isEnabled())
+		|| (__wellPumpDailyTS.isSelected() && __wellPumpDailyTS.isEnabled())
+		|| (__wellPumpEstDailyTS.isSelected() && __wellPumpEstDailyTS.isEnabled())
+		|| (__demandsMonthlyTS.isSelected() && __demandsMonthlyTS.isEnabled())
+		|| (__demandsDailyTS.isSelected() && __demandsDailyTS.isEnabled())
+		|| (__demandsEstDailyTS.isSelected() && __demandsEstDailyTS.isEnabled()) ) {
 		enabled = true;
 	}
 	
@@ -638,12 +605,10 @@ private void displayTSViewJFrame(Object o)
 		display_props.set("InitialView", "Summary");
 	}
 
-	StateMod_Well well = (StateMod_Well)
-		__wellsVector.get(__currentWellIndex);
+	StateMod_Well well = (StateMod_Well)__wellsVector.get(__currentWellIndex);
 
 	// display_props.set("HelpKey", "TSTool.ExportMenu");
-	display_props.set("TSViewTitleString",
-		StateMod_Util.createDataLabel(well,true) + " Time Series");
+	display_props.set("TSViewTitleString", StateMod_Util.createDataLabel(well,true) + " Time Series");
 	display_props.set("DisplayFont", "Courier");
 	display_props.set("DisplaySize", "11");
 	display_props.set("PrintFont", "Courier");
@@ -660,66 +625,56 @@ private void displayTSViewJFrame(Object o)
 	int its = 0;
 	TS ts = null;
 
-	if (	(__wellPumpMonthlyTS.isSelected() &&
-		(well.getPumpingMonthTS() != null) ) ||
-		(__demandsMonthlyTS.isSelected() &&
-		(well.getDemandMonthTS() != null) ) ) {
+	if ( (__wellPumpMonthlyTS.isSelected() && (well.getPumpingMonthTS() != null) ) ||
+		(__demandsMonthlyTS.isSelected() && (well.getDemandMonthTS() != null) ) ) {
 		// Do the monthly graph...
 		++sub;
 		its = 0;
 		props.set ( "SubProduct " + sub + ".GraphType=Line" );
 		props.set ( "SubProduct " + sub +
-			".SubTitleString=Monthly Data for Well "
-			+ well.getID() + " (" + well.getName() + ")" );
+			".SubTitleString=Monthly Data for Well " + well.getID() + " (" + well.getName() + ")" );
 		props.set ( "SubProduct " + sub + ".SubTitleFontSize=12" );
 		ts = well.getPumpingMonthTS();
 		if ( ts != null ) {
-			props.set ( "Data " + sub + "." + (++its) +
-				".TSID=" + ts.getIdentifierString() );
+			props.set ( "Data " + sub + "." + (++its) + ".TSID=" + ts.getIdentifierString() );
 			tslist.add ( ts );
 		}
 		ts = well.getDemandMonthTS();
 		if ( ts != null ) {
-			props.set ( "Data " + sub + "." + (++its) +
-				".TSID=" + ts.getIdentifierString() );
+			props.set ( "Data " + sub + "." + (++its) + ".TSID=" + ts.getIdentifierString() );
 			tslist.add ( ts );
 		}
 	}
 
-	// REVISIT - need to add estimated daily demands and estimated
-	// historical...
-	if (	(__wellPumpDailyTS.isSelected() &&
-		(well.getPumpingDayTS() != null) ) ||
-		(__demandsDailyTS.isSelected() &&
-		(well.getDemandDayTS() != null) ) ) {
+	// TODO - need to add estimated daily demands and estimated historical...
+	if ( (__wellPumpDailyTS.isSelected() && (well.getPumpingDayTS() != null) ) ||
+		(__demandsDailyTS.isSelected() && (well.getDemandDayTS() != null) ) ) {
 		// Do the daily graph...
 		++sub;
 		its = 0;
 		props.set ( "SubProduct " + sub + ".GraphType=Line" );
-		props.set ( "SubProduct " + sub +
-			".SubTitleString=Daily Data for Well "
+		props.set ( "SubProduct " + sub + ".SubTitleString=Daily Data for Well "
 			+ well.getID() + " (" + well.getName() + ")" );
 		props.set ( "SubProduct " + sub + ".SubTitleFontSize=12" );
 		ts = well.getPumpingDayTS();
 		if ( ts != null ) {
-			props.set ( "Data " + sub + "." + (++its) +
-				".TSID=" + ts.getIdentifierString() );
+			props.set ( "Data " + sub + "." + (++its) + ".TSID=" + ts.getIdentifierString() );
 			tslist.add ( ts );
 		}
 		ts = well.getDemandDayTS();
 		if ( ts != null ) {
-			props.set ( "Data " + sub + "." + (++its) +
-				".TSID=" + ts.getIdentifierString() );
+			props.set ( "Data " + sub + "." + (++its) + ".TSID=" + ts.getIdentifierString() );
 			tslist.add ( ts );
 		}
 	}
 	
-	try {	TSProduct tsproduct = new TSProduct ( props, display_props );
+	try {
+		TSProduct tsproduct = new TSProduct ( props, display_props );
 		tsproduct.setTSList ( tslist );
 		new TSViewJFrame ( tsproduct );
 	}
 	catch (Exception e) {
-		Message.printWarning(1,routine,"Error displaying time series.");
+		Message.printWarning(1,routine,"Error displaying time series (" + e + " ).");
 		Message.printWarning(2, routine, e);
 	}
 }
@@ -775,8 +730,7 @@ throws Throwable {
 
 /**
 Initializes the arrays that are used when items are selected and deselected.
-This should be called from setupGUI() before the a call is made to 
-selectTableIndex().
+This should be called from setupGUI() before the a call is made to selectTableIndex().
 */
 private void initializeDisables() {
 	__disables = new JComponent[39];
@@ -831,8 +785,7 @@ Responds to key pressed events; does nothing.
 public void keyPressed(KeyEvent e) {}
 
 /**
-Responds to key released events; calls 'processTableSelection' with the 
-newly-selected index in the table.
+Responds to key released events; calls 'processTableSelection' with the newly-selected index in the table.
 @param e the KeyEvent that happened.
 */
 public void keyReleased(KeyEvent e) {
@@ -867,8 +820,7 @@ Responds to mouse pressed events; does nothing.
 public void mousePressed(MouseEvent e) {}
 
 /**
-Responds to mouse released events; calls 'processTableSelection' with the 
-newly-selected index in the table.
+Responds to mouse released events; calls 'processTableSelection' with the newly-selected index in the table.
 @param e the MouseEvent that happened.
 */
 public void mouseReleased(MouseEvent e) {
@@ -882,13 +834,9 @@ private void populateWellDailyID() {
 	__dailyIDComboBox.removeAllItems();
 
 	List idNameVector = StateMod_Util.createDataList(__wellsVector,true);
-	idNameVector.add( 0,
-		"0 - Use average daily value from monthly time series");
-	idNameVector.add( 1,
-		"3 - Daily time series are supplied");
-	idNameVector.add( 2,
-		"4 - Daily time series interpolated from midpoints of "
-		+ "monthly data");
+	idNameVector.add( 0, "0 - Use average daily value from monthly time series");
+	idNameVector.add( 1, "3 - Daily time series are supplied");
+	idNameVector.add( 2, "4 - Daily time series interpolated from midpoints of monthly data");
 
 	DefaultComboBoxModel dcbm = new DefaultComboBoxModel(new Vector(idNameVector));
 	__dailyIDComboBox.setModel(dcbm);
@@ -897,8 +845,7 @@ private void populateWellDailyID() {
 /**
 Processes a table selection (either via a mouse press or programmatically 
 from selectTableIndex() by writing the old data back to the data set component
-and getting the next selection's data out of the data and displaying it 
-on the form.
+and getting the next selection's data out of the data and displaying it on the form.
 @param index the index of the reservoir to display on the form.
 */
 private void processTableSelection(int index) {
@@ -914,12 +861,10 @@ private void processTableSelection(int index) {
 		return;
 	}
 
-	JGUIUtil.enableComponents(__disables, __textUneditables,
-		__editable);
+	JGUIUtil.enableComponents(__disables, __textUneditables, __editable);
 	checkTimeSeriesButtonsStates();
 
-	StateMod_Well well = (StateMod_Well)
-		__wellsVector.get(__currentWellIndex);
+	StateMod_Well well = (StateMod_Well)__wellsVector.get(__currentWellIndex);
 
 	__stationIDJTextField.setText(well.getID());
 	__nameJTextField.setText(well.getName());
@@ -980,33 +925,38 @@ private void processTableSelection(int index) {
 	if ( well.getPumpingMonthTS() != null ) {
 		__wellPumpMonthlyTS.setEnabled(true);
 	}
-	else {	__wellPumpMonthlyTS.setEnabled(false);
+	else {
+		__wellPumpMonthlyTS.setEnabled(false);
 	}
 
 	if ( well.getPumpingDayTS() != null ) {
 		__wellPumpDailyTS.setEnabled(true);
 	}
-	else {	__wellPumpDailyTS.setEnabled(false);
+	else {
+		__wellPumpDailyTS.setEnabled(false);
 	}
 
 	if ( well.getDemandMonthTS() != null ) {
 		__demandsMonthlyTS.setEnabled(true);
 	}
-	else {	__demandsMonthlyTS.setEnabled(false);
+	else {
+		__demandsMonthlyTS.setEnabled(false);
 	}
 
 	if ( well.getDemandDayTS() != null ) {
 		__demandsDailyTS.setEnabled(true);
 	}
-	else {	__demandsDailyTS.setEnabled(false);
+	else {
+		__demandsDailyTS.setEnabled(false);
 	}
 
-	/* REVISIT - need to check daily ID and verify that appropriate time
+	/* TODO - need to check daily ID and verify that appropriate time
 	series are available to estimate...
 	if ( div.getDemandDayTS() != null ) {
 		__demandsEstDailyTS.setEnabled(true);
 	}
-	else {	__demandsEstDailyTS.setEnabled(false);
+	else {
+		__demandsEstDailyTS.setEnabled(false);
 	}
 	*/
 	__demandsEstDailyTS.setEnabled(false);
@@ -1028,12 +978,10 @@ private void processTableSelection(int index) {
 		__dataTypeSwitch_SimpleJComboBox.select(__DATA_TYPE_ANNUAL);
 	}
 	else if (idvcomw == 5) {
-		__dataTypeSwitch_SimpleJComboBox.select(
-			__DATA_TYPE_ESTIMATE_ZERO);
+		__dataTypeSwitch_SimpleJComboBox.select(__DATA_TYPE_ESTIMATE_ZERO);
 	}
 	else if (idvcomw == 6) {
-		__dataTypeSwitch_SimpleJComboBox.select(
-			__DATA_TYPE_DIRECT_DIV);
+		__dataTypeSwitch_SimpleJComboBox.select(__DATA_TYPE_DIRECT_DIV);
 	}
 
 	// effeciency switch
@@ -1056,18 +1004,14 @@ private void processTableSelection(int index) {
 	String c = well.getCdividyw();
 	if (c.trim().equals("")) {
 		if (!__dailyIDComboBox.setSelectedPrefixItem(c)) {
-			Message.printWarning(2, routine, "No matching Cdividyw"
-				+ " value to '" + c + "' found "
-				+ "in combo box.");
+			Message.printWarning(2, routine, "No matching Cdividyw  value to '" + c + "' found " + "in combo box.");
 			__dailyIDComboBox.select(0);
 		}
 		setOriginalCdividyw(well, "" + c);
 	}
 	else {
 		if (!__dailyIDComboBox.setSelectedPrefixItem(c)) {
-			Message.printWarning(2, routine, "No Cdividyw value "
-				+ " matching '" + c + "' found "
-				+ "in combo box.");
+			Message.printWarning(2, routine, "No Cdividyw value matching '" + c + "' found in combo box.");
 			__dailyIDComboBox.select(0);
 		}		
 	}	
@@ -1082,30 +1026,26 @@ private void processTableSelection(int index) {
 		__supplyComboBox.select(__SUPPLY_ELSE);
 		__supplyJTextField.setEditable(true);
 		__supplyJTextField.setEnabled(true);
-		StateMod_GUIUtil.checkAndSet(well.getPrimary(), 
-			__supplyJTextField);		
+		StateMod_GUIUtil.checkAndSet(well.getPrimary(), __supplyJTextField);		
 	}
 	
 	if (!__associatedDiversionsComboBox.setSelectedPrefixItem(
 		well.getIdvcow2())) {
-		Message.printWarning(2, routine, "No Idvcow2 value matching "
-			+ "'" + well.getIdvcow2() + "' found in combo box.");
+		Message.printWarning(2, routine, "No Idvcow2 value matching '" + well.getIdvcow2() + "' found in combo box.");
 		__associatedDiversionsComboBox.add(well.getIdvcow2());
 		__associatedDiversionsComboBox.select(well.getIdvcow2());
 	}
 }
 
 /**
-Saves the prior record selected in the table; called when moving to a new 
-record by a table selection.
+Saves the prior record selected in the table; called when moving to a new record by a table selection.
 */
 private void saveLastRecord() {
 	saveInformation(__lastWellIndex);
 }
 
 /**
-Saves the current record selected in the table; called when the window is closed
-or minimized or apply is pressed.
+Saves the current record selected in the table; called when the window is closed or minimized or apply is pressed.
 */
 private void saveCurrentRecord() {	
 	saveInformation(__currentWellIndex);
@@ -1114,8 +1054,7 @@ private void saveCurrentRecord() {
 /**
 Saves the information associated with the currently-selected well.
 The user doesn't need to hit the return key for the gui to recognize changes.
-The info is saved each time the user selects a differents tation or pressed
-the close button.
+The info is saved each time the user selects a different station or pressed the close button.
 */
 private void saveInformation(int record) {
 	if (!__editable || record == -1) {
@@ -1195,8 +1134,7 @@ private void saveInformation(int record) {
 		well.setCdividyw(cdividyw);
 	}
 
-	List dailyWellDemandTSVector = 
-		(List)(__dataset.getComponentForComponentType(
+	List dailyWellDemandTSVector = (List)(__dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_WELL_DEMAND_TS_DAILY).getData());
 	well.connectDemandDayTS(dailyWellDemandTSVector);
 
@@ -1223,7 +1161,7 @@ private void saveEfficiencies(StateMod_Well well) {
 		for (int i = 0; i < 12; i++) {
 			well.setDiveff(i, __monthlyEff[i].getText());
 		}
-//		well.setDivefcw(-1);
+		//well.setDivefcw(-1);
 	}
 	else {
 		well.setDivefcw(__monthlyEff[0].getText());
@@ -1277,11 +1215,10 @@ void setMonthlyEff(int record) {
 	if (efc > 0) {
 		efc = -1 * efc;
 	}
-//	well.setDivefcw(efc);
+	//well.setDivefcw(efc);
 
 	for (int i = 0; i < 12; i++) {
-		StateMod_GUIUtil.checkAndSet(well.getDiveff(i), 
-			__monthlyEff[i]);
+		StateMod_GUIUtil.checkAndSet(well.getDiveff(i), __monthlyEff[i]);
 		if (i > 0) {
 			__monthlyEff[i].setEditable(true);
 		}			
@@ -1303,7 +1240,7 @@ void setConstantEff(int record) {
 	if (efc < 0) {
 		efc = -1 * efc;
 	}
-//	well.setDivefcw(efc);
+	// well.setDivefcw(efc);
 
 	for (int i = 0; i < 12; i++) {
 		StateMod_GUIUtil.checkAndSet(efc, __monthlyEff[i]);
@@ -1315,8 +1252,7 @@ void setConstantEff(int record) {
 }
 
 /**
-Selects the desired ID in the table and displays the appropriate data
-in the remainder of the window.
+Selects the desired ID in the table and displays the appropriate data in the remainder of the window.
 @param id the identifier to select in the list.
 */
 public void selectID(String id) {
@@ -1332,8 +1268,7 @@ public void selectID(String id) {
 }
 
 /**
-Selects the desired index in the table, but also displays the appropriate data
-in the remainder of the window.
+Selects the desired index in the table, but also displays the appropriate data in the remainder of the window.
 @param index the index to select in the list.
 */
 public void selectTableIndex(int index) {
@@ -1378,8 +1313,7 @@ private void setupGUI(int index) {
 	__supplyJTextField = new JTextField(8);
 
 	__associatedDiversionsComboBox = new SimpleJComboBox();
-	__associatedDiversionsComboBox.add("N/A - Not associated with "
-		+ "diversion");
+	__associatedDiversionsComboBox.add("N/A - Not associated with diversion");
 	
 	List diversions = (List)(__dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_DIVERSION_STATIONS).getData());
@@ -1388,8 +1322,7 @@ private void setupGUI(int index) {
 	__associatedDiversionsComboBox.setModel(dcbm);
 	/*
 	for (int i = 0; i < size; i++) {
-		__associatedDiversionsComboBox.add(
-			(String)diversions.elementAt(i));
+		__associatedDiversionsComboBox.add(	(String)diversions.elementAt(i));
 	}
 	*/
 
@@ -1469,8 +1402,7 @@ private void setupGUI(int index) {
 
 	int y;
 
-	PropList p = 
-		new PropList("StateMod_Well_JFrame.JWorksheet");
+	PropList p = new PropList("StateMod_Well_JFrame.JWorksheet");
 	p.add("JWorksheet.ShowPopupMenu=true");
 	p.add("JWorksheet.AllowCopy=true");
 	p.add("JWorksheet.SelectionMode=SingleRowSelection");
@@ -1478,10 +1410,8 @@ private void setupGUI(int index) {
 	int[] widths = null;
 	JScrollWorksheet jsw = null;
 	try {
-		StateMod_Well_TableModel tmw = new
-			StateMod_Well_TableModel(__wellsVector, __editable);
-		StateMod_Well_CellRenderer crw = new
-			StateMod_Well_CellRenderer(tmw);
+		StateMod_Well_TableModel tmw = new StateMod_Well_TableModel(__wellsVector, __editable);
+		StateMod_Well_CellRenderer crw = new StateMod_Well_CellRenderer(tmw);
 
 		jsw = new JScrollWorksheet(crw, tmw, p);
 		__worksheet = jsw.getJWorksheet();
@@ -1525,7 +1455,7 @@ private void setupGUI(int index) {
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	
 	y++;
-	JGUIUtil.addComponent(p3, new JLabel("River Node ID:"),
+	JGUIUtil.addComponent(p3, new JLabel("River node ID:"),
 		0, y, 1, 1, 0, 0, 
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -1535,14 +1465,14 @@ private void setupGUI(int index) {
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	
 	y++;
-	JGUIUtil.addComponent(p3, new JLabel("Daily Data ID:"),
+	JGUIUtil.addComponent(p3, new JLabel("Daily data ID:"),
 		0, y, 1, 1, 0, 0, 
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(p3, __dailyIDComboBox,
 		1, y, 1, 1, 1, 1, 
 		1, 0, 0, 1,
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 	
 	y++;
 	JGUIUtil.addComponent(p3, new JLabel("Capacity (CFS):"),
@@ -1555,14 +1485,14 @@ private void setupGUI(int index) {
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	
 	y++;
-	JGUIUtil.addComponent(p3, new JLabel("On/Off Switch:"),
+	JGUIUtil.addComponent(p3, new JLabel("On/off switch:"),
 		0, y, 1, 1, 0, 0, 
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(p3, __wellSwitch_SimpleJComboBox,
 		1, y, 1, 1, 1, 1, 
 		1, 0, 0, 1,
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 	y++;
 
 	JPanel supplyPanel = new JPanel();
@@ -1574,45 +1504,45 @@ private void setupGUI(int index) {
 	JGUIUtil.addComponent(supplyPanel, __supplyJTextField,
 		1, 0, 1, 1, 0, 0,
 		0, 1, 0, 0,
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 	
-	JGUIUtil.addComponent(p3, new JLabel("Senior Supply:"),
+	JGUIUtil.addComponent(p3, new JLabel("Senior supply:"),
 		0, y, 1, 1, 0, 0,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(p3, supplyPanel,
 		1, y, 1, 1, 1, 1, 
 		1, 0, 0, 1, 
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 	y++;
-	JGUIUtil.addComponent(p3, new JLabel("Associated Diversion:"),
+	JGUIUtil.addComponent(p3, new JLabel("Associated diversion:"),
 		0, y, 1, 1, 0, 0, 
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(p3, __associatedDiversionsComboBox,
 		1, y, 1, 1, 1, 1, 
 		1, 0, 0, 1,
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
 	y++;
-	JGUIUtil.addComponent(p3, new JLabel("Use Type:"),
+	JGUIUtil.addComponent(p3, new JLabel("Use type:"),
 		0, y, 1, 1, 0, 0, 
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(p3, __useTypeSimpleJComboBox,
 		1, y, 1, 1, 1, 1, 
 		1, 0, 0, 1,
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 	
 	y++;
-	JGUIUtil.addComponent(p3, new JLabel("Demand Source:"),
+	JGUIUtil.addComponent(p3, new JLabel("Demand source:"),
 		0, y, 1, 1, 0, 0, 
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(p3, __demandSrcCodeSimpleJComboBox,
 		1, y, 1, 1, 1, 1, 
 		1, 0, 0, 1,
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
 	y++;
 	JGUIUtil.addComponent(p3, new JLabel("Data type switch:"),
@@ -1622,7 +1552,7 @@ private void setupGUI(int index) {
 	JGUIUtil.addComponent(p3, __dataTypeSwitch_SimpleJComboBox,
 		1, y, 1, 1, 1, 1, 
 		1, 0, 0, 1,
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 	y++;
 	JGUIUtil.addComponent(p3, new JLabel("Irrigated acreage:"),
 		0, y, 1, 1, 0, 0, 
@@ -1678,15 +1608,13 @@ private void setupGUI(int index) {
 		2, 0, 2, 4, 0, 0, 
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
-	eff_panel.setBorder(BorderFactory.createTitledBorder(
-		"System Efficiency"));
+	eff_panel.setBorder(BorderFactory.createTitledBorder("System Efficiency"));
 
 	// add search areas
 	y = 7;
 	JPanel searchPanel = new JPanel();
 	searchPanel.setLayout(gb);
-	searchPanel.setBorder(BorderFactory.createTitledBorder(
-		"Search above list for:     "));
+	searchPanel.setBorder(BorderFactory.createTitledBorder("Search above list for:     "));
 		
 	JGUIUtil.addComponent(left_panel, searchPanel,
 		0, y, 4, 1, 0, 0, 
@@ -1732,8 +1660,7 @@ private void setupGUI(int index) {
 
 	JPanel subformsPanel = new JPanel();
 	subformsPanel.setLayout(gb);
-	subformsPanel.setBorder(BorderFactory.createTitledBorder(
-		"Related Data"));
+	subformsPanel.setBorder(BorderFactory.createTitledBorder("Related Data"));
 	JPanel tsPanel = new JPanel();
 	tsPanel.setLayout(gb);
 	tsPanel.setBorder(BorderFactory.createTitledBorder("Time Series"));
@@ -1744,8 +1671,7 @@ private void setupGUI(int index) {
 	__wellPumpMonthlyTS.addItemListener(this);
 	__wellPumpDailyTS = new JCheckBox("Well Pumping (Historical Daily)");
 	__wellPumpDailyTS.addItemListener(this);
-	__wellPumpEstDailyTS = new JCheckBox(
-		"Well Pumping (Estimated Historical Daily)");
+	__wellPumpEstDailyTS = new JCheckBox("Well Pumping (Estimated Historical Daily)");
 	__wellPumpEstDailyTS.addItemListener(this);
 	__demandsMonthlyTS = new JCheckBox("Demands (Monthly)");
 	__demandsMonthlyTS.addItemListener(this);
@@ -1851,7 +1777,7 @@ private void setupGUI(int index) {
 		p6.add(__cancelJButton);
 	}
 	p6.add(__closeJButton);
-	// REVISIT SAM 2006-03-05
+	// TODO SAM 2006-03-05
 	// Comment out since help is not currently enabled.
 	//p6.add(__helpJButton);
 	JGUIUtil.addComponent(right_panel, p6,
@@ -1895,7 +1821,7 @@ private void setupGUI(int index) {
 		StateMod_DataSet_WindowManager.WINDOW_WELL, this );
 	}
 
-	// REVISIT TS (JTS - 2003-09-03)
+	// TODO TS (JTS - 2003-09-03)
 	// need code to disable the time series checkboxes:
 	/*
 	__wellPumpMonthlyTS,
@@ -1934,17 +1860,16 @@ Responds to Window closed events; does nothing.
 public void windowClosed(WindowEvent e) {}
 
 /**
-Responds to Window closing events; closes the window and marks it closed
-in StateMod_GUIUtil.
+Responds to Window closing events; closes the window and marks it closed in StateMod_GUIUtil.
 @param e the WindowEvent that happened.
 */
 public void windowClosing(WindowEvent e) {
 	saveCurrentRecord();
 	if ( __dataset_wm != null ) {
-		__dataset_wm.closeWindow (
-		StateMod_DataSet_WindowManager.WINDOW_WELL );
+		__dataset_wm.closeWindow ( StateMod_DataSet_WindowManager.WINDOW_WELL );
 	}
-	else {	JGUIUtil.close ( this );
+	else {
+		JGUIUtil.close ( this );
 	}
 }
 
