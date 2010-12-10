@@ -39,6 +39,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.List;
+import java.util.Vector;
 
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
@@ -232,20 +233,13 @@ private boolean saveData()
 	String newFilename0 = null;	// Used within path
 	String newFilename = null;
 	String oldFilename = null;
-	String [] comments = null;
+	List<String> comments = new Vector();
 	// TODO - add a checkbox to the display.
 	//if ( __add_revision_comments_JCheckBox.isSelected() ) {
+	comments.add("Modification to data made interactively by user with " + IOUtil.getProgramName() + " " 
+		+ IOUtil.getProgramVersion());
 	if (__updateCheckbox.isSelected()) {
-		comments = new String[2];
-	}
-	else {
-		comments = new String[1];
-	}
-	comments[0] = "Modification to data made interactively by user with " + IOUtil.getProgramName() + " " 
-		+ IOUtil.getProgramVersion();
-	
-	if (__updateCheckbox.isSelected()) {
-		comments[1] = "Updated by StateModGUI";
+		comments.add("Updated by StateModGUI");
 	}
 	//}
 	for (int i = 0; i < selectedRows.length; i++) {	
@@ -264,26 +258,8 @@ private boolean saveData()
 			}
 
 			if ( comp_type == StateMod_DataSet.COMP_RESPONSE ) {
-				boolean free_format = true;
-				if ( !__dataset.isFreeFormat() ) {
-					int response = new ResponseJDialog(this, "Save as free format?",
-					"The original response file was not free-format.\n" +
-					"The new free-format file is easier to maintain.\n" +
-					"Do you want to save the response file as free format (No to use fixed-format)?",
-					ResponseJDialog.YES | ResponseJDialog.NO | ResponseJDialog.CANCEL ).response();
-					if (response == ResponseJDialog.CANCEL){
-						// Go to next file in the loop...
-						continue;
-					}
-					if ( response == ResponseJDialog.NO ) {
-						free_format = false;
-					}
-				}
 				// TODO - need to track the original file name...
-				StateMod_DataSet.writeStateModFile (
-					__dataset, oldFilename, newFilename, comments, free_format );
-				// Now indicate whether the current data set is free format...
-				__dataset.setFreeFormat ( free_format );
+				StateMod_DataSet.writeStateModFile ( __dataset, oldFilename, newFilename, comments );
 				// Mark the component clean...
 				comp.setDirty ( false );
 			}
@@ -488,7 +464,7 @@ Responds to Window opening events; does nothing.
 */
 public void windowOpening(WindowEvent e) {}
 
-private void saveComponent(DataSetComponent comp, String oldFilename,String newFilename, String[] comments) 
+private void saveComponent(DataSetComponent comp, String oldFilename,String newFilename, List<String> comments) 
 throws Exception {
 	boolean daily = false;
 	int type = comp.getComponentType();
@@ -504,77 +480,64 @@ throws Exception {
 			break;
 		case StateMod_DataSet.COMP_DELAY_TABLES_DAILY:
 			StateMod_DelayTable.writeStateModFile(oldFilename,
-				newFilename, (List)data, StringUtil.toList(comments), __dataset.getInterv(), -1);
+				newFilename, (List)data, comments, __dataset.getInterv(), -1);
 			name = "Delay Tables Daily";
 			break;
 		case StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY:
 			StateMod_DelayTable.writeStateModFile(oldFilename,
-				newFilename, (List)data, StringUtil.toList(comments), __dataset.getInterv(), -1);
+				newFilename, (List)data, comments, __dataset.getInterv(), -1);
 			name = "Delay Tables Monthly";
 			break;
 		case StateMod_DataSet.COMP_DIVERSION_STATIONS:
-			StateMod_Diversion.writeStateModFile(oldFilename,
-				newFilename, (List)data, StringUtil.toList(comments), daily );
+			StateMod_Diversion.writeStateModFile(oldFilename, newFilename, (List)data, comments, daily );
 			name = "Diversion";
 			break;
 		case StateMod_DataSet.COMP_DIVERSION_RIGHTS:
-			StateMod_DiversionRight.writeStateModFile(oldFilename,
-				newFilename, (List)data, StringUtil.toList(comments), daily);
+			StateMod_DiversionRight.writeStateModFile(oldFilename, newFilename, (List)data, comments, daily);
 			name = "Diversion Rights";
 			break;
 		case StateMod_DataSet.COMP_INSTREAM_STATIONS:
-			StateMod_InstreamFlow.writeStateModFile(oldFilename,
-				newFilename, (List)data, StringUtil.toList(comments), daily);
+			StateMod_InstreamFlow.writeStateModFile(oldFilename, newFilename, (List)data, comments, daily);
 			name = "Instream";
 			break;
 		case StateMod_DataSet.COMP_INSTREAM_RIGHTS:
-			StateMod_InstreamFlowRight.writeStateModFile(
-				oldFilename, newFilename, (List)data, StringUtil.toList(comments) );
+			StateMod_InstreamFlowRight.writeStateModFile( oldFilename, newFilename, (List)data, comments );
 			name = "Instream Rights";
 			break;
 		case StateMod_DataSet.COMP_OPERATION_RIGHTS:
-			StateMod_OperationalRight.writeStateModFile(
-				oldFilename, newFilename, (List)data, comments);
+			StateMod_OperationalRight.writeStateModFile( oldFilename, newFilename, (List)data, comments);
 			name = "Operational Rights";
 			break;
 		case StateMod_DataSet.COMP_RESERVOIR_STATIONS:
-			StateMod_Reservoir.writeStateModFile(oldFilename, 
-				newFilename, (List)data, StringUtil.toList(comments), daily);
+			StateMod_Reservoir.writeStateModFile(oldFilename, newFilename, (List)data, comments, daily);
 			name = "Reservoir";
 			break;
 		case StateMod_DataSet.COMP_RESERVOIR_RIGHTS:
-			StateMod_ReservoirRight.writeStateModFile(oldFilename,
-				newFilename, (List)data, StringUtil.toList(comments));
+			StateMod_ReservoirRight.writeStateModFile(oldFilename, newFilename, (List)data, comments);
 			name = "Reservoir Rights";
 			break;
 		case StateMod_DataSet.COMP_RESPONSE:
-			StateMod_DataSet.writeStateModFile(__dataset,
-				oldFilename, newFilename, comments, true);
+			StateMod_DataSet.writeStateModFile(__dataset, oldFilename, newFilename, comments );
 			name = "Response";
 			break;
 		case StateMod_DataSet.COMP_RIVER_NETWORK:
-			StateMod_RiverNetworkNode.writeStateModFile(oldFilename,
-				newFilename, (List)data, StringUtil.toList(comments), true);
+			StateMod_RiverNetworkNode.writeStateModFile(oldFilename, newFilename, (List)data, comments, true);
 			name = "River Network";
 			break;
 		case StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS:
-			StateMod_StreamEstimate.writeStateModFile(oldFilename,
-				newFilename, (List)data, StringUtil.toList(comments), daily);
+			StateMod_StreamEstimate.writeStateModFile(oldFilename, newFilename, (List)data, comments, daily);
 			name = "Stream Estimate";
 			break;
 		case StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS:
-			StateMod_StreamEstimate_Coefficients.writeStateModFile(
-				oldFilename, newFilename, (List)data, StringUtil.toList(comments) );
+			StateMod_StreamEstimate_Coefficients.writeStateModFile( oldFilename, newFilename, (List)data, comments );
 			name = "Stream Estimate Coefficients";
 			break;
 		case StateMod_DataSet.COMP_STREAMGAGE_STATIONS:
-			StateMod_StreamGage.writeStateModFile(oldFilename,
-				newFilename, (List)data, StringUtil.toList(comments), daily);
+			StateMod_StreamGage.writeStateModFile(oldFilename, newFilename, (List)data, comments, daily);
 			name = "Streamgage Stations";
 			break;
 		case StateMod_DataSet.COMP_WELL_STATIONS:
-			StateMod_Well.writeStateModFile(oldFilename,
-				newFilename, (List)data, StringUtil.toList(comments));
+			StateMod_Well.writeStateModFile(oldFilename, newFilename, (List)data, comments);
 			name = "Well";
 			break;
 		case StateMod_DataSet.COMP_PLANS:
@@ -582,8 +545,7 @@ throws Exception {
 			name = "Plan";
 			break;
 		case StateMod_DataSet.COMP_WELL_RIGHTS:
-			StateMod_WellRight.writeStateModFile(oldFilename,
-				newFilename, (List)data, StringUtil.toList(comments), (PropList)null);
+			StateMod_WellRight.writeStateModFile(oldFilename, newFilename, (List)data, comments, (PropList)null);
 			name = "Well Rights";
 			break;
 
@@ -635,7 +597,7 @@ throws Exception {
 			}
 			
 			StateMod_TS.writeTimeSeriesList(oldFilename,
-				newFilename, StringUtil.toList(comments), (List)data, null, null, year, missing, precision);
+				newFilename, comments, (List)data, null, null, year, missing, precision);
 			name = "TS (" + type + ")";
 			break;
 
