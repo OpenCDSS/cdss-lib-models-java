@@ -101,6 +101,7 @@ import RTi.Util.GUI.SimpleJComboBox;
 import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
+import RTi.Util.String.StringUtil;
 
 /**
 This class is a gui for displaying and editing operational right data.
@@ -2089,7 +2090,7 @@ private void processTableSelection(int index) {
 
 	// rule type
 	int ityopr = opr.getItyopr();
-	if ( ityopr > 0 && ityopr <= StateMod_OperationalRight.MAX_KNOWN_TYPE ) {
+	if ( ityopr > 0 && ityopr <= StateMod_OperationalRight.MAX_HANDLED_TYPE ) {
 		__ruleTypeSwitch_JComboBox.select(ityopr);
 		if ( ityopr > StateMod_OperationalRight.MAX_HANDLED_TYPE) {
 			setMessageText ( "Rule type " + ityopr +
@@ -2359,7 +2360,7 @@ private void setupGUI(int index) {
 	}
 	
 	__ruleTypeSwitch_JComboBox = new SimpleJComboBox();
-	String[] options = StateMod_OperationalRight.NAMES;
+	String[] options = StringUtil.toArray(StateMod_OperationalRight_Metadata.getRightTypeNameList());
 	int num = options.length;
 	for (int i = 0; i < num; i++) {		
 		__ruleTypeSwitch_JComboBox.add("" + i + " - " + options[i]);

@@ -1,15 +1,3 @@
-// ----------------------------------------------------------------------------
-// StateMod_OperationalRight_Data_TableModel - Table model for displaying data
-//	for Operational Right-related tables
-// ----------------------------------------------------------------------------
-// Copyright:   See the COPYRIGHT file
-// ----------------------------------------------------------------------------
-// History:
-//
-// 2005-04-04	J. Thomas Sapienza, RTi	Initial version.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-// ----------------------------------------------------------------------------
-
 package DWR.StateMod;
 
 import java.util.List;
@@ -18,7 +6,7 @@ import java.util.Vector;
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 
 /**
-This class displays operational right data.
+Table model to display operational right data.
 */
 public class StateMod_OperationalRight_Data_TableModel 
 extends JWorksheet_AbstractRowTableModel {
@@ -26,30 +14,38 @@ extends JWorksheet_AbstractRowTableModel {
 /**
 Number of columns in the table model.
 */
-private final int __COLUMNS = 3;
+private final int __COLUMNS = 20;
 
 /**
 References to columns.
 */
 public final static int
-	COL_ID =		0,
-	COL_NAME =		1,
-	COL_STRUCTURE_ID =	2;
+	COL_ID = 0,
+	COL_NAME = 1,
+	COL_ADMINISTRATION_NUMBER = 2,
+	COL_MONTH_STR_SWITCH = 3,
+	COL_ONOFF_SWITCH = 4,
+	COL_DEST = 5,
+	COL_DEST_ACCOUNT = 6,
+	COL_SOURCE1 = 7,
+	COL_SOURCE1_ACCOUNT = 8,
+	COL_SOURCE2 = 9,
+	COL_SOURCE2_ACCOUNT = 10,
+	COL_RULE_TYPE = 11,
+	COL_REUSE_PLAN = 12,
+	COL_DIVERSION_TYPE = 13,
+	COL_LOSS = 14,
+	COL_LIMIT = 15,
+	COL_START_YEAR = 16,
+	COL_END_YEAR = 17,
+	COL_MONTHLY_SWITCH = 18,
+	COL_INTERVENING_STRUCTURES = 19;
+// TODO SAM 2010-12-13 Evaluate whether monthly switch and intervening structures should be separate columns
 
 /**
 Whether the gui data is editable or not.
 */
 private boolean __editable = false;
-
-/**
-The parent diversion under which the right and return flow is stored.
-*/
-private StateMod_OperationalRight __parentOperationalRight = null;
-
-/**
-A 10-element Vector of an Operational Right's intern data.
-*/
-private List __interns = null;
 
 /**
 Constructor.  This builds the Model for displaying the diversion data.
@@ -74,9 +70,26 @@ Returns the class of the data stored in a given column.
 */
 public Class getColumnClass (int columnIndex) {
 	switch (columnIndex) {
-		case COL_ID:		return String.class;
-		case COL_NAME:		return String.class;
-		case COL_STRUCTURE_ID:	return String.class;
+		case COL_ID: return String.class;
+		case COL_NAME: return String.class;
+		case COL_ADMINISTRATION_NUMBER: return String.class;
+		case COL_MONTH_STR_SWITCH: return Integer.class;
+		case COL_ONOFF_SWITCH: return Integer.class;
+		case COL_DEST: return String.class;
+		case COL_DEST_ACCOUNT: return String.class;
+		case COL_SOURCE1: return String.class;
+		case COL_SOURCE1_ACCOUNT: return String.class;
+		case COL_SOURCE2: return String.class;
+		case COL_SOURCE2_ACCOUNT: return String.class;
+		case COL_RULE_TYPE: return Integer.class;
+		case COL_REUSE_PLAN: return String.class;
+		case COL_DIVERSION_TYPE: return String.class;
+		case COL_LOSS: return Double.class;
+		case COL_LIMIT: return Double.class;
+		case COL_START_YEAR: return Integer.class;
+		case COL_END_YEAR: return Integer.class;
+		case COL_MONTHLY_SWITCH: return String.class;
+		case COL_INTERVENING_STRUCTURES: return String.class;
 	}
 	return String.class;
 }
@@ -95,9 +108,26 @@ Returns the name of the column at the given position.
 */
 public String getColumnName(int columnIndex) {
 	switch (columnIndex) {
-		case COL_ID:		return "ID";
-		case COL_NAME:		return "NAME";
-		case COL_STRUCTURE_ID:	return "STRUCTURE ID";
+		case COL_ID: return "\nID";
+		case COL_NAME: return "\nNAME";
+		case COL_ADMINISTRATION_NUMBER: return "ADMINISTRATION\nNUMBER";
+		case COL_MONTH_STR_SWITCH: return "MONTH/STRUCTURE\nSWITCH";
+		case COL_ONOFF_SWITCH: return "\nON/OFF";
+		case COL_DEST: return "DESTINATION\nID";
+		case COL_DEST_ACCOUNT: return "DESTINATION\nACCOUNT";
+		case COL_SOURCE1: return "SOURCE 1\nID";
+		case COL_SOURCE1_ACCOUNT: return "SOURCE 1\nACCOUNT";
+		case COL_SOURCE2: return "SOURCE 2\nID";
+		case COL_SOURCE2_ACCOUNT: return "SOURCE 2\nACCOUNT";
+		case COL_RULE_TYPE: return "RULE\nTYPE";
+		case COL_REUSE_PLAN: return "REUSE\nPLAN ID";
+		case COL_DIVERSION_TYPE: return "DIVERSION\nTYPE";
+		case COL_LOSS: return "% TRANSIT\nLOSS";
+		case COL_LIMIT: return "CAPACITY\nLIMIT";
+		case COL_START_YEAR: return "START\nYEAR";
+		case COL_END_YEAR: return "END\nYEAR";
+		case COL_MONTHLY_SWITCH: return "MONTHLY SWITCH\nVALUES";
+		case COL_INTERVENING_STRUCTURES: return "INTERVENING\nSTRUCTURE IDs";
 	}
 	return " ";
 }
@@ -110,9 +140,26 @@ the table is being displayed in the given table format.
 */
 public String getFormat(int column) {
 	switch (column) {
-		case COL_ID:		return "%-12.12s";
-		case COL_NAME:		return "%-24.24s";
-		case COL_STRUCTURE_ID:	return "%-12.12s";
+		case COL_ID: return "%-12.12s";
+		case COL_NAME: return "%-24.24s";
+		case COL_ADMINISTRATION_NUMBER: return "%-12.12s";
+		case COL_MONTH_STR_SWITCH: return "%8.0f";
+		case COL_ONOFF_SWITCH: return "%8d";
+		case COL_DEST: return "%-12.12s";
+		case COL_DEST_ACCOUNT: return "%-8.8s";
+		case COL_SOURCE1: return "%-12.12s";
+		case COL_SOURCE1_ACCOUNT: return "%-8.8s";
+		case COL_SOURCE2: return "%-12.12s";
+		case COL_SOURCE2_ACCOUNT: return "%-8.8s";
+		case COL_RULE_TYPE: return "%8d";
+		case COL_REUSE_PLAN: return "%-12.12s";
+		case COL_DIVERSION_TYPE: return "%-12.12s";
+		case COL_LOSS: return "%8.2f";
+		case COL_LIMIT: return "%12.2f";
+		case COL_START_YEAR: return "%d";
+		case COL_END_YEAR: return "%d";
+		case COL_MONTHLY_SWITCH: return "%24.24s";
+		case COL_INTERVENING_STRUCTURES: return "%40.40s";
 	}
 	return "%8s";
 }
@@ -135,19 +182,58 @@ public Object getValueAt(int row, int col) {
 		row = _sortOrder[row];
 	}
 
+	StateMod_OperationalRight opr = (StateMod_OperationalRight)_data.get(row);
 	switch (col) {
-		case COL_ID:	
-		case COL_NAME:
-			StateMod_OperationalRight smo = (StateMod_OperationalRight)_data.get(row);
-			switch (col) {
-				case COL_ID:	return smo.getID();
-				case COL_NAME: 	return smo.getName();
+		case COL_ID: return opr.getID();
+		case COL_NAME: return opr.getName();
+		case COL_ADMINISTRATION_NUMBER: return opr.getRtem();
+		case COL_MONTH_STR_SWITCH: return new Integer(opr.getDumx());
+		case COL_ONOFF_SWITCH: return new Integer(opr.getSwitch());
+		case COL_DEST: return opr.getCiopde();
+		case COL_DEST_ACCOUNT: return opr.getIopdes();
+		case COL_SOURCE1: return opr.getCiopso1();
+		case COL_SOURCE1_ACCOUNT: return opr.getIopsou1();
+		case COL_SOURCE2: return opr.getCiopso2();
+		case COL_SOURCE2_ACCOUNT: return opr.getIopsou2();
+		case COL_RULE_TYPE: return new Integer(opr.getItyopr());
+		case COL_REUSE_PLAN: return opr.getCreuse();
+		case COL_DIVERSION_TYPE: return opr.getCdivtyp();
+		case COL_LOSS: return new Double(opr.getOprLoss());
+		case COL_LIMIT: return new Double(opr.getOprLimit());
+		case COL_START_YEAR: return new Integer(opr.getIoBeg());
+		case COL_END_YEAR: return new Integer(opr.getIoEnd());
+		case COL_MONTHLY_SWITCH:
+			int [] imonsw = opr.getImonsw();
+			if ( (imonsw == null) || (imonsw.length == 0) ) {
+				return "";
 			}
-		case COL_STRUCTURE_ID:
-			return "N/A";
-			//return (String)__interns.elementAt(row);		
+			else {
+				StringBuffer b = new StringBuffer();
+				for ( int i = 0; i < imonsw.length; i++ ) {
+					if ( i > 0 ) {
+						b.append(",");
+					}
+					b.append("" + imonsw[i]);
+				}
+				return b.toString();
+			}
+		case COL_INTERVENING_STRUCTURES:
+			String [] intern = opr.getIntern();
+			if ( (intern == null) || (intern.length == 0) ) {
+				return "";
+			}
+			else {
+				StringBuffer b = new StringBuffer();
+				for ( int i = 0; i < intern.length; i++ ) {
+					if ( i > 0 ) {
+						b.append(",");
+					}
+					b.append("" + intern[i]);
+				}
+				return b.toString();
+			}
+		default: return "";
 	}
-	return " ";
 }
 
 /**
@@ -160,9 +246,26 @@ public int[] getColumnWidths() {
 	for (int i = 0; i < __COLUMNS; i++) {
 		widths[i] = 0;
 	}
-	widths[COL_ID] = 		12;
-	widths[COL_NAME] = 		23;
-	widths[COL_STRUCTURE_ID] =	15;
+	widths[COL_ID] = 12;
+	widths[COL_NAME] = 23;
+	widths[COL_ADMINISTRATION_NUMBER] = 12;
+	widths[COL_MONTH_STR_SWITCH] = 14;
+	widths[COL_ONOFF_SWITCH] = 4;
+	widths[COL_DEST] = 10;
+	widths[COL_DEST_ACCOUNT] = 9;
+	widths[COL_SOURCE1] = 10;
+	widths[COL_SOURCE1_ACCOUNT] = 9;
+	widths[COL_SOURCE2] = 10;
+	widths[COL_SOURCE2_ACCOUNT] = 9;
+	widths[COL_RULE_TYPE] = 5;
+	widths[COL_REUSE_PLAN] = 12;
+	widths[COL_DIVERSION_TYPE] = 7;
+	widths[COL_LOSS] = 8;
+	widths[COL_LIMIT] = 8;
+	widths[COL_START_YEAR] = 5;
+	widths[COL_END_YEAR] = 5;
+	widths[COL_MONTHLY_SWITCH] = 13;
+	widths[COL_INTERVENING_STRUCTURES] = 20;
 
 	return widths;
 }
@@ -171,8 +274,7 @@ public int[] getColumnWidths() {
 Returns whether the cell is editable or not.  In this model, all the cells in
 columns 3 and greater are editable.
 @param rowIndex unused.
-@param columnIndex the index of the column to check whether it is editable
-or not.
+@param columnIndex the index of the column to check whether it is editable or not.
 @return whether the cell is editable or not.
 */
 public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -195,6 +297,7 @@ public void setValueAt(Object value, int row, int col)
 {	if (_sortOrder != null) {
 		row = _sortOrder[row];
 	}
+/* TODO SAM 2010-12-13 Not sure if this is used but if so enable
 
 	switch (col) {
 		case COL_STRUCTURE_ID:	
@@ -204,24 +307,7 @@ public void setValueAt(Object value, int row, int col)
 	}
 
 	super.setValueAt(value, row, col);	
+	*/
 }	
-
-/**
-Sets the parent diversion under which the right and return flow data is stored.
-@param parent the parent diversion.
-*/
-public void setParentOperationalRight(StateMod_OperationalRight parent) {
-	__parentOperationalRight = parent;
-}
-
-/**
-The Vector of intern data associated with a specific Operational Right.
-@param interns a Vector of 10 elements containing an Operational Right's intern
-data.
-*/
-public void setInterns(List interns) {
-	_rows = 10;
-	__interns = interns;
-}
 
 }

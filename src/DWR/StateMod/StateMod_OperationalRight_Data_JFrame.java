@@ -1,22 +1,3 @@
-// ----------------------------------------------------------------------------
-// StateMod_OperationalRight_Data_JFrame - This is a JFrame that displays 
-//	OperationalRight data in a tabular format.
-// ----------------------------------------------------------------------------
-// Copyright:   See the COPYRIGHT file
-// ----------------------------------------------------------------------------
-// History:
-// 
-// 2005-01-17	J. Thomas Sapienza, RTi	Initial version.
-// 2005-01-20	JTS, RTi		Following review:
-//					* Improved some loop performance.
-//					* Removed getDataType().
-//					* Title string is now passed to the
-//					  super constructor.
-//					* Editability of data in the worksheet
-//					  is now passed in via the constructor.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-// ----------------------------------------------------------------------------
-
 package DWR.StateMod;
 
 import java.util.List;
@@ -24,11 +5,11 @@ import java.util.List;
 import RTi.Util.GUI.JScrollWorksheet;
 
 /**
-This class is a JFrame for displaying a Vector of StateMod_OperationalRight 
+This class is a JFrame for displaying a list of StateMod_OperationalRight 
 data in a worksheet.  The worksheet data can be exported to a file or printed.
 */
-public class StateMod_OperationalRight_Data_JFrame 
-extends StateMod_Data_JFrame {
+public class StateMod_OperationalRight_Data_JFrame extends StateMod_Data_JFrame
+{
 
 /**
 Constructor. 
@@ -39,7 +20,7 @@ which case an empty worksheet is shown.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_OperationalRight_Data_JFrame(List data, String titleString, boolean editable)
+public StateMod_OperationalRight_Data_JFrame(List<StateMod_OperationalRight> data, String titleString, boolean editable)
 throws Exception {
 	super(data, titleString, editable);
 }
