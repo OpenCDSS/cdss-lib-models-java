@@ -533,8 +533,7 @@ throws Exception {
 	_props.add("JWorksheet.ShowPopupMenu=true");
 	_props.add("JWorksheet.AllowCopy=true");
 	_props.add("JWorksheet.ShowRowHeader=true");
-	_props.add("JWorksheet.SelectionMode="
-		+ "MultipleDiscontinuousRowSelection");
+	_props.add("JWorksheet.SelectionMode=MultipleDiscontinuousRowSelection");
 
 	_titleString = titleString;
 	_editable = editable;
@@ -614,8 +613,7 @@ throws Exception {
 	panel.setLayout(new GridBagLayout());
 
 	// buildJScrollWorksheet is defined in the derived classes (it is
-	// abstract in this class).  It creates a JScrollWorksheet and returns 
-	// it.  
+	// abstract in this class).  It creates a JScrollWorksheet and returns it.  
 	__scrollWorksheet = buildJScrollWorksheet();
 	_worksheet = __scrollWorksheet.getJWorksheet();
 
@@ -654,13 +652,12 @@ throws Exception {
 	setTitle(_titleString);
 	pack();
 
-	setSize(500, 300);
+	setSize(800, 400);
 	JGUIUtil.center(this);
 	
 	setVisible(true);
 
-	JWorksheet_DefaultTableCellRenderer renderer 
-		= _worksheet.getCellRenderer();
+	JWorksheet_DefaultTableCellRenderer renderer = _worksheet.getCellRenderer();
 	int[] widths = renderer.getColumnWidths();
 	if (widths != null) {
 		_worksheet.setColumnWidths(widths);
