@@ -3543,27 +3543,34 @@ public List getSummary()
 			ityopr_max = opright.getItyopr();
 		}
 	}
-	//int count2[] = new int[ityopr_max + 1];	// To allow for 0th "Unknown"
-	int count2[] = new int[StateMod_OperationalRight.NAMES.length];
+	List<StateMod_OperationalRight_Metadata> oprMetadataList = StateMod_OperationalRight_Metadata.getAllMetadata();
+	int count2[] = new int[oprMetadataList.size() + 1]; // Last item is for unknown types
 	// Now loop through all the rights and count the number by type...
-	for ( int i = 0; i < StateMod_OperationalRight.NAMES.length; i++ ) {
+	for ( int i = 0; i < count2.length; i++ ) {
 		count2[i] = 0;
 	}
 	for ( int i = 0; i < size; i++ ) {
 		opright = (StateMod_OperationalRight)data_Vector.get(i);
-		++count2[opright.getItyopr()];
+		if ( opright.getItyopr() <= (count2.length - 1) ) {
+			// Have a known right type
+			++count2[opright.getItyopr() - 1];
+		}
+		else {
+			// Unknown right type
+			++count2[count2.length - 1];
+		}
 	}
 	String name = null;
-	for ( int i = 1; i < ityopr_max; i++ ) {
+	for ( int i = 0; i < count2.length; i++ ) {
 		// Default for oprights not understood by the software
-		name = StateMod_OperationalRight.NAMES[0];
-		if ( i <= StateMod_OperationalRight.NAMES.length ) {
-			name = StateMod_OperationalRight.NAMES[i];
+		name = "Unknown right type (> type " + oprMetadataList.size() + ")";
+		if ( i < oprMetadataList.size() ) {
+			name = oprMetadataList.get(i).getRightTypeName();
 		}
 		infoVector.add( " " + StringUtil.formatString(i,"%2d") + "  " +
 		StringUtil.formatString( name, "%-64.64s") + "  " + StringUtil.formatString(count2[i],"%4d"));
 	}
-	infoVector.add( "     Total                                                             "+
+	infoVector.add( "     Total                                                             " +
 		StringUtil.formatString(size,"%4d") );
 	infoVector.add("");
 
