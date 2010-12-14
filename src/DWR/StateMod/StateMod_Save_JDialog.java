@@ -505,7 +505,8 @@ throws Exception {
 			name = "Instream Rights";
 			break;
 		case StateMod_DataSet.COMP_OPERATION_RIGHTS:
-			StateMod_OperationalRight.writeStateModFile( oldFilename, newFilename, (List)data, comments);
+			// 2 is the file version (introduced for StateMod version 12 change)
+			StateMod_OperationalRight.writeStateModFile( oldFilename, newFilename, 2, (List)data, comments);
 			name = "Operational Rights";
 			break;
 		case StateMod_DataSet.COMP_RESERVOIR_STATIONS:
