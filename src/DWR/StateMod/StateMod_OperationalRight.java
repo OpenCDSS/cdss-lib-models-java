@@ -108,64 +108,6 @@ extends StateMod_Data
 implements Cloneable, Comparable {
 
 /**
-Operational right types using reasonably short phrases,
-*/
-/*
-public static final String[] NAMES = {
-	"Unknown",	// 0, Use when the right number is outside the supported range
-	"Reservoir Release to an Instream Flow",		// 1
-	"Reservoir Release to a Diversion by the River",	// 2
-	"Reservoir Release to a Diversion or Reservoir by a Carrier",	// 3
-	"Reservoir Release to a Div. by Exchange with River",	// 4
-	"Reservoir Storage by Exchange",			// 5
-	"Reservoir to Reservoir Transfer (Bookover)",		// 6
-	"Diversion by a Carrier by Exchange",			// 7
-	"Out of Priority Reservoir Storage",			// 8
-	"Reservoir Target",					// 9
-	"Replacement Res. to a Div. by Release or Exchange",	// 10
-	"Direct Flow Div. to a Demand or Res. through carriers",// 11
-	"Reoperation",						// 12
-	"Index Flow Constraint on an Instream Flow",		// 13
-	"Direct Flow Div. limited by Demand at Dest. and Carrier",// 14
-	"Interruptible Supply",					// 15
-	"Direct Flow Storage",					// 16
-	"Rio Grande Compact - Rio Grande River",		// 17
-	"Rio Grande Compact - Conejos River",			// 18
-	"Split Channel",					// 19
-	"San Juan RIP Reservoir",				// 20
-	"Wells with Sprinkler Use",				// 21
-	"Soil Moisture Use",					// 22
-	"Downstream Call",					// 23
-	"Direct Flow Exchange",					// 24
-	"Direct Flow Bypass",					// 25
-	"Reservoir or ReUse Plan to a T&C Plan",		// 26
-	"ReUse Plan to a Div. or Res. Direct w/ or w/out dest. reuse", // 27
-	"ReUse Plan to a Div. or Res by Exch. w/ or w/out dest reuse", // 28
-	"ReUse Plan Spill",					// 29
-	"Reservoir Re Diversion",				// 30
-	"Carrier to a ditch or res. w/ Reusable return flows",	// 31
-	"Res. and Plan to a Dir. Flow or res. or car. Dir. w/ or w/out dest. reuse", // 32
-	"Res. and Plan to a Dir. Flow or res. or car. by Exch. w/ or w/out dest. reuse", // 33
-	"Paper Exchange",					// 34
-	"Import to a Div., Res., or Carrier w/ or w/out Reuse.",	// 35
-	"Seasonal (Daily) Water Right", // 36
-	"Augmentation Well", // 37
-	"Out of Priority Diversion with Plan", // 38
-	"Alternate Point", // 39
-	"South Platte Compact", // 40
-	"Reservoir Storage with Special Limits", // 41
-	"Plan Demand Reset", // 42
-	"In Priority Supply", // 43
-	"Recharge Well", // 44
-	"Carrier with Loss", // 45
-	"Multiple Plan Ownership", // 46
-	"Administrative Plan Limit", // 47
-	"Plan or Reservoir Reuse to a T&C or Augmentation Plan Direct", // 48
-	"Plan or Reservoir Reuse to a T&C or Augmentation Plan Exchange" // 49
-};
-*/
-
-/**
 Maximum handled operational right type (those that the software has been coded to handle).
 Ideally this should be the same as those listed in the operational right metadata, but some metadata may
 be added at runtime to account for rights added to the model but not the Java code.
@@ -241,9 +183,10 @@ Monthly switch, for some rights, null if not used.
 */
 protected int _imonsw[] = null;
 /**
-Comments provided by user - # comments before each right.
+Comments provided by user - # comments before each right.  An empty (non-null) list is guaranteed.
+TODO SAM 2010-12-14 Evaluate whether this can be in StateMod_Data or will it bloat memory.
 */
-protected List<String> _comments;
+private List<String> __commentsBeforeData = new Vector();
 /**
 Used with operational right 17, 18.
 */
@@ -637,7 +580,7 @@ throws Throwable {
 	_iopsou5 = null;
 	_imonsw = null;
 	_intern = null;
-	_comments = null;
+	__commentsBeforeData = null;
 	__creuse = null;
 	__cdivtyp = null;
 	super.finalize();
@@ -700,11 +643,11 @@ public String getCreuse() {
 }
 
 /**
-Return the comments from the input file that immediately preceded the operational right.
-@return the comments from the input file that immediately preceded the operational right.
- */
-public List<String> getComments() {
-	return _comments;
+Return the comments from the input file that immediate precede the data.
+@return the comments from the input file that immediate precede the data.
+*/
+public List<String> getCommentsBeforeData() {
+	return __commentsBeforeData;
 }
 
 /**
@@ -900,7 +843,7 @@ private void initialize() {
 	_ityopr = 0;	// Unknown
 	_imonsw = null;	// Define in constructor or when reading
 	_intern = null;	// Define in constructor or when reading
-	_comments = new Vector(1);
+	__commentsBeforeData = new Vector(1);
 	_qdebt = 0.0;
 	_qdebtx = 0.0;
 	_sjmina = 0.0;
@@ -1154,7 +1097,7 @@ throws Exception {
 			}
 			if (comment_vector.size()> 0) {
 				// Set comments that have been read previous to this line.
-				anOprit.setComments(comment_vector);
+				anOprit.setCommentsBeforeData(comment_vector);
 			}
 			// Always clear out for next object...
 			comment_vector = new Vector(1);
@@ -1351,7 +1294,7 @@ throws Exception {
 	String iline = null;
 	List v = null;
 	List<StateMod_OperationalRight> theOprits = new Vector();
-	List<String> commentsBeforeRight = new Vector(1);	// Will be used prior to finding an operational right
+	List<String> commentsBeforeData = new Vector(1);	// Will be used prior to finding an operational right
 	// Formats use strings for many variables because files may have extra
 	// whitespace or be used for numeric and character data...
 	// Consistent among all operational rights...
@@ -1376,7 +1319,6 @@ throws Exception {
 
 	int dumxInt, ninterv, nmonsw;
 	float dumxFloat;
-	int oprLimitInt; // Used to trigger read in some operations
 	double oprLimit; // Internal value
 	int rightType = 0;
 	int errorCount = 0;
@@ -1426,35 +1368,36 @@ throws Exception {
 				}
 				// Don't trim because may want to compare output during testing
 				// Do trim the initial #, which will get added on output.
-				commentsBeforeRight.add(iline.substring(1));
+				commentsBeforeData.add(iline.substring(1));
 				continue;
 			}
 
 			// Allocate new operational rights object
 			anOprit = new StateMod_OperationalRight();
 			if (Message.isDebugOn) {
-				Message.printDebug(10, routine,	"Number of Opright comments: " + commentsBeforeRight.size());
+				Message.printDebug(10, routine,	"Number of Opright comments: " + commentsBeforeData.size());
 			}
-			if (commentsBeforeRight.size()> 0) {
+			if (commentsBeforeData.size()> 0) {
 				// Set comments that have been read previous to this line.  First, attempt to discard
 				// comments that do not below with the operational right.  For now, search backward for
-				// "FileFormatVersion" and "--e".  If found, discard the comments prior to this because
-				// they are assumed to be file header comments, not comments for a specific right.
+				// "FileFormatVersion", "EndHeader", and "--e".  If found, discard the comments prior
+				// to this because they are assumed to be file header comments, not comments for a specific right.
 				String comment;
-				for ( int iComment = commentsBeforeRight.size() - 1; iComment >= 0; --iComment ) {
-					comment = commentsBeforeRight.get(iComment).toUpperCase();
-					if ( (comment.indexOf("FILEFORMATVERSION") >= 0) || (comment.indexOf("--E") >= 0) ) {
+				for ( int iComment = commentsBeforeData.size() - 1; iComment >= 0; --iComment ) {
+					comment = commentsBeforeData.get(iComment).toUpperCase();
+					if ( (comment.indexOf("FILEFORMATVERSION") >= 0) ||
+						(comment.indexOf("ENDHEADER") >= 0) || (comment.indexOf("--E") >= 0) ) {
 						// Remove the comments above the position.
 						while ( iComment >= 0 ) {
-							commentsBeforeRight.remove(iComment--);
+							commentsBeforeData.remove(iComment--);
 						}
 						break;
 					}
 				}
-				anOprit.setComments(commentsBeforeRight);
+				anOprit.setCommentsBeforeData(commentsBeforeData);
 			}
 			// Always clear out for next right...
-			commentsBeforeRight = new Vector(1);
+			commentsBeforeData = new Vector(1);
 
 			// line 1
 			if (Message.isDebugOn) {
@@ -1498,7 +1441,6 @@ throws Exception {
 			// Miscellaneous limits...
 			anOprit.setOprLimit ( (Float)v.get(15) );
 			oprLimit = anOprit.getOprLimit();
-			oprLimitInt = (int)(oprLimit + .1);
 			// Beginning year...
 			anOprit.setIoBeg ( (Integer)v.get(16) );
 			// Ending year...
@@ -1792,12 +1734,35 @@ public void setCiopso5(String ciopso5) {
 	}
 }
 
-// TODO SAM 2008-03-16 - need to check for dirty
 /**
-Set the comments
+Set the comments before the data in the input file.
+@param commentsBeforeData comments before the data in the input file.
 */
-public void setComments(List comments) {
-	_comments = comments;
+public void setCommentsBeforeData(List<String> commentsBeforeData)
+{	boolean dirty = false;
+	int size = commentsBeforeData.size();
+	List<String> commentsBeforeData0 = getCommentsBeforeData();
+	if ( size != commentsBeforeData0.size() ) {
+		dirty = true;
+	}
+	else {
+		// Lists are the same size and there may not have been any changes
+		// Need to check each string in the comments
+		for ( int i = 0; i < size; i++ ) {
+			if ( !commentsBeforeData.get(i).equals(commentsBeforeData0.get(i))) {
+				dirty = true;
+				break;
+			}
+		}
+	}
+	if ( dirty ) {
+		// Something was different so set the comments and change the dirty flag
+		__commentsBeforeData = commentsBeforeData;
+		setDirty ( true );
+		if ( !_isClone && _dataset != null ) {
+			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS,true);
+		}
+	}
 }
 
 /**
@@ -2396,7 +2361,7 @@ throws Exception {
 				continue;
 			}
 
-			comments_vector = opr.getComments();
+			comments_vector = opr.getCommentsBeforeData();
 			num_comments = comments_vector.size();
 			// Print the comments in front of the operational right
 			for (int j = 0; j < num_comments; j++) {
@@ -2523,7 +2488,7 @@ throws Exception {
 		List vMonthlySwitches = new Vector(12);
 		List vsp = new Vector(1);
 		List vI = new Vector(1);
-		List<String> commentList = null;
+		List<String> commentsBeforeData = null;
 	
 		out.println(cmnt);
 		out.println(cmnt + " *******************************************************");
@@ -2621,7 +2586,7 @@ throws Exception {
 			num = theOpr.size();
 		}
 		int num_intern;
-		int num_comments;
+		int numComments;
 		int dumx;
 		int ruleType;
 		double oprLimit;
@@ -2632,13 +2597,13 @@ throws Exception {
 			}
 			ruleType = opr.getItyopr();
 
-			commentList = opr.getComments();
-			num_comments = commentList.size();
+			commentsBeforeData = opr.getCommentsBeforeData();
+			numComments = commentsBeforeData.size();
 			// Print the comments in front of the operational right
 			// The original comments were stripped of the leading # but otherwise are padded with whitespace
-			// as per the origional - when written they should exactly match the original
-			for (int j = 0; j < num_comments; j++) {
-				out.println("#" + commentList.get(j));
+			// as per the original - when written they should exactly match the original
+			for (int j = 0; j < numComments; j++) {
+				out.println("#" + commentsBeforeData.get(j));
 			}
 			if ( !isRightUnderstoodByCode(opr.getItyopr()) ) {
 				// The operational right is not explicitly understood so print the original contents
