@@ -198,7 +198,7 @@ public Object getValueAt(int row, int col) {
 		case COL_RIVER_NODE_ID:	return smp.getCgoto();
 		case COL_ON_OFF:	return new Integer(smp.getSwitch());
 		case COL_TYPE:		return new Integer(smp.getIPlnTyp());
-		case COL_EFFICIENCY:	return new Double(smp.getPeff());
+		case COL_EFFICIENCY:	return new Integer(smp.getPeffFlag());
 		case COL_RETURN_FLOW_TABLE:
 					return new Integer(smp.getIPrf());
 		case COL_FAILURE_SWITCH:return new Integer(smp.getIPfail());
@@ -304,7 +304,7 @@ public void setValueAt(Object value, int row, int col)
 			}
 			break;
 		case COL_EFFICIENCY:
-			smp.setPeff((Double)value);
+			smp.setPeffFlag((Integer)value);
 			break;
 		case COL_RETURN_FLOW_TABLE:
 			if (value instanceof Integer) {

@@ -632,7 +632,7 @@ private void processTableSelection(int index, boolean try_to_save )
 
 	// Efficiency...
 
-	StateMod_GUIUtil.checkAndSet(plan.getPeff(), __Peff_JTextField );
+	StateMod_GUIUtil.checkAndSet(plan.getPeffFlag(), __Peff_JTextField );
 
 	// Return flow table...
 
@@ -719,13 +719,13 @@ private boolean saveData(int record) {
 	// Efficiency...
 
 	String Peff = __Peff_JTextField.getText().trim();
-	if ( Peff.equals("") && !StateMod_Util.isMissing(plan.getPeff()) ) {
+	if ( Peff.equals("") && !StateMod_Util.isMissing(plan.getPeffFlag()) ) {
 		// User has blanked to missing for some reason...
-		plan.setPeff(StateMod_Util.MISSING_DOUBLE);
+		plan.setPeffFlag(StateMod_Util.MISSING_INT);
 	}
 	else if ( !Peff.equals("") ) {
 		// Something has changed so set it...
-		plan.setPeff ( Peff );
+		plan.setPeffFlag ( Peff );
 	}
 
 	// Return flow table...
