@@ -1367,15 +1367,15 @@ The options are of the form "0" if include_notes is false and
 @return a list of on/off switch option strings, for use in GUIs.
 @param include_notes Indicate whether notes should be added after the parameter values.
 */
-public static List getIdivswChoices ( boolean include_notes )
-{	List v = new Vector(2);
+public static List<String> getIdivswChoices ( boolean include_notes )
+{	List<String> v = new Vector(2);
 	v.add ( "0 - Off" );	// Possible options are listed here.
 	v.add ( "1 - On" );
 	if ( !include_notes ) {
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.set(i,StringUtil.getToken((String)v.get(i), " ", 0, 0) );
+			v.set(i,StringUtil.getToken(v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
@@ -2230,7 +2230,7 @@ Set the system efficiency for a particular month.
 The efficiencies are stored in the order of the year for the data set.  For
 example, if water years are used, the first efficiency will be for October.  For
 calendar year, the first efficiency will be for January.
-@param index month index
+@param index month index (0+)
 @param diveff monthly efficiency
 */
 public void setDiveff(int index, double diveff) {
