@@ -347,7 +347,8 @@ Types of collections.  An aggregate merges the water rights whereas
 a system keeps all the water rights but just has one ID.  See email from Erin
 Wilson 2004-09-01, to reiterate current modeling procedures:
 <pre>
-1)  Multistructure should be used to represent two or more structures
+<ol>
+<li>Multistructure should be used to represent two or more structures
 that divert from DIFFERENT TRIBUTARIES to serve the same demand
 (irrigated acreage or M&I demand).  In the Historic model used to
 estimate Baseflows, the historic diversions need to be represented on
@@ -359,20 +360,17 @@ and zero out the demand for the secondary structures.  Water rights will
 continue to be assigned to each individual structure, and operating
 rules need to be included to allow the model to divert from the
 secondary structure location (under their water right) to meet the
-primary structure demand.
-
-2)  Divsystems should be used to represents two or more structures with
+primary structure demand.</li>
+<li>Divsystems should be used to represents two or more structures with
 intermingled lands and/or diversions that divert from the SAME
 TRIBUTARY.  Only the primary structure should be included in the
 network.  The Divsystem(x,x) command will combine historic diversions,
 capacities, and acreages for use in the Historic model and to create
 Baseflows.  Water rights for all structures will be assigned explicitly
-to the primary structure.  No operating rules or set efficiency commands
-are required.
-
-3)  Aggregates.  The only difference between Divsystems and Aggregates
+to the primary structure.  No operating rules or set efficiency commands are required.</li>
+<li>Aggregates.  The only difference between Divsystems and Aggregates
 is that the water rights are not necessarily assigned explicitly, but
-are generally grouped into water rights classes.
+are generally grouped into water rights classes.</li>
 </pre>
 */
 public static String COLLECTION_TYPE_AGGREGATE = "Aggregate";
