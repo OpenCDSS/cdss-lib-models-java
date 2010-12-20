@@ -132,8 +132,7 @@ Button group for search criteria settings.
 private ButtonGroup __searchCriteriaGroup;
 
 /**
-The index in __disables[] of textfields that should NEVER be made
-editable (e.g., ID fields).
+The index in __disables[] of textfields that should NEVER be made editable (e.g., ID fields).
 */
 private int[] __textUneditables;
 
@@ -161,8 +160,7 @@ private JButton
 	__applyJButton;
 
 /**
-Array of JComponents that should be disabled when nothing is selected 
-from the list.
+Array of JComponents that should be disabled when nothing is selected from the list.
 */
 private JComponent[] __disables;
 
@@ -260,9 +258,9 @@ The DataSetComponent that contains the operational rights data.
 private DataSetComponent __operationalRightsComponent;
 
 /**
-Vector of operational rights data.
+List of operational rights data.
 */
-private List __operationalRights;
+private List<StateMod_OperationalRight> __operationalRights;
 
 private int __currentItyopr = -1;
 
@@ -270,7 +268,7 @@ private int __currentItyopr = -1;
 Vectors used to populate combo boxes.  They are only initialized if they need
 to be used, and then they are re-used.
 */
-private List
+private List<String>
 	__reservoirIDs = null,
 	__diversionRightIDs = null,
 	__streamGageIDs = null,
@@ -278,25 +276,21 @@ private List
 	__diversionIDs = null,
 	__operationalRightIDs = null;
 
-private List
-	__reservoirs = null,
-	__reservoirRights = null,
-	__diversionRights = null,
-	__diversions = null,
-	__streamGages = null,
-	__instreamFlows = null;
+private List<StateMod_Reservoir> __reservoirs = null;
+private List<StateMod_ReservoirRight>__reservoirRights = null;
+private List<StateMod_DiversionRight>__diversionRights = null;
+private List<StateMod_Diversion>__diversions = null;
+private List<StateMod_StreamGage>__streamGages = null;
+private List<StateMod_InstreamFlow>__instreamFlows = null;
 
 /**
 Constructor.
 @param dataset the StateMod_DataSet object that has the data.
-@param dataset_wm the dataset window manager or null if the data set windows
-are not being managed.
+@param dataset_wm the dataset window manager or null if the data set windows are not being managed.
 @param editable whether the data are editable or not.
 */
-public StateMod_OperationalRight_JFrame (	
-						StateMod_DataSet dataset,
-						StateMod_DataSet_WindowManager
-						dataset_wm, boolean editable)
+public StateMod_OperationalRight_JFrame ( StateMod_DataSet dataset,
+	StateMod_DataSet_WindowManager dataset_wm, boolean editable)
 {
 	StateMod_GUIUtil.setTitle(this, dataset, "Operational Rights", null);
 	__currentOpRightsIndex = -1;
@@ -305,11 +299,11 @@ public StateMod_OperationalRight_JFrame (
 	__dataset_wm = dataset_wm;
 	__operationalRightsComponent = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_OPERATION_RIGHTS);
-	__operationalRights = (List)__operationalRightsComponent.getData();
+	__operationalRights = (List<StateMod_OperationalRight>)__operationalRightsComponent.getData();
 	int size = __operationalRights.size();
 	StateMod_OperationalRight o = null;
 	for (int i = 0; i < size; i++) {
-		o = (StateMod_OperationalRight)__operationalRights.get(i);
+		o = __operationalRights.get(i);
 		o.createBackup();
 	}
 
@@ -321,18 +315,13 @@ public StateMod_OperationalRight_JFrame (
 /**
 Constructor.
 @param dataset the StateMod_DataSet object that has the data.
-@param dataset_wm the dataset window manager or null if the data set windows
-are not being managed.
+@param dataset_wm the dataset window manager or null if the data set windows are not being managed.
 @param operationalRight the operational right to select from the list
 @param editable whether the data are editable or not.
 */
-public StateMod_OperationalRight_JFrame (	
-						StateMod_DataSet dataset,
-						StateMod_DataSet_WindowManager
-						dataset_wm,
-						StateMod_OperationalRight
-						operationalRight,
-						boolean editable )
+public StateMod_OperationalRight_JFrame ( StateMod_DataSet dataset,
+	StateMod_DataSet_WindowManager dataset_wm, StateMod_OperationalRight operationalRight,
+	boolean editable )
 {	
 	StateMod_GUIUtil.setTitle(this, dataset, "Operational Rights", null);
 	__currentOpRightsIndex = -1;
@@ -345,7 +334,7 @@ public StateMod_OperationalRight_JFrame (
 	int size = __operationalRights.size();
 	StateMod_OperationalRight o = null;
 	for (int i = 0; i < size; i++) {
-		o = (StateMod_OperationalRight)__operationalRights.get(i);
+		o = __operationalRights.get(i);
 		o.createBackup();
 	}
 
@@ -376,23 +365,20 @@ public void actionPerformed(ActionEvent e) {
 		StateMod_OperationalRight o = null;
 		boolean changed = false;
 		for (int i = 0; i < size; i++) {
-			o = (StateMod_OperationalRight)
-				__operationalRights.get(i);
+			o = __operationalRights.get(i);
 			if (!changed && o.changed()) {
 				changed = true;
 			}
 			o.acceptChanges();
 		}				
 		if (changed) {
-			__dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, 
-				true);
+			__dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}		
 		if ( __dataset_wm != null ) {
-			__dataset_wm.closeWindow (
-			StateMod_DataSet_WindowManager.
-			WINDOW_OPERATIONAL_RIGHT) ;
+			__dataset_wm.closeWindow ( StateMod_DataSet_WindowManager.WINDOW_OPERATIONAL_RIGHT) ;
 		}
-		else {	JGUIUtil.close ( this );
+		else {
+			JGUIUtil.close ( this );
 		}
 	}
 	else if (action.equals(__BUTTON_APPLY)) {
@@ -401,32 +387,28 @@ public void actionPerformed(ActionEvent e) {
 		StateMod_OperationalRight o = null;
 		boolean changed = false;
 		for (int i = 0; i < size; i++) {
-			o = (StateMod_OperationalRight)
-				__operationalRights.get(i);
+			o = __operationalRights.get(i);
 			if (!changed && o.changed()) {
 				changed = true;
 			}
 			o.createBackup();
 		}		
 		if (changed) {
-			__dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, 
-				true);
+			__dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}		
 	}
 	else if (action.equals(__BUTTON_CANCEL)) {
 		int size = __operationalRights.size();
 		StateMod_OperationalRight o = null;
 		for (int i = 0; i < size; i++) {
-			o = (StateMod_OperationalRight)
-				__operationalRights.get(i);
+			o = __operationalRights.get(i);
 			o.restoreOriginal();
 		}					
 		if ( __dataset_wm != null ) {
-			__dataset_wm.closeWindow (
-			StateMod_DataSet_WindowManager.
-			WINDOW_OPERATIONAL_RIGHT) ;
+			__dataset_wm.closeWindow ( StateMod_DataSet_WindowManager.WINDOW_OPERATIONAL_RIGHT) ;
 		}
-		else {	JGUIUtil.close ( this );
+		else {
+			JGUIUtil.close ( this );
 		}
 	}
 	else if (source == __findNextOpr) {
@@ -444,41 +426,36 @@ public void actionPerformed(ActionEvent e) {
 		__searchName.setEditable(true);
 	}
 	else if (source == __destination_JComboBox) {		
-		fillDestinationAccount(__currentItyopr,
-			__destination_JComboBox.getSelected());
+		fillDestinationAccount(__currentItyopr, __destination_JComboBox.getSelected());
 		if (__currentItyopr == 8) {
 			// special case, the source is tied to the destination
 			__source1_JComboBox.setSelectedItem(__destination_JComboBox.getSelected());
 		}
 	}
 	else if (source == __source1_JComboBox) {
-		StateMod_OperationalRight opr = (StateMod_OperationalRight)
-			__operationalRights.get(__currentOpRightsIndex);
+		StateMod_OperationalRight opr = __operationalRights.get(__currentOpRightsIndex);
 		opr.setCiopso1(trim(__source1_JComboBox.getSelected()));
 		fillSourceAccount1(__currentItyopr, opr);
 	}
 	else if (source == __ruleTypeSwitch_JComboBox) {
-		StateMod_OperationalRight opr = (StateMod_OperationalRight)
-			__operationalRights.get(__currentOpRightsIndex);
+		StateMod_OperationalRight opr = __operationalRights.get(__currentOpRightsIndex);
 		opr.setItyopr(trim(__ruleTypeSwitch_JComboBox.getSelected()));
-		populateRightInformation(opr);
+		populateOperationalRightInformation(opr);
 		populateAdditionalData(opr);
 	}	
 }
 
 /**
-Checks the text fields for validity before they are saved back into the
-data object.
+Checks the text fields for validity before they are saved back into the data object.
 @return true if the text fields are okay, false if not.
 */
 private boolean checkInput() {
-	List errors = new Vector();
+	List<String> errors = new Vector();
 	int errorCount = 0;
 
-	// for each field, check if it contains valid input.  If not,
+	// For each field, check if it contains valid input.  If not,
 	// create a string of the format "fieldname -- reason why it
-	// is not correct" and add it to the errors vector.  also
-	// increment error count
+	// is not correct" and add it to the errors vector.  Also increment error count
 	
 	if (errorCount == 0) {
 		return true;
@@ -488,34 +465,24 @@ private boolean checkInput() {
 	if (errorCount > 1) {
 		plural = "s were ";
 	}
-	String label = "The following error" + plural + "encountered "
-		+ "trying to save the record:\n";
+	String label = "The following error" + plural + "encountered trying to save the record:\n";
 	for (int i = 0; i < errorCount; i++) {
 		label += errors.get(i) + "\n";
 	}
-	new ResponseJDialog(this, 
-		"Errors encountered", label, ResponseJDialog.OK);
+	new ResponseJDialog(this, "Errors encountered", label, ResponseJDialog.OK);
 	return false;
 }
 
 /**
-Combines two Vectors into a new Vector.  
-@param v1 the first Vector to add into the new Vector.
-@param v2 the second Vector to add into the new Vector.
-@return a new Vector that contains all the elements from the first and second
-Vectors.
+Combines two lists into a new list.  
+@param v1 the first list to add into the new Vector.
+@param v2 the second list to add into the new Vector.
+@return a new list that contains all the elements from the first and second lists.
 */
-private List combineVectors(List v1, List v2) {
+private List combineLists(List v1, List v2) {
 	List v = new Vector();
-	int size = v1.size();
-	for (int i = 0; i < size; i++) {
-		v.add(v1.get(i));
-	}
-	size = v2.size();
-	for (int i = 0; i < size; i++) {
-		v.add(v2.get(i));
-	}
-
+	v.addAll(v1);
+	v.addAll(v2);
 	return v;
 }
 
@@ -527,7 +494,7 @@ stores the instream flow Vector from the dataset into __instreamFlows.
 private void createInstreamFlowIDVector() {
 	DataSetComponent isfComp = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_INSTREAM_STATIONS);
-	__instreamFlows = (List)isfComp.getData();
+	__instreamFlows = (List<StateMod_InstreamFlow>)isfComp.getData();
 	__instreamFlowIDs = StateMod_Util.createDataList(__instreamFlows, true);
 }
 
@@ -550,17 +517,14 @@ private void createDiversionRightIDVector() {
 	DataSetComponent divRightComp = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_DIVERSION_RIGHTS);
 	__diversionRights = (List)divRightComp.getData();
-	__diversionRightIDs = StateMod_Util.createDataList(__diversionRights, 
-		true);
+	__diversionRightIDs = StateMod_Util.createDataList(__diversionRights, true);
 }
 
 /**
-Creates the operational right ID Vector and stores it into 
-__operationalRightIDs.
+Creates the operational right ID Vector and stores it into __operationalRightIDs.
 */
 private void createOperationalRightIDVector() {
-	__operationalRightIDs = StateMod_Util.createDataList(
-		__operationalRights, true);
+	__operationalRightIDs = StateMod_Util.createDataList(__operationalRights, true);
 }
 
 /**
@@ -584,8 +548,7 @@ private void createReservoirRightIDVector() {
 		__dataset.COMP_RESERVOIR_RIGHTS);
 	__reservoirRights = (Vector)resRightComp.getData();
 	// TODO SAM 2007-03-01 Evaluate use
-	//__reservoirRightIDs = StateMod_Util.createDataList(__reservoirRights, 
-	//	true);
+	//__reservoirRightIDs = StateMod_Util.createDataList(__reservoirRights, true);
 }
 */
 
@@ -601,8 +564,7 @@ private void createStreamGageIDVector() {
 }
 
 /**
-Disables a combo box by setting it disabled, uneditable, and removing all the
-items.
+Disables a combo box by setting it disabled, uneditable, and removing all the items.
 @param cb the SimpleJComboBox to disable.
 */
 private void disableComboBox(SimpleJComboBox cb) {
@@ -629,15 +591,13 @@ private void enableOpPanel(boolean enable) {
 }
 
 /**
-Fills the destination account field based on the value in the destination 
-field.
+Fills the destination account field based on the value in the destination field.
 @param ityopr the current operational rule.
 @param value the value in the destination field.
 */
 private void fillDestinationAccount(int ityopr, String value) {
 	value = trim(value);
-//	System.out.println("fillDestinationAccount: " + ityopr + " '" + value 
-//		+ "'");
+//	System.out.println("fillDestinationAccount: " + ityopr + " '" + value + "'");
 	int index = 0;
 	List accounts = null;
 	StateMod_Reservoir r = null;
@@ -649,10 +609,8 @@ private void fillDestinationAccount(int ityopr, String value) {
 			__destinationAccount_JComboBox.removeAllItems();
 			index = StateMod_Util.indexOf(__reservoirs, value);
 			if (index == -1) {
-				// not a reservoir, check to see if it's
-				// a diversion
-				index = StateMod_Util.indexOf(__diversions,
-					value);
+				// not a reservoir, check to see if it's a diversion
+				index = StateMod_Util.indexOf(__diversions, value);
 				if (index == -1) {
 					return;
 				}
@@ -662,25 +620,19 @@ private void fillDestinationAccount(int ityopr, String value) {
 			}
 			r = (StateMod_Reservoir)__reservoirs.get(index);
 			accounts = r.getAccounts();
-			__destinationAccount_JComboBox.setData(
-				StateMod_Util.createDataList(accounts, true));
+			__destinationAccount_JComboBox.setData(StateMod_Util.createDataList(accounts, true));
 			__destinationAccount_JComboBox.setEditable(true);
 			break;
 		case 5:
 			__destinationAccount_JComboBox.removeAllItems();
-			index = StateMod_Util.indexOf(__reservoirRights,
-				value);
+			index = StateMod_Util.indexOf(__reservoirRights,value);
 			if (index > -1) {
 				// TODO SAM 2007-03-01 Evaluate logic
-				//rr = (StateMod_ReservoirRight)
-					//__reservoirRights.elementAt(index);
+				//rr = __reservoirRights.elementAt(index);
 				/*
-				REVISIT (JTS - 2003-09-18)
-				when rights get accounts
+				REVISIT (JTS - 2003-09-18) when rights get accounts
 				accounts = rr.getAccounts();
-				__destinationAccount.setData(
-					StateMod_Util.createDataList(accounts,
-					true));
+				__destinationAccount.setData(StateMod_Util.createDataList(accounts,true));
 				*/
 				__destinationAccount_JComboBox.setEditable(true);
 				return;
@@ -688,12 +640,9 @@ private void fillDestinationAccount(int ityopr, String value) {
 			
 			index = StateMod_Util.indexOf(__reservoirs, value);
 			if (index > -1) {
-				r = (StateMod_Reservoir)
-					__reservoirs.get(index);
+				r = __reservoirs.get(index);
 				accounts = r.getAccounts();
-				__destinationAccount_JComboBox.setData(
-					StateMod_Util.createDataList(accounts,
-					true));
+				__destinationAccount_JComboBox.setData(StateMod_Util.createDataList(accounts,true));
 				__destinationAccount_JComboBox.setEditable(true);
 				return;
 			}
@@ -703,12 +652,9 @@ private void fillDestinationAccount(int ityopr, String value) {
 			__destinationAccount_JComboBox.removeAllItems();
 			index = StateMod_Util.indexOf(__reservoirs, value);
 			if (index > -1) {
-				r = (StateMod_Reservoir)
-					__reservoirs.get(index);
+				r = __reservoirs.get(index);
 				accounts = r.getAccounts();
-				__destinationAccount_JComboBox.setData(
-					StateMod_Util.createDataList(accounts,
-					true));
+				__destinationAccount_JComboBox.setData(StateMod_Util.createDataList(accounts,true));
 				__destinationAccount_JComboBox.setEditable(true);
 				return;
 			}
@@ -728,8 +674,7 @@ right rule and the right.
 private void fillSourceAccount1(int ityopr, StateMod_OperationalRight opr) {
 	String value = opr.getCiopso1().trim();
 
-//	System.out.println("fillSourceAccount1: " + ityopr + " '" + value 
-//		+ "'");
+//	System.out.println("fillSourceAccount1: " + ityopr + " '" + value + "'");
 	int index = 0;
 	switch (ityopr) {
 		case 0:
@@ -750,11 +695,9 @@ private void fillSourceAccount1(int ityopr, StateMod_OperationalRight opr) {
 			if (index == -1) {
 				return;
 			}
-			StateMod_Reservoir r = (StateMod_Reservoir)
-				__reservoirs.get(index);
+			StateMod_Reservoir r = __reservoirs.get(index);
 			List accounts = r.getAccounts();
-			__sourceAccount1_JComboBox.setData(StateMod_Util.createDataList(
-				accounts, true));
+			__sourceAccount1_JComboBox.setData(StateMod_Util.createDataList(accounts, true));
 			if (ityopr == 9 || ityopr == 20) {
 				// special case
 				__sourceAccount1_JComboBox.addAt("0 - Prorate", 0);
@@ -1036,7 +979,7 @@ private void populateAdditionalData(StateMod_OperationalRight opr) {
 Fills in the display information for the specified operational right.
 @param opr the operational right to use to populate the fields for right information.
 */
-private void populateRightInformation(StateMod_OperationalRight opr)
+private void populateOperationalRightInformation(StateMod_OperationalRight opr)
 {
 	__ruleTypeSwitch_JComboBox.setEditable(false);
 	__oprSwitch_JComboBox.setEditable(false);
@@ -1188,8 +1131,7 @@ private void populateRightInformation(StateMod_OperationalRight opr)
 			if (__reservoirIDs == null) {
 				createReservoirIDVector();
 			}
-			__destination_JComboBox.setData(combineVectors(
-				__reservoirIDs, __diversionIDs));
+			__destination_JComboBox.setData(combineLists(__reservoirIDs, __diversionIDs));
 			__destination_JComboBox.setSelectedPrefixItem(dest);
 			__destination_JComboBox.setEditable(true);
 
@@ -1330,8 +1272,7 @@ private void populateRightInformation(StateMod_OperationalRight opr)
 			__sourceAccount1_JComboBox.setSelectedPrefixItem(srcAcct1);
 
 			__source2_JComboBox.removeAllItems();
-			__source2_JComboBox.setData(StateMod_Util.createDataList(
-				__operationalRights, true));			
+			__source2_JComboBox.setData(StateMod_Util.createDataList(__operationalRights, true));			
 			__source2_JComboBox.addAt("0", 0);
 			__source2_JComboBox.setSelectedPrefixItem(srcAcct2);
 			__source2_JComboBox.setEditable(true);
@@ -1523,7 +1464,7 @@ private void populateRightInformation(StateMod_OperationalRight opr)
 			if (__reservoirIDs == null) {
 				createReservoirIDVector();
 			}
-			__destination_JComboBox.setData(combineVectors(
+			__destination_JComboBox.setData(combineLists(
 				__reservoirIDs, __diversionIDs));
 			__destination_JComboBox.setSelectedPrefixItem(dest);
 			__destination_JComboBox.setEditable(true);
@@ -1611,7 +1552,7 @@ private void populateRightInformation(StateMod_OperationalRight opr)
 			__destinationAccount_JComboBox.add("1");
 			__destinationAccount_JComboBox.setEditable(false);
 			
-			List cgotoIDs = StateMod_Util.createCgotoDataList(__instreamFlows, true);
+			List<String> cgotoIDs = StateMod_Util.createCgotoDataList(__instreamFlows, true);
 			__source1_JComboBox.setData(cgotoIDs);
 			__source1_JComboBox.setSelectedPrefixItem(src1);
 			__source1_JComboBox.setEditable(true);
@@ -1649,8 +1590,7 @@ private void populateRightInformation(StateMod_OperationalRight opr)
 			if (__reservoirIDs == null) {
 				createReservoirIDVector();
 			}
-			__destination_JComboBox.setData(combineVectors(
-				__reservoirIDs, __diversionIDs));
+			__destination_JComboBox.setData(combineLists(__reservoirIDs, __diversionIDs));
 			__destination_JComboBox.setSelectedPrefixItem(dest);
 			__destination_JComboBox.setEditable(true);
 				
@@ -1668,8 +1608,7 @@ private void populateRightInformation(StateMod_OperationalRight opr)
 			__sourceAccount1_JComboBox.removeAllItems();
 			__sourceAccount1_JComboBox.add("0");
 			__sourceAccount1_JComboBox.add("0");
-			__sourceAccount1_JComboBox.add(
-				"(enter a positive integer value)");
+			__sourceAccount1_JComboBox.add(	"(enter a positive integer value)");
 
 			__source2_JComboBox.removeAllItems();
 			__source2_JComboBox.add("0");
@@ -1722,8 +1661,7 @@ private void populateRightInformation(StateMod_OperationalRight opr)
 
 			__sourceAccount2_JComboBox.removeAllItems();
 			__sourceAccount2_JComboBox.add("0 - Allow 100% to be Diverted");
-			__sourceAccount2_JComboBox.add("-1 - Allow the Depletion to be "
-				+ "Diverted");
+			__sourceAccount2_JComboBox.add("-1 - Allow the Depletion to be Diverted");
 			__sourceAccount2_JComboBox.setSelectedPrefixItem("" + srcAcct2);
 			__sourceAccount2_JComboBox.setEditable(false);
 
@@ -2055,8 +1993,7 @@ private void populateRightInformation(StateMod_OperationalRight opr)
 /**
 Processes a table selection (either via a mouse press or programmatically 
 from selectTableIndex() by writing the old data back to the data set component
-and getting the next selection's data out of the data and displaying it 
-on the form.
+and getting the next selection's data out of the data and displaying it on the form.
 @param index the index of the reservoir to display on the form.
 */
 private void processTableSelection(int index) {
@@ -2072,7 +2009,7 @@ private void processTableSelection(int index) {
 
 	JGUIUtil.enableComponents(__disables, __textUneditables, __editable);
 
-	StateMod_OperationalRight opr = (StateMod_OperationalRight)__operationalRights.get(__currentOpRightsIndex);
+	StateMod_OperationalRight opr = __operationalRights.get(__currentOpRightsIndex);
 	__oprStationID_JTextField.setText(opr.getID());
 	__oprName_JTextField.setText(opr.getName());
 	__oprLocation_JTextField.setText(opr.getRtem());
@@ -2107,7 +2044,7 @@ private void processTableSelection(int index) {
 				" is unknown and was read as text only (some information may not display)." );
 	}
 	
-	populateRightInformation(opr);
+	populateOperationalRightInformation(opr);
 	populateAdditionalData(opr);
 }
 
@@ -2144,8 +2081,7 @@ private void saveInformation(int record) {
 
 	__opRightWorksheet.stopEditing();
 
-	StateMod_OperationalRight opr = (StateMod_OperationalRight)
-		__operationalRights.get(record);
+	StateMod_OperationalRight opr = __operationalRights.get(record);
 	opr.setName(__oprName_JTextField.getText());
 	opr.setSwitch(__oprSwitch_JComboBox.getSelectedIndex());
 	opr.setCgoto(__oprLocation_JTextField.getText());
@@ -2355,15 +2291,15 @@ private void setupGUI(int index) {
 	__monthSwitch = new SimpleJComboBox[12];
 	for (int i = 0; i < 12; i++) {
 		__monthSwitch[i] = new SimpleJComboBox(false);
-		__monthSwitch[i].setPrototypeDisplayValue(
-			"                           ");
+		__monthSwitch[i].setPrototypeDisplayValue("                           ");
 	}
 	
 	__ruleTypeSwitch_JComboBox = new SimpleJComboBox();
-	String[] options = StringUtil.toArray(StateMod_OperationalRight_Metadata.getRightTypeNameList());
-	int num = options.length;
-	for (int i = 0; i < num; i++) {		
-		__ruleTypeSwitch_JComboBox.add("" + i + " - " + options[i]);
+	List<StateMod_OperationalRight_Metadata> metadataList =
+		StateMod_OperationalRight_Metadata.getAllMetadata();
+	for ( int i = 0; i < metadataList.size(); i++ ) {
+		__ruleTypeSwitch_JComboBox.add("" + metadataList.get(i).getRightTypeNumber() + " - " +
+			metadataList.get(i).getRightTypeName() );
 	}
 
 	__ruleTypeSwitch_JComboBox.setEnabled(false);
@@ -2885,8 +2821,7 @@ private void setupGUI(int index) {
 	// add search areas
 	//y=5;
 	y=0;
-	psearch.setBorder(BorderFactory.createTitledBorder(
-		"Search above list for:"));
+	psearch.setBorder(BorderFactory.createTitledBorder("Search above list for:"));
 	JGUIUtil.addComponent(psearch, __searchIDJRadioButton,
 		0, y, 1, 1, 0, 0,
 		1, 0, 0, 0,
@@ -3070,12 +3005,10 @@ public void windowClosing(WindowEvent e) {
 		o.acceptChanges();
 	}					
 	if (changed) {
-		__dataset.setDirty(
-			StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
+		__dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 	}	
 	if ( __dataset_wm != null ) {
-		__dataset_wm.closeWindow (
-		StateMod_DataSet_WindowManager.  WINDOW_OPERATIONAL_RIGHT );
+		__dataset_wm.closeWindow (StateMod_DataSet_WindowManager.WINDOW_OPERATIONAL_RIGHT );
 	}
 }
 
@@ -3112,26 +3045,22 @@ Responds to Window opening events; does nothing.
 public void windowOpening(WindowEvent e) {}
 
 /**
-Called just before the worksheet is sorted.  Stores the index of the record
-that is selected.
+Called just before the worksheet is sorted.  Stores the index of the record that is selected.
 @param worksheet the worksheet being sorted.
 @param sort the type of sort being performed.
 */
 public void worksheetSortAboutToChange(JWorksheet worksheet, int sort) {
-	__sortSelectedRow = __worksheet.getOriginalRowNumber(
-		__worksheet.getSelectedRow());
+	__sortSelectedRow = __worksheet.getOriginalRowNumber(__worksheet.getSelectedRow());
 }
 
 /**
-Called when the worksheet is sorted.  Reselects the record that was selected
-prior to the sort.
+Called when the worksheet is sorted.  Reselects the record that was selected prior to the sort.
 @param worksheet the worksheet being sorted.
 @param sort the type of sort being performed.
 */
 public void worksheetSortChanged(JWorksheet worksheet, int sort) {
 	__worksheet.deselectAll();
-	__worksheet.selectRow(__worksheet.getSortedRowNumber(
-		__sortSelectedRow));
+	__worksheet.selectRow(__worksheet.getSortedRowNumber(__sortSelectedRow));
 }
 
 }

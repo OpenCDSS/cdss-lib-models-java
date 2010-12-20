@@ -85,10 +85,9 @@ public static String MISSING_STRING = 		"";
 /**
 Reference to the _dataset into which all the StateMod_* data objects are 
 being placed.  It is used statically because this way every object that extends
-StateMod_Data will have a reference to the same dataset for using the 
-setDirty() method.
+StateMod_Data will have a reference to the same dataset for using the setDirty() method.
 */
-protected static StateMod_DataSet _dataset;
+protected static StateMod_DataSet _dataset = null;
 
 /**
 Whether the data is dirty or not.
@@ -96,7 +95,7 @@ Whether the data is dirty or not.
 protected boolean _isDirty = false;
 
 /**
-Whether this object is a clone (ie, data that can be cancelled out of).
+Whether this object is a clone (i.e. data that can be canceled out of).
 */
 protected boolean _isClone = false;
 
@@ -162,14 +161,12 @@ protected Object _original;
 /**
 Each GRShape has a pointer to the StateMod_Data which is its associated object.
 This variable whether this object's location was found.  We could
-have pointed back to the GRShape, but I was trying to avoid including GR in
-this package.
+have pointed back to the GRShape, but I was trying to avoid including GR in this package.
 Add a GeoRecord _georecord; object to derived classes that really have 
-locational information.  Adding it here would bloat the code since 
+location information.  Adding it here would bloat the code since 
 StateMod_Data is the base class for most other classes.
 */
 public boolean _shape_found;
-
 
 /**
 Constructor.
@@ -299,7 +296,6 @@ Return the Cgoto.
 public String getCgoto() {
 	return _cgoto;
 }
-
 
 /**
 Return the comment.

@@ -330,9 +330,10 @@ Soil available water content, from StateCU file.
 protected double _awc;
 
 /**
-Reference to spatial data for this diversion -- currently NOT cloned.
+Reference to spatial data for this diversion -- currently NOT cloned.  If null, then no spatial data
+are available.
 */
-protected GeoRecord _georecord;
+protected GeoRecord _georecord = null;
 
 /**
 Vector of parcel data, in particular to allow StateDMI to detect when a diversion had no data.
@@ -1508,7 +1509,7 @@ public static List getIrturnChoices ( boolean include_notes )
 	v.add ( "0 - Storage" );
 	v.add ( "1 - Irrigation" );
 	v.add ( "2 - Municipal" );
-	v.add ( "3 - N/A" );
+	v.add ( "3 - Carrier" );
 	v.add ( "4 - Transmountain" );
 	v.add ( "5 - Other" );
 	if ( !include_notes ) {

@@ -44,65 +44,81 @@ import java.util.List;
 
 import javax.swing.JFrame;
 
+import cdss.domain.hydrology.network.HydrologyNode;
+
+import RTi.GIS.GeoView.GeoRecord;
+import RTi.GIS.GeoView.GeoViewAnnotationRenderer;
+import RTi.GIS.GeoView.GeoViewJComponent;
+import RTi.GIS.GeoView.GeoViewJPanel;
+import RTi.GR.GRColor;
+import RTi.GR.GRDrawingArea;
+import RTi.GR.GRDrawingAreaUtil;
+import RTi.GR.GRPoint;
+import RTi.GR.GRText;
 import RTi.GRTS.TSViewJFrame;
 import RTi.Util.GUI.ReportJFrame;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 
 /**
+<p>
 The StateMod_DataSet_WindowManager class opens/manages/closes display windows
 for StateMod data set component data.  Currently, only the main windows
 (e.g., Diversion, Reservoir, but not the secondary windows) are managed and
 only one of each main window is allowed to be open at a time.  In the future,
 secondary windows may also be managed more closely but currently more than one
 copy of secondary windows can be opened at the same time.
+</p>
+<p>
+An instance of the window manager also helps with window coordination, such as initiating a request
+to display (annotate) a data object on the map or network.
+</p>
 */
 public class StateMod_DataSet_WindowManager
-implements WindowListener
+implements WindowListener, GeoViewAnnotationRenderer, StateMod_Network_AnnotationRenderer
 {
 
 /**
 Window status settings.  See setWindowOpen(), etc.
 */
 private final int 
-	CLOSED = 	0,
-	OPEN = 		1;
+	CLOSED = 0,
+	OPEN = 1;
 	// INVISIBLE - might be needed if we decide to not fully destroy
 	// windows - that is why an integer is tracked (not a boolean)
 
 /**
 Windows numbers, managed by the StateMod_GUI - list in the order of the data
 set components, although there is not a one to one correspondence.
+Note that the network editor is not managed by this component and must be opened/closed separately.
 */
 public static final int 
-	WINDOW_MAIN = 			0,	// Main interface - this is
-						// currently used to supply some
-						// listeners for closing windows
-						// opened by displayWindow().
-	WINDOW_CONTROL = 		1,	// Control 
-	WINDOW_OUTPUT_CONTROL = 	2,	// Control 
-	WINDOW_RESPONSE	= 		3,	// Response file
-	WINDOW_STREAMGAGE =		4,	// Stream gage stations
-	WINDOW_DELAY_TABLE_MONTHLY =	5,	// Delay tables (monthly)
-	WINDOW_DELAY_TABLE_DAILY = 	6,	// Delay tables (daily)
-	WINDOW_DIVERSION = 		7,	// Diversions
-	WINDOW_PRECIPITATION = 		8,	// Precipitation time series
-	WINDOW_EVAPORATION = 		9,	// Evaporation time series
-	WINDOW_RESERVOIR = 		10,	// Reservoirs
-	WINDOW_INSTREAM = 		11,	// Instream flows
-	WINDOW_WELL = 			12,	// Wells
-	WINDOW_PLAN = 			13,	// Plans
-	WINDOW_STREAMESTIMATE	= 	14,	// Stream estimate stations
-	WINDOW_RIVER_NETWORK = 		15,	// River network
-	WINDOW_OPERATIONAL_RIGHT = 	16,	// Operational rights
+	WINDOW_MAIN = 0, // Main interface - currently used to supply some
+						// listeners for closing windows opened by displayWindow().
+	WINDOW_CONTROL = 1, // Control 
+	WINDOW_OUTPUT_CONTROL = 2, // Control 
+	WINDOW_RESPONSE	= 3, // Response file
+	WINDOW_STREAMGAGE = 4, // Stream gage stations
+	WINDOW_DELAY_TABLE_MONTHLY = 5, // Delay tables (monthly)
+	WINDOW_DELAY_TABLE_DAILY = 6, // Delay tables (daily)
+	WINDOW_DIVERSION = 7, // Diversions
+	WINDOW_PRECIPITATION = 8, // Precipitation time series
+	WINDOW_EVAPORATION = 9, // Evaporation time series
+	WINDOW_RESERVOIR = 10, // Reservoirs
+	WINDOW_INSTREAM = 11, // Instream flows
+	WINDOW_WELL = 12, // Wells
+	WINDOW_PLAN = 13, // Plans
+	WINDOW_STREAMESTIMATE = 14, // Stream estimate stations
+	WINDOW_RIVER_NETWORK = 15, // River network
+	WINDOW_OPERATIONAL_RIGHT = 16, // Operational rights
 	// The following are actions that modify or view data...
-	WINDOW_ADD_NODE = 		17,	// Add node
-	WINDOW_DELETE_NODE = 		18,	// Delete node
-	WINDOW_DATASET_SUMMARY =	19,	// Data set summary
-	WINDOW_RUN_REPORT = 		20,	// Run Statemod -report
-	WINDOW_GRAPHING_TOOL = 		21,	// Graphing tool?
-	WINDOW_RUN_DELPLT = 		22,	// Run delplt
-	WINDOW_QUERY_TOOL = 		23;	// Query tool
+	WINDOW_ADD_NODE = 17, // Add node
+	WINDOW_DELETE_NODE = 18, // Delete node
+	WINDOW_DATASET_SUMMARY = 19, // Data set summary
+	WINDOW_RUN_REPORT = 20, // Run Statemod -report
+	WINDOW_GRAPHING_TOOL = 21, // Graphing tool?
+	WINDOW_RUN_DELPLT = 22, // Run delplt
+	WINDOW_QUERY_TOOL = 23; // Query tool
 
 /**
 The number of windows handled by the methods in this class.
@@ -123,6 +139,16 @@ private JFrame __windows[];
 Data set for which windows are being managed.
 */
 private StateMod_DataSet __dataset = null;
+
+/**
+Map panel, needed for interaction between editor windows and the map.
+*/
+private GeoViewJPanel __mapPanel = null;
+
+/**
+Network editor window, needed for interaction between editor windows and the network.
+*/
+private StateMod_Network_JFrame __networkEditor = null;
 
 /**
 Constructor.
@@ -204,8 +230,7 @@ Format a summary report about the data set and display in a report window.
 */
 private JFrame displayDataSetSummary ( StateMod_DataSet dataset )
 {	if ( dataset == null ) {
-		// Should not happen because menu should be disabled if no data
-		// set...
+		// Should not happen because menu should be disabled if no data set...
 		return null;
 	}
 	PropList props = new PropList("Data Set Summary");
@@ -217,7 +242,6 @@ private JFrame displayDataSetSummary ( StateMod_DataSet dataset )
 	// to set its "close" status in this window manager, so need to listen
 	// for a close event here...
 	f.addWindowListener ( this );
-	props = null;
 	return f;
 }
 
@@ -231,7 +255,7 @@ public JFrame displayWindow ( int window_type )
 {	return displayWindow ( window_type, true );
 }
 
-// REVISIT - how to deal with printStatus and other calls that need the
+// TODO - how to deal with printStatus and other calls that need the
 // StateModGUI_JFrame - for now comment out the calls.
 /**
 Show the indicated window type.  If that window type is already displayed,
@@ -254,8 +278,7 @@ public JFrame displayWindow ( int window_type, boolean editable )
 		}
 		// Now make sure it is in the front...
 		win.toFront();
-		Message.printStatus ( 2, "displayWindow",
-		"Window displayed (already open): " + window_type );
+		Message.printStatus ( 2, "displayWindow", "Window displayed (already open): " + window_type );
 	}
 
 	// Create window for the appropriate window.
@@ -268,39 +291,33 @@ public JFrame displayWindow ( int window_type, boolean editable )
 	}
 	else if ( window_type == WINDOW_CONTROL ) {
 		//printStatus("Initializing control edit window.", WAIT);
-		win = new StateMod_Control_JFrame(
-			__dataset, this, true );
+		win = new StateMod_Control_JFrame( __dataset, this, true );
 		setWindowOpen ( WINDOW_CONTROL, win );
 	}
 	else if ( window_type == WINDOW_RESPONSE ) {
 		// printStatus("Initializing response window.", WAIT);
-		win = new StateMod_Response_JFrame (
-			__dataset, this);
+		win = new StateMod_Response_JFrame (__dataset, this);
 		setWindowOpen(WINDOW_RESPONSE, win);
 	}
 	else if ( window_type == WINDOW_STREAMGAGE ) {
 		//printStatus("Initializing river station window.", WAIT);
 		setWindowOpen ( WINDOW_STREAMGAGE, win );
-		win = new StateMod_StreamGage_JFrame(
-			__dataset, this, true);
+		win = new StateMod_StreamGage_JFrame(__dataset, this, true);
 	}
 	else if ( window_type == WINDOW_DELAY_TABLE_MONTHLY ) {
 		//printStatus("Initializing delay edit window.", WAIT);
-		win = new StateMod_DelayTable_JFrame(
-			__dataset, this, true, true );
+		win = new StateMod_DelayTable_JFrame( __dataset, this, true, true );
 		setWindowOpen ( WINDOW_DELAY_TABLE_MONTHLY, win );
 	}
 	else if ( window_type == WINDOW_DELAY_TABLE_DAILY ) {
 		//printStatus("Initializing delay edit window.", WAIT);
-		win = new StateMod_DelayTable_JFrame(
-			__dataset, this, false, true );
+		win = new StateMod_DelayTable_JFrame( __dataset, this, false, true );
 		setWindowOpen ( WINDOW_DELAY_TABLE_DAILY, win );
 	}
 	else if ( window_type == WINDOW_DIVERSION ) {
 		//printStatus("Initializing diversions edit window.", WAIT);
 		setWindowOpen ( WINDOW_DIVERSION, win );
-		win = new StateMod_Diversion_JFrame(
-			__dataset, this, true );
+		win = new StateMod_Diversion_JFrame( __dataset, this, true );
 	}
 	else if ( window_type == WINDOW_PRECIPITATION ) {
 		// Don't have a special window - just display all precipitation
@@ -319,19 +336,16 @@ public JFrame displayWindow ( int window_type, boolean editable )
 		props.set ( "PrintFont", "Courier" );
 		props.set ( "PrintSize", "7" );
 		props.set ( "PageLength", "100" );
-		try {	win = new TSViewJFrame (
-			(List)(__dataset.getComponentForComponentType(
-			StateMod_DataSet.COMP_PRECIPITATION_TS_MONTHLY)).
-			getData(), props );
+		try {
+			win = new TSViewJFrame ( (List)(__dataset.getComponentForComponentType(
+			StateMod_DataSet.COMP_PRECIPITATION_TS_MONTHLY)).getData(), props );
 			setWindowOpen ( WINDOW_PRECIPITATION, win );
 			// Use a window listener to know when the window closes
-			// so that it can be managed like all the other data
-			// windows.
+			// so that it can be managed like all the other data windows.
 			win.addWindowListener ( this );
 		}
 		catch ( Exception e ) {
-			Message.printWarning ( 1, routine,
-			"Error displaying precipitation data." );
+			Message.printWarning ( 1, routine, "Error displaying precipitation data." );
 			Message.printWarning ( 2, routine, e );
 		}
 	}
@@ -352,38 +366,32 @@ public JFrame displayWindow ( int window_type, boolean editable )
 		props.set ( "PrintFont", "Courier" );
 		props.set ( "PrintSize", "7" );
 		props.set ( "PageLength", "100" );
-		try {	win = new TSViewJFrame (
-			(List)(__dataset.getComponentForComponentType(
-			StateMod_DataSet.COMP_EVAPORATION_TS_MONTHLY)).
-			getData(), props );
+		try {
+			win = new TSViewJFrame ( (List)(__dataset.getComponentForComponentType(
+				StateMod_DataSet.COMP_EVAPORATION_TS_MONTHLY)).getData(), props );
 			setWindowOpen ( WINDOW_EVAPORATION, win );
 			// Use a window listener to know when the window closes
-			// so that it can be managed like all the other data
-			// windows.
+			// so that it can be managed like all the other data windows.
 			win.addWindowListener ( this );
 		}
 		catch ( Exception e ) {
-			Message.printWarning ( 1, routine,
-			"Error displaying precipitation data." );
+			Message.printWarning ( 1, routine, "Error displaying precipitation data." );
 			Message.printWarning ( 2, routine, e );
 		}
 	}
 	else if ( window_type == WINDOW_RESERVOIR ) {
 		//printStatus("Initializing reservoirs edit window.", WAIT);
-		win = new StateMod_Reservoir_JFrame(
-			__dataset, this, true );
+		win = new StateMod_Reservoir_JFrame( __dataset, this, true );
 		setWindowOpen ( WINDOW_RESERVOIR, win );
 	}
 	else if ( window_type == WINDOW_INSTREAM ) {
 		//printStatus("Initializing instream flows edit window.",WAIT);
 		setWindowOpen ( WINDOW_INSTREAM, win );
-		win = new StateMod_InstreamFlow_JFrame(
-			__dataset, this, true );
+		win = new StateMod_InstreamFlow_JFrame( __dataset, this, true );
 	}
 	else if ( window_type == WINDOW_WELL ) {
 		//printStatus("Initializing well edit window.", WAIT);
-		win = new StateMod_Well_JFrame(
-			__dataset, this, true );
+		win = new StateMod_Well_JFrame( __dataset, this, true );
 		setWindowOpen ( WINDOW_WELL, win );
 	}
 	else if ( window_type == WINDOW_PLAN ) {
@@ -393,43 +401,54 @@ public JFrame displayWindow ( int window_type, boolean editable )
 	}
 	else if ( window_type == WINDOW_STREAMESTIMATE ) {
 		//printStatus("Initializing baseflows edit window.", WAIT);
-		win = new StateMod_StreamEstimate_JFrame(
-			__dataset, this, true);
+		win = new StateMod_StreamEstimate_JFrame(__dataset, this, true);
 		setWindowOpen ( WINDOW_STREAMESTIMATE, win );
 	}
 	else if ( window_type == WINDOW_RIVER_NETWORK ) {
 		//printStatus("Initializing river network edit window.", WAIT);
-		win = new StateMod_RiverNetworkNode_JFrame(
-			__dataset, this, true);
+		win = new StateMod_RiverNetworkNode_JFrame(__dataset, this, true);
 		setWindowOpen ( WINDOW_RIVER_NETWORK, win );
 	}
 	else if ( window_type == WINDOW_OPERATIONAL_RIGHT ) {
 		//printStatus("Initializing operational rights window.",WAIT);
-		win = new StateMod_OperationalRight_JFrame(
-			__dataset, this, true );
+		win = new StateMod_OperationalRight_JFrame( __dataset, this, true );
 		setWindowOpen ( WINDOW_OPERATIONAL_RIGHT, win );
 	}
 	else if ( window_type == WINDOW_QUERY_TOOL ) {
 		win = new StateMod_QueryTool_JFrame( __dataset, this );
 		setWindowOpen ( WINDOW_QUERY_TOOL, win );
 	}
-	else {	Message.printWarning(2, routine, "Unable to display specified "
-			+ "window type: " + window_type);
+	else {
+		Message.printWarning(2, routine, "Unable to display specified window type: " + window_type);
 	}
 
 	//JGUIUtil.setWaitCursor(this, false);
 	//printStatus("Ready", READY);
 
-	// Return the JFrame so that it is easy for other code to do subsequent
-	// calls...
+	// Return the JFrame so that it is easy for other code to do subsequent calls...
 
 	return win;
 }
 
 /**
+Return the map panel used for StateMod.
+*/
+private GeoViewJPanel getMapPanel ()
+{
+	return __mapPanel;
+}
+
+/**
+Return the network editor used for StateMod.
+*/
+private StateMod_Network_JFrame getNetworkEditor ()
+{
+	return __networkEditor;
+}
+
+/**
 Returns the window at the specified position.
-@param win_index the position of the window (should be one of the public fields
-above).
+@param win_index the position of the window (should be one of the public fields above).
 @return the window at the specified position.
 */
 public JFrame getWindow(int win_index) {
@@ -438,8 +457,7 @@ public JFrame getWindow(int win_index) {
 
 /**
 Returns the status of the window at the specified position.
-@param win_index the position of the window (should be one of the public fields
-above).
+@param win_index the position of the window (should be one of the public fields above).
 @return the status of the window at the specified position.
 */
 public int getWindowStatus(int win_index) {
@@ -467,8 +485,7 @@ previous version of the GUI.
 @param always_open If true, the window will always be opened.  If false, no
 action will occur if the window was not originally opened.
 @return the JFrame that was refreshed.  This is used, for example, to move the
-window to the front (but it is not automatically moved to the front by this
-method).
+window to the front (but it is not automatically moved to the front by this method).
 */
 public JFrame refreshWindow ( int win_type, boolean always_open )
 {	// Check to see if the window was opened...
@@ -477,13 +494,63 @@ public JFrame refreshWindow ( int win_type, boolean always_open )
 	// First close the window...
 	closeWindow ( win_type );
 	// Now open if requested or if it was previously open...
-	if (	(status == OPEN) ||
+	if ( (status == OPEN) ||
 		// Window was opened before so open again...
 		always_open ) {
 		// Window was not opened before but want to open it now...
 		window = displayWindow ( win_type );
 	}
 	return window;
+}
+
+/**
+Render an object as an annotation on the GeoView map.
+@param geoviewPanel the map object
+@param objectToRender the object to render as an annotation on the map
+@param label the string that is used to label the annotation on the map
+*/
+public void renderGeoViewAnnotation ( GeoViewJComponent geoview, Object objectToRender, String label )
+{
+	GeoRecord geoRecord = null;
+	GRPoint point = null;
+	if ( objectToRender instanceof StateMod_Diversion ) {
+		Message.printStatus(2, "", "Rendering \"" + label + "\" annotation on map." );
+		StateMod_Diversion div = (StateMod_Diversion)objectToRender;
+		geoRecord = div.getGeoRecord();
+		point = (GRPoint)geoRecord.getShape();
+	}
+	GRDrawingArea da = geoview.getDrawingArea();
+	//GRShape shape = new 
+	//GRDrawingAreaUtil.drawShape(da, shape );
+	GRDrawingAreaUtil.setColor(da, GRColor.magenta );
+	GRDrawingAreaUtil.drawText(da, label, point.getX(), point.getY(), 0.0, GRText.CENTER_X|GRText.CENTER_Y );
+}
+
+/**
+Render an object as an annotation on the network editor.
+@param geoviewPanel the map object
+@param objectToRender the object to render as an annotation on the map
+@param label the string that is used to label the annotation on the map
+*/
+public void renderStateModNetworkAnnotation ( StateMod_Network_JComponent network, Object objectToRender, String label )
+{
+	//GRPoint point = null;
+	String commonID = null;
+	if ( objectToRender instanceof StateMod_Diversion ) {
+		Message.printStatus(2, "", "Rendering \"" + label + "\" annotation on network." );
+		StateMod_Diversion div = (StateMod_Diversion)objectToRender;
+		commonID = div.getID();
+	}
+	if ( commonID != null ) {
+		// Find the node in the network and scroll to it.
+		HydrologyNode node = network.findNode ( commonID, false, true );
+		// Draw the annotated version on top...
+		GRDrawingArea da = network.getDrawingArea();
+		//GRShape shape = new 
+		//GRDrawingAreaUtil.drawShape(da, shape );
+		GRDrawingAreaUtil.setColor(da, GRColor.magenta );
+		GRDrawingAreaUtil.drawText(da, label, node.getX(), node.getY(), 0.0, GRText.CENTER_X|GRText.CENTER_Y );
+	}
 }
 
 /**
@@ -504,9 +571,24 @@ public void setDataSet(StateMod_DataSet dataset) {
 }
 
 /**
+Set the map panel.
+*/
+public void setMapPanel ( GeoViewJPanel mapPanel )
+{
+	__mapPanel = mapPanel;
+}
+
+/**
+Set the network editor.
+*/
+public void setNetworkEditor ( StateMod_Network_JFrame networkEditor )
+{
+	__networkEditor = networkEditor;
+}
+
+/**
 Sets the window at the specified position.
-@param win_index the position of the window (should be one of the public fields
-above).
+@param win_index the position of the window (should be one of the public fields above).
 @param window the window to set.
 */
 public void setWindow(int win_index, JFrame window) {
@@ -523,14 +605,12 @@ windows (so that only one copy of a data set group window is open at a time).
 public void setWindowOpen(int win_type, JFrame window)
 {	setWindow(win_type, window);
 	setWindowStatus(win_type, OPEN);
-	Message.printStatus ( 1, "setWindowOpen", "Window set open: " +
-		win_type );
+	Message.printStatus ( 1, "setWindowOpen", "Window set open: " + win_type );
 }
 
 /**
 Sets the window at the specified position to be either OPEN or CLOSED.
-@param win_index the position of the window (should be one of the public fields
-above).
+@param win_index the position of the window (should be one of the public fields above).
 @param status the status of the window (OPEN or CLOSED)
 */
 private void setWindowStatus ( int win_index, int status )
@@ -538,14 +618,38 @@ private void setWindowStatus ( int win_index, int status )
 }
 
 /**
+Show a StateMod data object on the map.  This method simply helps with the hand-off of information.
+@param smData the StateMod data object to display on the map
+@param label the label for the data object on the map
+*/
+public void showOnMap ( StateMod_Data smData, String label )
+{
+	GeoViewJPanel geoviewPanel = getMapPanel();
+	if ( geoviewPanel != null ) {
+		geoviewPanel.addAnnotationRenderer ( this, smData, label, true );
+	}
+}
+
+/**
+Show a StateMod data object on the network.  This method simply helps with the hand-off of information.
+@param smData the StateMod data object to display on the network
+@param label the label for the data object on the network
+*/
+public void showOnNetwork ( StateMod_Data smData, String label )
+{
+	StateMod_Network_JFrame networkEditor = getNetworkEditor();
+	if ( networkEditor != null ) {
+		networkEditor.addAnnotationRenderer ( this, smData, label, true );
+	}
+}
+
+/**
 Update the status of a window.  This is primarily used to update the status
-of the main JFrame, with the title and menus being updated if the data set
-has been modified.
+of the main JFrame, with the title and menus being updated if the data set has been modified.
 */
 public void updateWindowStatus ( int win_type )
 {	if ( win_type == WINDOW_MAIN ) {
-		StateMod_GUIUpdatable window =
-			(StateMod_GUIUpdatable)getWindow ( win_type );
+		StateMod_GUIUpdatable window = (StateMod_GUIUpdatable)getWindow ( win_type );
 		window.updateWindowStatus ();
 	}
 }
@@ -556,8 +660,7 @@ Responds to window activated events; does nothing.
 */
 public void windowActivated(WindowEvent evt) {}
 
-// REVISIT SAM 2006-08-16
-// Perhaps all windows should be listened for here to simplify the individual
+// TODO SAM 2006-08-16 Perhaps all windows should be listened for here to simplify the individual
 // window code.
 /**
 Responds to window closed events.  The following windows are handled because
@@ -616,4 +719,4 @@ Responds to window opened events; does nothing.
 */
 public void windowOpened(WindowEvent evt) {}
 
-} // End StateMod_DataSet_WindowManager
+}

@@ -199,9 +199,9 @@ private StateMod_OutputControl_TableModel __tableModel;
 /**
 Specific dataset components that are kept handy.
 */
-private DataSetComponent
-	__riverNetworkComp = null;
+private DataSetComponent __riverNetworkComp = null;
 
+// TODO SAM 2010-12-18 Needs an editable parameter like for other data files
 /** 
 Constructor for output control
 @param dataset the dataset containing the data

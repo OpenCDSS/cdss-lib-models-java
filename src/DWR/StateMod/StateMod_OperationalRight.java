@@ -1575,15 +1575,15 @@ throws Exception {
 			// ...end reading additional data after monthly and intervening structure data
 
 			// add the operational right to the vector of rights
-			Message.printStatus ( 2, routine, "Adding recognized operational right \"" +
-					anOprit.getID() + "\" from full read.");
+			Message.printStatus ( 2, routine, "Adding recognized operational right type " + rightType +
+			    " \"" + anOprit.getID() + "\" from full read.");
 			theOprits.add(anOprit);
 		}
 		// All lines have been read.
 		if ( readingUnknownRight ) {
 			// Last line was part of the unknown right so need to add what there was.
-			Message.printStatus ( 2, routine, "Adding unrecognized operational right \"" +
-					anOprit.getID() + "\" as text.");
+			Message.printStatus ( 2, routine, "Adding unrecognized operational right type " + rightType +
+				" \"" + anOprit.getID() + "\" as text.");
 			theOprits.add(anOprit);
 		}
 	}

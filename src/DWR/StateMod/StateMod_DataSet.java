@@ -5303,6 +5303,12 @@ throws IllegalArgumentException, IOException
 	File f = new File(filename);
 	setDataSetDirectory(f.getParent());
 	setDataSetFileName(f.getName());
+	
+	// String printed at the end of warning messages
+	String warningEndString = "\".";
+	if ( useGUI ) {
+		warningEndString = "\"\nInteractive edits for file will be disabled.";
+	}
 
 	// Check whether the response file is free format.  If it is free
 	// format then the file is read into a PropList below...
@@ -5380,17 +5386,20 @@ throws IllegalArgumentException, IOException
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
 				readStateModControlFile(fn);
-				comp.setDirty ( false );
-				// Control does not have its own data file now so use the data set.
-				comp.setData ( this );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds() );
 			}
-			
 		}
 		catch (Exception e) {
-			Message.printWarning(1, routine, "Unexpected error reading control file:\n" + "\"" + fn + "\"");
-			Message.printWarning(2, routine, e);
+			Message.printWarning(1, routine, "Unexpected error reading control file:\n" + "\"" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			// Control does not have its own data file now so use the data set.
+			comp.setData ( this );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	
 		// River network file (.rin)...
@@ -5409,13 +5418,18 @@ throws IllegalArgumentException, IOException
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
 				comp.setData( StateMod_RiverNetworkNode.readStateModFile(fn) );
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds() );
 			}
-		} catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading river network file:\n\"" + fn + "\"");
-			Message.printWarning(2, routine, e);
+		}
+		catch (Exception e) {
+			Message.printWarning(1, routine, "Error reading river network file:\n\"" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	
 		// Reservoir stations file (.res)...
@@ -5434,14 +5448,18 @@ throws IllegalArgumentException, IOException
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
 				comp.setData( StateMod_Reservoir.readStateModFile(fn) );
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds() );
 			}
 		}
 		catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading reservoir station file:\n\"" + fn +"\"");
-			Message.printWarning(2, routine, e);
+			Message.printWarning(1, routine, "Error reading reservoir station file:\n\"" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	
 		// Diversion stations file (.dds)...
@@ -5460,14 +5478,18 @@ throws IllegalArgumentException, IOException
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
 				comp.setData( StateMod_Diversion.readStateModFile(fn) );
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds() );
 			}
 		}
 		catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading diversion station file:\n\"" + fn +"\"");
-			Message.printWarning(2, routine, e);
+			Message.printWarning(1, routine, "Error reading diversion station file:\n\"" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	
 		// Stream gage stations file (.ris)...
@@ -5486,14 +5508,18 @@ throws IllegalArgumentException, IOException
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
 				comp.setData(StateMod_StreamGage.readStateModFile(fn) );
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds() );
 			}
 		}
 		catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading stream gage stations file:\n\""+fn+"\"");
-			Message.printWarning(2, routine, e);
+			Message.printWarning(1, routine, "Error reading stream gage stations file:\n\""+fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	
 		// If not a free-format data set with separate stream estimate station,
@@ -5528,14 +5554,18 @@ throws IllegalArgumentException, IOException
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
 				comp.setData( StateMod_StreamEstimate.readStateModFile(fn) );
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds() );
 			}
 		}
 		catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading stream estimate stations file:\n\"" + fn + "\"");
-			Message.printWarning(2, routine, e);
+			Message.printWarning(1, routine, "Error reading stream estimate stations file:\n\"" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	
 		// Instream flow stations file (.ifs)...
@@ -5554,13 +5584,18 @@ throws IllegalArgumentException, IOException
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
 				comp.setData ( StateMod_InstreamFlow.readStateModFile(fn) );
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds() );
 			}
-		} catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading instream flow station file:\n\""+fn+"\"");
-			Message.printWarning(2, routine, e);
+		}
+		catch (Exception e) {
+			Message.printWarning(1, routine, "Error reading instream flow station file:\n\""+fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	
 		// Well stations...
@@ -5579,14 +5614,18 @@ throws IllegalArgumentException, IOException
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
 				comp.setData( StateMod_Well.readStateModFile(fn) );
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds());
 			}
 		}
 		catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading well station file:\n\"" + fn + "\"");
-			Message.printWarning(2, routine, e);
+			Message.printWarning(1, routine, "Error reading well station file:\n\"" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds());
 		}
 	
 		// Plans...
@@ -5608,14 +5647,18 @@ throws IllegalArgumentException, IOException
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
 				comp.setData( StateMod_Plan.readStateModFile(fn) );
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds());
 			}
 		}
 		catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading plan file:\n\"" + fn + "\"");
-			Message.printWarning(2, routine, e);
+			Message.printWarning(1, routine, "Error reading plan file:\n\"" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds());
 		}
 	
 		// Instream flow rights file (.ifr)...
@@ -5634,17 +5677,21 @@ throws IllegalArgumentException, IOException
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
 				comp.setData( StateMod_InstreamFlowRight.readStateModFile(fn) );
-				comp.setDirty ( false );
 				Message.printStatus ( 1, routine, "Connecting instream flow rights to stations.");
 				StateMod_InstreamFlow.connectAllRights(
 					(List)getComponentForComponentType ( COMP_INSTREAM_STATIONS ).getData(), (List)comp.getData() );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds() );
 			}
 		}
 		catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading instream flow rights file:\n\"" + fn+"\"");
-			Message.printWarning(2, routine, e);
+			Message.printWarning(1, routine, "Error reading instream flow rights file:\n\"" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	
 		// Reservoir rights file (.rer)...
@@ -5663,17 +5710,21 @@ throws IllegalArgumentException, IOException
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
 				comp.setData( StateMod_ReservoirRight.readStateModFile(fn) );
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds() );
 				Message.printStatus ( 1, routine, "Connecting reservoir rights with reservoir stations.");
 				StateMod_Reservoir.connectAllRights(
 					(List)getComponentForComponentType( COMP_RESERVOIR_STATIONS).getData(), (List)comp.getData());
 			}
 		}
 		catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading reservoir rights file:\n\"" + fn + "\"");
-			Message.printWarning(2, routine, e);
+			Message.printWarning(1, routine, "Error reading reservoir rights file:\n\"" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 		
 		// Diversion rights file (.ddr)...
@@ -5692,17 +5743,21 @@ throws IllegalArgumentException, IOException
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
 				comp.setData( StateMod_DiversionRight.readStateModFile(fn) );
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds() );
 				Message.printStatus ( 1, routine, "Connecting diversion rights to diversion stations" );
 				StateMod_Diversion.connectAllRights(
 					(List)getComponentForComponentType ( COMP_DIVERSION_STATIONS).getData(), (List)comp.getData());
 			}
 		}
 		catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading diversion rights file:\n\"" + fn + "\"");
-			Message.printWarning(2, routine, e);
+			Message.printWarning(1, routine, "Error reading diversion rights file:\n\"" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	
 		// Operational rights file (.opr)...
@@ -5721,14 +5776,18 @@ throws IllegalArgumentException, IOException
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
 				comp.setData( StateMod_OperationalRight.readStateModFile(fn));
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds() );
 			}
 		}
 		catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading operational rights file:\n\"" + fn+"\"");
-			Message.printWarning(2, routine, e);
+			Message.printWarning(1, routine, "Error reading operational rights file:\n\"" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			comp.setErrorReadingInputFile ( true );
+			Message.printWarning(3, routine, e);
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	
 		// Well rights file (.wer)...
@@ -5747,16 +5806,21 @@ throws IllegalArgumentException, IOException
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
 				comp.setData( StateMod_WellRight.readStateModFile(fn) );
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds());
 				Message.printStatus ( 1, routine, "Connecting well rights to well stations.");
 				StateMod_Well.connectAllRights(
 					(List)getComponentForComponentType( COMP_WELL_STATIONS).getData(), (List)comp.getData() );
 			}
-		} catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading well rights file:\n\"" + fn + "\"");
-			Message.printWarning(2, routine, e);
+		}
+		catch (Exception e) {
+			Message.printWarning(1, routine, "Error reading well rights file:\n\"" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds());
 		}
 	
 		// Precipitation TS monthly file (.pre) - always read...
@@ -5785,14 +5849,18 @@ throws IllegalArgumentException, IOException
 					((MonthTS)v.get(i)).setDataType(lookupTimeSeriesDataType( COMP_PRECIPITATION_TS_MONTHLY ) );
 				}
 				comp.setData(v);
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds() );
 			}
 		}
 		catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading precipitation time series file:\n\"" + fn +"\"");
-			Message.printWarning(2, routine, e);
+			Message.printWarning(1, routine, "Error reading precipitation time series file:\n\"" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	
 		// Evaporation time series file (.eva) - always read...
@@ -5821,18 +5889,23 @@ throws IllegalArgumentException, IOException
 					((MonthTS)v.get(i)).setDataType( lookupTimeSeriesDataType( COMP_EVAPORATION_TS_MONTHLY ) );
 				}
 				comp.setData(v);
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds() );
 			}
 		}
 		catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading evaporation time series file:\n\"" + fn + "\"");
-			Message.printWarning(2, routine, e);
+			Message.printWarning(1, routine, "Error reading evaporation time series file:\n\"" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	
 		// Stream gage base flow time series (.rim or .xbm) - always read...
 	
+		DataSetComponent comp2 = null;
 		try {
 			fn = response_props.getValue ( "Stream_Base_Monthly" );
 			// Always set the file name...
@@ -5855,21 +5928,28 @@ throws IllegalArgumentException, IOException
 					((MonthTS)v.get(i)).setDataType( lookupTimeSeriesDataType( COMP_STREAMGAGE_BASEFLOW_TS_MONTHLY ) );
 				}
 				comp.setData(v);
-				comp.setDirty ( false );
 	
 				// The StreamGage and StreamEstimate groups share the same baseflow time series files...
 	
-				DataSetComponent comp2 = getComponentForComponentType( COMP_STREAMESTIMATE_BASEFLOW_TS_MONTHLY );
+				comp2 = getComponentForComponentType( COMP_STREAMESTIMATE_BASEFLOW_TS_MONTHLY );
 				comp2.setDataFileName ( comp.getDataFileName());
 				comp2.setData(v);
-				comp2.setDirty ( false );
-	
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds() );
 			}
-		} catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading baseflow time series (monthly) file:\n\""+ fn+"\"");
-			Message.printWarning(2, routine, e);
+		}
+		catch (Exception e) {
+			Message.printWarning(1, routine, "Error reading baseflow time series (monthly) file:\n\""+ fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			if ( comp2 != null ) {
+				// Never read data above so no need to call the following
+				comp2.setDirty ( false );
+			}
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	
 		// Diversion direct flow demand time series (monthly) file (.ddm)...
@@ -5896,15 +5976,18 @@ throws IllegalArgumentException, IOException
 					((MonthTS)v.get(i)).setDataType( lookupTimeSeriesDataType( COMP_DEMAND_TS_MONTHLY ) );
 				}
 				comp.setData(v);
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds() );
-	
 			}
 		}
 		catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading demand time series (monthly) file:\n\""+fn+"\"");
-			Message.printWarning(2, routine, e);
+			Message.printWarning(1, routine, "Error reading demand time series (monthly) file:\n\""+fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 		
 		// Direct flow demand time series override (monthly) file (.ddo)...
@@ -5931,15 +6014,18 @@ throws IllegalArgumentException, IOException
 					((MonthTS)v.get(i)).setDataType( lookupTimeSeriesDataType(COMP_DEMAND_TS_OVERRIDE_MONTHLY ) );
 				}
 				comp.setData(v);
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds() );
-	
 			}
 		}
 		catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading demand time series override (monthly) file:\n\""+fn+"\"");
-			Message.printWarning(2, routine, e);
+			Message.printWarning(1, routine, "Error reading demand time series override (monthly) file:\n\""+fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 		
 		// Direct flow demand time series average (monthly) file (.dda)...
@@ -5966,14 +6052,18 @@ throws IllegalArgumentException, IOException
 					((MonthTS)v.get(i)).setDataType( lookupTimeSeriesDataType( COMP_DEMAND_TS_AVERAGE_MONTHLY ) );
 				}
 				comp.setData(v);
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds() );
 			}
 		}
 		catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading demand time series (average monthly) file:\n\""+fn+"\"");
-			Message.printWarning(2, routine, e);
+			Message.printWarning(1, routine, "Error reading demand time series (average monthly) file:\n\""+fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 		
 		// Monthly instream flow demand...
@@ -6000,14 +6090,19 @@ throws IllegalArgumentException, IOException
 					((MonthTS)v.get(i)).setDataType(lookupTimeSeriesDataType(COMP_INSTREAM_DEMAND_TS_MONTHLY ) );
 				}
 				comp.setData(v);
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds());
 			}
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			Message.printWarning(1, routine, 
-			"Error reading monthly instream flow demand time series file:\n\"" + fn + "\"");
-			Message.printWarning(2, routine, e);
+				"Error reading monthly instream flow demand time series file:\n\"" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds());
 		}
 	
 		// Instream demand time series (average monthly) file (.ifa)...
@@ -6035,14 +6130,18 @@ throws IllegalArgumentException, IOException
 							lookupTimeSeriesDataType( COMP_INSTREAM_DEMAND_TS_AVERAGE_MONTHLY ) );
 				}
 				comp.setData(v);
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds() );
 			}
 		}
 		catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading instream flow demand time series file:\n\"" + fn + "\"");
-			Message.printWarning(2, routine, e);
+			Message.printWarning(1, routine, "Error reading instream flow demand time series file:\n\"" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	
 		// Well demand time series (monthly) file (.wem)...
@@ -6069,13 +6168,18 @@ throws IllegalArgumentException, IOException
 					((MonthTS)v.get(i)).setDataType( lookupTimeSeriesDataType( COMP_WELL_DEMAND_TS_MONTHLY ) );
 				}
 				comp.setData(v);
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds());
 			}
-		} catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading well demand time series (monthly) file:\n" + fn + "\"");
-			Message.printWarning(2, routine, e);
+		}
+		catch (Exception e) {
+			Message.printWarning(1, routine, "Error reading well demand time series (monthly) file:\n" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds());
 		}
 	
 		// Delay file (monthly) file (.dly)...
@@ -6094,14 +6198,18 @@ throws IllegalArgumentException, IOException
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
 				comp.setData( StateMod_DelayTable.readStateModFile(	fn,true,getInterv()) );
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds() );
 			}
 		}
 		catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading delay table (monthly) file:\n\"" + fn + "\"");
-			Message.printWarning(2, routine, e);
+			Message.printWarning(1, routine, "Error reading delay table (monthly) file:\n\"" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	
 		// Reservoir target time series (monthly) file (.tar)...
@@ -6135,14 +6243,18 @@ throws IllegalArgumentException, IOException
 					}
 				}
 				comp.setData(v);
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds() );
 			}
 		}
 		catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading reservoir target time series (monthly) file:\n\"" + fn + "\"");
-			Message.printWarning(2, routine, e);
+			Message.printWarning(1, routine, "Error reading reservoir target time series (monthly) file:\n\"" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	
 		// TODO - San Juan Sediment Recovery
@@ -6155,13 +6267,21 @@ throws IllegalArgumentException, IOException
 				comp.setDataFileName ( fn );
 			}
 			// Read the data...
+			//readInputAnnounce1(comp);
 			if ( (fn != null) && hasSanJuanData(false) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 				Message.printWarning ( 1, routine, "Do not know how to read the San Juan Recovery File." );
 			}
 		}
 		catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading San Juan Recovery file:\n\""+fn+"\"");
-			Message.printWarning(2, routine, e);
+			Message.printWarning(1, routine, "Error reading San Juan Recovery file:\n\""+fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			//readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	
 		// Irrigation practice time series (tsp/ipy)...
@@ -6180,13 +6300,18 @@ throws IllegalArgumentException, IOException
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
 				comp.setData( StateCU_IrrigationPracticeTS.readStateCUFile( fn, null, null ) );
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds());
 			}
-		} catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading irrigation practice file:\n\"" + fn + "\"");
-			Message.printWarning(2, routine, e);
+		}
+		catch (Exception e) {
+			Message.printWarning(1, routine, "Error reading irrigation practice file:\n\"" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds());
 		}
 	
 		// Irrigation water requirement (iwr) - monthly...
@@ -6214,15 +6339,18 @@ throws IllegalArgumentException, IOException
 							COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_MONTHLY));
 				}
 				comp.setData(v);
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds());
 			}
 		}
 		catch (Exception e) {
 			Message.printWarning(1,routine,"Error reading irrigation water requirement (monthly) time series " +
-			"file:\n\"" + fn + "\"");
-			Message.printWarning(2, routine, e);
+				"file:\n\"" + fn + warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds());
 		}
 	
 		// TODO - Soil moisture (StateCU STR?) - StateMod used to read PAR but the AWC is now in the STR file.
@@ -6235,13 +6363,21 @@ throws IllegalArgumentException, IOException
 				comp.setDataFileName ( fn );
 			}
 			// Read the data...
+			//readInputAnnounce1(comp, readTime.getSeconds());
 			if ( (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
 				Message.printWarning ( 2, routine, "StateCU Soil moisture File - not yet supported.");
 			}
 		}
 		catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading soil moisture file:\n\""+fn+"\"");
-			Message.printWarning(2, routine, e);
+			Message.printWarning(1, routine, "Error reading soil moisture file:\n\""+fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			//readInputAnnounce2(comp, readTime.getSeconds());
 		}
 	
 		// Reservoir content time series (monthly) file (.eom)...
@@ -6269,14 +6405,18 @@ throws IllegalArgumentException, IOException
 					((MonthTS)v.get(i)).setDataType( lookupTimeSeriesDataType ( COMP_RESERVOIR_CONTENT_TS_MONTHLY ));
 				}
 				comp.setData(v);
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds() );
 			}
 		}
 		catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading reservoir end of month time series file:\n\"" + fn + "\"");
-			Message.printWarning(2, routine, e);
+			Message.printWarning(1, routine, "Error reading reservoir end of month time series file:\n\"" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	
 		// Baseflow coefficients file (.rib)...
@@ -6295,14 +6435,18 @@ throws IllegalArgumentException, IOException
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
 				comp.setData( StateMod_StreamEstimate_Coefficients.readStateModFile(fn) );
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds() );
 			}
 		}
 		catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading baseflow coefficient file:\n\"" + fn + "\"");
-			Message.printWarning(2, routine, e);
+			Message.printWarning(1, routine, "Error reading baseflow coefficient file:\n\"" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	
 		// Historical streamflow (monthly) file (.rih)...
@@ -6330,14 +6474,18 @@ throws IllegalArgumentException, IOException
 					((MonthTS)v.get(i)).setDataType( lookupTimeSeriesDataType (COMP_STREAMGAGE_HISTORICAL_TS_MONTHLY ));
 				}
 				comp.setData(v);
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds() );
 			}
 		}
 		catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading historical streamflow time series file:\n\n\"" + fn + "\"");
-			Message.printWarning(2, routine, e);
+			Message.printWarning(1, routine, "Error reading historical streamflow time series file:\n\n\"" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	
 		// Diversion time series (historical monthly) file (.ddh)...
@@ -6364,14 +6512,18 @@ throws IllegalArgumentException, IOException
 					((MonthTS)v.get(i)).setDataType( lookupTimeSeriesDataType (COMP_DIVERSION_TS_MONTHLY ));
 				}
 				comp.setData ( v );
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds() );
 			}
 		}
 		catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading historical diversion time series (monthly) file:\n\"" + fn + "\"");
-			Message.printWarning(2, routine, e);
+			Message.printWarning(1, routine, "Error reading historical diversion time series (monthly) file:\n\"" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
 	
 		// Well historical pumping time series (monthly) file (.weh)..
@@ -6398,13 +6550,18 @@ throws IllegalArgumentException, IOException
 					((MonthTS)v.get(i)).setDataType( lookupTimeSeriesDataType ( COMP_WELL_PUMPING_TS_MONTHLY ));
 				}
 				comp.setData(v);
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds());
 			}
-		} catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading well pumping time series (monthly) file:\n\"" + fn + "\"");
-			Message.printWarning(2, routine, e);
+		}
+		catch (Exception e) {
+			Message.printWarning(1, routine, "Error reading well pumping time series (monthly) file:\n\"" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds());
 		}
 	
 		// GeoView project file...
@@ -6420,18 +6577,22 @@ throws IllegalArgumentException, IOException
 				readTime.clear();
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
-				readInputAnnounce1(comp);
-				comp.setDirty ( false );
-				readTime.stop();
-				//readInputAnnounce2(comp, readTime.getSeconds() );
-				// Read data and display when the GUI is shown - no read for data to be read if no GUI
+				//readInputAnnounce1(comp);
 			} 
 		}
 		catch (Exception e) {
 			// Print this at level 2 because the main GUI will warn if it
 			// cannot read the file.  We don't want 2 warnings.
-			Message.printWarning(2, routine, "Unable to read/process GeoView project file \"" + fn + "\"" );
-			Message.printWarning(2, routine, e);
+			Message.printWarning(2, routine, "Unable to read/process GeoView project file \"" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			//readInputAnnounce2(comp, readTime.getSeconds() );
+			// Read data and display when the GUI is shown - no read for data to be read if no GUI
 		}
 	
 		// TODO - output control - this is usually read separately when
@@ -6444,9 +6605,19 @@ throws IllegalArgumentException, IOException
 			if ( (comp != null) && (fn != null) ) {
 				comp.setDataFileName ( fn );
 			}
-		} catch (Exception e) {
-			//Message.printWarning(1, routine, "Error reading output control file:\n\""+fn+"\"");
-			//Message.printWarning(2, routine, e);
+			//readInputAnnounce1(comp, readTime.getSeconds() );
+		}
+		catch (Exception e) {
+			Message.printWarning(1, routine, "Error reading output control file:\n\""+fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			//readInputAnnounce2(comp, readTime.getSeconds() );
+			// Read data and display when the GUI is shown - no read for data to be read if no GUI
 		}
 	
 		// Stream base flow time series (daily) file (.rid)...
@@ -6474,22 +6645,28 @@ throws IllegalArgumentException, IOException
 					((DayTS)v.get(i)).setDataType( lookupTimeSeriesDataType ( COMP_STREAMGAGE_BASEFLOW_TS_DAILY ));
 				}
 				comp.setData(v);
-				comp.setDirty ( false );
 
 				// The StreamGage and StreamEstimate groups share the same baseflow time series files...
 
-				DataSetComponent comp2 = getComponentForComponentType( COMP_STREAMESTIMATE_BASEFLOW_TS_DAILY );
+				comp2 = getComponentForComponentType( COMP_STREAMESTIMATE_BASEFLOW_TS_DAILY );
 				comp2.setDataFileName ( comp.getDataFileName());
 				comp2.setData(v);
-				comp2.setDirty ( false );
-
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds());
 			}
 		}
 		catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading daily baseflow time series file:\n\"" + fn + "\"");
-			Message.printWarning(2, routine, e);
+			Message.printWarning(1, routine, "Error reading daily baseflow time series file:\n\"" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			if ( comp2 != null ) {
+				// Never read data above so no need to call the following
+				comp2.setDirty ( false );
+			}
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds());
 		}
 		
 		// Direct diversion demand time series (daily) file (.ddd)...
@@ -6516,14 +6693,18 @@ throws IllegalArgumentException, IOException
 					((DayTS)v.get(i)).setDataType( lookupTimeSeriesDataType (	COMP_DEMAND_TS_DAILY ));
 				}
 				comp.setData(v);
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds());
 			}
 		}
 		catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading daily demand time series file:\n\"" + fn + "\"");
-			Message.printWarning(2, routine, e);
+			Message.printWarning(1, routine, "Error reading daily demand time series file:\n\"" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds());
 		}
 	
 		// Instream flow demand time series (daily) file (.ifd)...
@@ -6550,15 +6731,18 @@ throws IllegalArgumentException, IOException
 					((DayTS)v.get(i)).setDataType( lookupTimeSeriesDataType ( COMP_INSTREAM_DEMAND_TS_DAILY ));
 				}
 				comp.setData(v);
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds());
 			}
 		}
 		catch (Exception e) {
 			Message.printWarning(1, routine, "Error reading daily instream flow demand time series"
-			+ " file:\n\"" + fn + "\"");
-			Message.printWarning(2, routine, e);
+				+ " file:\n\"" + fn + warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds());
 		}
 	
 		// Well demand time series (daily) file (.wed)...
@@ -6585,14 +6769,18 @@ throws IllegalArgumentException, IOException
 					((DayTS)v.get(i)).setDataType( lookupTimeSeriesDataType ( COMP_WELL_DEMAND_TS_DAILY ));
 				}
 				comp.setData(v);
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds());
 			}
 		}
 		catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading daily well demand time series file:\n\"" +fn + "\"");
-			Message.printWarning(2, routine, e);
+			Message.printWarning(1, routine, "Error reading daily well demand time series file:\n\"" +fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds());
 		}
 	
 		// Reservoir target time series (daily) file (.tad)...
@@ -6626,15 +6814,18 @@ throws IllegalArgumentException, IOException
 					}
 				}
 				comp.setData(v);
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds());
 			}
 		}
 		catch (Exception e) {
 			Message.printWarning(1, routine, "Error reading daily reservoir target time series file:\n\""
-			+ fn + "\"");
-			Message.printWarning(2, routine, e);
+				+ fn + warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds());
 		}
 	
 		// Delay table (daily)...
@@ -6653,13 +6844,18 @@ throws IllegalArgumentException, IOException
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
 				comp.setData( StateMod_DelayTable.readStateModFile(fn,false,getInterv()) );
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds());
 			}
-		} catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading delay table (daily) file:\n\"" + fn + "\"");
-			Message.printWarning(2, routine, e);
+		}
+		catch (Exception e) {
+			Message.printWarning(1, routine, "Error reading delay table (daily) file:\n\"" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds());
 		}
 	
 		// Irrigation water requirement (iwr) - daily...
@@ -6687,15 +6883,18 @@ throws IllegalArgumentException, IOException
 						COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_DAILY) );
 				}
 				comp.setData(v);
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds());
 			}
 		}
 		catch (Exception e) {
 			Message.printWarning(1, routine, "Error reading irrigation water requirement (daily) time series " +
-			"file:\n\"" + fn + "\"");
-			Message.printWarning(2, routine, e);
+			"file:\n\"" + fn + warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds());
 		}
 	
 		// Streamflow historical time series (daily) file (.riy) - always read...
@@ -6724,15 +6923,18 @@ throws IllegalArgumentException, IOException
 					lookupTimeSeriesDataType ( COMP_STREAMGAGE_HISTORICAL_TS_DAILY) );
 				}
 				comp.setData(v);
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds());
 			}
 		}
 		catch (Exception e) {
 			Message.printWarning(1, routine, "Error reading daily historical streamflow time series file:\n\"" +
-			fn+ "\"");
-			Message.printWarning(2, routine, e);
+				fn + warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds());
 		}
 	
 		// Diversion (daily) time series (.ddd)...
@@ -6760,13 +6962,18 @@ throws IllegalArgumentException, IOException
 					((DayTS)v.get(i)).setDataType( lookupTimeSeriesDataType (	COMP_DIVERSION_TS_DAILY) );
 				}
 				comp.setData(v);
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds());
 			}
-		} catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading diversion (daily) time series file:\n\"" + fn + "\"");
-			Message.printWarning(2, routine, e);
+		}
+		catch (Exception e) {
+			Message.printWarning(1, routine, "Error reading diversion (daily) time series file:\n\"" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds());
 		}
 	
 		// Well pumping (daily) time series...
@@ -6794,14 +7001,18 @@ throws IllegalArgumentException, IOException
 					((MonthTS)v.get(i)).setDataType( lookupTimeSeriesDataType ( COMP_WELL_PUMPING_TS_DAILY) );
 				}
 				comp.setData(v);
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds());
 			}
 		}
 		catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading well pumping (daily) time series file:\n\"" + fn + "\"");
-			Message.printWarning(2, routine, e);
+			Message.printWarning(1, routine, "Error reading well pumping (daily) time series file:\n\"" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds());
 		}
 	
 		// Daily reservoir content "eoy"...
@@ -6829,14 +7040,18 @@ throws IllegalArgumentException, IOException
 					((MonthTS)v.get(i)).setDataType( lookupTimeSeriesDataType ( COMP_RESERVOIR_CONTENT_TS_DAILY) );
 				}
 				comp.setData(v);
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds());
 			}
 		}
 		catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading reservoir end of day time series file:\n\"" + fn + "\"");
-			Message.printWarning(2, routine, e);
+			Message.printWarning(1, routine, "Error reading reservoir end of day time series file:\n\"" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds());
 		}
 	
 		// Connect all the instream flow time series to the stations...
@@ -6941,14 +7156,18 @@ throws IllegalArgumentException, IOException
 				StateMod_NodeNetwork network = (StateMod_NodeNetwork)StateMod_NodeNetwork.readStateModNetworkFile( fn, null, true);
 				comp.setData(network);
 				comp.setVisible(true);
-				comp.setDirty ( false );
-				readTime.stop();
-				readInputAnnounce2(comp, readTime.getSeconds());
 			}
 		}
 		catch (Exception e) {
-			Message.printWarning(1, routine, "Unexpected error reading network file:\n\"" + fn+"\"");
-			Message.printWarning(2, routine, e);
+			Message.printWarning(1, routine, "Unexpected error reading network file:\n\"" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds());
 		}
 	
 		// Network network = createNetworkFromStateModRiverNetwork();
@@ -6957,7 +7176,7 @@ throws IllegalArgumentException, IOException
 	}
 	catch (Exception e) {
 		// Main catch for all reads.
-		String message = "Unexpected error during read (" + e + ").";
+		String message = "Unexpected error during read (" + e + ") - please contact support.";
 		Message.printStatus ( 1, routine, message );
 		Message.printWarning(1, routine, e);
 		// TODO Just rethrow for now

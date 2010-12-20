@@ -86,6 +86,7 @@ import org.w3c.dom.NodeList;
 
 import cdss.domain.hydrology.network.HydrologyNode;
 
+import RTi.GIS.GeoView.GeoViewAnnotationRenderer;
 import RTi.GR.GRAspect;
 import RTi.GR.GRJComponentDrawingArea;
 import RTi.GR.GRLimits;
@@ -493,6 +494,19 @@ public void actionPerformed(ActionEvent event)
 }
 
 /**
+Add an annotation renderer.  Just chain to the network component.
+@param renderer the renderer that will be called when it is time to draw the object
+@param objectToRender the object to render (will be passed back to the renderer)
+@param label label for the object, to list in the GeoViewJPanel
+@param scrollToAnnotation if true, scroll to the annotation (without changing scale)
+*/
+public void addAnnotationRenderer ( StateMod_Network_AnnotationRenderer renderer,
+	Object objectToRender, String label, boolean scrollToAnnotation )
+{	// Ad the annotation to the list and redraw if necessary, zooming to new annotation.
+	__device.addAnnotationRenderer ( renderer, objectToRender, label, scrollToAnnotation );
+}
+
+/**
 Adds a node to the network.
 @param name the name of the node to add.
 @param type the type of node to add to the network.
@@ -673,10 +687,23 @@ public void buildToolBar() {
 }
 
 /**
-Closes the GUI.
+Closes the GUI and frees resources.  This method is called, for example, from the StateMod GUI when
+a new data set is opened and the old network editor needs to be closed down.
 */
-private void closeClicked() {
+public void close()
+{
+	closeClicked(true);
+}
+
+/**
+Closes the GUI and optionally frees resources.
+@param hardClose if true, the window is disposed; if false, the window is set not visible
+*/
+private void closeClicked( boolean hardClose) {
 	setVisible(false);
+	if ( hardClose ) {
+		dispose();
+	}
 }
 
 /**
@@ -1971,7 +1998,8 @@ public void windowClosing(WindowEvent event) {
 		}
 	}
 	if (event.getSource() == this) {
-		closeClicked();
+		// Does not dispose
+		closeClicked( false );
 	}
 }
 

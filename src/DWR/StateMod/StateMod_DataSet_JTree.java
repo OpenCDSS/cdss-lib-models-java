@@ -87,8 +87,7 @@ import RTi.Util.String.StringUtil;
 
 /**
 This StateMod_DataSet_JTree class displays a StateMod_DataSet and its components
-in a JTree.  It can be constructed to show all the data, or just the high-level
-objects.
+in a JTree.  It can be constructed to show all the data, or just the high-level objects.
 */
 public class StateMod_DataSet_JTree extends SimpleJTree
 implements ActionListener, MouseListener
@@ -146,16 +145,13 @@ private SimpleJTree_Node __popup_Node;
 Construct a StateMod_DataSet_JFrame.
 @param parent JFrame from which this instance is constructed.
 @param dataset StateMod_DataSet that is being displayed/managed.
-@param dataset_wm the dataset window manager or null if the data set windows
-are not being managed.
+@param dataset_wm the dataset window manager or null if the data set windows are not being managed.
 @param display_data_objects If true, data objects are listed in the tree.  If
 @param editable If true, data objects can be edited.
 false, only the top-level data set components are listed.
 */
 public StateMod_DataSet_JTree (	JFrame parent, StateMod_DataSet dataset,
-				StateMod_DataSet_WindowManager dataset_wm,
-				boolean display_data_objects,
-				boolean editable )
+	StateMod_DataSet_WindowManager dataset_wm, boolean display_data_objects, boolean editable )
 {	__dataset = dataset;
 	__dataset_wm = dataset_wm;
 	__display_data_objects = display_data_objects;
@@ -178,8 +174,7 @@ using setDataSet() and setDataSetWindowManager().
 false, only the top-level data set components are listed.
 @param editable If true, data objects can be edited.
 */
-public StateMod_DataSet_JTree ( JFrame parent, boolean display_data_objects,
-				boolean editable )
+public StateMod_DataSet_JTree ( JFrame parent, boolean display_data_objects, boolean editable )
 {	__display_data_objects = display_data_objects;
 	__editable = editable;
 	__folderIcon = getClosedIcon();
@@ -222,84 +217,53 @@ public void actionPerformed(ActionEvent event)
 		DataSetComponent comp = (DataSetComponent)data;
 		int comp_type = comp.getComponentType();
 		if ( comp_type == StateMod_DataSet.COMP_CONTROL_GROUP ){
-			__dataset_wm.displayWindow (
-				StateMod_DataSet_WindowManager.WINDOW_CONTROL,
-				__editable );
+			__dataset_wm.displayWindow ( StateMod_DataSet_WindowManager.WINDOW_CONTROL, __editable );
 		}
 		else if ( comp_type == StateMod_DataSet.COMP_STREAMGAGE_GROUP ){
-			__dataset_wm.displayWindow (
-			StateMod_DataSet_WindowManager.WINDOW_STREAMGAGE,
-				__editable );
+			__dataset_wm.displayWindow ( StateMod_DataSet_WindowManager.WINDOW_STREAMGAGE, __editable );
 		}
-		else if (comp_type ==
-			StateMod_DataSet.COMP_DELAY_TABLE_MONTHLY_GROUP){
-			__dataset_wm.displayWindow (
-				StateMod_DataSet_WindowManager.
-				WINDOW_DELAY_TABLE_MONTHLY, __editable );
+		else if (comp_type == StateMod_DataSet.COMP_DELAY_TABLE_MONTHLY_GROUP){
+			__dataset_wm.displayWindow ( StateMod_DataSet_WindowManager.WINDOW_DELAY_TABLE_MONTHLY, __editable );
 		}
-		else if (comp_type ==
-			StateMod_DataSet.COMP_DELAY_TABLE_DAILY_GROUP){
+		else if (comp_type == StateMod_DataSet.COMP_DELAY_TABLE_DAILY_GROUP){
 			__dataset_wm.displayWindow (
-				StateMod_DataSet_WindowManager.
-				WINDOW_DELAY_TABLE_DAILY, __editable );
+				StateMod_DataSet_WindowManager.WINDOW_DELAY_TABLE_DAILY, __editable );
 		}
 		else if ( comp_type == StateMod_DataSet.COMP_DIVERSION_GROUP ){
-			__dataset_wm.displayWindow (
-				StateMod_DataSet_WindowManager.
-				WINDOW_DIVERSION, __editable );
+			__dataset_wm.displayWindow ( StateMod_DataSet_WindowManager.WINDOW_DIVERSION, __editable );
 		}
 		else if ( comp_type==StateMod_DataSet.COMP_PRECIPITATION_GROUP){
-			__dataset_wm.displayWindow (
-				StateMod_DataSet_WindowManager.
-				WINDOW_PRECIPITATION, __editable );
+			__dataset_wm.displayWindow ( StateMod_DataSet_WindowManager.WINDOW_PRECIPITATION, __editable );
 		}
 		else if ( comp_type==StateMod_DataSet.COMP_EVAPORATION_GROUP){
-			__dataset_wm.displayWindow (
-				StateMod_DataSet_WindowManager.
-				WINDOW_EVAPORATION, __editable );
+			__dataset_wm.displayWindow ( StateMod_DataSet_WindowManager.WINDOW_EVAPORATION, __editable );
 		}
 		else if ( comp_type==StateMod_DataSet.COMP_RESERVOIR_GROUP ) {
-			__dataset_wm.displayWindow (
-				StateMod_DataSet_WindowManager.
-				WINDOW_RESERVOIR, __editable );
+			__dataset_wm.displayWindow ( StateMod_DataSet_WindowManager.WINDOW_RESERVOIR, __editable );
 		}
 		else if ( comp_type==StateMod_DataSet.COMP_INSTREAM_GROUP ) {
-			__dataset_wm.displayWindow (
-				StateMod_DataSet_WindowManager.
-				WINDOW_INSTREAM, __editable );
+			__dataset_wm.displayWindow ( StateMod_DataSet_WindowManager.WINDOW_INSTREAM, __editable );
 		}
 		else if ( comp_type==StateMod_DataSet.COMP_WELL_GROUP ) {
-			__dataset_wm.displayWindow (
-				StateMod_DataSet_WindowManager.
-				WINDOW_WELL, __editable );
+			__dataset_wm.displayWindow ( StateMod_DataSet_WindowManager.WINDOW_WELL, __editable );
 		}
 		else if ( comp_type==StateMod_DataSet.COMP_PLAN_GROUP ) {
-			__dataset_wm.displayWindow (
-				StateMod_DataSet_WindowManager.
-				WINDOW_PLAN, __editable );
+			__dataset_wm.displayWindow ( StateMod_DataSet_WindowManager.WINDOW_PLAN, __editable );
 		}
 		else if (comp_type==StateMod_DataSet.COMP_STREAMESTIMATE_GROUP){
-			__dataset_wm.displayWindow (
-				StateMod_DataSet_WindowManager.
-				WINDOW_STREAMESTIMATE, __editable );
+			__dataset_wm.displayWindow ( StateMod_DataSet_WindowManager.WINDOW_STREAMESTIMATE, __editable );
 		}
 		else if ( comp_type==StateMod_DataSet.COMP_RIVER_NETWORK_GROUP){
-			__dataset_wm.displayWindow (
-				StateMod_DataSet_WindowManager.
-				WINDOW_RIVER_NETWORK, __editable );
+			__dataset_wm.displayWindow ( StateMod_DataSet_WindowManager.WINDOW_RIVER_NETWORK, __editable );
 		}
 		else if ( comp_type==StateMod_DataSet.COMP_OPERATION_GROUP ) {
-			__dataset_wm.displayWindow (
-				StateMod_DataSet_WindowManager.
-				WINDOW_OPERATIONAL_RIGHT, __editable );
+			__dataset_wm.displayWindow ( StateMod_DataSet_WindowManager.WINDOW_OPERATIONAL_RIGHT, __editable );
 		}
 	}
 	// Below here are specific instances of objects.  Similar to above,
 	// display the main window but then also select the specific object...
 	else if ( data instanceof StateMod_StreamGage ) {
-		__dataset_wm.displayWindow (
-			StateMod_DataSet_WindowManager.WINDOW_STREAMGAGE,
-			__editable);
+		__dataset_wm.displayWindow ( StateMod_DataSet_WindowManager.WINDOW_STREAMGAGE, __editable);
 		((StateMod_StreamGage_JFrame)__dataset_wm.getWindow (
 			StateMod_DataSet_WindowManager.WINDOW_STREAMGAGE )).
 			selectID ( ((StateMod_StreamGage)data).getID() );
@@ -308,15 +272,12 @@ public void actionPerformed(ActionEvent event)
 		StateMod_DelayTable dt = (StateMod_DelayTable)data;
 		if ( dt.isMonthly() ) {
 			__dataset_wm.displayWindow (
-				StateMod_DataSet_WindowManager.
-				WINDOW_DELAY_TABLE_MONTHLY, __editable );
-				((StateMod_DelayTable_JFrame)
-				__dataset_wm.getWindow (
-				StateMod_DataSet_WindowManager.
-				WINDOW_DELAY_TABLE_MONTHLY )).selectID (
-				dt.getID() );
+				StateMod_DataSet_WindowManager.WINDOW_DELAY_TABLE_MONTHLY, __editable );
+				((StateMod_DelayTable_JFrame)__dataset_wm.getWindow (
+				StateMod_DataSet_WindowManager.WINDOW_DELAY_TABLE_MONTHLY )).selectID (dt.getID() );
 		}
-		else {	__dataset_wm.displayWindow (
+		else {
+			__dataset_wm.displayWindow (
 				StateMod_DataSet_WindowManager.
 				WINDOW_DELAY_TABLE_DAILY, __editable );
 				((StateMod_DelayTable_JFrame)

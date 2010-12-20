@@ -674,7 +674,13 @@ private String
 Vector of all the annotations displayed on the network.  Note that internally
 annotations are managed as a list of HydrologyNode.
 */
-private List __annotations = new Vector();
+private List<HydrologyNode> __annotations = new Vector();
+
+/**
+StateMod_Network_AnnotationRenderers to display extra information as annotations on the map.
+Note that these are complex annotations whereas the __annotations list contains simple lines and shapes.
+*/
+private List<StateMod_Network_AnnotationData> __annotationDataList = new Vector();
 
 /**
 Vector of all the links drawn on the network.
@@ -854,7 +860,7 @@ public void actionPerformed(ActionEvent event) {
 	}
 	else if (action.equals(__MENU_PROPERTIES)) {
 		if (__isLastSelectedAnAnnotation) {
-			HydrologyNode node = (HydrologyNode)__annotations.get(__popupNodeNum);
+			HydrologyNode node = __annotations.get(__popupNodeNum);
 
 			new StateMod_Network_AnnotationProperties_JDialog( this, __editable, node, __popupNodeNum);
 		}
@@ -982,6 +988,30 @@ protected void addAnnotation(double x, double y)
 	node.setDirty(true);
 	__annotations.add(node);
 	forceRepaint();
+}
+
+/**
+Add an annotation renderer.  This allows generic objects to be drawn on top of the map, allowing
+rendering to occur by external code that is familiar with domain issues.  The StateMod_Network_JComponent
+is passed back to the renderer to allow full access to layer information, symbols, etc.
+@param renderer the renderer that will be called when it is time to draw the object
+@param objectToRender the object to render (will be passed back to the renderer)
+@param objectLabel label for the object, to list in the GeoViewJPanel
+@param scrollToAnnotation if true, scroll to the annotation (without changing scale)
+*/
+public void addAnnotationRenderer ( StateMod_Network_AnnotationRenderer renderer,
+	Object objectToRender, String objectLabel, boolean scrollToAnnotation )
+{
+	// Only add if the annotation is not already in the list
+	for ( StateMod_Network_AnnotationData annotationData: __annotationDataList ) {
+		if ( (annotationData.getObject() == objectToRender) &&
+			annotationData.getLabel().equalsIgnoreCase(objectLabel) ) {
+			// Don't add again.
+			return;
+		}
+	}
+	__annotationDataList.add ( new StateMod_Network_AnnotationData(renderer,objectToRender,objectLabel) );
+	repaint ();
 }
 
 /**
@@ -1692,7 +1722,7 @@ private void drawAnnotations() {
 			// skip it -- outline being drawn for drag
 			continue;
 		}
-		node = (HydrologyNode)__annotations.get(i);
+		node = __annotations.get(i);
 		p = (PropList)node.getAssociatedObject();
 		String fname = p.getValue("FontName");
 		String style = p.getValue("FontStyle");
@@ -2457,10 +2487,11 @@ private double[] findNearestGridXY(double x, double y) {
 Displays a dialog containing all the nodes on the network; the user can 
 select one and the node will be highlighted and zoomed to.
 */
-private void findNode() {
+public HydrologyNode findNode()
+{
 	// compile a list of all the node IDs in the network
 	int size = __nodes.length;
-	List v = new Vector(size);
+	List<String> v = new Vector(size);
 	for (int i = 0; i < size; i++) {
 		v.add(__nodes[i].getCommonID());
 	}
@@ -2477,38 +2508,59 @@ private void findNode() {
 	String s = j.response();
 	if (s == null) {
 		// if s is null, then the user pressed CANCEL
-		return;
+		return null;
 	}
 
 	// find the node in the network and center the display window around it.
-	double x = 0;
-	double y = 0;
-	boolean found = false;
-	for (int i = 0; i < size; i++) {
-		if (__nodes[i].getCommonID().equals(s)) {
-			x = __nodes[i].getX();
-			y = __nodes[i].getY();
-			__nodes[i].setSelected(true);
-			found = true;
-		}
-		else {
-			__nodes[i].setSelected(false);
-		}
-	}
+	HydrologyNode foundNode = findNode ( s, true, true );
 
-	if (!found) {
+	if ( foundNode == null ) {
 		new ResponseJDialog(__parent, "Node '" + s + "' not found",
 			"The node with ID '" + s + "' could not be found.\n"
 			+ "The node ID must match exactly, including case\n"
 			+ "sensitivity.", ResponseJDialog.OK).response();
-		return;
+		return null;
 	}
 
-	// center the screen around the node
-	__screenLeftX = x - (__screenDataWidth / 2);
-	__screenBottomY = y - (__screenDataHeight / 2);
+	return foundNode;
+}
 
-	forceRepaint();
+/**
+Find a node given its common identifier.
+@param changeSelection if true, then change the selection of the node as the identifier is checked
+@param center if true, center on the found node; if false do not change position
+@return the found node, or null if not found
+*/
+public HydrologyNode findNode ( String s, boolean changeSelection, boolean center )
+{
+	double x = 0;
+	double y = 0;
+	HydrologyNode foundNode = null;
+	int size = __nodes.length;
+	for (int i = 0; i < size; i++) {
+		if (__nodes[i].getCommonID().equals(s)) {
+			x = __nodes[i].getX();
+			y = __nodes[i].getY();
+			if ( changeSelection ) {
+				__nodes[i].setSelected(true);
+			}
+			foundNode = __nodes[i];
+		}
+		else {
+			if ( changeSelection ) {
+				__nodes[i].setSelected(false);
+			}
+		}
+	}
+	
+	if ( center ) {
+		// center the screen around the node
+		__screenLeftX = x - (__screenDataWidth / 2);
+		__screenBottomY = y - (__screenDataHeight / 2);
+		forceRepaint();
+	}
+	
+	return foundNode;
 }
 
 /**
@@ -2543,7 +2595,7 @@ private int findNodeOrAnnotationAtXY(double x, double y)
 	HydrologyNode node = null;
 	int size = __annotations.size();
 	for (int i = 0; i < size; i++) {	
-		node = (HydrologyNode)__annotations.get(i);
+		node = __annotations.get(i);
 		limits = new GRLimits(node.getX(), node.getY(), 
 			node.getX() + node.getWidth(),
 			node.getY() + node.getHeight());
@@ -2567,11 +2619,19 @@ public void forceRepaint() {
 }
 
 /**
-Returns the annotation node held in the annotations Vector at the specified position.
-@return the annotation node held in the annotations Vector at the specified position.
+Return the list of StateMod_Network_AnnotationData to be processed when rendering the map.
+*/
+protected List<StateMod_Network_AnnotationData> getAnnotationData ()
+{
+	return __annotationDataList;
+}
+
+/**
+Returns the annotation node held in the annotations list at the specified position.
+@return the annotation node held in the annotations list at the specified position.
 */
 protected HydrologyNode getAnnotationNode(int nodeNum) {
-	return (HydrologyNode)__annotations.get(nodeNum);
+	return __annotations.get(nodeNum);
 }
 
 /**
@@ -2596,6 +2656,14 @@ Returns the data limits for the entire network.
 */
 protected GRLimits getDataLimits() {
 	return __dataLimits;
+}
+
+/**
+Return the GRDrawingArea used for drawing.  This allows external code to draw on the drawing area.
+@return the GRDrawingArea used for drawing.
+*/
+public GRJComponentDrawingArea getDrawingArea ()
+{	return __drawingArea;
 }
 
 /**
@@ -2751,7 +2819,7 @@ public boolean isDirty() {
 	int size = __annotations.size();
 	HydrologyNode node = null;
 	for (int i = 0; i < size; i++) {
-		node = (HydrologyNode)__annotations.get(i);
+		node = __annotations.get(i);
 		if (node.isDirty()) {
 //			Message.printStatus(1, "", "isDirty: Annotation[" + i + "]: dirty");
 			return true;
@@ -2774,7 +2842,7 @@ public void keyPressed(KeyEvent event) {
 			}
 			else if (__nodeDrag) {
 				if (__isLastSelectedAnAnnotation) {
-					HydrologyNode node = (HydrologyNode)__annotations.get(__clickedNodeNum);
+					HydrologyNode node = __annotations.get(__clickedNodeNum);
 					node.setVisible(true);
 				}
 				else {
@@ -3015,7 +3083,7 @@ public void mousePressed(MouseEvent event) {
 		}		
 
 		if (__isLastSelectedAnAnnotation) {
-			HydrologyNode node = (HydrologyNode)__annotations.get(__clickedNodeNum);
+			HydrologyNode node = __annotations.get(__clickedNodeNum);
 			__draggedNodeLimits = new GRLimits(node.getX(), 
 				node.getY(), 
 				node.getX() + node.getWidth(),
@@ -3181,7 +3249,7 @@ public void mouseReleased(MouseEvent event) {
 			__mouseDataX -= __xAdjust;
 			__mouseDataY -= __yAdjust;
 
-			HydrologyNode node = (HydrologyNode)__annotations.get(__clickedNodeNum);
+			HydrologyNode node = __annotations.get(__clickedNodeNum);
 			GRLimits data = __drawingArea.getDataLimits();
 			if (__mouseDataX < data.getLeftX()) {
 				__mouseDataX = data.getLeftX() + node.getWidth() / 2;
@@ -3610,6 +3678,20 @@ public void paint(Graphics g) {
 		drawLinks();
 		setAntiAlias(__antiAlias);
 		drawNodes();
+		//if ( !_ ) {
+			// Draw annotations on the top
+			try {
+				for ( StateMod_Network_AnnotationData annotationData: getAnnotationData() ) {
+					StateMod_Network_AnnotationRenderer annotationRenderer = annotationData.getStateModNetworkAnnotationRenderer();
+					annotationRenderer.renderStateModNetworkAnnotation(this, annotationData.getObject(),
+						annotationData.getLabel() );
+				}
+			}
+			catch ( Exception e ) {
+				Message.printWarning ( 3, routine, "Error drawing annotations (" + e + ")." );
+				Message.printWarning ( 3, routine, e );
+			}
+		//}
 		setAntiAlias(__antiAlias);
 		if (!__eraseLegend) {
 			drawLegend();
@@ -4033,7 +4115,7 @@ private void processAnnotations() {
 	int size = __annotations.size();
 
 	for (int i = 0; i < size; i++) {
-		node = (HydrologyNode)__annotations.get(i);
+		node = __annotations.get(i);
 		p = (PropList)node.getAssociatedObject();
 
 		String text = p.getValue("Text");
@@ -4695,7 +4777,7 @@ info in reaction to the annotation being moved on the screen.
 to have the proplist updated.
 */
 private void updateAnnotationLocation(int annotation) {
-	HydrologyNode node = (HydrologyNode)__annotations.get(annotation);
+	HydrologyNode node = __annotations.get(annotation);
 
 	double x = node.getX();
 	double y = node.getY();
@@ -4744,7 +4826,7 @@ Updates one of the annotaiton nodes with location and text information stored in
 protected void updateAnnotation(int nodeNum, HydrologyNode node) {
 	PropList p = (PropList)node.getAssociatedObject();
 
-	HydrologyNode vNode = (HydrologyNode)__annotations.get( nodeNum);
+	HydrologyNode vNode = __annotations.get( nodeNum);
 	PropList vp = (PropList)vNode.getAssociatedObject();
 	vNode.setAssociatedObject(p);
 

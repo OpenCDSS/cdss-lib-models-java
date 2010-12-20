@@ -222,6 +222,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
+import RTi.GIS.GeoView.GeoViewJPanel;
 import RTi.GRTS.TSProduct;
 import RTi.GRTS.TSViewJFrame;
 import RTi.TS.DayTS;
@@ -279,15 +280,16 @@ private boolean __editable = false;
 /**
 String labels for buttons.
 */
-private static final String 
+private static final String
+	__BUTTON_SHOW_ON_MAP = "Show on Map",	
+	__BUTTON_SHOW_ON_NETWORK = "Show on Network",
 	__BUTTON_APPLY = "Apply",
 	__BUTTON_CANCEL = "Cancel",
 	__BUTTON_CLOSE = "Close";
 
 /**
 Whether itemStateChanged() should ignore next state change that occurs.
-This is to prevent endless loops caused by the setMonthlyEff and setConstantEff
-methods.
+This is to prevent endless loops caused by the setMonthlyEff and setConstantEff methods.
 */
 private boolean __ignoreNextStateChange = false;
 
@@ -331,7 +333,9 @@ private JButton
 	__help_JButton = null,
 	__close_JButton = null,
 	__cancel_JButton = null,
-	__apply_JButton = null;
+	__apply_JButton = null,
+	__showOnMap_JButton = null,
+	__showOnNetwork_JButton = null;
 
 /**
 Checkboxes for selecting the kind of time series to display.
@@ -425,9 +429,9 @@ The DataSetComponent that contains the diversions data.
 private DataSetComponent __diversionsComponent;
 
 /**
-The vector of diversions to fill the worksheet with.
+The list of diversions to view/edit.
 */
-private List __diversionsVector;
+private List<StateMod_Diversion> __diversionsVector;
 
 /**
 Constructor.
@@ -435,8 +439,8 @@ Constructor.
 @param dataset_wm the dataset window manager or null if the data set windows are not being managed.
 @param editable whether the data values on the form can be edited or not.
 */
-public StateMod_Diversion_JFrame ( StateMod_DataSet dataset, StateMod_DataSet_WindowManager
-	dataset_wm, boolean editable )
+public StateMod_Diversion_JFrame ( StateMod_DataSet dataset,
+	StateMod_DataSet_WindowManager dataset_wm, boolean editable )
 {	
 	StateMod_GUIUtil.setTitle(this, dataset, "Diversions", null);
 	JGUIUtil.setIcon(this, JGUIUtil.getIconImage());
@@ -445,11 +449,11 @@ public StateMod_Diversion_JFrame ( StateMod_DataSet dataset, StateMod_DataSet_Wi
 	__diversionsComponent = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_DIVERSION_STATIONS);
 
-	__diversionsVector = (List)__diversionsComponent.getData();	
+	__diversionsVector = (List<StateMod_Diversion>)__diversionsComponent.getData();	
 	int size = __diversionsVector.size();
 	StateMod_Diversion div = null;
 	for (int i = 0; i < size; i++) {
-		div = (StateMod_Diversion)__diversionsVector.get(i);
+		div = __diversionsVector.get(i);
 		div.createBackup();
 	}
 
@@ -478,7 +482,7 @@ public StateMod_Diversion_JFrame ( StateMod_DataSet dataset, StateMod_DataSet_Wi
 	int size = __diversionsVector.size();
 	StateMod_Diversion div = null;
 	for (int i = 0; i < size; i++) {
-		div = (StateMod_Diversion)__diversionsVector.get(i);
+		div = __diversionsVector.get(i);
 		div.createBackup();
 	}
 
@@ -513,8 +517,7 @@ public void actionPerformed(ActionEvent e) {
 		// Display efficiencies as monthly, do not reset data...
 		displayEff ( true, false );
 	}	
-	else if (action.equals("Graph") || action.equals("Table") 
-		|| action.equals("Summary")) {
+	else if (action.equals("Graph") || action.equals("Table") || action.equals("Summary")) {
 		displayTSViewJFrame(action);
 	}
 	else if ( source == __close_JButton ) {
@@ -523,7 +526,7 @@ public void actionPerformed(ActionEvent e) {
 		StateMod_Diversion div = null;
 		boolean changed = false;
 		for (int i = 0; i < size; i++) {
-			div = (StateMod_Diversion)__diversionsVector.get(i);
+			div = __diversionsVector.get(i);
 			if (!changed && div.changed()) {
 				changed = true;
 			}
@@ -545,7 +548,7 @@ public void actionPerformed(ActionEvent e) {
 		StateMod_Diversion div = null;
 		boolean changed = false;
 		for (int i = 0; i < size; i++) {
-			div = (StateMod_Diversion)__diversionsVector.get(i);
+			div = __diversionsVector.get(i);
 			if (!changed && div.changed()) {
 				changed = true;
 			}
@@ -559,7 +562,7 @@ public void actionPerformed(ActionEvent e) {
 		int size = __diversionsVector.size();
 		StateMod_Diversion div = null;
 		for (int i = 0; i < size; i++) {
-			div = (StateMod_Diversion)__diversionsVector.get(i);
+			div = __diversionsVector.get(i);
 			div.restoreOriginal();
 		}
 
@@ -583,7 +586,15 @@ public void actionPerformed(ActionEvent e) {
 	else if (e.getSource() == __searchName_JRadioButton) {
 		__searchID_JTextField.setEditable(false);
 		__searchName_JTextField.setEditable(true);
-	}		
+	}
+	else if ( source == __showOnMap_JButton ) {
+		__dataset_wm.showOnMap ( getSelectedDiversion(),
+			getSelectedDiversion().getID() + " - " + getSelectedDiversion().getName() );
+	}
+	else if ( source == __showOnNetwork_JButton ) {
+		__dataset_wm.showOnNetwork ( getSelectedDiversion(),
+			getSelectedDiversion().getID() + " - " + getSelectedDiversion().getName() );
+	}
 	else if (source == __waterRights_JButton) {
 		if (__currentDiversionIndex == -1) {
 			new ResponseJDialog(this, "You must first select a diversion from the list.",
@@ -592,7 +603,7 @@ public void actionPerformed(ActionEvent e) {
 		}
 
 		// set placeholder to current diversion
-		StateMod_Diversion div = (StateMod_Diversion)__diversionsVector.get(__currentDiversionIndex);
+		StateMod_Diversion div = __diversionsVector.get(__currentDiversionIndex);
 	
 		new StateMod_Diversion_Right_JFrame(__dataset, div, __editable);
 	}
@@ -604,7 +615,7 @@ public void actionPerformed(ActionEvent e) {
 		}
 
 		// set placeholder to current diversion
-		StateMod_Diversion div = (StateMod_Diversion)__diversionsVector.get(__currentDiversionIndex);
+		StateMod_Diversion div = __diversionsVector.get(__currentDiversionIndex);
 	
 		new StateMod_Diversion_ReturnFlow_JFrame(__dataset, div, __editable);
 	}
@@ -612,6 +623,22 @@ public void actionPerformed(ActionEvent e) {
 	catch (Exception ex) {
 		Message.printWarning(2, routine, "Error processing action");
 		Message.printWarning(2, routine, ex);
+	}
+}
+
+/**
+Checks the states of the map and network view buttons based on the selected diversion.
+*/
+private void checkViewButtonState()
+{
+	StateMod_Diversion div = getSelectedDiversion();
+	if ( div.getGeoRecord() == null ) {
+		// No spatial data are available
+		__showOnMap_JButton.setEnabled ( false );
+	}
+	else {
+		// Enable the button...
+		__showOnMap_JButton.setEnabled ( true );
 	}
 }
 
@@ -674,7 +701,7 @@ private int checkInput()
 	}
 	// TODO - if daily time series are supplied, check for time series and allow creation if not available.
 	if ( warning.length() > 0 ) {
-		StateMod_Diversion div = (StateMod_Diversion)__diversionsVector.get(__currentDiversionIndex);
+		StateMod_Diversion div = __diversionsVector.get(__currentDiversionIndex);
 		warning = "\nDiversion:  " +
 		StateMod_Util.formatDataLabel ( div.getID(), div.getName() ) + warning + "\nCorrect or Cancel.";
 		Message.printWarning ( 1, routine, warning, this );
@@ -742,7 +769,7 @@ private void displayEff ( boolean monthly_data, boolean reset_data )
 		return;
 	}
 	
-	StateMod_Diversion div = (StateMod_Diversion)__diversionsVector.get(__currentDiversionIndex);
+	StateMod_Diversion div = __diversionsVector.get(__currentDiversionIndex);
 	// Set this because setting 
 	__ignoreNextStateChange = true;
 	// This is only really needed when needed when the data are initially being populated.
@@ -790,7 +817,7 @@ public void displayTSViewJFrame(String type)
 		ResponseJDialog.OK);
 		return;
 	}
-	StateMod_Diversion div = (StateMod_Diversion)__diversionsVector.get(__currentDiversionIndex);
+	StateMod_Diversion div = __diversionsVector.get(__currentDiversionIndex);
 
 	PropList display_props = new PropList("TSView");
 
@@ -1123,6 +1150,14 @@ throws Throwable {
 }
 
 /**
+Get the selected diversion, based on the current index in the list.
+*/
+private StateMod_Diversion getSelectedDiversion ()
+{
+	return __diversionsVector.get(__currentDiversionIndex);
+}
+
+/**
 Initializes the arrays that are used when items are selected and deselected.
 This should be called from setupGUI() before the a call is made to selectTableIndex().
 */
@@ -1218,8 +1253,7 @@ public void itemStateChanged(ItemEvent e)
 
 	// set placeholder to current diversion
 	// TODO SAM Evaluate logic
-	//StateMod_Diversion div = (StateMod_Diversion)
-	//	__diversionsVector.elementAt(__currentDiversionIndex);
+	//StateMod_Diversion div = __diversionsVector.elementAt(__currentDiversionIndex);
 }
 
 /**
@@ -1300,7 +1334,7 @@ private void populateDiversionDailyID()
 Processes a table selection (either via a mouse press or programmatically 
 from selectTableIndex()) by writing the old data back to the data set component
 and getting the next selection's data out of the data and displaying it on the form.
-@param index the index of the reservoir to display on the form.
+@param index the index of the diversion to display on the form.
 @param try_to_save Indicates whether the current data should try to be saved.
 false should be specified if the call is being made after checkInput() fails.
 */
@@ -1336,7 +1370,7 @@ private void processTableSelection(int index, boolean try_to_save )
 	
 	// List these in the order of the GUI...
 
-	StateMod_Diversion div = (StateMod_Diversion)__diversionsVector.get(__currentDiversionIndex);
+	StateMod_Diversion div = __diversionsVector.get(__currentDiversionIndex);
 
 	// Diversion identifier...
 
@@ -1660,6 +1694,7 @@ private void processTableSelection(int index, boolean try_to_save )
 	}
 
 	checkTimeSeriesButtonsStates();
+	checkViewButtonState();
 }
 
 /**
@@ -1691,7 +1726,7 @@ private boolean saveData(int record) {
 		return false;
 	}
 
-	StateMod_Diversion div = (StateMod_Diversion)__diversionsVector.get(record);
+	StateMod_Diversion div = __diversionsVector.get(record);
 
 	// Save in the order of the GUI.  Save all the items, even if not
 	// currently editable/enabled (like ID and river node ID) because later
@@ -2570,9 +2605,13 @@ private void setupGUI(int index)
 	button_JPanel.setLayout(new FlowLayout());
 	//__help_JButton = new SimpleJButton(__BUTTON_HELP, this);
 	//__help_JButton.setEnabled(false);
+	__showOnMap_JButton = new SimpleJButton(__BUTTON_SHOW_ON_MAP, this);
+	__showOnNetwork_JButton = new SimpleJButton(__BUTTON_SHOW_ON_NETWORK, this);
 	__close_JButton = new SimpleJButton(__BUTTON_CLOSE, this);
 	__apply_JButton = new SimpleJButton(__BUTTON_APPLY, this);
 	__cancel_JButton = new SimpleJButton(__BUTTON_CANCEL, this);
+	button_JPanel.add(__showOnMap_JButton);
+	button_JPanel.add(__showOnNetwork_JButton);
 	if (__editable) {
 		button_JPanel.add(__apply_JButton);
 		button_JPanel.add(__cancel_JButton);
@@ -2645,7 +2684,7 @@ public void windowClosing(WindowEvent e) {
 	StateMod_Diversion div = null;
 	boolean changed = false;
 	for (int i = 0; i < size; i++) {
-		div = (StateMod_Diversion)__diversionsVector.get(i);
+		div = __diversionsVector.get(i);
 		if (!changed && div.changed()) {
 			changed = true;
 		}
