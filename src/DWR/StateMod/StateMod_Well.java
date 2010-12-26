@@ -127,6 +127,7 @@ import java.util.Vector;
 
 import DWR.StateCU.StateCU_IrrigationPracticeTS;
 import RTi.GIS.GeoView.GeoRecord;
+import RTi.GIS.GeoView.HasGeoRecord;
 import RTi.TS.DayTS;
 import RTi.TS.MonthTS;
 import RTi.Util.IO.CommandStatus;
@@ -143,7 +144,7 @@ This class stores all relevant data for a StateMod well.
 
 public class StateMod_Well 
 extends StateMod_Data
-implements Cloneable, Comparable, StateMod_ComponentValidator {
+implements Cloneable, Comparable, HasGeoRecord, StateMod_ComponentValidator {
 /**
 Well id to use for daily data.
 */

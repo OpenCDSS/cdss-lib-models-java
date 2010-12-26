@@ -94,6 +94,7 @@ import java.util.List;
 import java.util.Vector;
 
 import RTi.GIS.GeoView.GeoRecord;
+import RTi.GIS.GeoView.HasGeoRecord;
 import RTi.TS.DayTS;
 import RTi.TS.MonthTS;
 import RTi.Util.IO.DataSetComponent;
@@ -102,7 +103,7 @@ import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 
 public class StateMod_InstreamFlow extends StateMod_Data
-implements StateMod_ComponentValidator
+implements HasGeoRecord, StateMod_ComponentValidator
 {
 
 /**

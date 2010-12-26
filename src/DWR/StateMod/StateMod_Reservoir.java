@@ -152,6 +152,7 @@ import java.util.List;
 import java.util.Vector;
 
 import RTi.GIS.GeoView.GeoRecord;
+import RTi.GIS.GeoView.HasGeoRecord;
 import RTi.TS.DayTS;
 import RTi.TS.MonthTS;
 import RTi.TS.TS;
@@ -166,7 +167,8 @@ The Reservoir class holds data for entries in the StateMod reservoir station
 file.  Secondary data classes are used in cases where lists of data are used.
 */
 public class StateMod_Reservoir extends StateMod_Data
-implements Cloneable, Comparable, StateMod_ComponentValidator {
+implements Cloneable, Comparable, HasGeoRecord, StateMod_ComponentValidator
+{
 
 /**
 date for one fill rule admin

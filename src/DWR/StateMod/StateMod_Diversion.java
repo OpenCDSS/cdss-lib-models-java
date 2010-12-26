@@ -170,6 +170,7 @@ import java.util.Vector;
 
 import DWR.StateCU.StateCU_IrrigationPracticeTS;
 import RTi.GIS.GeoView.GeoRecord;
+import RTi.GIS.GeoView.HasGeoRecord;
 import RTi.TS.DayTS;
 import RTi.TS.MonthTS;
 import RTi.Util.IO.DataSetComponent;
@@ -184,7 +185,7 @@ the COMP_DIVERSION_STATIONS flag dirty.  A new object will have empty non-null
 Vectors, null time series, and defaults for all other data.
 */
 public class StateMod_Diversion extends StateMod_Data
-implements Cloneable, Comparable, StateMod_ComponentValidator
+implements Cloneable, Comparable, StateMod_ComponentValidator, HasGeoRecord
 {
 
 /**
@@ -336,9 +337,9 @@ are available.
 protected GeoRecord _georecord = null;
 
 /**
-Vector of parcel data, in particular to allow StateDMI to detect when a diversion had no data.
+List of parcel data, in particular to allow StateDMI to detect when a diversion had no data.
 */
-protected List _parcel_Vector = new Vector();
+protected List<StateMod_Parcel> _parcel_Vector = new Vector();
 
 // Collections are set up to be specified by year, although currently for
 // diversions collections are always the same for the full period.

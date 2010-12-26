@@ -74,6 +74,7 @@ import java.util.List;
 import java.util.Vector;
 
 import RTi.GIS.GeoView.GeoRecord;
+import RTi.GIS.GeoView.HasGeoRecord;
 import RTi.TS.DayTS;
 import RTi.TS.MonthTS;
 import RTi.TS.TS;
@@ -84,7 +85,8 @@ import RTi.Util.String.StringUtil;
 
 public class StateMod_StreamEstimate 
 extends StateMod_Data
-implements Cloneable, Comparable, StateMod_ComponentValidator {
+implements Cloneable, Comparable, HasGeoRecord, StateMod_ComponentValidator
+{
 
 /**
 Monthly base flow time series, for use with the stream estimate station

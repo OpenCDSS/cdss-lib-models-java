@@ -147,6 +147,7 @@ import java.util.List;
 import java.util.Vector;
 
 import RTi.GIS.GeoView.GeoRecord;
+import RTi.GIS.GeoView.HasGeoRecord;
 import RTi.TS.DayTS;
 import RTi.TS.MonthTS;
 import RTi.Util.IO.DataSetComponent;
@@ -156,7 +157,7 @@ import RTi.Util.String.StringUtil;
 
 public class StateMod_StreamGage 
 extends StateMod_Data
-implements Cloneable, Comparable, StateMod_ComponentValidator
+implements Cloneable, Comparable, HasGeoRecord, StateMod_ComponentValidator
 {
 
 //protected String 	_cgoto;		// River node for stream station.

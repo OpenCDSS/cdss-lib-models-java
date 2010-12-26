@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Vector;
 
 import RTi.GIS.GeoView.GeoRecord;
+import RTi.GIS.GeoView.HasGeoRecord;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
@@ -18,7 +19,7 @@ the COMP_PLANS flag dirty.  A new object will have empty non-null
 lists, null time series, and defaults for all other data.
 */
 public class StateMod_Plan extends StateMod_Data
-implements Cloneable, Comparable
+implements Cloneable, Comparable, HasGeoRecord
 {
 
 // ID, name, river node (cgoto), and switch are in the base class.
