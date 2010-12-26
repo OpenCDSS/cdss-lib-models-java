@@ -1120,12 +1120,10 @@ public void mouseReleased(MouseEvent event) {}
 
 /**
 Method needed for TSSupplier interface, to supply the time series for the graph.
-This method is called from the TSProcessor when creating graphs and other
-products.
+This method is called from the TSProcessor when creating graphs and other products.
 */
-public TS readTimeSeries (	String tsident,
-				DateTime req_date1, DateTime req_date2,
-				String req_units, boolean read_data )
+public TS readTimeSeries ( String tsident, DateTime req_date1, DateTime req_date2,
+	String req_units, boolean read_data )
 {	TS ts = null;
 	return ts;
 }
@@ -1133,9 +1131,8 @@ public TS readTimeSeries (	String tsident,
 /**
 Method needed for TSSupplier interface - not used.
 */
-public TS readTimeSeries (	TS req_ts, String fname,
-				DateTime req_date1, DateTime req_date2,
-				String req_units, boolean read_data )
+public TS readTimeSeries ( TS req_ts, String fname, DateTime req_date1, DateTime req_date2,
+	String req_units, boolean read_data )
 {	return null;
 }
 
@@ -1143,20 +1140,16 @@ public TS readTimeSeries (	TS req_ts, String fname,
 Method needed for TSSupplier interface, to supply the time series for the graph.
 This method is not used.
 */
-public List readTimeSeriesList (	String tsident,
-					DateTime req_date1, DateTime req_date2,
-					String req_units, boolean read_data )
+public List readTimeSeriesList ( String tsident, DateTime req_date1, DateTime req_date2,
+	String req_units, boolean read_data )
 {	return null;
 }
 
 /**
 Method needed for TSSupplier interface - not used.
 */
-public List readTimeSeriesList (	TSIdent tsident, String fname,
-					DateTime req_date1,
-					DateTime req_date2,
-					String req_units,
-					boolean read_data )
+public List readTimeSeriesList ( TSIdent tsident, String fname, DateTime req_date1,
+	DateTime req_date2, String req_units, boolean read_data )
 {	return null;
 }
 
@@ -1167,11 +1160,9 @@ type and list of time series identifiers is saved.
 private void saveTSProduct ()
 {	String routine = "StateMod_GraphingTool_JFrame.saveTSProduct";
 	String lastDirectorySelected = JGUIUtil.getLastFileDialogDirectory();
-	JFileChooser fc = JFileChooserFactory.createJFileChooser (
-		lastDirectorySelected );
+	JFileChooser fc = JFileChooserFactory.createJFileChooser ( lastDirectorySelected );
 	fc.setDialogTitle("Select Graph");
-	SimpleFileFilter tsp_ff = new SimpleFileFilter("tsp",
-			"Time Series Product");
+	SimpleFileFilter tsp_ff = new SimpleFileFilter("tsp", "Time Series Product");
 	fc.addChoosableFileFilter(tsp_ff);
 	fc.setFileFilter(tsp_ff);
 	fc.setDialogType(JFileChooser.SAVE_DIALOG);	
@@ -1208,8 +1199,8 @@ private void saveTSProduct ()
 	String id;			// Location for reset.
 	String data_type = null;	// Data type for reset.
 	for ( int i = 0; i < nrows; i++ ) {
-		try {	tsident = new TSIdent (
-				(TSIdent)tsident_Vector.get(i) );
+		try {
+			tsident = new TSIdent ( (TSIdent)tsident_Vector.get(i) );
 		}
 		catch ( Exception e ) {
 			// Should not happen.
@@ -1224,20 +1215,17 @@ private void saveTSProduct ()
 		data_type = StringUtil.getToken(tsident.getType(), " ", 0, 0 );
 		tsident.setType ( data_type );
 		// Save with the input name...
-		props.set ( "Data " + sub + "." + (++its) +
-				".TSID=" + tsident.toString(true) );
+		props.set ( "Data " + sub + "." + (++its) + ".TSID=" + tsident.toString(true) );
 	}
 
 	// Write the file, with all properties that were set here...
 
 	try {	TSProduct tsp = new TSProduct ( props, null );
-		Message.printStatus ( 1, "", "Writing TSProduct \"" +
-		filename + "\"" );
+		Message.printStatus ( 1, "", "Writing TSProduct \"" + filename + "\"" );
 		tsp.writeFile ( filename, true );
 	}
 	catch ( Exception e ) {
-		Message.printWarning ( 1, routine,
-		"Error writing time series product \"" + filename + "\"", this);
+		Message.printWarning ( 1, routine, "Error writing time series product \"" + filename + "\"", this);
 	}
 }
 
@@ -1265,41 +1253,34 @@ private void setupGUI() {
 
 	__addRow_JButton = new SimpleJButton(__BUTTON_ADD_ROW, this);
 	__addRow_JButton.setToolTipText (
-		"<HTML>Add a row for a time series.<BR>" +
-		"The default is to copy the previous row (see checkbox below)."+
-		"</HTML>");
+		"<html>Add a row for a time series.<br>" +
+		"The default is to copy the previous row (see checkbox below).</html>");
 	__deleteRow_JButton = new SimpleJButton(__BUTTON_DELETE_ROW, this);
-	__deleteRow_JButton.setToolTipText (
-		"<HTML>Delete the selected rows from below.</HTML>" );
+	__deleteRow_JButton.setToolTipText ( "<html>Delete the selected rows from below.</html>" );
 	__deleteAll_JButton =new SimpleJButton(__BUTTON_CLEAR_TEMPLATE,this);
-	__deleteAll_JButton.setToolTipText (
-		"<HTML>Delete all rows.</HTML>" );
+	__deleteAll_JButton.setToolTipText ( "<html>Delete all rows.</html>" );
 	__save_JButton = new SimpleJButton(__BUTTON_SAVE_TEMPLATE, this);
 	__save_JButton.setToolTipText (
-		"<HTML>Save the graph as a time series product.<BR>" +
-		"The graph can be reloaded later.</HTML>" );
+		"<html>Save the graph as a time series product.<br>" +
+		"The graph can be reloaded later.</html>" );
 	__load_JButton =new SimpleJButton(__BUTTON_LOAD_TEMPLATE, this);
-	__load_JButton.setToolTipText (
-		"<HTML>Load an existing time series graph.</HTML>" );
+	__load_JButton.setToolTipText ( "<html>Load an existing time series graph.</hbml>" );
 
 	// REVISIT - enable when a better help system is implemented
 	//__help_JButton = new SimpleJButton(__BUTTON_HELP, this);
 	__getTS_JButton = new SimpleJButton(__BUTTON_GET_TIME_SERIES, this);
 	__getTS_JButton.setToolTipText (
-		"<HTML>Get time series data from memory, input, " +
-		"and output files.</HTML>" );
+		"<html>Get time series data from memory, input, and output files.</html>" );
 	__graph_JButton = new SimpleJButton(__BUTTON_GRAPH, this);
 	__graph_JButton.setToolTipText (
-		"<HTML>Graph available time series using the specified " +
-		"graph type.</HTML>" );
+		"<html>Graph available time series using the specified graph type.</html>" );
 	__graph_JButton.setEnabled(false);
 	__close_JButton = new SimpleJButton(__BUTTON_CLOSE, this);
 	__close_JButton.setToolTipText (
-		"<HTML>Close this window, prompting for save if necessary." +
-		"</HTML>" );
+		"<html>Close this window, prompting for save if necessary.</html>" );
 	__export_JButton = new SimpleJButton(__BUTTON_EXPORT_DATA, this);
 	__export_JButton.setToolTipText (
-		"<HTML>Save the time series data to a file.</HTML>" );
+		"<html>Save the time series data to a file.</html>" );
 	__export_JButton.setEnabled(false);
 
 	__autoLineCopyJCheckBox = new JCheckBox("Automatically fill "
@@ -1360,8 +1341,7 @@ private void setupGUI() {
 		0, ++y, 1, 1, 0, 0, 
 		0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
 
-	PropList p = 
-		new PropList("StateMod_GraphingTool_JFrame.JWorksheet");
+	PropList p = new PropList("StateMod_GraphingTool_JFrame.JWorksheet");
 	p.add("JWorksheet.ShowRowHeader=true");
 	p.add("JWorksheet.AllowCopy=true");
 	p.add("JWorksheet.RowColumnBackground=LightGray");
@@ -1369,8 +1349,8 @@ private void setupGUI() {
 
 	int[] widths = null;
 	JScrollWorksheet jsw = null;
-	try {	__tableModel = new StateMod_GraphingTool_TableModel (
-					this, __dataset, new Vector() );
+	try {
+		__tableModel = new StateMod_GraphingTool_TableModel (this, __dataset, new Vector() );
 			
 		StateMod_GraphingTool_CellRenderer crg = new
 			StateMod_GraphingTool_CellRenderer(__tableModel);
@@ -1378,22 +1358,16 @@ private void setupGUI() {
 		jsw = new JScrollWorksheet(crg, __tableModel, p);		
 		__worksheet = jsw.getJWorksheet();
 
-		List v = StateMod_Util.getStationTypes();
-		__worksheet.setColumnJComboBoxValues(
-			__tableModel._COL_STATION_TYPE, v);
+		List<String> v = StateMod_Util.getStationTypes();
+		__worksheet.setColumnJComboBoxValues(__tableModel._COL_STATION_TYPE, v);
 
 		// Initialize a combo box for columns that use fixed-data.
 
-		__worksheet.setCellSpecificJComboBoxColumn(
-			__tableModel._COL_ID, false );
-		__worksheet.setCellSpecificJComboBoxColumn(
-			__tableModel._COL_INTERVAL, false );
-		__worksheet.setCellSpecificJComboBoxColumn(
-			__tableModel._COL_DATA_TYPE, false );
-		__worksheet.setCellSpecificJComboBoxColumn(
-			__tableModel._COL_INPUT_TYPE, false );
-		__worksheet.setCellSpecificJComboBoxColumn(
-			__tableModel._COL_INPUT_NAME, true );
+		__worksheet.setCellSpecificJComboBoxColumn(	__tableModel._COL_ID, false );
+		__worksheet.setCellSpecificJComboBoxColumn(	__tableModel._COL_INTERVAL, false );
+		__worksheet.setCellSpecificJComboBoxColumn(	__tableModel._COL_DATA_TYPE, false );
+		__worksheet.setCellSpecificJComboBoxColumn(	__tableModel._COL_INPUT_TYPE, false );
+		__worksheet.setCellSpecificJComboBoxColumn(	__tableModel._COL_INPUT_NAME, true );
 
 		__tableModel.setWorksheet(__worksheet);
 
