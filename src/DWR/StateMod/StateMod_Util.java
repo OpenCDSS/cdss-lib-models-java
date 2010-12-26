@@ -123,6 +123,7 @@
 
 package DWR.StateMod;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
@@ -2409,6 +2410,27 @@ public static DayTS getDailyTimeSeries ( String ID, String dailyID,
 }
 
 /**
+Return a list of identifiers given a list of StateMod data.
+@param smdataList list of StateMod data objects
+@param sort if true, sort the identifiers before returning
+@return a list of identifiers given a list of StateMod data, guaranteed to be non-null.
+*/
+public static List<String> getIDList ( List<? extends StateMod_Data> smdataList, boolean sort )
+{
+	List<String> idList = new Vector();
+	if ( smdataList == null ) {
+		return idList;
+	}
+	for ( StateMod_Data smdata: smdataList ) {
+		idList.add ( smdata.getID() );
+	}
+	if ( sort ) {
+		Collections.sort(idList);
+	}
+	return idList;
+}
+
+/**
 Helper method to return validators to check an ID.
 @return List of Validators.
  */
@@ -2606,10 +2628,11 @@ public static String getStateModVersionLatest()
 Return a list of station types for use in the GUI.
 @return a list of station types for use in the GUI.
 */
-public static List getStationTypes ()
+public static List<String> getStationTypes ()
 {	return StringUtil.toList(__station_types);
 }
 
+// TODO SAM 2010-12-21 Should plans be included?
 /**
 Get the time series data types associated with a component, for use with the
 graphing tool.  Currently this returns all possible data types but does not
