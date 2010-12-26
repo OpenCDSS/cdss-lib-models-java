@@ -68,19 +68,17 @@ import RTi.Util.Time.DateTime;
 /**
 Abstract object from which all other StateMod objects are derived.  
 Each object can be identified by setting the smdata_type member.
-Possible values for this member come from the SMFileData class 
-(RES_FILE, DIV_FILE, etc.)
+Possible values for this member come from the SMFileData class (RES_FILE, DIV_FILE, etc.)
 */
-public class StateMod_Data 
-implements Cloneable, Comparable {
+public class StateMod_Data implements Cloneable, Comparable {
 
-
-public static DateTime MISSING_DATE = 		null;
-public static double MISSING_DOUBLE = 		-999.0;
-public static float MISSING_FLOAT = 		(float)-999.0;
-public static int MISSING_INT = 		-999;
-public static long MISSING_LONG = 		-999;
-public static String MISSING_STRING = 		"";
+// TODO SAM 2010-12-20 Consider moving to NaN for missing floats, but what about integers?
+public static DateTime MISSING_DATE = null;
+public static double MISSING_DOUBLE = -999.0;
+public static float MISSING_FLOAT = (float)-999.0;
+public static int MISSING_INT = -999;
+public static long MISSING_LONG = -999;
+public static String MISSING_STRING = "";
 
 /**
 Reference to the _dataset into which all the StateMod_* data objects are 
@@ -137,12 +135,12 @@ UTM should be written to gis file.
 protected int _new_utm;
 
 /**
-For graphing.
+For mapping, but see StateMod_GeoRecord interface.
 */
 protected double _utm_x;
 
 /**
-For graphing
+For mapping, but see StateMod_GeoRecord interface.
 */
 protected double _utm_y;
 
