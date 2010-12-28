@@ -74,11 +74,15 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
+import RTi.GIS.GeoView.GeoRecord;
+import RTi.GR.GRLimits;
+import RTi.GR.GRShape;
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.JScrollWorksheet;
 import RTi.Util.GUI.JWorksheet;
 import RTi.Util.GUI.JWorksheet_SortListener;
 import RTi.Util.GUI.ResponseJDialog;
+import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
@@ -109,7 +113,9 @@ private JButton
 	__cancelJButton,
 	__findNext,
 	__helpJButton,
-	__closeJButton;
+	__closeJButton,
+	__showOnMap_JButton = null,
+	__showOnNetwork_JButton = null;
 
 /**
 Radio buttons for selecting the kind of search to do.
@@ -134,6 +140,8 @@ private JWorksheet __worksheet;
 Button label strings.
 */
 private final String
+	__BUTTON_SHOW_ON_MAP = "Show on Map",	
+	__BUTTON_SHOW_ON_NETWORK = "Show on Network",
 	__BUTTON_APPLY = "Apply",
 	__BUTTON_CANCEL = "Cancel",
 	__BUTTON_CLOSE = "Close",
@@ -151,7 +159,7 @@ Data set window manager.
 private StateMod_DataSet_WindowManager __dataset_wm;
 
 private DataSetComponent __riverNetworkNodeComponent;
-private List __riverNetworkNodesVector;
+private List<StateMod_RiverNetworkNode> __riverNetworkNodesVector;
 
 private JTextField __idJTextField;
 private JTextField __nameJTextField;
@@ -162,14 +170,12 @@ private int __lastStationIndex = 1;
 private int __currentStationIndex = -1;
 
 /**
-The index in __disables[] of textfields that should NEVER be made
-editable (e.g., ID fields).
+The index in __disables[] of textfields that should NEVER be made editable (e.g., ID fields).
 */
 private int[] __textUneditables;
 
 /**
-Array of JComponents that should be disabled when nothing is selected 
-from the list.
+Array of JComponents that should be disabled when nothing is selected from the list.
 */
 private JComponent[] __disables;
 
@@ -178,8 +184,7 @@ private boolean __editable = true;
 /**
 Constructor.
 @param dataset the dataset containing the data to show in the form.
-@param dataset_wm the dataset window manager or null if the data set windows
-are not being managed.
+@param dataset_wm the dataset window manager or null if the data set windows are not being managed.
 @param editable whether the data on the gui can be edited or not.
 */
 public StateMod_RiverNetworkNode_JFrame (
@@ -249,18 +254,16 @@ Responds to action performed events.
 public void actionPerformed(ActionEvent e) {
 	String routine="StateMod_RiverNetworkNode_JFrame.actionPerformed"; 
 	if (Message.isDebugOn) {
-		Message.printDebug(1, routine, 
-		"In actionPerformed: " + e.getActionCommand());
+		Message.printDebug(1, routine, "In actionPerformed: " + e.getActionCommand());
 	}
-
-	if (e.getSource() == __closeJButton) {
+	Object source = e.getSource();
+	if ( source == __closeJButton) {
 		saveCurrentRecord();
 		int size = __riverNetworkNodesVector.size();
 		StateMod_RiverNetworkNode r = null;
 		boolean changed = false;
 		for (int i = 0; i < size; i++) {
-			r = (StateMod_RiverNetworkNode)
-				__riverNetworkNodesVector.get(i);
+			r = __riverNetworkNodesVector.get(i);
 			if (!changed && r.changed()) {
 				changed = true;
 			}
@@ -273,17 +276,17 @@ public void actionPerformed(ActionEvent e) {
 			__dataset_wm.closeWindow (
 			StateMod_DataSet_WindowManager.WINDOW_RIVER_NETWORK );
 		}
-		else {	JGUIUtil.close ( this );
+		else {
+			JGUIUtil.close ( this );
 		}
 	}
-	else if (e.getSource() == __applyJButton) {
+	else if ( source == __applyJButton) {
 		saveCurrentRecord();
 		int size = __riverNetworkNodesVector.size();
 		StateMod_RiverNetworkNode r = null;
 		boolean changed = false;
 		for (int i = 0; i < size; i++) {
-			r = (StateMod_RiverNetworkNode)
-				__riverNetworkNodesVector.get(i);
+			r = __riverNetworkNodesVector.get(i);
 			if (!changed && r.changed()) {
 				changed = true;
 			}
@@ -293,36 +296,47 @@ public void actionPerformed(ActionEvent e) {
 			__dataset.setDirty(StateMod_DataSet.COMP_RIVER_NETWORK, true);
 		}		
 	}
-	else if (e.getSource() == __cancelJButton) {
+	else if (source == __cancelJButton) {
 		int size = __riverNetworkNodesVector.size();
 		StateMod_RiverNetworkNode r = null;
 		for (int i = 0; i < size; i++) {
-			r = (StateMod_RiverNetworkNode)
-				__riverNetworkNodesVector.get(i);
+			r = __riverNetworkNodesVector.get(i);
 			r.restoreOriginal();
 		}			
 		if ( __dataset_wm != null ) {
-			__dataset_wm.closeWindow (
-			StateMod_DataSet_WindowManager.WINDOW_RIVER_NETWORK );
+			__dataset_wm.closeWindow ( StateMod_DataSet_WindowManager.WINDOW_RIVER_NETWORK );
 		}
-		else {	JGUIUtil.close ( this );
+		else {
+			JGUIUtil.close ( this );
 		}
 	}
-	else if (e.getSource() == __helpJButton) {
+	else if (source == __helpJButton) {
 		// REVISIT HELP (JTS - 2003-08-18)
 	}
-	else if (e.getSource() == __searchIDJRadioButton) {
+	else if (source == __searchIDJRadioButton) {
 		__searchName.setEditable(false);
 		__searchID.setEditable(true);
 	}
-	else if (e.getSource() == __searchNameJRadioButton) {
+	else if (source == __searchNameJRadioButton) {
 		__searchName.setEditable(true);
 		__searchID.setEditable(false);
-	}		
-	else if (e.getSource() == __findNext) {
+	}
+	else if ( source == __showOnMap_JButton ) {
+		GeoRecord geoRecord = getSelectedRiverNetworkNode().getGeoRecord();
+		GRShape shape = geoRecord.getShape();
+		__dataset_wm.showOnMap ( getSelectedRiverNetworkNode(),
+			"Node: " + getSelectedRiverNetworkNode().getID() + " - " + getSelectedRiverNetworkNode().getName(),
+			new GRLimits(shape.xmin, shape.ymin, shape.xmax, shape.ymax),
+			geoRecord.getLayer().getProjection() );
+	}
+	else if ( source == __showOnNetwork_JButton ) {
+		__dataset_wm.showOnNetwork ( getSelectedRiverNetworkNode(),
+			"Node: " + getSelectedRiverNetworkNode().getID() + " - " + getSelectedRiverNetworkNode().getName() );
+	}
+	else if (source == __findNext) {
 		searchWorksheet(__worksheet.getSelectedRow() + 1);
 	}
-	else if (e.getSource() == __searchID || e.getSource() == __searchName) {
+	else if (source == __searchID || source == __searchName) {
 		searchWorksheet(0);
 	}	
 }
@@ -357,6 +371,22 @@ private boolean checkInput() {
 	new ResponseJDialog(this, 
 		"Errors encountered", label, ResponseJDialog.OK);
 	return false;
+}
+
+/**
+Checks the states of the map and network view buttons based on the selected river network node.
+*/
+private void checkViewButtonState()
+{
+	StateMod_RiverNetworkNode rin = getSelectedRiverNetworkNode();
+	if ( rin.getGeoRecord() == null ) {
+		// No spatial data are available
+		__showOnMap_JButton.setEnabled ( false );
+	}
+	else {
+		// Enable the button...
+		__showOnMap_JButton.setEnabled ( true );
+	}
 }
  
 /**
@@ -397,6 +427,14 @@ private StateMod_RiverNetworkNode findRiverNetworkNode(String id) {
 	return null;
 }
 */
+
+/**
+Get the selected river network node, based on the current index in the list.
+*/
+private StateMod_RiverNetworkNode getSelectedRiverNetworkNode ()
+{
+	return __riverNetworkNodesVector.get(__currentStationIndex);
+}
 
 /**
 Initializes the arrays that are used when items are selected and deselected.
@@ -473,8 +511,7 @@ public void mouseReleased(MouseEvent e) {
 /**
 Processes a table selection (either via a mouse press or programmatically 
 from selectTableIndex() by writing the old data back to the data set component
-and getting the next selection's data out of the data and displaying it 
-on the form.
+and getting the next selection's data out of the data and displaying it on the form.
 @param index the index of the reservoir to display on the form.
 */
 private void processTableSelection(int index) {
@@ -504,6 +541,7 @@ Message.printStatus(1, "", "Index: " + index);
 	__nameJTextField.setText(rnn.getName());
 	__nodeJTextField.setText(rnn.getCstadn());
 	__commentJTextField.setText(rnn.getComment());
+	checkViewButtonState();
 }
 
 /**
@@ -647,6 +685,11 @@ private void setupGUI(int index) {
 	__nodeJTextField = new JTextField(12);
 	__commentJTextField = new JTextField(24);
 
+	__showOnMap_JButton = new SimpleJButton(__BUTTON_SHOW_ON_MAP, this);
+	__showOnMap_JButton.setToolTipText(
+		"Annotate map with location (button is disabled if layer does not have matching ID)" );
+	__showOnNetwork_JButton = new SimpleJButton(__BUTTON_SHOW_ON_NETWORK, this);
+	__showOnNetwork_JButton.setToolTipText( "Annotate network with location" );
 	__applyJButton = new JButton(__BUTTON_APPLY);
 	__cancelJButton = new JButton(__BUTTON_CANCEL);
 	__helpJButton = new JButton(__BUTTON_HELP);
@@ -666,10 +709,8 @@ private void setupGUI(int index) {
 	JScrollWorksheet jsw = null;
 	try {
 		StateMod_RiverNetworkNode_TableModel tmr = new
-			StateMod_RiverNetworkNode_TableModel(
-			__riverNetworkNodesVector);
-		StateMod_RiverNetworkNode_CellRenderer crr = new
-			StateMod_RiverNetworkNode_CellRenderer(tmr);
+			StateMod_RiverNetworkNode_TableModel(__riverNetworkNodesVector);
+		StateMod_RiverNetworkNode_CellRenderer crr = new StateMod_RiverNetworkNode_CellRenderer(tmr);
 	
 		jsw = new JScrollWorksheet(crr, tmr, p);
 		__worksheet = jsw.getJWorksheet();
@@ -770,6 +811,8 @@ private void setupGUI(int index) {
 	FlowLayout fl = new FlowLayout(FlowLayout.RIGHT);
 	pfinal.setLayout(fl);
 	__helpJButton.setEnabled(false);
+	pfinal.add(__showOnMap_JButton);
+	pfinal.add(__showOnNetwork_JButton);
 	if (__editable) {
 		pfinal.add(__applyJButton);
 		pfinal.add(__cancelJButton);

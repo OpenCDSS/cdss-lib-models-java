@@ -123,6 +123,9 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
+import RTi.GIS.GeoView.GeoRecord;
+import RTi.GR.GRLimits;
+import RTi.GR.GRShape;
 import RTi.GRTS.TSProduct;
 import RTi.GRTS.TSViewJFrame;
 import RTi.TS.TS;
@@ -186,7 +189,9 @@ private final String
 /**
 Button labels.
 */
-private final String 
+private final String
+	__BUTTON_SHOW_ON_MAP = "Show on Map",	
+	__BUTTON_SHOW_ON_NETWORK = "Show on Network",
 	__BUTTON_FIND_NEXT = "Find Next",
 	__BUTTON_ID = "ID",
 	__BUTTON_NAME = "Name",
@@ -238,7 +243,9 @@ private JButton
 	__closeJButton,
 	__applyJButton,
 	__cancelJButton,
-	__makeViewFrame;
+	__makeViewFrame,
+	__showOnMap_JButton = null,
+	__showOnNetwork_JButton = null;
 
 /**
 Buttons to determine how to view the selected time series.
@@ -348,7 +355,7 @@ private DataSetComponent __wellComponent;
 /**
 List of wells data in the DataSetComponent.
 */
-private List __wellsVector;
+private List<StateMod_Well> __wellsVector;
 
 /**
 Constructor.
@@ -494,7 +501,19 @@ public void actionPerformed(ActionEvent e) {
 	}
 	else if (source == __searchID || source == __searchName) {	
 		searchWorksheet();
-	}		
+	}
+	else if ( source == __showOnMap_JButton ) {
+		GeoRecord geoRecord = getSelectedWell().getGeoRecord();
+		GRShape shape = geoRecord.getShape();
+		__dataset_wm.showOnMap ( getSelectedWell(),
+			"Well: " + getSelectedWell().getID() + " - " + getSelectedWell().getName(),
+			new GRLimits(shape.xmin, shape.ymin, shape.xmax, shape.ymax),
+			geoRecord.getLayer().getProjection() );
+	}
+	else if ( source == __showOnNetwork_JButton ) {
+		__dataset_wm.showOnNetwork ( getSelectedWell(),
+			"Well: " + getSelectedWell().getID() + " - " + getSelectedWell().getName() );
+	}
 	else if (source == __searchNameJRadioButton) {
 		__searchName.setEditable(true);
 		__searchID.setEditable(false);
@@ -583,6 +602,22 @@ private void checkTimeSeriesButtonsStates() {
 	__graph_JButton.setEnabled(enabled);
 	__table_JButton.setEnabled(enabled);
 	__summary_JButton.setEnabled(enabled);
+}
+
+/**
+Checks the states of the map and network view buttons based on the selected diversion.
+*/
+private void checkViewButtonState()
+{
+	StateMod_Well well = getSelectedWell();
+	if ( well.getGeoRecord() == null ) {
+		// No spatial data are available
+		__showOnMap_JButton.setEnabled ( false );
+	}
+	else {
+		// Enable the button...
+		__showOnMap_JButton.setEnabled ( true );
+	}
 }
 
 /**
@@ -726,6 +761,14 @@ throws Throwable {
 	__closeJButton = null;
 
 	super.finalize();
+}
+
+/**
+Get the selected divwellersion, based on the current index in the list.
+*/
+private StateMod_Well getSelectedWell ()
+{
+	return __wellsVector.get(__currentWellIndex);
 }
 
 /**
@@ -1035,6 +1078,8 @@ private void processTableSelection(int index) {
 		__associatedDiversionsComboBox.add(well.getIdvcow2());
 		__associatedDiversionsComboBox.select(well.getIdvcow2());
 	}
+	
+	checkViewButtonState();
 }
 
 /**
@@ -1386,6 +1431,11 @@ private void setupGUI(int index) {
 	__returnFlowInformationJButton = new JButton(__BUTTON_RETURN_FLOW);
 	__depletionInformationJButton = new JButton(__BUTTON_DEPLETION);
 
+	__showOnMap_JButton = new SimpleJButton(__BUTTON_SHOW_ON_MAP, this);
+	__showOnMap_JButton.setToolTipText(
+		"Annotate map with location (button is disabled if layer does not have matching ID)" );
+	__showOnNetwork_JButton = new SimpleJButton(__BUTTON_SHOW_ON_NETWORK, this);
+	__showOnNetwork_JButton.setToolTipText( "Annotate network with location" );
 	__applyJButton = new JButton(__BUTTON_APPLY);
 	__cancelJButton = new JButton(__BUTTON_CANCEL);
 	__helpJButton = new JButton(__BUTTON_HELP);
@@ -1772,6 +1822,8 @@ private void setupGUI(int index) {
 	y = 10;
 	JPanel p6 = new JPanel();
 	p6.setLayout(fl);
+	p6.add(__showOnMap_JButton);
+	p6.add(__showOnNetwork_JButton);
 	if (__editable) {
 		p6.add(__applyJButton);
 		p6.add(__cancelJButton);

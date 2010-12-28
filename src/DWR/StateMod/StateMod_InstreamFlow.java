@@ -142,9 +142,9 @@ Data type switch
 protected int _iifcom;
 
 /**
-Link to spatial data -- currently not cloned.
+Link to spatial data.
 */
-protected GeoRecord _georecord;
+protected GeoRecord _georecord = null;
 	
 /**
 Construct a new instance of a StateMod instream flow station.

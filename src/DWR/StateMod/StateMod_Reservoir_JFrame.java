@@ -126,6 +126,9 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
+import RTi.GIS.GeoView.GeoRecord;
+import RTi.GR.GRLimits;
+import RTi.GR.GRShape;
 import RTi.GRTS.TSProduct;
 import RTi.GRTS.TSViewJFrame;
 import RTi.TS.TS;
@@ -183,7 +186,9 @@ private JButton
 	__helpJButton = null,
 	__findNextRes = null,
 	__ownerAccounts = null,
-	__waterRights = null;
+	__waterRights = null,
+	__showOnMap_JButton = null,
+	__showOnNetwork_JButton = null;;
 
 private SimpleJButton
 	__graph_JButton = null,
@@ -254,17 +259,20 @@ private SimpleJComboBox __oneFillRuleAdmin = null;
 
 private SimpleJComboBox __resDailyID = null;
 int __resDailyIDBaseSize = 4;
+
 /**
 Strings to be displayed on buttons.
 */
-private final static String 
+private final static String
+	__BUTTON_SHOW_ON_MAP = "Show on Map",	
+	__BUTTON_SHOW_ON_NETWORK = "Show on Network",
 	__BUTTON_APPLY = "Apply",
 	__BUTTON_CANCEL = "Cancel",
 	__BUTTON_CLOSE = "Close",
 	__BUTTON_HELP = "Help";
 
 /**
-The StateMod_Dataset that contains the statemod data.
+The StateMod_Dataset that contains the StateMod data.
 */
 private StateMod_DataSet __dataset;
 
@@ -282,7 +290,7 @@ private DataSetComponent __reservoirComponent = null;
 /**
 The list of data in the __reservoirComponent.
 */
-private List __reservoirsVector = null;
+private List<StateMod_Reservoir> __reservoirsVector = null;
 
 /**
 Constructor.
@@ -352,26 +360,26 @@ public void actionPerformed(ActionEvent e) {
 	String routine="StateMod_Reservoir_JFrame.actionPerformed"; 
 
 	try {
-	Object o = e.getSource();
+	Object source = e.getSource();
 
-	if ( o == __findNextRes) {
+	if ( source == __findNextRes) {
 		searchWorksheet(__worksheet.getSelectedRow() + 1);
 	}
-	else if ( (o == __searchID) || (o == __searchName) ) {
+	else if ( (source == __searchID) || (source == __searchName) ) {
 		searchWorksheet(0);
 	}
-	else if ( o == __searchIDJRadioButton ) {
+	else if ( source == __searchIDJRadioButton ) {
 		__searchName.setEditable(false);
 		__searchID.setEditable(true);
 	}
-	else if ( o == __searchNameJRadioButton) {
+	else if ( source == __searchNameJRadioButton) {
 		__searchName.setEditable(true);
 		__searchID.setEditable(false);
 	}	
-	else if ( o == __helpJButton) {
+	else if ( source == __helpJButton) {
 		// TODO HELP (JTS - 2003-06-09)
 	}
-	else if ( o == __closeJButton ) {
+	else if ( source == __closeJButton ) {
 		saveCurrentRecord();
 		int size = __reservoirsVector.size();
 		boolean changed = false;
@@ -392,7 +400,7 @@ public void actionPerformed(ActionEvent e) {
 			JGUIUtil.close ( this );
 		}
 	}
-	else if ( o == __applyJButton ) {
+	else if ( source == __applyJButton ) {
 		saveCurrentRecord();
 		int size = __reservoirsVector.size();
 		boolean changed = false;
@@ -407,7 +415,7 @@ public void actionPerformed(ActionEvent e) {
 			__dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_STATIONS, true);
 		}		
 	}
-	else if ( o == __cancelJButton ) {
+	else if ( source == __cancelJButton ) {
 		int size = __reservoirsVector.size();
 		for (int i = 0; i < size; i++) {
 			StateMod_Reservoir r = (StateMod_Reservoir)__reservoirsVector.get(i);
@@ -420,9 +428,21 @@ public void actionPerformed(ActionEvent e) {
 			JGUIUtil.close ( this );
 		}
 	}
+	else if ( source == __showOnMap_JButton ) {
+		GeoRecord geoRecord = getSelectedReservoir().getGeoRecord();
+		GRShape shape = geoRecord.getShape();
+		__dataset_wm.showOnMap ( getSelectedReservoir(),
+			"Res: " + getSelectedReservoir().getID() + " - " + getSelectedReservoir().getName(),
+			new GRLimits(shape.xmin, shape.ymin, shape.xmax, shape.ymax),
+			geoRecord.getLayer().getProjection() );
+	}
+	else if ( source == __showOnNetwork_JButton ) {
+		__dataset_wm.showOnNetwork ( getSelectedReservoir(),
+			"Res: " + getSelectedReservoir().getID() + " - " + getSelectedReservoir().getName() );
+	}
 	// Time series buttons...
-	else if ( (o == __graph_JButton) || (o == __table_JButton) || (o == __summary_JButton) ) {
-		displayTSViewJFrame(o);
+	else if ( (source == __graph_JButton) || (source == __table_JButton) || (source == __summary_JButton) ) {
+		displayTSViewJFrame(source);
 	}
 	else {	
 		if (__currentReservoirIndex == -1) {
@@ -506,6 +526,22 @@ private void checkTimeSeriesButtonsStates() {
 	__graph_JButton.setEnabled(enabled);
 	__table_JButton.setEnabled(enabled);
 	__summary_JButton.setEnabled(enabled);
+}
+
+/**
+Checks the states of the map and network view buttons based on the selected diversion.
+*/
+private void checkViewButtonState()
+{
+	StateMod_Reservoir res = getSelectedReservoir();
+	if ( res.getGeoRecord() == null ) {
+		// No spatial data are available
+		__showOnMap_JButton.setEnabled ( false );
+	}
+	else {
+		// Enable the button...
+		__showOnMap_JButton.setEnabled ( true );
+	}
 }
 
 /**
@@ -703,6 +739,14 @@ throws Throwable {
 	__ts_content_est_daily_JCheckBox = null;
 
 	super.finalize();
+}
+
+/**
+Get the selected reservoir, based on the current index in the list.
+*/
+private StateMod_Reservoir getSelectedReservoir ()
+{
+	return __reservoirsVector.get(__currentReservoirIndex);
 }
 
 /**
@@ -941,6 +985,8 @@ private void processTableSelection(int index) {
 	else {
 		__oneFillRuleAdmin.select((int)res.getRdate());
 	}
+	
+	checkViewButtonState();
 }
 
 // TODO (JTS - 2003-09-04)
@@ -1569,10 +1615,17 @@ public void setupGUI(int index) {
 	FlowLayout gl5 = new FlowLayout(FlowLayout.RIGHT);
 	JPanel p5 = new JPanel();
 	p5.setLayout(gl5);
+	__showOnMap_JButton = new SimpleJButton(__BUTTON_SHOW_ON_MAP, this);
+	__showOnMap_JButton.setToolTipText(
+		"Annotate map with location (button is disabled if layer does not have matching ID)" );
+	__showOnNetwork_JButton = new SimpleJButton(__BUTTON_SHOW_ON_NETWORK, this);
+	__showOnNetwork_JButton.setToolTipText( "Annotate network with location" );
 	__applyJButton = new JButton(__BUTTON_APPLY);
 	__cancelJButton = new JButton(__BUTTON_CANCEL);
 	__applyJButton.addActionListener(this);
 	__cancelJButton.addActionListener(this);
+	p5.add(__showOnMap_JButton);
+	p5.add(__showOnNetwork_JButton);
 	if (__editable) {
 		p5.add(__applyJButton);
 		p5.add(__cancelJButton);

@@ -222,7 +222,9 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
-import RTi.GIS.GeoView.GeoViewJPanel;
+import RTi.GIS.GeoView.GeoRecord;
+import RTi.GR.GRLimits;
+import RTi.GR.GRShape;
 import RTi.GRTS.TSProduct;
 import RTi.GRTS.TSViewJFrame;
 import RTi.TS.DayTS;
@@ -583,17 +585,21 @@ public void actionPerformed(ActionEvent e) {
 		__searchName_JTextField.setEditable(false);		
 		__searchID_JTextField.setEditable(true);
 	}
-	else if (e.getSource() == __searchName_JRadioButton) {
+	else if (source == __searchName_JRadioButton) {
 		__searchID_JTextField.setEditable(false);
 		__searchName_JTextField.setEditable(true);
 	}
 	else if ( source == __showOnMap_JButton ) {
+		GeoRecord geoRecord = getSelectedDiversion().getGeoRecord();
+		GRShape shape = geoRecord.getShape();
 		__dataset_wm.showOnMap ( getSelectedDiversion(),
-			getSelectedDiversion().getID() + " - " + getSelectedDiversion().getName() );
+			"Div: " + getSelectedDiversion().getID() + " - " + getSelectedDiversion().getName(),
+			new GRLimits(shape.xmin, shape.ymin, shape.xmax, shape.ymax),
+			geoRecord.getLayer().getProjection() );
 	}
 	else if ( source == __showOnNetwork_JButton ) {
 		__dataset_wm.showOnNetwork ( getSelectedDiversion(),
-			getSelectedDiversion().getID() + " - " + getSelectedDiversion().getName() );
+			"Div: " + getSelectedDiversion().getID() + " - " + getSelectedDiversion().getName() );
 	}
 	else if (source == __waterRights_JButton) {
 		if (__currentDiversionIndex == -1) {
@@ -623,22 +629,6 @@ public void actionPerformed(ActionEvent e) {
 	catch (Exception ex) {
 		Message.printWarning(2, routine, "Error processing action");
 		Message.printWarning(2, routine, ex);
-	}
-}
-
-/**
-Checks the states of the map and network view buttons based on the selected diversion.
-*/
-private void checkViewButtonState()
-{
-	StateMod_Diversion div = getSelectedDiversion();
-	if ( div.getGeoRecord() == null ) {
-		// No spatial data are available
-		__showOnMap_JButton.setEnabled ( false );
-	}
-	else {
-		// Enable the button...
-		__showOnMap_JButton.setEnabled ( true );
 	}
 }
 
@@ -752,6 +742,22 @@ private void checkTimeSeriesButtonsStates() {
 		__graph_JButton.setEnabled(false);
 		__table_JButton.setEnabled(false);
 		__summary_JButton.setEnabled(false);	
+	}
+}
+
+/**
+Checks the states of the map and network view buttons based on the selected diversion.
+*/
+private void checkViewButtonState()
+{
+	StateMod_Diversion div = getSelectedDiversion();
+	if ( div.getGeoRecord() == null ) {
+		// No spatial data are available
+		__showOnMap_JButton.setEnabled ( false );
+	}
+	else {
+		// Enable the button...
+		__showOnMap_JButton.setEnabled ( true );
 	}
 }
 
@@ -1313,18 +1319,18 @@ private void populateDiversionDailyID()
 {	__diversionDailyID_JComboBox.removeAllItems();
 
 	// Get a list of all the diversions with "ID - Name"...
-	List idNameVector = StateMod_Util.createDataList(__diversionsVector, true);
-	List static_choices = StateMod_Diversion.getCdividyChoices ( true );
+	List<String> idNameVector = StateMod_Util.createDataList(__diversionsVector, true);
+	List<String> static_choices = StateMod_Diversion.getCdividyChoices ( true );
 	// Take special care if no diversions are in the list...
 	if ( idNameVector.size() == 0 ) {
-		idNameVector.add( (String)static_choices.get(0) );
+		idNameVector.add( static_choices.get(0) );
 	}
 	else {
-		idNameVector.add(0,(String)static_choices.get(0) );
+		idNameVector.add(0,static_choices.get(0) );
 	}
 	int size = static_choices.size();
 	for ( int i = 1; i < size; i++ ) {
-		idNameVector.add(i, (String)static_choices.get(0) );
+		idNameVector.add(i, static_choices.get(0) );
 	}
 	// Add at once to increase performance...
 	__diversionDailyID_JComboBox.setData ( idNameVector );
@@ -2606,7 +2612,10 @@ private void setupGUI(int index)
 	//__help_JButton = new SimpleJButton(__BUTTON_HELP, this);
 	//__help_JButton.setEnabled(false);
 	__showOnMap_JButton = new SimpleJButton(__BUTTON_SHOW_ON_MAP, this);
+	__showOnMap_JButton.setToolTipText(
+		"Annotate map with location (button is disabled if layer does not have matching ID)" );
 	__showOnNetwork_JButton = new SimpleJButton(__BUTTON_SHOW_ON_NETWORK, this);
+	__showOnNetwork_JButton.setToolTipText( "Annotate network with location" );
 	__close_JButton = new SimpleJButton(__BUTTON_CLOSE, this);
 	__apply_JButton = new SimpleJButton(__BUTTON_APPLY, this);
 	__cancel_JButton = new SimpleJButton(__BUTTON_CANCEL, this);

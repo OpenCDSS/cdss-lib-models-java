@@ -1825,23 +1825,23 @@ non-null list is guaranteed; however, the list may have zero items.
 returned from StateMod_Data.getID().  If true the string will contain the ID,
 followed by " - xxxx", where xxxx is the value returned from StateMod_Data.getName().
 */
-public static List createDataList ( List smdata_Vector, boolean include_name )
-{	List v = null;
-	if ( smdata_Vector == null ) {
+public static List<String> createDataList ( List smdataList, boolean include_name )
+{	List<String> v = null;
+	if ( smdataList == null ) {
 		v = new Vector();
 		return v;
 	}
 	else {
 	    // This optimizes memory management...
-		v = new Vector ( smdata_Vector.size() );
+		v = new Vector ( smdataList.size() );
 	}
-	int size = smdata_Vector.size();
+	int size = smdataList.size();
 	StateMod_Data smdata;
 	String id = "", name = "";
 	TS ts;
 	Object o;
 	for ( int i = 0; i < size; i++ ) {
-		o = smdata_Vector.get(i);
+		o = smdataList.get(i);
 		if ( o == null ) {
 			continue;
 		}

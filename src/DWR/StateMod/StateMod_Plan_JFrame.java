@@ -38,6 +38,9 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
+import RTi.GIS.GeoView.GeoRecord;
+import RTi.GR.GRLimits;
+import RTi.GR.GRShape;
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.JScrollWorksheet;
 import RTi.Util.GUI.JWorksheet;
@@ -88,7 +91,9 @@ private boolean __editable = false;
 /**
 String labels for buttons.
 */
-private static final String 
+private static final String
+	__BUTTON_SHOW_ON_MAP = "Show on Map",	
+	__BUTTON_SHOW_ON_NETWORK = "Show on Network",
 	__BUTTON_APPLY = "Apply",
 	__BUTTON_CANCEL = "Cancel",
 	__BUTTON_CLOSE = "Close";
@@ -129,7 +134,9 @@ private JButton
 	__help_JButton = null,
 	__close_JButton = null,
 	__cancel_JButton = null,
-	__apply_JButton = null;
+	__apply_JButton = null,
+	__showOnMap_JButton = null,
+	__showOnNetwork_JButton = null;
 
 /**
 Array of JComponents that should be disabled when nothing is selected from the list.
@@ -194,9 +201,9 @@ The DataSetComponent that contains the plan data.
 private DataSetComponent __plansComponent;
 
 /**
-The vector of plans to fill the worksheet with.
+The list of plans to fill the worksheet with.
 */
-private List __plansVector;
+private List<StateMod_Plan> __plansVector;
 
 /**
 Constructor.
@@ -277,7 +284,7 @@ public void actionPerformed(ActionEvent e) {
 		StateMod_Plan plan = null;
 		boolean changed = false;
 		for (int i = 0; i < size; i++) {
-			plan = (StateMod_Plan)__plansVector.get( i);
+			plan = __plansVector.get( i);
 			if (!changed && plan.changed()) {
 				changed = true;
 			}
@@ -299,7 +306,7 @@ public void actionPerformed(ActionEvent e) {
 		StateMod_Plan plan = null;
 		boolean changed = false;
 		for (int i = 0; i < size; i++) {
-			plan = (StateMod_Plan)__plansVector.get( i);
+			plan = __plansVector.get( i);
 			if (!changed && plan.changed()) {
 				changed = true;
 			}
@@ -313,7 +320,7 @@ public void actionPerformed(ActionEvent e) {
 		int size = __plansVector.size();
 		StateMod_Plan plan = null;
 		for (int i = 0; i < size; i++) {
-			plan = (StateMod_Plan)__plansVector.get( i);
+			plan = __plansVector.get( i);
 			plan.restoreOriginal();
 		}
 
@@ -331,14 +338,26 @@ public void actionPerformed(ActionEvent e) {
 		source == __searchID_JTextField) {	
 		searchWorksheet();
 	}	
-	else if (e.getSource() == __searchID_JRadioButton) {
+	else if ( source == __searchID_JRadioButton) {
 		__searchName_JTextField.setEditable(false);		
 		__searchID_JTextField.setEditable(true);
 	}
-	else if (e.getSource() == __searchName_JRadioButton) {
+	else if ( source == __searchName_JRadioButton) {
 		__searchID_JTextField.setEditable(false);
 		__searchName_JTextField.setEditable(true);
-	}		
+	}
+	else if ( source == __showOnMap_JButton ) {
+		GeoRecord geoRecord = getSelectedPlan().getGeoRecord();
+		GRShape shape = geoRecord.getShape();
+		__dataset_wm.showOnMap ( getSelectedPlan(),
+			"Plan: " + getSelectedPlan().getID() + " - " + getSelectedPlan().getName(),
+			new GRLimits(shape.xmin, shape.ymin, shape.xmax, shape.ymax),
+			geoRecord.getLayer().getProjection() );
+	}
+	else if ( source == __showOnNetwork_JButton ) {
+		__dataset_wm.showOnNetwork ( getSelectedPlan(),
+			"Plan: " + getSelectedPlan().getID() + " - " + getSelectedPlan().getName() );
+	}
 	}
 	catch (Exception ex) {
 		Message.printWarning(2, routine, "Error processing action");
@@ -414,6 +433,22 @@ private int checkInput()
 }
 
 /**
+Checks the states of the map and network view buttons based on the selected diversion.
+*/
+private void checkViewButtonState()
+{
+	StateMod_Plan plan = getSelectedPlan();
+	if ( plan.getGeoRecord() == null ) {
+		// No spatial data are available
+		__showOnMap_JButton.setEnabled ( false );
+	}
+	else {
+		// Enable the button...
+		__showOnMap_JButton.setEnabled ( true );
+	}
+}
+
+/**
 Clean up before garbage collection.
 */
 protected void finalize()
@@ -440,6 +475,14 @@ throws Throwable {
 	__planSwitch_JComboBox = null;
 
 	super.finalize();
+}
+
+/**
+Get the selected diversion, based on the current index in the list.
+*/
+private StateMod_Plan getSelectedPlan ()
+{
+	return __plansVector.get(__currentPlanIndex);
 }
 
 /**
@@ -659,6 +702,8 @@ private void processTableSelection(int index, boolean try_to_save )
 	// Source ID...
 
 	__Psource_JTextField.setText(plan.getPsource());
+	
+	checkViewButtonState();
 }
 
 /**
@@ -1106,9 +1151,16 @@ private void setupGUI(int index)
 	button_JPanel.setLayout(new FlowLayout());
 	//__help_JButton = new SimpleJButton(__BUTTON_HELP, this);
 	//__help_JButton.setEnabled(false);
+	__showOnMap_JButton = new SimpleJButton(__BUTTON_SHOW_ON_MAP, this);
+	__showOnMap_JButton.setToolTipText(
+		"Annotate map with location (button is disabled if layer does not have matching ID)" );
+	__showOnNetwork_JButton = new SimpleJButton(__BUTTON_SHOW_ON_NETWORK, this);
+	__showOnNetwork_JButton.setToolTipText( "Annotate network with location" );
 	__close_JButton = new SimpleJButton(__BUTTON_CLOSE, this);
 	__apply_JButton = new SimpleJButton(__BUTTON_APPLY, this);
 	__cancel_JButton = new SimpleJButton(__BUTTON_CANCEL, this);
+	button_JPanel.add(__showOnMap_JButton);
+	button_JPanel.add(__showOnNetwork_JButton);
 	if (__editable) {
 		button_JPanel.add(__apply_JButton);
 		button_JPanel.add(__cancel_JButton);
@@ -1143,7 +1195,7 @@ private void setupGUI(int index)
 	}
 
 	pack();
-	setSize(600,400);
+	setSize(700,400);
 	JGUIUtil.center(this);
 	initializeJComponents();
 	selectTableIndex(index, false, true);

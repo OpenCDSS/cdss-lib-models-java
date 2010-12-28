@@ -108,6 +108,9 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
+import RTi.GIS.GeoView.GeoRecord;
+import RTi.GR.GRLimits;
+import RTi.GR.GRShape;
 import RTi.GRTS.TSProduct;
 import RTi.GRTS.TSViewJFrame;
 import RTi.TS.TS;
@@ -132,7 +135,9 @@ WindowListener, JWorksheet_SortListener {
 /**
 Button labels.
 */
-private final String 
+private final String
+	__BUTTON_SHOW_ON_MAP = "Show on Map",	
+	__BUTTON_SHOW_ON_NETWORK = "Show on Network",
 	__BUTTON_APPLY = "Apply",
 	__BUTTON_CANCEL = "Cancel",
 	__BUTTON_CLOSE = "Close",
@@ -179,7 +184,9 @@ private JButton
 	__closeJButton,
 	__findNextInsf,
 	__helpJButton,
-	__waterRightsJButton;
+	__waterRightsJButton,
+	__showOnMap_JButton = null,
+	__showOnNetwork_JButton = null;
 
 /**
 Checkboxes for selecting the time series to view.
@@ -264,7 +271,7 @@ private DataSetComponent __instreamFlowComponent;
 /**
 The list of instream flows to be displayed.
 */
-private List __instreamFlowsVector;
+private List<StateMod_InstreamFlow> __instreamFlowsVector;
 
 /**
 Constructor.
@@ -340,28 +347,29 @@ public void actionPerformed(ActionEvent e) {
 	}
 
 	String action = e.getActionCommand();
+	Object source = e.getSource();
 
-	if (e.getSource() == __findNextInsf) {
+	if (source == __findNextInsf) {
 		searchWorksheet(__worksheet.getSelectedRow() + 1);		
 	}
-	else if (e.getSource() == __searchIDJRadioButton) {
+	else if (source == __searchIDJRadioButton) {
 		__searchName.setEditable(false);
 		__searchID.setEditable(true);
 	}
-	else if (e.getSource() == __searchNameJRadioButton) {
+	else if (source == __searchNameJRadioButton) {
 		__searchName.setEditable(true);
 		__searchID.setEditable(false);
 	}		
-	else if (e.getSource() == __searchID ||	e.getSource() == __searchName) {
+	else if (source == __searchID || source == __searchName) {
 		searchWorksheet();
 	}
 	else if (action.equals(__BUTTON_HELP)) {
 		// TODO HELP (JTS - 2003-06-09)
 	}
 	// Time series buttons...
-	else if ( (e.getSource() == __graph_JButton) || (e.getSource() == __table_JButton)
-		|| (e.getSource() == __summary_JButton) ) {
-		displayTSViewJFrame(e.getSource());
+	else if ( (source == __graph_JButton) || (source == __table_JButton)
+		|| (source == __summary_JButton) ) {
+		displayTSViewJFrame(source);
 	}	
 	else if (action.equals(__BUTTON_CLOSE)) {
 		saveCurrentRecord();
@@ -369,7 +377,7 @@ public void actionPerformed(ActionEvent e) {
 		StateMod_InstreamFlow isf = null;
 		boolean changed = false;
 		for (int i = 0; i < size; i++) {
-			isf = (StateMod_InstreamFlow)__instreamFlowsVector.get(i);
+			isf = __instreamFlowsVector.get(i);
 			if (!changed && isf.changed()) {
 				changed = true;
 			}
@@ -391,7 +399,7 @@ public void actionPerformed(ActionEvent e) {
 		StateMod_InstreamFlow isf = null;
 		boolean changed = false;
 		for (int i = 0; i < size; i++) {
-			isf = (StateMod_InstreamFlow)__instreamFlowsVector.get(i);
+			isf = __instreamFlowsVector.get(i);
 			if (!changed && isf.changed()) {
 				changed = true;
 			}
@@ -405,7 +413,7 @@ public void actionPerformed(ActionEvent e) {
 		int size = __instreamFlowsVector.size();
 		StateMod_InstreamFlow isf = null;
 		for (int i = 0; i < size; i++) {
-			isf = (StateMod_InstreamFlow)__instreamFlowsVector.get(i);
+			isf = __instreamFlowsVector.get(i);
 			isf.restoreOriginal();
 		}			
 		if ( __dataset_wm != null ) {
@@ -415,6 +423,18 @@ public void actionPerformed(ActionEvent e) {
 			JGUIUtil.close ( this );
 		}		
 	}
+	else if ( source == __showOnMap_JButton ) {
+		GeoRecord geoRecord = getSelectedInstreamFlow().getGeoRecord();
+		GRShape shape = geoRecord.getShape();
+		__dataset_wm.showOnMap ( getSelectedInstreamFlow(),
+			"Instream: " + getSelectedInstreamFlow().getID() + " - " + getSelectedInstreamFlow().getName(),
+			new GRLimits(shape.xmin, shape.ymin, shape.xmax, shape.ymax),
+			geoRecord.getLayer().getProjection() );
+	}
+	else if ( source == __showOnNetwork_JButton ) {
+		__dataset_wm.showOnNetwork ( getSelectedInstreamFlow(),
+			"Instream: " + getSelectedInstreamFlow().getID() + " - " + getSelectedInstreamFlow().getName() );
+	}
 	else {
 		if (__currentInstreamFlowIndex == -1) {
 			new ResponseJDialog(this, "You must first select an instream flow from the list.", ResponseJDialog.OK);
@@ -422,9 +442,9 @@ public void actionPerformed(ActionEvent e) {
 		}
 
 		// set placeholder to current instream flow
-		StateMod_InstreamFlow insf = (StateMod_InstreamFlow)__instreamFlowsVector.get(__currentInstreamFlowIndex);
+		StateMod_InstreamFlow insf = __instreamFlowsVector.get(__currentInstreamFlowIndex);
 
-		if (e.getSource() == __waterRightsJButton) {
+		if (source == __waterRightsJButton) {
 			new StateMod_InstreamFlow_Right_JFrame(__dataset, insf, __editable);
 		}
 	}
@@ -480,6 +500,22 @@ private void checkTimeSeriesButtonsStates() {
 	__graph_JButton.setEnabled(enabled);
 	__table_JButton.setEnabled(enabled);
 	__summary_JButton.setEnabled(enabled);
+}
+
+/**
+Checks the states of the map and network view buttons based on the selected diversion.
+*/
+private void checkViewButtonState()
+{
+	StateMod_InstreamFlow ifs = getSelectedInstreamFlow();
+	if ( ifs.getGeoRecord() == null ) {
+		// No spatial data are available
+		__showOnMap_JButton.setEnabled ( false );
+	}
+	else {
+		// Enable the button...
+		__showOnMap_JButton.setEnabled ( true );
+	}
 }
 
 /**
@@ -612,6 +648,14 @@ throws Throwable {
 	__instreamFlowsVector = null;
 	
 	super.finalize();
+}
+
+/**
+Get the selected instream flow, based on the current index in the list.
+*/
+private StateMod_InstreamFlow getSelectedInstreamFlow ()
+{
+	return __instreamFlowsVector.get(__currentInstreamFlowIndex );
 }
 
 /**
@@ -812,6 +856,8 @@ private void processTableSelection(int index) {
 
 	int iifcom = insf.getIifcom();
 	__dataType.select(iifcom);
+	
+	checkViewButtonState();
 }
 
 /**
@@ -1000,6 +1046,11 @@ private void setupGUI(int index) {
 	}
 	__demandsEstDailyTS.setEnabled(false);
 
+	__showOnMap_JButton = new SimpleJButton(__BUTTON_SHOW_ON_MAP, this);
+	__showOnMap_JButton.setToolTipText(
+		"Annotate map with location (button is disabled if layer does not have matching ID)" );
+	__showOnNetwork_JButton = new SimpleJButton(__BUTTON_SHOW_ON_NETWORK, this);
+	__showOnNetwork_JButton.setToolTipText( "Annotate network with location" );
 	__helpJButton = new JButton(__BUTTON_HELP);
 	__helpJButton.setEnabled(false);
 	__closeJButton = new JButton(__BUTTON_CLOSE);
@@ -1193,6 +1244,8 @@ private void setupGUI(int index) {
 	// add the help and close buttons
 	JPanel pfinal = new JPanel();
 	pfinal.setLayout(fl);
+	pfinal.add(__showOnMap_JButton);
+	pfinal.add(__showOnNetwork_JButton);
 	if (__editable) {
 		pfinal.add(__applyJButton);
 		pfinal.add(__cancelJButton);

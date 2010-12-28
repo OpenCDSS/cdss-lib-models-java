@@ -538,10 +538,10 @@ private static int determineFileVersion ( String filename )
 	try {
 	    in = new BufferedReader ( new InputStreamReader(IOUtil.getInputStream ( filename )) );
 	    try {
-    		// Read lines and check for common strings that indicate a DateValue file.
+    		// Read lines and check for string that indicates a version 2 file.
     		String string = null;
     		while( (string = in.readLine()) != null ) {
-    			string = string.trim().toUpperCase();
+    			string = string.toUpperCase();
     			if ( string.startsWith("#") && (string.indexOf("FILEFORMATVERSION 2") > 0) ) {
     				version = 2;
     				break;
@@ -553,10 +553,10 @@ private static int determineFileVersion ( String filename )
 	            in.close();
 	        }
 	    }
-		in = null;
 		return version;
 	}
 	catch ( Exception e ) {
+		Message.printWarning(3, "", e );
 		return version;
 	}
 }
@@ -888,7 +888,9 @@ throws Exception
 {
 	int version = determineFileVersion(filename);
 	if ( version == 1 ) {
-		return readStateModFileVersion1(filename);
+		// TODO SAM 2010-12-27 Evaluate whether old format should be supported - too much work.
+		throw new Exception ( "StateMod operating rules file format 1 is not supported." );
+		//return readStateModFileVersion1(filename);
 	}
 	else if ( version == 2 ) {
 		return readStateModFileVersion2(filename);

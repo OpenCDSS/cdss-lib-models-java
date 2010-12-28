@@ -46,14 +46,18 @@ import javax.swing.JFrame;
 
 import cdss.domain.hydrology.network.HydrologyNode;
 
+import RTi.GIS.GeoView.GeoProjection;
 import RTi.GIS.GeoView.GeoRecord;
 import RTi.GIS.GeoView.GeoViewAnnotationRenderer;
 import RTi.GIS.GeoView.GeoViewJComponent;
 import RTi.GIS.GeoView.GeoViewJPanel;
+import RTi.GIS.GeoView.HasGeoRecord;
 import RTi.GR.GRColor;
 import RTi.GR.GRDrawingArea;
 import RTi.GR.GRDrawingAreaUtil;
+import RTi.GR.GRLimits;
 import RTi.GR.GRPoint;
+import RTi.GR.GRSymbol;
 import RTi.GR.GRText;
 import RTi.GRTS.TSViewJFrame;
 import RTi.Util.GUI.ReportJFrame;
@@ -513,17 +517,45 @@ public void renderGeoViewAnnotation ( GeoViewJComponent geoview, Object objectTo
 {
 	GeoRecord geoRecord = null;
 	GRPoint point = null;
-	if ( objectToRender instanceof StateMod_Diversion ) {
+	if ( objectToRender instanceof StateMod_Data ) {
 		Message.printStatus(2, "", "Rendering \"" + label + "\" annotation on map." );
-		StateMod_Diversion div = (StateMod_Diversion)objectToRender;
-		geoRecord = div.getGeoRecord();
-		point = (GRPoint)geoRecord.getShape();
+		StateMod_Data smdata = (StateMod_Data)objectToRender;
+		if ( smdata instanceof HasGeoRecord) {
+			HasGeoRecord hasGeoRecord = (HasGeoRecord)smdata;
+			geoRecord = hasGeoRecord.getGeoRecord();
+			point = (GRPoint)geoRecord.getShape();
+		}
+		else {
+			// Do not have geographic data (should not get here)...
+			return;
+		}
+	}
+	else {
+		// Do not know how to handle
+		return;
 	}
 	GRDrawingArea da = geoview.getDrawingArea();
-	//GRShape shape = new 
-	//GRDrawingAreaUtil.drawShape(da, shape );
-	GRDrawingAreaUtil.setColor(da, GRColor.magenta );
-	GRDrawingAreaUtil.drawText(da, label, point.getX(), point.getY(), 0.0, GRText.CENTER_X|GRText.CENTER_Y );
+	//GRDrawingAreaUtil.setColor(da, GRColor.magenta );
+	GRDrawingAreaUtil.setColor(da, GRColor.black );
+	GRDrawingAreaUtil.setFont(da, "Helvetica", "Bold", 14.0 );
+	// Make the symbol size relatively large so it is visible...
+	// The pushpin is always drawn with the pin point on the point so center the text is OK
+	/*
+	GRDrawingAreaUtil.drawSymbolText(da, GRSymbol.SYM_PUSHPIN_VERTICAL, point.getX(), point.getY(),
+		32.0, // Size in device units (pixels)
+		//label, 0.0, GRText.CENTER_X|GRText.TOP, GRUnits.DEVICE, 0 );
+		label, 0.0, GRText.CENTER_X|GRText.CENTER_Y, GRUnits.DEVICE, 0 );
+		*/
+	// Use two methods to improve the placement of text independent of symbol
+	// May need to project on the fly...
+	GeoProjection layerProjection = geoRecord.getLayer().getProjection();
+	GeoProjection geoviewProjection = geoview.getProjection();
+	boolean doProject = GeoProjection.needToProject ( layerProjection, geoview.getProjection() );
+	if ( doProject ) {
+		point = (GRPoint)GeoProjection.projectShape( layerProjection, geoviewProjection, point, false );
+	}
+	GRDrawingAreaUtil.drawSymbol(da, GRSymbol.SYM_PUSHPIN_VERTICAL, point.getX(), point.getY(), 32.0, 0, 0 );
+	GRDrawingAreaUtil.drawText(da, label, point.getX(), point.getY(), 0.0, GRText.CENTER_X|GRText.TOP );
 }
 
 /**
@@ -622,11 +654,11 @@ Show a StateMod data object on the map.  This method simply helps with the hand-
 @param smData the StateMod data object to display on the map
 @param label the label for the data object on the map
 */
-public void showOnMap ( StateMod_Data smData, String label )
+public void showOnMap ( StateMod_Data smData, String label, GRLimits limits, GeoProjection projection )
 {
 	GeoViewJPanel geoviewPanel = getMapPanel();
 	if ( geoviewPanel != null ) {
-		geoviewPanel.addAnnotationRenderer ( this, smData, label, true );
+		geoviewPanel.addAnnotationRenderer ( this, smData, label, limits, projection, true );
 	}
 }
 

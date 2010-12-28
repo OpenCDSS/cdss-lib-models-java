@@ -126,6 +126,8 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.Vector;
 
+import RTi.GIS.GeoView.GeoRecord;
+import RTi.GIS.GeoView.HasGeoRecord;
 import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.Message.Message;
@@ -139,7 +141,7 @@ StateMod data objects.  It should not be confused with network node objects
 the .rin file into a true network.
 */
 public class StateMod_RiverNetworkNode  extends StateMod_Data
-implements Cloneable, Comparable, StateMod_ComponentValidator {
+implements Cloneable, Comparable, HasGeoRecord, StateMod_ComponentValidator {
 
 /**
 Downstream node identifier - third column of files.
@@ -149,6 +151,11 @@ protected String _cstadn;
 Used with .rin (column 4) - not really used anymore except by old watright code.
 */
 protected String _comment;
+/**
+Reference to spatial data for this diversion -- currently NOT cloned.  If null, then no spatial data
+are available.
+*/
+protected GeoRecord _georecord = null;
 /**
 Used with .rin (column 5) - ground water maximum recharge limit.
 */
@@ -298,6 +305,14 @@ public static String[] getDataHeader()
 	// TODO KAT 2007-04-16 When specific checks are added to checkComponentData
 	// return the header for that data here
 	return new String[] {};
+}
+
+/**
+Get the geographical data associated with the diversion.
+@return the GeoRecord for the diversion.
+*/
+public GeoRecord getGeoRecord() {
+	return _georecord;
 }
 
 /**
@@ -462,6 +477,14 @@ public void setCstadn ( String cstadn ) {
 			_dataset.setDirty ( _smdata_type, true );
 		}
 	}
+}
+
+/**
+Set the geographic information object associated with the diversion.
+@param georecord Geographic record associated with the diversion.
+*/
+public void setGeoRecord ( GeoRecord georecord )
+{	_georecord = georecord;
 }
 
 /**

@@ -95,6 +95,9 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
+import RTi.GIS.GeoView.GeoRecord;
+import RTi.GR.GRLimits;
+import RTi.GR.GRShape;
 import RTi.GRTS.TSProduct;
 import RTi.GRTS.TSViewJFrame;
 import RTi.TS.TS;
@@ -166,7 +169,9 @@ private JButton
 	__closeJButton,
 	__graph_JButton,
 	__table_JButton,
-	__summary_JButton;
+	__summary_JButton,
+	__showOnMap_JButton = null,
+	__showOnNetwork_JButton = null;
 
 private JCheckBox
 	__ts_streamflow_base_monthly_JCheckBox,
@@ -217,6 +222,8 @@ private StateMod_DataSet_WindowManager __dataset_wm;
 GUI strings.
 */
 private final String
+	__BUTTON_SHOW_ON_MAP = "Show on Map",	
+	__BUTTON_SHOW_ON_NETWORK = "Show on Network",
 	__BUTTON_APPLY = "Apply",
 	__BUTTON_CANCEL = "Cancel",
 	__BUTTON_CLOSE = "Close",
@@ -231,18 +238,17 @@ private StateMod_StreamEstimate_Coefficients_TableModel __tableModelR;
 /**
 The stream estimate stations data.
 */
-private List __stationsVector;
+private List<StateMod_StreamEstimate> __stationsVector;
 
 /**
 The coefficients data.
 */
-private List __coefficientsVector;
+private List<StateMod_StreamEstimate_Coefficients> __coefficientsVector;
 
 /**
 Constructor.
 @param dataset the dataset containing the stream estimate stations data.
-@param dataset_wm the dataset window manager or null if the data set windows
-are not being managed.
+@param dataset_wm the dataset window manager or null if the data set windows are not being managed.
 @param editable whether the data on the gui is editable or not
 */
 public StateMod_StreamEstimate_JFrame (	StateMod_DataSet dataset,
@@ -331,13 +337,13 @@ Responds to action performed events.
 */
 public void actionPerformed(ActionEvent e) {
 	String action = e.getActionCommand();
-	Object o = e.getSource();
+	Object source = e.getSource();
 
-	if (o == __searchIDJRadioButton) {
+	if (source == __searchIDJRadioButton) {
 		__searchIDJTextField.setEditable(true);
 		__searchNameJTextField.setEditable(false);
 	}
-	else if (o == __searchNameJRadioButton) {
+	else if (source == __searchNameJRadioButton) {
 		__searchIDJTextField.setEditable(false);
 		__searchNameJTextField.setEditable(true);
 	}
@@ -347,7 +353,7 @@ public void actionPerformed(ActionEvent e) {
 		StateMod_StreamEstimate s = null;
 		boolean changed = false;
 		for (int i = 0; i < size; i++) {
-			s = (StateMod_StreamEstimate)__stationsVector.get(i);
+			s = __stationsVector.get(i);
 			if (!changed && s.changed()) {
 				changed = true;
 			}
@@ -360,7 +366,7 @@ public void actionPerformed(ActionEvent e) {
 		StateMod_StreamEstimate_Coefficients c = null;
 		changed = false;
 		for (int i = 0; i < size; i++) {
-			c = (StateMod_StreamEstimate_Coefficients)__coefficientsVector.get(i);
+			c = __coefficientsVector.get(i);
 			if (!changed && c.changed()) {
 				changed = true;
 			}
@@ -374,13 +380,13 @@ public void actionPerformed(ActionEvent e) {
 		int size = __stationsVector.size();
 		StateMod_StreamEstimate s = null;
 		for (int i = 0; i < size; i++) {
-			s = (StateMod_StreamEstimate)__stationsVector.get(i);
+			s = __stationsVector.get(i);
 			s.restoreOriginal();
 		}		
 		size = __coefficientsVector.size();
 		StateMod_StreamEstimate_Coefficients c = null;
 		for (int i = 0; i < size; i++) {
-			c = (StateMod_StreamEstimate_Coefficients)__coefficientsVector.get(i);
+			c = __coefficientsVector.get(i);
 			c.restoreOriginal();
 		}		
 		if ( __dataset_wm != null ) {
@@ -396,7 +402,7 @@ public void actionPerformed(ActionEvent e) {
 		StateMod_StreamEstimate s = null;
 		boolean changed = false;
 		for (int i = 0; i < size; i++) {
-			s = (StateMod_StreamEstimate)__stationsVector.get(i);
+			s = __stationsVector.get(i);
 			if (!changed && s.changed()) {
 				changed = true;
 			}
@@ -409,7 +415,7 @@ public void actionPerformed(ActionEvent e) {
 		StateMod_StreamEstimate_Coefficients c = null;
 		changed = false;
 		for (int i = 0; i < size; i++) {
-			c = (StateMod_StreamEstimate_Coefficients)__coefficientsVector.get(i);
+			c = __coefficientsVector.get(i);
 			if (!changed && c.changed()) {
 				changed = true;
 			}
@@ -431,12 +437,24 @@ public void actionPerformed(ActionEvent e) {
 	else if (action.equals(__BUTTON_FIND_NEXT)) {
 		searchLWorksheet(__worksheetL.getSelectedRow() + 1);
 	}
-	else if ((o == __searchIDJTextField) || (o == __searchNameJTextField)) {
+	else if ((source == __searchIDJTextField) || (source == __searchNameJTextField)) {
 		searchLWorksheet(0);
-	}	
-	else if ( (o == __graph_JButton) || (o == __table_JButton) ||
-		(o == __summary_JButton) ) {
-		displayTSViewJFrame(o);
+	}
+	else if ( source == __showOnMap_JButton ) {
+		GeoRecord geoRecord = getSelectedStreamEstimate().getGeoRecord();
+		GRShape shape = geoRecord.getShape();
+		__dataset_wm.showOnMap ( getSelectedStreamEstimate(),
+			"StreamEst: " + getSelectedStreamEstimate().getID() + " - " + getSelectedStreamEstimate().getName(),
+			new GRLimits(shape.xmin, shape.ymin, shape.xmax, shape.ymax),
+			geoRecord.getLayer().getProjection() );
+	}
+	else if ( source == __showOnNetwork_JButton ) {
+		__dataset_wm.showOnNetwork ( getSelectedStreamEstimate(),
+			"StreamEst: " + getSelectedStreamEstimate().getID() + " - " + getSelectedStreamEstimate().getName() );
+	}
+	else if ( (source == __graph_JButton) || (source == __table_JButton) ||
+		(source == __summary_JButton) ) {
+		displayTSViewJFrame(source);
 	}	
 }
 
@@ -489,6 +507,22 @@ private void checkTimeSeriesButtonsStates() {
 	__graph_JButton.setEnabled(enabled);
 	__table_JButton.setEnabled(enabled);
 	__summary_JButton.setEnabled(enabled);
+}
+
+/**
+Checks the states of the map and network view buttons based on the selected stream estimate station.
+*/
+private void checkViewButtonState()
+{
+	StateMod_StreamEstimate ses = getSelectedStreamEstimate();
+	if ( ses.getGeoRecord() == null ) {
+		// No spatial data are available
+		__showOnMap_JButton.setEnabled ( false );
+	}
+	else {
+		// Enable the button...
+		__showOnMap_JButton.setEnabled ( true );
+	}
 }
 
 /**
@@ -614,6 +648,14 @@ private StateMod_StreamEstimate_Coefficients findCoefficients(String id) {
 		coef = (StateMod_StreamEstimate_Coefficients)__coefficientsVector.get(pos);
 	}
 	return coef;
+}
+
+/**
+Get the selected stream estimate station, based on the current index in the list.
+*/
+private StateMod_StreamEstimate getSelectedStreamEstimate ()
+{
+	return __stationsVector.get(__currentStationIndex);
 }
 
 /**
@@ -758,6 +800,7 @@ private void processLTableSelection(int index) {
 	else {
 		__ts_streamflow_base_daily_JCheckBox.setEnabled(false);
 	}
+	checkViewButtonState();
 }
 
 /**
@@ -909,6 +952,11 @@ private void setupGUI(int index) {
 	__searchNameJRadioButton.addActionListener(this);
 	__searchCriteriaGroup.add(__searchNameJRadioButton);
 
+	__showOnMap_JButton = new SimpleJButton(__BUTTON_SHOW_ON_MAP, this);
+	__showOnMap_JButton.setToolTipText(
+		"Annotate map with location (button is disabled if layer does not have matching ID)" );
+	__showOnNetwork_JButton = new SimpleJButton(__BUTTON_SHOW_ON_NETWORK, this);
+	__showOnNetwork_JButton.setToolTipText( "Annotate network with location" );
 	__applyJButton = new JButton(__BUTTON_APPLY);
 	__cancelJButton = new JButton(__BUTTON_CANCEL);
 	__helpJButton = new JButton(__BUTTON_HELP);
@@ -1091,6 +1139,8 @@ private void setupGUI(int index) {
 	JPanel pfinal = new JPanel();
 	FlowLayout fl = new FlowLayout(FlowLayout.RIGHT);
 	pfinal.setLayout(fl);
+	pfinal.add(__showOnMap_JButton);
+	pfinal.add(__showOnNetwork_JButton);
 	if (__editable) {
 		pfinal.add(__applyJButton);
 		pfinal.add(__cancelJButton);

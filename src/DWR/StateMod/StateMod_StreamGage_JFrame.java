@@ -111,6 +111,9 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
+import RTi.GIS.GeoView.GeoRecord;
+import RTi.GR.GRLimits;
+import RTi.GR.GRShape;
 import RTi.GRTS.TSProduct;
 import RTi.GRTS.TSViewJFrame;
 import RTi.TS.TS;
@@ -167,7 +170,9 @@ private JButton
 	__closeJButton,
 	__graph_JButton,
 	__table_JButton,
-	__summary_JButton;	
+	__summary_JButton,
+	__showOnMap_JButton = null,
+	__showOnNetwork_JButton = null;	
 
 /**
 Checkboxes to select the time series to view.
@@ -216,6 +221,8 @@ private SimpleJComboBox __crunidyComboBox;
 Button label strings.
 */
 private final String
+	__BUTTON_SHOW_ON_MAP = "Show on Map",	
+	__BUTTON_SHOW_ON_NETWORK = "Show on Network",
 	__BUTTON_APPLY = "Apply",
 	__BUTTON_CANCEL = "Cancel",
 	__BUTTON_CLOSE = "Close",
@@ -233,9 +240,9 @@ Data set window manager.
 private StateMod_DataSet_WindowManager __dataset_wm;
 
 /**
-Vector of stream gage station data to display in the form.
+List of stream gage station data to display in the form.
 */
-private List __streamGageStationsVector;
+private List<StateMod_StreamGage> __streamGageStationsVector;
 
 /**
 The index in __disables[] of textfields and other components that should NEVER be made editable (e.g., ID fields).
@@ -267,7 +274,7 @@ public StateMod_StreamGage_JFrame (	StateMod_DataSet dataset, StateMod_DataSet_W
 	int size = __streamGageStationsVector.size();
 	StateMod_StreamGage s = null;
 	for (int i = 0; i < size; i++) {
-		s =(StateMod_StreamGage)__streamGageStationsVector.get(i);
+		s = __streamGageStationsVector.get(i);
 		s.createBackup();
 	}
 	__editable = editable;
@@ -316,10 +323,10 @@ public void actionPerformed(ActionEvent e) {
 	}
 
 	String action = e.getActionCommand();
-	Object o = e.getSource();
+	Object source = e.getSource();
 
-	if ( (o == __graph_JButton) || (o == __table_JButton) || (o == __summary_JButton) ) {
-		displayTSViewJFrame(o);
+	if ( (source == __graph_JButton) || (source == __table_JButton) || (source == __summary_JButton) ) {
+		displayTSViewJFrame(source);
 	}	
 	else if (action.equals(__BUTTON_APPLY)) {
 		saveCurrentRecord();
@@ -376,18 +383,30 @@ public void actionPerformed(ActionEvent e) {
 	else if (action.equals(__BUTTON_HELP)) {
 		// TODO HELP (JTS - 2003-08-18)
 	}
-	else if (e.getSource() == __searchIDJRadioButton) {
+	else if ( source == __searchIDJRadioButton) {
 		__searchName.setEditable(false);
 		__searchID.setEditable(true);
 	}
-	else if (e.getSource() == __searchNameJRadioButton) {
+	else if ( source == __searchNameJRadioButton) {
 		__searchName.setEditable(true);
 		__searchID.setEditable(false);
-	}		
+	}
+	else if ( source == __showOnMap_JButton ) {
+		GeoRecord geoRecord = getSelectedStreamGage().getGeoRecord();
+		GRShape shape = geoRecord.getShape();
+		__dataset_wm.showOnMap ( getSelectedStreamGage(),
+			"Gage: " + getSelectedStreamGage().getID() + " - " + getSelectedStreamGage().getName(),
+			new GRLimits(shape.xmin, shape.ymin, shape.xmax, shape.ymax),
+			geoRecord.getLayer().getProjection() );
+	}
+	else if ( source == __showOnNetwork_JButton ) {
+		__dataset_wm.showOnNetwork ( getSelectedStreamGage(),
+			"Gage: " + getSelectedStreamGage().getID() + " - " + getSelectedStreamGage().getName() );
+	}
 	else if (action.equals(__BUTTON_FIND_NEXT)) {
 		searchWorksheet(__worksheet.getSelectedRow() + 1);
 	}
-	else if (e.getSource() == __searchID || e.getSource() == __searchName) {
+	else if (source == __searchID || e.getSource() == __searchName) {
 		searchWorksheet(0);
 	}	
 }
@@ -440,6 +459,22 @@ private void checkTimeSeriesButtonsStates() {
 	__graph_JButton.setEnabled(enabled);
 	__table_JButton.setEnabled(enabled);
 	__summary_JButton.setEnabled(enabled);
+}
+
+/**
+Checks the states of the map and network view buttons based on the selected diversion.
+*/
+private void checkViewButtonState()
+{
+	StateMod_StreamGage gage = getSelectedStreamGage();
+	if ( gage.getGeoRecord() == null ) {
+		// No spatial data are available
+		__showOnMap_JButton.setEnabled ( false );
+	}
+	else {
+		// Enable the button...
+		__showOnMap_JButton.setEnabled ( true );
+	}
 }
 
 /**
@@ -557,6 +592,14 @@ throws Throwable {
 	__ts_streamflow_est_base_daily_JCheckBox = null;
 	__ts_streamflow_est_hist_daily_JCheckBox = null;
 	super.finalize();
+}
+
+/**
+Get the selected stream gage, based on the current index in the list.
+*/
+private StateMod_StreamGage getSelectedStreamGage ()
+{
+	return __streamGageStationsVector.get(__currentStationIndex);
 }
 
 /**
@@ -757,7 +800,8 @@ private void processTableSelection(int index) {
 			Message.printWarning(2, routine, "No Crunidy value matching '" + c + "' found in combo box.");
 			__crunidyComboBox.select(0);
 		}		
-	}	
+	}
+	checkViewButtonState();
 }
 
 /**
@@ -904,6 +948,11 @@ private void setupGUI(int index) {
 	__closeJButton = new JButton(__BUTTON_CLOSE);
 	__cancelJButton = new JButton(__BUTTON_CANCEL);
 	__applyJButton = new JButton(__BUTTON_APPLY);
+	__showOnMap_JButton = new SimpleJButton(__BUTTON_SHOW_ON_MAP, this);
+	__showOnMap_JButton.setToolTipText(
+		"Annotate map with location (button is disabled if layer does not have matching ID)" );
+	__showOnNetwork_JButton = new SimpleJButton(__BUTTON_SHOW_ON_NETWORK, this);
+	__showOnNetwork_JButton.setToolTipText( "Annotate network with location" );
 
 	GridBagLayout gb = new GridBagLayout();
 	p1.setLayout(gb);
@@ -1134,6 +1183,8 @@ private void setupGUI(int index) {
 	FlowLayout fl = new FlowLayout(FlowLayout.RIGHT);
 	pfinal.setLayout(fl);
 	__helpJButton.setEnabled(false);
+	pfinal.add(__showOnMap_JButton);
+	pfinal.add(__showOnNetwork_JButton);
 	if (__editable) {
 		pfinal.add(__applyJButton);
 		pfinal.add(__cancelJButton);
