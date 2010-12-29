@@ -92,16 +92,22 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
+import RTi.GIS.GeoView.GeoProjection;
+import RTi.GIS.GeoView.GeoRecord;
+import RTi.GIS.GeoView.HasGeoRecord;
+import RTi.GR.GRLimits;
+import RTi.GR.GRPoint;
+import RTi.GR.GRShape;
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.JScrollWorksheet;
 import RTi.Util.GUI.JWorksheet;
 import RTi.Util.GUI.JWorksheet_SortListener;
 import RTi.Util.GUI.ResponseJDialog;
+import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.GUI.SimpleJComboBox;
 import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
-import RTi.Util.String.StringUtil;
 
 /**
 This class is a gui for displaying and editing operational right data.
@@ -113,7 +119,9 @@ JWorksheet_SortListener {
 /**
 Button labels.
 */
-private final String 
+private final String
+	__BUTTON_SHOW_ON_MAP = "Show on Map",	
+	__BUTTON_SHOW_ON_NETWORK = "Show on Network",
 	__BUTTON_APPLY = "Apply",
 	__BUTTON_ADD = "Add",
 	__BUTTON_CANCEL = "Cancel",
@@ -157,7 +165,9 @@ private JButton
 	__helpJButton,
 	__closeJButton,
 	__cancelJButton,
-	__applyJButton;
+	__applyJButton,
+	__showOnMap_JButton = null,
+	__showOnNetwork_JButton = null;
 
 /**
 Array of JComponents that should be disabled when nothing is selected from the list.
@@ -425,6 +435,49 @@ public void actionPerformed(ActionEvent e) {
 		__searchID.setEditable(false);
 		__searchName.setEditable(true);
 	}
+	else if ( source == __showOnMap_JButton ) {
+		// The button is only enabled if spatial data exist...
+		StateMod_OperationalRight opr = getSelectedOperationalRight();
+		StateMod_Data smdata = opr.lookupDestinationDataObject(__dataset);
+		GeoRecord geoRecord = ((HasGeoRecord)smdata).getGeoRecord();
+		GRShape shape = geoRecord.getShape();
+		// TODO SAM 2010-12-28 Need to include source and intervening structures...
+		GRLimits limits = new GRLimits(shape.xmin, shape.ymin, shape.xmax, shape.ymax);
+		// Extend the limits for source1 and source2
+		smdata = opr.lookupSource1DataObject(__dataset);
+		GeoProjection geoRecordProjection = geoRecord.getLayer().getProjection();
+		if ( (smdata != null) && (smdata instanceof HasGeoRecord) ) {
+			HasGeoRecord hasGeoRecord = (HasGeoRecord)smdata;
+			geoRecord = hasGeoRecord.getGeoRecord();
+			GRPoint pointSource1 = (GRPoint)geoRecord.getShape();
+			GeoProjection layerProjection = geoRecord.getLayer().getProjection();
+			boolean doProject = GeoProjection.needToProject ( layerProjection, geoRecordProjection );
+			if ( doProject ) {
+				pointSource1 = (GRPoint)GeoProjection.projectShape( layerProjection, geoRecordProjection, pointSource1, false );
+			}
+			limits.max(pointSource1.x,pointSource1.y,pointSource1.x,pointSource1.y,true);
+		}
+		smdata = opr.lookupSource2DataObject(__dataset);
+		if ( (smdata != null) && (smdata instanceof HasGeoRecord) ) {
+			HasGeoRecord hasGeoRecord = (HasGeoRecord)smdata;
+			geoRecord = hasGeoRecord.getGeoRecord();
+			GRPoint pointSource2 = (GRPoint)geoRecord.getShape();
+			GeoProjection layerProjection = geoRecord.getLayer().getProjection();
+			boolean doProject = GeoProjection.needToProject ( layerProjection, geoRecordProjection );
+			if ( doProject ) {
+				pointSource2 = (GRPoint)GeoProjection.projectShape( layerProjection, geoRecordProjection, pointSource2, false );
+			}
+			limits.max(pointSource2.x,pointSource2.y,pointSource2.x,pointSource2.y,true);
+		}
+		__dataset_wm.showOnMap ( opr,
+			"OpRight: " + getSelectedOperationalRight().getID() + " - " + getSelectedOperationalRight().getName(),
+			limits,
+			geoRecordProjection );
+	}
+	else if ( source == __showOnNetwork_JButton ) {
+		__dataset_wm.showOnNetwork ( getSelectedOperationalRight(),
+			"OpRight: " + getSelectedOperationalRight().getID() + " - " + getSelectedOperationalRight().getName() );
+	}
 	else if (source == __destination_JComboBox) {		
 		fillDestinationAccount(__currentItyopr, __destination_JComboBox.getSelected());
 		if (__currentItyopr == 8) {
@@ -471,6 +524,30 @@ private boolean checkInput() {
 	}
 	new ResponseJDialog(this, "Errors encountered", label, ResponseJDialog.OK);
 	return false;
+}
+
+/**
+Checks the states of the map and network view buttons based on the selected operational right.
+*/
+private void checkViewButtonState()
+{
+	StateMod_OperationalRight opr = getSelectedOperationalRight();
+	StateMod_Data smdata = opr.lookupDestinationDataObject(__dataset);
+	if ( smdata instanceof HasGeoRecord ) {
+		HasGeoRecord hasGeoRecord = (HasGeoRecord)smdata;
+		if ( hasGeoRecord.getGeoRecord() == null ) {
+			// No spatial data are available
+			__showOnMap_JButton.setEnabled ( false );
+		}
+		else {
+			// Enable the button...
+			__showOnMap_JButton.setEnabled ( true );
+		}
+	}
+	else {
+		// No spatial data are available
+		__showOnMap_JButton.setEnabled ( false );
+	}
 }
 
 /**
@@ -759,6 +836,14 @@ throws Throwable {
 	__qdebtPanel = null;
 
 	super.finalize();
+}
+
+/**
+Get the selected operational right, based on the current index in the list.
+*/
+private StateMod_OperationalRight getSelectedOperationalRight ()
+{
+	return __operationalRights.get(__currentOpRightsIndex);
 }
 
 /**
@@ -2046,11 +2131,11 @@ private void processTableSelection(int index) {
 	
 	populateOperationalRightInformation(opr);
 	populateAdditionalData(opr);
+	checkViewButtonState();
 }
 
 /**
-Saves the prior record selected in the table; called when moving to a new 
-record by a table selection.
+Saves the prior record selected in the table; called when moving to a new record by a table selection.
 */
 private void saveLastRecord() {
 	saveInformation(__lastOpRightsIndex);
@@ -2317,6 +2402,11 @@ private void setupGUI(int index) {
 	__searchIDJRadioButton.addActionListener(this);
 	__searchNameJRadioButton.addActionListener(this);
 
+	__showOnMap_JButton = new SimpleJButton(__BUTTON_SHOW_ON_MAP, this);
+	__showOnMap_JButton.setToolTipText(
+		"Annotate map with location (button is disabled if layer does not have matching ID)" );
+	__showOnNetwork_JButton = new SimpleJButton(__BUTTON_SHOW_ON_NETWORK, this);
+	__showOnNetwork_JButton.setToolTipText( "Annotate network with location" );
 	__applyJButton = new JButton(__BUTTON_APPLY);
 	__cancelJButton = new JButton(__BUTTON_CANCEL);
 	__helpJButton = new JButton(__BUTTON_HELP);
@@ -2772,6 +2862,8 @@ private void setupGUI(int index) {
 	FlowLayout fl = new FlowLayout(FlowLayout.RIGHT);
 	JPanel pfinal = new JPanel();
 	pfinal.setLayout(fl);
+	pfinal.add(__showOnMap_JButton);
+	pfinal.add(__showOnNetwork_JButton);
 	if (__editable) {
 		pfinal.add(__applyJButton);
 		pfinal.add(__cancelJButton);

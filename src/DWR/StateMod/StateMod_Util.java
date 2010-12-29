@@ -123,7 +123,6 @@
 
 package DWR.StateMod;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
@@ -2407,6 +2406,259 @@ public static DayTS getDailyTimeSeries ( String ID, String dailyID,
 		}
 		return newDayTS;
 	}
+}
+
+// TODO SAM 2010-12-28 Implement generics - had some problems 
+/**
+Get the list of data objects matching the operational right metadata source/destination type.
+Depending on the type, this may return a list of stations or rights.
+@param type the type of source or destination that is allowed
+@param dataset the full dataset, from which lists are extracted
+@param returnStations if the list is a list of rights, then specifying true will return the list of stations
+associated with the rights (ignored in cases where the type is stations)
+*/
+public static List getDataList (
+	StateMod_OperationalRight_Metadata_SourceOrDestinationType type, StateMod_DataSet dataset,
+	boolean returnStations )
+{
+	List dataList = new Vector();
+	if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.CARRIER ) {
+		// Diversions where irturn = 3
+		List<StateMod_Diversion> stationList2 = (List<StateMod_Diversion>)dataset.getComponentForComponentType(
+			StateMod_DataSet.COMP_DIVERSION_STATIONS).getData();
+		for ( StateMod_Diversion div: stationList2 ) {
+			if ( div.getIrturn() == 3 ) {
+				dataList.add ( div );
+			}
+		}
+	}
+	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.DIVERSION ) {
+		// All diversion stations
+		dataList = (List<StateMod_Diversion>)dataset.getComponentForComponentType(
+			StateMod_DataSet.COMP_DIVERSION_STATIONS).getData();
+	}
+	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.DIVERSION_RIGHT ) {
+		// Diversions rights
+		List<StateMod_DiversionRight> dataList2 = (List<StateMod_DiversionRight>)dataset.getComponentForComponentType(
+			StateMod_DataSet.COMP_DIVERSION_RIGHTS).getData();
+		for ( StateMod_DiversionRight divRight : dataList2 ) {
+			if ( returnStations ) {
+				// Get the diversion station associated with the right
+				List divList = (List<StateMod_Diversion>)dataset.getComponentForComponentType(
+					StateMod_DataSet.COMP_DIVERSION_STATIONS).getData();
+				int pos = indexOf (divList, divRight.getLocationIdentifier());
+				if ( pos >= 0 ) {
+					dataList.add ( divList.get(pos));
+				}
+			}
+			else {
+				dataList.add ( divRight );
+			}
+		}
+	}
+	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.INSTREAM_FLOW ) {
+		// All instream flow stations
+		dataList = (List<StateMod_InstreamFlow>)dataset.getComponentForComponentType(
+			StateMod_DataSet.COMP_INSTREAM_STATIONS).getData();
+	}
+	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.INSTREAM_FLOW_RIGHT ) {
+		// InstreamFlows rights
+		List<StateMod_InstreamFlowRight> dataList2 = (List<StateMod_InstreamFlowRight>)dataset.getComponentForComponentType(
+			StateMod_DataSet.COMP_INSTREAM_RIGHTS).getData();
+		for ( StateMod_InstreamFlowRight instreamRight : dataList2 ) {
+			if ( returnStations ) {
+				// Get the instream flow station associated with the right
+				List instreamList = (List<StateMod_InstreamFlow>)dataset.getComponentForComponentType(
+					StateMod_DataSet.COMP_INSTREAM_STATIONS).getData();
+				int pos = indexOf (instreamList, instreamRight.getLocationIdentifier());
+				if ( pos >= 0 ) {
+					dataList.add ( instreamList.get(pos));
+				}
+			}
+			else {
+				dataList.add ( instreamRight );
+			}
+		}
+	}
+	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.OPERATIONAL_RIGHT ) {
+		// All operational rights
+		dataList = (List<StateMod_OperationalRight>)dataset.getComponentForComponentType(
+			StateMod_DataSet.COMP_OPERATION_RIGHTS).getData();
+	}
+	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_ACCOUNTING ) {
+		// Plan where iPlnTyp = 11
+		List<StateMod_Plan> dataList2 = (List<StateMod_Plan>)dataset.getComponentForComponentType(
+			StateMod_DataSet.COMP_PLANS).getData();
+		for ( StateMod_Plan plan: dataList2 ) {
+			if ( plan.getIPlnTyp() == 11) {
+				dataList.add ( plan );
+			}
+		}
+	}
+	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_OUT_OF_PRIORITY ) {
+		// Plan where iPlnTyp = 9
+		List<StateMod_Plan> dataList2 = (List<StateMod_Plan>)dataset.getComponentForComponentType(
+			StateMod_DataSet.COMP_PLANS).getData();
+		for ( StateMod_Plan plan: dataList2 ) {
+			if ( plan.getIPlnTyp() == 9 ) {
+				dataList.add ( plan );
+			}
+		}
+	}
+	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_RECHARGE ) {
+		// Plan where iPlnTyp = 8
+		List<StateMod_Plan> dataList2 = (List<StateMod_Plan>)dataset.getComponentForComponentType(
+			StateMod_DataSet.COMP_PLANS).getData();
+		for ( StateMod_Plan plan: dataList2 ) {
+			if ( plan.getIPlnTyp() == 8 ) {
+				dataList.add ( plan );
+			}
+		}
+	}
+	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_RELEASE_LIMIT ) {
+		// Plan where iPlnTyp = 12
+		List<StateMod_Plan> dataList2 = (List<StateMod_Plan>)dataset.getComponentForComponentType(
+			StateMod_DataSet.COMP_PLANS).getData();
+		for ( StateMod_Plan plan: dataList2 ) {
+			if ( plan.getIPlnTyp() == 12 ) {
+				dataList.add ( plan );
+			}
+		}
+	}
+	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_REUSE_TO_DIVERSION) {
+		// Plan where iPlnTyp = 4
+		List<StateMod_Plan> dataList2 = (List<StateMod_Plan>)dataset.getComponentForComponentType(
+			StateMod_DataSet.COMP_PLANS).getData();
+		for ( StateMod_Plan plan: dataList2 ) {
+			if ( plan.getIPlnTyp() == 4 ) {
+				dataList.add ( plan );
+			}
+		}
+	}
+	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_REUSE_TO_DIVERSION_FROM_TRANSMOUNTAIN) {
+		// Plan where iPlnTyp = 6
+		List<StateMod_Plan> dataList2 = (List<StateMod_Plan>)dataset.getComponentForComponentType(
+			StateMod_DataSet.COMP_PLANS).getData();
+		for ( StateMod_Plan plan: dataList2 ) {
+			if ( plan.getIPlnTyp() == 6 ) {
+				dataList.add ( plan );
+			}
+		}
+	}
+	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_REUSE_TO_RESERVOIR) {
+		// Plan where iPlnTyp = 3
+		List<StateMod_Plan> dataList2 = (List<StateMod_Plan>)dataset.getComponentForComponentType(
+			StateMod_DataSet.COMP_PLANS).getData();
+		for ( StateMod_Plan plan: dataList2 ) {
+			if ( plan.getIPlnTyp() == 3 ) {
+				dataList.add ( plan );
+			}
+		}
+	}
+	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_REUSE_TO_RESERVOIR_FROM_TRANSMOUNTAIN) {
+		// Plan where iPlnTyp = 5
+		List<StateMod_Plan> dataList2 = (List<StateMod_Plan>)dataset.getComponentForComponentType(
+			StateMod_DataSet.COMP_PLANS).getData();
+		for ( StateMod_Plan plan: dataList2 ) {
+			if ( plan.getIPlnTyp() == 5 ) {
+				dataList.add ( plan );
+			}
+		}
+	}
+	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_SPECIAL_WELL_AUGMENTATION ) {
+		// Plan where iPlnTyp = 10
+		List<StateMod_Plan> dataList2 = (List<StateMod_Plan>)dataset.getComponentForComponentType(
+			StateMod_DataSet.COMP_PLANS).getData();
+		for ( StateMod_Plan plan: dataList2 ) {
+			if ( plan.getIPlnTyp() == 10 ) {
+				dataList.add ( plan );
+			}
+		}
+	}
+	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_TC) {
+		// Plan where iPlnTyp = 1
+		List<StateMod_Plan> dataList2 = (List<StateMod_Plan>)dataset.getComponentForComponentType(
+			StateMod_DataSet.COMP_PLANS).getData();
+		for ( StateMod_Plan plan: dataList2 ) {
+			if ( plan.getIPlnTyp() == 1) {
+				dataList.add ( plan );
+			}
+		}
+	}
+	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_TRANSMOUNTAIN_IMPORT) {
+		// Plan where iPlnTyp = 7
+		List<StateMod_Plan> dataList2 = (List<StateMod_Plan>)dataset.getComponentForComponentType(
+			StateMod_DataSet.COMP_PLANS).getData();
+		for ( StateMod_Plan plan: dataList2 ) {
+			if ( plan.getIPlnTyp() == 7) {
+				dataList.add ( plan );
+			}
+		}
+	}
+	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_WELL_AUGMENTATION) {
+		// Plan where iPlnTyp = 2
+		List<StateMod_Plan> dataList2 = (List<StateMod_Plan>)dataset.getComponentForComponentType(
+			StateMod_DataSet.COMP_PLANS).getData();
+		for ( StateMod_Plan plan: dataList2 ) {
+			if ( plan.getIPlnTyp() == 2 ) {
+				dataList.add ( plan );
+			}
+		}
+	}
+	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.RESERVOIR ) {
+		// All reservoir stations
+		dataList = (List<StateMod_Reservoir>)dataset.getComponentForComponentType(
+			StateMod_DataSet.COMP_RESERVOIR_STATIONS).getData();
+	}
+	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.RESERVOIR_RIGHT ) {
+		// Reservoir rights
+		List<StateMod_ReservoirRight> dataList2 = (List<StateMod_ReservoirRight>)dataset.getComponentForComponentType(
+			StateMod_DataSet.COMP_RESERVOIR_RIGHTS).getData();
+		for ( StateMod_ReservoirRight resRight : dataList2 ) {
+			if ( returnStations ) {
+				// Get the reservoir station associated with the right
+				List resList = (List<StateMod_Reservoir>)dataset.getComponentForComponentType(
+					StateMod_DataSet.COMP_RESERVOIR_STATIONS).getData();
+				int pos = indexOf (resList, resRight.getLocationIdentifier());
+				if ( pos >= 0 ) {
+					dataList.add ( resList.get(pos));
+				}
+			}
+			else {
+				dataList.add ( resRight );
+			}
+		}
+	}
+	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.STREAM_GAGE ) {
+		// All stream gage stations
+		dataList = (List<StateMod_StreamGage>)dataset.getComponentForComponentType(
+			StateMod_DataSet.COMP_STREAMGAGE_STATIONS).getData();
+	}
+	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.WELL ) {
+		// All well stations
+		dataList = (List<StateMod_Well>)dataset.getComponentForComponentType(
+			StateMod_DataSet.COMP_WELL_STATIONS).getData();
+	}
+	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.WELL_RIGHT ) {
+		// Wells rights
+		List<StateMod_WellRight> dataList2 = (List<StateMod_WellRight>)dataset.getComponentForComponentType(
+			StateMod_DataSet.COMP_WELL_RIGHTS).getData();
+		for ( StateMod_WellRight wellRight : dataList2 ) {
+			if ( returnStations ) {
+				// Get the well station associated with the right
+				List wellList = (List<StateMod_Well>)dataset.getComponentForComponentType(
+					StateMod_DataSet.COMP_WELL_STATIONS).getData();
+				int pos = indexOf (wellList, wellRight.getLocationIdentifier());
+				if ( pos >= 0 ) {
+					dataList.add ( wellList.get(pos));
+				}
+			}
+			else {
+				dataList.add ( wellRight );
+			}
+		}
+	}
+	return dataList;
 }
 
 /**

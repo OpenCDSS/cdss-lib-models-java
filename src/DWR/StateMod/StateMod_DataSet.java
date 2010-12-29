@@ -4707,7 +4707,8 @@ public boolean hasWellData ( boolean is_active )
 
 /**
 Initialize a data set by defining all the components for the data set.  This
-ensures that software will be able to evaluate all components.
+ensures that software will be able to evaluate all components.  Nulls are avoided where possible for
+data (e.g., empty lists are assigned).
 */
 private void initialize()
 {	String routine = "StateMod_DataSet.initialize";

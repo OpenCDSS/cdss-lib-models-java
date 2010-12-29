@@ -435,6 +435,14 @@ public JFrame displayWindow ( int window_type, boolean editable )
 }
 
 /**
+Return the StateMod dataset being managed.
+*/
+private StateMod_DataSet getDataSet ()
+{
+	return __dataset;
+}
+
+/**
 Return the map panel used for StateMod.
 */
 private GeoViewJPanel getMapPanel ()
@@ -516,10 +524,88 @@ Render an object as an annotation on the GeoView map.
 public void renderGeoViewAnnotation ( GeoViewJComponent geoview, Object objectToRender, String label )
 {
 	GeoRecord geoRecord = null;
-	GRPoint point = null;
-	if ( objectToRender instanceof StateMod_Data ) {
+	GRDrawingArea da = geoview.getDrawingArea();
+	GRDrawingAreaUtil.setColor(da, GRColor.black );
+	GRDrawingAreaUtil.setFont(da, "Helvetica", "Bold", 14.0 );
+	// Make the symbol size relatively large so it is visible...
+	// The pushpin is always drawn with the pin point on the point so center the text is OK
+	// May need to project on the fly depending on the original data
+	if ( objectToRender instanceof StateMod_OperationalRight ) {
+		// Draw source and destination as separate symbols
+		StateMod_OperationalRight opr = (StateMod_OperationalRight)objectToRender;
+		StateMod_DataSet dataset = getDataSet();
+		StateMod_Data smdata = opr.lookupDestinationDataObject(dataset);
+		GRPoint pointDest = null;
+		GRPoint pointSource1 = null;
+		GRPoint pointSource2 = null;
+		String labelDest = "";
+		String labelSource1 = "";
+		String labelSource2 = "";
+		if ( (smdata != null) && (smdata instanceof HasGeoRecord) ) {
+			HasGeoRecord hasGeoRecord = (HasGeoRecord)smdata;
+			geoRecord = hasGeoRecord.getGeoRecord();
+			pointDest = (GRPoint)geoRecord.getShape();
+			GeoProjection layerProjection = geoRecord.getLayer().getProjection();
+			GeoProjection geoviewProjection = geoview.getProjection();
+			boolean doProject = GeoProjection.needToProject ( layerProjection, geoview.getProjection() );
+			if ( doProject ) {
+				pointDest = (GRPoint)GeoProjection.projectShape( layerProjection, geoviewProjection, pointDest, false );
+			}
+			labelDest = label + "\n(Dest: " + smdata.getID() + " - " + smdata.getName() + ")";
+		}
+		smdata = opr.lookupSource1DataObject(dataset);
+		if ( (smdata != null) && (smdata instanceof HasGeoRecord) ) {
+			HasGeoRecord hasGeoRecord = (HasGeoRecord)smdata;
+			geoRecord = hasGeoRecord.getGeoRecord();
+			pointSource1 = (GRPoint)geoRecord.getShape();
+			GeoProjection layerProjection = geoRecord.getLayer().getProjection();
+			GeoProjection geoviewProjection = geoview.getProjection();
+			boolean doProject = GeoProjection.needToProject ( layerProjection, geoview.getProjection() );
+			if ( doProject ) {
+				pointSource1 = (GRPoint)GeoProjection.projectShape( layerProjection, geoviewProjection, pointSource1, false );
+			}
+			labelSource1 = label + "\n(Source1: " + smdata.getID() + " - " + smdata.getName() + ")";
+		}
+		smdata = opr.lookupSource2DataObject(dataset);
+		if ( (smdata != null) && (smdata instanceof HasGeoRecord) ) {
+			HasGeoRecord hasGeoRecord = (HasGeoRecord)smdata;
+			geoRecord = hasGeoRecord.getGeoRecord();
+			pointSource2 = (GRPoint)geoRecord.getShape();
+			GeoProjection layerProjection = geoRecord.getLayer().getProjection();
+			GeoProjection geoviewProjection = geoview.getProjection();
+			boolean doProject = GeoProjection.needToProject ( layerProjection, geoview.getProjection() );
+			if ( doProject ) {
+				pointSource2 = (GRPoint)GeoProjection.projectShape( layerProjection, geoviewProjection, pointSource2, false );
+			}
+			labelSource2 = label + "\n(Source2: " + smdata.getID() + " - " + smdata.getName() + ")";
+		}
+		// Draw connecting lines first (under the symbols and text)...
+		if ( (pointDest != null) && (pointSource1 != null) ) {
+			GRDrawingAreaUtil.setLineWidth(da, 2);
+			GRDrawingAreaUtil.drawLine(da, pointDest.x, pointDest.y, pointSource1.x, pointSource1.y);
+		}
+		if ( (pointDest != null) && (pointSource2 != null) ) {
+			GRDrawingAreaUtil.setLineWidth(da, 2);
+			GRDrawingAreaUtil.drawLine(da, pointDest.x, pointDest.y, pointSource2.x, pointSource2.y);
+		}
+		// Now draw all the symbols and text
+		if ( pointDest != null ) {
+			GRDrawingAreaUtil.drawSymbol(da, GRSymbol.SYM_PUSHPIN_VERTICAL, pointDest.getX(), pointDest.getY(), 32.0, 0, 0 );
+			GRDrawingAreaUtil.drawText(da, labelDest, pointDest.getX(), pointDest.getY(), 0.0, GRText.CENTER_X|GRText.TOP );
+		}
+		if ( pointSource1 != null ) {
+			GRDrawingAreaUtil.drawSymbol(da, GRSymbol.SYM_PUSHPIN_VERTICAL, pointSource1.getX(), pointSource1.getY(), 32.0, 0, 0 );
+			GRDrawingAreaUtil.drawText(da, labelSource1, pointSource1.getX(), pointSource1.getY(), 0.0, GRText.CENTER_X|GRText.TOP );
+		}
+		if ( pointSource2 != null ) {
+			GRDrawingAreaUtil.drawSymbol(da, GRSymbol.SYM_PUSHPIN_VERTICAL, pointSource2.getX(), pointSource2.getY(), 32.0, 0, 0 );
+			GRDrawingAreaUtil.drawText(da, labelSource2, pointSource2.getX(), pointSource2.getY(), 0.0, GRText.CENTER_X|GRText.TOP );
+		}
+	}
+	else if ( objectToRender instanceof StateMod_Data ) {
 		Message.printStatus(2, "", "Rendering \"" + label + "\" annotation on map." );
 		StateMod_Data smdata = (StateMod_Data)objectToRender;
+		GRPoint point = null;
 		if ( smdata instanceof HasGeoRecord) {
 			HasGeoRecord hasGeoRecord = (HasGeoRecord)smdata;
 			geoRecord = hasGeoRecord.getGeoRecord();
@@ -529,33 +615,19 @@ public void renderGeoViewAnnotation ( GeoViewJComponent geoview, Object objectTo
 			// Do not have geographic data (should not get here)...
 			return;
 		}
+		GeoProjection layerProjection = geoRecord.getLayer().getProjection();
+		GeoProjection geoviewProjection = geoview.getProjection();
+		boolean doProject = GeoProjection.needToProject ( layerProjection, geoview.getProjection() );
+		if ( doProject ) {
+			point = (GRPoint)GeoProjection.projectShape( layerProjection, geoviewProjection, point, false );
+		}
+		GRDrawingAreaUtil.drawSymbol(da, GRSymbol.SYM_PUSHPIN_VERTICAL, point.getX(), point.getY(), 32.0, 0, 0 );
+		GRDrawingAreaUtil.drawText(da, label, point.getX(), point.getY(), 0.0, GRText.CENTER_X|GRText.TOP );
 	}
 	else {
 		// Do not know how to handle
 		return;
 	}
-	GRDrawingArea da = geoview.getDrawingArea();
-	//GRDrawingAreaUtil.setColor(da, GRColor.magenta );
-	GRDrawingAreaUtil.setColor(da, GRColor.black );
-	GRDrawingAreaUtil.setFont(da, "Helvetica", "Bold", 14.0 );
-	// Make the symbol size relatively large so it is visible...
-	// The pushpin is always drawn with the pin point on the point so center the text is OK
-	/*
-	GRDrawingAreaUtil.drawSymbolText(da, GRSymbol.SYM_PUSHPIN_VERTICAL, point.getX(), point.getY(),
-		32.0, // Size in device units (pixels)
-		//label, 0.0, GRText.CENTER_X|GRText.TOP, GRUnits.DEVICE, 0 );
-		label, 0.0, GRText.CENTER_X|GRText.CENTER_Y, GRUnits.DEVICE, 0 );
-		*/
-	// Use two methods to improve the placement of text independent of symbol
-	// May need to project on the fly...
-	GeoProjection layerProjection = geoRecord.getLayer().getProjection();
-	GeoProjection geoviewProjection = geoview.getProjection();
-	boolean doProject = GeoProjection.needToProject ( layerProjection, geoview.getProjection() );
-	if ( doProject ) {
-		point = (GRPoint)GeoProjection.projectShape( layerProjection, geoviewProjection, point, false );
-	}
-	GRDrawingAreaUtil.drawSymbol(da, GRSymbol.SYM_PUSHPIN_VERTICAL, point.getX(), point.getY(), 32.0, 0, 0 );
-	GRDrawingAreaUtil.drawText(da, label, point.getX(), point.getY(), 0.0, GRText.CENTER_X|GRText.TOP );
 }
 
 /**

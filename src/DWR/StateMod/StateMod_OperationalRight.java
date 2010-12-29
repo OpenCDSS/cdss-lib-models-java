@@ -99,13 +99,17 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.Vector;
 
+import RTi.GIS.GeoView.GeoRecord;
+import RTi.GIS.GeoView.HasGeoRecord;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 
 public class StateMod_OperationalRight 
 extends StateMod_Data
-implements Cloneable, Comparable {
+implements Cloneable, Comparable, HasGeoRecord
+
+{
 
 /**
 Maximum handled operational right type (those that the software has been coded to handle).
@@ -242,6 +246,13 @@ private String __cx = "";
 // cidvri = ID is in base class identifier
 // nameo = Name is in base class name
 // ioprsw = on/off is in base class switch
+
+/**
+Reference to spatial data for this operational right -- currently NOT cloned.  If null, then no spatial data
+are available.  The location is a point for the destination of the operational right.  More extensive
+annotation of map and network views is done by determining other coordinate information on the fly.
+*/
+private GeoRecord __georecord = null;
 
 /**
 Constructor.
@@ -658,10 +669,114 @@ public String getCx() {
 }
 
 /**
+Return the destination data set object by searching appropriate dataset lists.
+The destination identifier is matched up against station and right identifiers and the corresponding
+object returned.
+@param dataset the full dataset from which the destination should be extracted
+*/
+public StateMod_Data lookupDestinationDataObject ( StateMod_DataSet dataset )
+{
+	String destinationID = getCiopde();
+	StateMod_OperationalRight_Metadata metadata = StateMod_OperationalRight_Metadata.getMetadata(getItyopr());
+	if ( metadata == null ) {
+		throw new RuntimeException ( "Unable to get operational right metadata for type " + getItyopr() +
+			" - unanble to get destination object." );
+	}
+	StateMod_OperationalRight_Metadata_SourceOrDestinationType [] destinationTypes =
+		metadata.getDestinationTypes();
+	if ( destinationTypes == null ) {
+		return null;
+	}
+	for ( int i = 0; i < destinationTypes.length; i++ ) {
+		List<StateMod_Data> smdataList = StateMod_Util.getDataList ( destinationTypes[i], dataset, true );
+		int pos = StateMod_Util.indexOf(smdataList, destinationID);
+		if ( pos >= 0 ) {
+			// Found the destination
+			return smdataList.get(pos);
+		}
+	}
+	return null;
+}
+
+/**
+Return the source1 data set object(s) by searching appropriate dataset lists.
+The source identifier(s) are matched up against station and right identifiers and the corresponding
+object returned.
+@param dataset the full dataset from which the destination should be extracted
+*/
+public StateMod_Data lookupSource1DataObject ( StateMod_DataSet dataset )
+{
+	String sourceID = getCiopso1();
+	StateMod_OperationalRight_Metadata metadata = StateMod_OperationalRight_Metadata.getMetadata(getItyopr());
+	if ( metadata == null ) {
+		throw new RuntimeException ( "Unable to get operational right metadata for type " + getItyopr() +
+			" - unanble to get source1 object." );
+	}
+	StateMod_OperationalRight_Metadata_SourceOrDestinationType [] sourceTypes = metadata.getSource1Types();
+	if ( sourceTypes == null ) {
+		return null;
+	}
+	else if ( (sourceTypes.length == 1) &&
+		(sourceTypes[0] == StateMod_OperationalRight_Metadata_SourceOrDestinationType.NA) ) {
+		return null;
+	}
+	for ( int i = 0; i < sourceTypes.length; i++ ) {
+		List<StateMod_Data> smdataList = StateMod_Util.getDataList ( sourceTypes[i], dataset, true );
+		int pos = StateMod_Util.indexOf(smdataList, sourceID);
+		if ( pos >= 0 ) {
+			// Found the source
+			return smdataList.get(pos);
+		}
+	}
+	return null;
+}
+
+/**
+Return the source2 data set object(s) by searching appropriate dataset lists.
+The source identifier(s) are matched up against station and right identifiers and the corresponding
+object returned.
+@param dataset the full dataset from which the destination should be extracted
+*/
+public StateMod_Data lookupSource2DataObject ( StateMod_DataSet dataset )
+{
+	String sourceID = getCiopso2();
+	StateMod_OperationalRight_Metadata metadata = StateMod_OperationalRight_Metadata.getMetadata(getItyopr());
+	if ( metadata == null ) {
+		throw new RuntimeException ( "Unable to get operational right metadata for type " + getItyopr() +
+			" - unanble to get source2 object." );
+	}
+	StateMod_OperationalRight_Metadata_SourceOrDestinationType [] sourceTypes = metadata.getSource1Types();
+	if ( sourceTypes == null ) {
+		return null;
+	}
+	else if ( (sourceTypes.length == 1) &&
+		(sourceTypes[0] == StateMod_OperationalRight_Metadata_SourceOrDestinationType.NA) ) {
+		return null;
+	}
+	for ( int i = 0; i < sourceTypes.length; i++ ) {
+		List<StateMod_Data> smdataList = StateMod_Util.getDataList ( sourceTypes[i], dataset, true );
+		int pos = StateMod_Util.indexOf(smdataList, sourceID);
+		if ( pos >= 0 ) {
+			// Found the source
+			return smdataList.get(pos);
+		}
+	}
+	return null;
+}
+
+/**
 Retrieve dumx.
 */
 public int getDumx() {
 	return _dumx;
+}
+
+/**
+Get the geographical data associated with the diversion.
+@return the GeoRecord for the diversion.
+*/
+public GeoRecord getGeoRecord() {
+	return __georecord;
 }
 
 /**
@@ -855,6 +970,7 @@ private void initialize() {
 	__oprLimit = 0.0;
 	__ioBeg = 0;
 	__ioEnd = 0;
+	__georecord = null;
 }
 
 public boolean hasImonsw() {
@@ -1822,6 +1938,14 @@ public void setDumx(String dumx)
 		Double d = (Double.parseDouble(dumx.trim()));
 		setDumx((int)d.doubleValue());
 	}
+}
+
+/**
+Set the geographic information object associated with the diversion.
+@param georecord Geographic record associated with the diversion.
+*/
+public void setGeoRecord ( GeoRecord georecord )
+{	__georecord = georecord;
 }
 
 /**

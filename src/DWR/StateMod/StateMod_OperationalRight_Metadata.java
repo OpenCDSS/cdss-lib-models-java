@@ -40,6 +40,21 @@ private int __rightTypeNumber;
 Operational right name.
 */
 private String __rightTypeName;
+
+/**
+Types of data that can be used as the destination for an operational right.
+*/
+private StateMod_OperationalRight_Metadata_SourceOrDestinationType [] __destinationTypes = null;
+
+/**
+Types of data that can be used as the source1 for an operational right.
+*/
+private StateMod_OperationalRight_Metadata_SourceOrDestinationType [] __source1Types = null;
+
+/**
+Types of data that can be used as the source2 for an operational right.
+*/
+private StateMod_OperationalRight_Metadata_SourceOrDestinationType [] __source2Types = null;
 	
 /**
 List of static global metadata, meant to be initialized once and shared within the application.
@@ -66,6 +81,9 @@ public StateMod_OperationalRight_Metadata ( int rightTypeNumber, String rightNam
 	setRightTypeNumber ( rightTypeNumber );
 	setRightTypeName ( rightName );
 	setRuleTypeCategory ( ruleTypeCategory );
+	setDestinationTypes ( destinationTypes );
+	setSource1Types ( source1Types );
+	setSource2Types ( source2Types );
 }
 
 /**
@@ -75,6 +93,14 @@ public static List<StateMod_OperationalRight_Metadata> getAllMetadata ()
 {
 	initialize();
 	return __opRightsMetadataList;
+}
+
+/**
+Return the allowed destination types for the right.
+*/
+public StateMod_OperationalRight_Metadata_SourceOrDestinationType [] getDestinationTypes ()
+{
+	return __destinationTypes;
 }
 
 /**
@@ -132,6 +158,22 @@ Return the operating rule type.
 public StateMod_OperationalRight_Metadata_RuleType getRuleTypeCategory()
 {
 	return __ruleTypeCategory;
+}
+
+/**
+Return the allowed source1 types for the right.
+*/
+public StateMod_OperationalRight_Metadata_SourceOrDestinationType [] getSource1Types ()
+{
+	return __source1Types;
+}
+
+/**
+Return the allowed source2 types for the right.
+*/
+public StateMod_OperationalRight_Metadata_SourceOrDestinationType [] getSource2Types ()
+{
+	return __source2Types;
 }
 
 /**
@@ -1705,6 +1747,16 @@ throws FileNotFoundException, IOException
 */
 
 /**
+Set the destination types (in agreement with StateMod documentation).
+Make private because objects should be immutable.
+@param destinationTypes types of destinations allowed for the right
+*/
+private void setDestinationTypes ( StateMod_OperationalRight_Metadata_SourceOrDestinationType [] destinationTypes )
+{
+	__destinationTypes = destinationTypes;
+}
+
+/**
 Set the operational right name (in agreement with StateMod documentation).
 Make private because objects should be immutable.
 @param rightTypeName name of operational right
@@ -1732,6 +1784,26 @@ Make private because objects should be immutable.
 private void setRuleTypeCategory ( StateMod_OperationalRight_Metadata_RuleType ruleTypeCategory )
 {
 	__ruleTypeCategory = ruleTypeCategory;
+}
+
+/**
+Set the source1 types (in agreement with StateMod documentation).
+Make private because objects should be immutable.
+@param sourceTypes types of destinations allowed for the right
+*/
+private void setSource1Types ( StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source1Types )
+{
+	__source1Types = source1Types;
+}
+
+/**
+Set the source2 types (in agreement with StateMod documentation).
+Make private because objects should be immutable.
+@param sourceTypes types of destinations allowed for the right
+*/
+private void setSource2Types ( StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source2Types )
+{
+	__source2Types = source2Types;
 }
 
 }
