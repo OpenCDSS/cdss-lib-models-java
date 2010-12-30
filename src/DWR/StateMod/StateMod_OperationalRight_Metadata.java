@@ -62,6 +62,13 @@ List of static global metadata, meant to be initialized once and shared within t
 private static List<StateMod_OperationalRight_Metadata> __opRightsMetadataList = null;
 
 /**
+Whether the operational right uses intervening structures.  These are usually indicated in the dumx value
+and are provided in separate records.  This might be the same as whether the carrier is allowed
+but Ray Bennett was going to check on it.
+*/
+private boolean __usesInterveningStructures = false;
+
+/**
 Constructor for metadata.
 */
 public StateMod_OperationalRight_Metadata ( int rightTypeNumber, String rightName,
@@ -73,6 +80,7 @@ public StateMod_OperationalRight_Metadata ( int rightTypeNumber, String rightNam
 	StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationType,
 	StateMod_OperationalRight_Metadata_DeliveryMethodType deliveryMethodType,
 	StateMod_OperationalRight_Metadata_CarrierAllowedType carrierAllowedType,
+	boolean usesInterveningStructures,
 	StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedTypes,
 	StateMod_OperationalRight_Metadata_DiversionType [] diversionTypes,
 	StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType transitAndConveyanceLossAllowedType,
@@ -84,6 +92,7 @@ public StateMod_OperationalRight_Metadata ( int rightTypeNumber, String rightNam
 	setDestinationTypes ( destinationTypes );
 	setSource1Types ( source1Types );
 	setSource2Types ( source2Types );
+	setUsesInterveningStructures ( usesInterveningStructures );
 }
 
 /**
@@ -177,6 +186,14 @@ public StateMod_OperationalRight_Metadata_SourceOrDestinationType [] getSource2T
 }
 
 /**
+Indicate whether the operational right uses intervening structures.
+*/
+public boolean getUsesInterveningStructures ()
+{
+	return __usesInterveningStructures;
+}
+
+/**
 Initialize the singleton list of operational right metadata.  Do this rather than having a large amount
 of static data in memory.
 */
@@ -217,6 +234,7 @@ private static void initialize ()
 					destinationLocationArray_1,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NO,
+					false,
 					associatedPlanAllowedArray_1,
 					diversionTypeArray_1,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -246,6 +264,7 @@ private static void initialize ()
 					destinationLocationArray_2,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
+					true,
 					associatedPlanAllowedArray_2,
 					diversionTypeArray_2,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -257,7 +276,9 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source2Array_3 =
 					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.NA};
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] destinationArray_3 =
-					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.CARRIER };
+					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.DIVERSION,
+					//StateMod_OperationalRight_Metadata_SourceOrDestinationType.CARRIER,
+					StateMod_OperationalRight_Metadata_SourceOrDestinationType.RESERVOIR };
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_3 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.DOWNSTREAM};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_3 =
@@ -274,6 +295,7 @@ private static void initialize ()
 					destinationLocationArray_3,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
+					false,
 					associatedPlanAllowedArray_3,
 					diversionTypeArray_3,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -285,7 +307,8 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source2Array_4 =
 					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.NA};
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] destinationArray_4 =
-					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.DIVERSION };
+					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.DIVERSION,
+					StateMod_OperationalRight_Metadata_SourceOrDestinationType.RESERVOIR };
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_4 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.UPSTREAM};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_4 =
@@ -302,6 +325,7 @@ private static void initialize ()
 					destinationLocationArray_4,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NO,
+					false,
 					associatedPlanAllowedArray_4,
 					diversionTypeArray_4,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -330,6 +354,7 @@ private static void initialize ()
 					destinationLocationArray_5,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NO,
+					false,
 					associatedPlanAllowedArray_5,
 					diversionTypeArray_5,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -358,6 +383,7 @@ private static void initialize ()
 					destinationLocationArray_6,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.BOOKOVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NO,
+					false,
 					associatedPlanAllowedArray_6,
 					diversionTypeArray_6,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -386,6 +412,7 @@ private static void initialize ()
 					destinationLocationArray_7,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
+					true,
 					associatedPlanAllowedArray_7,
 					diversionTypeArray_7,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -414,6 +441,7 @@ private static void initialize ()
 					destinationLocationArray_8,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NO,
+					false,
 					associatedPlanAllowedArray_8,
 					diversionTypeArray_8,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -442,6 +470,7 @@ private static void initialize ()
 					destinationLocationArray_9,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NO,
+					false,
 					associatedPlanAllowedArray_9,
 					diversionTypeArray_9,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -471,6 +500,7 @@ private static void initialize ()
 					destinationLocationArray_10,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NO,
+					false,
 					associatedPlanAllowedArray_10,
 					diversionTypeArray_10,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -478,7 +508,8 @@ private static void initialize ()
 				break;
 			case 11:
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source1Array_11 =
-			    	{StateMod_OperationalRight_Metadata_SourceOrDestinationType.DIVERSION_RIGHT};
+			    	{StateMod_OperationalRight_Metadata_SourceOrDestinationType.DIVERSION_RIGHT,
+					StateMod_OperationalRight_Metadata_SourceOrDestinationType.RESERVOIR_RIGHT};
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source2Array_11 =
 					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.NA};
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] destinationArray_11 =
@@ -500,6 +531,7 @@ private static void initialize ()
 					destinationLocationArray_11,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.CARRIER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
+					true,
 					associatedPlanAllowedArray_11,
 					diversionTypeArray_11,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -528,6 +560,7 @@ private static void initialize ()
 					destinationLocationArray_12,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NO,
+					false,
 					associatedPlanAllowedArray_12,
 					diversionTypeArray_12,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -556,6 +589,7 @@ private static void initialize ()
 					destinationLocationArray_13,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NO,
+					false,
 					associatedPlanAllowedArray_13,
 					diversionTypeArray_13,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -563,7 +597,7 @@ private static void initialize ()
 				break;
 			case 14:
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source1Array_14 =
-			    	{StateMod_OperationalRight_Metadata_SourceOrDestinationType.DIVERSION};
+			    	{StateMod_OperationalRight_Metadata_SourceOrDestinationType.DIVERSION_RIGHT};
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source2Array_14 =
 					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.NA};
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] destinationArray_14 =
@@ -585,6 +619,7 @@ private static void initialize ()
 					destinationLocationArray_14,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
+					true,
 					associatedPlanAllowedArray_14,
 					diversionTypeArray_14,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -613,6 +648,7 @@ private static void initialize ()
 					destinationLocationArray_15,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NO,
+					true,
 					associatedPlanAllowedArray_15,
 					diversionTypeArray_15,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -641,6 +677,7 @@ private static void initialize ()
 					destinationLocationArray_16,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NO,
+					true,
 					associatedPlanAllowedArray_16,
 					diversionTypeArray_16,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -669,6 +706,7 @@ private static void initialize ()
 					destinationLocationArray_17,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NO,
+					false,
 					associatedPlanAllowedArray_17,
 					diversionTypeArray_17,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -697,6 +735,7 @@ private static void initialize ()
 					destinationLocationArray_18,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NO,
+					false,
 					associatedPlanAllowedArray_18,
 					diversionTypeArray_18,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -725,6 +764,7 @@ private static void initialize ()
 					destinationLocationArray_19,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NO,
+					false,
 					associatedPlanAllowedArray_19,
 					diversionTypeArray_19,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -753,6 +793,7 @@ private static void initialize ()
 					destinationLocationArray_20,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NO,
+					false,
 					associatedPlanAllowedArray_20,
 					diversionTypeArray_20,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -781,6 +822,7 @@ private static void initialize ()
 					destinationLocationArray_21,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NO,
+					false,
 					associatedPlanAllowedArray_21,
 					diversionTypeArray_21,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -810,6 +852,7 @@ private static void initialize ()
 					destinationLocationArray_22,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NO,
+					false,
 					associatedPlanAllowedArray_22,
 					diversionTypeArray_22,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -838,6 +881,7 @@ private static void initialize ()
 					destinationLocationArray_23,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NO,
+					false,
 					associatedPlanAllowedArray_23,
 					diversionTypeArray_23,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -869,6 +913,7 @@ private static void initialize ()
 					destinationLocationArray_24,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
+					true,
 					associatedPlanAllowedArray_24,
 					diversionTypeArray_24,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.YES,
@@ -900,6 +945,7 @@ private static void initialize ()
 					destinationLocationArray_25,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
+					true,
 					associatedPlanAllowedArray_25,
 					diversionTypeArray_25,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.YES,
@@ -928,6 +974,7 @@ private static void initialize ()
 					destinationLocationArray_26,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.NA,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NA,
+					false,
 					associatedPlanAllowedArray_26,
 					diversionTypeArray_26,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -967,6 +1014,7 @@ private static void initialize ()
 					destinationLocationArray_27,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
+					true,
 					associatedPlanAllowedArray_27,
 					diversionTypeArray_27,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.YES,
@@ -1006,6 +1054,7 @@ private static void initialize ()
 					destinationLocationArray_28,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
+					true,
 					associatedPlanAllowedArray_28,
 					diversionTypeArray_28,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.YES,
@@ -1041,6 +1090,7 @@ private static void initialize ()
 					destinationLocationArray_29,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NO,
+					false,
 					associatedPlanAllowedArray_29,
 					diversionTypeArray_29,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -1070,6 +1120,7 @@ private static void initialize ()
 					destinationLocationArray_30,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NO,
+					true,
 					associatedPlanAllowedArray_30,
 					diversionTypeArray_30,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -1108,6 +1159,7 @@ private static void initialize ()
 					destinationLocationArray_31,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.CARRIER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
+					true,
 					associatedPlanAllowedArray_31,
 					diversionTypeArray_31,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.YES,
@@ -1147,6 +1199,7 @@ private static void initialize ()
 					destinationLocationArray_32,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
+					true,
 					associatedPlanAllowedArray_32,
 					diversionTypeArray_32,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.YES,
@@ -1186,6 +1239,7 @@ private static void initialize ()
 					destinationLocationArray_33,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
+					true,
 					associatedPlanAllowedArray_33,
 					diversionTypeArray_33,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.YES,
@@ -1225,6 +1279,7 @@ private static void initialize ()
 					destinationLocationArray_34,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.BOOKOVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
+					true,
 					associatedPlanAllowedArray_34,
 					diversionTypeArray_34,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -1258,6 +1313,7 @@ private static void initialize ()
 					destinationLocationArray_35,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
+					true,
 					associatedPlanAllowedArray_35,
 					diversionTypeArray_35,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -1286,6 +1342,7 @@ private static void initialize ()
 					destinationLocationArray_36,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
+					true,
 					associatedPlanAllowedArray_36,
 					diversionTypeArray_36,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -1318,6 +1375,7 @@ private static void initialize ()
 					destinationLocationArray_37,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
+					true,
 					associatedPlanAllowedArray_37,
 					diversionTypeArray_37,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -1350,6 +1408,7 @@ private static void initialize ()
 					destinationLocationArray_38,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
+					true,
 					associatedPlanAllowedArray_38,
 					diversionTypeArray_38,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -1379,6 +1438,7 @@ private static void initialize ()
 					destinationLocationArray_39,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
+					true,
 					associatedPlanAllowedArray_39,
 					diversionTypeArray_39,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -1407,6 +1467,7 @@ private static void initialize ()
 					destinationLocationArray_40,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NO,
+					true,
 					associatedPlanAllowedArray_40,
 					diversionTypeArray_40,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -1435,6 +1496,7 @@ private static void initialize ()
 					destinationLocationArray_41,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NO,
+					true,
 					associatedPlanAllowedArray_41,
 					diversionTypeArray_41,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -1465,6 +1527,7 @@ private static void initialize ()
 					destinationLocationArray_42,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NO,
+					false,
 					associatedPlanAllowedArray_42,
 					diversionTypeArray_42,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -1493,6 +1556,7 @@ private static void initialize ()
 					destinationLocationArray_43,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NO,
+					false,
 					associatedPlanAllowedArray_43,
 					diversionTypeArray_43,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -1521,6 +1585,7 @@ private static void initialize ()
 					destinationLocationArray_44,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
+					true,
 					associatedPlanAllowedArray_44,
 					diversionTypeArray_44,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -1550,6 +1615,7 @@ private static void initialize ()
 					destinationLocationArray_45,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
+					true,
 					associatedPlanAllowedArray_45,
 					diversionTypeArray_45,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.YES,
@@ -1578,6 +1644,7 @@ private static void initialize ()
 					destinationLocationArray_46,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
+					true,
 					associatedPlanAllowedArray_46,
 					diversionTypeArray_46,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -1608,6 +1675,7 @@ private static void initialize ()
 					destinationLocationArray_47,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
+					true,
 					associatedPlanAllowedArray_47,
 					diversionTypeArray_47,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -1645,6 +1713,7 @@ private static void initialize ()
 					destinationLocationArray_48,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NO,
+					false,
 					associatedPlanAllowedArray_48,
 					diversionTypeArray_48,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -1682,6 +1751,7 @@ private static void initialize ()
 					destinationLocationArray_49,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NO,
+					false,
 					associatedPlanAllowedArray_49,
 					diversionTypeArray_49,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
@@ -1804,6 +1874,16 @@ Make private because objects should be immutable.
 private void setSource2Types ( StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source2Types )
 {
 	__source2Types = source2Types;
+}
+
+/**
+Set whether the operational right uses intervening structures.
+Make private because objects should be immutable.
+@param usesInterveningStructures whether intervening structures are used
+*/
+private void setUsesInterveningStructures ( boolean usesInterveningStructures )
+{
+	__usesInterveningStructures = usesInterveningStructures;
 }
 
 }

@@ -96,6 +96,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 
@@ -120,72 +121,72 @@ public static int MAX_HANDLED_TYPE = 23;
 /**
 Administration number.
 */
-protected String _rtem;
+private String _rtem;
 /**
 Typically the number of intervening structures or the number of monthly
 switches, depending on the right number
 */
-protected int _dumx;
+private int _dumx;
 /**
 Typically the destination ID.
 */
-protected String _ciopde;
+private String _ciopde;
 /**
 Typically the destination account.
 */
-protected String _iopdes;
+private String _iopdes;
 /**
 Typically the supply ID.
 */
-protected String _ciopso1;
+private String _ciopso1;
 /**
 Typically the supply account.
 */
-protected String _iopsou1;
+private String _iopsou1;
 /**
 Definition varies by right type.
 */
-protected String _ciopso2;
+private String _ciopso2;
 /**
 Definition varies by right type.
 */
-protected String _iopsou2;
+private String _iopsou2;
 /**
 Definition varies by right type.
 */
-protected String _ciopso3;
+private String _ciopso3;
 /**
 Definition varies by right type.
 */
-protected String _iopsou3;
+private String _iopsou3;
 /**
 Used with type 17, 18.
 */
-protected String _ciopso4;
+private String _ciopso4;
 /**
 Used with type 17, 18.
 */
-protected String _iopsou4;
+private String _iopsou4;
 /**
 Used with type 17, 18.
 */
-protected String _ciopso5;
+private String _ciopso5;
 /**
 Used with type 17, 18.
 */
-protected String _iopsou5;
+private String _iopsou5;
 /**
 Operational right type > 1.
 */
-protected int _ityopr;
+private int __ityopr;
 /**
 Intervening structure IDs (up to 10 in StateMod doc but no limit here) - used by some rights, null if not used.
 */
-protected String _intern[] = null;
+private String _intern[] = null;
 /**
 Monthly switch, for some rights, null if not used.
 */
-protected int _imonsw[] = null;
+private int _imonsw[] = null;
 /**
 Comments provided by user - # comments before each right.  An empty (non-null) list is guaranteed.
 TODO SAM 2010-12-14 Evaluate whether this can be in StateMod_Data or will it bloat memory.
@@ -194,19 +195,19 @@ private List<String> __commentsBeforeData = new Vector();
 /**
 Used with operational right 17, 18.
 */
-protected double _qdebt;
+private double _qdebt;
 /**
 used with operational right 17, 18.
 */
-protected double _qdebtx;
+private double _qdebtx;
 /**
 Used with operational right 20.
 */
-protected double _sjmina;
+private double _sjmina;
 /**
 Used with operational right 20.
 */
-protected double _sjrela;
+private double _sjrela;
 /**
 Plan ID.
 */
@@ -253,6 +254,11 @@ are available.  The location is a point for the destination of the operational r
 annotation of map and network views is done by determining other coordinate information on the fly.
 */
 private GeoRecord __georecord = null;
+
+/**
+The metadata that corresponds to the operational right type, or null if the right type is not recognized.
+*/
+private StateMod_OperationalRight_Metadata __metadata = null;
 
 /**
 Constructor.
@@ -451,10 +457,10 @@ public int compareTo(Object o) {
 		}
 	}
 
-	if (_ityopr < op._ityopr) {
+	if (__ityopr < op.__ityopr) {
 		return -1;
 	}
-	else if (_ityopr > op._ityopr) {
+	else if (__ityopr > op.__ityopr) {
 		return 1;
 	}
 	
@@ -669,102 +675,6 @@ public String getCx() {
 }
 
 /**
-Return the destination data set object by searching appropriate dataset lists.
-The destination identifier is matched up against station and right identifiers and the corresponding
-object returned.
-@param dataset the full dataset from which the destination should be extracted
-*/
-public StateMod_Data lookupDestinationDataObject ( StateMod_DataSet dataset )
-{
-	String destinationID = getCiopde();
-	StateMod_OperationalRight_Metadata metadata = StateMod_OperationalRight_Metadata.getMetadata(getItyopr());
-	if ( metadata == null ) {
-		throw new RuntimeException ( "Unable to get operational right metadata for type " + getItyopr() +
-			" - unanble to get destination object." );
-	}
-	StateMod_OperationalRight_Metadata_SourceOrDestinationType [] destinationTypes =
-		metadata.getDestinationTypes();
-	if ( destinationTypes == null ) {
-		return null;
-	}
-	for ( int i = 0; i < destinationTypes.length; i++ ) {
-		List<StateMod_Data> smdataList = StateMod_Util.getDataList ( destinationTypes[i], dataset, true );
-		int pos = StateMod_Util.indexOf(smdataList, destinationID);
-		if ( pos >= 0 ) {
-			// Found the destination
-			return smdataList.get(pos);
-		}
-	}
-	return null;
-}
-
-/**
-Return the source1 data set object(s) by searching appropriate dataset lists.
-The source identifier(s) are matched up against station and right identifiers and the corresponding
-object returned.
-@param dataset the full dataset from which the destination should be extracted
-*/
-public StateMod_Data lookupSource1DataObject ( StateMod_DataSet dataset )
-{
-	String sourceID = getCiopso1();
-	StateMod_OperationalRight_Metadata metadata = StateMod_OperationalRight_Metadata.getMetadata(getItyopr());
-	if ( metadata == null ) {
-		throw new RuntimeException ( "Unable to get operational right metadata for type " + getItyopr() +
-			" - unanble to get source1 object." );
-	}
-	StateMod_OperationalRight_Metadata_SourceOrDestinationType [] sourceTypes = metadata.getSource1Types();
-	if ( sourceTypes == null ) {
-		return null;
-	}
-	else if ( (sourceTypes.length == 1) &&
-		(sourceTypes[0] == StateMod_OperationalRight_Metadata_SourceOrDestinationType.NA) ) {
-		return null;
-	}
-	for ( int i = 0; i < sourceTypes.length; i++ ) {
-		List<StateMod_Data> smdataList = StateMod_Util.getDataList ( sourceTypes[i], dataset, true );
-		int pos = StateMod_Util.indexOf(smdataList, sourceID);
-		if ( pos >= 0 ) {
-			// Found the source
-			return smdataList.get(pos);
-		}
-	}
-	return null;
-}
-
-/**
-Return the source2 data set object(s) by searching appropriate dataset lists.
-The source identifier(s) are matched up against station and right identifiers and the corresponding
-object returned.
-@param dataset the full dataset from which the destination should be extracted
-*/
-public StateMod_Data lookupSource2DataObject ( StateMod_DataSet dataset )
-{
-	String sourceID = getCiopso2();
-	StateMod_OperationalRight_Metadata metadata = StateMod_OperationalRight_Metadata.getMetadata(getItyopr());
-	if ( metadata == null ) {
-		throw new RuntimeException ( "Unable to get operational right metadata for type " + getItyopr() +
-			" - unanble to get source2 object." );
-	}
-	StateMod_OperationalRight_Metadata_SourceOrDestinationType [] sourceTypes = metadata.getSource1Types();
-	if ( sourceTypes == null ) {
-		return null;
-	}
-	else if ( (sourceTypes.length == 1) &&
-		(sourceTypes[0] == StateMod_OperationalRight_Metadata_SourceOrDestinationType.NA) ) {
-		return null;
-	}
-	for ( int i = 0; i < sourceTypes.length; i++ ) {
-		List<StateMod_Data> smdataList = StateMod_Util.getDataList ( sourceTypes[i], dataset, true );
-		int pos = StateMod_Util.indexOf(smdataList, sourceID);
-		if ( pos >= 0 ) {
-			// Found the source
-			return smdataList.get(pos);
-		}
-	}
-	return null;
-}
-
-/**
 Retrieve dumx.
 */
 public int getDumx() {
@@ -811,6 +721,28 @@ public String getIntern(int index) {
 }
 
 /**
+Return the intervening structure identifiers, guaranteed to be non-null but may be empty.
+*/
+public List<String> getInterveningStructureIDs()
+{	List<String> structureIDList = new Vector();
+	if ( __metadata == null ) {
+		return structureIDList;
+	}
+	else if ( __metadata.getUsesInterveningStructures() ) {
+		String[] intern = getIntern();
+		if ( (intern == null) || (intern.length == 0) ) {
+			return structureIDList;
+		}
+		else {
+			return Arrays.asList(intern);
+		}
+	}
+	else {
+		return structureIDList;
+	}
+}
+
+/**
 Retrieve the ioBeg.
 */
 public int getIoBeg() {
@@ -825,10 +757,10 @@ public int getIoEnd() {
 }
 
 /**
-Get the interns as a vector.
+Get the interns as a list.
 @return the intervening structure identifiers or an empty Vector.
 */
-public List getInternsVector() {
+public List<String> getInternsVector() {
 	List v = new Vector();
 	if ( _intern != null ) {
 		for ( int i = 0; i < _intern.length; i++) {
@@ -884,7 +816,15 @@ public String getIopsou5() {
 Retrieve the ityopr.
 */
 public int getItyopr() {
-	return _ityopr;
+	return __ityopr;
+}
+
+/**
+Get the metadata for the right or null if the right type is not recognized.
+*/
+public StateMod_OperationalRight_Metadata getMetadata()
+{
+	return __metadata;
 }
 
 /**
@@ -904,6 +844,15 @@ public double getOprLoss() {
 }
 
 /**
+ * @return the list of strings that containing the operating rule data when the
+ * right is not understood.
+ */
+public List<String> getRightStrings()
+{
+	return __rightStringsVector;
+}
+
+/**
 Return rtem.
 @return rtem.
 */
@@ -917,15 +866,6 @@ public double getQdebt() {
 
 public double getQdebtx() {
 	return _qdebtx;
-}
-
-/**
- * @return the list of strings that containing the operating rule data when the
- * right is not understood.
- */
-public List<String> getRightStrings()
-{
-	return __rightStringsVector;
 }
 
 public double getSjrela() {
@@ -955,7 +895,7 @@ private void initialize() {
 	_iopsou4 = "0";
 	_ciopso5 = "";
 	_iopsou5 = "0";
-	_ityopr = 0;	// Unknown
+	setItyopr ( 0 );	// Unknown
 	_imonsw = null;	// Define in constructor or when reading
 	_intern = null;	// Define in constructor or when reading
 	__commentsBeforeData = new Vector(1);
@@ -991,6 +931,130 @@ public static boolean isRightUnderstoodByCode( int rightType )
 	}
 	else {
 		return false;
+	}
+}
+
+/**
+Return the destination data set object by searching appropriate dataset lists.
+The destination identifier is matched up against station and right identifiers and the corresponding
+object returned.
+@param dataset the full dataset from which the destination should be extracted
+*/
+public StateMod_Data lookupDestinationDataObject ( StateMod_DataSet dataset )
+{
+	String destinationID = getCiopde();
+	StateMod_OperationalRight_Metadata metadata = getMetadata();
+	if ( metadata == null ) {
+		throw new RuntimeException ( "Unable to get operational right metadata for type " + getItyopr() +
+			" - unable to get destination object." );
+	}
+	StateMod_OperationalRight_Metadata_SourceOrDestinationType [] destinationTypes =
+		metadata.getDestinationTypes();
+	if ( destinationTypes == null ) {
+		return null;
+	}
+	List<StateMod_Data> smdataList = new Vector();
+	for ( int i = 0; i < destinationTypes.length; i++ ) {
+		 smdataList.addAll ( StateMod_Util.getDataList ( destinationTypes[i], dataset,
+			destinationID, true ) );
+		if ( smdataList.size() > 0 ) {
+			break;
+		}
+	}
+	if ( smdataList.size() == 1 ) {
+		return smdataList.get(0);
+	}
+	else if ( smdataList.size() == 0 ) {
+		return null;
+	}
+	else {
+		throw new RuntimeException ( "" + smdataList.size() +
+			" data objects returned matching destination \"" + destinationID +
+			"\" for operational right \"" + getID() + " - one is expected." );
+	}
+}
+
+/**
+Return the source1 data set object(s) by searching appropriate dataset lists.
+The source identifier(s) are matched up against station and right identifiers and the corresponding
+object returned.
+@param dataset the full dataset from which the destination should be extracted
+*/
+public StateMod_Data lookupSource1DataObject ( StateMod_DataSet dataset )
+{
+	String sourceID = getCiopso1();
+	StateMod_OperationalRight_Metadata metadata = getMetadata();
+	if ( metadata == null ) {
+		throw new RuntimeException ( "Unable to get operational right metadata for type " + getItyopr() +
+			" - unable to get source1 object." );
+	}
+	StateMod_OperationalRight_Metadata_SourceOrDestinationType [] sourceTypes = metadata.getSource1Types();
+	if ( sourceTypes == null ) {
+		return null;
+	}
+	else if ( (sourceTypes.length == 1) &&
+		(sourceTypes[0] == StateMod_OperationalRight_Metadata_SourceOrDestinationType.NA) ) {
+		return null;
+	}
+	List<StateMod_Data> smdataList = new Vector();
+	for ( int i = 0; i < sourceTypes.length; i++ ) {
+		smdataList.addAll ( StateMod_Util.getDataList ( sourceTypes[i], dataset, sourceID, true ) );
+		if ( smdataList.size() > 0 ) {
+			break;
+		}
+	}
+	if ( smdataList.size() == 1 ) {
+		return smdataList.get(0);
+	}
+	else if ( smdataList.size() == 0 ) {
+		return null;
+	}
+	else {
+		throw new RuntimeException ( "" + smdataList.size() +
+			" data objects returned matching source1 \"" + sourceID +
+			"\" for \"" + getID() + "\" - one is expected." );
+	}
+}
+
+/**
+Return the source2 data set object(s) by searching appropriate dataset lists.
+The source identifier(s) are matched up against station and right identifiers and the corresponding
+object returned.
+@param dataset the full dataset from which the destination should be extracted
+*/
+public StateMod_Data lookupSource2DataObject ( StateMod_DataSet dataset )
+{
+	String sourceID = getCiopso2();
+	StateMod_OperationalRight_Metadata metadata = getMetadata();
+	if ( metadata == null ) {
+		throw new RuntimeException ( "Unable to get operational right metadata for type " + getItyopr() +
+			" - unable to get source2 object." );
+	}
+	StateMod_OperationalRight_Metadata_SourceOrDestinationType [] sourceTypes = metadata.getSource2Types();
+	if ( sourceTypes == null ) {
+		return null;
+	}
+	else if ( (sourceTypes.length == 1) &&
+		(sourceTypes[0] == StateMod_OperationalRight_Metadata_SourceOrDestinationType.NA) ) {
+		return null;
+	}
+	List<StateMod_Data> smdataList = new Vector();
+	for ( int i = 0; i < sourceTypes.length; i++ ) {
+		smdataList.addAll( StateMod_Util.getDataList ( sourceTypes[i], dataset, sourceID, true ));
+		if ( smdataList.size() > 0 ) {
+			break;
+		}
+	}
+	if ( smdataList.size() == 1 ) {
+		return smdataList.get(0);
+	}
+	else if ( smdataList.size() == 0 ) {
+		return null;
+	}
+	else {
+		throw new RuntimeException ( "" + smdataList.size() +
+			" data objects returned matching source2 \"" + sourceID +
+			"\" for \"" + getID() + " - one is expected." );
 	}
 }
 
@@ -1743,7 +1807,7 @@ public void restoreOriginal() {
 	_iopsou4 = op._iopsou4;
 	_ciopso5 = op._ciopso5;
 	_iopsou5 = op._iopsou5;
-	_ityopr = op._ityopr;
+	__ityopr = op.__ityopr;
 	_qdebt = op._qdebt;
 	_qdebtx = op._qdebtx;
 	_sjmina = op._sjmina;
@@ -2166,8 +2230,8 @@ public void setIopsou5(String iopsou5) {
 Set the ityopr
 */
 public void setItyopr(int ityopr) {
-	if (ityopr != _ityopr) {
-		_ityopr = ityopr;
+	if (ityopr != __ityopr) {
+		__ityopr = ityopr;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
@@ -2178,8 +2242,11 @@ public void setItyopr(int ityopr) {
 /**
 Set the ityopr
 */
-public void setItyopr(Integer ityopr) {
+public void setItyopr(Integer ityopr)
+{
 	setItyopr(ityopr.intValue());
+	// Also get the metadata for the right
+	__metadata = StateMod_OperationalRight_Metadata.getMetadata(ityopr);
 }
 
 /**

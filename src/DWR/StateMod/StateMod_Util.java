@@ -2414,12 +2414,13 @@ Get the list of data objects matching the operational right metadata source/dest
 Depending on the type, this may return a list of stations or rights.
 @param type the type of source or destination that is allowed
 @param dataset the full dataset, from which lists are extracted
+@param idToMatch the identifier to match to limit the list (generally will limit the list to one return item)
 @param returnStations if the list is a list of rights, then specifying true will return the list of stations
 associated with the rights (ignored in cases where the type is stations)
 */
 public static List getDataList (
 	StateMod_OperationalRight_Metadata_SourceOrDestinationType type, StateMod_DataSet dataset,
-	boolean returnStations )
+	String idToMatch, boolean returnStations )
 {
 	List dataList = new Vector();
 	if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.CARRIER ) {
@@ -2428,7 +2429,9 @@ public static List getDataList (
 			StateMod_DataSet.COMP_DIVERSION_STATIONS).getData();
 		for ( StateMod_Diversion div: stationList2 ) {
 			if ( div.getIrturn() == 3 ) {
-				dataList.add ( div );
+				if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(div.getID()) ) {
+					dataList.add ( div );
+				}
 			}
 		}
 	}
@@ -2448,11 +2451,15 @@ public static List getDataList (
 					StateMod_DataSet.COMP_DIVERSION_STATIONS).getData();
 				int pos = indexOf (divList, divRight.getLocationIdentifier());
 				if ( pos >= 0 ) {
-					dataList.add ( divList.get(pos));
+					if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(divRight.getID()) ) {
+						dataList.add ( divList.get(pos));
+					}
 				}
 			}
 			else {
-				dataList.add ( divRight );
+				if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(divRight.getID()) ) {
+					dataList.add ( divRight );
+				}
 			}
 		}
 	}
@@ -2472,11 +2479,15 @@ public static List getDataList (
 					StateMod_DataSet.COMP_INSTREAM_STATIONS).getData();
 				int pos = indexOf (instreamList, instreamRight.getLocationIdentifier());
 				if ( pos >= 0 ) {
-					dataList.add ( instreamList.get(pos));
+					if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(instreamRight.getID()) ) {
+						dataList.add ( instreamList.get(pos));
+					}
 				}
 			}
 			else {
-				dataList.add ( instreamRight );
+				if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(instreamRight.getID()) ) {
+					dataList.add ( instreamRight );
+				}
 			}
 		}
 	}
@@ -2491,7 +2502,9 @@ public static List getDataList (
 			StateMod_DataSet.COMP_PLANS).getData();
 		for ( StateMod_Plan plan: dataList2 ) {
 			if ( plan.getIPlnTyp() == 11) {
-				dataList.add ( plan );
+				if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(plan.getID()) ) {
+					dataList.add ( plan );
+				}
 			}
 		}
 	}
@@ -2501,7 +2514,9 @@ public static List getDataList (
 			StateMod_DataSet.COMP_PLANS).getData();
 		for ( StateMod_Plan plan: dataList2 ) {
 			if ( plan.getIPlnTyp() == 9 ) {
-				dataList.add ( plan );
+				if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(plan.getID()) ) {
+					dataList.add ( plan );
+				}
 			}
 		}
 	}
@@ -2511,7 +2526,9 @@ public static List getDataList (
 			StateMod_DataSet.COMP_PLANS).getData();
 		for ( StateMod_Plan plan: dataList2 ) {
 			if ( plan.getIPlnTyp() == 8 ) {
-				dataList.add ( plan );
+				if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(plan.getID()) ) {
+					dataList.add ( plan );
+				}
 			}
 		}
 	}
@@ -2521,7 +2538,9 @@ public static List getDataList (
 			StateMod_DataSet.COMP_PLANS).getData();
 		for ( StateMod_Plan plan: dataList2 ) {
 			if ( plan.getIPlnTyp() == 12 ) {
-				dataList.add ( plan );
+				if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(plan.getID()) ) {
+					dataList.add ( plan );
+				}
 			}
 		}
 	}
@@ -2531,7 +2550,9 @@ public static List getDataList (
 			StateMod_DataSet.COMP_PLANS).getData();
 		for ( StateMod_Plan plan: dataList2 ) {
 			if ( plan.getIPlnTyp() == 4 ) {
-				dataList.add ( plan );
+				if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(plan.getID()) ) {
+					dataList.add ( plan );
+				}
 			}
 		}
 	}
@@ -2541,7 +2562,9 @@ public static List getDataList (
 			StateMod_DataSet.COMP_PLANS).getData();
 		for ( StateMod_Plan plan: dataList2 ) {
 			if ( plan.getIPlnTyp() == 6 ) {
-				dataList.add ( plan );
+				if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(plan.getID()) ) {
+					dataList.add ( plan );
+				}
 			}
 		}
 	}
@@ -2551,7 +2574,9 @@ public static List getDataList (
 			StateMod_DataSet.COMP_PLANS).getData();
 		for ( StateMod_Plan plan: dataList2 ) {
 			if ( plan.getIPlnTyp() == 3 ) {
-				dataList.add ( plan );
+				if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(plan.getID()) ) {
+					dataList.add ( plan );
+				}
 			}
 		}
 	}
@@ -2561,7 +2586,9 @@ public static List getDataList (
 			StateMod_DataSet.COMP_PLANS).getData();
 		for ( StateMod_Plan plan: dataList2 ) {
 			if ( plan.getIPlnTyp() == 5 ) {
-				dataList.add ( plan );
+				if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(plan.getID()) ) {
+					dataList.add ( plan );
+				}
 			}
 		}
 	}
@@ -2571,7 +2598,9 @@ public static List getDataList (
 			StateMod_DataSet.COMP_PLANS).getData();
 		for ( StateMod_Plan plan: dataList2 ) {
 			if ( plan.getIPlnTyp() == 10 ) {
-				dataList.add ( plan );
+				if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(plan.getID()) ) {
+					dataList.add ( plan );
+				}
 			}
 		}
 	}
@@ -2581,7 +2610,9 @@ public static List getDataList (
 			StateMod_DataSet.COMP_PLANS).getData();
 		for ( StateMod_Plan plan: dataList2 ) {
 			if ( plan.getIPlnTyp() == 1) {
-				dataList.add ( plan );
+				if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(plan.getID()) ) {
+					dataList.add ( plan );
+				}
 			}
 		}
 	}
@@ -2591,7 +2622,9 @@ public static List getDataList (
 			StateMod_DataSet.COMP_PLANS).getData();
 		for ( StateMod_Plan plan: dataList2 ) {
 			if ( plan.getIPlnTyp() == 7) {
-				dataList.add ( plan );
+				if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(plan.getID()) ) {
+					dataList.add ( plan );
+				}
 			}
 		}
 	}
@@ -2601,7 +2634,9 @@ public static List getDataList (
 			StateMod_DataSet.COMP_PLANS).getData();
 		for ( StateMod_Plan plan: dataList2 ) {
 			if ( plan.getIPlnTyp() == 2 ) {
-				dataList.add ( plan );
+				if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(plan.getID()) ) {
+					dataList.add ( plan );
+				}
 			}
 		}
 	}
@@ -2621,11 +2656,15 @@ public static List getDataList (
 					StateMod_DataSet.COMP_RESERVOIR_STATIONS).getData();
 				int pos = indexOf (resList, resRight.getLocationIdentifier());
 				if ( pos >= 0 ) {
-					dataList.add ( resList.get(pos));
+					if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(resRight.getID()) ) {
+						dataList.add ( resList.get(pos));
+					}
 				}
 			}
 			else {
-				dataList.add ( resRight );
+				if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(resRight.getID()) ) {
+					dataList.add ( resRight );
+				}
 			}
 		}
 	}
@@ -2650,13 +2689,33 @@ public static List getDataList (
 					StateMod_DataSet.COMP_WELL_STATIONS).getData();
 				int pos = indexOf (wellList, wellRight.getLocationIdentifier());
 				if ( pos >= 0 ) {
-					dataList.add ( wellList.get(pos));
+					if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(wellRight.getID()) ) {
+						dataList.add ( wellList.get(pos));
+					}
 				}
 			}
 			else {
-				dataList.add ( wellRight );
+				if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(wellRight.getID()) ) {
+					dataList.add ( wellRight );
+				}
 			}
 		}
+	}
+	if ( (idToMatch != null) &&
+		((type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.DIVERSION) ||
+		(type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.INSTREAM_FLOW) ||
+		(type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.OPERATIONAL_RIGHT) ||
+		(type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.RESERVOIR) ||
+		(type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.STREAM_GAGE) ||
+		(type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.WELL)) ) {
+		// Further process the initial lists
+		List<StateMod_Data> dataList2 = new Vector();
+		for ( StateMod_Data smdata: (List<StateMod_Data>)dataList ) {
+			if ( smdata.getID().equalsIgnoreCase(idToMatch) ) {
+				dataList2.add(smdata);
+			}
+		}
+		dataList = dataList2;
 	}
 	return dataList;
 }

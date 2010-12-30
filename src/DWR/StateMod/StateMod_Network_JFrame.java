@@ -86,7 +86,6 @@ import org.w3c.dom.NodeList;
 
 import cdss.domain.hydrology.network.HydrologyNode;
 
-import RTi.GIS.GeoView.GeoViewAnnotationRenderer;
 import RTi.GR.GRAspect;
 import RTi.GR.GRJComponentDrawingArea;
 import RTi.GR.GRLimits;
@@ -158,7 +157,8 @@ private final String
 	__BUTTON_SET_NAME = "Set Name";
 
 /**
-Whether the network is running in StateModGUI or not.
+Whether the network is running in StateModGUI or not.  If true, then the network cannot be edited
+directly (it must be edited through the Edit > Add/Delete menus.
 */
 private boolean __inStateModGUI = false;
 
@@ -304,9 +304,14 @@ The String ID of the current layout.
 private String __id = "";
 
 /**
-Vector to manage all the different pre-defined layouts for the network.
+List to manage all the different pre-defined layouts for the network.
 */
-private List __layouts = null;
+private List<PropList> __layouts = null;
+
+/**
+The panel that includes the list of StateMod_Network_AnnotationData.
+*/
+private StateMod_Network_AnnotationDataListJPanel __annotationListJPanel = null;
 
 /**
 Constructor.  
@@ -430,7 +435,7 @@ public void actionPerformed(ActionEvent event)
 		}
 
 		int index = __layoutComboBox.getSelectedIndex();
-		PropList p = (PropList)__layouts.get(index);		
+		PropList p = __layouts.get(index);		
 		p.set("ID=\"" + name + "\"");
 		__ignoreEvents = true;
 		__layoutComboBox.removeAt(index);
@@ -500,10 +505,24 @@ Add an annotation renderer.  Just chain to the network component.
 @param label label for the object, to list in the GeoViewJPanel
 @param scrollToAnnotation if true, scroll to the annotation (without changing scale)
 */
-public void addAnnotationRenderer ( StateMod_Network_AnnotationRenderer renderer,
-	Object objectToRender, String label, boolean scrollToAnnotation )
-{	// Ad the annotation to the list and redraw if necessary, zooming to new annotation.
-	__device.addAnnotationRenderer ( renderer, objectToRender, label, scrollToAnnotation );
+public void addAnnotationRenderer ( StateMod_Network_AnnotationRenderer renderer, Object objectToRender,
+	String label, GRLimits limits, boolean scrollToAnnotation )
+{	// Add the annotation to the list, which will trigger a redraw, during which the limits of the
+	// rendered data will be set.  Once the limits are set, the zoomToAnnotations() call below will
+	// properly center on the annotations.
+	StateMod_Network_AnnotationData annotationData = __device.addAnnotationRenderer (
+		renderer, objectToRender, label, limits );
+	// Also add to the annotation list for managing the list from the UI
+	if ( annotationData != null ) {
+		__annotationListJPanel.addAnnotation ( annotationData );
+	}
+	// TODO SAM 2010-12-28 Need to enable
+	if ( scrollToAnnotation ) {
+		// Scroll and zoom so the object is visible (do this even if no new data were added because
+		// the user may have asked to reposition the display to see the annotation)...
+		// Make the buffer relatively large due to wide text labels.
+		zoomToAnnotations ( .75, .1 );
+	}
 }
 
 /**
@@ -718,10 +737,8 @@ private void createFirstLayout() {
 	__id = "Page Layout #" + (__layouts.size() + 1);
 	main.set("ID=\"" + __id + "\"");
 	main.set("PaperSize=\"" + __DEFAULT_PAPER_SIZE + "\"");
-	main.set("PageOrientation=\"" + __DEFAULT_PAGE_ORIENTATION 
-		+ "\"");
-	main.set("NodeLabelFontSize=\"" + __DEFAULT_FONT_SIZE 
-		+ "\"");
+	main.set("PageOrientation=\"" + __DEFAULT_PAGE_ORIENTATION + "\"");
+	main.set("NodeLabelFontSize=\"" + __DEFAULT_FONT_SIZE + "\"");
 	main.set("NodeSize=\"" + __DEFAULT_NODE_SIZE + "\"");
 	main.set("IsDefault=\"true\"");			
 	__layouts.add(main);
@@ -855,10 +872,10 @@ public boolean getIsDirty()
 }
 
 /**
-Returns a Vector of all the layouts used in the current network.
-@return a Vector of all the layouts used in the current network.
+Returns a list of all the layouts used in the current network.
+@return a list of all the layouts used in the current network.
 */
-public List getLayouts() {
+public List<PropList> getLayouts() {
 	return __layouts;
 }
 
@@ -868,6 +885,14 @@ Returns the network being drawn.
 */
 public StateMod_NodeNetwork getNetwork() {
 	return __device.getNetwork();
+}
+
+/**
+Returns the network editor JComponent that displays the network.
+*/
+public StateMod_Network_JComponent getNetworkJComponent ()
+{
+	return __device;
 }
 
 /**
@@ -1032,13 +1057,13 @@ public void itemStateChanged(ItemEvent event)
 		int index = __layoutComboBox.getSelectedIndex();
 		String value = __paperSizeComboBox.getSelected();
 		__device.setPaperSize( shorten(__paperSizeComboBox.getSelected()));
-		PropList p = (PropList)__layouts.get(index);
+		PropList p = __layouts.get(index);
 		p.set("PaperSize=\"" + value + "\"");
 	}
 	else if (event.getSource() == __textSizeComboBox) {	
 		int index = __layoutComboBox.getSelectedIndex();
 		String value = __textSizeComboBox.getSelected();
-		PropList p = (PropList)__layouts.get(index);
+		PropList p = __layouts.get(index);
 		try {
 			int i = Integer.decode(	__textSizeComboBox.getSelected()).intValue();
 			__device.setPrintFontSize(i);
@@ -1049,7 +1074,7 @@ public void itemStateChanged(ItemEvent event)
 	else if (event.getSource() == __nodeSizeComboBox) {
 		int index = __layoutComboBox.getSelectedIndex();
 		String value = __nodeSizeComboBox.getSelected();
-		PropList p = (PropList)__layouts.get(index);
+		PropList p = __layouts.get(index);
 		try {
 			int i = Integer.decode(	__nodeSizeComboBox.getSelected()).intValue();
 			__device.setNodeSize((double)i);
@@ -1062,7 +1087,7 @@ public void itemStateChanged(ItemEvent event)
 	}
 	else if (event.getSource() == __layoutComboBox) {
 		int index = __layoutComboBox.getSelectedIndex();	
-		PropList p = (PropList)__layouts.get(index);
+		PropList p = __layouts.get(index);
 		String paperFormat = p.getValue("PaperSize");
 		Message.printStatus ( 2, routine, "Selected layout has paper size \"" + paperFormat + "\"" );
 		if ( !__paperSizeComboBox.setSelectedPrefixItem(paperFormat + " -") ) {
@@ -1107,12 +1132,12 @@ public void itemStateChanged(ItemEvent event)
 		if (set) {
 			int size = __layouts.size();
 			for (int i = 0; i < size; i++) {
-				p = (PropList)__layouts.get(i);
+				p = __layouts.get(i);
 				p.set("IsDefault=\"False\"");
 			}
 		}
 
-		p = (PropList)__layouts.get(index);
+		p = __layouts.get(index);
 		p.set("IsDefault=\"" + set + "\"");
 	}
 }
@@ -1312,7 +1337,7 @@ throws Exception {
 	String s = null;
 	List ids = new Vector();
 	for (int i = 0; i < size; i++) {
-		p = (PropList)__layouts.get(i);
+		p = __layouts.get(i);
 		s = p.getValue("IsDefault");
 		if (main == null && s != null && s.equalsIgnoreCase("true")) {
 			main = p;
@@ -1325,7 +1350,7 @@ throws Exception {
 		Message.printWarning(2, routine,
 			"No layout was marked as the main layout.  Values "
 			+ "from the first layout will be used, instead.");
-		main = (PropList)__layouts.get(0);
+		main = __layouts.get(0);
 	}
 
 	String id = main.getValue("ID");
@@ -1828,6 +1853,14 @@ private void setupGUI() {
 	JGUIUtil.addComponent(nodePanel, __nodeDBXYTextField,
 		1, 4, 1, 1, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
+	
+	__annotationListJPanel = new StateMod_Network_AnnotationDataListJPanel (
+		__device.getAnnotationData(), __device, true );
+	__annotationListJPanel.setMinimumSize(new Dimension(175, 150));
+	__annotationListJPanel.setPreferredSize(new Dimension(175, 150));
+	JGUIUtil.addComponent(panel, __annotationListJPanel,
+		11, 1, 1, 1, 0, 0,
+		GridBagConstraints.BOTH, GridBagConstraints.CENTER);
 
 	JGUIUtil.addComponent(centerPanel, panel,
 		1, 2, 1, 1, 0, 0, 
@@ -1853,7 +1886,7 @@ private void setupGUI() {
 	getContentPane().add(statusBar, "South");
 	
 	pack();
-	setSize(750, 700);
+	setSize(900, 700);
 	JGUIUtil.center(this);
 	}
 	catch (Exception e) {
@@ -1875,7 +1908,7 @@ private void setupPaper() {
 	String s = null;
 	List ids = new Vector();
 	for (int i = 0; i < size; i++) {
-		p = (PropList)__layouts.get(i);
+		p = __layouts.get(i);
 		s = p.getValue("IsDefault");
 		if (main == null && s != null && s.equalsIgnoreCase("true")) {
 			main = p;
@@ -1888,7 +1921,7 @@ private void setupPaper() {
 		Message.printWarning(2, routine,
 			"No layout was marked as the main layout.  Values "
 			+ "from the first layout will be used, instead.");
-		main = (PropList)__layouts.get(0);
+		main = __layouts.get(0);
 	}
 
 	String id = main.getValue("ID");
@@ -2023,6 +2056,51 @@ Does nothing.
 */
 public void windowOpened(WindowEvent event) {}
 
+/**
+Zoom to the annotations and redraw.  This is generally called after adding a new annotation,
+so the user will see what was highlighted on the map.
+@param zoomBuffer The percent (1.0 is 100%) to expand the visible area in
+both directions for the selected shapes.  For example, specifying a value of
+1.0 would result in a viewable area that is 50% bigger than selected shapes on each edge.
+@param zoomBuffer2 If the selected shapes result in a region that is a single
+point, then zoomBuffer2 can be applied similar to zoomBuffer but using the
+dimension of the main view as the reference region.
+*/
+public void zoomToAnnotations ( double zoomBuffer, double zoomBuffer2 )
+{
+	StateMod_Network_JComponent networkJComponent = __device;
+	List<StateMod_Network_AnnotationData> annotationDataList = networkJComponent.getAnnotationData();
+	GRLimits dataLimits = null; 
+	for ( StateMod_Network_AnnotationData annotationData: annotationDataList ) {
+		// Have to check for zero because some shapes
+		// don't have coordinates...  For now check only the max...
+		GRLimits annotationDataLimits = annotationData.getLimits();
+		if ( dataLimits == null) {
+			dataLimits = new GRLimits( annotationDataLimits );
+		}
+		else {	
+			dataLimits = dataLimits.max( annotationDataLimits );
+		}
+	}
+	// Increase the limits...
+	double xincrease = 0.0, yincrease = 0.0;
+	if (dataLimits.getMinX() == dataLimits.getMaxX()) {
+		xincrease = networkJComponent.getDataLimitsMax().getWidth()*zoomBuffer2;
+	}
+	else {	
+		xincrease = dataLimits.getWidth()*zoomBuffer;
+	}
+	if (dataLimits.getMinY() == dataLimits.getMaxY()) {
+		yincrease = networkJComponent.getDataLimitsMax().getHeight()*zoomBuffer2;
+	}
+	else {	
+		yincrease = dataLimits.getHeight()*zoomBuffer;
+	}
+	dataLimits.increase(xincrease, yincrease);
+	// Center the reference network zoom on the given limits and reposition the main map..
+	networkJComponent.centerOn(dataLimits);
+}
+
 // TODO (JTS - 2005-04-19) necessary anymore??
 public void setSaveOnExit(boolean saveOnExit) {
 	__saveOnExit = saveOnExit;
@@ -2046,7 +2124,7 @@ System.out.println("TW/TH: " + __device.getTotalWidth() + "  "
 */
 	__reference.setNewDataLimits(__device.getTotalDataLimits());
 	__reference.forceRepaint();
-	PropList p = (PropList)__layouts.get(index);
+	PropList p = __layouts.get(index);
 	p.set("PageOrientation=\"" + value + "\"");
 }
 

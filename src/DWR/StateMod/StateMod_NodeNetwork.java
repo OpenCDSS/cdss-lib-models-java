@@ -58,29 +58,28 @@ private int __reachCounter;
 /**
 Used in reading in an XML file.
 */
-private static List __aggregateAnnotations = null;
+private static List<HydrologyNode> __aggregateAnnotations = null;
 
 /**
-Vector for aggregating layout information when reading statically from the XML files.
+List for aggregating layout information when reading statically from the XML files.
 */
-private static List __aggregateLayouts = null;
+private static List<PropList> __aggregateLayouts = null;
 
 /**
 Used in reading in an XML file.
 */
-private static List __aggregateLinks = null;
+private static List<PropList> __aggregateLinks = null;
 
 /**
 Contains the nodes read from an XML file.  This is a static data member because
 the method used to read in an XML file and create a network is static.
 */
-private static List __aggregateNodes;
+private static List<HydrologyNode> __aggregateNodes;
 
 // End XML data
 
 /**
-Boolean values that specify if all the bounds of the network were read in
-during a static XML read.
+Boolean values that specify if all the bounds of the network were read in during a static XML read.
 */
 private static boolean 
 	__lxSet = false,
@@ -143,7 +142,7 @@ private static StateMod_NodeNetwork buildNetworkFromXMLNodes() {
 	// performance will be impacted by all the casts.  
 	HydrologyNode[] nodes = new HydrologyNode[size];
 	for (int i = 0; i < size; i++) {
-		nodes[i] = (HydrologyNode)__aggregateNodes.get(i);
+		nodes[i] = __aggregateNodes.get(i);
 		// FIXME 2008-03-15 Need to remove WIS code
 		//nodes[i].setInWIS(false);
 	}
@@ -181,7 +180,7 @@ private static StateMod_NodeNetwork buildNetworkFromXMLNodes() {
 	}
 
 	// put the nodes back in a Vector for placement back into the node network.
-	List v = new Vector();
+	List<HydrologyNode> v = new Vector();
 	for (int i = 0; i < size; i++) {
 		v.add(nodes[i]);
 	}
@@ -198,13 +197,13 @@ Creates a HydroBase_NodeNetwork from a Vector of StateMod_RiverNetworkNodes.
 REVISIT (JTS - 2004-07-03)<br>
 Should not be a static returning a method, I think ...
 */
-public static StateMod_NodeNetwork createFromStateModVector(List nodes) {
+public static StateMod_NodeNetwork createFromStateModVector(List<StateMod_RiverNetworkNode> nodes) {
 	int size = nodes.size();
 	
 	HydrologyNode[] nodeArray = new HydrologyNode[size];
 	StateMod_RiverNetworkNode rnn = null;
 	for (int i = size - 1; i >= 0; i--) {
-		rnn = (StateMod_RiverNetworkNode)nodes.get(i);
+		rnn = nodes.get(i);
 		nodeArray[i] = new HydrologyNode();
 		// FIXME 2008-03-15 Need to remove WIS code
 		//nodeArray[i].setInWIS(false);
@@ -220,14 +219,13 @@ public static StateMod_NodeNetwork createFromStateModVector(List nodes) {
 		if (dsid != null) {
 			for (int j = 0; j < size; j++) {
 				if (nodeArray[j].getCommonID().equals(dsid)) {
-					nodeArray[j].addUpstreamNodeID(
-						nodeArray[i].getCommonID());
+					nodeArray[j].addUpstreamNodeID(nodeArray[i].getCommonID());
 				}
 			}
 		}
 	}
 
-	List v = new Vector();
+	List<HydrologyNode> v = new Vector();
 	for (int i = 0; i < size; i++) {
 		v.add(nodeArray[i]);
 	}
@@ -242,13 +240,13 @@ Creates a StateMod_RiverNodeNetwork from the nodes in the HydroBase_NodeNetwork.
 The output contains only actual nodes.  Therefore, confluence nodes are skipped.
 @return the Vector of StateMod_RiverNodeNetwork nodes.
 */
-public List createStateModRiverNetwork() {
+public List<StateMod_RiverNetworkNode> createStateModRiverNetwork() {
 	boolean done = false;
 	HydrologyNode holdNode = null;
 	HydrologyNode node = getMostUpstreamNode();	
 	HydrologyNode dsNode = null;
 	StateMod_RiverNetworkNode rnn = null;
-	List v = new Vector();
+	List<StateMod_RiverNetworkNode> v = new Vector();
 	int node_type;		// Type for current node.
 	int dsNode_type;	// Type for downstream node.
 	HydrologyNode node_downstream = null;		// Used to find a real
@@ -484,32 +482,31 @@ throws Throwable
 Initialize data.
 */
 private void initialize() {
-	__closeCount = 			0;
-	__createOutputFiles = 		true;
-	__createFancyDescription = 	false;
-	//In base... __fontSize = 			10.0;
-	//In base... __labelType = 			LABEL_NODES_NETID;
-	//__legendDX = 			1.0;
-	//__legendDY = 			1.0;
-	//__legendX = 			0.0;
-	//__legendY = 			0.0;
-	__line = 			1;
-	//In base...__nodes = 			new Vector();
-	//In base...__plotCommands = 		new Vector();
-	//In base...__nodeCount = 			1;
-	//In base...__nodeDiam = 			10.0;
-	//In base...__nodeHead = 			null;
-	__openCount = 			0;
-	__reachCounter = 		0;
-	//In base... __title = 			"Node Network";
-	//In base...__titleX = 			0.0;
-	//In base...__titleY = 			0.0;
-	//In base... __treatDryAsBaseflow = 		false;
+	__closeCount = 0;
+	__createOutputFiles = true;
+	__createFancyDescription = false;
+	//In base... __fontSize = 10.0;
+	//In base... __labelType = LABEL_NODES_NETID;
+	//__legendDX = 1.0;
+	//__legendDY = 1.0;
+	//__legendX = 0.0;
+	//__legendY = 0.0;
+	__line = 1;
+	//In base...__nodes = new Vector();
+	//In base...__plotCommands = new Vector();
+	//In base...__nodeCount = 1;
+	//In base...__nodeDiam = 10.0;
+	//In base...__nodeHead = null;
+	__openCount = 0;
+	__reachCounter = 0;
+	//In base... __title = "Node Network";
+	//In base...__titleX = 0.0;
+	//In base...__titleY = 0.0;
+	//In base... __treatDryAsBaseflow = false;
 }
 
 /**
-Processes an annotation node from an XML file and builds the annotation that
-will appear on the network.
+Processes an annotation node from an XML file and builds the annotation that will appear on the network.
 @param node the XML Node containing the annotation information.
 */
 private static void processAnnotation(Node node) 
@@ -554,8 +551,7 @@ throws Exception {
 	switch (node.getNodeType()) {
 		case Node.DOCUMENT_NODE:
 			// The main data set node.  Get the data set type, etc.
-			processDocumentNodeForRead(
-				((Document)node).getDocumentElement());
+			processDocumentNodeForRead(((Document)node).getDocumentElement());
 			children = node.getChildNodes();
 			if (children != null) {
 				processDocumentNodeForRead(children.item(0));
@@ -573,8 +569,7 @@ throws Exception {
 				if (children != null) {
 					int len = children.getLength();
 					for (int i = 0; i < len; i++) {
-						processDocumentNodeForRead(
-							children.item(i));
+						processDocumentNodeForRead(children.item(i));
 					}
 				}
 			}
@@ -595,8 +590,7 @@ throws Exception {
 }
 
 /**
-Processes a "Downstream" node containing the ID of the downstream node from
-the Network node.
+Processes a "Downstream" node containing the ID of the downstream node from the Network node.
 @param hnode the HydroBase_Node being built.
 @param node the XML node read from the file.
 @throws Exception if an error occurs.
@@ -667,8 +661,7 @@ private static void processLayoutNode(Node node) {
 }
 
 /**
-Processes a link node from an XML file and builds the link that will appear 
-on the network.
+Processes a link node from an XML file and builds the link that will appear on the network.
 @param node the XML Node containing the link information.
 */
 private static void processLink(Node node) 
@@ -709,8 +702,7 @@ Processes node information from a makenet file. This version initializes the
 counters properly and then calls the version that has the full argument list.
 @param netfp the BufferedReader to use for reading from the file.
 @param filename the name of the file being read.
-@param skipBlankNodes whether blank nodes should just be skipped when read
-in from the file.
+@param skipBlankNodes whether blank nodes should just be skipped when read in from the file.
 @return a node filled with data from the makenet file.
 */
 private HydrologyNode processMakenetNodes(BufferedReader netfp, String filename, boolean skipBlankNodes) {
@@ -724,8 +716,7 @@ private HydrologyNode processMakenetNodes(BufferedReader netfp, String filename,
 	String wd = "";
 
 	return processMakenetNodes((HydrologyNode)null, netfp, filename, wd,
-		x0, y0, dx, dy, __openCount, __closeCount, _reachLevel,
-		skipBlankNodes);
+		x0, y0, dx, dy, __openCount, __closeCount, _reachLevel, skipBlankNodes);
 }
 
 /**
@@ -742,14 +733,14 @@ recursively.  A main program should call the other version.
 @param openCount the number of open {s.
 @param closeCount the number of closed }s.
 @param reachLevel the current reach level being iterated over.
-@param skipBlankNodes whether to skip blank nodes when reading nodes in 
-from the file.
+@param skipBlankNodes whether to skip blank nodes when reading nodes in from the file.
 @return a node filled with data from the makenet file.
 */
 private HydrologyNode processMakenetNodes(HydrologyNode node, 
-BufferedReader netfp, String filename, String wd, double x0, double y0, 
-double dx, double dy, int openCount, int closeCount, int reachLevel,
-boolean skipBlankNodes) {
+	BufferedReader netfp, String filename, String wd, double x0, double y0, 
+	double dx, double dy, int openCount, int closeCount, int reachLevel,
+	boolean skipBlankNodes)
+{
 	String routine = "HydroBase_NodeNetwork.processMakenetNodes";
 	double 	river_dx, 
 		river_dy, 
@@ -768,8 +759,8 @@ boolean skipBlankNodes) {
 	String	message, 
 		nodeID, 
 		token0;
-	List	list, 
-		tokens;
+	List<String> list; 
+	List<String> tokens;
 
 	__closeCount = 0;	// Number of closing curly-braces.
 	__openCount = 0;	// Number of opening curly-braces.
@@ -815,9 +806,7 @@ boolean skipBlankNodes) {
 			numTokens = tokens.size();
 			if (numTokens == 0) {
 				// Blank line...
-				Message.printWarning(2, routine,
-					"Skipping line " + __line + " in \""
-					+ filename + "\"");
+				Message.printWarning(2, routine, "Skipping line " + __line + " in \"" + filename + "\"");
 				continue;
 			}
 		}
@@ -827,45 +816,37 @@ boolean skipBlankNodes) {
 		// ------------------------------------------------------------
 		token0 = new String((String)tokens.get(0));
 		if (Message.isDebugOn) {
-			Message.printDebug(dl, routine,
-				"token[0]=\"" + token0 + "\"");
+			Message.printDebug(dl, routine, "token[0]=\"" + token0 + "\"");
 		}
 		if (token0.charAt(0) == '#') {
 			// Comment line...
 			continue;
 		}
 		if (token0.equalsIgnoreCase("DISTRICT")) {
-			wd = new String((String)tokens.get(1));
-			Message.printStatus(2, routine,
-				"Water district specified as " + wd);
-			//HMPrintWarning(1, routine,
-			//"DISTRICT command is no longer recognized.  Use " +
-			//"full ID");
+			wd = new String(tokens.get(1));
+			Message.printStatus(2, routine, "Water district specified as " + wd);
+			//HMPrintWarning(1, routine, "DISTRICT command is no longer recognized.  Use full ID");
 			continue;
 		}
 		else if (token0.equalsIgnoreCase("FONT")) {
-			setFont((String)tokens.get(1),
-				StringUtil.atod((String)tokens.get(2)));
+			setFont(tokens.get(1), StringUtil.atod(tokens.get(2)));
 			continue;
 		}
 		else if (token0.equalsIgnoreCase("TEXT")) {
 			message = "The TEXT command is obsolete.  Use FONT";
-			Message.printWarning(1, routine, message);
+			Message.printWarning(3, routine, message);
 			printCheck(routine, 'W', message);
 			continue;
 		}
 		else if (token0.equalsIgnoreCase("NODESIZE")) {
-			message = "The NODESIZE command is obsolete.  Use" +
-				" NODEDIAM";
-			Message.printWarning(1, routine, message);
+			message = "The NODESIZE command is obsolete.  Use NODEDIAM";
+			Message.printWarning(3, routine, message);
 			printCheck(routine, 'W', message);
-			setNodeDiam(StringUtil.atod(
-				(String)tokens.get(1)));
+			setNodeDiam(StringUtil.atod(tokens.get(1)));
 			continue;
 		}
 		else if (token0.equalsIgnoreCase("NODEDIAM")) {
-			setNodeDiam(StringUtil.atod(
-				(String)tokens.get(1)));
+			setNodeDiam(StringUtil.atod(tokens.get(1)));
 			continue;
 		}
 		else if (token0.equalsIgnoreCase("{")) {
@@ -884,20 +865,16 @@ boolean skipBlankNodes) {
 			++openCount;
 			++__openCount;
 			if (Message.isDebugOn) {
-				Message.printDebug(dl, routine,
-					"Adding a reach above \"" 
-					+ node.getCommonID() + "\" nupstream=" 
-					+ node.getNumUpstreamNodes());
+				Message.printDebug(dl, routine, "Adding a reach above \"" 
+					+ node.getCommonID() + "\" nupstream=" + node.getNumUpstreamNodes());
 			}
-			HydrologyNode node_upstream =
-				processMakenetNodes(node, netfp, filename,
-				wd, x, y, dx, dy, openCount, closeCount,
-				reachLevel, skipBlankNodes);
+			HydrologyNode node_upstream = processMakenetNodes(node, netfp, filename,
+				wd, x, y, dx, dy, openCount, closeCount, reachLevel, skipBlankNodes);
 			if (node_upstream == null) {
 				// We have bad troubles.  Return null here to
 				// back out also (we want to end the program).
 				message  = "Major error processing nodes.";
-				Message.printWarning(1, routine, message);
+				Message.printWarning(3, routine, message);
 				printCheck(routine, 'W', message);
 				return null;
 			}
@@ -906,37 +883,29 @@ boolean skipBlankNodes) {
 			// Don't need to add again...
 			//node.addUpstreamNode(node_upstream);
 			if (Message.isDebugOn) {
-				Message.printDebug(dl, routine,
-					"Added reach starting at \"" 
-					+ node_upstream.getNetID() 
-					+ "\" reachnum=" 
+				Message.printDebug(dl, routine, "Added reach starting at \"" 
+					+ node_upstream.getNetID() + "\" reachnum=" 
 					+ node_upstream.getTributaryNumber() 
 					+ " num=" + node_upstream.getSerial() 
-					+ "(downstream is \"" 
-					+ node.getNetID() + "\" [" 
-					+ node.getSerial() + ", nupstream=" 
-					+ node.getNumUpstreamNodes() + ")");
+					+ "(downstream is \"" + node.getNetID() + "\" [" 
+					+ node.getSerial() + ", nupstream=" + node.getNumUpstreamNodes() + ")");
 			}
 			x += dx;
 			y += dy;
 			if (Message.isDebugOn) {
-				Message.printDebug(dl, routine,
-					"Now back at reach level " 
-					+ reachLevel);
+				Message.printDebug(dl, routine, "Now back at reach level " + reachLevel);
 			}
 		}
 		else if (token0.equalsIgnoreCase("STREAM")) {
-			// We are starting a stream(this will generally only
-			// be called when recursing).
+			// We are starting a stream(this will generally only be called when recursing).
 
 			// with graphing
-			river.id = new String((String)tokens.get(1));
-			Message.printStatus(2, routine, "Starting stream \"" 
-				+ river.id 
+			river.id = new String(tokens.get(1));
+			Message.printStatus(2, routine, "Starting stream \"" + river.id 
 				+ "\".  Building network upstream...");
-			numRiverNodes = StringUtil.atoi((String)tokens.get(2));
-			river_dx = StringUtil.atod((String)tokens.get(3));
-			river_dy = StringUtil.atod((String)tokens.get(4));
+			numRiverNodes = StringUtil.atoi(tokens.get(2));
+			river_dx = StringUtil.atod(tokens.get(3));
+			river_dy = StringUtil.atod(tokens.get(4));
 			river.strx = x;
 			river.stry = y;
 			river.endx = x + river_dx;
@@ -948,36 +917,28 @@ boolean skipBlankNodes) {
 				dy = river.endy - river.stry;
 			}
 			else {	
-				dx = (river.endx - river.strx)
-					/ (numRiverNodes - 1);
-				dy = (river.endy - river.stry)
-					/ (numRiverNodes - 1);
+				dx = (river.endx - river.strx)/(numRiverNodes - 1);
+				dy = (river.endy - river.stry)/(numRiverNodes - 1);
 			}
 			if (Message.isDebugOn) {
-				Message.printDebug(1, routine,
-					"Resetting dx,dy to " + dx + "," + dy);
+				Message.printDebug(1, routine, "Resetting dx,dy to " + dx + "," + dy);
 			}
 			// Save the reach label...
-			storeLabel((String)tokens.get(1), x, y,
-				(x + river_dx),(y + river_dy));
+			storeLabel((String)tokens.get(1), x, y, (x + river_dx),(y + river_dy));
 			// Plot the line for the river reach in the old plot
-			// file.  The nodes will plot on top and clear the line
-			// under the node...
+			// file.  The nodes will plot on top and clear the line under the node...
 			
 			// Because we are on a new reach, we want our first
 			// node to be off the previous stem...
 		}
 		// Add { here to help editor with matching on the next line...
 		else if (token0.equalsIgnoreCase("}")) {
-			// Make sure that we are not closing off more reaches
-			// than we have started...
+			// Make sure that we are not closing off more reaches than we have started...
 			++closeCount;
 			++__closeCount;
 			if (closeCount > openCount) {
-				message = "Line " + __line + ":  unmatched }(" 
-					+ openCount + " {, " + closeCount 
-					+ " })";
-				Message.printWarning(1, routine, message);
+				message = "Line " + __line + ":  unmatched }(" + openCount + " {, " + closeCount + " })";
+				Message.printWarning(3, routine, message);
 				printCheck(routine, 'W', message);
 				return null;
 			}
@@ -985,10 +946,8 @@ boolean skipBlankNodes) {
 			// but need to return the lowest node in the reach...
 			nodePt = getDownstreamNode(node, POSITION_REACH);
 			if (Message.isDebugOn) {
-				Message.printDebug(dl, routine,
-					"Done with reach(top=\"" 
-					+ node.getCommonID() + "\", bottom=\"" 
-					+ nodePt.getCommonID() + "\")");
+				Message.printDebug(dl, routine, "Done with reach(top=\"" 
+					+ node.getCommonID() + "\", bottom=\"" + nodePt.getCommonID() + "\")");
 			}
 			return nodePt;
 		}
@@ -996,9 +955,7 @@ boolean skipBlankNodes) {
 			// We are at the end of the system.  Just return the
 			// node (which will be the upstream node).  This should
 			// send us back to the main program...
-			Message.printStatus(2, routine,
-				"Detected STOP in net file.  Stop "
-				+ "processing nodes.");
+			Message.printStatus(2, routine, "Detected STOP in net file.  Stop processing nodes.");
 			return node;
 		}
 		else if (token0.equalsIgnoreCase("BLANK") && skipBlankNodes) {
@@ -1010,18 +967,14 @@ boolean skipBlankNodes) {
 			// Node information...
 
 			// Create a new node above another node (this is not
-			// adding a reach - it is adding a node within a
-			// reach)...
+			// adding a reach - it is adding a node within a reach)...
 			if (token0.length() > 12) {
-				Message.printWarning(1, routine,
-					"\"" + token0 + "\"(line " + __line
-					+ " is > 12 characters.  Truncating "
-					+ "to 12.");
+				Message.printWarning(1, routine, "\"" + token0 + "\"(line " + __line
+					+ " is > 12 characters.  Truncating to 12.");
 				token0 = new String(token0.substring(0, 12));
 			}
 			if (node == null) {
-				// This is the first node in the
-				// network...
+				// This is the first node in the network...
 				node = new HydrologyNode();
 				// FIXME SAM 2008-03-15 Remove WIS code
 				// node.setInWIS(false);
@@ -1034,26 +987,19 @@ boolean skipBlankNodes) {
 
 				// First create the upstream node...
 				if (Message.isDebugOn) {
-					Message.printDebug(dl, routine,
-						"Adding upstream node \"" 
-						+ token0 + "\"(line " + __line 
-						+ ")");
+					Message.printDebug(dl, routine, "Adding upstream node \"" 
+						+ token0 + "\"(line " + __line + ")");
 				}
 			
 				tempNode = new HydrologyNode();
 				// FIXME 2008-03-15 Remove WIS code
 				// tempNode.setInWIS(false);
 				node.addUpstreamNode(tempNode);
-				// Now it is safe to reset the current node to
-				// be the upstream node...
-				node = node.getUpstreamNode(
-					node.getNumUpstreamNodes() - 1);
+				// Now it is safe to reset the current node to be the upstream node...
+				node = node.getUpstreamNode( node.getNumUpstreamNodes() - 1);
 				// Set the h_num to be the same as the
-				// number of nodes added above the downstream
-				// node...
-				node.setTributaryNumber(
-					(node.getDownstreamNode())
-					.getNumUpstreamNodes());
+				// number of nodes added above the downstream node...
+				node.setTributaryNumber( (node.getDownstreamNode()).getNumUpstreamNodes());
 			}
 			// Set the node information regardless whether the
 			// first node or not.  By here, "node" points to the
@@ -1063,8 +1009,7 @@ boolean skipBlankNodes) {
 			node.setNodeInReachNumber(nodeInReach);
 			
 			// Use the saved reach counter so that we
-			// do not keep incrementing the reach counter
-			// for the same reach...
+			// do not keep incrementing the reach counter for the same reach...
 			node.setReachCounter(reachCounterSave);
 			node.setReachLevel(reachLevel);
 			node.setSerial(getNodeCount());
@@ -1072,8 +1017,7 @@ boolean skipBlankNodes) {
 			if (node.getDownstreamNode() == null) {
 				// First node.  Do not print downstream...
 				if (Message.isDebugOn) {
-					Message.printDebug(dl, routine,
-						"Added node \"" + token0 
+					Message.printDebug(dl, routine, "Added node \"" + token0 
 						+ "\" nodeInReach=" + node.getNodeInReachNumber()
 						+ " reachnum=" + node.getTributaryNumber()
 						+ " reachCounter=" + node.getReachCounter() 
@@ -1083,8 +1027,7 @@ boolean skipBlankNodes) {
 			}
 			else {	
 				if (Message.isDebugOn) {
-					Message.printDebug(1, routine,
-						"Added node \"" + (String)tokens.get(0)
+					Message.printDebug(1, routine, "Added node \"" + tokens.get(0)
 						+ "\" nodeInReach=" + node.getNodeInReachNumber() 
 						+ " reachnum=" + node.getTributaryNumber() 
 						+ " reachCounter=" + node.getReachCounter() 
@@ -1115,8 +1058,7 @@ boolean skipBlankNodes) {
 				Message.printStatus(2, routine,	"Processing node " + (getNodeCount() - 1) + ": XCONFL");
 			}
 			else if (token0.equalsIgnoreCase("END")) {
-				// End of system.  This node has no
-				// downstream node...
+				// End of system.  This node has no downstream node...
 				node.setType(HydrologyNode.NODE_TYPE_END);
 				node.setNetID(token0);
 				Message.printStatus(2, routine,	"Processing node " + (getNodeCount() - 1) + ": END");
@@ -1126,7 +1068,7 @@ boolean skipBlankNodes) {
 				node.setNetID(token0);
 				Message.printStatus(2, routine,	"Processing node " + (getNodeCount() - 1) + ": " + token0);
 				// Get the node type. 
-				String token1 = (String)tokens.get(1);
+				String token1 = tokens.get(1);
 				if (token1.equalsIgnoreCase("BLANK")) {
 					node.setType(HydrologyNode.NODE_TYPE_BLANK);
 				}
@@ -1134,21 +1076,14 @@ boolean skipBlankNodes) {
 					node.setType(HydrologyNode.NODE_TYPE_DIV);
 					if (Message.isDebugOn) {
 						Message.printDebug(dl, routine,
-							"Node \"" 
-							+ node.getNetID() 
-							+ "\" type is DIV "
-							+ "from \"DIV\"");
+							"Node \"" + node.getNetID() + "\" type is DIV " + "from \"DIV\"");
 					}
 				}
-				else if (token1.equalsIgnoreCase("D&W")
-					|| token1.equalsIgnoreCase("DW")) {
+				else if (token1.equalsIgnoreCase("D&W") || token1.equalsIgnoreCase("DW")) {
 					node.setType( HydrologyNode.NODE_TYPE_DIV_AND_WELL);
 					if (Message.isDebugOn) {
 						Message.printDebug(dl, routine,
-							"Node \"" 
-							+ node.getNetID() 
-							+ "\" type is D&W "
-							+ "from \"D&W\"");
+							"Node \"" + node.getNetID() + "\" type is D&W from \"D&W\"");
 					}
 				}
 				else if (token1.equalsIgnoreCase("WELL")) {
@@ -1187,53 +1122,37 @@ boolean skipBlankNodes) {
 				else {	
 					// Assume number type...
 					if (Message.isDebugOn) {
-						message =
-							"\"" + node.getNetID() 
-							+ "\" Node type \"" 
-							+ token1 
-							+ "\":  Node type is "
-							+ "not recognized.";
-						Message.printWarning(1,	routine, message);
+						message = "\"" + node.getNetID() + "\" Node type \"" 
+							+ token1 + "\":  Node type is not recognized.";
+						Message.printWarning(3,	routine, message);
 						printCheck(routine, 'W', message);
 					}
 					return null;
 				}
 				// Now process the area*precip information...
-				if (!node.parseAreaPrecip(
-  				    (String)tokens.get(2))) {
-					message = "Error processing area*"
-						+ "precip info for \""
-						+ node.getNetID() + "\"";
-					Message.printWarning(1, routine,
-						message);
+				if (!node.parseAreaPrecip(tokens.get(2))) {
+					message = "Error processing area*precip info for \"" + node.getNetID() + "\"";
+					Message.printWarning(3, routine,message);
 					printCheck(routine, 'W', message);
 				}
 				if (numTokens >= 4) {
-					dir = StringUtil.atoi(
-						(String)tokens.get(3));
+					dir = StringUtil.atoi(tokens.get(3));
 				}
 				else {	
-					Message.printWarning(1, routine,
-						"No direction for \"" + token0 
-						+ "\" symbol.  Assuming 1.");
+					Message.printWarning(3, routine, "No direction for \"" + token0 + "\" symbol.  Assuming 1.");
 					dir = 1;
 				}
 				node.setLabelDirection(dir);
-				// Now process the description if specified
-				// (it is optional)...
+				// Now process the description if specified (it is optional)...
 				if (numTokens >= 5) {
-					node.setDescription(
-						(String)tokens.get(4));
-					node.setUserDescription(
-						(String)tokens.get(4));
+					node.setDescription(tokens.get(4));
+					node.setUserDescription(tokens.get(4));
 				}
 				// Else defaults are empty descriptions.
 			}
 			if (Message.isDebugOn) {
-				Message.printDebug(dl, routine,
-					"Set \"" + node.getNetID() 
-					+ "\" node type to " 
-					+ node.getType() + " area=" 
+				Message.printDebug(dl, routine, "Set \"" + node.getNetID() 
+					+ "\" node type to " + node.getType() + " area=" 
 					+ node.getArea() + " precip=" 
 					+ node.getPrecip() + " water=" 
 					+ node.getWater() + " desc=\"" 
@@ -1273,32 +1192,25 @@ boolean skipBlankNodes) {
 				node.setCommonID(node.getNetID());
 			}
 			else if (node.getType() == HydrologyNode.NODE_TYPE_ISF) {
-				// Minimum streamflows.  Get the description
-				// from the water rights...  For these
-				// we are allowed to abbreviate the
-				// identifier on the network.  For the
-				// common ID we need to prepend the
-				// water district...
+				// Minimum streamflows.  Get the description from the water rights...  For these
+				// we are allowed to abbreviate the identifier on the network.  For the
+				// common ID we need to prepend the water district...
 
-				// To support old-style ISF identifiers with
-				// periods, we need to have the following...
-				list =	StringUtil.breakStringList(
-					node.getNetID(), ".", 0);
+				// To support old-style ISF identifiers with periods, we need to have the following...
+				list = StringUtil.breakStringList( node.getNetID(), ".", 0);
 				nlist = list.size();
 				if (nlist >= 1) {
-					nodeID = (String)list.get(0);
+					nodeID = list.get(0);
 				}
 				else {	
 					nodeID = new String(node.getNetID());
 				}
-				String wdid = formatWDID(wd, nodeID, 
-					node.getType());
+				String wdid = formatWDID(wd, nodeID, node.getType());
 				node.setCommonID(wdid); 
 				node.setCommonID(node.getNetID());
 			}
 			else if (node.getType() == HydrologyNode.NODE_TYPE_WELL) {
-				// Ground water well only.  Don't allow the
-				// abbreviation...
+				// Ground water well only.  Don't allow the abbreviation...
 				node.setCommonID(node.getNetID());
 			}
 			else if (node.getType() == HydrologyNode.NODE_TYPE_PLAN) {
@@ -1306,42 +1218,33 @@ boolean skipBlankNodes) {
 				node.setCommonID(node.getNetID());
 			}
 			else {	
-				// Diversions, imports, and D&W.  For
-				// these we are allowed to abbreviate the
-				// identifier on the network.  For the
-				// common ID we need to prepend the
+				// Diversions, imports, and D&W.  For these we are allowed to abbreviate the
+				// identifier on the network.  For the common ID we need to prepend the
 				// water district...
 				String wdid = formatWDID(wd, node.getNetID(), node.getType());
 				node.setCommonID(wdid);
-
 			}
 			if (Message.isDebugOn) {
-				Message.printDebug(dl, routine,
-					"Set common ID for \"" + node.getNetID()
-					+ "\" to \"" + node.getCommonID() 
-					+ "\"");
+				Message.printDebug(dl, routine, "Set common ID for \"" + node.getNetID()
+					+ "\" to \"" + node.getCommonID() + "\"");
 			}
 
 			// Set the river node ID...
 			// The new way is to just use the common ID.  The
-			// old way is to put an extension on USGS IDs (the old
-			// code has been deleted)...
+			// old way is to put an extension on USGS IDs (the old code has been deleted)...
 
 			// The new way...
 			node.setRiverNodeID(node.getCommonID());
 			if (Message.isDebugOn) {
-				Message.printDebug(dl, routine,
-					"Set \"" + node.getNetID() 
-					+ "\" river node to \"" 
-					+ node.getRiverNodeID() + "\"");
+				Message.printDebug(dl, routine, "Set \"" + node.getNetID() 
+					+ "\" river node to \"" + node.getRiverNodeID() + "\"");
 			}
 			// Now plot the node...
 			node.setX(x);
 			node.setY(y);
 			if ((node.getType() != HydrologyNode.NODE_TYPE_CONFLUENCE) 
 			    && (node.getType() != HydrologyNode.NODE_TYPE_XCONFLUENCE)) {
-				// If a confluence we want the line to come
-				// in at the same point...
+				// If a confluence we want the line to come in at the same point...
 				x += dx;
 				y += dy;
 			}
@@ -1531,8 +1434,7 @@ throws Exception {
 }
 
 /**
-Processes an "Upstream" node containing the IDs of the upstream nodes from
-the Network node.
+Processes an "Upstream" node containing the IDs of the upstream nodes from the Network node.
 @param hnode the HydroBase_Node being built.
 @param node the XML node read from the file.
 @throws Exception if an error occurs.
@@ -1604,19 +1506,18 @@ throws Exception {
 /**
 Read a line from the makenet network file and split into tokens.
 It is assumed that the line number is initialized to zero in the main program.
-Blank lines are ignored.  Comments are parsed and returned (can be ignored
-in calling code).
+Blank lines are ignored.  Comments are parsed and returned (can be ignored in calling code).
 @param netfp the reader reading the makenet net file.
 @return the tokens from the line
 @throws IOException if there is an error reading the line from the file.
 */
-public List readMakenetLineTokens(BufferedReader netfp) throws IOException {
-	String routine = "HydroBase_NodeNetwork.readMakenetLineTokens";
+public List<String> readMakenetLineTokens(BufferedReader netfp) throws IOException {
+	String routine = "StateMod_NodeNetwork.readMakenetLineTokens";
 	int	commentIndex = 0,
 		dl = 50, 
 		numTokens;
 	String lineString;
-	List tokens;
+	List<String> tokens;
 
 	while (true) {
 		try {	
@@ -1632,8 +1533,7 @@ public List readMakenetLineTokens(BufferedReader netfp) throws IOException {
 		++__line;
 		lineString = StringUtil.removeNewline(lineString.trim());
 		if (Message.isDebugOn) {
-			Message.printDebug(dl, routine,
-				"Line " + __line + ":  \"" + lineString + "\"");
+			Message.printDebug(dl, routine, "Line " + __line + ":  \"" + lineString + "\"");
 		}
 
 		// Trim comment from end (if included)...
@@ -1643,14 +1543,12 @@ public List readMakenetLineTokens(BufferedReader netfp) throws IOException {
 			// used in some identifiers...
 			if ((commentIndex > 0) &&
 				lineString.charAt(commentIndex - 1) == '_') {
-				Message.printWarning(1, routine,
+				Message.printWarning(3, routine,
 					"Need to remove # from ID on line " + __line + ": " + lineString);
 			}
 			else {	
-				// OK to reset the line to the the beginning of
-				// the line...
-				lineString = lineString.substring(0,
-					commentIndex);
+				// OK to reset the line to the the beginning of the line...
+				lineString = lineString.substring(0, commentIndex);
 			}
 		}
 
@@ -1658,8 +1556,7 @@ public List readMakenetLineTokens(BufferedReader netfp) throws IOException {
 
 		numTokens = 0;
 		tokens = StringUtil.breakStringList(lineString, "\t ",
-			StringUtil.DELIM_SKIP_BLANKS 
-			| StringUtil.DELIM_ALLOW_STRINGS);
+			StringUtil.DELIM_SKIP_BLANKS | StringUtil.DELIM_ALLOW_STRINGS);
 		if (tokens != null) {
 			numTokens = tokens.size();
 		}
@@ -1690,7 +1587,7 @@ Read an entire Makenet network file and save in memory.
 @return true if the network was read successfully, false if not.
 */
 public boolean readMakenetNetworkFile( StateMod_NodeDataProvider nodeDataProvider,
-		String filename, boolean skipBlankNodes)
+	String filename, boolean skipBlankNodes)
 {
 	String routine = "HydroBase_NodeNetwork.readMakenetNetworkFile";
 	BufferedReader in;
@@ -1699,7 +1596,7 @@ public boolean readMakenetNetworkFile( StateMod_NodeDataProvider nodeDataProvide
 	}
 	catch (IOException e) {
 		String message = "Error opening net file \"" + filename + "\"";
-		Message.printWarning(1, routine, message);
+		Message.printWarning(3, routine, message);
 		printCheck(routine, 'W', message);
 		return false;
 	}
@@ -1715,9 +1612,9 @@ Read an entire Makenet network file and save in memory.
 @param filename Makenet .net file to read and process.
 @return true if the network was read successfully, false if not.
 */
-public boolean readMakenetNetworkFile(
-		StateMod_NodeDataProvider nodeDataProvider,
-		BufferedReader in, String filename) {
+public boolean readMakenetNetworkFile( StateMod_NodeDataProvider nodeDataProvider,
+	BufferedReader in, String filename)
+{
 	return readMakenetNetworkFile( nodeDataProvider, in, filename, false);
 }
 
@@ -1729,9 +1626,9 @@ Read an entire makenet network file and save in memory.
 @param skipBlankNodes whether to skip blank nodes when reading in from a file.
 @return true if the network was read successfully, false if not.
 */
-public boolean readMakenetNetworkFile(
-		StateMod_NodeDataProvider nodeDataProvider,
-		BufferedReader in, String filename, boolean skipBlankNodes) {
+public boolean readMakenetNetworkFile( StateMod_NodeDataProvider nodeDataProvider,
+		BufferedReader in, String filename, boolean skipBlankNodes)
+{
 	String routine = "HydroBase_NodeNetwork.readMakenetNetworkFile";
 	double 	dx = 1.0, 
 		dy = 1.0, 
@@ -1744,7 +1641,7 @@ public boolean readMakenetNetworkFile(
 		numnodes, 
 		reachLevel = 0;		
 	String token0;
-	List tokens;
+	List<String> tokens;
 
 	// Create a blank node used for disappearing streams.  The identifiers
 	// will be empty strings...
@@ -1776,7 +1673,7 @@ public boolean readMakenetNetworkFile(
 			// Blank line...
 			continue;
 		}
-		token0 = (String)tokens.get(0);
+		token0 = tokens.get(0);
 		if (Message.isDebugOn) {
 			Message.printDebug(10, routine,	"token[0]=\"" + token0 + "\"");
 		}
@@ -1805,11 +1702,10 @@ public boolean readMakenetNetworkFile(
 		}
 		else if (token0.equalsIgnoreCase("SCALE")) {
 			if (Message.isDebugOn) {
-				Message.printDebug(dl, routine,
-					"Found SCALE command");
+				Message.printDebug(dl, routine,"Found SCALE command");
 			}
 			String message = "SCALE is obsolete!";
-			Message.printWarning(1, routine, message);
+			Message.printWarning(3, routine, message);
 			printCheck(routine, 'W', message);
 			//sx = atof(tokens[1]);
 			//sy = atof(tokens[2]);
@@ -1818,8 +1714,7 @@ public boolean readMakenetNetworkFile(
 		else if (token0.equalsIgnoreCase("RIVER")) {
 			// Line information for the river reach...
 			if (Message.isDebugOn) {
-				Message.printDebug(dl, routine,
-				"Found RIVER command");
+				Message.printDebug(dl, routine,"Found RIVER command");
 			}
 			numnodes = StringUtil.atoi((String)tokens.get(2));
 			x0 = StringUtil.atod((String)tokens.get(3));
@@ -1831,8 +1726,7 @@ public boolean readMakenetNetworkFile(
 			dx = (x1 - x0)/(double)(numnodes - 1);
 			dy = (y1 - y0)/(double)(numnodes - 1);
 
-			// Break out of this loop and go to the next level (do
-			// not use a continue...
+			// Break out of this loop and go to the next level (do not use a continue...
 		}
 		else if (token0.equalsIgnoreCase("TITLE")) {
 			if (Message.isDebugOn) {
@@ -1872,7 +1766,7 @@ public boolean readMakenetNetworkFile(
 			setNodeDescriptions(nodeDataProvider);
 		}
 		catch (Exception e) {
-			Message.printWarning(2, routine, e);
+			Message.printWarning(3, routine, e);
 			convertNodeTypes();
 			return false;
 		}
@@ -1901,7 +1795,7 @@ or not.  Does not matter if reading from an XML file.
 @throws Exception if an error occurs.
 */
 public static StateMod_NodeNetwork readStateModNetworkFile(String filename, 
-		StateMod_NodeDataProvider nodeDataProvider, boolean skipBlankNodes ) 
+	StateMod_NodeDataProvider nodeDataProvider, boolean skipBlankNodes ) 
 throws Exception {
 	StateMod_NodeNetwork network = null;
 	if (isXML(filename)) {
@@ -1965,11 +1859,10 @@ throws Exception {
 	}
 	if (!unset.equals("")) {
 		throw new Exception("Not all data points were set for the "
-			+ "network.  The following must be defined: " 
-			+ unset);
+			+ "network.  The following must be defined: " + unset);
 	}
 
-	HydrologyNode node = (HydrologyNode)__aggregateNodes.get(0);
+	HydrologyNode node = __aggregateNodes.get(0);
 	StateMod_NodeNetwork network = null;
 	if (node.getComputationalOrder() == -1) {
 		network = new StateMod_NodeNetwork();

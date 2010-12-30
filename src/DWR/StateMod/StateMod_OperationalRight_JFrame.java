@@ -92,6 +92,8 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
+import cdss.domain.hydrology.network.HydrologyNode;
+
 import RTi.GIS.GeoView.GeoProjection;
 import RTi.GIS.GeoView.GeoRecord;
 import RTi.GIS.GeoView.HasGeoRecord;
@@ -455,7 +457,12 @@ public void actionPerformed(ActionEvent e) {
 			if ( doProject ) {
 				pointSource1 = (GRPoint)GeoProjection.projectShape( layerProjection, geoRecordProjection, pointSource1, false );
 			}
-			limits.max(pointSource1.x,pointSource1.y,pointSource1.x,pointSource1.y,true);
+			if ( limits == null ) {
+				limits = new GRLimits(pointSource1.x,pointSource1.y,pointSource1.x,pointSource1.y);
+			}
+			else {
+				limits.max(pointSource1.x,pointSource1.y,pointSource1.x,pointSource1.y,true);
+			}
 		}
 		smdata = opr.lookupSource2DataObject(__dataset);
 		if ( (smdata != null) && (smdata instanceof HasGeoRecord) ) {
@@ -467,7 +474,12 @@ public void actionPerformed(ActionEvent e) {
 			if ( doProject ) {
 				pointSource2 = (GRPoint)GeoProjection.projectShape( layerProjection, geoRecordProjection, pointSource2, false );
 			}
-			limits.max(pointSource2.x,pointSource2.y,pointSource2.x,pointSource2.y,true);
+			if ( limits == null ) {
+				limits = new GRLimits(pointSource2.x,pointSource2.y,pointSource2.x,pointSource2.y);
+			}
+			else {
+				limits.max(pointSource2.x,pointSource2.y,pointSource2.x,pointSource2.y,true);
+			}
 		}
 		__dataset_wm.showOnMap ( opr,
 			"OpRight: " + getSelectedOperationalRight().getID() + " - " + getSelectedOperationalRight().getName(),
@@ -475,8 +487,48 @@ public void actionPerformed(ActionEvent e) {
 			geoRecordProjection );
 	}
 	else if ( source == __showOnNetwork_JButton ) {
-		__dataset_wm.showOnNetwork ( getSelectedOperationalRight(),
-			"OpRight: " + getSelectedOperationalRight().getID() + " - " + getSelectedOperationalRight().getName() );
+		StateMod_Network_JFrame networkEditor = __dataset_wm.getNetworkEditor();
+		if ( networkEditor != null ) {
+			StateMod_OperationalRight opr = getSelectedOperationalRight();
+			StateMod_Data smdataDest = opr.lookupDestinationDataObject(__dataset);
+			GRLimits limits = null;
+			if ( smdataDest != null ) {
+				HydrologyNode nodeDest = networkEditor.getNetworkJComponent().findNode(
+					smdataDest.getID(), false, false);
+				if ( nodeDest != null ) {
+					limits = new GRLimits(nodeDest.getX(),nodeDest.getY(),nodeDest.getX(),nodeDest.getY() );
+				}
+			}
+			StateMod_Data smdataSource1 = opr.lookupSource1DataObject(__dataset);
+			if ( smdataSource1 != null ) {
+				HydrologyNode nodeSource1 = networkEditor.getNetworkJComponent().findNode(
+					smdataSource1.getID(), false, false);
+				if ( nodeSource1 != null ) {
+					if ( limits == null ) {
+						limits = new GRLimits(nodeSource1.getX(),nodeSource1.getY(),nodeSource1.getX(),nodeSource1.getY() );
+					}
+					else {
+						limits = limits.max(nodeSource1.getX(),nodeSource1.getY(),nodeSource1.getX(),nodeSource1.getY(),false);
+					}
+				}
+			}
+			StateMod_Data smdataSource2 = opr.lookupSource2DataObject(__dataset);
+			if ( smdataSource2 != null ) {
+				HydrologyNode nodeSource2 = networkEditor.getNetworkJComponent().findNode(
+					smdataSource2.getID(), false, false);
+				if ( nodeSource2 != null ) {
+					if ( limits == null ) {
+						limits = new GRLimits(nodeSource2.getX(),nodeSource2.getY(),nodeSource2.getX(),nodeSource2.getY() );
+					}
+					else {
+						limits = limits.max(nodeSource2.getX(),nodeSource2.getY(),nodeSource2.getX(),nodeSource2.getY(),false);
+					}
+				}
+			}
+			__dataset_wm.showOnNetwork ( opr,
+				"OpRight: " + getSelectedOperationalRight().getID() + " - " + getSelectedOperationalRight().getName(),
+				limits );
+		}
 	}
 	else if (source == __destination_JComboBox) {		
 		fillDestinationAccount(__currentItyopr, __destination_JComboBox.getSelected());
@@ -528,26 +580,56 @@ private boolean checkInput() {
 
 /**
 Checks the states of the map and network view buttons based on the selected operational right.
+If any of the source or destination data are available then enable the view.
 */
 private void checkViewButtonState()
-{
+{	String routine = getClass().getName() + ".checkViewButtonState";
 	StateMod_OperationalRight opr = getSelectedOperationalRight();
-	StateMod_Data smdata = opr.lookupDestinationDataObject(__dataset);
-	if ( smdata instanceof HasGeoRecord ) {
-		HasGeoRecord hasGeoRecord = (HasGeoRecord)smdata;
-		if ( hasGeoRecord.getGeoRecord() == null ) {
-			// No spatial data are available
-			__showOnMap_JButton.setEnabled ( false );
-		}
-		else {
-			// Enable the button...
-			__showOnMap_JButton.setEnabled ( true );
-		}
+	StateMod_Data smdataDest = null;
+	StateMod_Data smdataSource1 = null;
+	StateMod_Data smdataSource2 = null;
+	boolean mapEnabled = false;
+	boolean networkEnabled = false;
+	try {
+		smdataDest = opr.lookupDestinationDataObject(__dataset);
+		smdataSource1 = opr.lookupSource1DataObject(__dataset);
+		smdataSource2 = opr.lookupSource2DataObject(__dataset);
 	}
-	else {
-		// No spatial data are available
+	catch ( Exception e ) {
+		Message.printWarning(3, routine, e);
 		__showOnMap_JButton.setEnabled ( false );
+		__showOnNetwork_JButton.setEnabled ( false );
+		return;
 	}
+	if ( smdataDest instanceof HasGeoRecord ) {
+		HasGeoRecord hasGeoRecord = (HasGeoRecord)smdataDest;
+		if ( hasGeoRecord.getGeoRecord() != null ) {
+			mapEnabled = true;
+		}
+	}
+	if ( smdataSource1 instanceof HasGeoRecord ) {
+		HasGeoRecord hasGeoRecord = (HasGeoRecord)smdataSource1;
+		if ( hasGeoRecord.getGeoRecord() != null ) {
+			mapEnabled = true;
+		}
+	}
+	if ( smdataSource2 instanceof HasGeoRecord ) {
+		HasGeoRecord hasGeoRecord = (HasGeoRecord)smdataSource2;
+		if ( hasGeoRecord.getGeoRecord() != null ) {
+			mapEnabled = true;
+		}
+	}
+	if ( smdataDest != null ) {
+		networkEnabled = true;
+	}
+	if ( smdataSource1 != null ) {
+		networkEnabled = true;
+	}
+	if ( smdataSource2 != null ) {
+		networkEnabled = true;
+	}
+	__showOnMap_JButton.setEnabled ( mapEnabled );
+	__showOnNetwork_JButton.setEnabled ( networkEnabled );
 }
 
 /**
@@ -2382,6 +2464,7 @@ private void setupGUI(int index) {
 	__ruleTypeSwitch_JComboBox = new SimpleJComboBox();
 	List<StateMod_OperationalRight_Metadata> metadataList =
 		StateMod_OperationalRight_Metadata.getAllMetadata();
+	__ruleTypeSwitch_JComboBox.add ( "0 - Unknown" ); // Unknown - TODO SAM 2010-12-29 Need to phase out
 	for ( int i = 0; i < metadataList.size(); i++ ) {
 		__ruleTypeSwitch_JComboBox.add("" + metadataList.get(i).getRightTypeNumber() + " - " +
 			metadataList.get(i).getRightTypeName() );
@@ -2975,7 +3058,7 @@ private void setupGUI(int index) {
 	}
 
 	pack();
-	setSize(950,700);
+	setSize(1050,700);
 	JGUIUtil.center(this);
 	//setResizable(false);
 	selectTableIndex(index);

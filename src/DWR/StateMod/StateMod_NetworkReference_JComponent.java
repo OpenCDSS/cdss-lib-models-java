@@ -59,8 +59,7 @@ Whether to force paint() to refresh the entire drawing area or not.
 private boolean __forceRefresh = true;
 
 /**
-Whether the box representing the current network view is being dragged
-around the display.
+Whether the box representing the current network view is being dragged around the display.
 */
 private boolean __inDrag = false;
 
@@ -75,8 +74,7 @@ The printing scale factor of the drawing.  This is the amount by which the
 72 dpi printable pixels are scaled.  A printing scale value of 1 means that
 the ER diagram will be printed at 72 pixels per inch (ppi), which is the 
 java standard.   A scale factor of .5 means that the ER Diagram will be 
-printed at 144 ppi.  A scale factor of 3 means that the ER Diagram will be 
-printed at 24 ppi.
+printed at 144 ppi.  A scale factor of 3 means that the ER Diagram will be printed at 24 ppi.
 */
 // TODO SAM 2007-03-01 Evaluate use
 //private double __printScale = 1;
@@ -113,8 +111,7 @@ private StateMod_NodeNetwork __network;
 
 /**
 The difference between where the user clicked in the box that represents the
-currently-viewed area of the network and the far bottom left point of the
-box.
+currently-viewed area of the network and the far bottom left point of the box.
 */
 private int 
 	__xAdjust,
@@ -130,8 +127,7 @@ private int
 	__totalWidth = 0;
 
 /**
-The class that draws the full network, and which interacts with the reference
-display.
+The class that draws the full network, and which interacts with the reference display.
 */
 private StateMod_Network_JComponent __networkJComponent;
 
@@ -152,36 +148,31 @@ public void clear() {
 	__drawingArea.clear(GRColor.gray);
 	GRDrawingAreaUtil.setColor(__drawingArea, GRColor.white);
 	__drawingArea.setScaleData(false);
-	GRDrawingAreaUtil.fillRectangle(__drawingArea,
-		__leftX, __bottomY, __totalWidth, __totalHeight);
+	GRDrawingAreaUtil.fillRectangle(__drawingArea, __leftX, __bottomY, __totalWidth, __totalHeight);
 	__drawingArea.setScaleData(true);
 }
 
 /**
-Converts an X value from being scaled for drawing units to be scaled for 
-data units.
+Converts an X value from being scaled for drawing units to be scaled for data units.
 @param x the x value to scale.
 @return the x value scaled to fit in the data units.
 */
 public double convertX(double x) {
 	GRLimits data = __drawingArea.getDataLimits();
 	GRLimits draw = __drawingArea.getDrawingLimits();
-	double newX = (data.getLeftX() 
-		+ (x / draw.getWidth()) * data.getWidth());
+	double newX = (data.getLeftX() + (x / draw.getWidth()) * data.getWidth());
 	return newX;
 }
 
 /**
-Converts an Y value from being scaled for drawing units to be scaled for 
-data units.
+Converts an Y value from being scaled for drawing units to be scaled for data units.
 @param y the y value to scale.
 @return the y value scaled to fit in the data units.
 */
 public double convertY(double y) {
 	GRLimits data = __drawingArea.getDataLimits();
 	GRLimits draw = __drawingArea.getDrawingLimits();
-	double newY = (data.getBottomY()
-		+ (y / draw.getHeight()) * data.getHeight());
+	double newY = (data.getBottomY() + (y / draw.getHeight()) * data.getHeight());
 	return newY;
 }
 
@@ -218,8 +209,7 @@ public void drawLegend() {
 	double by = l.getBottomY();
 	double rx = l.getRightX();
 	double ty = l.getTopY();
-	GRDrawingAreaUtil.fillRectangle(__drawingArea, lx, by, 
-		l.getWidth(), l.getHeight());
+	GRDrawingAreaUtil.fillRectangle(__drawingArea, lx, by, l.getWidth(), l.getHeight());
 	GRDrawingAreaUtil.setColor(__drawingArea, GRColor.black);
 	GRDrawingAreaUtil.drawLine(__drawingArea, lx, by, rx, by);
 	GRDrawingAreaUtil.drawLine(__drawingArea, lx, ty, rx, ty);
@@ -232,7 +222,7 @@ Draws the network between all the nodes.
 */
 private void drawNetworkLines() {
 	boolean dash = false;
-    	float[] dashes = { 5f, 4f };
+    float[] dashes = { 5f, 4f };
 	float offset = 0;
 	double[] x = new double[2];
 	double[] y = new double[2];
@@ -257,8 +247,7 @@ private void drawNetworkLines() {
 		}
 		holdNode2 = node;
 		while (node.getType() == HydrologyNode.NODE_TYPE_UNKNOWN) {
-			node = StateMod_NodeNetwork.getDownstreamNode(node, 
-				StateMod_NodeNetwork.POSITION_COMPUTATIONAL);
+			node = StateMod_NodeNetwork.getDownstreamNode(node, StateMod_NodeNetwork.POSITION_COMPUTATIONAL);
 			if (node == null || node == holdNode2) {
 				GRDrawingAreaUtil.setLineWidth(__drawingArea,1);
 				return;
@@ -266,8 +255,7 @@ private void drawNetworkLines() {
 		}
 		
 		ds = node.getDownstreamNode();
-		if (ds == null 
-		    || node.getType() == HydrologyNode.NODE_TYPE_END) {
+		if (ds == null || node.getType() == HydrologyNode.NODE_TYPE_END) {
 			GRDrawingAreaUtil.setLineWidth(__drawingArea, 1);
 			return;
 		}
@@ -278,17 +266,16 @@ private void drawNetworkLines() {
 		// in) then this is the last real node in disappearing stream.
 		// Use the end node for the downstream node.
 		dash = false;
-		if (dsRealNode == StateMod_NodeNetwork.getDownstreamNode(node, 
-				StateMod_NodeNetwork.POSITION_REACH)) {
+		if (dsRealNode == StateMod_NodeNetwork.getDownstreamNode(node, StateMod_NodeNetwork.POSITION_REACH)) {
 			dash = true;
 		}
 
-	    	// move ahead and skip and blank or unknown nodes (which won't
+	    // move ahead and skip and blank or unknown nodes (which won't
 		// be drawn, anyways -- check buildNodeArray()), so that 
 		// connections are only between visible nodes
 		holdNode2 = ds;
 		while (ds.getType() == HydrologyNode.NODE_TYPE_UNKNOWN) {
-		    	ds = ds.getDownstreamNode();
+		    ds = ds.getDownstreamNode();
 			if (ds == null || ds == holdNode2) {
 				GRDrawingAreaUtil.setLineWidth(__drawingArea,1);
 				return;
@@ -347,18 +334,15 @@ public void mouseClicked(MouseEvent event) {}
 
 /**
 Responds to mouse dragged events by moving around the box representing 
-the viewable network area, and also making the large network display change
-to show that area.
+the viewable network area, and also making the large network display change to show that area.
 @param event the MouseEvent that happened.
 */
 public void mouseDragged(MouseEvent event) {
 	if (__inDrag) {
-		if (event.getX() < __leftX 
-		    || event.getX() > __leftX + __totalWidth) {
+		if (event.getX() < __leftX || event.getX() > __leftX + __totalWidth) {
 			return;
 		}
-		if (event.getY() < __bottomY 
-		    || event.getY() >__bottomY+__totalHeight) {
+		if (event.getY() < __bottomY || event.getY() >__bottomY+__totalHeight) {
 			return;
 		}
 
@@ -371,8 +355,7 @@ public void mouseDragged(MouseEvent event) {
 		int xPoint = (int)((nw * pct) + data.getLeftX());
 	
 		int height = __totalHeight;
-		pct = (double)(height - event.getY() + __bottomY) 
-			/ (double)height;
+		pct = (double)(height - event.getY() + __bottomY) / (double)height;
 		int nh = (int)data.getHeight();
 		int yPoint = (int)((nh * pct) + data.getBottomY());
 		
@@ -400,7 +383,7 @@ public void mouseMoved(MouseEvent event) {}
 /**
 Responds to mouse pressed events.  If the mouse was clicked within the box that
 represents the viewable network area, then that view can be dragged around and
-will be represented in the large display.  Otherwise, the view is recentered
+will be represented in the large display.  Otherwise, the view is re-centered
 around the mouse click point.
 @param event the MouseEvent that happened.
 */
@@ -432,10 +415,9 @@ public void mousePressed(MouseEvent event) {
 	int w = rx - lx;
 	int h = ty - by;
 
-	// if the mouse was clicked in a point outside of the display box, 
-	// the box is recentered on the point and the network display is
-	// updated to show that area
-    	__xAdjust = (w / 2);
+	// If the mouse was clicked in a point outside of the display box, 
+	// the box is re-centered on the point and the network display is updated to show that area
+    __xAdjust = (w / 2);
 	__yAdjust = (h / 2);
 	int x = xPoint - __xAdjust;
 	int y = yPoint - __yAdjust;
@@ -448,7 +430,6 @@ Responds to mouse released events -- ends any dragging taking place.
 */
 public void mouseReleased(MouseEvent event) {
 	__inDrag = false;
-
 }
 
 /**
@@ -489,24 +470,18 @@ public void paint(Graphics g) {
 
 		setAntiAlias(true);
 		if (__drawMargin) {
-			GRLimits margins = 
-				__networkJComponent.getMarginLimits();
+			GRLimits margins = __networkJComponent.getMarginLimits();
 			int lx = (int)margins.getLeftX();
 			int rx = (int)margins.getRightX();
 			int by = (int)margins.getBottomY();
 			int ty = (int)margins.getTopY();
 
 			__drawingArea.setFloatLineDash(__bigDashes, 0);
-			GRDrawingAreaUtil.setColor(__drawingArea, 
-				GRColor.cyan);
-			GRDrawingAreaUtil.drawLine(__drawingArea,
-				lx, by, rx, by);
-			GRDrawingAreaUtil.drawLine(__drawingArea,
-				lx, ty, rx, ty);
-			GRDrawingAreaUtil.drawLine(__drawingArea,
-				lx, by, lx, ty);
-			GRDrawingAreaUtil.drawLine(__drawingArea,
-				rx, by, rx, ty);
+			GRDrawingAreaUtil.setColor(__drawingArea, GRColor.cyan);
+			GRDrawingAreaUtil.drawLine(__drawingArea, lx, by, rx, by);
+			GRDrawingAreaUtil.drawLine(__drawingArea, lx, ty, rx, ty);
+			GRDrawingAreaUtil.drawLine(__drawingArea, lx, by, lx, ty);
+			GRDrawingAreaUtil.drawLine(__drawingArea, rx, by, rx, ty);
 			__drawingArea.setFloatLineDash(null, 0);
 		}
 
@@ -521,40 +496,28 @@ public void paint(Graphics g) {
 			
 			GRDrawingAreaUtil.setColor(__drawingArea, GRColor.red);
 			int j = 0;
-			int minY = (int)(__networkJComponent.convertAbsY(0) 
-				+ bottomY);
-			int tempMaxY = (int)(__networkJComponent.convertAbsY(
-				maxY) + bottomY);
+			int minY = (int)(__networkJComponent.convertAbsY(0) + bottomY);
+			int tempMaxY = (int)(__networkJComponent.convertAbsY( maxY) + bottomY);
 			for (int i = 0; i < maxX; i+= ((72/printScale)/2)) {
-				j = (int)(__networkJComponent.convertAbsX(i) 
-					+ leftX);
-				GRDrawingAreaUtil.drawLine(__drawingArea, j, 
-					minY, j, tempMaxY);
-				GRDrawingAreaUtil.drawText(__drawingArea, 
-					"" + ((double)i/(72/printScale)),j, 
-					minY, 0, 
-					GRText.CENTER_X | GRText.BOTTOM);
+				j = (int)(__networkJComponent.convertAbsX(i) + leftX);
+				GRDrawingAreaUtil.drawLine(__drawingArea, j, minY, j, tempMaxY);
+				GRDrawingAreaUtil.drawText(__drawingArea, "" + ((double)i/(72/printScale)),j, 
+					minY, 0, GRText.CENTER_X | GRText.BOTTOM);
 			}
 
-			int minX = (int)(__networkJComponent.convertAbsX(0) 
-				+ leftX);
-			int tempMaxX = (int)(__networkJComponent.convertAbsX(
-				maxX) + leftX);
+			int minX = (int)(__networkJComponent.convertAbsX(0) + leftX);
+			int tempMaxX = (int)(__networkJComponent.convertAbsX(maxX) + leftX);
 			for (int i = 0; i < maxY; i+= ((72/printScale)/2)) {
-				j = (int)(__networkJComponent.convertAbsY(i) 
-					+ bottomY);
-				GRDrawingAreaUtil.drawLine(__drawingArea, 
-					minX, j, tempMaxX, j);
-				GRDrawingAreaUtil.drawText(__drawingArea, 
-					"" + ((double)i/(72/printScale)),minX,
+				j = (int)(__networkJComponent.convertAbsY(i) + bottomY);
+				GRDrawingAreaUtil.drawLine(__drawingArea, minX, j, tempMaxX, j);
+				GRDrawingAreaUtil.drawText(__drawingArea, "" + ((double)i/(72/printScale)),minX,
 					j, 0, GRText.CENTER_Y | GRText.LEFT);
 			}
 			__drawingArea.setFloatLineDash(null, 0);
 		}
 
 		GRDrawingAreaUtil.setColor(__drawingArea, GRColor.black);
-		GRLimits drawingLimits 
-			= __networkJComponent.getTotalDataLimits();
+		GRLimits drawingLimits = __networkJComponent.getTotalDataLimits();
 		GRDrawingAreaUtil.drawLine(__drawingArea,
 			drawingLimits.getLeftX(), drawingLimits.getBottomY(),
 			drawingLimits.getRightX(), drawingLimits.getBottomY());
@@ -577,8 +540,7 @@ public void paint(Graphics g) {
 }
 
 /**
-Sets whether the inch grid should be drawn.  The reference display will
-be instantly redrawn.
+Sets whether the inch grid should be drawn.  The reference display will be instantly redrawn.
 @param draw whether the inch grid should be drawn.
 */
 public void setDrawInchGrid(boolean draw) {
@@ -615,8 +577,7 @@ public void setDrawingArea(GRJComponentDrawingArea drawingArea) {
 }
 
 /**
-Sets whether the margin should be drawn.  The reference display will 
-be instantly redrawn.
+Sets whether the margin should be drawn.  The reference display will be instantly redrawn.
 @param draw whether the margin should be drawn.
 */
 public void setDrawMargin(boolean draw) {
@@ -691,6 +652,5 @@ public void setupDoubleBuffering() {
 	setupDoubleBuffer(0, 0, getBounds().width, getBounds().height);
 	forceRepaint();
 }
-
 
 }

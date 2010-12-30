@@ -222,6 +222,8 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
+import cdss.domain.hydrology.network.HydrologyNode;
+
 import RTi.GIS.GeoView.GeoRecord;
 import RTi.GR.GRLimits;
 import RTi.GR.GRShape;
@@ -524,11 +526,8 @@ public void actionPerformed(ActionEvent e) {
 	}
 	else if ( source == __close_JButton ) {
 		saveCurrentDiversion();
-		int size = __diversionsVector.size();
-		StateMod_Diversion div = null;
 		boolean changed = false;
-		for (int i = 0; i < size; i++) {
-			div = __diversionsVector.get(i);
+		for ( StateMod_Diversion div : __diversionsVector ) {
 			if (!changed && div.changed()) {
 				changed = true;
 			}
@@ -546,11 +545,8 @@ public void actionPerformed(ActionEvent e) {
 	}
 	else if ( source == __apply_JButton ) {
 		saveCurrentDiversion();
-		int size = __diversionsVector.size();
-		StateMod_Diversion div = null;
 		boolean changed = false;
-		for (int i = 0; i < size; i++) {
-			div = __diversionsVector.get(i);
+		for (StateMod_Diversion div : __diversionsVector) {
 			if (!changed && div.changed()) {
 				changed = true;
 			}
@@ -561,10 +557,7 @@ public void actionPerformed(ActionEvent e) {
 		}		
 	}
 	else if ( source == __cancel_JButton ) {
-		int size = __diversionsVector.size();
-		StateMod_Diversion div = null;
-		for (int i = 0; i < size; i++) {
-			div = __diversionsVector.get(i);
+		for (StateMod_Diversion div : __diversionsVector) {
 			div.restoreOriginal();
 		}
 
@@ -598,8 +591,16 @@ public void actionPerformed(ActionEvent e) {
 			geoRecord.getLayer().getProjection() );
 	}
 	else if ( source == __showOnNetwork_JButton ) {
-		__dataset_wm.showOnNetwork ( getSelectedDiversion(),
-			"Div: " + getSelectedDiversion().getID() + " - " + getSelectedDiversion().getName() );
+		StateMod_Network_JFrame networkEditor = __dataset_wm.getNetworkEditor();
+		if ( networkEditor != null ) {
+			HydrologyNode node = networkEditor.getNetworkJComponent().findNode(
+				getSelectedDiversion().getID(), false, false);
+			if ( node != null ) {
+				__dataset_wm.showOnNetwork ( getSelectedDiversion(),
+					"Div: " + getSelectedDiversion().getID() + " - " + getSelectedDiversion().getName(),
+					new GRLimits(node.getX(),node.getY(),node.getX(),node.getY()) );
+			}
+		}
 	}
 	else if (source == __waterRights_JButton) {
 		if (__currentDiversionIndex == -1) {

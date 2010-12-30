@@ -123,6 +123,8 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
+import cdss.domain.hydrology.network.HydrologyNode;
+
 import RTi.GIS.GeoView.GeoRecord;
 import RTi.GR.GRLimits;
 import RTi.GR.GRShape;
@@ -511,8 +513,16 @@ public void actionPerformed(ActionEvent e) {
 			geoRecord.getLayer().getProjection() );
 	}
 	else if ( source == __showOnNetwork_JButton ) {
-		__dataset_wm.showOnNetwork ( getSelectedWell(),
-			"Well: " + getSelectedWell().getID() + " - " + getSelectedWell().getName() );
+		StateMod_Network_JFrame networkEditor = __dataset_wm.getNetworkEditor();
+		if ( networkEditor != null ) {
+			HydrologyNode node = networkEditor.getNetworkJComponent().findNode(
+				getSelectedWell().getID(), false, false);
+			if ( node != null ) {
+				__dataset_wm.showOnNetwork ( getSelectedWell(),
+					"Well: " + getSelectedWell().getID() + " - " + getSelectedWell().getName(),
+					new GRLimits(node.getX(),node.getY(),node.getX(),node.getY()));
+			}
+		}
 	}
 	else if (source == __searchNameJRadioButton) {
 		__searchName.setEditable(true);

@@ -453,7 +453,7 @@ private GeoViewJPanel getMapPanel ()
 /**
 Return the network editor used for StateMod.
 */
-private StateMod_Network_JFrame getNetworkEditor ()
+public StateMod_Network_JFrame getNetworkEditor ()
 {
 	return __networkEditor;
 }
@@ -636,24 +636,191 @@ Render an object as an annotation on the network editor.
 @param objectToRender the object to render as an annotation on the map
 @param label the string that is used to label the annotation on the map
 */
-public void renderStateModNetworkAnnotation ( StateMod_Network_JComponent network, Object objectToRender, String label )
+public void renderStateModNetworkAnnotation ( StateMod_Network_JComponent network,
+	StateMod_Network_AnnotationData annotationData )
 {
 	//GRPoint point = null;
 	String commonID = null;
-	if ( objectToRender instanceof StateMod_Diversion ) {
-		Message.printStatus(2, "", "Rendering \"" + label + "\" annotation on network." );
-		StateMod_Diversion div = (StateMod_Diversion)objectToRender;
-		commonID = div.getID();
+	Object objectToRender = annotationData.getObject();
+	String label = annotationData.getLabel();
+	// Draw the annotated version on top...
+	GRDrawingArea da = network.getDrawingArea();
+	GRDrawingAreaUtil.setFont(da, "Helvetica", "Bold", 14.0 );
+	// Use blue so that red can be used to highlight problems.  The color should allow black
+	// symbols on top to be legible
+	GRColor blue = new GRColor(0,102,255);
+	GRDrawingAreaUtil.setColor(da,blue );
+	if ( objectToRender instanceof StateMod_OperationalRight ) {
+		// Draw source and destination as separate symbols
+		StateMod_OperationalRight opr = (StateMod_OperationalRight)objectToRender;
+		StateMod_OperationalRight_Metadata metadata =
+			StateMod_OperationalRight_Metadata.getMetadata(opr.getItyopr());
+		StateMod_DataSet dataset = getDataSet();
+		HydrologyNode nodeDest = null;
+		HydrologyNode nodeSource1 = null;
+		HydrologyNode nodeSource2 = null;
+		String labelDest = "";
+		String labelSource1 = "";
+		String labelSource2 = "";
+		StateMod_Data smdataDest = opr.lookupDestinationDataObject(dataset);
+		if ( smdataDest != null ) {
+			nodeDest = network.findNode ( smdataDest.getID(),
+				false, // Do not change the selection
+				false ); // Do not zoom to the node
+		}
+		else {
+			Message.printStatus(2,"","Unable to find StateMod destination data object for OPR \"" +
+				opr.getID() + "\" destination \"" + opr.getCiopde() + "\"" );
+		}
+		StateMod_Data smdataSource1 = opr.lookupSource1DataObject(dataset);
+		if ( smdataSource1 != null ) {
+			nodeSource1 = network.findNode ( smdataSource1.getID(),
+				false, // Do not change the selection
+				false ); // Do not zoom to the node
+		}
+		StateMod_Data smdataSource2 = opr.lookupSource2DataObject(dataset);
+		if ( smdataSource2 != null ) {
+			nodeSource2 = network.findNode ( smdataSource2.getID(),
+				false, // Do not change the selection
+				false ); // Do not zoom to the node
+		}
+		int textPositionDest = 0;
+		if ( nodeDest != null ) {
+			// The symbol is drawn behind the normal network so make bigger
+			double size = nodeDest.getSymbol().getSize()*2.0;
+			labelDest = label + "\n(Dest: " + smdataDest.getID() + " - " + smdataDest.getName() + ")";
+			//GRDrawingAreaUtil.drawSymbol(da, GRSymbol.SYM_FCIR, node.getX(), node.getY(), size, 0, 0);
+			//GRDrawingAreaUtil.drawText(da, label, node.getX(), node.getY(), 0.0, GRText.CENTER_X|GRText.BOTTOM );
+			String labelPosition = nodeDest.getTextPosition();
+			if ( (labelPosition.indexOf("Above") >= 0) || (labelPosition.indexOf("Upper") >= 0) ) {
+				textPositionDest = GRText.CENTER_X|GRText.BOTTOM;
+			}
+			else {
+				textPositionDest = GRText.CENTER_X|GRText.TOP;
+			}
+			GRDrawingAreaUtil.drawSymbolText(da, GRSymbol.SYM_FCIR, nodeDest.getX(), nodeDest.getY(),
+				size, labelDest, 0.0, textPositionDest, 0, 0);
+		}
+		if ( nodeSource1 != null ) {
+			// The symbol is drawn behind the normal network so make bigger
+			double size = nodeSource1.getSymbol().getSize()*2.0;
+			labelSource1 = label + "\n(Source1: " + smdataSource1.getID() + " - " + smdataSource1.getName() + ")";
+			//GRDrawingAreaUtil.drawSymbol(da, GRSymbol.SYM_FCIR, node.getX(), node.getY(), size, 0, 0);
+			//GRDrawingAreaUtil.drawText(da, label, node.getX(), node.getY(), 0.0, GRText.CENTER_X|GRText.BOTTOM );
+			// TODO SAM 2010-12-29 Need to optimize label positioning
+			String labelPosition = nodeSource1.getTextPosition();
+			int textPosition = 0;
+			if ( (labelPosition.indexOf("Above") >= 0) || (labelPosition.indexOf("Upper") >= 0) ) {
+				textPosition = GRText.CENTER_X|GRText.BOTTOM;
+			}
+			else {
+				// Default text below symbol.
+				textPosition = GRText.CENTER_X|GRText.TOP;
+			}
+			// Override to make sure it does not draw on the destination
+			if ( nodeDest == nodeSource1 ) {
+				if ( textPositionDest == (GRText.CENTER_X|GRText.TOP) ) {
+					textPosition = GRText.CENTER_X|GRText.BOTTOM;
+				}
+				else {
+					textPosition = GRText.CENTER_X|GRText.TOP;
+				}
+			}
+			GRDrawingAreaUtil.drawSymbolText(da, GRSymbol.SYM_FCIR, nodeSource1.getX(), nodeSource1.getY(),
+				size, labelSource1, 0.0, textPosition, 0, 0);
+		}
+		if ( nodeSource2 != null ) {
+			// The symbol is drawn behind the normal network so make bigger
+			double size = nodeSource2.getSymbol().getSize()*2.0;
+			labelSource2 = label + "\n(Source2: " + smdataSource2.getID() + " - " + smdataSource2.getName() + ")";
+			//GRDrawingAreaUtil.drawSymbol(da, GRSymbol.SYM_FCIR, node.getX(), node.getY(), size, 0, 0);
+			//GRDrawingAreaUtil.drawText(da, label, node.getX(), node.getY(), 0.0, GRText.CENTER_X|GRText.BOTTOM );
+			String labelPosition = nodeSource2.getTextPosition();
+			int textPosition = 0;
+			if ( (labelPosition.indexOf("Above") >= 0) || (labelPosition.indexOf("Upper") >= 0) ) {
+				textPosition = GRText.CENTER_X|GRText.BOTTOM;
+			}
+			else {
+				textPosition = GRText.CENTER_X|GRText.TOP;
+			}
+			// Override to make sure it does not draw on the destination
+			if ( nodeDest == nodeSource2 ) {
+				if ( textPositionDest == (GRText.CENTER_X|GRText.TOP) ) {
+					textPosition = GRText.CENTER_X|GRText.BOTTOM;
+				}
+				else {
+					textPosition = GRText.CENTER_X|GRText.TOP;
+				}
+			}
+			GRDrawingAreaUtil.drawSymbolText(da, GRSymbol.SYM_FCIR, nodeSource2.getX(), nodeSource2.getY(),
+				size, labelSource2, 0.0, textPosition, 0, 0);
+		}
+		// Draw the intervening structures specifically mentioned in the operational right
+		if ( metadata.getUsesInterveningStructures() ) {
+			List<String> structureIDList = opr.getInterveningStructureIDs ();
+			for ( String structureID : structureIDList ) {
+				HydrologyNode nodeIntervening = network.findNode ( structureID,
+						false, // Do not change the selection
+						false ); // Do not zoom to the node
+				if ( nodeIntervening != null ) {
+					double size = nodeIntervening.getSymbol().getSize()*2.0;
+					GRDrawingAreaUtil.drawSymbol(da, GRSymbol.SYM_FCIR,
+						nodeIntervening.getX(), nodeIntervening.getY(), size, 0, 0);
+				}
+			}
+		}
+		// Draw the network lines connecting the source and destination
+		GRDrawingAreaUtil.setColor(da,blue );
+		if ( (nodeDest != null) && (nodeSource1 != null) ) {
+			GRDrawingAreaUtil.setLineWidth(da, Math.max(nodeDest.getSymbol().getSize(),
+				nodeSource1.getSymbol().getSize()) );
+			List<HydrologyNode> connectingNodes = network.getNetwork().getNodeSequence(nodeDest,nodeSource1);
+			if ( connectingNodes.size() > 0 ) {
+				// Draw a line between each node
+				double [] x = new double[connectingNodes.size()];
+				double [] y = new double[x.length];
+				int i = -1;
+				for ( HydrologyNode node: connectingNodes ) {
+					++i;
+					x[i] = node.getX();
+					y[i] = node.getY();
+				}
+				GRDrawingAreaUtil.drawPolyline(da, x.length, x, y);
+			}
+		}
+		if ( (nodeDest != null) && (nodeSource2 != null) ) {
+			GRDrawingAreaUtil.setLineWidth(da, Math.max(nodeDest.getSymbol().getSize(),
+				nodeSource2.getSymbol().getSize()) );
+			List<HydrologyNode> connectingNodes = network.getNetwork().getNodeSequence(nodeDest,nodeSource2);
+			if ( connectingNodes.size() > 0 ) {
+				// Draw a line between each node
+				double [] x = new double[connectingNodes.size()];
+				double [] y = new double[x.length];
+				int i = -1;
+				for ( HydrologyNode node: connectingNodes ) {
+					++i;
+					x[i] = node.getX();
+					y[i] = node.getY();
+				}
+				GRDrawingAreaUtil.drawPolyline(da, x.length, x, y);
+			}
+		}
 	}
-	if ( commonID != null ) {
-		// Find the node in the network and scroll to it.
-		HydrologyNode node = network.findNode ( commonID, false, true );
-		// Draw the annotated version on top...
-		GRDrawingArea da = network.getDrawingArea();
-		//GRShape shape = new 
-		//GRDrawingAreaUtil.drawShape(da, shape );
-		GRDrawingAreaUtil.setColor(da, GRColor.magenta );
-		GRDrawingAreaUtil.drawText(da, label, node.getX(), node.getY(), 0.0, GRText.CENTER_X|GRText.CENTER_Y );
+	else if ( objectToRender instanceof StateMod_Data ) {
+		Message.printStatus(2, "", "Rendering \"" + label + "\" annotation on network." );
+		StateMod_Data smdata = (StateMod_Data)objectToRender;
+		commonID = smdata.getID();
+		if ( commonID != null ) {
+			// Find the node in the network and scroll to it.
+			HydrologyNode node = network.findNode ( commonID,
+				false, // Do not change the selection
+				false ); // Do not zoom to the node
+			// The symbol is drawn behind the normal network so make bigger
+			double size = node.getSymbol().getSize()*2.0;
+			//GRDrawingAreaUtil.drawSymbol(da, GRSymbol.SYM_FCIR, node.getX(), node.getY(), size, 0, 0);
+			//GRDrawingAreaUtil.drawText(da, label, node.getX(), node.getY(), 0.0, GRText.CENTER_X|GRText.BOTTOM );
+			GRDrawingAreaUtil.drawSymbolText(da, GRSymbol.SYM_FCIR, node.getX(), node.getY(), size, label, 0.0, GRText.CENTER_X|GRText.BOTTOM, 0, 0);
+		}
 	}
 }
 
@@ -739,11 +906,11 @@ Show a StateMod data object on the network.  This method simply helps with the h
 @param smData the StateMod data object to display on the network
 @param label the label for the data object on the network
 */
-public void showOnNetwork ( StateMod_Data smData, String label )
+public void showOnNetwork ( StateMod_Data smData, String label, GRLimits limits )
 {
 	StateMod_Network_JFrame networkEditor = getNetworkEditor();
 	if ( networkEditor != null ) {
-		networkEditor.addAnnotationRenderer ( this, smData, label, true );
+		networkEditor.addAnnotationRenderer ( this, smData, label, limits, true );
 	}
 }
 

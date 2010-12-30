@@ -328,6 +328,7 @@ The current node size (as drawn for the current zoom level), in data units.
 */
 private double __currNodeSize = 20;
 
+// TODO SAM 2010-12-29 Evaluate how this can be rectified with __dataLimitsMax
 /**
 The absolute Bottom Y of the data limits.
 */
@@ -412,13 +413,13 @@ private double
 The printing scale factor of the drawing.  This is the amount by which the
 72 dpi printable pixels are scaled.  A printing scale value of 1 means that
 the network will be printed at 72 pixels per inch (ppi), which is the 
-Java standard.   A scale factor of .5 means that the network will be 
+Java standard.  A scale factor of .5 means that the network will be 
 printed at 144 ppi.  A scale factor of 3 means that the ER Diagram will be printed at 24 ppi.
 */
 private double __printScale = 1;
 
 /**
-The Y value (in data units) of the of the bottom of the screen.
+The Y value (in data units) of the bottom of the screen.
 */
 private double __screenBottomY;
 
@@ -491,10 +492,15 @@ The array of limits of the nodes being dragged.
 private GRLimits[] __dragNodesLimits = null;
 
 /**
-Backup of the datalimits for the entire network.  Stored here so as to 
+Backup of the data limits for the visible network.  Stored here so as to 
 avoid lots of calls to __drawingArea.getDataLimits();
 */
 private GRLimits __dataLimits;
+
+/**
+Backup of the data limits for the network as initially opened.
+*/
+private GRLimits __dataLimitsMax;
 
 /**
 The limits of the node being dragged.
@@ -683,14 +689,14 @@ Note that these are complex annotations whereas the __annotations list contains 
 private List<StateMod_Network_AnnotationData> __annotationDataList = new Vector();
 
 /**
-Vector of all the links drawn on the network.
+List of all the links drawn on the network.
 */
-private List __links;
+private List<PropList> __links;
 
 /**
-Vector to hold change operations.
+List to hold change operations.
 */
-private List __undoOperations;
+private List<UndoData> __undoOperations;
 
 /**
 A private class to hold undo data.
@@ -861,16 +867,12 @@ public void actionPerformed(ActionEvent event) {
 	else if (action.equals(__MENU_PROPERTIES)) {
 		if (__isLastSelectedAnAnnotation) {
 			HydrologyNode node = __annotations.get(__popupNodeNum);
-
 			new StateMod_Network_AnnotationProperties_JDialog( this, __editable, node, __popupNodeNum);
 		}
 		else {
 			String idPre = __nodes[__popupNodeNum].getCommonID();
-
 			new StateMod_Network_NodeProperties_JDialog(__parent, __nodes, __popupNodeNum);
-	
 			String idPost = __nodes[__popupNodeNum].getCommonID();
-	
 			if (!idPre.equals(idPost)) {
 				adjustLinksForNodeRename(idPre, idPost);
 			}
@@ -999,19 +1001,22 @@ is passed back to the renderer to allow full access to layer information, symbol
 @param objectLabel label for the object, to list in the GeoViewJPanel
 @param scrollToAnnotation if true, scroll to the annotation (without changing scale)
 */
-public void addAnnotationRenderer ( StateMod_Network_AnnotationRenderer renderer,
-	Object objectToRender, String objectLabel, boolean scrollToAnnotation )
+public StateMod_Network_AnnotationData addAnnotationRenderer ( StateMod_Network_AnnotationRenderer renderer,
+	Object objectToRender, String objectLabel, GRLimits limits )
 {
 	// Only add if the annotation is not already in the list
 	for ( StateMod_Network_AnnotationData annotationData: __annotationDataList ) {
 		if ( (annotationData.getObject() == objectToRender) &&
 			annotationData.getLabel().equalsIgnoreCase(objectLabel) ) {
 			// Don't add again.
-			return;
+			return null;
 		}
 	}
-	__annotationDataList.add ( new StateMod_Network_AnnotationData(renderer,objectToRender,objectLabel) );
+	StateMod_Network_AnnotationData annotationData =
+		new StateMod_Network_AnnotationData(renderer,objectToRender,objectLabel,limits);
+	__annotationDataList.add ( annotationData );
 	repaint ();
+	return annotationData;
 }
 
 /**
@@ -1524,6 +1529,53 @@ public void clear() {
 }
 
 /**
+Clear annotations and redraw.
+*/
+public void clearAnnotations ()
+{
+	List<StateMod_Network_AnnotationData> annotationDataList = getAnnotationData();
+	int size = annotationDataList.size();
+	annotationDataList.clear();
+	// Also redraw
+	if ( size > 0 ) {
+		// Previously had some annotations and now do not so redraw
+		forceRepaint();
+	}
+}
+
+// TODO evaluate how to change the visible screen extent to ensure that the data extent is fully visible.
+/**
+Center on the given extent.  This code is similar to findNode() except that the data extent is
+already found and provides the coordinates.  If the limits do not fit in the viewpoint, zoom out.
+If the limits do fit, keep the current zoom to minimize disruption to the user.
+@param limits the limits of the data extents to center on.
+*/
+public void centerOn ( GRLimits limits )
+{
+	// Point on which to center...
+	
+	double x = limits.getCenterX();
+	double y = limits.getCenterY();
+	double buffer = 1.1;
+	double width = limits.getWidth()*buffer;
+	double width2 = width/2.0;
+	double height = limits.getHeight()*buffer;
+	double height2 = height/2.0;
+	
+	// Recompute the view position in data units...
+	__screenLeftX = x - (__screenDataWidth / 2);
+	__screenBottomY = y - (__screenDataHeight / 2);
+	
+	// Loop until the network fits (see how this looks visually - maybe cool?)
+	while ( ((x - width2) < __screenLeftX) || ((x + width2) > (__screenLeftX + __screenDataWidth)) ||
+			((y - height2) < __screenBottomY) || ((y + height2) > (__screenBottomY + __screenDataHeight)) ) {
+		forceRepaint();
+		zoomOut();
+	}
+	forceRepaint();
+}
+
+/**
 Converts a value that runs from 0 to __totalBufferWidth (the number of 
 pixels wide the screen buffer is) to a value from 0 to __totalDataWidth.  
 Add the value to __dataLeftX to get the data value.
@@ -1682,7 +1734,8 @@ public void deleteNode(String id) {
 }
 
 /**
-Draws annotations on the network.
+Draws annotations on the network.  These are the simple line annotations.  There are also annotations for
+more complex StateMod data, drawn by tne annotation renderers.
 */
 private void drawAnnotations() {
 	// if annotations were read from an XML file, then they will
@@ -2501,8 +2554,7 @@ public HydrologyNode findNode()
 
 	// display a dialog from which the user can choose the node to find
 	JComboBoxResponseJDialog j = new JComboBoxResponseJDialog(__parent,
-		"Select the Node to Find",
-		"Select the node to find in the network", v,
+		"Select the Node to Find", "Select the node to find in the network", v,
 		ResponseJDialog.OK | ResponseJDialog.CANCEL, true);
 		
 	String s = j.response();
@@ -2656,6 +2708,14 @@ Returns the data limits for the entire network.
 */
 protected GRLimits getDataLimits() {
 	return __dataLimits;
+}
+
+/**
+Returns the data limits for the entire network.
+@return the data limits for the entire network.
+*/
+protected GRLimits getDataLimitsMax() {
+	return __dataLimitsMax;
 }
 
 /**
@@ -3194,12 +3254,10 @@ public void mouseReleased(MouseEvent event) {
 		if (nodeNum > -1) {
 			// if nodeNum > -1 then a node was clicked on.
 			// findNodeAtXY() checks to see if the node is an
-			// annotation node or not, and sets __isAnnotation
-			// appropriately
+			// annotation node or not, and sets __isAnnotation appropriately
 			__popupNodeNum = nodeNum;
 			if (__isLastSelectedAnAnnotation) {
-				__annotationPopup.show(event.getComponent(), 
-					event.getX(), event.getY());
+				__annotationPopup.show(event.getComponent(), event.getX(), event.getY());
 			}
 			else {
 				if (nodeHasLinks()) {
@@ -3208,9 +3266,14 @@ public void mouseReleased(MouseEvent event) {
 				else {
 					__deleteLinkMenuItem.setEnabled(false);
 				}
-				if (__parent.inStateModGUI()) {
+				if (inStateModGUI()) {
+					// Adding and deleting nodes is controlled through the Edit menu in the StateMod GUI
+					// in order to ensure that other data manipulation occurs properly.
 					__addNodeMenuItem.setEnabled(false);
+					__addNodeMenuItem.setToolTipText( "Use the Edit > Add menu in " +
+						"StateMod GUI and then finish setting network node properties." );
 					__deleteNodeMenuItem.setEnabled(false);
+					__deleteNodeMenuItem.setToolTipText( "Use the Edit > Delete menu in StateMod GUI." );
 				}
 				__nodePopup.show(event.getComponent(), event.getX(), event.getY());
 			}
@@ -3553,7 +3616,7 @@ public void paint(Graphics g) {
 			__nodes[i].calculateExtents(__drawingArea);
 		}
 	
-		// odd-looking, but it works.  With the above things in place,
+		// Odd-looking, but it works.  With the above things in place,
 		// it recalls this method (but this time the initialization
 		// section won't be entered).  That sets up some more things
 		// and then the NEXT time through, a complete refresh is 
@@ -3671,27 +3734,28 @@ public void paint(Graphics g) {
 			clear();
 			__drawingArea.setFont(f.getName(), f.getStyle(), __fontPointSize);			
 		}
+		
+		// Draw annotations below the network since node size is exaggerated
+		try {
+			for ( StateMod_Network_AnnotationData annotationData: getAnnotationData() ) {
+				StateMod_Network_AnnotationRenderer annotationRenderer =
+					annotationData.getStateModNetworkAnnotationRenderer();
+				annotationRenderer.renderStateModNetworkAnnotation(this, annotationData );
+			}
+		}
+		catch ( Exception e ) {
+			Message.printWarning ( 3, routine, "Error drawing annotations (" + e + ")." );
+			Message.printWarning ( 3, routine, e );
+		}
         
 		setAntiAlias(__antiAlias);
 		drawNetworkLines();
 		setAntiAlias(__antiAlias);
 		drawLinks();
 		setAntiAlias(__antiAlias);
+		__drawingArea.setFont(f.getName(), f.getStyle(), __fontPointSize);
 		drawNodes();
-		//if ( !_ ) {
-			// Draw annotations on the top
-			try {
-				for ( StateMod_Network_AnnotationData annotationData: getAnnotationData() ) {
-					StateMod_Network_AnnotationRenderer annotationRenderer = annotationData.getStateModNetworkAnnotationRenderer();
-					annotationRenderer.renderStateModNetworkAnnotation(this, annotationData.getObject(),
-						annotationData.getLabel() );
-				}
-			}
-			catch ( Exception e ) {
-				Message.printWarning ( 3, routine, "Error drawing annotations (" + e + ")." );
-				Message.printWarning ( 3, routine, e );
-			}
-		//}
+
 		setAntiAlias(__antiAlias);
 		if (!__eraseLegend) {
 			drawLegend();
@@ -4243,7 +4307,7 @@ private void removeIDFromLinks(String id) {
 	String id2 = null;
 	for (int i = size - 1; i >= 0; i--) {
 		found = false;
-		p = (PropList)__links.get(i);
+		p = __links.get(i);
 		id1 = p.getValue("FromNodeID");
 		id2 = p.getValue("ToNodeID");
 
@@ -4275,7 +4339,6 @@ protected void saveNetwork() {
 	forceRepaint();
 	new RTi.Util.GUI.SaveImageGUI(__tempBuffer, __parent);
 	__tempBuffer = null;
-	System.gc();
 	__savingNetwork = false;
 }
 
@@ -4290,7 +4353,6 @@ protected void saveScreen() {
 	forceRepaint();
 	new RTi.Util.GUI.SaveImageGUI(__tempBuffer, __parent);
 	__tempBuffer = null;
-	System.gc();
 	__savingScreen = false;
 }
 
@@ -4382,6 +4444,26 @@ private void scaleUnscalables() {
 }
 
 /**
+Sets the visible data limits.
+@param dataLimits the data limits for the visible network.
+*/
+private void setDataLimits ( GRLimits dataLimits )
+{
+	__dataLimits = dataLimits;
+}
+
+// TODO SAM 2010-12-29 need to change the limits when a node is added or deleted
+// - not a big deal right now because the max is used for zooming
+/**
+Sets the maximum data limits for the data.
+@param dataLimitsMax the maximum data limits for the network.
+*/
+private void setDataLimitsMax ( GRLimits dataLimitsMax )
+{
+	__dataLimitsMax = dataLimitsMax;
+}
+
+/**
 Sets whether the network and its nodes are dirty.  Usually will be called with a parameter of false
 after a save has occurred.
 @param dirty whether to mark everything dirty or not.
@@ -4404,10 +4486,8 @@ protected void setDrawingArea(GRJComponentDrawingArea drawingArea) {
 }
 
 /**
-Sets the mode the network should be in in regard to how it responds to 
-mouse presses.
-@param mode the mode the network should be in in regard to how it responds
-to mouse presses.
+Sets the mode the network should be in in regard to how it responds to mouse presses.
+@param mode the mode the network should be in in regard to how it responds to mouse presses.
 */
 protected void setMode(int mode) {
 	__networkMouseMode = mode;
@@ -4472,8 +4552,7 @@ public void setOrientation(String orientation) {
 		__holdPaperOrientation = null;
 	}
 	try {
-		__pageFormat = PrintUtil.getPageFormat(
-			PrintUtil.pageFormatToString(__pageFormat));
+		__pageFormat = PrintUtil.getPageFormat( PrintUtil.pageFormatToString(__pageFormat));
 		if (orientation.trim().equalsIgnoreCase("Landscape")) {
 			PrintUtil.setPageFormatOrientation(__pageFormat, PrintUtil.LANDSCAPE);
 		}
@@ -4506,8 +4585,7 @@ public void setPageFormat(PageFormat pageFormat) {
 
 /**
 Changes the paper size.
-@param size the size to set the paper to (see PrintUtil for a list of 
-supported paper sizes).
+@param size the size to set the paper to (see PrintUtil for a list of supported paper sizes).
 */
 public void setPaperSize(String size) {
 	if (_graphics == null) {
@@ -4536,12 +4614,12 @@ public void setPaperSize(String size) {
 
 /**
 Sets the printing scale.  The network is designed to be set up so 
-that it fits well on a certain size printed page, and this scale is used
-to ensure that everything fits.  <p>
+that it fits well on a certain size printed page, and this scale is used to ensure that everything fits.
+<p>
 By default, Java prints out everything at 72 dpi.  At this size, a Letter-sized
 piece of paper could only have 792 x 612 pixels on it.  Since each node in the
-network is drawn at 20 pixels high, it is possible that larger networks would
-run out of space.  <p>
+network is drawn at 20 pixels high, it is possible that larger networks would run out of space.
+<p>
 At the same time, it should be possible to scale larger networks so that 
 even then can fit on a smaller piece of paper.  Thus the use of the printing scale.  <p>
 The printing scale basically adjusts the DPI at which Java prints.  A scale
@@ -4674,6 +4752,7 @@ Sets the data limits for the network from what was read in an XML file.
 protected void setXMLDataLimits(double lx, double by, double w, double h) {
 	GRLimits limits = new GRLimits( lx, by, lx + w, by + h);
 	__dataLimits = limits;
+	setDataLimitsMax ( new GRLimits(__dataLimits) );
 	__drawingArea.setDataLimits(limits);
 	calculateDataLimits();
 }
@@ -4692,8 +4771,7 @@ private double toSixDigits(double d) {
 /**
 Converts an X value in data units to an X value in drawing units.
 @param x the x value to convert.
-@return the x value, converted from being scaled for data limits to being 
-scaled for drawing units.
+@return the x value, converted from being scaled for data limits to being scaled for drawing units.
 */
 /* TODO SAM Evaluate use
 private double unconvertX(double x) {
@@ -4797,8 +4875,7 @@ private void updateAnnotationLocation(int annotation) {
 	else if (position.equalsIgnoreCase("LowerRight")) {
 		p.setValue("Point", "" + x + "," + (y + h));
 	}
-	else if (position.equalsIgnoreCase("Below")
-		|| position.equalsIgnoreCase("BelowCenter")) {
+	else if (position.equalsIgnoreCase("Below") || position.equalsIgnoreCase("BelowCenter")) {
 		p.setValue("Point", "" + (x + (w / 2)) + "," + (y + h));
 	}
 	else if (position.equalsIgnoreCase("LowerLeft")) {
@@ -4819,7 +4896,7 @@ private void updateAnnotationLocation(int annotation) {
 }
 
 /**
-Updates one of the annotaiton nodes with location and text information stored in the passed-in node.
+Updates one of the annotation nodes with location and text information stored in the passed-in node.
 @param nodeNum the number of the node (in the node array) to update.
 @param node the node holding information with which the other node should be updated.
 */
@@ -4851,14 +4928,10 @@ protected void updateAnnotation(int nodeNum, HydrologyNode node) {
 		|| !fontStyle.equals(vp.getValue("FontStyle"))
 		) {
 
-		int size = 
-			new Integer(p.getValue("OriginalFontSize")).intValue();
-		size = calculateScaledFont(p.getValue("FontName"), 
-			p.getValue("FontStyle"), size, false);
-		GRLimits limits = GRDrawingAreaUtil.getTextExtents(
-			__drawingArea, text, GRUnits.DEVICE,
-			p.getValue("FontName"), p.getValue("FontStyle"),
-			size);	
+		int size = new Integer(p.getValue("OriginalFontSize")).intValue();
+		size = calculateScaledFont(p.getValue("FontName"), p.getValue("FontStyle"), size, false);
+		GRLimits limits = GRDrawingAreaUtil.getTextExtents(	__drawingArea, text, GRUnits.DEVICE,
+			p.getValue("FontName"), p.getValue("FontStyle"), size);	
 
 		double w = convertX(limits.getWidth());
 		double h = convertY(limits.getHeight());
@@ -4887,8 +4960,7 @@ protected void updateAnnotation(int nodeNum, HydrologyNode node) {
 		else if (position.equalsIgnoreCase("LowerRight")) {
 			vNode.setPosition(x, y - h, w, h);
 		}
-		else if (position.equalsIgnoreCase("Below")
-			|| position.equalsIgnoreCase("BelowCenter")) {
+		else if (position.equalsIgnoreCase("Below")|| position.equalsIgnoreCase("BelowCenter")) {
 			vNode.setPosition(x - (w / 2), y - h, w, h);
 		}
 		else if (position.equalsIgnoreCase("LowerLeft")) {
@@ -4900,13 +4972,11 @@ protected void updateAnnotation(int nodeNum, HydrologyNode node) {
 		else if (position.equalsIgnoreCase("UpperLeft")) {
 			vNode.setPosition(x - w, y, w, h);
 		}
-		else if (position.equalsIgnoreCase("Above")
-			|| position.equalsIgnoreCase("AboveCenter")) {
+		else if (position.equalsIgnoreCase("Above") || position.equalsIgnoreCase("AboveCenter")) {
 			vNode.setPosition(x - (w / 2), y, w, h);
 		}
 		else if (position.equalsIgnoreCase("Center")) {
-			vNode.setPosition(x - (w / 2), y - (h / 2), 
-				w, h);
+			vNode.setPosition(x - (w / 2), y - (h / 2), w, h);
 		}		
 	}
 
@@ -5035,8 +5105,7 @@ private void writeListFiles()
 		filename = IOUtil.enforceFileExtension ( filename, "csv" );
 	}
 
-	// Now get the base name and remaining extension so that the basname can
-	// be adjusted below...
+	// Now get the base name and remaining extension so that the basename can be adjusted below...
 
 	int lastIndex = filename.lastIndexOf(".");
 	String front = filename.substring(0, lastIndex);
@@ -5059,26 +5128,18 @@ private void writeListFiles()
 			}
 			else {
 				comments[0] = "The following list contains data for the following node type:  " +
-					HydrologyNode.getTypeString(
-					types[i], HydrologyNode.ABBREVIATION) +
-					" (" +
-					HydrologyNode.getTypeString(
-					types[i], HydrologyNode.FULL) + ")";
+					HydrologyNode.getTypeString( types[i], HydrologyNode.ABBREVIATION) +
+					" (" + HydrologyNode.getTypeString(types[i], HydrologyNode.FULL) + ")";
 				outputFilename = front + "_" +
-					HydrologyNode.getTypeString(
-					types[i], HydrologyNode.ABBREVIATION) +
-					"." + end;
+					HydrologyNode.getTypeString(types[i], HydrologyNode.ABBREVIATION) + "." + end;
 			}
 	
 			try {
-				StateMod_NodeNetwork.writeListFile(
-					outputFilename, ",", false, v,
-					comments );
+				StateMod_NodeNetwork.writeListFile( outputFilename, ",", false, v, comments );
 			}
 			catch (Exception e) {
 				Message.printWarning(3, routine, e);
-				warning += "\nUnable to create list file \"" +
-				outputFilename + "\"";
+				warning += "\nUnable to create list file \"" + outputFilename + "\"";
 			}
 		}
 	}
@@ -5087,6 +5148,15 @@ private void writeListFiles()
 	if ( warning.length() > 0 ) {
 		Message.printWarning(1, routine, warning );
 	}
+}
+
+/**
+Zooms to the specified limits.
+*/
+protected void zoomCenterOn ( GRLimits limits )
+{
+	setDataLimits ( limits );
+	forceRepaint();
 }
 
 /**
@@ -5123,8 +5193,7 @@ protected void zoomIn() {
 		__parent.setZoomedOneToOne(false);
 	}
 
-	// done to avoid a bug in java when painting anti-aliased when
-	// zoomed-out
+	// Done to avoid a bug in java when painting anti-aliased when zoomed-out
 	if (__zoomPercentage < 100) {
 		__antiAlias = false;
 	}
@@ -5246,8 +5315,7 @@ protected void zoomOut() {
 }
 
 /**
-Zooms so that the height of the network fits exactly in the height of the 
-screen.
+Zooms so that the height of the network fits exactly in the height of the screen.
 */
 /* TODO SAM 2007-03-01 Evaluate whether needed
 private void zoomToHeight() {
