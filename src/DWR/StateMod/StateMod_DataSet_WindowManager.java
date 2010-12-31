@@ -544,40 +544,46 @@ public void renderGeoViewAnnotation ( GeoViewJComponent geoview, Object objectTo
 		if ( (smdata != null) && (smdata instanceof HasGeoRecord) ) {
 			HasGeoRecord hasGeoRecord = (HasGeoRecord)smdata;
 			geoRecord = hasGeoRecord.getGeoRecord();
-			pointDest = (GRPoint)geoRecord.getShape();
-			GeoProjection layerProjection = geoRecord.getLayer().getProjection();
-			GeoProjection geoviewProjection = geoview.getProjection();
-			boolean doProject = GeoProjection.needToProject ( layerProjection, geoview.getProjection() );
-			if ( doProject ) {
-				pointDest = (GRPoint)GeoProjection.projectShape( layerProjection, geoviewProjection, pointDest, false );
+			if ( geoRecord != null ) {
+				pointDest = (GRPoint)geoRecord.getShape();
+				GeoProjection layerProjection = geoRecord.getLayer().getProjection();
+				GeoProjection geoviewProjection = geoview.getProjection();
+				boolean doProject = GeoProjection.needToProject ( layerProjection, geoview.getProjection() );
+				if ( doProject ) {
+					pointDest = (GRPoint)GeoProjection.projectShape( layerProjection, geoviewProjection, pointDest, false );
+				}
+				labelDest = label + "\n(Dest: " + smdata.getID() + " - " + smdata.getName() + ")";
 			}
-			labelDest = label + "\n(Dest: " + smdata.getID() + " - " + smdata.getName() + ")";
 		}
 		smdata = opr.lookupSource1DataObject(dataset);
 		if ( (smdata != null) && (smdata instanceof HasGeoRecord) ) {
 			HasGeoRecord hasGeoRecord = (HasGeoRecord)smdata;
 			geoRecord = hasGeoRecord.getGeoRecord();
-			pointSource1 = (GRPoint)geoRecord.getShape();
-			GeoProjection layerProjection = geoRecord.getLayer().getProjection();
-			GeoProjection geoviewProjection = geoview.getProjection();
-			boolean doProject = GeoProjection.needToProject ( layerProjection, geoview.getProjection() );
-			if ( doProject ) {
-				pointSource1 = (GRPoint)GeoProjection.projectShape( layerProjection, geoviewProjection, pointSource1, false );
+			if ( geoRecord != null ) {
+				pointSource1 = (GRPoint)geoRecord.getShape();
+				GeoProjection layerProjection = geoRecord.getLayer().getProjection();
+				GeoProjection geoviewProjection = geoview.getProjection();
+				boolean doProject = GeoProjection.needToProject ( layerProjection, geoview.getProjection() );
+				if ( doProject ) {
+					pointSource1 = (GRPoint)GeoProjection.projectShape( layerProjection, geoviewProjection, pointSource1, false );
+				}
+				labelSource1 = label + "\n(Source1: " + smdata.getID() + " - " + smdata.getName() + ")";
 			}
-			labelSource1 = label + "\n(Source1: " + smdata.getID() + " - " + smdata.getName() + ")";
 		}
 		smdata = opr.lookupSource2DataObject(dataset);
 		if ( (smdata != null) && (smdata instanceof HasGeoRecord) ) {
 			HasGeoRecord hasGeoRecord = (HasGeoRecord)smdata;
 			geoRecord = hasGeoRecord.getGeoRecord();
-			pointSource2 = (GRPoint)geoRecord.getShape();
-			GeoProjection layerProjection = geoRecord.getLayer().getProjection();
-			GeoProjection geoviewProjection = geoview.getProjection();
-			boolean doProject = GeoProjection.needToProject ( layerProjection, geoview.getProjection() );
-			if ( doProject ) {
-				pointSource2 = (GRPoint)GeoProjection.projectShape( layerProjection, geoviewProjection, pointSource2, false );
+			if ( geoRecord != null ) {
+				pointSource2 = (GRPoint)geoRecord.getShape();
+				GeoProjection layerProjection = geoRecord.getLayer().getProjection();
+				GeoProjection geoviewProjection = geoview.getProjection();
+				boolean doProject = GeoProjection.needToProject ( layerProjection, geoview.getProjection() );
+				if ( doProject ) {
+					pointSource2 = (GRPoint)GeoProjection.projectShape( layerProjection, geoviewProjection, pointSource2, false );
+				}
+				labelSource2 = label + "\n(Source2: " + smdata.getID() + " - " + smdata.getName() + ")";
 			}
-			labelSource2 = label + "\n(Source2: " + smdata.getID() + " - " + smdata.getName() + ")";
 		}
 		// Draw connecting lines first (under the symbols and text)...
 		if ( (pointDest != null) && (pointSource1 != null) ) {
@@ -600,6 +606,62 @@ public void renderGeoViewAnnotation ( GeoViewJComponent geoview, Object objectTo
 		if ( pointSource2 != null ) {
 			GRDrawingAreaUtil.drawSymbol(da, GRSymbol.SYM_PUSHPIN_VERTICAL, pointSource2.getX(), pointSource2.getY(), 32.0, 0, 0 );
 			GRDrawingAreaUtil.drawText(da, labelSource2, pointSource2.getX(), pointSource2.getY(), 0.0, GRText.CENTER_X|GRText.TOP );
+		}
+	}
+	else if ( objectToRender instanceof StateMod_InstreamFlow ) {
+		// Draw upstream and downstream as separate symbols
+		StateMod_InstreamFlow ifs = (StateMod_InstreamFlow)objectToRender;
+		StateMod_DataSet dataset = getDataSet();
+		StateMod_Data smdata = ifs;
+		GRPoint pointUpstream = null;
+		GRPoint pointDownstream = null;
+		String labelUpstream = "";
+		String labelDownstream = "";
+		if ( (smdata != null) && (smdata instanceof HasGeoRecord) ) {
+			HasGeoRecord hasGeoRecord = (HasGeoRecord)smdata;
+			geoRecord = hasGeoRecord.getGeoRecord();
+			if ( geoRecord != null ) {
+				pointUpstream = (GRPoint)geoRecord.getShape();
+				GeoProjection layerProjection = geoRecord.getLayer().getProjection();
+				GeoProjection geoviewProjection = geoview.getProjection();
+				boolean doProject = GeoProjection.needToProject ( layerProjection, geoview.getProjection() );
+				if ( doProject ) {
+					pointUpstream = (GRPoint)GeoProjection.projectShape( layerProjection, geoviewProjection, pointUpstream, false );
+				}
+				labelUpstream = label + "\n(Up: " + smdata.getID() + " - " + smdata.getName() + ")";
+			}
+		}
+		smdata = ifs.lookupDownstreamDataObject(dataset);
+		if ( (smdata != null) && (smdata instanceof HasGeoRecord) ) {
+			HasGeoRecord hasGeoRecord = (HasGeoRecord)smdata;
+			geoRecord = hasGeoRecord.getGeoRecord();
+			if ( geoRecord != null ) {
+				pointDownstream = (GRPoint)geoRecord.getShape();
+				GeoProjection layerProjection = geoRecord.getLayer().getProjection();
+				GeoProjection geoviewProjection = geoview.getProjection();
+				boolean doProject = GeoProjection.needToProject ( layerProjection, geoview.getProjection() );
+				if ( doProject ) {
+					pointDownstream = (GRPoint)GeoProjection.projectShape( layerProjection, geoviewProjection, pointDownstream, false );
+				}
+				labelDownstream = label + "\n(Down: " + smdata.getID() + " - " + smdata.getName() + ")";
+			}
+		}
+		// Draw connecting lines first (under the symbols and text)...
+		if ( (pointUpstream != null) && (pointDownstream != null) ) {
+			GRDrawingAreaUtil.setLineWidth(da, 2);
+			GRDrawingAreaUtil.drawLine(da, pointUpstream.x, pointUpstream.y, pointDownstream.x, pointDownstream.y);
+		}
+		// Now draw all the symbols and text
+		if ( pointUpstream == pointDownstream ) {
+			labelUpstream = label;
+		}
+		if ( pointUpstream != null ) {
+			GRDrawingAreaUtil.drawSymbol(da, GRSymbol.SYM_PUSHPIN_VERTICAL, pointUpstream.getX(), pointUpstream.getY(), 32.0, 0, 0 );
+			GRDrawingAreaUtil.drawText(da, labelUpstream, pointUpstream.getX(), pointUpstream.getY(), 0.0, GRText.CENTER_X|GRText.TOP );
+		}
+		if ( (pointDownstream != null) && (pointDownstream != pointUpstream) ) {
+			GRDrawingAreaUtil.drawSymbol(da, GRSymbol.SYM_PUSHPIN_VERTICAL, pointDownstream.getX(), pointDownstream.getY(), 32.0, 0, 0 );
+			GRDrawingAreaUtil.drawText(da, labelDownstream, pointDownstream.getX(), pointDownstream.getY(), 0.0, GRText.CENTER_X|GRText.TOP );
 		}
 	}
 	else if ( objectToRender instanceof StateMod_Data ) {
@@ -792,6 +854,89 @@ public void renderStateModNetworkAnnotation ( StateMod_Network_JComponent networ
 			GRDrawingAreaUtil.setLineWidth(da, Math.max(nodeDest.getSymbol().getSize(),
 				nodeSource2.getSymbol().getSize()) );
 			List<HydrologyNode> connectingNodes = network.getNetwork().getNodeSequence(nodeDest,nodeSource2);
+			if ( connectingNodes.size() > 0 ) {
+				// Draw a line between each node
+				double [] x = new double[connectingNodes.size()];
+				double [] y = new double[x.length];
+				int i = -1;
+				for ( HydrologyNode node: connectingNodes ) {
+					++i;
+					x[i] = node.getX();
+					y[i] = node.getY();
+				}
+				GRDrawingAreaUtil.drawPolyline(da, x.length, x, y);
+			}
+		}
+	}
+	else if ( objectToRender instanceof StateMod_InstreamFlow ) {
+		// Draw source and destination as separate symbols
+		StateMod_InstreamFlow ifs = (StateMod_InstreamFlow)objectToRender;
+		StateMod_DataSet dataset = getDataSet();
+		HydrologyNode nodeUpstream = null;
+		HydrologyNode nodeDownstream = null;
+		String labelUpstream = "";
+		String labelDownstream = "";
+		StateMod_Data smdataUpstream = ifs;
+		if ( smdataUpstream != null ) {
+			nodeUpstream = network.findNode ( smdataUpstream.getID(),
+				false, // Do not change the selection
+				false ); // Do not zoom to the node
+		}
+		else {
+			Message.printStatus(2,"","Unable to find StateMod upstream data object for IFS \"" +
+				ifs.getID() + "\"" );
+		}
+		StateMod_Data smdataDownstream = ifs.lookupDownstreamDataObject(dataset);
+		if ( smdataDownstream != null ) {
+			nodeDownstream = network.findNode ( smdataDownstream.getID(),
+				false, // Do not change the selection
+				false ); // Do not zoom to the node
+		}
+		int textPositionUpstream = 0;
+		if ( nodeUpstream != null ) {
+			// The symbol is drawn behind the normal network so make bigger
+			double size = nodeUpstream.getSymbol().getSize()*2.0;
+			if ( nodeUpstream == nodeDownstream ) {
+				labelUpstream = label;
+			}
+			else {
+				labelUpstream = label + "\n(Up: " + smdataUpstream.getID() + " - " + smdataUpstream.getName() + ")";
+			}
+			//GRDrawingAreaUtil.drawSymbol(da, GRSymbol.SYM_FCIR, node.getX(), node.getY(), size, 0, 0);
+			//GRDrawingAreaUtil.drawText(da, label, node.getX(), node.getY(), 0.0, GRText.CENTER_X|GRText.BOTTOM );
+			if ( (nodeDownstream == null) || (nodeUpstream.getY() > nodeDownstream.getY())) {
+				textPositionUpstream = GRText.CENTER_X|GRText.BOTTOM;
+			}
+			else {
+				textPositionUpstream = GRText.CENTER_X|GRText.TOP;
+			}
+			GRDrawingAreaUtil.drawSymbolText(da, GRSymbol.SYM_FCIR, nodeUpstream.getX(), nodeUpstream.getY(),
+				size, labelUpstream, 0.0, textPositionUpstream, 0, 0);
+		}
+		if ( (nodeDownstream != null) && (nodeDownstream != nodeUpstream) ) {
+			// The symbol is drawn behind the normal network so make bigger
+			double size = nodeDownstream.getSymbol().getSize()*2.0;
+			labelDownstream = label + "\n(Down: " + smdataDownstream.getID() + " - " + smdataDownstream.getName() + ")";
+			//GRDrawingAreaUtil.drawSymbol(da, GRSymbol.SYM_FCIR, node.getX(), node.getY(), size, 0, 0);
+			//GRDrawingAreaUtil.drawText(da, label, node.getX(), node.getY(), 0.0, GRText.CENTER_X|GRText.BOTTOM );
+			// TODO SAM 2010-12-29 Need to optimize label positioning
+			int textPositionDownstream = 0;
+			if ( (nodeDownstream == null) || (nodeUpstream.getY() < nodeDownstream.getY()) ) {
+				textPositionDownstream = GRText.CENTER_X|GRText.BOTTOM;
+			}
+			else {
+				// Default text below symbol.
+				textPositionDownstream = GRText.CENTER_X|GRText.TOP;
+			}
+			GRDrawingAreaUtil.drawSymbolText(da, GRSymbol.SYM_FCIR, nodeDownstream.getX(), nodeDownstream.getY(),
+				size, labelDownstream, 0.0, textPositionDownstream, 0, 0);
+		}
+		// Draw the network lines connecting the upstream and downstream
+		GRDrawingAreaUtil.setColor(da,blue );
+		if ( (nodeUpstream != null) && (nodeDownstream != null) ) {
+			GRDrawingAreaUtil.setLineWidth(da, Math.max(nodeUpstream.getSymbol().getSize(),
+				nodeDownstream.getSymbol().getSize()) );
+			List<HydrologyNode> connectingNodes = network.getNetwork().getNodeSequence(nodeUpstream,nodeDownstream);
 			if ( connectingNodes.size() > 0 ) {
 				// Draw a line between each node
 				double [] x = new double[connectingNodes.size()];

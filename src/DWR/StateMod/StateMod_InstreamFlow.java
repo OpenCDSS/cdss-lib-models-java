@@ -119,7 +119,7 @@ protected String _ifrrdn;
 /**
 Instream flow rights
 */
-protected List _rights;
+protected List<StateMod_InstreamFlowRight> _rights;
 
 /**
 Annual demand time series
@@ -607,16 +607,46 @@ private void initialize ( boolean initializeDefaults )
 }
 
 /**
+Return the downstream data set object by searching appropriate dataset lists.
+@param dataset the full dataset from which the destination should be extracted
+*/
+public StateMod_Data lookupDownstreamDataObject ( StateMod_DataSet dataset )
+{
+	String downstreamID = getIfrrdn();
+	StateMod_OperationalRight_Metadata_SourceOrDestinationType downstreamTypes[] =
+		{ StateMod_OperationalRight_Metadata_SourceOrDestinationType.RIVER_NODE };
+	List<StateMod_Data> smdataList = new Vector();
+	for ( int i = 0; i < downstreamTypes.length; i++ ) {
+		 smdataList.addAll ( StateMod_Util.getDataList ( downstreamTypes[i], dataset,
+			downstreamID, true ) );
+		if ( smdataList.size() > 0 ) {
+			break;
+		}
+	}
+	if ( smdataList.size() == 1 ) {
+		return smdataList.get(0);
+	}
+	else if ( smdataList.size() == 0 ) {
+		return null;
+	}
+	else {
+		throw new RuntimeException ( "" + smdataList.size() +
+			" data objects returned matching downstream \"" + downstreamID +
+			"\" for instream flow \"" + getID() + " - one is expected." );
+	}
+}
+
+/**
 Read instream flow information in and store in a list.  The new instream
 flows are added to the end of the previously stored instream flows.
 @param filename Name of file to read.
 @exception Exception if there is an error reading the file.
 */
-public static List readStateModFile(String filename)
+public static List<StateMod_InstreamFlow> readStateModFile(String filename)
 throws Exception {
 	String routine = "StateMod_InstreamFlow.readStateModFile";
 	String iline, s;
-	List theIns = new Vector();
+	List<StateMod_InstreamFlow> theIns = new Vector();
 	List v = new Vector(9);
 	int format_0[] = {
 		StringUtil.TYPE_STRING,

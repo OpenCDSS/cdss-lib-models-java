@@ -110,7 +110,9 @@ import javax.swing.JTextField;
 
 import cdss.domain.hydrology.network.HydrologyNode;
 
+import RTi.GIS.GeoView.GeoProjection;
 import RTi.GIS.GeoView.GeoRecord;
+import RTi.GIS.GeoView.HasGeoRecord;
 import RTi.GR.GRLimits;
 import RTi.GR.GRShape;
 import RTi.GRTS.TSProduct;
@@ -426,12 +428,48 @@ public void actionPerformed(ActionEvent e) {
 		}		
 	}
 	else if ( source == __showOnMap_JButton ) {
-		GeoRecord geoRecord = getSelectedInstreamFlow().getGeoRecord();
-		GRShape shape = geoRecord.getShape();
-		__dataset_wm.showOnMap ( getSelectedInstreamFlow(),
-			"Instream: " + getSelectedInstreamFlow().getID() + " - " + getSelectedInstreamFlow().getName(),
-			new GRLimits(shape.xmin, shape.ymin, shape.xmax, shape.ymax),
-			geoRecord.getLayer().getProjection() );
+		// The button is only enabled if some spatial data exist, which can be one or more of
+		// upstream (this) or downstream location...
+		StateMod_InstreamFlow ifs = getSelectedInstreamFlow();
+		GRLimits limits = null;
+		GeoProjection limitsProjection = null; // for the data limits
+		if ( ifs instanceof HasGeoRecord ) {
+			GeoRecord geoRecord = ((HasGeoRecord)ifs).getGeoRecord();
+			if ( geoRecord != null ) {
+				GRShape shapeUpstream = geoRecord.getShape();
+				if ( shapeUpstream != null ) {
+					limits = new GRLimits(shapeUpstream.xmin, shapeUpstream.ymin, shapeUpstream.xmax, shapeUpstream.ymax);
+					limitsProjection = geoRecord.getLayer().getProjection();
+				}
+			}
+		}
+		// Extend the limits for the downstream
+		StateMod_Data smdata = ifs.lookupDownstreamDataObject(__dataset);
+		if ( (smdata != null) && (smdata instanceof HasGeoRecord) ) {
+			HasGeoRecord hasGeoRecord = (HasGeoRecord)smdata;
+			GeoRecord geoRecord = hasGeoRecord.getGeoRecord();
+			if ( geoRecord != null ) {
+				GRShape shapeDownstream = geoRecord.getShape();
+				if ( shapeDownstream != null ) {
+					GeoProjection layerProjection = geoRecord.getLayer().getProjection();
+					if ( limitsProjection == null ) {
+						limitsProjection = layerProjection;
+					}
+					boolean doProject = GeoProjection.needToProject ( layerProjection, limitsProjection );
+					if ( doProject ) {
+						shapeDownstream = GeoProjection.projectShape( layerProjection, limitsProjection, shapeDownstream, false );
+					}
+					if ( limits == null ) {
+						limits = new GRLimits(shapeDownstream.xmin,shapeDownstream.ymin,shapeDownstream.xmax,shapeDownstream.ymax);
+					}
+					else {
+						limits.max(shapeDownstream.xmin,shapeDownstream.ymin,shapeDownstream.xmax,shapeDownstream.ymax,true);
+					}
+				}
+			}
+		}
+		__dataset_wm.showOnMap ( ifs, "Instream: " + ifs.getID() + " - " + ifs.getName(), limits,
+			limitsProjection );
 	}
 	else if ( source == __showOnNetwork_JButton ) {
 		StateMod_Network_JFrame networkEditor = __dataset_wm.getNetworkEditor();
@@ -516,16 +554,33 @@ private void checkTimeSeriesButtonsStates() {
 Checks the states of the map and network view buttons based on the selected diversion.
 */
 private void checkViewButtonState()
-{
+{	String routine = getClass().getName() + ".checkViewButtonState";
 	StateMod_InstreamFlow ifs = getSelectedInstreamFlow();
-	if ( ifs.getGeoRecord() == null ) {
-		// No spatial data are available
+	StateMod_Data smdataDown = null;
+	boolean mapEnabled = false;
+	try {
+		smdataDown = ifs.lookupDownstreamDataObject(__dataset);
+	}
+	catch ( Exception e ) {
+		Message.printWarning(3, routine, e);
 		__showOnMap_JButton.setEnabled ( false );
+		__showOnNetwork_JButton.setEnabled ( false );
+		return;
 	}
-	else {
-		// Enable the button...
-		__showOnMap_JButton.setEnabled ( true );
+	if ( ifs instanceof HasGeoRecord ) {
+		HasGeoRecord hasGeoRecord = (HasGeoRecord)ifs;
+		if ( hasGeoRecord.getGeoRecord() != null ) {
+			mapEnabled = true;
+		}
 	}
+	if ( smdataDown instanceof HasGeoRecord ) {
+		HasGeoRecord hasGeoRecord = (HasGeoRecord)smdataDown;
+		if ( hasGeoRecord.getGeoRecord() != null ) {
+			mapEnabled = true;
+		}
+	}
+	__showOnMap_JButton.setEnabled ( mapEnabled );
+	__showOnNetwork_JButton.setEnabled ( true );
 }
 
 /**
@@ -763,12 +818,12 @@ private void populateInstreamDailyID() {
 	__instreamDailyID.add("3 - Daily time series are supplied");
 	__instreamDailyID.add("4 - Daily time series interpolated from midpoints of monthly data");
 
-	List idNameVector = StateMod_Util.createDataList(__instreamFlowsVector, true);
+	List<String> idNameVector = StateMod_Util.createDataList(__instreamFlowsVector, true);
 	int size = idNameVector.size();
 
 	String s = null;
 	for (int i = 0; i < size; i++) {
-		s = (String)idNameVector.get(i);
+		s = idNameVector.get(i);
 		__instreamDailyID.add(s.trim());
 	}
 }

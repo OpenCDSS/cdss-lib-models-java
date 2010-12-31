@@ -2668,6 +2668,11 @@ public static List getDataList (
 			}
 		}
 	}
+	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.RIVER_NODE ) {
+		// All river nodes
+		dataList = (List<StateMod_RiverNetworkNode>)dataset.getComponentForComponentType(
+			StateMod_DataSet.COMP_RIVER_NETWORK).getData();
+	}
 	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.STREAM_GAGE ) {
 		// All stream gage stations
 		dataList = (List<StateMod_StreamGage>)dataset.getComponentForComponentType(
@@ -2706,6 +2711,7 @@ public static List getDataList (
 		(type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.INSTREAM_FLOW) ||
 		(type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.OPERATIONAL_RIGHT) ||
 		(type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.RESERVOIR) ||
+		(type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.RIVER_NODE) ||
 		(type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.STREAM_GAGE) ||
 		(type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.WELL)) ) {
 		// Further process the initial lists

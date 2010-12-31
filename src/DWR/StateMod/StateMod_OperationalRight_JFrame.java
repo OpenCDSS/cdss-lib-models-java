@@ -437,7 +437,7 @@ public void actionPerformed(ActionEvent e) {
 		__searchName.setEditable(true);
 	}
 	else if ( source == __showOnMap_JButton ) {
-		// The button is only enabled if some spatial data exist, but can be one or more of
+		// The button is only enabled if some spatial data exist, which can be one or more of
 		// destination, source1, source2...
 		StateMod_OperationalRight opr = getSelectedOperationalRight();
 		StateMod_Data smdata = opr.lookupDestinationDataObject(__dataset);
@@ -458,21 +458,23 @@ public void actionPerformed(ActionEvent e) {
 		if ( (smdata != null) && (smdata instanceof HasGeoRecord) ) {
 			HasGeoRecord hasGeoRecord = (HasGeoRecord)smdata;
 			GeoRecord geoRecord = hasGeoRecord.getGeoRecord();
-			GRShape shapeSource1 = geoRecord.getShape();
-			if ( shapeSource1 != null ) {
-				GeoProjection layerProjection = geoRecord.getLayer().getProjection();
-				if ( limitsProjection == null ) {
-					limitsProjection = layerProjection;
-				}
-				boolean doProject = GeoProjection.needToProject ( layerProjection, limitsProjection );
-				if ( doProject ) {
-					shapeSource1 = GeoProjection.projectShape( layerProjection, limitsProjection, shapeSource1, false );
-				}
-				if ( limits == null ) {
-					limits = new GRLimits(shapeSource1.xmin,shapeSource1.ymin,shapeSource1.xmax,shapeSource1.ymax);
-				}
-				else {
-					limits.max(shapeSource1.xmin,shapeSource1.ymin,shapeSource1.xmax,shapeSource1.ymax,true);
+			if ( geoRecord != null ) {
+				GRShape shapeSource1 = geoRecord.getShape();
+				if ( shapeSource1 != null ) {
+					GeoProjection layerProjection = geoRecord.getLayer().getProjection();
+					if ( limitsProjection == null ) {
+						limitsProjection = layerProjection;
+					}
+					boolean doProject = GeoProjection.needToProject ( layerProjection, limitsProjection );
+					if ( doProject ) {
+						shapeSource1 = GeoProjection.projectShape( layerProjection, limitsProjection, shapeSource1, false );
+					}
+					if ( limits == null ) {
+						limits = new GRLimits(shapeSource1.xmin,shapeSource1.ymin,shapeSource1.xmax,shapeSource1.ymax);
+					}
+					else {
+						limits.max(shapeSource1.xmin,shapeSource1.ymin,shapeSource1.xmax,shapeSource1.ymax,true);
+					}
 				}
 			}
 		}
@@ -480,27 +482,28 @@ public void actionPerformed(ActionEvent e) {
 		if ( (smdata != null) && (smdata instanceof HasGeoRecord) ) {
 			HasGeoRecord hasGeoRecord = (HasGeoRecord)smdata;
 			GeoRecord geoRecord = hasGeoRecord.getGeoRecord();
-			GRShape shapeSource2 = geoRecord.getShape();
-			if ( shapeSource2 != null ) {
-				GeoProjection layerProjection = geoRecord.getLayer().getProjection();
-				if ( limitsProjection == null ) {
-					limitsProjection = layerProjection;
-				}
-				boolean doProject = GeoProjection.needToProject ( layerProjection, limitsProjection );
-				if ( doProject ) {
-					shapeSource2 = GeoProjection.projectShape( layerProjection, limitsProjection, shapeSource2, false );
-				}
-				if ( limits == null ) {
-					limits = new GRLimits(shapeSource2.xmin,shapeSource2.ymin,shapeSource2.xmax,shapeSource2.ymax);
-				}
-				else {
-					limits.max(shapeSource2.xmin,shapeSource2.ymin,shapeSource2.xmax,shapeSource2.ymax,true);
+			if ( geoRecord != null ) {
+				GRShape shapeSource2 = geoRecord.getShape();
+				if ( shapeSource2 != null ) {
+					GeoProjection layerProjection = geoRecord.getLayer().getProjection();
+					if ( limitsProjection == null ) {
+						limitsProjection = layerProjection;
+					}
+					boolean doProject = GeoProjection.needToProject ( layerProjection, limitsProjection );
+					if ( doProject ) {
+						shapeSource2 = GeoProjection.projectShape( layerProjection, limitsProjection, shapeSource2, false );
+					}
+					if ( limits == null ) {
+						limits = new GRLimits(shapeSource2.xmin,shapeSource2.ymin,shapeSource2.xmax,shapeSource2.ymax);
+					}
+					else {
+						limits.max(shapeSource2.xmin,shapeSource2.ymin,shapeSource2.xmax,shapeSource2.ymax,true);
+					}
 				}
 			}
 		}
 		__dataset_wm.showOnMap ( opr,
-			"OpRight: " + getSelectedOperationalRight().getID() + " - " +
-			getSelectedOperationalRight().getName(), limits, limitsProjection );
+			"OpRight: " + opr.getID() + " - " + opr.getName(), limits, limitsProjection );
 	}
 	else if ( source == __showOnNetwork_JButton ) {
 		StateMod_Network_JFrame networkEditor = __dataset_wm.getNetworkEditor();

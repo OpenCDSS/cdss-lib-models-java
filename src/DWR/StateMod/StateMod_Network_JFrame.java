@@ -521,7 +521,7 @@ public void addAnnotationRenderer ( StateMod_Network_AnnotationRenderer renderer
 		// Scroll and zoom so the object is visible (do this even if no new data were added because
 		// the user may have asked to reposition the display to see the annotation)...
 		// Make the buffer relatively large due to wide text labels.
-		zoomToAnnotations ( .75, .1 );
+		zoomToAnnotations ( .2, .1 );
 	}
 }
 

@@ -61,6 +61,10 @@ public enum StateMod_OperationalRight_Metadata_SourceOrDestinationType
      */
     RESERVOIR_RIGHT("Reservoir Right"),
     /**
+     * River node.
+     */
+    RIVER_NODE("River Node"),
+    /**
      * Stream gage.
      */
     STREAM_GAGE("Stream Gage"),

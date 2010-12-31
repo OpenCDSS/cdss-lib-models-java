@@ -100,15 +100,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 
-import RTi.GIS.GeoView.GeoRecord;
-import RTi.GIS.GeoView.HasGeoRecord;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 
 public class StateMod_OperationalRight 
 extends StateMod_Data
-implements Cloneable, Comparable, HasGeoRecord
+implements Cloneable, Comparable
 
 {
 
@@ -247,13 +245,6 @@ private String __cx = "";
 // cidvri = ID is in base class identifier
 // nameo = Name is in base class name
 // ioprsw = on/off is in base class switch
-
-/**
-Reference to spatial data for this operational right -- currently NOT cloned.  If null, then no spatial data
-are available.  The location is a point for the destination of the operational right.  More extensive
-annotation of map and network views is done by determining other coordinate information on the fly.
-*/
-private GeoRecord __georecord = null;
 
 /**
 The metadata that corresponds to the operational right type, or null if the right type is not recognized.
@@ -682,14 +673,6 @@ public int getDumx() {
 }
 
 /**
-Get the geographical data associated with the diversion.
-@return the GeoRecord for the diversion.
-*/
-public GeoRecord getGeoRecord() {
-	return __georecord;
-}
-
-/**
 Return the array of monthly switch.
 */
 public int [] getImonsw() {
@@ -910,7 +893,6 @@ private void initialize() {
 	__oprLimit = 0.0;
 	__ioBeg = 0;
 	__ioEnd = 0;
-	__georecord = null;
 }
 
 public boolean hasImonsw() {
@@ -2002,14 +1984,6 @@ public void setDumx(String dumx)
 		Double d = (Double.parseDouble(dumx.trim()));
 		setDumx((int)d.doubleValue());
 	}
-}
-
-/**
-Set the geographic information object associated with the diversion.
-@param georecord Geographic record associated with the diversion.
-*/
-public void setGeoRecord ( GeoRecord georecord )
-{	__georecord = georecord;
 }
 
 /**
