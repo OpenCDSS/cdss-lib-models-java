@@ -98,7 +98,6 @@ import RTi.GIS.GeoView.GeoProjection;
 import RTi.GIS.GeoView.GeoRecord;
 import RTi.GIS.GeoView.HasGeoRecord;
 import RTi.GR.GRLimits;
-import RTi.GR.GRPoint;
 import RTi.GR.GRShape;
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.JScrollWorksheet;
@@ -438,53 +437,70 @@ public void actionPerformed(ActionEvent e) {
 		__searchName.setEditable(true);
 	}
 	else if ( source == __showOnMap_JButton ) {
-		// The button is only enabled if spatial data exist...
+		// The button is only enabled if some spatial data exist, but can be one or more of
+		// destination, source1, source2...
 		StateMod_OperationalRight opr = getSelectedOperationalRight();
 		StateMod_Data smdata = opr.lookupDestinationDataObject(__dataset);
-		GeoRecord geoRecord = ((HasGeoRecord)smdata).getGeoRecord();
-		GRShape shape = geoRecord.getShape();
-		// TODO SAM 2010-12-28 Need to include source and intervening structures...
-		GRLimits limits = new GRLimits(shape.xmin, shape.ymin, shape.xmax, shape.ymax);
+		GRLimits limits = null;
+		GeoProjection limitsProjection = null; // for the data limits
+		if ( (smdata != null) && (smdata instanceof HasGeoRecord) ) {
+			GeoRecord geoRecord = ((HasGeoRecord)smdata).getGeoRecord();
+			if ( geoRecord != null ) {
+				GRShape shapeDest = geoRecord.getShape();
+				if ( shapeDest != null ) {
+					limits = new GRLimits(shapeDest.xmin, shapeDest.ymin, shapeDest.xmax, shapeDest.ymax);
+					limitsProjection = geoRecord.getLayer().getProjection();
+				}
+			}
+		}
 		// Extend the limits for source1 and source2
 		smdata = opr.lookupSource1DataObject(__dataset);
-		GeoProjection geoRecordProjection = geoRecord.getLayer().getProjection();
 		if ( (smdata != null) && (smdata instanceof HasGeoRecord) ) {
 			HasGeoRecord hasGeoRecord = (HasGeoRecord)smdata;
-			geoRecord = hasGeoRecord.getGeoRecord();
-			GRPoint pointSource1 = (GRPoint)geoRecord.getShape();
-			GeoProjection layerProjection = geoRecord.getLayer().getProjection();
-			boolean doProject = GeoProjection.needToProject ( layerProjection, geoRecordProjection );
-			if ( doProject ) {
-				pointSource1 = (GRPoint)GeoProjection.projectShape( layerProjection, geoRecordProjection, pointSource1, false );
-			}
-			if ( limits == null ) {
-				limits = new GRLimits(pointSource1.x,pointSource1.y,pointSource1.x,pointSource1.y);
-			}
-			else {
-				limits.max(pointSource1.x,pointSource1.y,pointSource1.x,pointSource1.y,true);
+			GeoRecord geoRecord = hasGeoRecord.getGeoRecord();
+			GRShape shapeSource1 = geoRecord.getShape();
+			if ( shapeSource1 != null ) {
+				GeoProjection layerProjection = geoRecord.getLayer().getProjection();
+				if ( limitsProjection == null ) {
+					limitsProjection = layerProjection;
+				}
+				boolean doProject = GeoProjection.needToProject ( layerProjection, limitsProjection );
+				if ( doProject ) {
+					shapeSource1 = GeoProjection.projectShape( layerProjection, limitsProjection, shapeSource1, false );
+				}
+				if ( limits == null ) {
+					limits = new GRLimits(shapeSource1.xmin,shapeSource1.ymin,shapeSource1.xmax,shapeSource1.ymax);
+				}
+				else {
+					limits.max(shapeSource1.xmin,shapeSource1.ymin,shapeSource1.xmax,shapeSource1.ymax,true);
+				}
 			}
 		}
 		smdata = opr.lookupSource2DataObject(__dataset);
 		if ( (smdata != null) && (smdata instanceof HasGeoRecord) ) {
 			HasGeoRecord hasGeoRecord = (HasGeoRecord)smdata;
-			geoRecord = hasGeoRecord.getGeoRecord();
-			GRPoint pointSource2 = (GRPoint)geoRecord.getShape();
-			GeoProjection layerProjection = geoRecord.getLayer().getProjection();
-			boolean doProject = GeoProjection.needToProject ( layerProjection, geoRecordProjection );
-			if ( doProject ) {
-				pointSource2 = (GRPoint)GeoProjection.projectShape( layerProjection, geoRecordProjection, pointSource2, false );
-			}
-			if ( limits == null ) {
-				limits = new GRLimits(pointSource2.x,pointSource2.y,pointSource2.x,pointSource2.y);
-			}
-			else {
-				limits.max(pointSource2.x,pointSource2.y,pointSource2.x,pointSource2.y,true);
+			GeoRecord geoRecord = hasGeoRecord.getGeoRecord();
+			GRShape shapeSource2 = geoRecord.getShape();
+			if ( shapeSource2 != null ) {
+				GeoProjection layerProjection = geoRecord.getLayer().getProjection();
+				if ( limitsProjection == null ) {
+					limitsProjection = layerProjection;
+				}
+				boolean doProject = GeoProjection.needToProject ( layerProjection, limitsProjection );
+				if ( doProject ) {
+					shapeSource2 = GeoProjection.projectShape( layerProjection, limitsProjection, shapeSource2, false );
+				}
+				if ( limits == null ) {
+					limits = new GRLimits(shapeSource2.xmin,shapeSource2.ymin,shapeSource2.xmax,shapeSource2.ymax);
+				}
+				else {
+					limits.max(shapeSource2.xmin,shapeSource2.ymin,shapeSource2.xmax,shapeSource2.ymax,true);
+				}
 			}
 		}
 		__dataset_wm.showOnMap ( opr,
-			"OpRight: " + getSelectedOperationalRight().getID() + " - " + getSelectedOperationalRight().getName(),
-			limits,
-			geoRecordProjection );
+			"OpRight: " + getSelectedOperationalRight().getID() + " - " +
+			getSelectedOperationalRight().getName(), limits, limitsProjection );
 	}
 	else if ( source == __showOnNetwork_JButton ) {
 		StateMod_Network_JFrame networkEditor = __dataset_wm.getNetworkEditor();
