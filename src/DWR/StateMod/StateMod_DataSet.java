@@ -297,7 +297,7 @@ public static final int SM_GAINS = 2;
 public final int WAIT = 0;
 public final int READY = 1;
 
-private List __processListeners = null;
+private List<ProcessListener> __processListeners = null;
 /**
 Should time series be read when reading the data set (will be slower)?
 */
@@ -345,6 +345,8 @@ public final static int
 		COMP_RESPONSE = 1,
 		COMP_CONTROL = 2,
 		COMP_OUTPUT_REQUEST = 3,
+		// TODO SAM 2011-01-01 Need to enable the following somehow
+		//COMP_REACH_DATA (*rch)
 	
 	COMP_STREAMGAGE_GROUP = 4,
 		COMP_STREAMGAGE_STATIONS = 5,
@@ -377,63 +379,68 @@ public final static int
 
 	COMP_PRECIPITATION_GROUP = 27,
 		COMP_PRECIPITATION_TS_MONTHLY = 28,
+		COMP_PRECIPITATION_TS_YEARLY = 29,
 
-	COMP_EVAPORATION_GROUP = 29,
-		COMP_EVAPORATION_TS_MONTHLY = 30,
+	COMP_EVAPORATION_GROUP = 30,
+		COMP_EVAPORATION_TS_MONTHLY = 31,
+		COMP_EVAPORATION_TS_YEARLY = 32,
 
-	COMP_RESERVOIR_GROUP = 31,
-		COMP_RESERVOIR_STATIONS = 32,
-			COMP_RESERVOIR_STATION_ACCOUNTS = 3201,
-			COMP_RESERVOIR_STATION_PRECIP_STATIONS = 3202,
-			COMP_RESERVOIR_STATION_EVAP_STATIONS = 3203,
-			COMP_RESERVOIR_STATION_CURVE = 3204,
-			COMP_RESERVOIR_STATION_COLLECTIONS = 3205,
-		COMP_RESERVOIR_RIGHTS = 33,
-		COMP_RESERVOIR_CONTENT_TS_MONTHLY = 34,
-		COMP_RESERVOIR_CONTENT_TS_DAILY = 35,
-		COMP_RESERVOIR_TARGET_TS_MONTHLY = 36,
-		COMP_RESERVOIR_TARGET_TS_DAILY = 37,
+	COMP_RESERVOIR_GROUP = 33,
+		COMP_RESERVOIR_STATIONS = 34,
+			COMP_RESERVOIR_STATION_ACCOUNTS = 3401,
+			COMP_RESERVOIR_STATION_PRECIP_STATIONS = 3402,
+			COMP_RESERVOIR_STATION_EVAP_STATIONS = 3403,
+			COMP_RESERVOIR_STATION_CURVE = 3404,
+			COMP_RESERVOIR_STATION_COLLECTIONS = 3405,
+		COMP_RESERVOIR_RIGHTS = 35,
+		COMP_RESERVOIR_CONTENT_TS_MONTHLY = 36,
+		COMP_RESERVOIR_CONTENT_TS_DAILY = 37,
+		COMP_RESERVOIR_TARGET_TS_MONTHLY = 38,
+		COMP_RESERVOIR_TARGET_TS_DAILY = 39,
+		COMP_RESERVOIR_RETURN = 40,
 
-	COMP_INSTREAM_GROUP = 38,
-		COMP_INSTREAM_STATIONS = 39,
-		COMP_INSTREAM_RIGHTS = 40,
-		COMP_INSTREAM_DEMAND_TS_MONTHLY = 41,
-		COMP_INSTREAM_DEMAND_TS_AVERAGE_MONTHLY = 42,
-		COMP_INSTREAM_DEMAND_TS_DAILY = 43,
+	COMP_INSTREAM_GROUP = 41,
+		COMP_INSTREAM_STATIONS = 42,
+		COMP_INSTREAM_RIGHTS = 43,
+		COMP_INSTREAM_DEMAND_TS_MONTHLY = 44,
+		COMP_INSTREAM_DEMAND_TS_AVERAGE_MONTHLY = 45,
+		COMP_INSTREAM_DEMAND_TS_DAILY = 46,
 
-	COMP_WELL_GROUP = 44,
-		COMP_WELL_STATIONS = 45,
-			COMP_WELL_STATION_DELAY_TABLES = 4501,
-			COMP_WELL_STATION_DEPLETION_TABLES = 4502,
-			COMP_WELL_STATION_COLLECTIONS = 4503,
-		COMP_WELL_RIGHTS = 46,
-		COMP_WELL_PUMPING_TS_MONTHLY = 47,
-		COMP_WELL_PUMPING_TS_DAILY = 48,
-		COMP_WELL_DEMAND_TS_MONTHLY = 49,
-		COMP_WELL_DEMAND_TS_DAILY = 50,
+	COMP_WELL_GROUP = 47,
+		COMP_WELL_STATIONS = 48,
+			COMP_WELL_STATION_DELAY_TABLES = 4801,
+			COMP_WELL_STATION_DEPLETION_TABLES = 4802,
+			COMP_WELL_STATION_COLLECTIONS = 4803,
+		COMP_WELL_RIGHTS = 49,
+		COMP_WELL_PUMPING_TS_MONTHLY = 50,
+		COMP_WELL_PUMPING_TS_DAILY = 51,
+		COMP_WELL_DEMAND_TS_MONTHLY = 52,
+		COMP_WELL_DEMAND_TS_DAILY = 53,
 
-	COMP_PLAN_GROUP = 51,
-		COMP_PLANS = 52,
+	COMP_PLAN_GROUP = 54,
+		COMP_PLANS = 55,
+		COMP_PLAN_WELL_AUGMENTATION = 56,
+		COMP_PLAN_RETURN = 57,
 
-	COMP_STREAMESTIMATE_GROUP = 53,
-		COMP_STREAMESTIMATE_STATIONS = 54,
-		COMP_STREAMESTIMATE_COEFFICIENTS = 55,
-		COMP_STREAMESTIMATE_BASEFLOW_TS_MONTHLY = 56,
-		COMP_STREAMESTIMATE_BASEFLOW_TS_DAILY = 57,
+	COMP_STREAMESTIMATE_GROUP = 58,
+		COMP_STREAMESTIMATE_STATIONS = 59,
+		COMP_STREAMESTIMATE_COEFFICIENTS = 60,
+		COMP_STREAMESTIMATE_BASEFLOW_TS_MONTHLY = 61,
+		COMP_STREAMESTIMATE_BASEFLOW_TS_DAILY = 62,
 
-	COMP_RIVER_NETWORK_GROUP = 58,
-		COMP_RIVER_NETWORK = 59,	// StateMod RIN
-		COMP_NETWORK = 60,		// HydroBase_NodeNetwork
+	COMP_RIVER_NETWORK_GROUP = 63,
+		COMP_RIVER_NETWORK = 64, // StateMod RIN
+		COMP_NETWORK = 65, // HydroBase_NodeNetwork
 
-	COMP_OPERATION_GROUP = 61,
-		COMP_OPERATION_RIGHTS = 62,
-		COMP_CALL_TS_DAILY = 63,
+	COMP_OPERATION_GROUP = 66,
+		COMP_OPERATION_RIGHTS = 67,
+		COMP_DOWNSTREAM_CALL_TS_DAILY = 68,
 
-	COMP_SANJUAN_GROUP = 64,
-		COMP_SANJUAN_RIP = 65,
+	COMP_SANJUAN_GROUP = 69,
+		COMP_SANJUAN_RIP = 70,
 
-	COMP_GEOVIEW_GROUP = 66,
-		COMP_GEOVIEW = 67;
+	COMP_GEOVIEW_GROUP = 71,
+		COMP_GEOVIEW = 72;
 
 // The data set component names, including the component groups.  Subcomponent
 // names are defined after this array and are currently treated as special cases.
@@ -472,9 +479,11 @@ private static String[] __component_names = {
 		
 	"Precipitation Data",
 		"Precipitation Time Series (Monthly)",
+		"Precipitation Time Series (Yearly)",
 
 	"Evaporation Data",
 		"Evaporation Time Series (Monthly)",
+		"Evaporation Time Series (Yearly)",
 	
 	"Reservoir Data",
 		"Reservoir Stations",
@@ -483,6 +492,7 @@ private static String[] __component_names = {
 		"Reservoir Content TS, End of Day (Daily)",
 		"Reservoir Target TS (Monthly)",
 		"Reservoir Target TS (Daily)",
+		"Reservoir Return Flows",
 	
 	"Instream Flow Data",
 		"Instream Flow Stations",
@@ -501,6 +511,8 @@ private static String[] __component_names = {
 
 	"Plan Data",
 		"Plans",
+		"Plan Well Augmentation Data",
+		"Plan Return Flows",
 	
 	"Stream Estimate Data",
 		"Stream Estimate Stations",
@@ -514,7 +526,7 @@ private static String[] __component_names = {
 		
 	"Operational Data",
 		"Operational Rights",
-		"Call Time Series (Daily)",
+		"Downstream Call Time Series (Daily)",
 
 	"San Juan Sediment Recovery Plan Data",
 		"San Juan Sediment Recovery Plan",
@@ -573,9 +585,11 @@ private static int[] __component_types = {
 
 	COMP_PRECIPITATION_GROUP,
 		COMP_PRECIPITATION_TS_MONTHLY,
+		COMP_PRECIPITATION_TS_YEARLY,
 
 	COMP_EVAPORATION_GROUP,
 		COMP_EVAPORATION_TS_MONTHLY,
+		COMP_EVAPORATION_TS_YEARLY,
 
 	COMP_RESERVOIR_GROUP,
 		COMP_RESERVOIR_STATIONS,
@@ -584,6 +598,7 @@ private static int[] __component_types = {
 		COMP_RESERVOIR_CONTENT_TS_DAILY,
 		COMP_RESERVOIR_TARGET_TS_MONTHLY,
 		COMP_RESERVOIR_TARGET_TS_DAILY,
+		COMP_RESERVOIR_RETURN,
 
 	COMP_INSTREAM_GROUP,
 		COMP_INSTREAM_STATIONS,
@@ -602,6 +617,8 @@ private static int[] __component_types = {
 
 	COMP_PLAN_GROUP,
 		COMP_PLANS,
+		COMP_PLAN_WELL_AUGMENTATION,
+		COMP_PLAN_RETURN,
 
 	COMP_STREAMESTIMATE_GROUP,
 		COMP_STREAMESTIMATE_STATIONS,
@@ -615,7 +632,7 @@ private static int[] __component_types = {
 
 	COMP_OPERATION_GROUP,
 		COMP_OPERATION_RIGHTS,
-		COMP_CALL_TS_DAILY,
+		COMP_DOWNSTREAM_CALL_TS_DAILY,
 
 	COMP_SANJUAN_GROUP,
 		COMP_SANJUAN_RIP,
@@ -663,8 +680,10 @@ private static String[] __component_file_extensions = {
 	
 	"Precipitation Group",
 		"pre",
+		"pra",
 		
 	"Evaporation Group",
+		"evm",
 		"eva",
 
 	"Reservoir Group",
@@ -673,7 +692,7 @@ private static String[] __component_file_extensions = {
 		"eom",
 		"eoy",
 		"tar",
-		"tad",
+		"rrf",
 	
 	"Instream Group",
 		"ifs",
@@ -692,6 +711,8 @@ private static String[] __component_file_extensions = {
 
 	"Plan Group",
 		"pln",
+		"plw",
+		"prf",
 
 	"StreamEstimate Group",
 		"ses",
@@ -754,9 +775,11 @@ private static String[] __statemod_file_properties = {
 	
 	"Precipitation Data",
 		"Precipitation_Monthly",
+		"Precipitation_Annual",
 		
 	"Evaporation Data",
 		"Evaporation_Monthly",
+		"Evaporation_Annual",
 
 	"Reservoir Data",
 		"Reservoir_Station",
@@ -765,6 +788,7 @@ private static String[] __statemod_file_properties = {
 		"Reservoir_Historic_Daily",
 		"Reservoir_Target_Monthly",
 		"Reservoir_Target_Daily",
+		"Reservoir_Return",
 	
 	"Instream Flow Data",
 		"Instreamflow_Station",
@@ -783,6 +807,8 @@ private static String[] __statemod_file_properties = {
 
 	"Plan Data",
 		"Plan_Data",
+		"Plan_Wells",
+		"Plan_Return",
 
 	"Stream (Estimated) Data",
 		"StreamEstimate_Station",
@@ -833,26 +859,26 @@ primary components are used to get the list of identifiers for displays and
 processing.  The number of values should agree with the list above.
 */
 private static int[] __component_group_primaries = {
-		COMP_RESPONSE,			// COMP_CONTROL_GROUP
-		COMP_STREAMGAGE_STATIONS,	// COMP_STREAMGAGE_GROUP
-		COMP_DELAY_TABLES_MONTHLY,// COMP_DELAY_TABLES_MONTHLY_GROUP
-		COMP_DELAY_TABLES_DAILY,	// COMP_DELAY_TABLES_DAILY_GROUP
-		COMP_DIVERSION_STATIONS,	// COMP_DIVERSION_GROUP
-		COMP_PRECIPITATION_TS_MONTHLY,	// COMP_PRECIPITATION_GROUP
-		COMP_EVAPORATION_TS_MONTHLY,	// COMP_EVAPORATION_GROUP
-		COMP_RESERVOIR_STATIONS,	// COMP_RESERVOIR_GROUP
-		COMP_INSTREAM_STATIONS,		// COMP_INSTREAM_GROUP
-		COMP_WELL_STATIONS,		// COMP_WELL_GROUP
-		COMP_PLANS,			// COMP_PLAN_GROUP
-		COMP_STREAMESTIMATE_STATIONS,	// COMP_STREAMESTIMATE_GROUP
-		COMP_RIVER_NETWORK,		// COMP_RIVER_NETWORK_GROUP
-		COMP_OPERATION_RIGHTS,		// COMP_OPERATION_GROUP
-		COMP_SANJUAN_RIP,		// COMP_SANJUAN_GROUP
-		COMP_GEOVIEW			// COMP_GEOVIEW_GROUP
+		COMP_RESPONSE, // COMP_CONTROL_GROUP
+		COMP_STREAMGAGE_STATIONS, // COMP_STREAMGAGE_GROUP
+		COMP_DELAY_TABLES_MONTHLY, // COMP_DELAY_TABLES_MONTHLY_GROUP
+		COMP_DELAY_TABLES_DAILY, // COMP_DELAY_TABLES_DAILY_GROUP
+		COMP_DIVERSION_STATIONS, // COMP_DIVERSION_GROUP
+		COMP_PRECIPITATION_TS_MONTHLY, // COMP_PRECIPITATION_GROUP
+		COMP_EVAPORATION_TS_MONTHLY, // COMP_EVAPORATION_GROUP
+		COMP_RESERVOIR_STATIONS, // COMP_RESERVOIR_GROUP
+		COMP_INSTREAM_STATIONS, // COMP_INSTREAM_GROUP
+		COMP_WELL_STATIONS, // COMP_WELL_GROUP
+		COMP_PLANS, // COMP_PLAN_GROUP
+		COMP_STREAMESTIMATE_STATIONS, // COMP_STREAMESTIMATE_GROUP
+		COMP_RIVER_NETWORK, // COMP_RIVER_NETWORK_GROUP
+		COMP_OPERATION_RIGHTS, // COMP_OPERATION_GROUP
+		COMP_SANJUAN_RIP, // COMP_SANJUAN_GROUP
+		COMP_GEOVIEW // COMP_GEOVIEW_GROUP
 };		
 
 /**
-Array indicating the groups for components.
+Array indicating the groups for each component.
 */
 private static int[] __component_group_assignments = {
 	COMP_CONTROL_GROUP,
@@ -889,11 +915,14 @@ private static int[] __component_group_assignments = {
 
 	COMP_PRECIPITATION_GROUP,
 		COMP_PRECIPITATION_GROUP,
+		COMP_PRECIPITATION_GROUP,
 
 	COMP_EVAPORATION_GROUP,
 		COMP_EVAPORATION_GROUP,
+		COMP_EVAPORATION_GROUP,
 
 	COMP_RESERVOIR_GROUP,
+		COMP_RESERVOIR_GROUP,
 		COMP_RESERVOIR_GROUP,
 		COMP_RESERVOIR_GROUP,
 		COMP_RESERVOIR_GROUP,
@@ -917,6 +946,8 @@ private static int[] __component_group_assignments = {
 		COMP_WELL_GROUP,
 
 	COMP_PLAN_GROUP,
+		COMP_PLAN_GROUP,
+		COMP_PLAN_GROUP,
 		COMP_PLAN_GROUP,
 
 	COMP_STREAMESTIMATE_GROUP,
@@ -970,50 +1001,55 @@ private static String[] __component_ts_data_types = {
 	"",	// "Diversion Data",
 		"",	// "Diversion Stations",
 		"TotalWaterRights",	// "Diversion Rights",
-		"DiversionHist",	// "Diversion Historical TS (Monthly)",
-		"DiversionHist",	// "Diversion Historical TS (Daily)",
-		"Demand",		// "Demand TS (Monthly)",
+		"DiversionHist", // "Diversion Historical TS (Monthly)",
+		"DiversionHist", // "Diversion Historical TS (Daily)",
+		"Demand", // "Demand TS (Monthly)",
 		"DemandOverride",
 		"DemandAverage",
 		"Demand",
-		"",			// "Irrigation Practice TS (Yearly)",
-		"CWR",	// "Consumptive Water Requirement (Monthly)",
-		"CWR",	// "Consumptive Water Requirement (Daily)",
+		"", // "Irrigation Practice TS (Yearly)",
+		"CWR", // "Consumptive Water Requirement (Monthly)",
+		"CWR", // "Consumptive Water Requirement (Daily)",
 		"",	// "Soil Moisture",
 		
 	"",	// "Precipitation Data",
-		"Precipitation",	//"Precipitation Time Series (Monthly)",
+		"Precipitation", //"Precipitation Time Series (Monthly)",
+		"Precipitation", //"Precipitation Time Series (Yearly)",
 
 	"",	// "Evaporation Data",
-		"Evaporation",		// "Evaporation Time Series (Monthly)",
+		"Evaporation", // "Evaporation Time Series (Monthly)",
+		"Evaporation", // "Evaporation Time Series (Yearly)",
 	
 	"",	// "Reservoir Data",
 		"",	// "Reservoir Stations",
 		"TotalWaterRights",	// "Reservoir Rights",
 		"ContentEOMHist", //"Content, End of Month (Monthly)",
 		"ContentEODHist", // "Content, End of Day (Daily)",
-		"Target",	// "Reservoir Targets (Monthly)",
-		"Target",	// "Reservoir Targets (Daily)",
+		"Target", // "Reservoir Targets (Monthly)",
+		"Target", // "Reservoir Targets (Daily)",
 				// "Min" and "Max" must be appended since the
 				// targets always go in pairs.
+		"", // Returns
 	
 	"",	// "Instream Flow Data",
 		"",	// "Instream Flow Stations",
 		"TotalWaterRights",	// "Instream Flow Rights",
-		"Demand",	// "Demand (Monthly)",
-		"DemandAverage",	// "Demand (Average Monthly)",
-		"Demand",	// "Demand (Daily)",
+		"Demand", // "Demand (Monthly)",
+		"DemandAverage", // "Demand (Average Monthly)",
+		"Demand", // "Demand (Daily)",
 
 	"",	// "Well Data",
 		"",	// "Well Stations",
 		"TotalWaterRights",	// "Well Rights",
-		"PumpingHist",	// "Well Historical Pumping (Monthly)",
-		"PumpingHist",	// "Well Historical Pumping (Daily)",
-		"Demand",		// "Demand (Monthly)",
-		"Demand",		// "Demand (Daily)",
+		"PumpingHist", // "Well Historical Pumping (Monthly)",
+		"PumpingHist", // "Well Historical Pumping (Daily)",
+		"Demand", // "Demand (Monthly)",
+		"Demand", // "Demand (Daily)",
 
 	"",	// "Plan Data",
 		"",	// "Plans",
+		"", // Well data
+		"", // Return
 	
 	"",	// "Stream Estimate Data",
 		"",	// "Stream Estimate Stations",
@@ -1023,8 +1059,7 @@ private static String[] __component_ts_data_types = {
 
 	"",	// "River Network Data",
 		"",	// "River Network",
-		"",	// "Network (Graphical)",	// RTi version (behind
-							// the scenes)
+		"",	// "Network (Graphical)", // For StateDMI and GUI
 		
 	"",	// "Operational Data",
 		"",	// "Operational Rights",
@@ -1043,89 +1078,94 @@ series.  This information is important because the data types themselves may
 not be unique and the interval must be examined.
 */
 private static int[] __component_ts_data_intervals = {
-	TimeInterval.UNKNOWN,	// "Control Data",
-		TimeInterval.UNKNOWN,	// "Response",
-		TimeInterval.UNKNOWN,	// "Control",
-		TimeInterval.UNKNOWN,	// "Output Request",
+	TimeInterval.UNKNOWN, // "Control Data",
+		TimeInterval.UNKNOWN, // "Response",
+		TimeInterval.UNKNOWN, // "Control",
+		TimeInterval.UNKNOWN, // "Output Request",
 
-	TimeInterval.UNKNOWN,	// "Stream Gage Data",
-		TimeInterval.UNKNOWN,	// "Stream Gage Stations",
+	TimeInterval.UNKNOWN, // "Stream Gage Data",
+		TimeInterval.UNKNOWN, // "Stream Gage Stations",
 		TimeInterval.MONTH,
 		TimeInterval.DAY,
 		TimeInterval.MONTH,
 		TimeInterval.DAY,
 
-	TimeInterval.UNKNOWN,	// "Delay Table (Monthly) Data",
-		TimeInterval.UNKNOWN,	// "Delay Tables (Monthly)",
+	TimeInterval.UNKNOWN, // "Delay Table (Monthly) Data",
+		TimeInterval.UNKNOWN, // "Delay Tables (Monthly)",
 
-	TimeInterval.UNKNOWN,	// "Delay Table (Daily) Data",
-		TimeInterval.UNKNOWN,	// "Delay Tables (Daily)",
+	TimeInterval.UNKNOWN, // "Delay Table (Daily) Data",
+		TimeInterval.UNKNOWN, // "Delay Tables (Daily)",
 
-	TimeInterval.UNKNOWN,	// "Diversion Data",
-		TimeInterval.UNKNOWN,	// "Diversion Stations",
-		TimeInterval.UNKNOWN,	// "Diversion Rights",
-		TimeInterval.MONTH,	// "Diversion Historical TS (Monthly)",
-		TimeInterval.DAY,	// "Diversion Historical TS (Daily)",
-		TimeInterval.MONTH,	// "Demand TS (Monthly)",
+	TimeInterval.UNKNOWN, // "Diversion Data",
+		TimeInterval.UNKNOWN, // "Diversion Stations",
+		TimeInterval.UNKNOWN, // "Diversion Rights",
+		TimeInterval.MONTH, // "Diversion Historical TS (Monthly)",
+		TimeInterval.DAY, // "Diversion Historical TS (Daily)",
+		TimeInterval.MONTH, // "Demand TS (Monthly)",
 		TimeInterval.MONTH,
 		TimeInterval.MONTH,
 		TimeInterval.DAY,
-		TimeInterval.YEAR,	// "Irrigation Practice TS (Yearly)",
-		TimeInterval.MONTH,	// "Consumptive Water Req. (Monthly)",
-		TimeInterval.DAY,	// "Consumptive Water Req. (Daily)",
-		TimeInterval.UNKNOWN,	// "Soil Moisture",
+		TimeInterval.YEAR, // "Irrigation Practice TS (Yearly)",
+		TimeInterval.MONTH, // "Consumptive Water Req. (Monthly)",
+		TimeInterval.DAY, // "Consumptive Water Req. (Daily)",
+		TimeInterval.UNKNOWN, // "Soil Moisture",
 		
-	TimeInterval.UNKNOWN,	// "Precipitation Data",
-		TimeInterval.MONTH,	//"Precipitation Time Series (Monthly)",
+	TimeInterval.UNKNOWN, // "Precipitation Data",
+		TimeInterval.MONTH, //"Precipitation Time Series (Monthly)",
+		TimeInterval.YEAR, //"Precipitation Time Series (Yearly)",
 
-	TimeInterval.UNKNOWN,	// "Evaporation Data",
-		TimeInterval.MONTH,	// "Evaporation Time Series (Monthly)",
+	TimeInterval.UNKNOWN, // "Evaporation Data",
+		TimeInterval.MONTH, // "Evaporation Time Series (Monthly)",
+		TimeInterval.YEAR, // "Evaporation Time Series (Yearly)",
 	
-	TimeInterval.UNKNOWN,	// "Reservoir Data",
-		TimeInterval.UNKNOWN,	// "Reservoir Stations",
-		TimeInterval.UNKNOWN,	// "Reservoir Rights",
-		TimeInterval.MONTH,	// "Content, End of Month (Monthly)",
-		TimeInterval.DAY,	// "Content, End of Day (Daily)",
-		TimeInterval.MONTH,	// "Reservoir Targets (Monthly)",
-		TimeInterval.DAY,	// "Reservoir Targets (Daily)"
+	TimeInterval.UNKNOWN, // "Reservoir Data",
+		TimeInterval.UNKNOWN, // "Reservoir Stations",
+		TimeInterval.UNKNOWN, // "Reservoir Rights",
+		TimeInterval.MONTH, // "Content, End of Month (Monthly)",
+		TimeInterval.DAY, // "Content, End of Day (Daily)",
+		TimeInterval.MONTH, // "Reservoir Targets (Monthly)",
+		TimeInterval.DAY, // "Reservoir Targets (Daily)"
+		TimeInterval.UNKNOWN, // "Return flow",
 	
-	TimeInterval.UNKNOWN,	// "Instream Flow Data",
-		TimeInterval.UNKNOWN,	// "Instream Flow Stations",
-		TimeInterval.UNKNOWN,	// "Instream Flow Rights",
-		TimeInterval.MONTH,	// "Demand (Monthly)",
-		TimeInterval.MONTH,	// "Demand (Average Monthly)",
-		TimeInterval.DAY,	// "Demand (Daily)",
+	TimeInterval.UNKNOWN, // "Instream Flow Data",
+		TimeInterval.UNKNOWN, // "Instream Flow Stations",
+		TimeInterval.UNKNOWN, // "Instream Flow Rights",
+		TimeInterval.MONTH, // "Demand (Monthly)",
+		TimeInterval.MONTH, // "Demand (Average Monthly)",
+		TimeInterval.DAY, // "Demand (Daily)",
 
-	TimeInterval.UNKNOWN,	// "Well Data",
-		TimeInterval.UNKNOWN,	// "Well Stations",
-		TimeInterval.UNKNOWN,	// "Well Rights",
-		TimeInterval.MONTH,	// "Well Historical Pumping (Monthly)",
-		TimeInterval.DAY,	// "Well Historical Pumping (Daily)",
-		TimeInterval.MONTH,	// "Demand (Monthly)",
-		TimeInterval.DAY,	// "Demand (Daily)",
+	TimeInterval.UNKNOWN, // "Well Data",
+		TimeInterval.UNKNOWN, // "Well Stations",
+		TimeInterval.UNKNOWN, // "Well Rights",
+		TimeInterval.MONTH, // "Well Historical Pumping (Monthly)",
+		TimeInterval.DAY, // "Well Historical Pumping (Daily)",
+		TimeInterval.MONTH, // "Demand (Monthly)",
+		TimeInterval.DAY, // "Demand (Daily)",
 
-	TimeInterval.UNKNOWN,	// "Plan Data",
-		TimeInterval.UNKNOWN,	// "Plans",
+	TimeInterval.UNKNOWN, // "Plan Data",
+		TimeInterval.UNKNOWN, // "Plans",
+		TimeInterval.UNKNOWN, // "Well augmentation,
+		TimeInterval.UNKNOWN, // "Return",
 	
-	TimeInterval.UNKNOWN,	// "Stream Estimate Data",
-		TimeInterval.UNKNOWN,	// "Stream Estimate Stations",
-		TimeInterval.UNKNOWN,	// "Stream Estimate Coefficients",
-		TimeInterval.MONTH,	// "Stream Base TS (Monthly)",
-		TimeInterval.DAY,	// "Stream Base TS (Daily)",
+	TimeInterval.UNKNOWN, // "Stream Estimate Data",
+		TimeInterval.UNKNOWN, // "Stream Estimate Stations",
+		TimeInterval.UNKNOWN, // "Stream Estimate Coefficients",
+		TimeInterval.MONTH, // "Stream Base TS (Monthly)",
+		TimeInterval.DAY, // "Stream Base TS (Daily)",
 
-	TimeInterval.UNKNOWN,	// "River Network Data",
-		TimeInterval.UNKNOWN,	// "River Network",
-		TimeInterval.UNKNOWN,	// "Network (Graphical)"
+	TimeInterval.UNKNOWN, // "River Network Data",
+		TimeInterval.UNKNOWN, // "River Network",
+		TimeInterval.UNKNOWN, // "Network (Graphical)"
 		
-	TimeInterval.UNKNOWN,	// "Operational Data",
-		TimeInterval.UNKNOWN,	// "Operational Rights",
-		TimeInterval.DAY,	// "Call time series",
+	TimeInterval.UNKNOWN, // "Operational Data",
+		TimeInterval.UNKNOWN, // "Operational Rights",
+		TimeInterval.DAY, // "Call time series",
 
-	TimeInterval.UNKNOWN,	// "San Juan Sediment Recovery Plan Data",
-		TimeInterval.UNKNOWN,	// "San Juan Sediment Recovery Plan",
+	TimeInterval.UNKNOWN, // "San Juan Sediment Recovery Plan Data",
+		TimeInterval.UNKNOWN, // "San Juan Sediment Recovery Plan",
 	
-	TimeInterval.UNKNOWN,	// "Spatial Data",
-		TimeInterval.UNKNOWN	//"GeoView Project"
+	TimeInterval.UNKNOWN, // "Spatial Data",
+		TimeInterval.UNKNOWN //"GeoView Project"
 };
 
 /**
@@ -1169,10 +1209,12 @@ private static String[] __component_ts_data_units = {
 		"",	// "Soil Moisture",
 		
 	"",	// "Precipitation Data",
-		"Precipitation",	//"Precipitation Time Series (Monthly)",
+		"IN", //"Precipitation Time Series (Monthly)",
+		"IN", //"Precipitation Time Series (Yearly)",
 
 	"",	// "Evaporation Data",
-		"Evaporation",		// "Evaporation Time Series (Monthly)",
+		"IN", // "Evaporation Time Series (Monthly)",
+		"IN", // "Evaporation Time Series (Yearly)",
 	
 	"",	// "Reservoir Data",
 		"",	// "Reservoir Stations",
@@ -1181,6 +1223,7 @@ private static String[] __component_ts_data_units = {
 		"ACFT", // "Content, End of Day (Daily)",
 		"ACFT",	// "Reservoir Targets (Monthly)",
 		"ACFT",	// "Reservoir Targets (Daily)",
+		"",	// "Return",
 	
 	"",	// "Instream Flow Data",
 		"",	// "Instream Flow Stations",
@@ -1199,6 +1242,8 @@ private static String[] __component_ts_data_units = {
 
 	"",	// "Plan Data",
 		"",	// "Plans",
+		"",	// "Well augmentation",
+		"",	// "Return",
 	
 	"",	// "Stream Estimate Data",
 		"",	// "Stream Estimate Stations",
@@ -1208,8 +1253,7 @@ private static String[] __component_ts_data_units = {
 
 	"",	// "River Network Data",
 		"",	// "River Network",
-		"",	// "Network (Graphical)",	// RTi version (behind
-							// the scenes)
+		"",	// "Network (Graphical)",
 		
 	"",	// "Operational Data",
 		"",	// "Operational Rights",
@@ -1444,14 +1488,14 @@ public StateMod_DataSet ( StateMod_DataSet dataset, boolean deep_copy )
 
 	// Add each component, doing a shallow copy...
 
-	List data_Vector = dataset.getComponents();
+	List<DataSetComponent> data_Vector = dataset.getComponents();
 	int size = 0;
 	if (data_Vector != null) {
 		size = data_Vector.size();
 	}
 	DataSetComponent comp, comp2, newcomp = null, newcomp2;
 	for ( int i = 0; i < size; i++ ) {
-		comp = (DataSetComponent)data_Vector.get(i);
+		comp = data_Vector.get(i);
 		if ( comp == null ) {
 			addComponent ( null );
 		}
@@ -1483,8 +1527,8 @@ public StateMod_DataSet ( StateMod_DataSet dataset, boolean deep_copy )
 						newcomp.addComponent (newcomp2);
 					}
 					catch ( Exception e ) {
-						Message.printWarning ( 2, routine, "Error copying component." );
-						Message.printWarning ( 2, routine, e );
+						Message.printWarning ( 3, routine, "Error copying component." );
+						Message.printWarning ( 3, routine, e );
 					}
 				}
 			}
@@ -1508,7 +1552,7 @@ Check a component's data, using other available components as appropriate.
 be used to control whether results are returned, and in what format.
 @return the Vector of check results messages.
 */
-public List checkComponentData ( int comp_type, PropList props )
+public List<String> checkComponentData ( int comp_type, PropList props )
 {	if ( comp_type == COMP_WELL_STATIONS ) {
 		return checkComponentData_WellStations ( props );
 	}
@@ -1529,8 +1573,8 @@ Helper method to check well rights component data.  The following are checked:
 	This requires that the dataset include well stations.<li>
 </ol>
 */
-private List checkComponentData_WellRights ( PropList props )
-{	List message_list = new Vector();
+private List<String> checkComponentData_WellRights ( PropList props )
+{	List<String> message_list = new Vector();
 
 	// Make sure that there is at least one well right for each well station...
 
@@ -1915,9 +1959,9 @@ parts for every file into tokens based on the path separator and check for:
 @param warning_level If 1, then a warning dialog will be shown. Otherwise,
 messages will be printed to the log file only, depending on the global warning level.
 */
-public boolean checkComponentFilenames ( List file_names, int warning_level )
+public boolean checkComponentFilenames ( List<String> file_names, int warning_level )
 {	// For now check each part of all, even though the path is reused...
-	List parts = null;
+	List<String> parts = null;
 	String fullname = null;
 	StringBuffer warnings = new StringBuffer();
 	String part = null;
@@ -1933,7 +1977,7 @@ public boolean checkComponentFilenames ( List file_names, int warning_level )
 		// Some ugly checks because at this point we are not being
 		// really careful about knowing the positions of specific files
 		// in the list.  When Ray Bennett starts using a PropList it should be a lot easier...
-		file_name = (String)file_names.get(i);
+		file_name = file_names.get(i);
 		//if ( == StateMod_DataSet.COMP_GEOVIEW) {}
 		if ( StringUtil.endsWithIgnoreCase(file_name,".gvp") ||
 			StringUtil.endsWithIgnoreCase(file_name,".net") ) {
@@ -1953,7 +1997,7 @@ public boolean checkComponentFilenames ( List file_names, int warning_level )
 		}
 		
 		for (j = 0; j < size; j++) {
-			part = (String)parts.get(j);
+			part = parts.get(j);
 			if (part == null) {
 				continue;
 			}
@@ -2922,11 +2966,11 @@ public int getIystr() {
 }
 
 /**
-Return a Vector of String containing information about modified data in the data
+Return a list of String containing information about modified data in the data
 set.  This can be used during development to see how a GUI modifies data when it is set.
 */
-public List getModifiedDataSummary ()
-{	List v = new Vector();
+public List<String> getModifiedDataSummary ()
+{	List<String> v = new Vector();
 
 	v.add ( "Summary of data objects that have been modified in computer memory" );
 	v.add ( "but not yet written to files." );
@@ -4820,11 +4864,17 @@ private void initialize()
 		subcomp = new DataSetComponent(this, COMP_PRECIPITATION_TS_MONTHLY);
 		subcomp.setData ( new Vector() );
 		comp.addComponent( subcomp );
+		subcomp = new DataSetComponent(this, COMP_PRECIPITATION_TS_YEARLY);
+		subcomp.setData ( new Vector() );
+		comp.addComponent( subcomp );
 
 		comp = new DataSetComponent(this, COMP_EVAPORATION_GROUP);
 		comp.setListSource ( DataSetComponent.LIST_SOURCE_PRIMARY_COMPONENT );
 		addComponent( comp );
 		subcomp =new DataSetComponent(this,COMP_EVAPORATION_TS_MONTHLY);
+		subcomp.setData ( new Vector() );
+		comp.addComponent( subcomp );
+		subcomp =new DataSetComponent(this,COMP_EVAPORATION_TS_YEARLY);
 		subcomp.setData ( new Vector() );
 		comp.addComponent( subcomp );
 
@@ -4847,6 +4897,9 @@ private void initialize()
 		subcomp.setData ( new Vector() );
 		comp.addComponent( subcomp );
 		subcomp = new DataSetComponent(this, COMP_RESERVOIR_TARGET_TS_DAILY);
+		subcomp.setData ( new Vector() );
+		comp.addComponent( subcomp );
+		subcomp = new DataSetComponent(this, COMP_RESERVOIR_RETURN);
 		subcomp.setData ( new Vector() );
 		comp.addComponent( subcomp );
 
@@ -4897,6 +4950,12 @@ private void initialize()
 		subcomp = new DataSetComponent(this, COMP_PLANS);
 		subcomp.setData ( new Vector() );
 		comp.addComponent ( subcomp );
+		subcomp = new DataSetComponent(this, COMP_PLAN_WELL_AUGMENTATION);
+		subcomp.setData ( new Vector() );
+		comp.addComponent ( subcomp );
+		subcomp = new DataSetComponent(this, COMP_PLAN_RETURN);
+		subcomp.setData ( new Vector() );
+		comp.addComponent ( subcomp );
 
 		comp = new DataSetComponent(this, COMP_STREAMESTIMATE_GROUP);
 		comp.setListSource ( DataSetComponent.LIST_SOURCE_PRIMARY_COMPONENT );
@@ -4930,6 +4989,9 @@ private void initialize()
 		subcomp = new DataSetComponent(this,COMP_OPERATION_RIGHTS);
 		subcomp.setData ( new Vector() );
 		comp.addComponent( subcomp );
+		subcomp = new DataSetComponent(this,COMP_DOWNSTREAM_CALL_TS_DAILY);
+		subcomp.setData ( new Vector() );
+		comp.addComponent( subcomp );
 
 		comp = new DataSetComponent(this, COMP_SANJUAN_GROUP);
 		comp.setListSource ( DataSetComponent.LIST_SOURCE_PRIMARY_COMPONENT );
@@ -4957,20 +5019,21 @@ set previously and "ext" is the default extension for the file.
 All file names are initialized, even if they are not used.
 */
 public void initializeDataFileNames ()
-{	List data_Vector = getComponents();
+{	List<DataSetComponent> dataComponentList = getComponents();
 	int size = 0;
-	if (data_Vector != null) {
-		size = data_Vector.size();
+	if (dataComponentList != null) {
+		size = dataComponentList.size();
 	}
 	DataSetComponent comp;
 	String basename = getBaseName();
 	for ( int i = 0; i < size; i++ ) {
-		comp = (DataSetComponent)data_Vector.get(i);
+		comp = dataComponentList.get(i);
 		if ( !comp.isGroup() ) {
 			// Set the name...
 			comp.setDataFileName ( basename + "." + __component_file_extensions[comp.getComponentType()] );
 			continue;
 		}
+		// FIXME SAM 2011-01-01 What is the following doing?  Does not make sense
 		// Need to add components to the group...
 		List data2 = (List)comp.getData();
 		int size2 = 0;
@@ -4983,7 +5046,6 @@ public void initializeDataFileNames ()
 		}
 	}
 }
-
 
 /**
 Indicate whether the component contains time series that are impacted by the
@@ -5661,6 +5723,66 @@ throws IllegalArgumentException, IOException
 			readTime.stop();
 			readInputAnnounce2(comp, readTime.getSeconds());
 		}
+		
+		// Plan well augmentation (.plw)...
+		
+		try {
+			fn = response_props.getValue ( "Plan_WellAugmentation" );
+			// Always set the file name...
+			comp = getComponentForComponentType( COMP_PLAN_WELL_AUGMENTATION );
+			if ( (comp != null) && (fn != null) ) {
+				comp.setDataFileName ( fn );
+			}
+			// Read the data...
+			if ( (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+				readTime.clear();
+				readTime.start();
+				fn = getDataFilePathAbsolute ( fn );
+				readInputAnnounce1(comp);
+				comp.setData( StateMod_Plan_WellAugmentation.readStateModFile(fn) );
+			}
+		}
+		catch (Exception e) {
+			Message.printWarning(1, routine, "Error reading plan well augmentation file:\n\"" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds() );
+		}
+		
+		// Plan return (.prf)...
+		
+		try {
+			fn = response_props.getValue ( "Plan_Return" );
+			// Always set the file name...
+			comp = getComponentForComponentType( COMP_PLAN_RETURN );
+			if ( (comp != null) && (fn != null) ) {
+				comp.setDataFileName ( fn );
+			}
+			// Read the data...
+			if ( (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+				readTime.clear();
+				readTime.start();
+				fn = getDataFilePathAbsolute ( fn );
+				readInputAnnounce1(comp);
+				comp.setData( StateMod_Plan_Return.readStateModFile(fn) );
+			}
+		}
+		catch (Exception e) {
+			Message.printWarning(1, routine, "Error reading plan return file:\n\"" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds() );
+		}
 	
 		// Instream flow rights file (.ifr)...
 	
@@ -5824,8 +5946,6 @@ throws IllegalArgumentException, IOException
 			readInputAnnounce2(comp, readTime.getSeconds());
 		}
 	
-		// Precipitation TS monthly file (.pre) - always read...
-	
 		try {
 			fn = response_props.getValue ( "Precipitation_Monthly");
 			// Always set the file name in the component...
@@ -5863,8 +5983,51 @@ throws IllegalArgumentException, IOException
 			readTime.stop();
 			readInputAnnounce2(comp, readTime.getSeconds() );
 		}
+		
+		// Precipitation TS yearly file (.pra) - always read...
+		
+		try {
+			fn = response_props.getValue ( "Precipitation_Annual");
+			// Always set the file name in the component...
+			Message.printStatus(2,routine,"StateMod GUI does not yet handle annual precipitation data." );
+			/*
+			comp = getComponentForComponentType( COMP_PRECIPITATION_TS_YEARLY );
+			if ( (comp != null) && (fn != null) ) {
+				comp.setDataFileName ( fn );
+			}
+			// Now read the file...
+			if ( (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+				readTime.clear();
+				readTime.start();
+				fn = getDataFilePathAbsolute ( fn );
+				readInputAnnounce1(comp);
+				List v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
+				if (v == null) {
+					v = new Vector();
+				}
+				size = v.size();
+				// TODO Old-style data that may be removed in new StateMod...
+				setNumpre ( size );
+				for (i = 0; i < size; i++) {
+					((MonthTS)v.get(i)).setDataType(lookupTimeSeriesDataType( COMP_PRECIPITATION_TS_YEARLY ) );
+				}
+				comp.setData(v);
+			}
+			*/
+		}
+		catch (Exception e) {
+			Message.printWarning(1, routine, "Error reading precipitation time series file:\n\"" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds() );
+		}
 	
-		// Evaporation time series file (.eva) - always read...
+		// Evaporation time series file monthly (.eva) - always read...
 	
 		try {
 			fn = response_props.getValue ( "Evaporation_Monthly" );
@@ -5891,6 +6054,49 @@ throws IllegalArgumentException, IOException
 				}
 				comp.setData(v);
 			}
+		}
+		catch (Exception e) {
+			Message.printWarning(1, routine, "Error reading evaporation time series file:\n\"" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds() );
+		}
+		
+		// Evaporation time series file yearly (.eva) - always read...
+		
+		try {
+			fn = response_props.getValue ( "Evaporation_Annual" );
+			Message.printStatus(2,routine,"StateMod GUI does not yet handle annual evaporation data." );
+			/*
+			// Always set the file name...
+			comp =getComponentForComponentType(COMP_EVAPORATION_TS_YEARLY);
+			if ( (comp != null) && (fn != null) ) {
+				comp.setDataFileName ( fn );
+			}
+			// Read the data...
+			if ( (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+				readTime.clear();
+				readTime.start();
+				fn = getDataFilePathAbsolute ( fn );
+				readInputAnnounce1(comp);
+				List v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
+				if (v == null) {
+					v = new Vector();
+				}
+				size = v.size();
+				// TODO Old-style data that may be removed in new StateMod...
+				setNumeva ( size );
+				for (i = 0; i < size; i++) {
+					((MonthTS)v.get(i)).setDataType( lookupTimeSeriesDataType( COMP_EVAPORATION_TS_MONTHLY ) );
+				}
+				comp.setData(v);
+			}
+			*/
 		}
 		catch (Exception e) {
 			Message.printWarning(1, routine, "Error reading evaporation time series file:\n\"" + fn +
@@ -6248,6 +6454,39 @@ throws IllegalArgumentException, IOException
 		}
 		catch (Exception e) {
 			Message.printWarning(1, routine, "Error reading reservoir target time series (monthly) file:\n\"" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds() );
+		}
+		
+		// Reservoir return (.rrf)...
+		
+		try {
+			fn = response_props.getValue ( "Reservoir_Return" );
+			Message.printStatus ( 2, routine, "StateMod GUI does not yet handle reservoir return data." );
+			// Always set the file name...
+			/*
+			comp = getComponentForComponentType( COMP_RESERVOIR_RETURN );
+			if ( (comp != null) && (fn != null) ) {
+				comp.setDataFileName ( fn );
+			}
+			// Read the data...
+			if ( (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+				readTime.clear();
+				readTime.start();
+				fn = getDataFilePathAbsolute ( fn );
+				readInputAnnounce1(comp);
+				comp.setData( StateMod_Reservoir.readStateModFile(fn) );
+			}
+			*/
+		}
+		catch (Exception e) {
+			Message.printWarning(1, routine, "Error reading reservoir return file:\n\"" + fn +
 				warningEndString + " (See log file for more on error:" + e + ")");
 			Message.printWarning(3, routine, e);
 			comp.setErrorReadingInputFile ( true );
@@ -7054,7 +7293,39 @@ throws IllegalArgumentException, IOException
 			readTime.stop();
 			readInputAnnounce2(comp, readTime.getSeconds());
 		}
+		
+		// Downstream call (.cal)...
+		
+		try {
+			fn = response_props.getValue ( "Downstream_Call" );
+			// Always set the file name...
+			comp = getComponentForComponentType( COMP_DOWNSTREAM_CALL_TS_DAILY );
+			if ( (comp != null) && (fn != null) ) {
+				comp.setDataFileName ( fn );
+			}
+			// Read the data...
+			if ( (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
+				readTime.clear();
+				readTime.start();
+				fn = getDataFilePathAbsolute ( fn );
+				readInputAnnounce1(comp);
+				comp.setData( StateMod_DownstreamCall.readStateModFile(fn) );
+			}
+		}
+		catch (Exception e) {
+			Message.printWarning(1, routine, "Error reading downstream call file:\n\"" + fn +
+				warningEndString + " (See log file for more on error:" + e + ")");
+			Message.printWarning(3, routine, e);
+			comp.setErrorReadingInputFile ( true );
+		}
+		finally {
+			comp.setDirty ( false );
+			readTime.stop();
+			readInputAnnounce2(comp, readTime.getSeconds() );
+		}
 	
+		// After reading, link objects using identifiers in the various files...
+		
 		// Connect all the instream flow time series to the stations...
 	
 		Message.printStatus (1,routine,"Connect all instream flow time series");
@@ -7137,9 +7408,9 @@ throws IllegalArgumentException, IOException
 			+ StringUtil.formatString(totalReadTime.getSeconds(),"%.3f") + " seconds");
 		totalReadTime.start();
 	
-		// Convert the StateMod network to the more general network object...
+		// Read the generalized network...
 	
-		Message.printStatus ( 1, routine, "Creating linked network from data set files." );
+		Message.printStatus ( 1, routine, "Reading generalized network." );
 	
 		try {
 			fn = response_props.getValue ( "Network" );
@@ -7170,10 +7441,6 @@ throws IllegalArgumentException, IOException
 			readTime.stop();
 			readInputAnnounce2(comp, readTime.getSeconds());
 		}
-	
-		// Network network = createNetworkFromStateModRiverNetwork();
-		//	getComponentForComponentType( COMP_NETWORK).setData(network);
-		Message.printStatus ( 1, routine, "Finished creating linked network from data set files.");
 	}
 	catch (Exception e) {
 		// Main catch for all reads.
@@ -7209,11 +7476,11 @@ throws IllegalArgumentException, IOException
 	readTime = null;
 	totalReadTime = null;
 	// TODO - uncomment for debugging
-	//Message.printStatus ( 1, routine,
+	//Message.printStatus ( 2, routine,
 	//		"SAMX - After reading all files, control dirty =" +
 	//		getComponentForComponentType(
 	//		COMP_CONTROL).isDirty() );
-	//Message.printStatus ( 1, routine, super.toString () );
+	//Message.printStatus ( 2, routine, super.toString () );
 }
 
 /**
@@ -7304,42 +7571,7 @@ public String runComponentChecks( int type, String fname, String commands, Strin
 }
 
 /**
-Write the data set to an XML file.  The filename is adjusted to the 
-working directory if necessary using IOUtil.getPathUsingWorkingDir().
-@param filename_prev the name of the previous version of the file(for
-processing headers).  Specify as null if no previous file is available.
-@param filename the name of the file to write.
-@param dataset the dataset
-@param new_comments Comments to add to the top of the file.  Specify as null if no comments are available.
-@throws IOException if there is an error writing the file.
-*/
-public void writeXMLFile(String filename_prev, String filename, StateMod_DataSet dataset, List<String> new_comments)
-throws IOException {
-	List<String> commentStr = new Vector();
-	commentStr.add("#");
-	List<String> ignoreCommentStr = new Vector();
-	ignoreCommentStr.add("#>");
-	PrintWriter out = null;
-	String full_filename_prev = IOUtil.getPathUsingWorkingDir(filename_prev);
-	if (!StringUtil.endsWithIgnoreCase(filename, ".xml")) {
-		filename = filename + ".xml";
-	}
-
-	String full_filename = IOUtil.getPathUsingWorkingDir(filename);
-	out = IOUtil.processFileHeaders(full_filename_prev, full_filename,
-		new_comments, commentStr, ignoreCommentStr, 0);
-	if (out == null) {
-		throw new IOException("Error writing to \"" + full_filename + "\"");
-	}
-
-	writeDataSetToXMLFile(dataset, out);
-	out.flush();
-	out.close();
-	out = null;
-}
-
-/**
-Write a data set to an opened XML file.
+Write a data set to an opened XML file.  This is experimental code.
 @param data a StateMod_DataSet to write.
 @param out output PrintWriter
 @throws IOException if an error occurs.
@@ -7388,6 +7620,41 @@ throws IOException {
 }
 
 /**
+Write the data set to an XML file.  The filename is adjusted to the 
+working directory if necessary using IOUtil.getPathUsingWorkingDir().
+This is experimental code.
+@param filename_prev the name of the previous version of the file(for
+processing headers).  Specify as null if no previous file is available.
+@param filename the name of the file to write.
+@param dataset the dataset
+@param new_comments Comments to add to the top of the file.  Specify as null if no comments are available.
+@throws IOException if there is an error writing the file.
+*/
+public void writeXMLFile(String filename_prev, String filename, StateMod_DataSet dataset, List<String> new_comments)
+throws IOException {
+	List<String> commentStr = new Vector();
+	commentStr.add("#");
+	List<String> ignoreCommentStr = new Vector();
+	ignoreCommentStr.add("#>");
+	PrintWriter out = null;
+	String full_filename_prev = IOUtil.getPathUsingWorkingDir(filename_prev);
+	if (!StringUtil.endsWithIgnoreCase(filename, ".xml")) {
+		filename = filename + ".xml";
+	}
+
+	String full_filename = IOUtil.getPathUsingWorkingDir(filename);
+	out = IOUtil.processFileHeaders(full_filename_prev, full_filename,
+		new_comments, commentStr, ignoreCommentStr, 0);
+	if (out == null) {
+		throw new IOException("Error writing to \"" + full_filename + "\"");
+	}
+
+	writeDataSetToXMLFile(dataset, out);
+	out.flush();
+	out.close();
+}
+
+/**
 Add a process listener.  This is used to notify other code (e.g., the StateMod
 GUI as progress is made reading the data set).
 @param p ProcessListener to remove.
@@ -7411,7 +7678,7 @@ public void sendProcessListenerMessage ( int status, String message )
 
 	ProcessListener p = null;
 	for (int i = 0; i < size; i++) {
-		p = (ProcessListener)__processListeners.get(i);
+		p = __processListeners.get(i);
 		p.processStatus(status, message);
 	}
 }

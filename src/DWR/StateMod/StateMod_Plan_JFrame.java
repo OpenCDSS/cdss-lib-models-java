@@ -1,16 +1,3 @@
-//------------------------------------------------------------------------------
-// StateMod_Plan_JFrame - dialog to edit the diversion information.
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-// 
-// 2006-08-22	Steven A. Malers, RTi	Copy StateMod_Diversion_JFrame and
-//					modify for plans.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-//-----------------------------------------------------------------------------
-// EndHeader
-
 package DWR.StateMod;
 
 import java.awt.FlowLayout;
@@ -66,10 +53,10 @@ import RTi.Util.String.StringUtil;
 //	||   worksheet       ||                                               ||
 //	||                   || --------------------------------------------- ||
 //	||                   ||                                               ||
-//	|| ----------------- ||         eff_JPanel       | relatedData_JPanel ||
+//	|| ----------------- ||         eff_JPanel                            ||
 //	||                   ||                                               ||
-//	||   search_JPanel   || --------------------------------------------- ||
-//	||                   ||        ts_JPanel                              ||
+//	||   search_JPanel   ||                                               ||
+//	||                   ||                                               ||
 //	||                   || --------------------------------------------- ||
 //	||                   ||        button_JPanel                          ||
 //	||-------------------||-----------------------------------------------||
