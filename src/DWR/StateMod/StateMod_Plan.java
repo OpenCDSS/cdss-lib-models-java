@@ -592,7 +592,7 @@ Read plan information in and store in a list.
 @param filename filename containing plan information
 @throws Exception if an error occurs
 */
-public static List readStateModFile(String filename)
+public static List<StateMod_Plan> readStateModFile(String filename)
 throws Exception
 {	String routine = "StateMod_Plan.readStateModFile";
 	String iline = null;
@@ -1030,24 +1030,24 @@ Write plan information to output.  History header information
 is also maintained by calling this routine.
 @param instrfile input file from which previous history should be taken
 @param outstrfile output file to which to write
-@param thePlans vector of plans to write.
-@param new_comments addition comments which should be included in history
+@param thePlans list of plans to write.
+@param newComments addition comments which should be included in history
 @exception Exception if an error occurs.
 */
 public static void writeStateModFile(String instrfile, String outstrfile,
-		List<StateMod_Plan> thePlans, List<String> new_comments )
+		List<StateMod_Plan> thePlans, List<String> newComments )
 throws Exception
 {	String routine = "StateMod_Plan.writeStateModFile";
-	List commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector(1);
 	commentIndicators.add ( "#" );
-	List ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector(1);
 	ignoredCommentIndicators.add ( "#>");
 	PrintWriter out = null;
 	try {
 		out = IOUtil.processFileHeaders(
 			IOUtil.getPathUsingWorkingDir(instrfile),
 			IOUtil.getPathUsingWorkingDir(outstrfile), 
-			new_comments, commentIndicators, ignoredCommentIndicators, 0);
+			newComments, commentIndicators, ignoredCommentIndicators, 0);
 
 		int i;
 		String iline;
@@ -1055,7 +1055,7 @@ throws Exception
 		// This format follows historical conventions
 		String formatLine1 = "%-12.12s \"%-24.24s\" %-12.12s%8d%8d%8d%8d%8d%8d \"%-12.12s\" %8.8s";
 		StateMod_Plan plan = null;
-		List v = new Vector(11); // Reuse for all output lines.
+		List<Object> v = new Vector(11); // Reuse for all output lines.
 
 		out.println(cmnt);
 		out.println(cmnt + "*************************************************");
@@ -1110,7 +1110,7 @@ throws Exception
 			num = thePlans.size();
 		}
 		for (i = 0; i < num; i++) {
-			plan = (StateMod_Plan)thePlans.get(i);
+			plan = thePlans.get(i);
 			if (plan == null) {
 				continue;
 			}

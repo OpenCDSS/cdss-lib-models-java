@@ -5769,7 +5769,7 @@ throws IllegalArgumentException, IOException
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
-				comp.setData( StateMod_Plan_Return.readStateModFile(fn) );
+				comp.setData( StateMod_ReturnFlow.readStateModFile(fn,COMP_PLAN_RETURN) );
 			}
 		}
 		catch (Exception e) {
@@ -6468,9 +6468,7 @@ throws IllegalArgumentException, IOException
 		
 		try {
 			fn = response_props.getValue ( "Reservoir_Return" );
-			Message.printStatus ( 2, routine, "StateMod GUI does not yet handle reservoir return data." );
 			// Always set the file name...
-			/*
 			comp = getComponentForComponentType( COMP_RESERVOIR_RETURN );
 			if ( (comp != null) && (fn != null) ) {
 				comp.setDataFileName ( fn );
@@ -6481,9 +6479,8 @@ throws IllegalArgumentException, IOException
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
 				readInputAnnounce1(comp);
-				comp.setData( StateMod_Reservoir.readStateModFile(fn) );
+				comp.setData( StateMod_ReturnFlow.readStateModFile(fn,COMP_RESERVOIR_RETURN) );
 			}
-			*/
 		}
 		catch (Exception e) {
 			Message.printWarning(1, routine, "Error reading reservoir return file:\n\"" + fn +
