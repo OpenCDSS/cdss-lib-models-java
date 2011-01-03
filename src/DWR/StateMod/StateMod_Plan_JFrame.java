@@ -40,6 +40,7 @@ import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
+import RTi.Util.Time.TimeUtil;
 
 // The layout for the GUI is as follows, for the most part using grid bag
 // layout.  Only the button_JPanel and bottom_JPanel use FlowLayout.  In this
@@ -81,6 +82,7 @@ private boolean __editable = false;
 String labels for buttons.
 */
 private static final String
+	__BUTTON_RETURN_FLOW = "Return Flow...",
 	__BUTTON_SHOW_ON_MAP = "Show on Map",	
 	__BUTTON_SHOW_ON_NETWORK = "Show on Network",
 	__BUTTON_APPLY = "Apply",
@@ -124,6 +126,7 @@ private JButton
 	__close_JButton = null,
 	__cancel_JButton = null,
 	__apply_JButton = null,
+	__returnFlow_JButton = null,
 	__showOnMap_JButton = null,
 	__showOnNetwork_JButton = null;
 
@@ -145,14 +148,14 @@ GUI JTextFields.
 private JTextField 
 	__searchID_JTextField = null,
 	__searchName_JTextField = null,
-
 	__planStationID_JTextField = null,
 	__planName_JTextField = null,
 	__riverNodeID_JTextField = null,
-	__Peff_JTextField = null,
 	__iPrf_JTextField = null,
 	__Psto1_JTextField = null,
 	__Psource_JTextField = null;
+private JTextField []
+	__Peff_JTextField = new JTextField[12];
 
 /**
 Status bar textfields 
@@ -162,7 +165,7 @@ private JTextField
 	__status_JTextField;
 
 /**
-The worksheet displaying the data.
+The worksheet displaying the list of plans.
 */
 private JWorksheet __worksheet;
 
@@ -172,7 +175,8 @@ GUI SimpleJComboBoxes.
 private SimpleJComboBox	
 	__planSwitch_JComboBox = null,
 	__iPlnTyp_JComboBox = null,
-	__iPfail_JComboBox = null;
+	__iPfail_JComboBox = null,
+	__PeffFlag_JComboBox = null;
 
 /**
 The StateMod_DataSet that contains the StateMod data.
@@ -370,7 +374,7 @@ private int checkInput()
 {	String routine = "StateMod_Plan_JFrame.checkInput";
 	//String name = __planName_JTextField.getText().trim();
 	String rivernode = __riverNodeID_JTextField.getText().trim();
-	String Peff = __Peff_JTextField.getText().trim();
+	String PeffFlag = __PeffFlag_JComboBox.getSelected().trim();
 	String iPrf = __iPrf_JTextField.getText().trim();
 	String Psto1 = __Psto1_JTextField.getText().trim();
 	//String Psource = __Psource_JTextField.getText().trim();
@@ -385,8 +389,8 @@ private int checkInput()
 		++fatal_count;
 	}
 	*/
-	if ( !StringUtil.isDouble(Peff) ) {
-		warning += "\nEfficiency (" + Peff + ") is not a number.";
+	if ( !StringUtil.isDouble(PeffFlag) ) {
+		warning += "\nEfficiency (" + PeffFlag + ") is not a number.";
 		++fatal_count;
 	}
 	if ( !StringUtil.isInteger(iPrf) ) {
@@ -459,7 +463,6 @@ throws Throwable {
 	__searchName_JRadioButton = null;
 	__searchID_JTextField = null;
 	__searchName_JTextField = null;
-	__Peff_JTextField = null;
 	__iPrf_JTextField = null;
 	__Psto1_JTextField = null;
 	__Psource_JTextField = null;
@@ -483,6 +486,14 @@ private StateMod_Plan getSelectedPlan ()
 }
 
 /**
+Return the worksheet that displays the list of plans.
+*/
+private JWorksheet getWorksheet ()
+{
+	return __worksheet;
+}
+
+/**
 Initializes the arrays that are used when items are selected and deselected.
 This should be called from setupGUI() before the a call is made to 
 selectTableIndex().
@@ -498,7 +509,7 @@ private void initializeJComponents()
 	__all_JComponents[i++] = __planName_JTextField;
 	__all_JComponents[i++] = __planSwitch_JComboBox;
 	__all_JComponents[i++] = __iPlnTyp_JComboBox;
-	__all_JComponents[i++] = __Peff_JTextField;
+	__all_JComponents[i++] = __PeffFlag_JComboBox;
 	__all_JComponents[i++] = __iPrf_JTextField;
 	__all_JComponents[i++] = __iPfail_JComboBox;
 	__all_JComponents[i++] = __Psource_JTextField;
@@ -509,9 +520,9 @@ private void initializeJComponents()
 	// All time series are enabled because it may be useful to compare
 	// time series, regardless of the control settings.
 
-	__disabled_JComponents = new int[2];
+	__disabled_JComponents = new int[1];
 	__disabled_JComponents[0] = 0;	//__planStationID_JTextField
-	__disabled_JComponents[1] = 1;	// __riverNodeID_JTextField
+	//__disabled_JComponents[1] = 1;	// __riverNodeID_JTextField
 
 }
 
@@ -670,9 +681,19 @@ private void processTableSelection(int index, boolean try_to_save )
 		__iPlnTyp_JComboBox.select(	StateMod_Plan.getIPlnTypDefault(true) );
 	}
 
-	// Efficiency...
+	// Efficiency flag...
 
-	StateMod_GUIUtil.checkAndSet(plan.getPeffFlag(), __Peff_JTextField );
+	String PeffFlag = "" + plan.getPeffFlag();
+	// Select the switch that matches the first token in the available choices...
+	try {
+		JGUIUtil.selectTokenMatches ( __PeffFlag_JComboBox, true, " ", 0, 0, "" + PeffFlag, null);
+	}
+	catch ( Exception e ) {
+		// Default...
+		Message.printWarning ( 2, routine, "Using default value PeffFlag = \"" + 
+		StateMod_Plan.getPeffFlagDefault(true) + "\" because data value " + PeffFlag + " is unknown." );
+		__PeffFlag_JComboBox.select( StateMod_Plan.getPeffFlagDefault(true) );
+	}
 
 	// Return flow table...
 
@@ -760,14 +781,14 @@ private boolean saveData(int record) {
 
 	// Efficiency...
 
-	String Peff = __Peff_JTextField.getText().trim();
-	if ( Peff.equals("") && !StateMod_Util.isMissing(plan.getPeffFlag()) ) {
+	String PeffFlag = __PeffFlag_JComboBox.getSelected().trim();
+	if ( PeffFlag.equals("") && !StateMod_Util.isMissing(plan.getPeffFlag()) ) {
 		// User has blanked to missing for some reason...
 		plan.setPeffFlag(StateMod_Util.MISSING_INT);
 	}
-	else if ( !Peff.equals("") ) {
+	else if ( !PeffFlag.equals("") ) {
 		// Something has changed so set it...
-		plan.setPeffFlag ( Peff );
+		plan.setPeffFlag ( PeffFlag );
 	}
 
 	// Return flow table...
@@ -911,49 +932,352 @@ private void setupGUI(int index)
 
 	GridBagLayout gbl = new GridBagLayout();
 
-	JPanel main_JPanel = new JPanel();	// Contains all in center panel
-	main_JPanel.setLayout(gbl);		// of the JFrame
-	JPanel left_JPanel = new JPanel ();	// Left side (list and search)
+	JPanel main_JPanel = new JPanel(); // Contains all in center panel of the JFrame
+	main_JPanel.setLayout(gbl);
+	JPanel left_JPanel = new JPanel (); // Left side (list and search)
 	left_JPanel.setLayout(gbl);
-	JPanel right_JPanel = new JPanel();	// Right side (all data)
+	JPanel right_JPanel = new JPanel(); // Right side (all data)
 	right_JPanel.setLayout(gbl);
 
 	// Plan list...
 
-	PropList p = new PropList("StateMod_Plan_JFrame.JWorksheet");
-	p.add("JWorksheet.ShowPopupMenu=true");
-	p.add("JWorksheet.AllowCopy=true");
-	p.add("JWorksheet.SelectionMode=SingleRowSelection");
-	
-	int[] widths = null;
-	JScrollWorksheet jsw = null;
-	try {
-		StateMod_Plan_TableModel tmd = new StateMod_Plan_TableModel(__plansVector, __editable, true);
-		StateMod_Plan_CellRenderer crd = new StateMod_Plan_CellRenderer(tmd);
-	
-		jsw = new JScrollWorksheet(crd, tmd, p);
-		__worksheet = jsw.getJWorksheet();
-
-		// Only want ID and name in this worksheet...
-		widths = crd.getColumnWidths();
-	}
-	catch (Exception e) {
-		Message.printWarning(2, routine, e);
-		jsw = new JScrollWorksheet(0, 0, p);		
-		__worksheet = jsw.getJWorksheet();
-	}
-	__worksheet.setPreferredScrollableViewportSize(null);
-	__worksheet.setHourglassJFrame(this);
-	__worksheet.addMouseListener(this);	
-	__worksheet.addKeyListener(this);
-
-	JGUIUtil.addComponent(left_JPanel, jsw,
+	JGUIUtil.addComponent(left_JPanel, setupGUI_PlanList(routine),
 		0, 0, 1, 5, 1, 1,
 		GridBagConstraints.BOTH, GridBagConstraints.NORTHWEST);
 
 	// Search panel...
 
+	JGUIUtil.addComponent(left_JPanel, setupGUI_SearchPanel(routine),
+		0, 5, 1, 1, 0, 0,  	
+		GridBagConstraints.NONE, GridBagConstraints.WEST);		
+
+	JGUIUtil.addComponent(main_JPanel, left_JPanel,
+		0, 0, 1, 10, 1, 1,
+		GridBagConstraints.BOTH, GridBagConstraints.NORTHWEST);
+	
+	// Add the parameters panel to the right panel (make it 12 wide)...
+
+	int yRight = 0;
+	JGUIUtil.addComponent(right_JPanel, setupGUI_PlanAttributes ( routine ),
+		0, yRight, 12, 1, 0, 0,
+		GridBagConstraints.BOTH, GridBagConstraints.CENTER);
+	
+	JGUIUtil.addComponent(right_JPanel, setupGUI_PlanEfficiency ( routine ),
+		0, ++yRight, 12, 1, 0, 0,
+		GridBagConstraints.BOTH, GridBagConstraints.CENTER);
+	
+	JGUIUtil.addComponent(right_JPanel, setupGUI_RelatedData ( routine ),
+		0, ++yRight, 12, 1, 0, 0,
+		GridBagConstraints.BOTH, GridBagConstraints.CENTER);
+	
+	// Main buttons...
+
+	JGUIUtil.addComponent(right_JPanel, setupGUI_ButtonPanel(),
+		//6, 9, 4, 1, 0, 0,
+		0, ++yRight, 11, 1, 0, 0,
+		GridBagConstraints.NONE, GridBagConstraints.CENTER);
+	
+	// Add the right panel to the main panel
+
+	JGUIUtil.addComponent(main_JPanel, right_JPanel,
+		1, 0, 3, 10, 0, 0, 
+		GridBagConstraints.NONE, GridBagConstraints.NORTHEAST);
+
+	getContentPane().add(main_JPanel);
+
+	// Panel at the bottom for messages...
+
+	JPanel bottom_JPanel = new JPanel();
+	bottom_JPanel.setLayout (gbl);
+	__message_JTextField = new JTextField();
+	__message_JTextField.setEditable(false);
+	JGUIUtil.addComponent(bottom_JPanel, __message_JTextField,
+		0, 0, 7, 1, 1.0, 0.0, 
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+	__status_JTextField = new JTextField(5);
+	__status_JTextField.setEditable(false);
+	JGUIUtil.addComponent(bottom_JPanel, __status_JTextField,
+		7, 0, 1, 1, 0.0, 0.0, 
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
+	getContentPane().add ("South", bottom_JPanel);	
+	
+	if ( __dataset_wm != null ) {
+		__dataset_wm.setWindowOpen ( StateMod_DataSet_WindowManager.WINDOW_PLAN, this );
+	}
+
+	pack();
+	setSize(700,500);
+	JGUIUtil.center(this);
+	initializeJComponents();
+	selectTableIndex(index, false, true);
+	setVisible(true);
+
+	int [] widths = getWorksheet().getCellRenderer().getColumnWidths();
+	if ( widths != null ) {
+		__worksheet.setColumnWidths(widths);
+	}	
+	__initialized = true;
+	__worksheet.addSortListener(this);
+}
+
+/**
+Set up the main button panel.
+*/
+private JPanel setupGUI_ButtonPanel ()
+{
+	JPanel button_JPanel = new JPanel();
+	button_JPanel.setLayout(new FlowLayout());
+	//__help_JButton = new SimpleJButton(__BUTTON_HELP, this);
+	//__help_JButton.setEnabled(false);
+	__showOnMap_JButton = new SimpleJButton(__BUTTON_SHOW_ON_MAP, this);
+	__showOnMap_JButton.setToolTipText(
+		"Annotate map with location (button is disabled if layer does not have matching ID)" );
+	__showOnNetwork_JButton = new SimpleJButton(__BUTTON_SHOW_ON_NETWORK, this);
+	__showOnNetwork_JButton.setToolTipText( "Annotate network with location" );
+	__close_JButton = new SimpleJButton(__BUTTON_CLOSE, this);
+	__apply_JButton = new SimpleJButton(__BUTTON_APPLY, this);
+	__cancel_JButton = new SimpleJButton(__BUTTON_CANCEL, this);
+	button_JPanel.add(__showOnMap_JButton);
+	button_JPanel.add(__showOnNetwork_JButton);
+	if (__editable) {
+		button_JPanel.add(__apply_JButton);
+		button_JPanel.add(__cancel_JButton);
+	}
+	button_JPanel.add(__close_JButton);
+	//button_JPanel.add(__help_JButton);
+	return button_JPanel;
+}
+
+/**
+Set up the parameter part of the GUI.
+*/
+private JPanel setupGUI_PlanAttributes ( String routine )
+{
+	JPanel param_JPanel = new JPanel();
+	GridBagLayout gbl = new GridBagLayout();
+	param_JPanel.setLayout ( gbl );
+	int y = 0;
+	JGUIUtil.addComponent(param_JPanel, new JLabel("Plan ID:"),
+		0, y, 1, 1, 0, 0, 
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
+	__planStationID_JTextField = new JTextField(12);
+	__planStationID_JTextField.setEditable(false);
+	__planStationID_JTextField.setToolTipText (
+		"<html>The plan ID is the primary identifier for the plan.<br>"+
+		"The ID is used to relate data in various data files.</html>");
+	JGUIUtil.addComponent(param_JPanel, __planStationID_JTextField,
+		1, y, 2, 1, 0, 0,
+		1, 0, 0, 1, 
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
+
+	JGUIUtil.addComponent(param_JPanel, new JLabel("Plan name:"),
+		0, ++y, 1, 1, 0, 0, 
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
+	__planName_JTextField = new JTextField(24);
+	__planName_JTextField.setToolTipText ( "The plan name is used for labels and output." );
+	JGUIUtil.addComponent(param_JPanel, __planName_JTextField,
+		1, y, 2, 1, 0, 0,
+		1, 0, 0, 1, 
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
+
+	JGUIUtil.addComponent(param_JPanel, new JLabel("River node ID:"),
+		0, ++y, 1, 1, 0, 0, 
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
+	__riverNodeID_JTextField = new JTextField(12);
+	__riverNodeID_JTextField.setEditable(true);
+	__riverNodeID_JTextField.setToolTipText (
+		"<html>The river node is used in the network file.<br>" +
+		"In most cases the river node ID is the same as the plan "+
+		"ID,<br>although StateMod internally uses two identifiers.</html>" );
+	JGUIUtil.addComponent(param_JPanel, __riverNodeID_JTextField,
+		1, y, 2, 1, 0, 0,
+		1, 0, 0, 1, 
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
+
+	JGUIUtil.addComponent(param_JPanel, new JLabel("On/off switch:"),
+		0, ++y, 1, 1, 0, 0, 
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
+	__planSwitch_JComboBox = new SimpleJComboBox();
+	__planSwitch_JComboBox.setData ( StateMod_Plan.getPonChoices(true) );
+	__planSwitch_JComboBox.addItemListener(this);
+	__planSwitch_JComboBox.setToolTipText (
+		"The on/off switch tells StateMod whether to include the plan in the analysis." );
+	JGUIUtil.addComponent(param_JPanel, __planSwitch_JComboBox,
+		1, y, 2, 1, 0, 0,
+		1, 0, 0, 1, 
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+
+	JGUIUtil.addComponent(param_JPanel, new JLabel("Plan type:"),
+		0, ++y, 1, 1, 0, 0, 
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
+	__iPlnTyp_JComboBox = new SimpleJComboBox();
+	__iPlnTyp_JComboBox.setData (
+		StateMod_Plan.getIPlnTypChoices(true) );
+	__iPlnTyp_JComboBox.addItemListener(this);
+	__iPlnTyp_JComboBox.setToolTipText (
+		"The plan type indicates the behavior of the plan." );
+	JGUIUtil.addComponent(param_JPanel, __iPlnTyp_JComboBox,
+		1, y, 2, 1, 0, 0,
+		1, 0, 0, 1, 
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+
+	JGUIUtil.addComponent(param_JPanel, new JLabel("Return flow table:"),
+		0, ++y, 1, 1, 0, 0, 
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
+	__iPrf_JTextField = new JTextField(11);
+	__iPrf_JTextField.setToolTipText ("The return flow table for the plan." );
+	JGUIUtil.addComponent(param_JPanel, __iPrf_JTextField,
+		1, y, 2, 1, 0, 0,
+		1, 0, 0, 1, 
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
+
+	JGUIUtil.addComponent(param_JPanel, new JLabel("Failure switch:"),
+		0, ++y, 1, 1, 0, 0, 
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
+	__iPfail_JComboBox = new SimpleJComboBox();
+	__iPfail_JComboBox.setData (
+		StateMod_Plan.getIPfailChoices(true) );
+	__iPfail_JComboBox.addItemListener(this);
+	__iPfail_JComboBox.setToolTipText ( "Plan failure switch." );
+	JGUIUtil.addComponent(param_JPanel, __iPfail_JComboBox,
+		1, y, 2, 1, 0, 0,
+		1, 0, 0, 1, 
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+
+	// Put in blanks to have better spacing in layout...
+	JGUIUtil.addComponent(param_JPanel,
+		new JLabel("Initial storage (AF):"),
+		0, ++y, 1, 1, 0, 0, 
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
+	__Psto1_JTextField = new JTextField(11);
+	__Psto1_JTextField.setToolTipText ( "The plan initial storage (for types 3 & 5)." );
+	JGUIUtil.addComponent(param_JPanel, __Psto1_JTextField,
+		1, y, 2, 1, 0, 0,
+		1, 0, 0, 1, 
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
+
+	JGUIUtil.addComponent(param_JPanel, new JLabel("Source ID:"),
+		0, ++y, 1, 1, 0, 0, 
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
+	__Psource_JTextField = new JTextField(24);
+	__Psource_JTextField.setToolTipText (
+		"Source ID of the structure where reuse water " +
+		"became available or a T&C condition originated." );
+	JGUIUtil.addComponent(param_JPanel, __Psource_JTextField,
+		1, y, 2, 1, 0, 0,
+		1, 0, 0, 1, 
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
+	return param_JPanel;
+}
+
+/**
+Set up the plan efficiency part of the GUI.
+*/
+private JPanel setupGUI_PlanEfficiency ( String routine )
+{
+	JPanel effJPanel = new JPanel();
+	effJPanel.setBorder(BorderFactory.createTitledBorder("Efficiency Data"));
+	GridBagLayout gbl = new GridBagLayout();
+	effJPanel.setLayout ( gbl );
+	int y = 0;
+	JGUIUtil.addComponent(effJPanel, new JLabel("Efficiency Flag:"),
+		0, y, 1, 1, 0, 0, 
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
+	__PeffFlag_JComboBox = new SimpleJComboBox();
+	__PeffFlag_JComboBox.setData ( StateMod_Plan.getPeffFlagChoices(true) );
+	__PeffFlag_JComboBox.addItemListener(this);
+	__PeffFlag_JComboBox.setToolTipText ( "The plan efficiency." );
+	JGUIUtil.addComponent(effJPanel, __PeffFlag_JComboBox,
+		1, y, 2, 1, 0, 0,
+		1, 0, 0, 1, 
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
+	JPanel monthEffJPanel = new JPanel();
+	monthEffJPanel.setLayout ( gbl );
+	int [] monthsCyr = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+	int [] monthsWyr = { 10, 11, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+	int [] monthsIyr = { 11, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	int [] months = monthsCyr;
+	if ( __dataset.getCyrl() == StateMod_DataSet.SM_WYR ) {
+		months = monthsWyr;
+	}
+	else if ( __dataset.getCyrl() == StateMod_DataSet.SM_IYR ) {
+		months = monthsIyr;
+	}
+	for ( int i = 0; i < 12; i++ ) {
+		__Peff_JTextField[i] = new JTextField(4);
+		JGUIUtil.addComponent(monthEffJPanel, new JLabel(TimeUtil.monthAbbreviation(months[i])),
+			i, 0, 1, 1, 0, 0,
+			1, 0, 0, 1, 
+			GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
+		JGUIUtil.addComponent(monthEffJPanel, __Peff_JTextField[i],
+			i, 1, 1, 1, 0, 0,
+			1, 0, 0, 1, 
+			GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
+	}
+	JGUIUtil.addComponent(effJPanel, monthEffJPanel,
+			0, ++y, 3, 1, 0, 0,
+			1, 0, 0, 1, 
+			GridBagConstraints.NONE, GridBagConstraints.WEST);
+	return effJPanel;
+}
+
+/**
+Set up the plan list part of the GUI.
+*/
+private JScrollWorksheet setupGUI_PlanList ( String routine )
+{
+	PropList p = new PropList("StateMod_Plan_JFrame.JWorksheet");
+	p.add("JWorksheet.ShowPopupMenu=true");
+	p.add("JWorksheet.AllowCopy=true");
+	p.add("JWorksheet.SelectionMode=SingleRowSelection");
+	
+	JScrollWorksheet jsw = null;
+	JWorksheet worksheet = null;
+	try {
+		StateMod_Plan_TableModel tmd = new StateMod_Plan_TableModel(__plansVector, __editable, true);
+		StateMod_Plan_CellRenderer crd = new StateMod_Plan_CellRenderer(tmd);
+	
+		jsw = new JScrollWorksheet(crd, tmd, p);
+	}
+	catch (Exception e) {
+		Message.printWarning(2, routine, e);
+		jsw = new JScrollWorksheet(0, 0, p);		
+	}
+	worksheet = jsw.getJWorksheet();
+	worksheet.setPreferredScrollableViewportSize(null);
+	worksheet.setHourglassJFrame(this);
+	worksheet.addMouseListener(this);	
+	worksheet.addKeyListener(this);
+	setWorksheet ( worksheet );
+	return jsw;
+}
+
+/**
+Setup the related data panel for the GUI.
+*/
+private JPanel setupGUI_RelatedData ( String routine )
+{
+	JPanel relatedDataJPanel = new JPanel();
+	GridBagLayout gbl = new GridBagLayout();
+	relatedDataJPanel.setLayout(gbl);
+	relatedDataJPanel.setBorder(BorderFactory.createTitledBorder("Related Data"));
+	__returnFlow_JButton = new JButton(__BUTTON_RETURN_FLOW);
+	JGUIUtil.addComponent(relatedDataJPanel, __returnFlow_JButton,
+		0, 0, 1, 1, 1, 1,  
+		1, 0, 0, 1,
+		GridBagConstraints.NONE, GridBagConstraints.CENTER);
+	__returnFlow_JButton.addActionListener(this);
+	return relatedDataJPanel;
+}
+
+// TODO SAM 2011-01-02 Need to put into a reusable component
+/**
+Setup up the search panel for the GUI.
+*/
+private JPanel setupGUI_SearchPanel ( String routine )
+{
 	JPanel search_JPanel = new JPanel();
+	GridBagLayout gbl = new GridBagLayout();
 	search_JPanel.setLayout(gbl);
 	search_JPanel.setBorder(BorderFactory.createTitledBorder("Search above list for:"));
 	int y = 0;
@@ -990,219 +1314,15 @@ private void setupGUI(int index)
 	JGUIUtil.addComponent(search_JPanel, __findNextPlan_JButton,
 		1, ++y, 2, 1, 0, 0,  
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
+	return search_JPanel;
+}
 
-	JGUIUtil.addComponent(left_JPanel, search_JPanel,
-		0, 5, 1, 1, 0, 0,  	
-		GridBagConstraints.NONE, GridBagConstraints.WEST);		
-
-	JGUIUtil.addComponent(main_JPanel, left_JPanel,
-		0, 0, 1, 10, 1, 1,
-		GridBagConstraints.BOTH, GridBagConstraints.NORTHWEST);
-	
-	// All the parametric information...
-
-	JPanel param_JPanel = new JPanel();
-	param_JPanel.setLayout ( gbl );
-	y = 0;
-	JGUIUtil.addComponent(param_JPanel, new JLabel("Plan ID:"),
-		0, y, 1, 1, 0, 0, 
-		GridBagConstraints.NONE, GridBagConstraints.EAST);
-	__planStationID_JTextField = new JTextField(12);
-	__planStationID_JTextField.setEditable(false);
-	__planStationID_JTextField.setToolTipText (
-		"<HTML>The plan ID is the primary identifier for the plan.<BR>"+
-		"The ID is used to relate data in various data files.</HTML>");
-	JGUIUtil.addComponent(param_JPanel, __planStationID_JTextField,
-		1, y, 2, 1, 0, 0,
-		1, 0, 0, 1, 
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
-
-	JGUIUtil.addComponent(param_JPanel, new JLabel("Plan name:"),
-		0, ++y, 1, 1, 0, 0, 
-		GridBagConstraints.NONE, GridBagConstraints.EAST);
-	__planName_JTextField = new JTextField(24);
-	__planName_JTextField.setToolTipText (
-		"<HTML>The plan name is used for labels and output.</HTML>" );
-	JGUIUtil.addComponent(param_JPanel, __planName_JTextField,
-		1, y, 2, 1, 0, 0,
-		1, 0, 0, 1, 
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
-
-	JGUIUtil.addComponent(param_JPanel, new JLabel("River node ID:"),
-		0, ++y, 1, 1, 0, 0, 
-		GridBagConstraints.NONE, GridBagConstraints.EAST);
-	__riverNodeID_JTextField = new JTextField(12);
-	__riverNodeID_JTextField.setEditable(false);
-	__riverNodeID_JTextField.setToolTipText (
-		"<HTML>The river node is used in the network file.<BR>" +
-		"In most cases the river node ID is the same as the plan "+
-		"ID,<BR>although StateMod internally uses two identifiers.</HTML>" );
-	JGUIUtil.addComponent(param_JPanel, __riverNodeID_JTextField,
-		1, y, 2, 1, 0, 0,
-		1, 0, 0, 1, 
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
-
-	JGUIUtil.addComponent(param_JPanel, new JLabel("On/off switch:"),
-		0, ++y, 1, 1, 0, 0, 
-		GridBagConstraints.NONE, GridBagConstraints.EAST);
-	__planSwitch_JComboBox = new SimpleJComboBox();
-	__planSwitch_JComboBox.setData (
-		StateMod_Plan.getPonChoices(true) );
-	__planSwitch_JComboBox.addItemListener(this);
-	__planSwitch_JComboBox.setToolTipText (
-		"<HTML>The on/off switch tells StateMod whether to include the plan in the analysis.</HTML>" );
-	JGUIUtil.addComponent(param_JPanel, __planSwitch_JComboBox,
-		1, y, 2, 1, 0, 0,
-		1, 0, 0, 1, 
-		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
-
-	JGUIUtil.addComponent(param_JPanel, new JLabel("Plan type:"),
-		0, ++y, 1, 1, 0, 0, 
-		GridBagConstraints.NONE, GridBagConstraints.EAST);
-	__iPlnTyp_JComboBox = new SimpleJComboBox();
-	__iPlnTyp_JComboBox.setData (
-		StateMod_Plan.getIPlnTypChoices(true) );
-	__iPlnTyp_JComboBox.addItemListener(this);
-	__iPlnTyp_JComboBox.setToolTipText (
-		"<HTML>The on/off switch tells StateMod whether to include the plan in the analysis.</HTML>" );
-	JGUIUtil.addComponent(param_JPanel, __iPlnTyp_JComboBox,
-		1, y, 2, 1, 0, 0,
-		1, 0, 0, 1, 
-		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
-
-	JGUIUtil.addComponent(param_JPanel, new JLabel("Efficiency (%):"),
-		0, ++y, 1, 1, 0, 0, 
-		GridBagConstraints.NONE, GridBagConstraints.EAST);
-	__Peff_JTextField = new JTextField(11);
-	__Peff_JTextField.setToolTipText ( "<HTML>The plan efficiency.</HTML>" );
-	JGUIUtil.addComponent(param_JPanel, __Peff_JTextField,
-		1, y, 2, 1, 0, 0,
-		1, 0, 0, 1, 
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
-
-	JGUIUtil.addComponent(param_JPanel, new JLabel("Return flow table:"),
-		0, ++y, 1, 1, 0, 0, 
-		GridBagConstraints.NONE, GridBagConstraints.EAST);
-	__iPrf_JTextField = new JTextField(11);
-	__iPrf_JTextField.setToolTipText ("<HTML>The return flow table for the plan.</HTML>" );
-	JGUIUtil.addComponent(param_JPanel, __iPrf_JTextField,
-		1, y, 2, 1, 0, 0,
-		1, 0, 0, 1, 
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
-
-	JGUIUtil.addComponent(param_JPanel, new JLabel("Failure switch:"),
-		0, ++y, 1, 1, 0, 0, 
-		GridBagConstraints.NONE, GridBagConstraints.EAST);
-	__iPfail_JComboBox = new SimpleJComboBox();
-	__iPfail_JComboBox.setData (
-		StateMod_Plan.getIPfailChoices(true) );
-	__iPfail_JComboBox.addItemListener(this);
-	__iPfail_JComboBox.setToolTipText ( "<HTML>Plan failure switch.</HTML>" );
-	JGUIUtil.addComponent(param_JPanel, __iPfail_JComboBox,
-		1, y, 2, 1, 0, 0,
-		1, 0, 0, 1, 
-		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
-
-	// Put in blanks to have better spacing in layout...
-	JGUIUtil.addComponent(param_JPanel,
-		new JLabel("  Initial storage (AF):"),
-		0, ++y, 1, 1, 0, 0, 
-		GridBagConstraints.NONE, GridBagConstraints.EAST);
-	__Psto1_JTextField = new JTextField(11);
-	__Psto1_JTextField.setToolTipText ( "<HTML>The plan initial storage (for types 3 & 5).</HTML>" );
-	JGUIUtil.addComponent(param_JPanel, __Psto1_JTextField,
-		1, y, 2, 1, 0, 0,
-		1, 0, 0, 1, 
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
-
-	JGUIUtil.addComponent(param_JPanel, new JLabel("Source ID:"),
-		0, ++y, 1, 1, 0, 0, 
-		GridBagConstraints.NONE, GridBagConstraints.EAST);
-	__Psource_JTextField = new JTextField(24);
-	__Psource_JTextField.setToolTipText (
-		"<HTML>Source ID of the structure where reuse water " +
-		"became available or a T&C condition originated.</HTML>" );
-	JGUIUtil.addComponent(param_JPanel, __Psource_JTextField,
-		1, y, 2, 1, 0, 0,
-		1, 0, 0, 1, 
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
-
-	// Add the parameters panel to the right panel...
-
-	JGUIUtil.addComponent(right_JPanel,param_JPanel,
-		0, 0, 11, 5, 0, 0,
-		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
-
-	JGUIUtil.addComponent(main_JPanel, right_JPanel,
-		1, 0, 3, 10, 0, 0, 
-		GridBagConstraints.NONE, GridBagConstraints.NORTHEAST);
-
-	// Now add the middle panel to the right side of the main panel.
-	//JGUIUtil.addComponent(right_JPanel, middle_JPanel, 
-		//0, 5, 8, 2, 0, 0, 
-		//GridBagConstraints.NONE, GridBagConstraints.WEST);
-
-	// Main window buttons...
-
-	JPanel button_JPanel = new JPanel();
-	button_JPanel.setLayout(new FlowLayout());
-	//__help_JButton = new SimpleJButton(__BUTTON_HELP, this);
-	//__help_JButton.setEnabled(false);
-	__showOnMap_JButton = new SimpleJButton(__BUTTON_SHOW_ON_MAP, this);
-	__showOnMap_JButton.setToolTipText(
-		"Annotate map with location (button is disabled if layer does not have matching ID)" );
-	__showOnNetwork_JButton = new SimpleJButton(__BUTTON_SHOW_ON_NETWORK, this);
-	__showOnNetwork_JButton.setToolTipText( "Annotate network with location" );
-	__close_JButton = new SimpleJButton(__BUTTON_CLOSE, this);
-	__apply_JButton = new SimpleJButton(__BUTTON_APPLY, this);
-	__cancel_JButton = new SimpleJButton(__BUTTON_CANCEL, this);
-	button_JPanel.add(__showOnMap_JButton);
-	button_JPanel.add(__showOnNetwork_JButton);
-	if (__editable) {
-		button_JPanel.add(__apply_JButton);
-		button_JPanel.add(__cancel_JButton);
-	}
-	button_JPanel.add(__close_JButton);
-	//button_JPanel.add(__help_JButton);
-	JGUIUtil.addComponent(right_JPanel, button_JPanel,
-		//6, 9, 4, 1, 0, 0,
-		0, 9, 10, 1, 0, 0,
-		GridBagConstraints.NONE, GridBagConstraints.SOUTHEAST);
-
-	getContentPane().add(main_JPanel);
-
-	// Panel at the bottom for messages...
-
-	JPanel bottom_JPanel = new JPanel();
-	bottom_JPanel.setLayout (gbl);
-	__message_JTextField = new JTextField();
-	__message_JTextField.setEditable(false);
-	JGUIUtil.addComponent(bottom_JPanel, __message_JTextField,
-		0, 0, 7, 1, 1.0, 0.0, 
-		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
-	__status_JTextField = new JTextField(5);
-	__status_JTextField.setEditable(false);
-	JGUIUtil.addComponent(bottom_JPanel, __status_JTextField,
-		7, 0, 1, 1, 0.0, 0.0, 
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
-	getContentPane().add ("South", bottom_JPanel);	
-	
-	if ( __dataset_wm != null ) {
-		__dataset_wm.setWindowOpen ( StateMod_DataSet_WindowManager.WINDOW_PLAN, this );
-	}
-
-	pack();
-	setSize(700,400);
-	JGUIUtil.center(this);
-	initializeJComponents();
-	selectTableIndex(index, false, true);
-	setVisible(true);
-
-	if (widths != null) {
-		__worksheet.setColumnWidths(widths);
-	}	
-	__initialized = true;
-	__worksheet.addSortListener(this);
+/**
+Set the worksheet that displays the list of plans.
+*/
+private void setWorksheet ( JWorksheet worksheet )
+{
+	__worksheet = worksheet;
 }
 
 /**

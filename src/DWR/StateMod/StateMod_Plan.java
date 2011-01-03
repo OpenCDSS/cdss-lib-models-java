@@ -436,8 +436,8 @@ public static List<String> getPeffFlagChoices ( boolean includeNotes )
 }
 
 /**
-Return the default on/off switch choice.  This can be used by GUI code to pick a default for a new plan.
-@return the default reservoir replacement choice.
+Return the plan efficiency flag choice.  This can be used by GUI code to pick a default for a new plan.
+@return the default plan efficiency choice.
 */
 public static String getPeffFlagDefault ( boolean includeNotes )
 {	// Make this agree with the above method...

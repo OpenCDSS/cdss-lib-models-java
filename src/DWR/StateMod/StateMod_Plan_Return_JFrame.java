@@ -30,10 +30,11 @@ import RTi.Util.GUI.ResponseJDialog;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 
+// TODO SAM 2011-01-02 Copied similar reservoir class - both need updated if full editing is enabled.
 /**
-GUI for displaying/editing the return flow assignments for a reservoir.
+GUI for displaying/editing the return flow assignments for a plan.
 */
-public class StateMod_Reservoir_Return_JFrame extends JFrame
+public class StateMod_Plan_Return_JFrame extends JFrame
 implements ActionListener, KeyListener, MouseListener, WindowListener {
 
 /**
@@ -79,33 +80,33 @@ Dataset that contains the data.
 private StateMod_DataSet __dataset;
 
 /**
-The current reservoir for which returns are being shown.
+The current plan for which returns are being shown.
 */
-private StateMod_Reservoir __currentRes;
+private StateMod_Plan __currentPlan;
 
 /**
 The list of return data to view.  These returns are maintained as a separate data component and not
-currently linked to the reservoir.  This is a different approach than diversion/well returns, mainly
+currently linked to the plan.  This is a different approach than diversion/well returns, mainly
 because effort has not been put into the full editing features and "dirty" data need to be separate.
 */
-private List<StateMod_ReturnFlow> __currentResReturnList = new Vector();
+private List<StateMod_ReturnFlow> __currentPlanReturnList = new Vector();
 
 /**
 Constructor.
 @param dataset the dataset in which the data is contained.
-@param res the Reservoir for which to display return information.
+@param plan the plan for which to display return information.
 @param editable whether the gui data is editable or not.
 */
-public StateMod_Reservoir_Return_JFrame(StateMod_DataSet dataset, StateMod_Reservoir res, boolean editable) {
-	StateMod_GUIUtil.setTitle(this, dataset, res.getName() 
-		+ " - Reservoir Return Flow Table Assignment", null);
+public StateMod_Plan_Return_JFrame(StateMod_DataSet dataset, StateMod_Plan plan, boolean editable) {
+	StateMod_GUIUtil.setTitle(this, dataset, plan.getName() 
+		+ " - Plan Return Flow Table Assignment", null);
 	JGUIUtil.setIcon(this, JGUIUtil.getIconImage());
-	__currentRes = res;
+	__currentPlan = plan;
 	List<StateMod_ReturnFlow> allReturns = (List<StateMod_ReturnFlow>)dataset.getComponentForComponentType(
-		StateMod_DataSet.COMP_RESERVOIR_RETURN).getData();
-	__currentResReturnList = (List<StateMod_ReturnFlow>)StateMod_Util.getDataList (allReturns,res.getID());
-	Message.printStatus(2,"","Have " + __currentResReturnList.size() + " return records for reservoir \"" +
-		__currentRes.getID() + "\" (selected from full list of size " + allReturns.size() + ")." );
+		StateMod_DataSet.COMP_PLAN_RETURN).getData();
+	__currentPlanReturnList = (List<StateMod_ReturnFlow>)StateMod_Util.getDataList (allReturns,plan.getID());
+	Message.printStatus(2,"","Have " + __currentPlanReturnList.size() + " return records for plan \"" +
+		__currentPlan.getID() + "\" (selected from full list of size " + allReturns.size() + ")." );
 	__dataset = dataset;
 	// TODO SAM 2011-01-02 For now editing is disabled...
 	editable = false;
@@ -118,18 +119,18 @@ Responds to action performed events.
 @param e the ActionEvent that happened.
 */
 public void actionPerformed(ActionEvent e) {
-	String routine = "StateMod_Reservoir_Return_JFrame::actionPerformed";
+	String routine = "StateMod_Plan_Return_JFrame.actionPerformed";
 
 	String action = e.getActionCommand();
 	
 	if (action.equals(__BUTTON_ADD_RETURN)) {
-		StateMod_ReturnFlow aReturn = new StateMod_ReturnFlow(StateMod_DataSet.COMP_RESERVOIR_RETURN);
+		StateMod_ReturnFlow aReturn = new StateMod_ReturnFlow(StateMod_DataSet.COMP_PLAN_RETURN);
 		aReturn._isClone = true;
 		StateMod_ReturnFlow last = (StateMod_ReturnFlow)__worksheet.getLastRowData();
 
 		if (last == null) {
-			aReturn.setID(StateMod_Util.createNewID(__currentRes.getID()));
-			aReturn.setCgoto(__currentRes.getID());
+			aReturn.setID(StateMod_Util.createNewID(__currentPlan.getID()));
+			aReturn.setCgoto(__currentPlan.getID());
 		}
 		else {
 			aReturn.setID(StateMod_Util.createNewID(last.getID()));
@@ -143,7 +144,7 @@ public void actionPerformed(ActionEvent e) {
 	else if (action.equals(__BUTTON_DEL_RETURN)) {
 		int row = __worksheet.getSelectedRow();
 		if (row != -1) {	
-			int x = new ResponseJDialog(this, "Delete return", "Delete reservoir return?",
+			int x = new ResponseJDialog(this, "Delete return", "Delete plan return?",
 				ResponseJDialog.YES | ResponseJDialog.NO).response();
 			if (x == ResponseJDialog.NO) {
 				return;
@@ -180,7 +181,7 @@ Checks the data to make sure that all the data are valid.
 @return 0 if the data are valid, 1 if errors exist and -1 if non-fatal errors exist.
 */
 private int checkInput() {
-	String routine = "StateMod_Reservoir_Return_JFrame.checkInput";
+	String routine = "StateMod_Plan_Return_JFrame.checkInput";
 	List v = __worksheet.getAllData();
 
 	int size = v.size();
@@ -203,12 +204,12 @@ private int checkInput() {
 	
 		// TODO SAM 2011-01-02 Need to implement validators
 		if (id.length() > 12) {
-			warning += "\nReservoir ID (" + id + ") is longer than 12 characters.";
+			warning += "\nPlan ID (" + id + ") is longer than 12 characters.";
 			fatalCount++;
 		}
 
 		if (id.indexOf(" ") > -1 || id.indexOf("-") > -1) {
-			warning += "\nReservoir ID (" + id + ") cannot contain spaces or dashes.";
+			warning += "\nPlan ID (" + id + ") cannot contain spaces or dashes.";
 			fatalCount++;
 		}
 
@@ -243,7 +244,7 @@ Saves the input back into the dataset.
 @return true if the data was saved successfully.  False if not.
 */
 private boolean saveData() {
-	String routine = "StateMod_Reservoir_Return_JFrame.saveData";
+	String routine = "StateMod_Plan_Return_JFrame.saveData";
 	/* TODO SAM 2011-01-02 Enable - for now no editing is allowed
 	if (!__worksheet.stopEditing()) {
 		// don't save if there are errors.
@@ -332,7 +333,7 @@ Clean up before garbage collection.
 */
 protected void finalize()
 throws Throwable {
-	__currentRes = null;
+	__currentPlan = null;
 	__worksheet = null;
 	__addReturn_JButton = null;
 	__deleteReturn_JButton = null;
@@ -401,7 +402,7 @@ public void setupGUI() {
 
 	addWindowListener(this);
 
-	PropList p = new PropList("StateMod_Reservoir_Return_JFrame.JWorksheet");
+	PropList p = new PropList("StateMod_Plan_Return_JFrame.JWorksheet");
 	p.add("JWorksheet.AllowCopy=true");		
 	p.add("JWorksheet.CellFont=Courier");
 	p.add("JWorksheet.CellStyle=Plain");
@@ -444,10 +445,10 @@ public void setupGUI() {
 		*/
 		// Get the list of all returns and filter for this reservoir
 		// TODO SAM 2011-01-02 The code needs to use a table model with lists if editing is enabled
-		StateMod_Reservoir_Return_Data_TableModel tmr =
-			new StateMod_Reservoir_Return_Data_TableModel(__currentResReturnList, __editable);
-		StateMod_Reservoir_Return_Data_CellRenderer crr =
-			new StateMod_Reservoir_Return_Data_CellRenderer(tmr);
+		StateMod_Plan_Return_Data_TableModel tmr =
+			new StateMod_Plan_Return_Data_TableModel(__currentPlanReturnList, __editable);
+		StateMod_Plan_Return_Data_CellRenderer crr =
+			new StateMod_Plan_Return_Data_CellRenderer(tmr);
 		
 		jsw = new JScrollWorksheet(crr, tmr, p);
 		__worksheet = jsw.getJWorksheet();
@@ -508,10 +509,10 @@ public void setupGUI() {
 	JPanel main_panel = new JPanel();
 	main_panel.setLayout(new BorderLayout());
 
-	info_panel.add(new JLabel("Reservoir:"));	
-	info_panel.add(new JLabel(__currentRes.getID()));
-	info_panel.add(new JLabel("Reservoir name:"));	
-	info_panel.add(new JLabel(__currentRes.getName()));
+	info_panel.add(new JLabel("Plan:"));	
+	info_panel.add(new JLabel(__currentPlan.getID()));
+	info_panel.add(new JLabel("Plan name:"));	
+	info_panel.add(new JLabel(__currentPlan.getName()));
 
 	if (__editable) {
 		p1.add(__addReturn_JButton);
@@ -523,9 +524,9 @@ public void setupGUI() {
 	p1.add(__close_JButton);
 	if ( !__editable ) {
 		applyJButton.setEnabled(false);
-		applyJButton.setToolTipText ( "Editing reservoir return data is not implemented." );
+		applyJButton.setToolTipText ( "Editing plan return data is not implemented." );
 		__close_JButton.setEnabled(false);
-		__close_JButton.setToolTipText ( "Editing reservoir return data is not implemented." );
+		__close_JButton.setToolTipText ( "Editing plan return data is not implemented." );
 	}
 
 	main_panel.add(jsw, "Center");
