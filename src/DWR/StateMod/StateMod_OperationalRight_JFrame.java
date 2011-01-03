@@ -673,7 +673,7 @@ private void createInstreamFlowIDVector() {
 	DataSetComponent isfComp = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_INSTREAM_STATIONS);
 	__instreamFlows = (List<StateMod_InstreamFlow>)isfComp.getData();
-	__instreamFlowIDs = StateMod_Util.createDataList(__instreamFlows, true);
+	__instreamFlowIDs = StateMod_Util.createIdentifierList(__instreamFlows, true);
 }
 
 /**
@@ -684,7 +684,7 @@ private void createDiversionIDVector() {
 	DataSetComponent divComp = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_DIVERSION_STATIONS);
 	__diversions = (List)divComp.getData();
-	__diversionIDs = StateMod_Util.createDataList(__diversions, true);
+	__diversionIDs = StateMod_Util.createIdentifierList(__diversions, true);
 }
 
 /**
@@ -695,14 +695,14 @@ private void createDiversionRightIDVector() {
 	DataSetComponent divRightComp = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_DIVERSION_RIGHTS);
 	__diversionRights = (List)divRightComp.getData();
-	__diversionRightIDs = StateMod_Util.createDataList(__diversionRights, true);
+	__diversionRightIDs = StateMod_Util.createIdentifierList(__diversionRights, true);
 }
 
 /**
 Creates the operational right ID Vector and stores it into __operationalRightIDs.
 */
 private void createOperationalRightIDVector() {
-	__operationalRightIDs = StateMod_Util.createDataList(__operationalRights, true);
+	__operationalRightIDs = StateMod_Util.createIdentifierList(__operationalRights, true);
 }
 
 /**
@@ -713,7 +713,7 @@ private void createReservoirIDVector() {
 	DataSetComponent resComp = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_RESERVOIR_STATIONS);
 	__reservoirs = (List)resComp.getData();
-	__reservoirIDs = StateMod_Util.createDataList(__reservoirs, true);
+	__reservoirIDs = StateMod_Util.createIdentifierList(__reservoirs, true);
 }
 
 /**
@@ -738,7 +738,7 @@ private void createStreamGageIDVector() {
 	DataSetComponent gageComp = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_STREAMGAGE_STATIONS);
 	__streamGages = (List)gageComp.getData();
-	__streamGageIDs = StateMod_Util.createDataList(__streamGages, true);
+	__streamGageIDs = StateMod_Util.createIdentifierList(__streamGages, true);
 }
 
 /**
@@ -798,7 +798,7 @@ private void fillDestinationAccount(int ityopr, String value) {
 			}
 			r = (StateMod_Reservoir)__reservoirs.get(index);
 			accounts = r.getAccounts();
-			__destinationAccount_JComboBox.setData(StateMod_Util.createDataList(accounts, true));
+			__destinationAccount_JComboBox.setData(StateMod_Util.createIdentifierList(accounts, true));
 			__destinationAccount_JComboBox.setEditable(true);
 			break;
 		case 5:
@@ -820,7 +820,7 @@ private void fillDestinationAccount(int ityopr, String value) {
 			if (index > -1) {
 				r = __reservoirs.get(index);
 				accounts = r.getAccounts();
-				__destinationAccount_JComboBox.setData(StateMod_Util.createDataList(accounts,true));
+				__destinationAccount_JComboBox.setData(StateMod_Util.createIdentifierList(accounts,true));
 				__destinationAccount_JComboBox.setEditable(true);
 				return;
 			}
@@ -832,7 +832,7 @@ private void fillDestinationAccount(int ityopr, String value) {
 			if (index > -1) {
 				r = __reservoirs.get(index);
 				accounts = r.getAccounts();
-				__destinationAccount_JComboBox.setData(StateMod_Util.createDataList(accounts,true));
+				__destinationAccount_JComboBox.setData(StateMod_Util.createIdentifierList(accounts,true));
 				__destinationAccount_JComboBox.setEditable(true);
 				return;
 			}
@@ -875,7 +875,7 @@ private void fillSourceAccount1(int ityopr, StateMod_OperationalRight opr) {
 			}
 			StateMod_Reservoir r = __reservoirs.get(index);
 			List accounts = r.getAccounts();
-			__sourceAccount1_JComboBox.setData(StateMod_Util.createDataList(accounts, true));
+			__sourceAccount1_JComboBox.setData(StateMod_Util.createIdentifierList(accounts, true));
 			if (ityopr == 9 || ityopr == 20) {
 				// special case
 				__sourceAccount1_JComboBox.addAt("0 - Prorate", 0);
@@ -1458,7 +1458,7 @@ private void populateOperationalRightInformation(StateMod_OperationalRight opr)
 			__sourceAccount1_JComboBox.setSelectedPrefixItem(srcAcct1);
 
 			__source2_JComboBox.removeAllItems();
-			__source2_JComboBox.setData(StateMod_Util.createDataList(__operationalRights, true));			
+			__source2_JComboBox.setData(StateMod_Util.createIdentifierList(__operationalRights, true));			
 			__source2_JComboBox.addAt("0", 0);
 			__source2_JComboBox.setSelectedPrefixItem(srcAcct2);
 			__source2_JComboBox.setEditable(true);

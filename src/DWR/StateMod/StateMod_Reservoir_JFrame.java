@@ -189,6 +189,7 @@ private JButton
 	__findNextRes = null,
 	__ownerAccounts = null,
 	__waterRights = null,
+	__returnFlow_JButton = null,
 	__showOnMap_JButton = null,
 	__showOnNetwork_JButton = null;;
 
@@ -362,124 +363,127 @@ public void actionPerformed(ActionEvent e) {
 	String routine="StateMod_Reservoir_JFrame.actionPerformed"; 
 
 	try {
-	Object source = e.getSource();
-
-	if ( source == __findNextRes) {
-		searchWorksheet(__worksheet.getSelectedRow() + 1);
-	}
-	else if ( (source == __searchID) || (source == __searchName) ) {
-		searchWorksheet(0);
-	}
-	else if ( source == __searchIDJRadioButton ) {
-		__searchName.setEditable(false);
-		__searchID.setEditable(true);
-	}
-	else if ( source == __searchNameJRadioButton) {
-		__searchName.setEditable(true);
-		__searchID.setEditable(false);
-	}	
-	else if ( source == __helpJButton) {
-		// TODO HELP (JTS - 2003-06-09)
-	}
-	else if ( source == __closeJButton ) {
-		saveCurrentRecord();
-		int size = __reservoirsVector.size();
-		boolean changed = false;
-		for (int i = 0; i < size; i++) {
-			StateMod_Reservoir r = (StateMod_Reservoir)__reservoirsVector.get(i);
-			if (!changed && r.changed()) {
-				changed = true;
+		Object source = e.getSource();
+	
+		if ( source == __findNextRes) {
+			searchWorksheet(__worksheet.getSelectedRow() + 1);
+		}
+		else if ( (source == __searchID) || (source == __searchName) ) {
+			searchWorksheet(0);
+		}
+		else if ( source == __searchIDJRadioButton ) {
+			__searchName.setEditable(false);
+			__searchID.setEditable(true);
+		}
+		else if ( source == __searchNameJRadioButton) {
+			__searchName.setEditable(true);
+			__searchID.setEditable(false);
+		}	
+		else if ( source == __helpJButton) {
+			// TODO HELP (JTS - 2003-06-09)
+		}
+		else if ( source == __closeJButton ) {
+			saveCurrentRecord();
+			int size = __reservoirsVector.size();
+			boolean changed = false;
+			for (int i = 0; i < size; i++) {
+				StateMod_Reservoir r = __reservoirsVector.get(i);
+				if (!changed && r.changed()) {
+					changed = true;
+				}
+				r.acceptChanges();
+			}					
+			if (changed) {
+				__dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_STATIONS,true);
+			}		
+			if ( __dataset_wm != null ) {
+				__dataset_wm.closeWindow ( StateMod_DataSet_WindowManager.WINDOW_RESERVOIR);
 			}
-			r.acceptChanges();
-		}					
-		if (changed) {
-			__dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_STATIONS,true);
-		}		
-		if ( __dataset_wm != null ) {
-			__dataset_wm.closeWindow ( StateMod_DataSet_WindowManager.WINDOW_RESERVOIR);
-		}
-		else {
-			JGUIUtil.close ( this );
-		}
-	}
-	else if ( source == __applyJButton ) {
-		saveCurrentRecord();
-		int size = __reservoirsVector.size();
-		boolean changed = false;
-		for (int i = 0; i < size; i++) {
-			StateMod_Reservoir r = (StateMod_Reservoir)__reservoirsVector.get(i);
-			if (!changed && r.changed()) {
-				changed = true;
-			}
-			r.createBackup();
-		}			
-		if (changed) {
-			__dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_STATIONS, true);
-		}		
-	}
-	else if ( source == __cancelJButton ) {
-		int size = __reservoirsVector.size();
-		for (int i = 0; i < size; i++) {
-			StateMod_Reservoir r = (StateMod_Reservoir)__reservoirsVector.get(i);
-			r.restoreOriginal();
-		}				
-		if ( __dataset_wm != null ) {
-			__dataset_wm.closeWindow ( StateMod_DataSet_WindowManager.WINDOW_RESERVOIR);
-		}
-		else {
-			JGUIUtil.close ( this );
-		}
-	}
-	else if ( source == __showOnMap_JButton ) {
-		GeoRecord geoRecord = getSelectedReservoir().getGeoRecord();
-		GRShape shape = geoRecord.getShape();
-		__dataset_wm.showOnMap ( getSelectedReservoir(),
-			"Res: " + getSelectedReservoir().getID() + " - " + getSelectedReservoir().getName(),
-			new GRLimits(shape.xmin, shape.ymin, shape.xmax, shape.ymax),
-			geoRecord.getLayer().getProjection() );
-	}
-	else if ( source == __showOnNetwork_JButton ) {
-		StateMod_Network_JFrame networkEditor = __dataset_wm.getNetworkEditor();
-		if ( networkEditor != null ) {
-			HydrologyNode node = networkEditor.getNetworkJComponent().findNode(
-				getSelectedReservoir().getID(), false, false);
-			if ( node != null ) {
-				__dataset_wm.showOnNetwork ( getSelectedReservoir(),
-					"Res: " + getSelectedReservoir().getID() + " - " + getSelectedReservoir().getName(),
-					new GRLimits(node.getX(),node.getY(),node.getX(),node.getY()));
+			else {
+				JGUIUtil.close ( this );
 			}
 		}
-	}
-	// Time series buttons...
-	else if ( (source == __graph_JButton) || (source == __table_JButton) || (source == __summary_JButton) ) {
-		displayTSViewJFrame(source);
-	}
-	else {	
-		if (__currentReservoirIndex == -1) {
-			new ResponseJDialog(this, "You must first select a reservoir from the list.", ResponseJDialog.OK);
-			return;
+		else if ( source == __applyJButton ) {
+			saveCurrentRecord();
+			int size = __reservoirsVector.size();
+			boolean changed = false;
+			for (int i = 0; i < size; i++) {
+				StateMod_Reservoir r = __reservoirsVector.get(i);
+				if (!changed && r.changed()) {
+					changed = true;
+				}
+				r.createBackup();
+			}			
+			if (changed) {
+				__dataset.setDirty(StateMod_DataSet.COMP_RESERVOIR_STATIONS, true);
+			}		
 		}
-
-		// set placeholder for current reservoir
-		StateMod_Reservoir res =((StateMod_Reservoir)__reservoirsVector.get(__currentReservoirIndex));
-
-		if (e.getSource() == __ownerAccounts) {
-			new StateMod_Reservoir_Owner_JFrame(__dataset, res, __editable);
+		else if ( source == __cancelJButton ) {
+			int size = __reservoirsVector.size();
+			for (int i = 0; i < size; i++) {
+				StateMod_Reservoir r = __reservoirsVector.get(i);
+				r.restoreOriginal();
+			}				
+			if ( __dataset_wm != null ) {
+				__dataset_wm.closeWindow ( StateMod_DataSet_WindowManager.WINDOW_RESERVOIR);
+			}
+			else {
+				JGUIUtil.close ( this );
+			}
 		}
-		else if (e.getSource() == __areaCapacityContent) {
-			new StateMod_Reservoir_AreaCap_JFrame( __dataset, res, __editable);
+		else if ( source == __showOnMap_JButton ) {
+			GeoRecord geoRecord = getSelectedReservoir().getGeoRecord();
+			GRShape shape = geoRecord.getShape();
+			__dataset_wm.showOnMap ( getSelectedReservoir(),
+				"Res: " + getSelectedReservoir().getID() + " - " + getSelectedReservoir().getName(),
+				new GRLimits(shape.xmin, shape.ymin, shape.xmax, shape.ymax),
+				geoRecord.getLayer().getProjection() );
 		}
-		else if (e.getSource() == __climateFactors) {
-			new StateMod_Reservoir_Climate_JFrame( __dataset, res, __editable);
+		else if ( source == __showOnNetwork_JButton ) {
+			StateMod_Network_JFrame networkEditor = __dataset_wm.getNetworkEditor();
+			if ( networkEditor != null ) {
+				HydrologyNode node = networkEditor.getNetworkJComponent().findNode(
+					getSelectedReservoir().getID(), false, false);
+				if ( node != null ) {
+					__dataset_wm.showOnNetwork ( getSelectedReservoir(),
+						"Res: " + getSelectedReservoir().getID() + " - " + getSelectedReservoir().getName(),
+						new GRLimits(node.getX(),node.getY(),node.getX(),node.getY()));
+				}
+			}
 		}
-		else if (e.getSource() == __waterRights) {
-			new StateMod_Reservoir_Right_JFrame( __dataset, res, __editable);
+		// Time series buttons...
+		else if ( (source == __graph_JButton) || (source == __table_JButton) || (source == __summary_JButton) ) {
+			displayTSViewJFrame(source);
 		}
-	}
+		else {	
+			if (__currentReservoirIndex == -1) {
+				new ResponseJDialog(this, "You must first select a reservoir from the list.", ResponseJDialog.OK);
+				return;
+			}
+	
+			// set placeholder for current reservoir
+			StateMod_Reservoir res = getSelectedReservoir();
+	
+			if (e.getSource() == __ownerAccounts) {
+				new StateMod_Reservoir_Owner_JFrame(__dataset, res, __editable);
+			}
+			else if (e.getSource() == __areaCapacityContent) {
+				new StateMod_Reservoir_AreaCap_JFrame( __dataset, res, __editable);
+			}
+			else if (e.getSource() == __climateFactors) {
+				new StateMod_Reservoir_Climate_JFrame( __dataset, res, __editable);
+			}
+			else if (e.getSource() == __waterRights) {
+				new StateMod_Reservoir_Right_JFrame( __dataset, res, __editable);
+			}
+			else if (e.getSource() == __returnFlow_JButton) {
+				new StateMod_Reservoir_Return_JFrame( __dataset, res, __editable );
+			}
+		}
 	}
 	catch (Exception ex) {
-		Message.printWarning(2, routine, "Error in action performed");
-		Message.printWarning(2, routine, ex);
+		Message.printWarning(3, routine, "Error in action performed");
+		Message.printWarning(3, routine, ex);
 	}
 }
 
@@ -764,7 +768,7 @@ Initializes the arrays that are used when items are selected and deselected.
 This should be called from setupGUI() before the a call is made to selectTableIndex().
 */
 private void initializeDisables() {
-	__disables = new JComponent[26];
+	__disables = new JComponent[27];
 	int i = 0;
 	__disables[i++] = __reservoirStationID;
 	__disables[i++] = __applyJButton;
@@ -772,6 +776,7 @@ private void initializeDisables() {
 	__disables[i++] = __climateFactors;
 	__disables[i++] = __ownerAccounts;
 	__disables[i++] = __waterRights;
+	__disables[i++] = __returnFlow_JButton;
 	__disables[i++] = __reservoirSwitch;
 	__disables[i++] = __oneFillRuleAdmin;
 	__disables[i++] = __deadStorageInRes;
@@ -1015,7 +1020,7 @@ private void rebuildResDailyID() {
 
 	// then add the IDs of all the other reservoirs in the dataset,
 	// making sure not to re-add the above ID again.
-	List ids = StateMod_Util.createDataList(__reservoirsVector, false);
+	List ids = StateMod_Util.createIdentifierList(__reservoirsVector, false);
 	
 	for (int i = 0; i < ids.size(); i++) {
 		String currID = (String)ids.get(i);
@@ -1266,6 +1271,7 @@ public void setupGUI(int index) {
 	__areaCapacityContent = new JButton("Content/Area/Seepage...");
 	__climateFactors = new JButton("Climate Stations...");
 	__waterRights = new JButton("Water Rights...");
+	__returnFlow_JButton = new JButton("Return Flow...");
 	__helpJButton = new JButton(__BUTTON_HELP);
 	__closeJButton = new JButton(__BUTTON_CLOSE);
 
@@ -1577,11 +1583,17 @@ public void setupGUI(int index) {
 		0, y3, 1, 1, 1, 1,  
 		1, 0, 0, 1,
 		GridBagConstraints.NONE, GridBagConstraints.CENTER);
+	y3++;
+	JGUIUtil.addComponent(subformsPanel, __returnFlow_JButton,
+		0, y3, 1, 1, 1, 1,  
+		1, 0, 0, 1,
+		GridBagConstraints.NONE, GridBagConstraints.CENTER);
 		
 	__ownerAccounts.addActionListener(this);
 	__areaCapacityContent.addActionListener(this);
 	__climateFactors.addActionListener(this);
 	__waterRights.addActionListener(this);
+	__returnFlow_JButton.addActionListener(this);
 
 	y = 12;
 

@@ -886,7 +886,7 @@ Populates the well daily id combo box.
 private void populateWellDailyID() {
 	__dailyIDComboBox.removeAllItems();
 
-	List idNameVector = StateMod_Util.createDataList(__wellsVector,true);
+	List idNameVector = StateMod_Util.createIdentifierList(__wellsVector,true);
 	idNameVector.add( 0, "0 - Use average daily value from monthly time series");
 	idNameVector.add( 1, "3 - Daily time series are supplied");
 	idNameVector.add( 2, "4 - Daily time series interpolated from midpoints of monthly data");
@@ -1372,7 +1372,7 @@ private void setupGUI(int index) {
 	
 	List diversions = (List)(__dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_DIVERSION_STATIONS).getData());
-	diversions = StateMod_Util.createDataList(diversions, true);
+	diversions = StateMod_Util.createIdentifierList(diversions, true);
 	DefaultComboBoxModel dcbm = new DefaultComboBoxModel(new Vector(diversions));
 	__associatedDiversionsComboBox.setModel(dcbm);
 	/*

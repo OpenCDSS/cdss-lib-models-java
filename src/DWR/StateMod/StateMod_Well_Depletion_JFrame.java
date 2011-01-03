@@ -477,7 +477,7 @@ public void setupGUI() {
 		jsw = new JScrollWorksheet(crw, tmw, p);
 		__worksheet = jsw.getJWorksheet();
 
-		v = StateMod_Util.createDataList(nodes, true);
+		v = StateMod_Util.createIdentifierList(nodes, true);
 		__worksheet.setColumnJComboBoxValues(
 		StateMod_ReturnFlow_TableModel.COL_RIVER_NODE, v, false);
 
@@ -492,7 +492,7 @@ public void setupGUI() {
 				.getComponentForComponentType(
 				StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY).getData());
 		}
-		v = StateMod_Util.createDataList(delayIDs, true);
+		v = StateMod_Util.createIdentifierList(delayIDs, true);
 		__worksheet.setColumnJComboBoxValues(
 		StateMod_ReturnFlow_TableModel.COL_RETURN_ID, v, false);
 		widths = crw.getColumnWidths();		

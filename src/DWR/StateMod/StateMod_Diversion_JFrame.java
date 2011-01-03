@@ -1320,7 +1320,7 @@ private void populateDiversionDailyID()
 {	__diversionDailyID_JComboBox.removeAllItems();
 
 	// Get a list of all the diversions with "ID - Name"...
-	List<String> idNameVector = StateMod_Util.createDataList(__diversionsVector, true);
+	List<String> idNameVector = StateMod_Util.createIdentifierList(__diversionsVector, true);
 	List<String> static_choices = StateMod_Diversion.getCdividyChoices ( true );
 	// Take special care if no diversions are in the list...
 	if ( idNameVector.size() == 0 ) {

@@ -958,8 +958,8 @@ non-null list is guaranteed; however, the list may have zero items.
 returned from StateMod_Data.getID().  If true the string will contain the ID,
 followed by " - xxxx", where xxxx is the value returned from StateMod_Data.getName().
 */
-public static List createCgotoDataList ( List smdata_Vector, boolean include_name )
-{	List v = null;
+public static List<String> createCgotoDataList ( List smdata_Vector, boolean include_name )
+{	List<String> v = null;
 	if ( smdata_Vector == null ) {
 		v = new Vector();
 		return v;
@@ -1146,6 +1146,60 @@ public static DayTS createDailyEstimateTS (	String id, String desc,
 		}
 	}
 	return estdayts;
+}
+
+/**
+Create a list of strings for use in choices, etc.
+@return a list of String containing formatted identifiers and names.  A
+non-null list is guaranteed; however, the list may have zero items.
+@param includeName If false, each string will consist of only the value
+returned from StateMod_Data.getID().  If true the string will contain the ID,
+followed by " - xxxx", where xxxx is the value returned from StateMod_Data.getName().
+*/
+public static List<String> createIdentifierList ( List smdataList, boolean includeName )
+{	List<String> v = null;
+	if ( smdataList == null ) {
+		v = new Vector();
+		return v;
+	}
+	else {
+	    // This optimizes memory management...
+		v = new Vector ( smdataList.size() );
+	}
+	int size = smdataList.size();
+	StateMod_Data smdata;
+	String id = "", name = "";
+	TS ts;
+	Object o;
+	for ( int i = 0; i < size; i++ ) {
+		o = smdataList.get(i);
+		if ( o == null ) {
+			continue;
+		}
+		if ( o instanceof StateMod_Data ) {
+			smdata = (StateMod_Data)o;
+			id = smdata.getID();
+			name = smdata.getName();
+		}
+		else if ( o instanceof TS ) {
+			ts = (TS)o;
+			id = ts.getLocation();
+			name = ts.getDescription();
+		}
+		else {
+		    Message.printWarning ( 2,"StateMod_Util.createDataList", "Unrecognized StateMod data." );
+		}
+		if ( id.equalsIgnoreCase(name) ) {
+			v.add ( id );
+		}
+		else if ( includeName ) {
+			v.add ( id + " - " + name );
+		}
+		else {
+		    v.add ( id );
+		}
+	}
+	return v;
 }
 
 /**
@@ -1817,60 +1871,6 @@ throws Exception
 }
 
 /**
-Create a list of data objects, for use in choices, etc.
-@return a Vector of String containing formatted identifiers and names.  A
-non-null list is guaranteed; however, the list may have zero items.
-@param include_name If false, each string will consist of only the value
-returned from StateMod_Data.getID().  If true the string will contain the ID,
-followed by " - xxxx", where xxxx is the value returned from StateMod_Data.getName().
-*/
-public static List<String> createDataList ( List smdataList, boolean include_name )
-{	List<String> v = null;
-	if ( smdataList == null ) {
-		v = new Vector();
-		return v;
-	}
-	else {
-	    // This optimizes memory management...
-		v = new Vector ( smdataList.size() );
-	}
-	int size = smdataList.size();
-	StateMod_Data smdata;
-	String id = "", name = "";
-	TS ts;
-	Object o;
-	for ( int i = 0; i < size; i++ ) {
-		o = smdataList.get(i);
-		if ( o == null ) {
-			continue;
-		}
-		if ( o instanceof StateMod_Data ) {
-			smdata = (StateMod_Data)o;
-			id = smdata.getID();
-			name = smdata.getName();
-		}
-		else if ( o instanceof TS ) {
-			ts = (TS)o;
-			id = ts.getLocation();
-			name = ts.getDescription();
-		}
-		else {
-		    Message.printWarning ( 2,"StateMod_Util.createDataList", "Unrecognized StateMod data." );
-		}
-		if ( id.equalsIgnoreCase(name) ) {
-			v.add ( id );
-		}
-		else if ( include_name ) {
-			v.add ( id + " - " + name );
-		}
-		else {
-		    v.add ( id );
-		}
-	}
-	return v;
-}
-
-/**
 Creates a new ID given an ID used for rights.  If the previous right ID was
 12345.05, 12345.06 will be returned.  This also works for alphanumeric IDs
 (ABC_003.05 becomes ABC_003.06).  If the old ID doesn't contain a '.', the same old ID is returned.
@@ -2406,6 +2406,30 @@ public static DayTS getDailyTimeSeries ( String ID, String dailyID,
 		}
 		return newDayTS;
 	}
+}
+
+/**
+Get a list of data objects, as a subset of a full data component list.
+@param smdataList a list of StateMod_Data to search.
+@param idToMatch the identifier to match (case-insensitive).
+@return a list of objects matching the idToMatch.  A
+non-null list is guaranteed; however, the list may have zero items.
+*/
+public static List getDataList ( List<? extends StateMod_Data> smdataList, String idToMatch )
+{	List<StateMod_Data> v = new Vector();
+	if ( smdataList == null ) {
+		return v;
+	}
+
+	for ( StateMod_Data smdata: smdataList ) {
+		if ( smdata == null ) {
+			continue;
+		}
+		else if ( smdata.getID().equalsIgnoreCase(idToMatch) ) {
+			v.add(smdata);
+		}
+	}
+	return v;
 }
 
 // TODO SAM 2010-12-28 Implement generics - had some problems 

@@ -573,7 +573,7 @@ private void setupGUI() {
 	List diversionsVector = (List)
 		__dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_DIVERSION_STATIONS).getData();
-	List list_names = StateMod_Util.createDataList (
+	List list_names = StateMod_Util.createIdentifierList (
 		diversionsVector, true );
 	int size = list_names.size();
 	for (int i = 0; i < size; i++) {
@@ -584,7 +584,7 @@ private void setupGUI() {
 	List instreamFlowsVector = (List)
 		__dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_INSTREAM_STATIONS).getData();
-	list_names = StateMod_Util.createDataList ( instreamFlowsVector, true );
+	list_names = StateMod_Util.createIdentifierList ( instreamFlowsVector, true );
 	size = list_names.size();
 	for (int i = 0; i < size; i++) {
 		__xdgSimpleJComboBox.add ( list_names.get(i) +
@@ -594,7 +594,7 @@ private void setupGUI() {
 	List gageVector = (List)
 		__dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_STREAMGAGE_STATIONS).getData();
-	list_names = StateMod_Util.createDataList ( gageVector, true );
+	list_names = StateMod_Util.createIdentifierList ( gageVector, true );
 	size = list_names.size();
 	for (int i = 0; i < size; i++) {
 		__xdgSimpleJComboBox.add ( list_names.get(i) +
@@ -604,7 +604,7 @@ private void setupGUI() {
 	List estimateVector = (List)
 		__dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS).getData();
-	list_names = StateMod_Util.createDataList ( estimateVector, true );
+	list_names = StateMod_Util.createIdentifierList ( estimateVector, true );
 	size = list_names.size();
 	for (int i = 0; i < size; i++) {
 		__xdgSimpleJComboBox.add ( list_names.get(i) +
@@ -614,7 +614,7 @@ private void setupGUI() {
 	List reservoirsVector = (List)
 		__dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_RESERVOIR_STATIONS).getData();
-	list_names = StateMod_Util.createDataList ( reservoirsVector, true );
+	list_names = StateMod_Util.createIdentifierList ( reservoirsVector, true );
 	size = list_names.size();
 	__xrgSimpleJComboBox = new SimpleJComboBox();
 	for (int i = 0; i < size; i++) {
@@ -625,7 +625,7 @@ private void setupGUI() {
 	List wellsVector = (List)
 		__dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_WELL_STATIONS).getData();
-	list_names = StateMod_Util.createDataList ( wellsVector, true );
+	list_names = StateMod_Util.createIdentifierList ( wellsVector, true );
 	size = list_names.size();
 	__xwgSimpleJComboBox = new SimpleJComboBox();
 	for (int i = 0; i < size; i++) {

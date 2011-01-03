@@ -144,11 +144,11 @@ the table is being displayed in the given table format.
 */
 public String getFormat(int column) {
 	switch (column) {
-		case  COL_RESERVOIR_ID: return "%-12.12s";	
-		case  COL_RIVER_NODE_ID: return "%-12.12s";	
-		case  COL_PERCENT_RETURN: return "%12.2f";
-		case  COL_DELAY_TABLE_ID: return "%-12.12s";
-		case  COL_COMMENT: return "%-s";
+		case COL_RESERVOIR_ID: return "%-12.12s";	
+		case COL_RIVER_NODE_ID: return "%-12.12s";	
+		case COL_PERCENT_RETURN: return "%12.2f";
+		case COL_DELAY_TABLE_ID: return "%-12.12s";
+		case COL_COMMENT: return "%-s";
 		default: return "%-8s";
 	}
 }

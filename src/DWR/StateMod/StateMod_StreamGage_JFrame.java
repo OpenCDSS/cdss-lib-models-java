@@ -714,7 +714,7 @@ private void populateCrunidyComboBox() {
 	__crunidyComboBox.add("3 - Daily time series are supplied");
 	__crunidyComboBox.add("4 - Daily time series interpolated from midpoints of monthly data");
 
-	List idNameVector = StateMod_Util.createDataList(__streamGageStationsVector, true);
+	List idNameVector = StateMod_Util.createIdentifierList(__streamGageStationsVector, true);
 	int size = idNameVector.size();
 
 	String s = null;

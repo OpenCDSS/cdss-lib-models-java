@@ -818,7 +818,7 @@ private void populateInstreamDailyID() {
 	__instreamDailyID.add("3 - Daily time series are supplied");
 	__instreamDailyID.add("4 - Daily time series interpolated from midpoints of monthly data");
 
-	List<String> idNameVector = StateMod_Util.createDataList(__instreamFlowsVector, true);
+	List<String> idNameVector = StateMod_Util.createIdentifierList(__instreamFlowsVector, true);
 	int size = idNameVector.size();
 
 	String s = null;

@@ -543,7 +543,7 @@ public void setupGUI() {
 
 	int widthsP[] = null;
 	JScrollWorksheet jswP = null;
-	List stations = StateMod_Util.createDataList(
+	List stations = StateMod_Util.createIdentifierList(
 		combineData(
 		(List)__dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_PRECIPITATION_TS_MONTHLY).getData(),
