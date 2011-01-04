@@ -4244,12 +4244,12 @@ Reads a network from a makenet file.
 protected void readMakenetFile(	StateMod_NodeDataProvider nodeDataProvider, String filename ) {
 	__network = new StateMod_NodeNetwork();
 	__network.readMakenetNetworkFile( nodeDataProvider,	filename, true );
-	__annotations = __network.getAnnotations();
+	__annotations = __network.getAnnotationList();
 	__processAnnotations = true;
 	if (__annotations == null) {
 		__annotations = new Vector();
 	}	
-	__links = __network.getLinks();
+	__links = __network.getLinkList();
 	printNetworkInfo();
 	buildNodeArray();
 	findMaxReachLevel();	
@@ -4393,6 +4393,7 @@ protected void saveXML(String filename) {
 
 	selectedFilename = IOUtil.enforceFileExtension(selectedFilename, "net");
 
+	// These are the limits based on the 
 	GRLimits limits = new GRLimits(
 		__dataLeftX, 
 		__dataBottomY, 
@@ -4500,8 +4501,8 @@ Sets the network to be used.  Called by the code that has read in a network from
 protected void setNetwork(StateMod_NodeNetwork network, boolean dirty, boolean doAll) {
 	if (__network == null && network != null) {
 		// new network
-		__links = network.getLinks();
-		__annotations = network.getAnnotations();
+		__links = network.getLinkList();
+		__annotations = network.getAnnotationList();
 	}
 
 	__network = network;
@@ -4516,8 +4517,8 @@ protected void setNetwork(StateMod_NodeNetwork network, boolean dirty, boolean d
 	}
 	buildNodeArray();
 	findMaxReachLevel();	
-	__network.setLinks(__links);
-	__network.setAnnotations(__annotations);
+	__network.setLinkList(__links);
+	__network.setAnnotationList(__annotations);
 	__referenceJComponent.setNetwork(__network );
 	__referenceJComponent.setNodesArray(__nodes);
 }

@@ -53,53 +53,6 @@ private int __reachCounter;
 
 // End Makenet data
 
-// Start data needed by XML reader
-
-/**
-Used in reading in an XML file.
-*/
-private static List<HydrologyNode> __aggregateAnnotations = null;
-
-/**
-List for aggregating layout information when reading statically from the XML files.
-*/
-private static List<PropList> __aggregateLayouts = null;
-
-/**
-Used in reading in an XML file.
-*/
-private static List<PropList> __aggregateLinks = null;
-
-/**
-Contains the nodes read from an XML file.  This is a static data member because
-the method used to read in an XML file and create a network is static.
-*/
-private static List<HydrologyNode> __aggregateNodes;
-
-// End XML data
-
-/**
-Boolean values that specify if all the bounds of the network were read in during a static XML read.
-*/
-private static boolean 
-	__lxSet = false,
-	__bySet = false,
-	__rxSet = false,
-	__tySet = false,
-	__legendXSet = false,
-	__legendYSet = false;
-
-/**
-Holds the bounds of the network when read in from the network file.
-*/
-private static double
-	__staticLX = 0,
-	__staticBY = 0,
-	__staticRX = 0,
-	__staticTY = 0,
-	__staticLegendX = 0,
-	__staticLegendY = 0;
-
 /**
 Whether to generate fancy node descriptions or not.
 */
@@ -111,7 +64,7 @@ Whether to create output files or not.
 private boolean	__createOutputFiles;
 
 /**
-Construct a StateMod_NodeNetwork.
+Construct a StateMod_NodeNetwork but do not add an end node.
 */
 public StateMod_NodeNetwork ()
 {
@@ -129,73 +82,128 @@ public StateMod_NodeNetwork(boolean addEndNode)
 }
 
 /**
-Builds all the network connections based on individual network nodes read in
-from an XML file and returns the network that was built.
-@return a HydroBase_NodeNetwork with all its connections built.
+Append a network to this network.  The process taken is to reduce the data to a list of nodes and then
+recalculate the node connectivity.
+@param networkToAppend a network to append to this existing network
+@param appendEndAs the identifier for a node in the current network, which will become the downstream
+node for the appended network
 */
-private static StateMod_NodeNetwork buildNetworkFromXMLNodes() {
-	// put the nodes into an array for quicker iteration
-	int size = __aggregateNodes.size();
-
-	// add the nodes to an array for quicker traversal.  The nodes will be
-	// looped through entirely size*3 times, so with a large Vector 
-	// performance will be impacted by all the casts.  
-	HydrologyNode[] nodes = new HydrologyNode[size];
-	for (int i = 0; i < size; i++) {
-		nodes[i] = __aggregateNodes.get(i);
-		// FIXME 2008-03-15 Need to remove WIS code
-		//nodes[i].setInWIS(false);
+public StateMod_NodeNetwork append ( StateMod_NodeNetwork networkToAppend, String appendEndAs )
+{
+	// The network will already have been read in and cleaned up.  Therefore just extract the
+	// nodes and replace the end node with the node matching the "appendEndAs" identifier, which must
+	// exist in the current network.
+	
+	// Find the new end node.
+	HydrologyNode existingDownstreamNode = findNode ( appendEndAs );
+	if ( existingDownstreamNode == null ) {
+		throw new RuntimeException ( "Unable to match node \"" + appendEndAs +
+			"\" in existing network to serve as downstream node for appended network.");
 	}
-
-	// no longer needed
-	__aggregateNodes = null;
-
-	String dsid = null;
-	String[] usid = null;
-	// right now every node has a String that tells what its upstream
-	// and downstream nodes are.  No connections.  Find the nodes that
-	// match the upstream and downstream node IDs and make the connections.
-	for (int i = 0; i < size; i++) {
-		dsid = nodes[i].getDownstreamNodeID();
-		usid = nodes[i].getUpstreamNodeIDs();
-
-		if (dsid != null && !dsid.equals("") 
-		    && !dsid.equalsIgnoreCase("null")) {
-			for (int j = 0; j < size; j++) {
-				if (nodes[j].getCommonID().equals(dsid)) {
-					nodes[i].setDownstreamNode(nodes[j]);
-					j = size + 1;
-				}
+	// Find the end node on the network to be appended.
+	HydrologyNode endNode = networkToAppend.getNodeHead();
+	if ( endNode == null ) {
+		throw new RuntimeException ( "Unable to get downstream (end) node for appended network.");
+	}
+	// Verify that the existing node does not also exist in the other network.
+	/*
+	HydrologyNode endNode = networkToAppend.getNodeHead();
+	if ( endNode == null ) {
+		throw new RuntimeException ( "Unable to get downstream (end) node for appended network.");
+	}
+	*/
+	
+	// The following logic is similar to that in the readXMLNetworkFile() method.  Basically the lists of
+	// nodes, labels, etc., are combined into one big list and then the internal network is reconstructed
+	// to assign network navigation information.  The items being appended are also repositioned to align
+	// with the joined network.  Finally, overall limits are reset.
+	
+	// Get the original lists...
+	
+	List<HydrologyNode> networkNodeList = this.getNodeList(); // List of all nodes read
+	List<PropList> networkLinkList = this.getLinkList(); // List of all links read (lines from one node to another)
+	List<PropList> networkLayoutList = this.getLayoutList(); // List of all layouts
+	List<HydrologyNode> networkAnnotationList = this.getAnnotationList(); // All annotations.
+	
+	// Get the lists to append...
+	
+	List<HydrologyNode> appendNetworkNodeList = this.getNodeList();
+	List<PropList> appendNetworkLinkList = this.getLinkList();
+	List<PropList> appendNetworkLayoutList = this.getLayoutList();
+	List<HydrologyNode> appendNetworkAnnotationList = this.getAnnotationList();
+	
+	// Calculate the coordinate offset such that the end node would exactly overly the node that will
+	// replace it.  The offset can be added to the coordinates in the new network.
+	
+	double offsetX = existingDownstreamNode.getX() - endNode.getX();
+	double offsetY = existingDownstreamNode.getY() - endNode.getY();
+	double offsetXAdditional = 0.0; // Additional offset needed to position whole block of new nodes
+	double offsetYAdditional = 0.0;
+	double scale = 1.0; // TODO SAM 2011-01-04 Compute from average node spacing?
+	
+	// Create the new merged network using the full list of data and further process network internals.
+	
+	for ( HydrologyNode nodeToAppend: appendNetworkNodeList ) {
+		if ( nodeToAppend == endNode ) {
+			// Connect the node to the existing network
+			List<HydrologyNode> endUpstreamNodes = endNode.getUpstreamNodes();
+			for ( HydrologyNode upstreamNode : endUpstreamNodes ) {
+				upstreamNode.setDownstreamNode(existingDownstreamNode);
+				existingDownstreamNode.addUpstreamNode(upstreamNode);
 			}
+			// No need to adjust coordinates since end node is replaced by downstream
+			continue;
 		}
-		
-		for (int j = 0; j < usid.length; j++) {
-			for (int k = 0; k < size; k++) {
-				if (nodes[k].getCommonID().equals(usid[j])) {
-					nodes[i].addUpstreamNode(nodes[k]);
-					k = size + 1;
-				}
-			}
-		}
+		// Adjust the coordinates
+		nodeToAppend.setX((nodeToAppend.getX() + offsetX)*scale + offsetXAdditional);
+		nodeToAppend.setY((nodeToAppend.getY() + offsetY)*scale + offsetYAdditional);
+		// Add the node to the list...
+		networkNodeList.add(nodeToAppend);
 	}
-
-	// put the nodes back in a Vector for placement back into the node network.
-	List<HydrologyNode> v = new Vector();
-	for (int i = 0; i < size; i++) {
-		v.add(nodes[i]);
+	for ( PropList linkToAppend: appendNetworkLinkList ) {
+		// TODO SAM 2011-01-04 Any need to adjust any coordinates?
+		networkLinkList.add(linkToAppend);
 	}
+	for ( PropList layoutToAppend: appendNetworkLayoutList ) {
+		// For now use the layout from the original network
+		// TODO SAM 2011-01-04 Any need to adjust any coordinates?  Check layout consistency?
+		//networkLayoutList.add(layoutToAppend);
+	}
+	for ( HydrologyNode annotationToAppend: appendNetworkAnnotationList ) {
+		// Adjust the coordinates
+		annotationToAppend.setX((annotationToAppend.getX() + offsetX)*scale + offsetXAdditional);
+		annotationToAppend.setY((annotationToAppend.getY() + offsetY)*scale + offsetYAdditional);
+		networkAnnotationList.add(annotationToAppend);
+	}
+	
+	StateMod_NodeNetwork mergedNetwork = new StateMod_NodeNetwork();
+	mergedNetwork.calculateNetworkNodeData(networkNodeList, false);
+	mergedNetwork.setAnnotationList(networkAnnotationList);
+	mergedNetwork.setLayoutList(networkLayoutList);
+	mergedNetwork.setLinkList(networkLinkList);
+	
+	// For lack of a better option, get the new data extents for the bounds.
+	// TODO SAM 2011-01-04 this really needs to consider the page size, labels, etc.,
+	// but do the following for a first cut
 
-	StateMod_NodeNetwork network = new StateMod_NodeNetwork();
-	network.setNetworkFromNodes(v);
-	return network;
+	GRLimits networkDataLimits = mergedNetwork.determineExtentFromNetworkData();
+	mergedNetwork.setBounds(networkDataLimits.getLeftX(), networkDataLimits.getBottomY(),
+		networkDataLimits.getRightX(), networkDataLimits.getTopY() );
+	// Use the old legend position
+	mergedNetwork.setLegendPosition(this.getLegendX(), this.getLegendY());
+
+	mergedNetwork.convertNodeTypes();
+	mergedNetwork.finalCheck(networkDataLimits.getLeftX(), networkDataLimits.getBottomY(),
+		networkDataLimits.getRightX(), networkDataLimits.getTopY(), false);
+	
+	return mergedNetwork;
 }
 
 /**
 Creates a HydroBase_NodeNetwork from a Vector of StateMod_RiverNetworkNodes.
 @param nodes the nodes from which to create a HydroBase_NodeNetwork.
 @return the HydroBase_NodeNetwork that was built.<p>
-REVISIT (JTS - 2004-07-03)<br>
-Should not be a static returning a method, I think ...
+TODO (JTS - 2004-07-03) should not be a static returning a method, I think ...
 */
 public static StateMod_NodeNetwork createFromStateModVector(List<StateMod_RiverNetworkNode> nodes) {
 	int size = nodes.size();
@@ -205,8 +213,6 @@ public static StateMod_NodeNetwork createFromStateModVector(List<StateMod_RiverN
 	for (int i = size - 1; i >= 0; i--) {
 		rnn = nodes.get(i);
 		nodeArray[i] = new HydrologyNode();
-		// FIXME 2008-03-15 Need to remove WIS code
-		//nodeArray[i].setInWIS(false);
 		nodeArray[i].setCommonID(rnn.getID().trim());
 		nodeArray[i].setDownstreamNodeID(rnn.getCstadn().trim());
 		nodeArray[i].setType(HydrologyNode.NODE_TYPE_UNKNOWN);
@@ -238,7 +244,7 @@ public static StateMod_NodeNetwork createFromStateModVector(List<StateMod_RiverN
 /**
 Creates a StateMod_RiverNodeNetwork from the nodes in the HydroBase_NodeNetwork.
 The output contains only actual nodes.  Therefore, confluence nodes are skipped.
-@return the Vector of StateMod_RiverNodeNetwork nodes.
+@return the list of StateMod_RiverNetworkNode nodes.
 */
 public List<StateMod_RiverNetworkNode> createStateModRiverNetwork() {
 	boolean done = false;
@@ -247,14 +253,12 @@ public List<StateMod_RiverNetworkNode> createStateModRiverNetwork() {
 	HydrologyNode dsNode = null;
 	StateMod_RiverNetworkNode rnn = null;
 	List<StateMod_RiverNetworkNode> v = new Vector();
-	int node_type;		// Type for current node.
-	int dsNode_type;	// Type for downstream node.
-	HydrologyNode node_downstream = null;		// Used to find a real
-	HydrologyNode real_node_downstream = null;	// downstream node.
-	// Create a blank node used for disappearing streams.  The identifiers
-	// will be empty strings...
+	int node_type; // Type for current node.
+	int dsNode_type; // Type for downstream node.
+	HydrologyNode node_downstream = null; // Used to find a real
+	HydrologyNode real_node_downstream = null; // downstream node.
+	// Create a blank node used for disappearing streams.  The identifiers will be empty strings...
 	HydrologyNode blankNode = new HydrologyNode();
-	// FIXME SAM 2008-03-15 Need to remove WIS code__blankNode.setInWIS(__inWIS);
 	blankNode.setDescription("SURFACE WATER LOSS");
 	blankNode.setUserDescription("SURFACE WATER LOSS");
 	blankNode.setType(HydrologyNode.NODE_TYPE_UNKNOWN);
@@ -313,45 +317,29 @@ public List<StateMod_RiverNetworkNode> createStateModRiverNetwork() {
 				// We want to always show a real node in the river network...
 				real_node_downstream = findNextRealDownstreamNode(node);
 				node_downstream = findNextRealOrXConfluenceDownstreamNode( node);
-				//Message.printStatus ( 2, "",
-				//"real ds node=" +
-				//real_node_downstream.getCommonID() +
-				//" real or X ds node=" +
-				//node_downstream.getCommonID() );
+				//Message.printStatus ( 2, "", "real ds node=" + real_node_downstream.getCommonID() +
+				//" real or X ds node=" + node_downstream.getCommonID() );
 				// If the downstream node in the reach is an XCONFLUENCE (as opposed to a tributary
 				// coming in) then this is the last real node in disappearing stream.
 				// Use a blank for the downstream node...
 				//
-				// Cannot simply check for the downstream node
-				// to be an XCONFL because incoming tributaries
+				// Cannot simply check for the downstream node to be an XCONFL because incoming tributaries
 				// may be joined to the main stem with an XCONFL
 				//
-				// There may be cases where multiple XCONFL
-				// nodes are in a row (e.g., to bend lines).  In
-				// these cases, it is necessary to check the
-				// downstream reach node type, rather than
-				// make sure that the node is the same as the
-				// immediate downstream node (as was done in
-				// software prior to 2005-06-13).  This has not
-				// been implemented.  The user should make sure
-				// that multiple XCONFL nodes are not included
-				// on a tributary reach that joins another
-				// stream.
+				// There may be cases where multiple XCONFL nodes are in a row (e.g., to bend lines).  In
+				// these cases, it is necessary to check the downstream reach node type, rather than
+				// make sure that the node is the same as the immediate downstream node (as was done in
+				// software prior to 2005-06-13).  This has not been implemented.  The user should make sure
+				// that multiple XCONFL nodes are not included on a tributary reach that joins another stream.
 				//
 				if ( node_downstream.getType() == HydrologyNode.NODE_TYPE_XCONFLUENCE ) {
 					// Get node to check...
 					/* Use for debugging
 					HydroBase_Node temp_node;
-					temp_node=
-						getDownstreamNode(node,
-						POSITION_REACH);
-					Message.printStatus ( 2, "",
-						"reach end =" + temp_node );
+					temp_node = getDownstreamNode(node, POSITION_REACH);
+					Message.printStatus ( 2, "", "reach end =" + temp_node );
 					if ( temp_node != null ) {
-					Message.printStatus ( 2, "",
-						"reach end ds =" +
-						temp_node.
-						getDownstreamNode() );
+						Message.printStatus ( 2, "", "reach end ds =" + temp_node.getDownstreamNode() );
 					}
 					*/
 					if ( node_downstream == getDownstreamNode(node,POSITION_REACH).getDownstreamNode() ) {
@@ -366,8 +354,7 @@ public List<StateMod_RiverNetworkNode> createStateModRiverNetwork() {
 						node_downstream = blankNode;
 					}
 					else {
-						// Picking up on a confluence from another trib so use what
-						// we normally would have...
+						// Picking up on a confluence from another trib so use what normally would have...
 						node_downstream = real_node_downstream;
 					}
 				}
@@ -400,6 +387,48 @@ public List<StateMod_RiverNetworkNode> createStateModRiverNetwork() {
 }
 
 /**
+Gets the extent of the nodes in the network in the form of GRLimits, in network plotting coordinates
+(NOT alternative coordinates).  This is different from the HydrologyNodeNetwork.getExtents() in that
+it processes the raw nodes before they have been assimilated into a network.  This method may need to be
+called if the XMin, Ymin, XMax, Ymax data are corrupted in the network metadata (happened because of a
+bug that used alternative coordinates for computing these limits).
+@param nodeList list of nodes to be processed.
+@return the GRLimits that represent the bounds of the nodes in the network, or null if no nodes have
+coordinates.
+*/
+public static GRLimits determineExtentFromNetworkData ( List<HydrologyNode> nodeList )
+{
+	double lx = Double.NaN;
+	double rx = Double.NaN;
+	double by = Double.NaN;
+	double ty = Double.NaN;	
+
+	for ( HydrologyNode node: nodeList ) {
+		if ( Double.isNaN(lx) || (node.getX() < lx) ) {
+			lx = node.getX();
+		}
+		if ( Double.isNaN(rx) || (node.getX() > rx) ) {
+			rx = node.getX();
+		}
+		if ( Double.isNaN(by) || (node.getY() < by) ) {
+			by = node.getY();
+		}
+		if ( Double.isNaN(ty) || (node.getY() > ty) ) {
+			ty = node.getY();
+		}
+	}
+
+
+	if ( Double.isNaN(lx) || Double.isNaN(rx) || Double.isNaN(by) || Double.isNaN(ty) ) {
+		// Do not have all parts of the data limits
+		return null;
+	}
+	else {
+		return new GRLimits(lx, by, rx, ty);
+	}
+}
+
+/**
 Fills the locations of the nodes in the network, interpolating if necessary, 
 and looking up from the database if possible.
 @param nodeDataProvider the dmi to use for talking to the database.  Should be open and non-null.
@@ -410,7 +439,7 @@ looked up from the database.
 public void fillLocations(StateMod_NodeDataProvider nodeDataProvider, boolean interpolate, GRLimits limits) {
 	double lx, rx, by, ty;
 	if (limits == null) {
-		limits = getExtents();
+		limits = determineExtentFromNetworkData();
 	}
 
 	lx = limits.getLeftX();
@@ -503,187 +532,6 @@ private void initialize() {
 	//In base...__titleX = 0.0;
 	//In base...__titleY = 0.0;
 	//In base... __treatDryAsBaseflow = false;
-}
-
-/**
-Processes an annotation node from an XML file and builds the annotation that will appear on the network.
-@param node the XML Node containing the annotation information.
-*/
-private static void processAnnotation(Node node) 
-throws Exception {
-	if (__aggregateAnnotations == null) {
-		__aggregateAnnotations = new Vector();
-	}
-	NamedNodeMap attributes = node.getAttributes();;
-	Node attributeNode;
-	String name = null;
-	String value = null;	
-	int nattributes = attributes.getLength();
-
-	HydrologyNode hnode = new HydrologyNode();
-	// FIXME SAM 2008-03-15 Remove WIS code
-	//hnode.setInWIS(__setInWIS);
-	PropList p = new PropList("");
-	for (int i = 0; i < nattributes; i++) {
-		attributeNode = attributes.item(i);
-		name = attributeNode.getNodeName();
-		value = attributeNode.getNodeValue();
-		if (name.equalsIgnoreCase("FontSize")) {
-			p.set("OriginalFontSize", value);
-		}
-		else {
-			p.set(name, value);
-		}
-	}
-	hnode.setAssociatedObject(p);
-
-	__aggregateAnnotations.add(hnode);
-}
-
-/**
-Processes a document node while reading from an XML file.
-@param node the node to process.
-@throws Exception if an error occurs.
-*/
-private static void processDocumentNodeForRead(Node node)
-throws Exception {
-	NodeList children;
-	switch (node.getNodeType()) {
-		case Node.DOCUMENT_NODE:
-			// The main data set node.  Get the data set type, etc.
-			processDocumentNodeForRead(((Document)node).getDocumentElement());
-			children = node.getChildNodes();
-			if (children != null) {
-				processDocumentNodeForRead(children.item(0));
-			}				
-			break;
-		case Node.ELEMENT_NODE:
-			// Data set components.  Print the basic information...
-			String elementName = node.getNodeName();
-			if (elementName.equalsIgnoreCase("StateMod_Network")) {
-				processStateMod_NetworkNode(node);
-				// The main document node will have a list 
-				// of children but components will not.
-				// Recursively process each node...
-				children = node.getChildNodes();
-				if (children != null) {
-					int len = children.getLength();
-					for (int i = 0; i < len; i++) {
-						processDocumentNodeForRead(children.item(i));
-					}
-				}
-			}
-			else if (elementName.equalsIgnoreCase("PageLayout")) {
-				processLayoutNode(node);
-			}
-			else if (elementName.equalsIgnoreCase("Node")) {
-				processNode(node);
-			}
-			else if (elementName.equalsIgnoreCase("Annotation")) {
-				processAnnotation(node);
-			}			
-			else if (elementName.equalsIgnoreCase("Link")) {
-				processLink(node);
-			}
-			break;
-	}
-}
-
-/**
-Processes a "Downstream" node containing the ID of the downstream node from the Network node.
-@param hnode the HydroBase_Node being built.
-@param node the XML node read from the file.
-@throws Exception if an error occurs.
-*/
-private static void processDownstreamNode(HydrologyNode hnode, Node node) 
-throws Exception
-{
-	NamedNodeMap attributes = node.getAttributes();
-	Node attributeNode;
-	int nattributes = attributes.getLength();
-	String name = null;
-	String value = null;
-
-	for (int i = 0; i < nattributes; i++) {
-		attributeNode = attributes.item(i);
-		name = attributeNode.getNodeName();
-		value = attributeNode.getNodeValue();
-		if (name.equalsIgnoreCase("ID")) {
-			hnode.setDownstreamNodeID(value);
-		}
-	}
-}
-
-/**
-Called by the readXML code when processing a Layout node.
-@param node the node being read.
-*/
-private static void processLayoutNode(Node node) {
-	NamedNodeMap attributes;
-	Node attributeNode;
-	String name = null;
-	String value = null;
-	
-	attributes = node.getAttributes();
-	int nattributes = attributes.getLength();
-
-	PropList p = new PropList("Layout");
-	p.set("ID=\"Page Layout #" + (__aggregateLayouts.size() + 1) + "\"");
-	p.set("PaperSize=\"" + DEFAULT_PAPER_SIZE + "\"");
-	p.set("PageOrientation=\"" + DEFAULT_PAGE_ORIENTATION + "\"");
-	p.set("NodeLabelFontSize=\"" + DEFAULT_FONT_SIZE + "\"");
-	p.set("NodeSize=\"" + DEFAULT_NODE_SIZE + "\"");
-	p.set("IsDefault=\"false\"");
-	for (int i = 0; i < nattributes; i++) {
-		attributeNode = attributes.item(i);
-		name = attributeNode.getNodeName();
-		value = attributeNode.getNodeValue();
-		if (name.equalsIgnoreCase("ID")) {
-			p.set("ID=\"" + value + "\"");
-		}
-		if (name.equalsIgnoreCase("IsDefault")) {
-			p.set("IsDefault=\"" + value + "\"");
-		}
-		if (name.equalsIgnoreCase("PaperSize")) {
-			p.set("PaperSize=\"" + value + "\"");
-		}
-		if (name.equalsIgnoreCase("PageOrientation")) {
-			p.set("PageOrientation=\"" + value + "\"");
-		}		
-		if (name.equalsIgnoreCase("NodeLabelFontSize")) {
-			p.set("NodeLabelFontSize=\"" + value + "\"");
-		}
-		if (name.equalsIgnoreCase("NodeSize")) {
-			p.set("NodeSize=\"" + value + "\"");
-		}
-	}
-	__aggregateLayouts.add(p);
-}
-
-/**
-Processes a link node from an XML file and builds the link that will appear on the network.
-@param node the XML Node containing the link information.
-*/
-private static void processLink(Node node) 
-throws Exception {
-	if (__aggregateLinks == null) {
-		__aggregateLinks = new Vector();
-	}
-	NamedNodeMap attributes = node.getAttributes();;
-	Node attributeNode;
-	String name = null;
-	String value = null;	
-	int nattributes = attributes.getLength();
-
-	PropList p = new PropList("");
-	for (int i = 0; i < nattributes; i++) {
-		attributeNode = attributes.item(i);
-		name = attributeNode.getNodeName();
-		value = attributeNode.getNodeValue();
-		p.set(name, value);
-	}
-
-	__aggregateLinks.add(p);
 }
 
 /**
@@ -976,8 +824,6 @@ private HydrologyNode processMakenetNodes(HydrologyNode node,
 			if (node == null) {
 				// This is the first node in the network...
 				node = new HydrologyNode();
-				// FIXME SAM 2008-03-15 Remove WIS code
-				// node.setInWIS(false);
 				if (Message.isDebugOn) {
 					Message.printDebug(dl, routine,	"Adding first node");
 				}
@@ -992,18 +838,14 @@ private HydrologyNode processMakenetNodes(HydrologyNode node,
 				}
 			
 				tempNode = new HydrologyNode();
-				// FIXME 2008-03-15 Remove WIS code
-				// tempNode.setInWIS(false);
 				node.addUpstreamNode(tempNode);
 				// Now it is safe to reset the current node to be the upstream node...
 				node = node.getUpstreamNode( node.getNumUpstreamNodes() - 1);
-				// Set the h_num to be the same as the
-				// number of nodes added above the downstream node...
+				// Set the h_num to be the same as the number of nodes added above the downstream node...
 				node.setTributaryNumber( (node.getDownstreamNode()).getNumUpstreamNodes());
 			}
 			// Set the node information regardless whether the
-			// first node or not.  By here, "node" points to the
-			// node that has just been added...
+			// first node or not.  By here, "node" points to the node that has just been added...
 			
 			// Set node in reach...
 			node.setNodeInReachNumber(nodeInReach);
@@ -1254,256 +1096,6 @@ private HydrologyNode processMakenetNodes(HydrologyNode node,
 }
 
 /**
-Process the data attributes of a HydroBase_Node in the XML file.
-@param node the XML document node being processed.
-@throws Exception if an error occurs.
-*/
-private static void processNode(Node node) 
-throws Exception {
-	NamedNodeMap attributes = node.getAttributes();;
-	Node attributeNode;
-	String area = null;
-	String precip = null;
-	String name = null;
-	String value = null;	
-	int nattributes = attributes.getLength();
-
-	HydrologyNode hnode = new HydrologyNode();
-	// FIXME 2008-03-15 Remove WIS code
-	//hnode.setInWIS(__setInWIS);
-	for (int i = 0; i < nattributes; i++) {
-		attributeNode = attributes.item(i);
-		name = attributeNode.getNodeName();
-		value = attributeNode.getNodeValue();
-		if (name.equalsIgnoreCase("AlternateX")) {
-			hnode.setDBX(new Double(value).doubleValue());
-		}
-		else if (name.equalsIgnoreCase("AlternateY")) {
-			hnode.setDBY(new Double(value).doubleValue());
-		}
-		else if (name.equalsIgnoreCase("Area")) {
-			area = value;
-			hnode.setArea(new Double(value).doubleValue());
-		}
-		else if (name.equalsIgnoreCase("ComputationalOrder")) {
-			hnode.setComputationalOrder( Integer.decode(value).intValue());
-		}
-		else if (name.equalsIgnoreCase("Description")) {
-			hnode.setDescription(value);
-		}
-		else if (name.equalsIgnoreCase("ID")) {
-			hnode.setCommonID(value);
-		}
-		// FIXME SAM 2008-12-10 Support both in the code: legacy "IsBaseflow" and new "IsNaturalFlow"
-		else if (name.equalsIgnoreCase("IsBaseflow") || name.equalsIgnoreCase("IsNaturalFlow")) {
-			if (value.equalsIgnoreCase("true")) {
-				hnode.setIsNaturalFlow(true);
-			}
-			else {
-				hnode.setIsNaturalFlow(false);
-			}
-		}
-		else if (name.equalsIgnoreCase("IsImport")) {
-			if (value.equalsIgnoreCase("true")) {
-				hnode.setIsImport(true);
-			}
-			else {
-				hnode.setIsImport(false);
-			}
-		}		
-		else if (name.equalsIgnoreCase("LabelAngle")) {
-			hnode.setLabelAngle(new Double(value).doubleValue());
-		}
-		else if (name.equalsIgnoreCase("LabelPosition")) {
-			int div = hnode.getLabelDirection() / 10;
-			if (value.equalsIgnoreCase("AboveCenter")) {
-				hnode.setLabelDirection((div * 10) + 1);
-			}
-			else if (value.equalsIgnoreCase("UpperRight")) {
-				hnode.setLabelDirection((div * 10) + 7);
-			}			
-			else if (value.equalsIgnoreCase("Right")) {
-				hnode.setLabelDirection((div * 10) + 4);
-			}
-			else if (value.equalsIgnoreCase("LowerRight")) {
-				hnode.setLabelDirection((div * 10) + 8);
-			}			
-			else if (value.equalsIgnoreCase("BelowCenter")) {
-				hnode.setLabelDirection((div * 10) + 2);
-			}
-			else if (value.equalsIgnoreCase("LowerLeft")) {
-				hnode.setLabelDirection((div * 10) + 5);
-			}			
-			else if (value.equalsIgnoreCase("Left")) {
-				hnode.setLabelDirection((div * 10) + 3);
-			}
-			else if (value.equalsIgnoreCase("UpperLeft")) {
-				hnode.setLabelDirection((div * 10) + 6);
-			}
-			else if (value.equalsIgnoreCase("Center")) {
-				hnode.setLabelDirection((div * 10) + 1);
-			}			
-			else {
-				hnode.setLabelDirection((div * 10) + 1);
-			}
-		}
-		else if (name.equalsIgnoreCase("NetID")) {
-			hnode.setNetID(value);
-		}
-		else if (name.equalsIgnoreCase("NodeInReachNum")) {
-			hnode.setNodeInReachNumber(	Integer.decode(value).intValue());
-		}
-		else if (name.equalsIgnoreCase("Precipitation")) {
-			precip = value;
-			hnode.setPrecip(new Double(value).doubleValue());
-		}
-		else if (name.equalsIgnoreCase("ReachCounter")) {
-			hnode.setReachCounter( Integer.decode(value).intValue());
-		}		
-		else if (name.equalsIgnoreCase("ReservoirDir")) {
-			int mod = hnode.getLabelDirection() % 10;
-			if (value.equalsIgnoreCase("Up")) {
-				hnode.setLabelDirection(20 + mod);
-			}
-			else if (value.equalsIgnoreCase("Down")) {
-				hnode.setLabelDirection(10 + mod);
-			}
-			else if (value.equalsIgnoreCase("Left")) {
-				hnode.setLabelDirection(40 + mod);
-			}
-			else if (value.equalsIgnoreCase("Right")) {
-				hnode.setLabelDirection(30 + mod);
-			}
-			else {
-				hnode.setLabelDirection(40 + mod);
-			}
-		}			
-		else if (name.equalsIgnoreCase("Serial")) {
-			hnode.setSerial( Integer.decode(value).intValue());
-		}				
-		else if (name.equalsIgnoreCase("TributaryNum")) {
-			hnode.setTributaryNumber( Integer.decode(value).intValue());
-		}						
-		else if (name.equalsIgnoreCase("Type")) {
-			hnode.setVerboseType(value);
-		}								
-		else if (name.equalsIgnoreCase("UpstreamOrder")) {
-			hnode.setUpstreamOrder(
-				Integer.decode(value).intValue());
-		}						
-		else if (name.equalsIgnoreCase("X")) {
-			hnode.setX(new Double(value).doubleValue());
-		}
-		else if (name.equalsIgnoreCase("Y")) {
-			hnode.setY(new Double(value).doubleValue());
-		}
-	}
-
-	if (area != null && precip != null) {
-		area = area.trim();
-		precip = precip.trim();
-		hnode.parseAreaPrecip(area + "*" + precip);
-	}
-	else if (area != null && precip == null) {
-		hnode.parseAreaPrecip(area);
-	}
-	else {
-		// do nothing
-	}
-
-	NodeList children = node.getChildNodes();
-
-	if (children != null) {
-		String elementName = null;
-		int len = children.getLength();
-		for (int i = 0; i < len; i++) {
-			node = children.item(i);
-			elementName = node.getNodeName();
-			// Evaluate the nodes attributes...
-			if (elementName.equalsIgnoreCase("DownstreamNode")) {
-				processDownstreamNode(hnode, node);
-			}
-			else if (elementName.equalsIgnoreCase("UpstreamNode")) {
-				processUpstreamNodes(hnode, node);
-			}
-			else {}
-		}
-	}
-
-	__aggregateNodes.add(hnode);
-}
-
-/**
-Processes an "Upstream" node containing the IDs of the upstream nodes from the Network node.
-@param hnode the HydroBase_Node being built.
-@param node the XML node read from the file.
-@throws Exception if an error occurs.
-*/
-public static void processUpstreamNodes(HydrologyNode hnode, Node node) 
-throws Exception {
-	NamedNodeMap attributes = node.getAttributes();
-	Node attributeNode;
-	int nattributes = attributes.getLength();
-	String name = null;
-	String value = null;
-
-	for (int i = 0; i < nattributes; i++) {
-		attributeNode = attributes.item(i);
-		name = attributeNode.getNodeName();
-		value = attributeNode.getNodeValue();
-		if (name.equalsIgnoreCase("ID")) {
-			hnode.addUpstreamNodeID(value);
-		}
-	}
-}
-
-
-/**
-Called by the readXML code when processing a StateMod_Network node.
-@param node the XML node being read.
-*/
-private static void processStateMod_NetworkNode(Node node) 
-throws Exception {
-	NamedNodeMap attributes;
-	Node attributeNode;
-	String name = null;
-	String value = null;
-	
-	attributes = node.getAttributes();
-	int nattributes = attributes.getLength();
-	
-	for (int i = 0; i < nattributes; i++) {
-		attributeNode = attributes.item(i);
-		name = attributeNode.getNodeName();
-		value = attributeNode.getNodeValue();
-		if (name.equalsIgnoreCase("XMin")) {
-			__staticLX = new Double(value).doubleValue();
-			__lxSet = true;
-		}
-		if (name.equalsIgnoreCase("YMin")) {
-			__staticBY = new Double(value).doubleValue();
-			__bySet = true;
-		}
-		if (name.equalsIgnoreCase("XMax")) {
-			__staticRX = new Double(value).doubleValue();
-			__rxSet = true;
-		}
-		if (name.equalsIgnoreCase("YMax")) {
-			__staticTY = new Double(value).doubleValue();
-			__tySet = true;
-		}
-		if (name.equalsIgnoreCase("LegendX")) {
-			__staticLegendX = new Double(value).doubleValue();
-			__legendXSet = true;
-		}
-		if (name.equalsIgnoreCase("LegendY")) {
-			__staticLegendY = new Double(value).doubleValue();
-			__legendYSet = true;
-		}
-	}
-}
-
-/**
 Read a line from the makenet network file and split into tokens.
 It is assumed that the line number is initialized to zero in the main program.
 Blank lines are ignored.  Comments are parsed and returned (can be ignored in calling code).
@@ -1511,7 +1103,7 @@ Blank lines are ignored.  Comments are parsed and returned (can be ignored in ca
 @return the tokens from the line
 @throws IOException if there is an error reading the line from the file.
 */
-public List<String> readMakenetLineTokens(BufferedReader netfp) throws IOException {
+private List<String> readMakenetLineTokens(BufferedReader netfp) throws IOException {
 	String routine = "StateMod_NodeNetwork.readMakenetLineTokens";
 	int	commentIndex = 0,
 		dl = 50, 
@@ -1627,7 +1219,7 @@ Read an entire makenet network file and save in memory.
 @return true if the network was read successfully, false if not.
 */
 public boolean readMakenetNetworkFile( StateMod_NodeDataProvider nodeDataProvider,
-		BufferedReader in, String filename, boolean skipBlankNodes)
+	BufferedReader in, String filename, boolean skipBlankNodes)
 {
 	String routine = "HydroBase_NodeNetwork.readMakenetNetworkFile";
 	double 	dx = 1.0, 
@@ -1643,18 +1235,14 @@ public boolean readMakenetNetworkFile( StateMod_NodeDataProvider nodeDataProvide
 	String token0;
 	List<String> tokens;
 
-	// Create a blank node used for disappearing streams.  The identifiers
-	// will be empty strings...
+	// Create a blank node used for disappearing streams.  The identifiers will be empty strings...
 
 	HydrologyNode blankNode = new HydrologyNode();
-	// FIXME SAM 2008-03-15 Need to remove WIS code
-	//__blankNode.setInWIS(__inWIS);
 	blankNode.setDescription("SURFACE WATER LOSS");
 	blankNode.setUserDescription("SURFACE WATER LOSS");
 	blankNode.setType(HydrologyNode.NODE_TYPE_UNKNOWN);
 
-	// Start at the top of the file and read until we get to the STOP
-	// command or the end of the file...
+	// Start at the top of the file and read until we get to the STOP command or the end of the file...
 
 	while (true) {
 		numTokens = 0;
@@ -1815,10 +1403,12 @@ Reads a HydroBase_NodeNetwork from an XML Network file.
 */
 public static StateMod_NodeNetwork readXMLNetworkFile(String filename) 
 throws Exception {
-	String routine = "StateCU_DataSet.readXMLFile";
-	// FIXME SAM 2008-03-15 Need to remove WIS code
-	//__setInWIS = false;
-	__aggregateNodes = new Vector();
+	String routine = "StateMod_NodeNetwork.readXMLNetworkFile";
+	List<HydrologyNode> networkNodeList = new Vector(); // List of all nodes read
+	List<PropList> networkLinkList = new Vector(); // List of all links read (lines from one node to another)
+	List<PropList> networkLayoutList = new Vector(); // List of all layouts
+	List<HydrologyNode> networkAnnotationList = new Vector(); // List of all annotations read - these are built-in
+													// as opposed to run-time annotations from the StateMod GUI
 
 	DOMParser parser = null;
 	try {	
@@ -1834,64 +1424,565 @@ throws Exception {
 	// Now get information from the document.  For now don't hold the document as a data member...
 	Document doc = parser.getDocument();
 
-	// Loop through and process the document nodes, starting with the root node...
-	__aggregateLayouts = new Vector();
+	// Loop through and process the document nodes, starting with the root node.
+	// Pass data needed during processing but keep handing within static code
 
-	__lxSet = false;
-	__rxSet = false;
-	__tySet = false;
-	__bySet = false;
+	// LeftX, LowerY, RightX, TopY, LegendX, LegendY
+	Double [] extentData = { Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN };
 	
-	processDocumentNodeForRead(doc);
+	readXMLNetworkFile_ProcessDocumentNode(doc, networkNodeList, networkLinkList, networkLayoutList,
+		networkAnnotationList, extentData );
 
-	String unset = "";
-	if (!__lxSet) {
-		unset += "XMin\n";
+	// This just checks that XMin, YMin, Xmax, YMax were set in the original XML
+	// The limits are bigger than the extent of the data, accounting for page size (and generally set
+	// from the UI.  Therefore, it is important to use the limits that were interactively saved to
+	// preserve consistency with the editor.  After initializing, the user may edit and cause the limits
+	// to change after which they will be saved again with new values.
+	String missingElements = "";
+	if ( extentData[0].isNaN() ) {
+		missingElements += "XMin\n";
 	}
-	if (!__bySet) {
-		unset += "YMin\n";
+	if ( extentData[1].isNaN() ) {
+		missingElements += "YMin\n";
 	}
-	if (!__rxSet) {
-		unset += "XMax\n";
+	if ( extentData[2].isNaN() ) {
+		missingElements += "XMax\n";
 	}
-	if (!__tySet) {
-		unset += "YMax\n";
+	if ( extentData[3].isNaN() ) {
+		missingElements += "YMax\n";
 	}
-	if (!unset.equals("")) {
-		throw new Exception("Not all data points were set for the "
-			+ "network.  The following must be defined: " + unset);
+	HydrologyNode node = networkNodeList.get(0);
+	if (!missingElements.equals("")) {
+		/*
+		// Original limits were not set.  Try to get from the data
+		GRLimits nodeLimits = determineExtentFromNetworkData ( __aggregateNodes );
+		if ( nodeLimits != null ) {
+			__staticLX = nodeLimits.getLeftX();
+			__staticBY = nodeLimits.getBottomY();
+			__staticRX = nodeLimits.getRightX();
+			__staticTY = nodeLimits.getTopY();
+			This does not preserve the limits for page layout.
+			FIXME SAM 2011-01-03 need to figure this out so that StateDMI test to read and write network
+			results in comparable file.
+		}
+		else {
+			throw new Exception("Extent for node plotting coordinates was not defined and unable to " +
+				"determine from network data.  " +
+				"The following XML network properties must be defined: " + missingElements);
+			
+		}*/
+			throw new Exception("Extent for node plotting coordinates was not defined.  " +
+				"The following XML network properties must be defined: " + missingElements);
 	}
 
-	HydrologyNode node = __aggregateNodes.get(0);
 	StateMod_NodeNetwork network = null;
 	if (node.getComputationalOrder() == -1) {
 		network = new StateMod_NodeNetwork();
-		network.calculateNetworkNodeData(__aggregateNodes, false);
+		network.calculateNetworkNodeData(networkNodeList, false);
 	}
 	else {
-		network = buildNetworkFromXMLNodes();
+		network = readXMLNetworkFile_BuildNetworkFromXMLNodes(networkNodeList);
 	}
 	// Set the filename so that it can be selected by default, for example in save dialogs
 	// This is in the base class
 	network.setInputName ( filename );
-	network.setAnnotations(__aggregateAnnotations);
-	__aggregateAnnotations = null;
-	network.setLayouts(__aggregateLayouts);
-	__aggregateLayouts = null;
-	network.setLinks(__aggregateLinks);
-	__aggregateLinks = null;
+	network.setAnnotationList(networkAnnotationList);
+	network.setLayoutList(networkLayoutList);
+	network.setLinkList(networkLinkList);
 
-	network.setBounds(__staticLX, __staticBY, __staticRX, __staticTY);
-	if (__legendXSet && __legendYSet) {
-		network.setLegendPosition(__staticLegendX, __staticLegendY);
+	network.setBounds(extentData[0], extentData[1], extentData[2], extentData[3]);
+	if ( !extentData[4].isNaN() && !extentData[5].isNaN() ) {
+		network.setLegendPosition(extentData[4], extentData[5]);
 	}
 
 	if (network != null) {
 		network.convertNodeTypes();
-		network.finalCheck(__staticLX, __staticBY, __staticRX, __staticTY, false);
+		network.finalCheck(extentData[0], extentData[1], extentData[2], extentData[3], false);
 	}	
 
 	return network;
+}
+
+/**
+Builds all the network connections based on individual network nodes read in
+from an XML file and returns the network that was built.
+@return a HydroBase_NodeNetwork with all its connections built.
+*/
+private static StateMod_NodeNetwork readXMLNetworkFile_BuildNetworkFromXMLNodes(
+	List<HydrologyNode> networkNodeList) {
+	// Put the nodes into an array for quicker iteration
+	int size = networkNodeList.size();
+
+	// Add the nodes to an array for quicker traversal.  The nodes will be
+	// looped through entirely size*3 times, so with a large Vector 
+	// performance will be impacted by all the casts.  
+	HydrologyNode[] nodes = new HydrologyNode[size];
+	for (int i = 0; i < size; i++) {
+		nodes[i] = networkNodeList.get(i);
+	}
+
+	String dsid = null;
+	String[] usid = null;
+	// Right now every node has a String that tells what its upstream
+	// and downstream nodes are.  No connections.  Find the nodes that
+	// match the upstream and downstream node IDs and make the connections.
+	for (int i = 0; i < size; i++) {
+		dsid = nodes[i].getDownstreamNodeID();
+		usid = nodes[i].getUpstreamNodeIDs();
+
+		if (dsid != null && !dsid.equals("") && !dsid.equalsIgnoreCase("null")) {
+			for (int j = 0; j < size; j++) {
+				if (nodes[j].getCommonID().equals(dsid)) {
+					nodes[i].setDownstreamNode(nodes[j]);
+					j = size + 1;
+				}
+			}
+		}
+		
+		for (int j = 0; j < usid.length; j++) {
+			for (int k = 0; k < size; k++) {
+				if (nodes[k].getCommonID().equals(usid[j])) {
+					nodes[i].addUpstreamNode(nodes[k]);
+					k = size + 1;
+				}
+			}
+		}
+	}
+
+	// Put the nodes back in a list for placement back into the node network.
+	List<HydrologyNode> v = new Vector();
+	for (int i = 0; i < size; i++) {
+		v.add(nodes[i]);
+	}
+
+	StateMod_NodeNetwork network = new StateMod_NodeNetwork();
+	network.setNetworkFromNodes(v);
+	return network;
+}
+
+/**
+Processes an annotation node from an XML file and builds the annotation that will appear on the network.
+@param node the XML Node containing the annotation information.
+*/
+private static void readXMLNetworkFile_ProcessAnnotation(Node node, List<HydrologyNode> networkAnnotationList ) 
+throws Exception {
+	NamedNodeMap attributes = node.getAttributes();;
+	Node attributeNode;
+	String name = null;
+	String value = null;	
+	int nattributes = attributes.getLength();
+
+	HydrologyNode hnode = new HydrologyNode();
+	PropList p = new PropList("");
+	for (int i = 0; i < nattributes; i++) {
+		attributeNode = attributes.item(i);
+		name = attributeNode.getNodeName();
+		value = attributeNode.getNodeValue();
+		if (name.equalsIgnoreCase("FontSize")) {
+			p.set("OriginalFontSize", value);
+		}
+		else {
+			p.set(name, value);
+		}
+	}
+	hnode.setAssociatedObject(p);
+
+	networkAnnotationList.add(hnode);
+}
+
+/**
+Processes a document node while reading from an XML file.
+@param node the node to process.
+@throws Exception if an error occurs.
+*/
+private static void readXMLNetworkFile_ProcessDocumentNode(Node node, List<HydrologyNode> networkNodeList,
+	List<PropList> networkLinkList, List<PropList> networkLayoutList, List<HydrologyNode> networkAnnotationList,
+	Double[] extentData )
+throws Exception {
+	NodeList children;
+	switch (node.getNodeType()) {
+		case Node.DOCUMENT_NODE:
+			// The main data set node.  Get the data set type, etc.
+			readXMLNetworkFile_ProcessDocumentNode(((Document)node).getDocumentElement(), networkNodeList,
+				networkLinkList, networkLayoutList, networkAnnotationList, extentData );
+			children = node.getChildNodes();
+			if (children != null) {
+				readXMLNetworkFile_ProcessDocumentNode(children.item(0), networkNodeList, networkLinkList,
+					networkLayoutList, networkAnnotationList, extentData );
+			}				
+			break;
+		case Node.ELEMENT_NODE:
+			// Data set components.  Print the basic information...
+			String elementName = node.getNodeName();
+			if (elementName.equalsIgnoreCase("StateMod_Network")) {
+				readXMLNetworkFile_ProcessStateMod_NetworkNode(node, extentData);
+				// The main document node will have a list 
+				// of children but components will not.
+				// Recursively process each node...
+				children = node.getChildNodes();
+				if (children != null) {
+					int len = children.getLength();
+					for (int i = 0; i < len; i++) {
+						readXMLNetworkFile_ProcessDocumentNode(children.item(i),networkNodeList,
+							networkLinkList, networkLayoutList, networkAnnotationList, extentData );
+					}
+				}
+			}
+			else if (elementName.equalsIgnoreCase("PageLayout")) {
+				readXMLNetworkFile_ProcessLayoutNode(node, networkLayoutList);
+			}
+			else if (elementName.equalsIgnoreCase("Node")) {
+				readXMLNetworkFile_ProcessNode(node, networkNodeList, extentData );
+			}
+			else if (elementName.equalsIgnoreCase("Annotation")) {
+				readXMLNetworkFile_ProcessAnnotation(node, networkAnnotationList );
+			}			
+			else if (elementName.equalsIgnoreCase("Link")) {
+				readXMLNetworkFile_ProcessLink(node, networkLinkList);
+			}
+			break;
+	}
+}
+
+/**
+Processes a "Downstream" node containing the ID of the downstream node from the Network node.
+@param hnode the HydroBase_Node being built.
+@param node the XML node read from the file.
+@throws Exception if an error occurs.
+*/
+private static void readXMLNetworkFile_ProcessDownstreamNode(HydrologyNode hnode, Node node) 
+throws Exception
+{
+	NamedNodeMap attributes = node.getAttributes();
+	Node attributeNode;
+	int nattributes = attributes.getLength();
+	String name = null;
+	String value = null;
+
+	for (int i = 0; i < nattributes; i++) {
+		attributeNode = attributes.item(i);
+		name = attributeNode.getNodeName();
+		value = attributeNode.getNodeValue();
+		if (name.equalsIgnoreCase("ID")) {
+			hnode.setDownstreamNodeID(value);
+		}
+	}
+}
+
+/**
+Called by the readXML code when processing a Layout node.
+@param node the node being read.
+*/
+private static void readXMLNetworkFile_ProcessLayoutNode(Node node, List<PropList> networkLayoutList ) {
+	NamedNodeMap attributes;
+	Node attributeNode;
+	String name = null;
+	String value = null;
+	
+	attributes = node.getAttributes();
+	int nattributes = attributes.getLength();
+
+	PropList p = new PropList("Layout");
+	p.set("ID=\"Page Layout #" + (networkLayoutList.size() + 1) + "\"");
+	p.set("PaperSize=\"" + DEFAULT_PAPER_SIZE + "\"");
+	p.set("PageOrientation=\"" + DEFAULT_PAGE_ORIENTATION + "\"");
+	p.set("NodeLabelFontSize=\"" + DEFAULT_FONT_SIZE + "\"");
+	p.set("NodeSize=\"" + DEFAULT_NODE_SIZE + "\"");
+	p.set("IsDefault=\"false\"");
+	for (int i = 0; i < nattributes; i++) {
+		attributeNode = attributes.item(i);
+		name = attributeNode.getNodeName();
+		value = attributeNode.getNodeValue();
+		if (name.equalsIgnoreCase("ID")) {
+			p.set("ID=\"" + value + "\"");
+		}
+		if (name.equalsIgnoreCase("IsDefault")) {
+			p.set("IsDefault=\"" + value + "\"");
+		}
+		if (name.equalsIgnoreCase("PaperSize")) {
+			p.set("PaperSize=\"" + value + "\"");
+		}
+		if (name.equalsIgnoreCase("PageOrientation")) {
+			p.set("PageOrientation=\"" + value + "\"");
+		}		
+		if (name.equalsIgnoreCase("NodeLabelFontSize")) {
+			p.set("NodeLabelFontSize=\"" + value + "\"");
+		}
+		if (name.equalsIgnoreCase("NodeSize")) {
+			p.set("NodeSize=\"" + value + "\"");
+		}
+	}
+	networkLayoutList.add(p);
+}
+
+/**
+Processes a link node from an XML file and builds the link that will appear on the network.
+@param node the XML Node containing the link information.
+*/
+private static void readXMLNetworkFile_ProcessLink(Node node, List<PropList> networkLinkList) 
+throws Exception {
+	NamedNodeMap attributes = node.getAttributes();;
+	Node attributeNode;
+	String name = null;
+	String value = null;	
+	int nattributes = attributes.getLength();
+
+	PropList p = new PropList("");
+	for (int i = 0; i < nattributes; i++) {
+		attributeNode = attributes.item(i);
+		name = attributeNode.getNodeName();
+		value = attributeNode.getNodeValue();
+		p.set(name, value);
+	}
+
+	networkLinkList.add(p);
+}
+
+/**
+Process the data attributes of a HydroBase_Node in the XML file.
+@param node the XML document node being processed.
+@throws Exception if an error occurs.
+*/
+private static void readXMLNetworkFile_ProcessNode(Node node, List<HydrologyNode> networkNodeList,
+		Double [] extentData ) 
+throws Exception {
+	NamedNodeMap attributes = node.getAttributes();;
+	Node attributeNode;
+	String area = null;
+	String precip = null;
+	String name = null;
+	String value = null;	
+	int nattributes = attributes.getLength();
+
+	HydrologyNode hnode = new HydrologyNode();
+	for (int i = 0; i < nattributes; i++) {
+		attributeNode = attributes.item(i);
+		name = attributeNode.getNodeName();
+		value = attributeNode.getNodeValue();
+		if (name.equalsIgnoreCase("AlternateX")) {
+			hnode.setDBX(new Double(value).doubleValue());
+		}
+		else if (name.equalsIgnoreCase("AlternateY")) {
+			hnode.setDBY(new Double(value).doubleValue());
+		}
+		else if (name.equalsIgnoreCase("Area")) {
+			area = value;
+			hnode.setArea(new Double(value).doubleValue());
+		}
+		else if (name.equalsIgnoreCase("ComputationalOrder")) {
+			hnode.setComputationalOrder( Integer.decode(value).intValue());
+		}
+		else if (name.equalsIgnoreCase("Description")) {
+			hnode.setDescription(value);
+		}
+		else if (name.equalsIgnoreCase("ID")) {
+			hnode.setCommonID(value);
+		}
+		// FIXME SAM 2008-12-10 Support both in the code: legacy "IsBaseflow" and new "IsNaturalFlow"
+		else if (name.equalsIgnoreCase("IsBaseflow") || name.equalsIgnoreCase("IsNaturalFlow")) {
+			if (value.equalsIgnoreCase("true")) {
+				hnode.setIsNaturalFlow(true);
+			}
+			else {
+				hnode.setIsNaturalFlow(false);
+			}
+		}
+		else if (name.equalsIgnoreCase("IsImport")) {
+			if (value.equalsIgnoreCase("true")) {
+				hnode.setIsImport(true);
+			}
+			else {
+				hnode.setIsImport(false);
+			}
+		}		
+		else if (name.equalsIgnoreCase("LabelAngle")) {
+			hnode.setLabelAngle(new Double(value).doubleValue());
+		}
+		else if (name.equalsIgnoreCase("LabelPosition")) {
+			int div = hnode.getLabelDirection() / 10;
+			if (value.equalsIgnoreCase("AboveCenter")) {
+				hnode.setLabelDirection((div * 10) + 1);
+			}
+			else if (value.equalsIgnoreCase("UpperRight")) {
+				hnode.setLabelDirection((div * 10) + 7);
+			}			
+			else if (value.equalsIgnoreCase("Right")) {
+				hnode.setLabelDirection((div * 10) + 4);
+			}
+			else if (value.equalsIgnoreCase("LowerRight")) {
+				hnode.setLabelDirection((div * 10) + 8);
+			}			
+			else if (value.equalsIgnoreCase("BelowCenter")) {
+				hnode.setLabelDirection((div * 10) + 2);
+			}
+			else if (value.equalsIgnoreCase("LowerLeft")) {
+				hnode.setLabelDirection((div * 10) + 5);
+			}			
+			else if (value.equalsIgnoreCase("Left")) {
+				hnode.setLabelDirection((div * 10) + 3);
+			}
+			else if (value.equalsIgnoreCase("UpperLeft")) {
+				hnode.setLabelDirection((div * 10) + 6);
+			}
+			else if (value.equalsIgnoreCase("Center")) {
+				hnode.setLabelDirection((div * 10) + 1);
+			}			
+			else {
+				hnode.setLabelDirection((div * 10) + 1);
+			}
+		}
+		else if (name.equalsIgnoreCase("NetID")) {
+			hnode.setNetID(value);
+		}
+		else if (name.equalsIgnoreCase("NodeInReachNum")) {
+			hnode.setNodeInReachNumber(	Integer.decode(value).intValue());
+		}
+		else if (name.equalsIgnoreCase("Precipitation")) {
+			precip = value;
+			hnode.setPrecip(new Double(value).doubleValue());
+		}
+		else if (name.equalsIgnoreCase("ReachCounter")) {
+			hnode.setReachCounter( Integer.decode(value).intValue());
+		}		
+		else if (name.equalsIgnoreCase("ReservoirDir")) {
+			int mod = hnode.getLabelDirection() % 10;
+			if (value.equalsIgnoreCase("Up")) {
+				hnode.setLabelDirection(20 + mod);
+			}
+			else if (value.equalsIgnoreCase("Down")) {
+				hnode.setLabelDirection(10 + mod);
+			}
+			else if (value.equalsIgnoreCase("Left")) {
+				hnode.setLabelDirection(40 + mod);
+			}
+			else if (value.equalsIgnoreCase("Right")) {
+				hnode.setLabelDirection(30 + mod);
+			}
+			else {
+				hnode.setLabelDirection(40 + mod);
+			}
+		}			
+		else if (name.equalsIgnoreCase("Serial")) {
+			hnode.setSerial( Integer.decode(value).intValue());
+		}				
+		else if (name.equalsIgnoreCase("TributaryNum")) {
+			hnode.setTributaryNumber( Integer.decode(value).intValue());
+		}						
+		else if (name.equalsIgnoreCase("Type")) {
+			hnode.setVerboseType(value);
+		}								
+		else if (name.equalsIgnoreCase("UpstreamOrder")) {
+			hnode.setUpstreamOrder(
+				Integer.decode(value).intValue());
+		}						
+		else if (name.equalsIgnoreCase("X")) {
+			hnode.setX(new Double(value).doubleValue());
+		}
+		else if (name.equalsIgnoreCase("Y")) {
+			hnode.setY(new Double(value).doubleValue());
+		}
+	}
+
+	if (area != null && precip != null) {
+		area = area.trim();
+		precip = precip.trim();
+		hnode.parseAreaPrecip(area + "*" + precip);
+	}
+	else if (area != null && precip == null) {
+		hnode.parseAreaPrecip(area);
+	}
+	else {
+		// do nothing
+	}
+
+	NodeList children = node.getChildNodes();
+
+	if (children != null) {
+		String elementName = null;
+		int len = children.getLength();
+		for (int i = 0; i < len; i++) {
+			node = children.item(i);
+			elementName = node.getNodeName();
+			// Evaluate the nodes attributes...
+			if (elementName.equalsIgnoreCase("DownstreamNode")) {
+				readXMLNetworkFile_ProcessDownstreamNode(hnode, node );
+			}
+			else if (elementName.equalsIgnoreCase("UpstreamNode")) {
+				ReadXMLNetworkFile_ProcessUpstreamNodes(hnode, node);
+			}
+			else {}
+		}
+	}
+
+	networkNodeList.add(hnode);
+}
+
+/**
+Called by the readXML code when processing a StateMod_Network node.
+@param node the XML node being read.
+*/
+private static void readXMLNetworkFile_ProcessStateMod_NetworkNode(Node node, Double [] extentData ) 
+throws Exception {
+	String routine = "StateMod_NodeNetwork.processStateMod_NetworkNode";
+	NamedNodeMap attributes;
+	Node attributeNode;
+	String name = null;
+	String value = null;
+	
+	attributes = node.getAttributes();
+	int nattributes = attributes.getLength();
+	
+	for (int i = 0; i < nattributes; i++) {
+		attributeNode = attributes.item(i);
+		name = attributeNode.getNodeName();
+		value = attributeNode.getNodeValue();
+		if (name.equalsIgnoreCase("XMin")) {
+			extentData[0] = new Double(value);
+			Message.printStatus(2, routine, "Read Xmin=" + extentData[0] );
+		}
+		else if (name.equalsIgnoreCase("YMin")) {
+			extentData[1] = new Double(value);
+			Message.printStatus(2, routine, "Read Ymin=" + extentData[1] );
+		}
+		else if (name.equalsIgnoreCase("XMax")) {
+			extentData[2] = new Double(value);
+			Message.printStatus(2, routine, "Read Xmax=" + extentData[2] );
+		}
+		else if (name.equalsIgnoreCase("YMax")) {
+			extentData[3] = new Double(value);
+			Message.printStatus(2, routine, "Read Ymax=" + extentData[3] );
+		}
+		else if (name.equalsIgnoreCase("LegendX")) {
+			extentData[4] = new Double(value);
+		}
+		else if (name.equalsIgnoreCase("LegendY")) {
+			extentData[5] = new Double(value);
+		}
+	}
+}
+
+/**
+Processes an "Upstream" node containing the IDs of the upstream nodes from the Network node.
+@param hnode the HydroBase_Node being built.
+@param node the XML node read from the file.
+@throws Exception if an error occurs.
+*/
+private static void ReadXMLNetworkFile_ProcessUpstreamNodes(HydrologyNode hnode, Node node) 
+throws Exception {
+	NamedNodeMap attributes = node.getAttributes();
+	Node attributeNode;
+	int nattributes = attributes.getLength();
+	String name = null;
+	String value = null;
+
+	for (int i = 0; i < nattributes; i++) {
+		attributeNode = attributes.item(i);
+		name = attributeNode.getNodeName();
+		value = attributeNode.getNodeValue();
+		if (name.equalsIgnoreCase("ID")) {
+			hnode.addUpstreamNodeID(value);
+		}
+	}
 }
 
 /**

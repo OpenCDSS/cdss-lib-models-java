@@ -336,7 +336,7 @@ throws Exception {
 	setupGUI();
 	__device.setNetwork(network, false, true);
 
-	__layouts = network.getLayouts();
+	__layouts = network.getLayoutList();
 	if (__layouts == null || __layouts.size() == 0) {
 		createFirstLayout();
 		__layoutComboBox.add(__id);
