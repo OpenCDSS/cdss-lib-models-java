@@ -3,6 +3,9 @@ package DWR.StateMod;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.security.InvalidParameterException;
+import java.util.Collections;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Vector;
 
@@ -83,27 +86,30 @@ public StateMod_NodeNetwork(boolean addEndNode)
 
 /**
 Append a network to this network.  The process taken is to reduce the data to a list of nodes and then
-recalculate the node connectivity.
+recalculate the node connectivity.  This uses data and methods that mix HydrologyNode and ID representations
+of the network since it is a mix of processing raw data from existing networks.
 @param networkToAppend a network to append to this existing network
 @param appendEndAs the identifier for a node in the current network, which will become the downstream
 node for the appended network
 */
-public StateMod_NodeNetwork append ( StateMod_NodeNetwork networkToAppend, String appendEndAs )
-{
+public StateMod_NodeNetwork append ( StateMod_NodeNetwork networkToAppend,
+	StateMod_NodeNetwork_AppendHowType appendHowType, String existingDownstreamNodeID,
+	String appendedUpstreamNodeID, Double scaleXY, Double shiftX, Double shiftY )
+{	String routine = getClass().getName() + ".append";
 	// The network will already have been read in and cleaned up.  Therefore just extract the
 	// nodes and replace the end node with the node matching the "appendEndAs" identifier, which must
 	// exist in the current network.
 	
 	// Find the new end node.
-	HydrologyNode existingDownstreamNode = findNode ( appendEndAs );
+	HydrologyNode existingDownstreamNode = findNode ( existingDownstreamNodeID );
 	if ( existingDownstreamNode == null ) {
-		throw new RuntimeException ( "Unable to match node \"" + appendEndAs +
+		throw new RuntimeException ( "Unable to match node \"" + existingDownstreamNodeID +
 			"\" in existing network to serve as downstream node for appended network.");
 	}
-	// Find the end node on the network to be appended.
-	HydrologyNode endNode = networkToAppend.getNodeHead();
-	if ( endNode == null ) {
-		throw new RuntimeException ( "Unable to get downstream (end) node for appended network.");
+	// Find the starting node on the network to be appended.
+	HydrologyNode appendedUpstreamNode = networkToAppend.findNode (appendedUpstreamNodeID);
+	if ( appendedUpstreamNode == null ) {
+		throw new RuntimeException ( "Unable to find appended upstream node \"" + appendedUpstreamNodeID + "\".");
 	}
 	// Verify that the existing node does not also exist in the other network.
 	/*
@@ -118,7 +124,7 @@ public StateMod_NodeNetwork append ( StateMod_NodeNetwork networkToAppend, Strin
 	// to assign network navigation information.  The items being appended are also repositioned to align
 	// with the joined network.  Finally, overall limits are reset.
 	
-	// Get the original lists...
+	// Get the original node lists...
 	
 	List<HydrologyNode> networkNodeList = this.getNodeList(); // List of all nodes read
 	List<PropList> networkLinkList = this.getLinkList(); // List of all links read (lines from one node to another)
@@ -127,41 +133,224 @@ public StateMod_NodeNetwork append ( StateMod_NodeNetwork networkToAppend, Strin
 	
 	// Get the lists to append...
 	
-	List<HydrologyNode> appendNetworkNodeList = this.getNodeList();
-	List<PropList> appendNetworkLinkList = this.getLinkList();
-	List<PropList> appendNetworkLayoutList = this.getLayoutList();
-	List<HydrologyNode> appendNetworkAnnotationList = this.getAnnotationList();
+	List<HydrologyNode> appendNetworkNodeList = networkToAppend.getNodeList();
+	List<PropList> appendNetworkLinkList = networkToAppend.getLinkList();
+	List<PropList> appendNetworkLayoutList = networkToAppend.getLayoutList();
+	List<HydrologyNode> appendNetworkAnnotationList = networkToAppend.getAnnotationList();
+	// Get the list of confluences, which have internally assigned identifiers like "CONFL_1"
+	// (although the first one may just be "CONFL"
+	// It is likely that there are duplicate identifiers so find the maximum confluence ID number
+	// and change all the confluences in the network being appended to continue the series.
+	int [] types = { HydrologyNode.NODE_TYPE_CONFLUENCE };
+	List<String> conflIDList = new Vector();
+	try {
+		conflIDList = getNodeIdentifiersByType(types);
+	}
+	catch ( Exception e ) {
+		throw new RuntimeException ( e );
+	}
+	int max = 1;
+	for ( String conflID: conflIDList ) {
+		int pos = conflID.indexOf("_");
+		if ( pos > 0 ) {
+			max = Math.max(max,Integer.parseInt(conflID.substring(pos + 1)));
+		}
+	}
+	// Get the confluence nodes in the network to append...
+	List<String> conflIDAppendList = new Vector();
+	try {
+		conflIDAppendList = networkToAppend.getNodeIdentifiersByType(types);
+	}
+	catch ( Exception e ) {
+		throw new RuntimeException ( e );
+	}
+	Collections.sort(conflIDAppendList);
+	// Create a hash and define the translation
+	Hashtable confIDLookup = new Hashtable();
+	int conflNum = max + 1;
+	Message.printStatus(2,routine,
+		"Renumbering confluence nodes in appended network to start with CONFL_" + conflNum);
+	for ( String conflIDAppend: conflIDAppendList ) {
+		// Remove the number and replace with another
+		int pos = conflIDAppend.indexOf("_");
+		if ( pos < 0 ) {
+			// CONFL
+			confIDLookup.put(conflIDAppend,conflIDAppend + "_" + conflNum );
+		}
+		else {
+			// CONFL_N
+			confIDLookup.put(conflIDAppend,conflIDAppend.substring(0,pos) + "_" + conflNum );
+		}
+		++conflNum;
+	}
+	// Finally, loop through all the nodes and replace the confluence identifiers with non-conflicting values
+	String id;
+	Object oHashValue;
+	for ( HydrologyNode nodeToAppend: appendNetworkNodeList ) {
+		id = nodeToAppend.getCommonID();
+		oHashValue = confIDLookup.get(id);
+		if ( oHashValue != null ) {
+			// Have a match...
+			nodeToAppend.setCommonID((String)oHashValue);
+		}
+		id = nodeToAppend.getNetID(); // Legacy...
+		oHashValue = confIDLookup.get(id);
+		if ( oHashValue != null ) {
+			// Have a match...
+			nodeToAppend.setNetID((String)oHashValue);
+		}
+		// Also process the node upstream and downstream IDs, which are maintained as strings during the
+		// network build process...
+		// Upstream...
+		String [] upstreamIDs = nodeToAppend.getUpstreamNodeIDs();
+		if ( (upstreamIDs != null) && (upstreamIDs.length > 0) ) {
+			nodeToAppend.clearUpstreamNodeIDs();
+			for ( int i = 0; i < upstreamIDs.length; i++ ) {
+				id = upstreamIDs[i];
+				if ( id != null ) {
+					oHashValue = confIDLookup.get(id);
+					if ( oHashValue != null ) {
+						// Have a match...
+						nodeToAppend.addUpstreamNodeID((String)oHashValue);
+					}
+				}
+			}
+		}
+		// Downstream...
+		id = nodeToAppend.getDownstreamNodeID();
+		if ( id != null ) {
+			oHashValue = confIDLookup.get(id);
+			if ( oHashValue != null ) {
+				// Have a match...
+				nodeToAppend.setDownstreamNodeID((String)oHashValue);
+			}
+		}
+	}
 	
 	// Calculate the coordinate offset such that the end node would exactly overly the node that will
 	// replace it.  The offset can be added to the coordinates in the new network.
-	
-	double offsetX = existingDownstreamNode.getX() - endNode.getX();
-	double offsetY = existingDownstreamNode.getY() - endNode.getY();
-	double offsetXAdditional = 0.0; // Additional offset needed to position whole block of new nodes
-	double offsetYAdditional = 0.0;
+	// This aligns the appended network such that the appended node is at coordinate (0,0) of its space,
+	// and it will subsequently be scaled to match the scaling of the existing network.
+	double shiftXAlignNetworks1 = -appendedUpstreamNode.getX();
+	double shiftYAlignNetworks1 = -appendedUpstreamNode.getY();
+	double shiftXAlignNetworks2 = existingDownstreamNode.getX();
+	double shiftYAlignNetworks2 = existingDownstreamNode.getY();
 	double scale = 1.0; // TODO SAM 2011-01-04 Compute from average node spacing?
+	if ( scaleXY != null ) {
+		scale = scaleXY;
+	}
+	double shiftXAdditional = 0.0; // Additional offset needed to position whole block of new nodes
+	double shiftYAdditional = 0.0;
+	if ( shiftX != null ) {
+		shiftXAdditional = shiftX;
+	}
+	if ( shiftY != null ) {
+		shiftYAdditional = shiftY;
+	}
+	Message.printStatus(2, routine, "Shift to set coordinates of append node to zero = " +
+		shiftXAlignNetworks1 + "," + shiftYAlignNetworks1 );
+	Message.printStatus(2, routine, "Scale to apply to appended network = " + scale );
+	Message.printStatus(2, routine, "Shift to set coordinates of append point to downstream = " +
+		shiftXAlignNetworks2 + "," + shiftYAlignNetworks2 );
+	Message.printStatus(2, routine, "Additional shift to apply to appended network = " +
+		shiftXAdditional + "," + shiftYAdditional );
 	
-	// Create the new merged network using the full list of data and further process network internals.
-	
-	for ( HydrologyNode nodeToAppend: appendNetworkNodeList ) {
-		if ( nodeToAppend == endNode ) {
-			// Connect the node to the existing network
-			List<HydrologyNode> endUpstreamNodes = endNode.getUpstreamNodes();
-			for ( HydrologyNode upstreamNode : endUpstreamNodes ) {
-				upstreamNode.setDownstreamNode(existingDownstreamNode);
-				existingDownstreamNode.addUpstreamNode(upstreamNode);
-			}
-			// No need to adjust coordinates since end node is replaced by downstream
-			continue;
+	// Adjust the merge point nodes
+
+	if ( appendHowType == StateMod_NodeNetwork_AppendHowType.ADD_UPSTREAM_OF_DOWNSTREAM ) {
+		// Remove all nodes downstream in the appended network.  Because this code will rebuild the
+		// network below, just do this brute force without properly recalculating the navigation data.
+		// Start with the node downstream of the requested node...
+		append_RemoveNodesDownsteamOfAppendNode ( routine, appendedUpstreamNode, appendNetworkNodeList );
+		appendedUpstreamNode.setDownstreamNodeID(null);
+		// Now reset the downstream node of the append point
+		appendedUpstreamNode.setDownstreamNode(existingDownstreamNode);
+		appendedUpstreamNode.setDownstreamNodeID(existingDownstreamNode.getCommonID());
+		Message.printStatus(2,routine,"Setting append node \"" + appendedUpstreamNode.getCommonID() +
+			"\" downstream to: " + existingDownstreamNode.getCommonID() );
+		if ( appendedUpstreamNode.getType() == HydrologyNode.NODE_TYPE_END ) {
+			// Change to an "Other" node
+			Message.printStatus(2,routine,"Changing append node type from End to Other" );
+			appendedUpstreamNode.setType(HydrologyNode.NODE_TYPE_OTHER);
 		}
-		// Adjust the coordinates
-		nodeToAppend.setX((nodeToAppend.getX() + offsetX)*scale + offsetXAdditional);
-		nodeToAppend.setY((nodeToAppend.getY() + offsetY)*scale + offsetYAdditional);
-		// Add the node to the list...
+		Message.printStatus(2,routine,"Adding to existing downstream node \"" +
+			existingDownstreamNode.getCommonID() + "\" the append node as upstream: " +
+			appendedUpstreamNode.getCommonID() );
+		existingDownstreamNode.addUpstreamNode(appendedUpstreamNode);
+		existingDownstreamNode.addUpstreamNodeID(appendedUpstreamNode.getCommonID());
+	}
+	else if ( appendHowType == StateMod_NodeNetwork_AppendHowType.REPLACE_UPSTREAM_OF_DOWNSTREAM ) {
+		// Remove all nodes downstream of the appended network.  Because this code will rebuild
+		// the network below, just do this brute force without properly recalculating the navigation data.
+		// Start with the node downstream of the requested node...
+		append_RemoveNodesDownsteamOfAppendNode ( routine, appendedUpstreamNode, appendNetworkNodeList );
+		appendedUpstreamNode.setDownstreamNodeID(null);
+		// Remove all the nodes upstream of the downstream node, on the reach
+		append_RemoveNodesUpstreamOfDownstreamNode(routine, existingDownstreamNode.getUpstreamNodes(),
+			networkNodeList );
+		// Also need to manually remove because the above removes from the node list but does not reset
+		// the pointers on the node.
+		int nUp = existingDownstreamNode.getNumUpstreamNodes();
+		for ( int i = (nUp - 1); i >= 0; i-- ) {
+			existingDownstreamNode.removeUpstreamNode(i);
+		}
+		existingDownstreamNode.clearUpstreamNodeIDs();
+		// Set the downstream node for the append point
+		appendedUpstreamNode.setDownstreamNode(existingDownstreamNode);
+		appendedUpstreamNode.setDownstreamNodeID(existingDownstreamNode.getCommonID());
+		Message.printStatus(2,routine,"Setting append node \"" + appendedUpstreamNode.getCommonID() +
+			"\" downstream=\"" + existingDownstreamNode.getCommonID() + "\".");
+		if ( appendedUpstreamNode.getType() == HydrologyNode.NODE_TYPE_END ) {
+			// Change to an "Other" node
+			Message.printStatus(2,routine,"Changing append node type from End to Other" );
+			appendedUpstreamNode.setType(HydrologyNode.NODE_TYPE_OTHER);
+		}
+		Message.printStatus(2,routine,"Adding to existing downstream node \"" +
+			existingDownstreamNode.getCommonID() + "\" the append node as upstream: " +
+			appendedUpstreamNode.getCommonID() );
+		// All upstream nodes were removed above so the following should be the only one.
+		existingDownstreamNode.addUpstreamNode(appendedUpstreamNode);
+		existingDownstreamNode.addUpstreamNodeID(appendedUpstreamNode.getCommonID());
+	}
+	else {
+		throw new InvalidParameterException ("AppendHowType is not supported: " + appendHowType );
+	}
+	
+	// Check for duplicate identifiers.  If not removed, they will cause lots of problems with infinite loops
+	// in network navigation.
+	
+	StringBuffer b = new StringBuffer();
+	double xOld, yOld;
+	for ( HydrologyNode nodeToAppend: appendNetworkNodeList ) {
+		// Adjust the coordinates of appended node and check for duplicates
+		xOld = nodeToAppend.getX();
+		yOld = nodeToAppend.getY();
+		nodeToAppend.setX((xOld + shiftXAlignNetworks1)*scale +
+			shiftXAlignNetworks2 + shiftXAdditional);
+		nodeToAppend.setY((yOld + shiftYAlignNetworks1)*scale +
+			shiftYAlignNetworks2 + shiftYAdditional);
+		Message.printStatus(2,routine,"For appended node \"" + nodeToAppend.getCommonID() + "\" oldXY=" +
+			xOld + "," + yOld + " newXY=" + nodeToAppend.getX() + "," + nodeToAppend.getY() );
+		for ( HydrologyNode nodeToCheck: networkNodeList ) {
+			if ( nodeToCheck.getCommonID().equalsIgnoreCase(nodeToAppend.getCommonID() ) ) {
+				b.append(" " + nodeToCheck.getCommonID());
+			}
+		}
+		// Add the node to the list.
 		networkNodeList.add(nodeToAppend);
 	}
+	if ( b.length() > 0 ) {
+		throw new RuntimeException (
+			"Network being appended has nodes with identifiers in the existing network:  " + b );
+	}
+	Message.printStatus(2,routine,"Merged network has " + networkNodeList.size() +
+		" nodes (from simple list merge)." );
+	// TODO SAM 2011-01-05 Evaluate whether duplicate labels, etc. are an issue
+	
+	// Now merge the nodes from each network.
+	
 	for ( PropList linkToAppend: appendNetworkLinkList ) {
-		// TODO SAM 2011-01-04 Any need to adjust any coordinates?
+		// Links are just two identifiers so no need to adjust coordinates.
 		networkLinkList.add(linkToAppend);
 	}
 	for ( PropList layoutToAppend: appendNetworkLayoutList ) {
@@ -170,14 +359,67 @@ public StateMod_NodeNetwork append ( StateMod_NodeNetwork networkToAppend, Strin
 		//networkLayoutList.add(layoutToAppend);
 	}
 	for ( HydrologyNode annotationToAppend: appendNetworkAnnotationList ) {
-		// Adjust the coordinates
-		annotationToAppend.setX((annotationToAppend.getX() + offsetX)*scale + offsetXAdditional);
-		annotationToAppend.setY((annotationToAppend.getY() + offsetY)*scale + offsetYAdditional);
+		// Adjust the coordinates and add
+		annotationToAppend.setX((annotationToAppend.getX() + shiftXAlignNetworks1)*scale +
+			shiftXAlignNetworks2 + shiftXAdditional);
+		annotationToAppend.setY((annotationToAppend.getY() + shiftYAlignNetworks1)*scale +
+			shiftYAlignNetworks2 + shiftYAdditional);
 		networkAnnotationList.add(annotationToAppend);
 	}
 	
 	StateMod_NodeNetwork mergedNetwork = new StateMod_NodeNetwork();
-	mergedNetwork.calculateNetworkNodeData(networkNodeList, false);
+	boolean debug = Message.isDebugOn ;
+	if ( debug ) {
+		try {
+			HydrologyNodeNetwork.writeListFile(getInputName() + ".beforeCalc", null, false,
+				networkNodeList, null, true );
+		}
+		catch ( Exception e ) {
+			Message.printWarning(3,routine,e);
+		}
+	}
+	mergedNetwork.calculateNetworkNodeData(networkNodeList, false); // False means upstream first
+	Message.printStatus(2,routine,"Merged network has " + mergedNetwork.getNodeCount() +
+		" nodes (from complete network)." );
+	if ( debug ) {
+		try {
+			HydrologyNodeNetwork.writeListFile(getInputName() + ".afterCalc", null, false,
+				networkNodeList, null, true );
+		}
+		catch ( Exception e ) {
+			Message.printWarning(3,routine,e);
+		}
+	}
+	// FIXME SAM 2011-01-05 Do not know why but the above call sometimes results in duplicate
+	// upstream nodes in the list.  Fix that here by removing the duplicate.  Don't have time right
+	// now to track down the root issue
+	HydrologyNode node2, node3;
+	for ( HydrologyNode node: networkNodeList ) {
+		List<HydrologyNode> upstreamNodeList = node.getUpstreamNodes();
+		if ( upstreamNodeList != null ) {
+			// Loop through each node in the list...
+			for ( int i = 0; i < upstreamNodeList.size(); i++ ) {
+				node2 = upstreamNodeList.get(i);
+				// Loop through the remaining items in the list..
+				for ( int i1 = (i + 1); i1 < upstreamNodeList.size(); i1++ ) {
+					node3 = upstreamNodeList.get(i1);
+					if ( node2 == node3 ) {
+						upstreamNodeList.remove(i1);
+						--i1; // To ensure next node will also be compared.
+					}
+				}
+			}
+		}
+	}
+	if ( debug ) {
+		try {
+			HydrologyNodeNetwork.writeListFile(getInputName() + ".afterRemoveDuplicates", null, false,
+				networkNodeList, null, true );
+		}
+		catch ( Exception e ) {
+			Message.printWarning(3,routine,e);
+		}
+	}
 	mergedNetwork.setAnnotationList(networkAnnotationList);
 	mergedNetwork.setLayoutList(networkLayoutList);
 	mergedNetwork.setLinkList(networkLinkList);
@@ -187,6 +429,8 @@ public StateMod_NodeNetwork append ( StateMod_NodeNetwork networkToAppend, Strin
 	// but do the following for a first cut
 
 	GRLimits networkDataLimits = mergedNetwork.determineExtentFromNetworkData();
+	//GRLimits networkDataLimits = determineExtentFromNetworkData ( networkNodeList );
+	Message.printStatus(2,routine,"Limits of merged network data=" + networkDataLimits );
 	mergedNetwork.setBounds(networkDataLimits.getLeftX(), networkDataLimits.getBottomY(),
 		networkDataLimits.getRightX(), networkDataLimits.getTopY() );
 	// Use the old legend position
@@ -197,6 +441,59 @@ public StateMod_NodeNetwork append ( StateMod_NodeNetwork networkToAppend, Strin
 		networkDataLimits.getRightX(), networkDataLimits.getTopY(), false);
 	
 	return mergedNetwork;
+}
+
+/**
+Helper method to remove nodes downstream of append node (local data from append() method).
+*/
+private void append_RemoveNodesDownsteamOfAppendNode ( String routine, HydrologyNode appendedUpstreamNode,
+	List<HydrologyNode> appendNetworkNodeList )
+{
+	HydrologyNode node = appendedUpstreamNode.getDownstreamNode();
+	if ( node != null ) {
+		// Not at the bottom of the network so remove downstream nodes.
+		List<HydrologyNode> downstreamNodesToRemoveList = new Vector();
+		// Move to the bottom of the network and save node references in a list...
+		while ( true ) {
+			// This node needs to be removed.
+			downstreamNodesToRemoveList.add(node);
+			// Get the next downstream...
+			node = node.getDownstreamNode();
+			if ( node == null ) {
+				break;
+			}
+		}
+		// Now have a list of nodes to remove
+		// Delete the nodes from the network being appended...
+		for ( HydrologyNode node2: downstreamNodesToRemoveList ) {
+			Message.printStatus(2,routine,"Deleting the following downstream node in " +
+				"append network before appending: " + node2.getCommonID() );
+			appendNetworkNodeList.remove(node2);
+		}
+	}
+}
+
+/**
+Helper method to remove nodes upstream of the existing downstream node (local data from append() method).
+*/
+private void append_RemoveNodesUpstreamOfDownstreamNode ( String routine,
+	List<HydrologyNode> upstreamNodeList, List<HydrologyNode> networkNodeList )
+{
+	// Follow each reach upstream
+	for ( HydrologyNode upstreamNode: upstreamNodeList ) {
+		List<HydrologyNode> upstreamNodeList2 = upstreamNode.getUpstreamNodes();
+		if ( upstreamNodeList2 != null ) {
+			// Call recursively.  This should result in a march up the network and deletes of each node
+			// as the recursive calls back down.
+			append_RemoveNodesUpstreamOfDownstreamNode ( routine,
+				upstreamNodeList2, networkNodeList );
+		}
+		// Now remove this current node.
+		Message.printStatus(2,routine,"Deleting node \"" + upstreamNode.getCommonID() +
+			"\" that is upstream of \"" + upstreamNode.getDownstreamNode().getCommonID() +
+			"\" in the existing network." );
+			networkNodeList.remove(upstreamNode);
+	}
 }
 
 /**
@@ -1372,8 +1669,7 @@ public boolean readMakenetNetworkFile( StateMod_NodeDataProvider nodeDataProvide
 }
 
 /**
-Reads a StateMod network file in either Makenet or XML format and returns
-the network that was generated.
+Reads a StateMod network file in either Makenet or XML format and returns the network that was generated.
 @param filename the name of the file from which to read.
 @param nodeDataProvider Object that fills in node data (e.g., from HydroBase).
 Can be null if reading from an XML file.
@@ -1908,7 +2204,7 @@ throws Exception {
 				readXMLNetworkFile_ProcessDownstreamNode(hnode, node );
 			}
 			else if (elementName.equalsIgnoreCase("UpstreamNode")) {
-				ReadXMLNetworkFile_ProcessUpstreamNodes(hnode, node);
+				readXMLNetworkFile_ProcessUpstreamNodes(hnode, node);
 			}
 			else {}
 		}
@@ -1967,7 +2263,7 @@ Processes an "Upstream" node containing the IDs of the upstream nodes from the N
 @param node the XML node read from the file.
 @throws Exception if an error occurs.
 */
-private static void ReadXMLNetworkFile_ProcessUpstreamNodes(HydrologyNode hnode, Node node) 
+private static void readXMLNetworkFile_ProcessUpstreamNodes(HydrologyNode hnode, Node node) 
 throws Exception {
 	NamedNodeMap attributes = node.getAttributes();
 	Node attributeNode;

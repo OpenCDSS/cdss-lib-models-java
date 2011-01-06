@@ -1719,7 +1719,7 @@ private void deleteLink() {
 }
 
 /**
-Deletes a node from the network.
+Deletes a node from the network and rebuilds the network connectivity.
 @param id the id of the node to delete.
 */
 public void deleteNode(String id) {
@@ -2244,9 +2244,7 @@ private void drawNetworkLines() {
 			StateMod_NodeNetwork.POSITION_COMPUTATIONAL);
 
 		dots = false;
-		if (dsRealNode != null 
-		    && dsRealNode.getType() 
-		    == HydrologyNode.NODE_TYPE_XCONFLUENCE) {
+		if (dsRealNode != null && dsRealNode.getType() == HydrologyNode.NODE_TYPE_XCONFLUENCE) {
 			dots = true;
 		}
 
@@ -2255,7 +2253,7 @@ private void drawNetworkLines() {
 		// connections are only between visible nodes
 		holdNode2 = ds;
 		while (ds.getType() == HydrologyNode.NODE_TYPE_UNKNOWN) {
-		    	ds = ds.getDownstreamNode();
+	    	ds = ds.getDownstreamNode();
 			if (ds == null || ds == holdNode2) {
 				GRDrawingAreaUtil.setLineWidth(__drawingArea,1);
 				return;
@@ -5136,7 +5134,7 @@ private void writeListFiles()
 			}
 	
 			try {
-				StateMod_NodeNetwork.writeListFile( outputFilename, ",", false, v, comments );
+				StateMod_NodeNetwork.writeListFile( outputFilename, ",", false, v, comments, false );
 			}
 			catch (Exception e) {
 				Message.printWarning(3, routine, e);
