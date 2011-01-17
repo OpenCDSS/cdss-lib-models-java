@@ -49,6 +49,9 @@ private double __elevation = StateCU_Util.MISSING_DOUBLE;
 private String __region1 = StateCU_Util.MISSING_STRING;
 private String __region2 = StateCU_Util.MISSING_STRING;
 
+private double __zh = StateCU_Util.MISSING_DOUBLE;
+private double __zm = StateCU_Util.MISSING_DOUBLE;
+
 /**
 Construct a StateCU_ClimateStation instance and set to missing and empty data.
 */
@@ -122,67 +125,101 @@ public String getRegion2() {
 }
 
 /**
-Read the StateCU climate stations file and return as a Vector of CUClimateStation.
+Return the height of humidity and temperature measurements, feet.
+@return the height of humidity and temperature measurements, feet.
+*/
+public double getZh() {
+	return __zh;
+}
+
+/**
+Return the height of wind speed measurements, feet.
+@return the height of wind speed measurements, feet.
+*/
+public double getZm() {
+	return __zm;
+}
+
+/**
+Read the StateCU climate stations file and return as a list of CUClimateStation.
 @param filename filename containing CLI records.
 */
-public static List readStateCUFile ( String filename )
+public static List<StateCU_ClimateStation> readStateCUFile ( String filename )
 throws IOException
 {	String rtn = "StateCU_ClimateStation.readStateCUFile";
 	String iline = null;
 	List v = new Vector ( 10 );
-	List sta_Vector = new Vector ( 100 );	// Data to return.
-	int format_0[] = {	StringUtil.TYPE_STRING,		// station id
-				StringUtil.TYPE_STRING,		// latitude
-				StringUtil.TYPE_STRING,		// elevation
-				StringUtil.TYPE_SPACE,
-				StringUtil.TYPE_STRING,		// region1
-				StringUtil.TYPE_STRING,		// region2
-				StringUtil.TYPE_SPACE,
-				StringUtil.TYPE_STRING };	// station name
+	List<StateCU_ClimateStation> sta_Vector = new Vector ( 100 ); // Data to return.
+	int format_0[] = {
+		StringUtil.TYPE_STRING, // station id
+		StringUtil.TYPE_STRING, // latitude
+		StringUtil.TYPE_STRING, // elevation
+		StringUtil.TYPE_SPACE,
+		StringUtil.TYPE_STRING, // region1
+		StringUtil.TYPE_STRING, // region2
+		StringUtil.TYPE_SPACE,
+		StringUtil.TYPE_STRING, // station name
+		StringUtil.TYPE_STRING, // zh
+		StringUtil.TYPE_STRING }; // zm
 
-	int format_0w[] = {	12,	// station id
-				6,	// latitude
-				9,	// elevation
-				2,
-				20,	// region1
-				8,	// region2
-				2,
-				24 };	// station name
+	int format_0w[] = {
+		12,	// station id
+		6, // latitude
+		9, // elevation
+		2,
+		20, // region1
+		8, // region2
+		2,
+		24, // station name
+		8, // zh
+		8}; // zm
 	StateCU_ClimateStation sta = null;
 	BufferedReader in = null;
 
-	Message.printStatus ( 1, rtn, "Reading StateCU climate station file: \"" + filename + "\"" );
-	// The following throws an IOException if the file cannot be opened...
-	in = new BufferedReader ( new FileReader (filename));
-	String string;
-	while ( (iline = in.readLine()) != null ) {
-		// check for comments
-		if (iline.startsWith("#") || iline.trim().length()==0 ){
-			continue;
+	try {
+		Message.printStatus ( 2, rtn, "Reading StateCU climate station file: \"" + filename + "\"" );
+		// The following throws an IOException if the file cannot be opened...
+		in = new BufferedReader ( new FileReader (filename));
+		String string;
+		while ( (iline = in.readLine()) != null ) {
+			// check for comments
+			if (iline.startsWith("#") || iline.trim().length()==0 ){
+				continue;
+			}
+	
+			// allocate new StateCU_ClimateStation instance...
+			sta = new StateCU_ClimateStation();
+	
+			StringUtil.fixedRead ( iline, format_0, format_0w, v );
+			sta.setID ( ((String)v.get(0)).trim() ); 
+			string = ((String)v.get(1)).trim();
+			if ( (string.length() != 0) && StringUtil.isDouble(string) ) {
+				sta.setLatitude ( StringUtil.atod(string) );
+			}
+			string = ((String)v.get(2)).trim();
+			if ( (string.length() != 0) && StringUtil.isDouble(string) ) {
+				sta.setElevation ( StringUtil.atod(string) );
+			}
+			sta.setRegion1 ( ((String)v.get(3)).trim() ); 
+			sta.setRegion2 ( ((String)v.get(4)).trim() ); 
+			sta.setName ( ((String)v.get(5)).trim() );
+			string = ((String)v.get(6)).trim();
+			if ( (string.length() != 0) && StringUtil.isDouble(string) ) {
+				sta.setZh ( Double.parseDouble(string) );
+			}
+			string = ((String)v.get(7)).trim();
+			if ( (string.length() != 0) && StringUtil.isDouble(string) ) {
+				sta.setZm ( Double.parseDouble(string) );
+			}
+	
+			// add the StateCU_ClimateStation to the list...
+			sta_Vector.add ( sta );
 		}
-
-		// allocate new StateCU_ClimateStation instance...
-		sta = new StateCU_ClimateStation();
-
-		StringUtil.fixedRead ( iline, format_0, format_0w, v );
-		sta.setID ( ((String)v.get(0)).trim() ); 
-		string = ((String)v.get(1)).trim();
-		if ( (string.length() != 0) && StringUtil.isDouble(string) ) {
-			sta.setLatitude ( StringUtil.atod(string) );
-		}
-		string = ((String)v.get(2)).trim();
-		if ( (string.length() != 0) && StringUtil.isDouble(string) ) {
-			sta.setElevation ( StringUtil.atod(string) );
-		}
-		sta.setRegion1 ( ((String)v.get(3)).trim() ); 
-		sta.setRegion2 ( ((String)v.get(4)).trim() ); 
-		sta.setName ( ((String)v.get(5)).trim() ); 
-
-		// add the StateCU_ClimateStation to the vector...
-		sta_Vector.add ( sta );
 	}
-	if ( in != null ) {
-		in.close();
+	finally {
+		if ( in != null ) {
+			in.close();
+		}
 	}
 	return sta_Vector;
 }
@@ -199,6 +236,8 @@ public void restoreOriginal() {
 	__elevation = station.__elevation;
 	__region1 = station.__region1;
 	__region2 = station.__region2;
+	__zh = station.__zh;
+	__zm = station.__zm;
 
 	_isClone = false;
 	_original = null;
@@ -237,6 +276,22 @@ public void setRegion2(String region2) {
 }
 
 /**
+Set the height of humidity and temperature measurements.
+@param zh height of humidity and temperature measurements, feet
+*/
+public void setZh(double zh) {
+	__zh = zh;
+}
+
+/**
+Set the height of wind speed measurement.
+@param zm height of wind speed measurement, feet
+*/
+public void setZm(double zm) {
+	__zm = zm;
+}
+
+/**
 Performs specific data checks and returns a list of data that failed the data checks.
 @param dataset StateCU dataset currently in memory.
 @return Validation results.
@@ -266,6 +321,16 @@ public StateCU_ComponentValidation validateComponent( StateCU_DataSet dataset )
 			"\" region1 is blank - may cause region lookups to fail for other data.",
 			"Specify as county or other region indicator.") );
 	}
+	double zh = getZh();
+	if ( !(zh >= 0.0) ) {
+		validation.add(new StateCU_ComponentValidationProblem(this,"Climate station \"" + id + "\" zh (" +
+			zh + ") is invalid.", "Specify a zh >= 0.") );
+	}
+	double zm = getZm();
+	if ( !(zm >= 0.0) ) {
+		validation.add(new StateCU_ComponentValidationProblem(this,"Climate station \"" + id + "\" zm (" +
+			zm + ") is invalid.", "Specify a zm >= 0.") );
+	}
 	return validation;
 }
 
@@ -279,25 +344,30 @@ Specify as null if no previous file is available.
 @param newComments Comments to add to the top of the file.  Specify as null if no comments are available.
 @exception IOException if there is an error writing the file.
 */
-public static void writeStateCUFile ( String filenamePrev, String filename, List dataList,
-		List newComments )
+public static void writeStateCUFile ( String filenamePrev, String filename, List<StateCU_ClimateStation> dataList,
+		List<String> newComments )
 throws IOException
-{	List comment_str = new Vector(1);
+{	List<String> comment_str = new Vector(1);
 	comment_str.add ( "#" );
-	List ignore_comment_str = new Vector(1);
+	List<String> ignore_comment_str = new Vector(1);
 	ignore_comment_str.add ( "#>" );
 	PrintWriter out = null;
-	String full_filename_prev = IOUtil.getPathUsingWorkingDir ( filenamePrev );
-	String full_filename = IOUtil.getPathUsingWorkingDir ( filename );
-	out = IOUtil.processFileHeaders ( full_filename_prev, full_filename, 
-		newComments, comment_str, ignore_comment_str, 0 );
-	if ( out == null ) {
-		throw new IOException ( "Error writing to \"" + full_filename + "\"" );
+	try {
+		String full_filename_prev = IOUtil.getPathUsingWorkingDir ( filenamePrev );
+		String full_filename = IOUtil.getPathUsingWorkingDir ( filename );
+		out = IOUtil.processFileHeaders ( full_filename_prev, full_filename, 
+			newComments, comment_str, ignore_comment_str, 0 );
+		if ( out == null ) {
+			throw new IOException ( "Error writing to \"" + full_filename + "\"" );
+		}
+		writeStateCUFile ( dataList, out );
 	}
-	writeStateCUFile ( dataList, out );
-	out.flush();
-	out.close();
-	out = null;
+	finally {
+		if ( out != null ) {
+			out.flush();
+			out.close();
+		}
+	}
 }
 
 /**
@@ -306,19 +376,19 @@ Write a list of StateCU_ClimateStation to an opened file.
 @param out output PrintWriter.
 @exception IOException if an error occurs.
 */
-private static void writeStateCUFile ( List dataList, PrintWriter out )
+private static void writeStateCUFile ( List<StateCU_ClimateStation> dataList, PrintWriter out )
 throws IOException
 {	int i;
 	String iline;
 	String cmnt = "#>";
 	// Missing data handled by formatting all as strings...
-	String format =	"%-12.12s%6.6s%9.9s  %-20.20s%-8.8s  %-24.24s";
-	List v = new Vector(6);	// Reuse for all output lines.
+	String format =	"%-12.12s%6.6s%9.9s  %-20.20s%-8.8s  %-24.24s%8.8s%8.8s";
+	List v = new Vector(8);	// Reuse for all output lines.
 
 	out.println ( cmnt );
 	out.println ( cmnt + "  StateCU Climate Stations File" );
 	out.println ( cmnt );
-	out.println ( cmnt + "  Record format (a12,f6.2,f9.2,2x,a20,a8,2x,a24)" );
+	out.println ( cmnt + "  Record format (a12,f6.2,f9.2,2x,a20,a8,2x,a24,8.2f,2.2f)" );
 	out.println ( cmnt );
 	out.println ( cmnt + "  StationID:  Station identifier (e.g., 3951)" );
 	out.println ( cmnt + "        Lat:  Latitude (decimal degrees)" );
@@ -326,9 +396,11 @@ throws IOException
 	out.println ( cmnt + "    Region1:  Region1 (e.g., County)" );
 	out.println ( cmnt + "    Region2:  Region2 (e.g., Hydrologic Unit Code, HUC)" );
 	out.println ( cmnt + "StationName:  Station name" );
+	out.println ( cmnt + "     zHumid:  Height of humidity and temperature measurements (feet, daily analysis only)" );
+	out.println ( cmnt + "      zWind:  Height of wind speed measurement (feet, daily analysis only)" );
 	out.println ( cmnt );
-	out.println ( cmnt + " StationID  Lat   Elev            Region1      Region2        StationName" );
-	out.println ( cmnt + "---------eb----eb-------exxb------------------eb------exxb----------------------e" );
+	out.println ( cmnt + " StationID  Lat   Elev            Region1      Region2        StationName         zHumid  zWind" );
+	out.println ( cmnt + "---------eb----eb-------exxb------------------eb------exxb----------------------eb------eb------e" );
 	out.println ( cmnt + "EndHeader" );
 
 	int num = 0;
@@ -337,7 +409,7 @@ throws IOException
 	}
 	StateCU_ClimateStation sta = null;
 	for ( i=0; i<num; i++ ) {
-		sta = (StateCU_ClimateStation)dataList.get(i);
+		sta = dataList.get(i);
 		if ( sta == null ) {
 			continue;
 		}
@@ -361,6 +433,20 @@ throws IOException
 		v.add(sta.__region1);
 		v.add(sta.__region2);
 		v.add(sta._name);
+		// zh...
+		if ( StateCU_Util.isMissing(sta.__zh) ) {
+			v.add("");
+		}
+		else {
+			v.add( StringUtil.formatString(sta.__zh,"%8.2f"));
+		}
+		// zm...
+		if ( StateCU_Util.isMissing(sta.__zm) ) {
+			v.add("");
+		}
+		else {
+			v.add( StringUtil.formatString(sta.__zm,"%8.2f"));
+		}
 
 		iline = StringUtil.formatString ( v, format);
 		out.println ( iline );
@@ -379,20 +465,22 @@ header (true) or to create a new file with a new header@param data the Vector of
 @throws Exception if an error occurs.
 */
 public static void writeListFile(String filename, String delimiter, boolean update,
-		List data, List outputComments ) 
+		List<StateCU_ClimateStation> data, List<String> outputComments ) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
 		size = data.size();
 	}
 	
-	List fields = new Vector();
+	List<String> fields = new Vector();
 	fields.add("ID");
 	fields.add("Name");
 	fields.add("Latitude");
 	fields.add("Elevation");
 	fields.add("Region1");
 	fields.add("Region2");
+	fields.add("HeightHumidity");
+	fields.add("HeightWind");
 	int fieldCount = fields.size();
 
 	String[] names = new String[fieldCount];
@@ -400,7 +488,7 @@ throws Exception {
 	int comp = StateCU_DataSet.COMP_CLIMATE_STATIONS;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.get(i);
+		s = fields.get(i);
 		names[i] = StateCU_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateCU_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -413,9 +501,9 @@ throws Exception {
 	int j = 0;
 	PrintWriter out = null;
 	StateCU_ClimateStation cli = null;
-	List commentString = new Vector(1);
+	List<String> commentString = new Vector(1);
 	commentString.add ( "#" );
-	List ignoreCommentString = new Vector(1);
+	List<String> ignoreCommentString = new Vector(1);
 	ignoreCommentString.add ( "#>" );
 	String[] line = new String[fieldCount];
 	StringBuffer buffer = new StringBuffer();
@@ -448,7 +536,7 @@ throws Exception {
 		out.println(buffer.toString());
 		
 		for (int i = 0; i < size; i++) {
-			cli = (StateCU_ClimateStation)data.get(i);
+			cli = data.get(i);
 			
 			line[0] = StringUtil.formatString(cli.getID(), formats[0]).trim();
 			line[1] = StringUtil.formatString(cli.getName(), formats[1]).trim();
@@ -456,6 +544,8 @@ throws Exception {
 			line[3] = StringUtil.formatString(cli.getElevation(), formats[3]).trim();
 			line[4] = StringUtil.formatString(cli.getRegion1(), formats[4]).trim();
 			line[5] = StringUtil.formatString(cli.getRegion2(), formats[5]).trim();
+			line[6] = StringUtil.formatString(cli.getZh(), formats[6]).trim();
+			line[7] = StringUtil.formatString(cli.getZm(), formats[7]).trim();
 
 			buffer = new StringBuffer();	
 			for (j = 0; j < fieldCount; j++) {
@@ -470,17 +560,12 @@ throws Exception {
 
 			out.println(buffer.toString());
 		}
-		out.flush();
-		out.close();
-		out = null;
 	}
-	catch (Exception e) {
+	finally {
 		if (out != null) {
 			out.flush();
 			out.close();
 		}
-		out = null;
-		throw e;
 	}
 }
 

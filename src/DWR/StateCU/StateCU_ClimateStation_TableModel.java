@@ -1,22 +1,3 @@
-// ----------------------------------------------------------------------------
-// StateCU_ClimateStation_TableModel - Table model for displaying data for 
-//	climate station tables
-// ----------------------------------------------------------------------------
-// Copyright:   See the COPYRIGHT file
-// ----------------------------------------------------------------------------
-// History:
-// 2003-07-14	J. Thomas Sapienza, RTi	Initial version.
-// 2005-01-21	JTS, RTi		Added the flag to make data editable or
-//					not.
-// 2005-01-24	JTS, RTi		* Removed the row count column because
-//					  worksheets now handle that.
-//					* Added column reference variables.
-// 					* Filled setValue().
-// 2005-03-28	JTS, RTi		Added latitude, elevation, and region
-//					fields.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-// ----------------------------------------------------------------------------
-
 package DWR.StateCU;
 
 import java.util.List;
@@ -25,7 +6,7 @@ import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 import RTi.Util.IO.Validator;
 
 /**
-This class is a table model for displaying climate station data.
+This class is a table model for displaying StateCU climate station data.
 */
 public class StateCU_ClimateStation_TableModel 
 extends JWorksheet_AbstractRowTableModel implements StateCU_Data_TableModel {
@@ -33,7 +14,7 @@ extends JWorksheet_AbstractRowTableModel implements StateCU_Data_TableModel {
 /**
 Number of columns in the table model.
 */
-private int __COLUMNS = 6;
+private int __COLUMNS = 8;
 
 /**
 References to the columns.
@@ -44,7 +25,9 @@ private final int
 	__COL_LATITUDE = 2,
 	__COL_ELEVATION = 3,
 	__COL_REGION1 = 4,
-	__COL_REGION2 = 5;
+	__COL_REGION2 = 5,
+	__COL_ZH = 6,
+	__COL_ZM = 7;
 
 /**
 Whether the data are editable or not.
@@ -76,7 +59,7 @@ Constructor.  This builds the Model for displaying climate station data
 public StateCU_ClimateStation_TableModel(List data, boolean editable)
 throws Exception {
 	if (data == null) {
-		throw new Exception ("Invalid data Vector passed to " 
+		throw new Exception ("Invalid data list passed to " 
 			+ "StateCU_ClimateStation_TableModel constructor.");
 	}
 	_rows = data.size();
@@ -91,13 +74,15 @@ Returns the class of the data stored in a given column.
 */
 public Class getColumnClass (int columnIndex) {
 	switch (columnIndex) {
-		case __COL_ID:		return String.class;
-		case __COL_NAME:	return String.class;
-		case __COL_ELEVATION:	return Double.class;
-		case __COL_LATITUDE:	return Double.class;
+		case __COL_ID: return String.class;
+		case __COL_NAME: return String.class;
+		case __COL_ELEVATION: return Double.class;
+		case __COL_LATITUDE: return Double.class;
 		case __COL_REGION1:	return String.class;
 		case __COL_REGION2:	return String.class;
-		default:		return String.class;
+		case __COL_ZH: return Double.class;
+		case __COL_ZM: return Double.class;
+		default: return String.class;
 	}
 }
 
@@ -115,13 +100,15 @@ Returns the name of the column at the given position.
 */
 public String getColumnName(int columnIndex) {
 	switch (columnIndex) {
-		case __COL_ID:		return "\nID";
-		case __COL_NAME:	return "\nNAME";
-		case __COL_ELEVATION:	return "ELEVATION\n(FT)";
-		case __COL_LATITUDE:	return "LATITUDE\n(DEC. DEG.)";
-		case __COL_REGION1:	return "\nREGION1";
-		case __COL_REGION2:	return "\nREGION2";
-		default:		return " ";
+		case __COL_ID: return "\nID";
+		case __COL_NAME: return "\nNAME";
+		case __COL_ELEVATION: return "ELEVATION\n(FT)";
+		case __COL_LATITUDE: return "LATITUDE\n(DEC. DEG.)";
+		case __COL_REGION1: return "\nREGION1";
+		case __COL_REGION2: return "\nREGION2";
+		case __COL_ZH: return "HEIGHT HUMID.&TEMP.\nMEASUREMENTS (FT)";
+		case __COL_ZM: return "HEIGHT WIND\nMEASUREMENT (FT)";
+		default: return " ";
 	}
 }
 
@@ -130,18 +117,19 @@ public String getColumnName(int columnIndex) {
 Returns the format that the specified column should be displayed in when
 the table is being displayed in the given table format. 
 @param column column for which to return the format.
-@return the format (as used by StringUtil.formatString() in which to display the
-column.
+@return the format (as used by StringUtil.formatString() in which to display the column.
 */
 public String getFormat(int column) {
 	switch (column) {
-		case __COL_ID:		return "%-20.20s";	
-		case __COL_NAME:	return "%-20.20s";	
-		case __COL_ELEVATION:	return "%10.2f";
-		case __COL_LATITUDE:	return "%10.2f";
-		case __COL_REGION1:	return "%-20.20s";
-		case __COL_REGION2:	return "%-20.20s";
-		default:		return "%-8s";
+		case __COL_ID: return "%-20.20s";	
+		case __COL_NAME: return "%-20.20s";	
+		case __COL_ELEVATION: return "%10.2f";
+		case __COL_LATITUDE: return "%10.2f";
+		case __COL_REGION1: return "%-20.20s";
+		case __COL_REGION2: return "%-20.20s";
+		case __COL_ZH: return "%8.2f";
+		case __COL_ZM: return "%8.2f";
+		default: return "%-8s";
 	}
 }
 
@@ -161,19 +149,18 @@ public Validator[] getValidators( int col ) {
 	Validator[] no_checks = new Validator[] {};
 	
 	switch ( col ) {
-	case __COL_ID:			return ids;
-	case __COL_NAME: 		return blank;
-	case __COL_ELEVATION:	return nums;
-	case __COL_LATITUDE:	return nums;
-	case __COL_REGION1:		return blank;
-	case __COL_REGION2:		return blank;
-	default: 				return no_checks;
+		case __COL_ID: return ids;
+		case __COL_NAME: return blank;
+		case __COL_ELEVATION: return nums;
+		case __COL_LATITUDE: return nums;
+		case __COL_REGION1: return blank;
+		case __COL_REGION2: return blank;
+		default: return no_checks;
 	}	
 }
 
 /**
-Returns the data that should be placed in the JTable
-at the given row and column.
+Returns the data that should be placed in the JTable at the given row and column.
 @param row the row for which to return data.
 @param col the column for which to return data.
 @return the data that should be placed in the JTable at the given row and col.
@@ -183,17 +170,28 @@ public Object getValueAt(int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	StateCU_ClimateStation station = 
-		(StateCU_ClimateStation)_data.get(row);
+	StateCU_ClimateStation station = (StateCU_ClimateStation)_data.get(row);
 	switch (col) {
-		case __COL_ID:		return station.getID();
-		case __COL_NAME: 	return station.getName();
-		case __COL_ELEVATION:	return new Double(
-						station.getElevation());
-		case __COL_LATITUDE:	return new Double(
-						station.getLatitude());
-		case __COL_REGION1:	return station.getRegion1();
-		case __COL_REGION2:	return station.getRegion2();
+		case __COL_ID: return station.getID();
+		case __COL_NAME: return station.getName();
+		case __COL_ELEVATION: return new Double(station.getElevation());
+		case __COL_LATITUDE: return new Double(station.getLatitude());
+		case __COL_REGION1: return station.getRegion1();
+		case __COL_REGION2: return station.getRegion2();
+		case __COL_ZH:
+			if ( StateCU_Util.isMissing(station.getZh()) ) {
+				return null;
+			}
+			else {
+				return new Double(station.getZh());
+			}
+		case __COL_ZM:
+			if ( StateCU_Util.isMissing(station.getZm()) ) {
+				return null;
+			}
+			else {
+				return new Double(station.getZm());
+			}
 	}	
 
 	return "";
@@ -215,6 +213,8 @@ public int[] getColumnWidths() {
 	widths[__COL_LATITUDE] = 7;
 	widths[__COL_REGION1] = 9;
 	widths[__COL_REGION2] = 6;
+	widths[__COL_ZH] = 15;
+	widths[__COL_ZM] = 15;
 	return widths;
 }
 
@@ -222,8 +222,7 @@ public int[] getColumnWidths() {
 Returns whether the cell is editable or not.  In this model, all the cells in
 columns 3 and greater are editable.
 @param rowIndex unused.
-@param columnIndex the index of the column to check whether it is editable
-or not.
+@param columnIndex the index of the column to check whether it is editable or not.
 @return whether the cell is editable or not.
 */
 public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -260,6 +259,12 @@ public void setValueAt(Object value, int row, int col) {
 			break;
 		case __COL_REGION2:
 			station.setRegion2((String)value);
+			break;
+		case __COL_ZH:
+			station.setZh(((Double)value).doubleValue());
+			break;
+		case __COL_ZM:
+			station.setZm(((Double)value).doubleValue());
 			break;
 	}	
 

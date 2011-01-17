@@ -278,6 +278,9 @@ public static boolean isMissing ( double d )
 {	if ( (d < MISSING_DOUBLE_CEILING) && (d > MISSING_DOUBLE_FLOOR) ) {
 		return true;
 	}
+	else if ( Double.isNaN(d) ) {
+		return true;
+	}
 	else {
 		return false;
 	}
@@ -318,7 +321,7 @@ Currently this simply returns the component name, replacing " TS " with " Time S
 */
 public static String lookupTimeSeriesGraphTitle ( int comp_type )
 {	try {
-	StateCU_DataSet dataset = new StateCU_DataSet();
+		StateCU_DataSet dataset = new StateCU_DataSet();
 		return dataset.lookupComponentName ( comp_type ).replaceAll(" TS ", " Time Series " );
 	}
 	catch ( Exception e ) {
@@ -546,6 +549,12 @@ private static String lookupClimatePropValue(String propType, String field) {
 		else if (field.equalsIgnoreCase("Region2")) {
 			return "REGION2";
 		}
+		else if (field.equalsIgnoreCase("HeightHumidity")) {
+			return "HEIGHT HUMIDITY/TEMPERATURE MEASUREMENT (FT)";
+		}
+		else if (field.equalsIgnoreCase("HeightWind")) {
+			return "HEIGHT WIND MEASUREMENT (FT)";
+		}
 	}
 	else if (propType.equalsIgnoreCase("FieldNameHeader")) {	
 		if (field.equalsIgnoreCase("ID")) {
@@ -565,7 +574,13 @@ private static String lookupClimatePropValue(String propType, String field) {
 		}
 		else if (field.equalsIgnoreCase("Region2")) {
 			return "\nREGION2";
-		}	
+		}
+		else if (field.equalsIgnoreCase("HeightHumidity")) {
+			return "HEIGHT HUMIDITY/TEMPERATURE\nMEASUREMENT (FT)";
+		}
+		else if (field.equalsIgnoreCase("HeightWind")) {
+			return "HEIGHT WIND\nMEASUREMENT (FT)";
+		}
 	}	
 	else if (propType.equalsIgnoreCase("ToolTip")) {
 		if (field.equalsIgnoreCase("ID")) {
@@ -585,7 +600,13 @@ private static String lookupClimatePropValue(String propType, String field) {
 		}
 		else if (field.equalsIgnoreCase("Region2")) {
 			return "";
-		}		
+		}
+		else if (field.equalsIgnoreCase("HeightHumidity")) {
+			return "Height of humidity and temperature measurements (feet, daily analysis only)";
+		}
+		else if (field.equalsIgnoreCase("HeightWind")) {
+			return "Height of wind measurement (feet, daily analysis only)";
+		}
 	}
 	else if (propType.equalsIgnoreCase("Format")) {
 		if (field.equalsIgnoreCase("ID")) {
@@ -605,9 +626,14 @@ private static String lookupClimatePropValue(String propType, String field) {
 		}
 		else if (field.equalsIgnoreCase("Region2")) {
 			return "%-20.20s";
-		}		
+		}
+		else if (field.equalsIgnoreCase("HeightHumidity")) {
+			return "%8.2f";
+		}
+		else if (field.equalsIgnoreCase("HeightWind")) {
+			return "%8.2f";
+		}
 	}
-
 	return null;
 }
 

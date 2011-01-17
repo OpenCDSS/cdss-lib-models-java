@@ -129,8 +129,7 @@ Array of JComponents that should be disabled if nothing is selected.
 private JComponent[] __disables;
 
 /**
-Radio buttons for selecting the field on which to search through the
-JWorksheet.
+Radio buttons for selecting the field on which to search through the JWorksheet.
 */
 private JRadioButton
 	__searchIDJRadioButton,
@@ -172,9 +171,9 @@ Dataset containing the station data.
 private StateCU_DataSet __dataset;
 
 /**
-Vector of stations data in the DataSetComponent.
+List of stations data in the DataSetComponent.
 */
-private List __stationsVector;
+private List<StateCU_ClimateStation> __stationsVector;
 
 /**
 Constructor.
@@ -182,20 +181,19 @@ Constructor.
 @param dataset dataset containing data to display
 @param editable whether the display should be editable or not
 */
-public StateCU_ClimateStation_JFrame (	String title, StateCU_DataSet dataset,
-					boolean editable )
+public StateCU_ClimateStation_JFrame ( String title, StateCU_DataSet dataset, boolean editable )
 {	if ( title == null ) {
 		setTitle ( "StateCU Climate Stations" );
 	}
-	else {	setTitle ( title );
+	else {
+		setTitle ( title );
 	}
 	__currentStationIndex = -1;
 	__editable = editable;
 
 	__dataset = dataset;
-	__stationComponent = __dataset.getComponentForComponentType(
-		StateCU_DataSet.COMP_CLIMATE_STATIONS);
-	__stationsVector = (List)__stationComponent.getData();
+	__stationComponent = __dataset.getComponentForComponentType(StateCU_DataSet.COMP_CLIMATE_STATIONS);
+	__stationsVector = (List<StateCU_ClimateStation>)__stationComponent.getData();
 
 	setupGUI(0);
 }
@@ -207,21 +205,20 @@ Constructor.
 @param station StateCU_ClimateStation object to display
 @param editable whether the display should be editable or not.
 */
-public StateCU_ClimateStation_JFrame (	String title, StateCU_DataSet dataset, 
-					StateCU_ClimateStation station,
-					boolean editable)
+public StateCU_ClimateStation_JFrame ( String title, StateCU_DataSet dataset, 
+	StateCU_ClimateStation station, boolean editable)
 {	if ( title == null ) {
 		setTitle ( "StateCU Climate Stations" );
 	}
-	else {	setTitle ( title );
+	else {
+		setTitle ( title );
 	}
 	__dataset = dataset;
 	__currentStationIndex = -1;	
 	__stationsVector = new Vector();
 
-	__stationComponent = __dataset.getComponentForComponentType(
-		StateCU_DataSet.COMP_CLIMATE_STATIONS);
-	__stationsVector = (List)__stationComponent.getData();	
+	__stationComponent = __dataset.getComponentForComponentType(StateCU_DataSet.COMP_CLIMATE_STATIONS);
+	__stationsVector = (List<StateCU_ClimateStation>)__stationComponent.getData();	
 
 	String id = station.getID();
 	int index = StateCU_Util.indexOf(__stationsVector, id);
@@ -279,8 +276,7 @@ public void actionPerformed(ActionEvent e) {
 }
 
 /**
-Checks the text fields for validity before they are saved back into the
-data object.
+Checks the text fields for validity before they are saved back into the data object.
 @return true if the text fields are okay, false if not.
 */
 private boolean checkInput() {
@@ -301,14 +297,12 @@ private boolean checkInput() {
 	if (errorCount > 1) {
 		plural = "s were ";
 	}
-	String label = "The following error" + plural + "encountered "
-		+ "trying to save the record:\n";
+	String label = "The following error" + plural + "encountered trying to save the record:\n";
 	for (int i = 0; i < errorCount; i++) {
 		label += errors.get(i) + "\n";
 	}
 	// TODO SAM 2007-03-01 Why not using Message/Logging
-	new ResponseJDialog(this, 
-		"Errors encountered", label, ResponseJDialog.OK);
+	new ResponseJDialog(this, "Errors encountered", label, ResponseJDialog.OK);
 	return false;
 }
 
@@ -343,7 +337,7 @@ private void displayTSViewJFrame(String action)
 
 	PropList props = new PropList("ClimateStation");
 
-	List tslist = new Vector();
+	List<TS> tslist = new Vector();
 
 	// Get the time series to display and set plot properties if graphing.
 	// For now need to find in the lists because references to time series
@@ -353,8 +347,7 @@ private void displayTSViewJFrame(String action)
 	TS ts = null;
 	int sub = 0;
 	int pos;
-	StateCU_ClimateStation station = (StateCU_ClimateStation)
-		__stationsVector.get(__currentStationIndex);
+	StateCU_ClimateStation station = __stationsVector.get(__currentStationIndex);
 	if (__precipitationCheckBox.isSelected()) {
 		v = (List)__dataset.getComponentForComponentType(
 			StateCU_DataSet.COMP_PRECIPITATION_TS_MONTHLY).getData();
@@ -367,16 +360,14 @@ private void displayTSViewJFrame(String action)
 			++sub;
 			ts.setDataType ( "Precipitation" );
 			props.set ( "SubProduct " + sub + ".GraphType=Bar" );
-			props.set ( "SubProduct " + sub +
-				".SubTitleString=Monthly Precipitation" );
-			props.set ( "Data " + sub +
-				".1.TSID=" + ts.getIdentifierString() );
+			props.set ( "SubProduct " + sub + ".SubTitleString=Monthly Precipitation" );
+			props.set ( "Data " + sub + ".1.TSID=" + ts.getIdentifierString() );
 			tslist.add( ts );
 		}
 	}
 	if (__temperatureCheckBox.isSelected()) {
 		v = (List)__dataset.getComponentForComponentType(
-		StateCU_DataSet.COMP_TEMPERATURE_TS_MONTHLY_AVERAGE).getData();
+				StateCU_DataSet.COMP_TEMPERATURE_TS_MONTHLY_AVERAGE).getData();
 		pos = TSUtil.indexOf ( v, station.getID(), "Location", 1 );
 		if ( pos >= 0 ) {
 			ts = (TS)v.get(pos);
@@ -386,10 +377,8 @@ private void displayTSViewJFrame(String action)
 			++sub;
 			ts.setDataType ( "Temperature" );
 			props.set ( "SubProduct " + sub + ".GraphType=Line" );
-			props.set ( "SubProduct " + sub +
-				".SubTitleString=Monthly Average Temperature" );
-			props.set ( "Data " + sub +
-				".1.TSID=" + ts.getIdentifierString() );
+			props.set ( "SubProduct " + sub + ".SubTitleString=Monthly Average Temperature" );
+			props.set ( "Data " + sub + ".1.TSID=" + ts.getIdentifierString() );
 			tslist.add( ts );
 		}
 	}
@@ -399,7 +388,8 @@ private void displayTSViewJFrame(String action)
 
 	// Display the time series...
 
-	try {	TSProduct tsproduct = new TSProduct ( props, display_props );
+	try {
+		TSProduct tsproduct = new TSProduct ( props, display_props );
 		tsproduct.setTSList ( tslist );
 		new TSViewJFrame ( tsproduct );
 	}
@@ -438,8 +428,7 @@ throws Throwable {
 
 /**
 Initializes the Swing Components that should be disabled or enabled when
-stations are selected.  This should be called before the first call to
-selectTableIndex().
+stations are selected.  This should be called before the first call to selectTableIndex().
 */
 private void initializeDisables() {
 	__disables = new JComponent[0];
@@ -526,8 +515,7 @@ private void nothingSelected() {
 /**
 Processes a table selection (either via a mouse press or programmatically 
 from selectTableIndex() by writing the old data back to the data set component
-and getting the next selection's data out of the data and displaying it 
-on the form.
+and getting the next selection's data out of the data and displaying it on the form.
 @param index the index of the reservoir to display on the form.
 */
 private void processTableSelection(int index) {
@@ -543,14 +531,12 @@ private void processTableSelection(int index) {
 
 	somethingSelected();
 
-	StateCU_ClimateStation station = (StateCU_ClimateStation)
-		__stationsVector.get(__currentStationIndex);
+	StateCU_ClimateStation station = __stationsVector.get(__currentStationIndex);
 
 	__stationIDJTextField.setText(station.getID());
 	__nameJTextField.setText(station.getName());
 	StateCU_Util.checkAndSet(station.getLatitude(), __latitudeJTextField);
-	StateCU_Util.checkAndSet(station.getElevation(), 
-		__elevationJTextField);
+	StateCU_Util.checkAndSet(station.getElevation(), __elevationJTextField);
 	__region1JTextField.setText(station.getRegion1());
 	__region2JTextField.setText(station.getRegion2());
 }
@@ -574,16 +560,14 @@ private void saveCurrentRecord() {
 /**
 Saves the information associated with the currently-selected station.
 The user doesn't need to hit the return key for the gui to recognize changes.
-The info is saved each time the user selects a differents tation or pressed
-the close button.
+The info is saved each time the user selects a different station or pressed the close button.
 */
 private void saveInformation(int record) {	
 	if (!__editable || record == -1) {
 		return;
 	}
 
-	StateCU_ClimateStation station = 
-		(StateCU_ClimateStation)__stationsVector.get(record);
+	StateCU_ClimateStation station = __stationsVector.get(record);
 
 	if(!checkInput()) {
 		return;
@@ -591,10 +575,8 @@ private void saveInformation(int record) {
 		
 	station.setName(__nameJTextField.getText());
 	station.setID(__stationIDJTextField.getText());
-	station.setLatitude(
-		new Double(__latitudeJTextField.getText()).doubleValue());
-	station.setElevation(
-		new Double(__elevationJTextField.getText()).doubleValue());
+	station.setLatitude( new Double(__latitudeJTextField.getText()).doubleValue());
+	station.setElevation( new Double(__elevationJTextField.getText()).doubleValue());
 	station.setRegion1(__region1JTextField.getText());
 	station.setRegion2(__region2JTextField.getText());
 }
@@ -701,8 +683,7 @@ private void setupGUI(int index) {
 
 	int y;
 
-	PropList p = 
-		new PropList("StateCU_ClimateStation_JFrame.JWorksheet");
+	PropList p = new PropList("StateCU_ClimateStation_JFrame.JWorksheet");
 
 	p.add("JWorksheet.CellFont=Courier");
 	p.add("JWorksheet.CellStyle=Plain");
@@ -717,10 +698,8 @@ private void setupGUI(int index) {
 
 	int[] widths = null;
 	try {
-		StateCU_ClimateStation_TableModel tmw = new
-			StateCU_ClimateStation_TableModel(__stationsVector);
-		StateCU_ClimateStation_CellRenderer crw = new
-			StateCU_ClimateStation_CellRenderer(tmw);
+		StateCU_ClimateStation_TableModel tmw = new StateCU_ClimateStation_TableModel(__stationsVector);
+		StateCU_ClimateStation_CellRenderer crw = new StateCU_ClimateStation_CellRenderer(tmw);
 	
 		__worksheet = new JWorksheet(crw, tmw, p);
 
@@ -838,12 +817,9 @@ private void setupGUI(int index) {
 		__frostDatesCheckBox.setEnabled(false);
 	}		
 
-	JButton graphButton = new SimpleJButton(__BUTTON_GRAPH, __BUTTON_GRAPH,
-						this);
-	JButton tableButton = new SimpleJButton(__BUTTON_TABLE, __BUTTON_TABLE,
-						this);
-	JButton summaryButton = new SimpleJButton(__BUTTON_SUMMARY,
-						__BUTTON_SUMMARY, this);
+	JButton graphButton = new SimpleJButton(__BUTTON_GRAPH, __BUTTON_GRAPH, this);
+	JButton tableButton = new SimpleJButton(__BUTTON_TABLE, __BUTTON_TABLE, this);
+	JButton summaryButton = new SimpleJButton(__BUTTON_SUMMARY, __BUTTON_SUMMARY, this);
 	
 	JGUIUtil.addComponent(graphPanel, graphButton,
 		0, yy, 1, 1, 1, 0, 
@@ -867,8 +843,7 @@ private void setupGUI(int index) {
 	y = 7;
 	JPanel searchPanel = new JPanel();
 	searchPanel.setLayout(gb);
-	searchPanel.setBorder(BorderFactory.createTitledBorder(
-		"Search above list for:     "));
+	searchPanel.setBorder(BorderFactory.createTitledBorder("Search above list for:     "));
 		
 	JGUIUtil.addComponent(left_panel, searchPanel,
 		0, y, 4, 1, 0, 0, 
@@ -962,7 +937,7 @@ private void setupGUI(int index) {
 
 //	JGUIUtil.center(this);
 	pack();
-	setSize(730,440);
+	setSize(900,440);
 	selectTableIndex(index);
 	setVisible(true);
 
