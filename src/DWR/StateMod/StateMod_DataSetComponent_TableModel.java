@@ -193,7 +193,7 @@ public Object getValueAt(int row, int col) {
 		(__component.getComponentType() ==
 		StateMod_DataSet.COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_DAILY) ||
 		(__component.getComponentType() ==
-		StateMod_DataSet.COMP_SOIL_MOISTURE) ) {
+		StateMod_DataSet.COMP_STATECU_STRUCTURE) ) {
 		// StateCU_Data...
 		StateCU_Data data = (StateCU_Data)_data.get(row);
 		switch (col) {

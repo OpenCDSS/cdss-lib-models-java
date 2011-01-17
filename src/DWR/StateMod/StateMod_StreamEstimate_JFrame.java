@@ -1100,13 +1100,13 @@ private void setupGUI(int index) {
 	__ts_streamflow_base_monthly_JCheckBox = new JCheckBox( "Streamflow (Baseflow Monthly)");
 	__ts_streamflow_base_monthly_JCheckBox.addItemListener(this);
 	if (!__dataset.getComponentForComponentType(
-		StateMod_DataSet.COMP_STREAMESTIMATE_BASEFLOW_TS_MONTHLY).hasData()) {
+		StateMod_DataSet.COMP_STREAMESTIMATE_NATURAL_FLOW_TS_MONTHLY).hasData()) {
 		__ts_streamflow_base_monthly_JCheckBox.setEnabled(false);
 	}
 	__ts_streamflow_base_daily_JCheckBox = new JCheckBox( "Streamflow (Baseflow Daily)");
 	__ts_streamflow_base_daily_JCheckBox.addItemListener(this);
 	if (!__dataset.getComponentForComponentType(	
-		StateMod_DataSet.COMP_STREAMESTIMATE_BASEFLOW_TS_DAILY).hasData()) {
+		StateMod_DataSet.COMP_STREAMESTIMATE_NATURAL_FLOW_TS_DAILY).hasData()) {
 		__ts_streamflow_base_daily_JCheckBox.setEnabled(false);
 	}
 	

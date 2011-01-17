@@ -1935,7 +1935,7 @@ public static DateTime findEarliestDateInPOR(StateMod_DataSet dataset)
 
 	int numFiles = 8;
 	int[] files = new int[numFiles];
-	files[0] = StateMod_DataSet.COMP_STREAMGAGE_BASEFLOW_TS_MONTHLY;
+	files[0] = StateMod_DataSet.COMP_STREAMGAGE_NATURAL_FLOW_TS_MONTHLY;
 	files[1] = StateMod_DataSet.COMP_INSTREAM_DEMAND_TS_AVERAGE_MONTHLY;
 	files[2] = StateMod_DataSet.COMP_INSTREAM_DEMAND_TS_MONTHLY;
 	files[3] = StateMod_DataSet.COMP_DEMAND_TS_MONTHLY;
@@ -2009,7 +2009,7 @@ public static DateTime findLatestDateInPOR(StateMod_DataSet dataset)
 
 	int numFiles = 8;
 	int[] files = new int[numFiles];
-	files[0] = StateMod_DataSet.COMP_STREAMGAGE_BASEFLOW_TS_MONTHLY;
+	files[0] = StateMod_DataSet.COMP_STREAMGAGE_NATURAL_FLOW_TS_MONTHLY;
 	files[1] = StateMod_DataSet.COMP_INSTREAM_DEMAND_TS_AVERAGE_MONTHLY;
 	files[2] = StateMod_DataSet.COMP_INSTREAM_DEMAND_TS_MONTHLY;
 	files[3] = StateMod_DataSet.COMP_DEMAND_TS_MONTHLY;
@@ -3321,11 +3321,11 @@ public static List getTimeSeriesDataTypes ( String binary_filename,
 		// Input baseflow...
 		if ( include_input && (interval == TimeInterval.MONTH) ) {
 			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
-			StateMod_DataSet.COMP_STREAMGAGE_BASEFLOW_TS_MONTHLY) + input );
+			StateMod_DataSet.COMP_STREAMGAGE_NATURAL_FLOW_TS_MONTHLY) + input );
 		}
 		else if(include_input && (interval == TimeInterval.DAY) ) {
 			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
-			StateMod_DataSet.COMP_STREAMGAGE_BASEFLOW_TS_DAILY) + input );
+			StateMod_DataSet.COMP_STREAMGAGE_NATURAL_FLOW_TS_DAILY) + input );
 		}
 		// Input historical time series if requested...
 		if ( include_input && (interval == TimeInterval.MONTH) &&
@@ -3343,7 +3343,7 @@ public static List getTimeSeriesDataTypes ( String binary_filename,
 		if ( include_input_estimated && (interval == TimeInterval.DAY) ) {
 			// TODO - need to check daily ID on station...
 			data_types.add ( StateMod_DataSet.lookupTimeSeriesDataType (
-			StateMod_DataSet.COMP_STREAMGAGE_BASEFLOW_TS_DAILY) + "Estimated" + input);
+			StateMod_DataSet.COMP_STREAMGAGE_NATURAL_FLOW_TS_DAILY) + "Estimated" + input);
 		}
 		// Input historical time series if requested...
 		if ( include_input_estimated && (interval == TimeInterval.DAY) &&
