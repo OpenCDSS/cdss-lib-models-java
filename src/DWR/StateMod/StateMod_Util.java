@@ -4034,6 +4034,9 @@ public static boolean isMissing ( double d )
 {	if ( (d < MISSING_DOUBLE_CEILING) && (d > MISSING_DOUBLE_FLOOR) ) {
 		return true;
 	}
+	else if ( Double.isNaN(d) ) {
+		return true;
+	}
     return false;
 }
 
@@ -4294,7 +4297,7 @@ String field) {
 		}
 		else if (field.equalsIgnoreCase("ReturnAmount")) {
 			return "\nPERCENT";
-		}	
+		}
 	}	
 	else if (propType.equalsIgnoreCase("Format")) {
 		if (field.equalsIgnoreCase("DelayTableID")) {
@@ -4329,8 +4332,7 @@ Returns property values for diversions
 @param field the field for which to return the property.  
 @return the property, or if it could not be found null will be returned.
 */
-private static String lookupDiversionPropValue(String propType, 
-String field) {
+private static String lookupDiversionPropValue(String propType, String field) {
 	if (propType.equalsIgnoreCase("FieldName")) {
 		if (field.equalsIgnoreCase("ID")) {
 			return "ID";
@@ -4650,8 +4652,7 @@ Returns property values for diversion collections.
 @param field the field for which to return the property.  
 @return the property, or if it could not be found null will be returned.
 */
-private static String lookupDiversionCollectionPropValue(String propType, 
-String field) {
+private static String lookupDiversionCollectionPropValue(String propType, String field) {
 	if (propType.equalsIgnoreCase("FieldName")) {
 		if (field.equalsIgnoreCase("LocationID")) {
 			return "DIVERSION ID";
@@ -4729,8 +4730,7 @@ Returns property values for diversion return flows.
 @param field the field for which to return the property.  
 @return the property, or if it could not be found null will be returned.
 */
-private static String lookupDiversionReturnFlowPropValue(String propType, 
-String field) {
+private static String lookupDiversionReturnFlowPropValue(String propType, String field) {
 	if (propType.equalsIgnoreCase("FieldName")) {
 		if (field.equalsIgnoreCase("ID")) {
 			return "DIVERSION STATION ID";
@@ -4743,6 +4743,9 @@ String field) {
 		}
 		else if (field.equalsIgnoreCase("DelayTableID")) {
 			return "DELAY TABLE ID";
+		}
+		else if (field.equalsIgnoreCase("Comment")) {
+			return "COMMENT";
 		}
 	}
 	else if (propType.equalsIgnoreCase("FieldNameHeader")) {	
@@ -4758,6 +4761,9 @@ String field) {
 		else if (field.equalsIgnoreCase("DelayTableID")) {
 			return "\n\n\nDELAY\nTABLE ID";
 		}
+		else if (field.equalsIgnoreCase("Comment")) {
+			return "\n\n\n\nCOMMENT";
+		}
 	}	
 	else if (propType.equalsIgnoreCase("Format")) {
 		if (field.equalsIgnoreCase("ID")) {
@@ -4771,7 +4777,10 @@ String field) {
 		}
 		else if (field.equalsIgnoreCase("DelayTableID")) {
 			return "%8d";
-		}	
+		}
+		else if (field.equalsIgnoreCase("Comment")) {
+			return "%s";
+		}
 	}	
 	else if (propType.equalsIgnoreCase("ToolTip")) {
 		if (field.equalsIgnoreCase("ID")) {
@@ -4785,7 +4794,10 @@ String field) {
 		}
 		else if (field.equalsIgnoreCase("DelayTableID")) {
 			return "Delay table identifier";
-		}	
+		}
+		else if (field.equalsIgnoreCase("Comment")) {
+			return "Comment explaining return assignment";
+		}
 	}
 	return null;
 }
@@ -4890,8 +4902,7 @@ Returns property values for instream flows.
 @param field the field for which to return the property.  
 @return the property, or if it could not be found null will be returned.
 */
-private static String lookupInstreamFlowPropValue(String propType, 
-String field) {
+private static String lookupInstreamFlowPropValue(String propType, String field) {
 	if (propType.equalsIgnoreCase("FieldName")) {
 		if (field.equalsIgnoreCase("ID")) {
 			return "ID";
@@ -4995,8 +5006,7 @@ Returns property values for instream flow rights.
 @param field the field for which to return the property.  
 @return the property, or if it could not be found null will be returned.
 */
-private static String lookupInstreamFlowRightPropValue(String propType, 
-String field) {
+private static String lookupInstreamFlowRightPropValue(String propType, String field) {
 	if (propType.equalsIgnoreCase("FieldName")) {
 		if (field.equalsIgnoreCase("ID")) {
 			return "RIGHT ID";
@@ -5090,8 +5100,7 @@ Returns property values for reservoirs.
 @param field the field for which to return the property.  
 @return the property, or if it could not be found null will be returned.
 */
-private static String lookupReservoirPropValue(String propType, 
-String field) {
+private static String lookupReservoirPropValue(String propType, String field) {
 	if (propType.equalsIgnoreCase("FieldName")) {
 		if (field.equalsIgnoreCase("ID")) {
 			return "ID";
@@ -5278,8 +5287,7 @@ Returns property values for reservoir accounts.
 @param field the field for which to return the property.  
 @return the property, or if it could not be found null will be returned.
 */
-private static String lookupReservoirAccountPropValue(String propType, 
-String field) {
+private static String lookupReservoirAccountPropValue(String propType, String field) {
 	if (propType.equalsIgnoreCase("FieldName")) {
 		if (field.equalsIgnoreCase("ReservoirID")) {
 			return "RESERVOIR ID";
@@ -5381,8 +5389,7 @@ Returns property values for reservoir area caps.
 @param field the field for which to return the property.  
 @return the property, or if it could not be found null will be returned.
 */
-private static String lookupReservoirAreaCapPropValue(String propType, 
-String field) {
+private static String lookupReservoirAreaCapPropValue(String propType, String field) {
 	if (propType.equalsIgnoreCase("FieldName")) {
 		if (field.equalsIgnoreCase("ReservoirID")) {
 			return "RESERVOIR ID";
@@ -5557,8 +5564,7 @@ Returns property values for reservoir collections.
 @param field the field for which to return the property.  
 @return the property, or if it could not be found null will be returned.
 */
-private static String lookupReservoirCollectionPropValue(String propType, 
-String field) {
+private static String lookupReservoirCollectionPropValue(String propType, String field) {
 	if (propType.equalsIgnoreCase("FieldName")) {
 		if (field.equalsIgnoreCase("LocationID")) {
 			return "RESERVOIR ID";
@@ -6539,6 +6545,9 @@ private static String lookupWellDepletionPropValue(String propType, String field
 		else if (field.equalsIgnoreCase("DelayTableID")) {
 			return "DELAY TABLE ID";
 		}
+		else if (field.equalsIgnoreCase("Comment")) {
+			return "COMMENT";
+		}
 	}
 	else if (propType.equalsIgnoreCase("FieldNameHeader")) {	
 		if (field.equalsIgnoreCase("ID")) {
@@ -6552,7 +6561,10 @@ private static String lookupWellDepletionPropValue(String propType, String field
 		}
 		else if (field.equalsIgnoreCase("DelayTableID")) {
 			return "\n\nDELAY\nTABLE ID";
-		}	
+		}
+		else if (field.equalsIgnoreCase("Comment")) {
+			return "\n\n\nCOMMENT";
+		}
 	}	
 	else if (propType.equalsIgnoreCase("Format")) {
 		if (field.equalsIgnoreCase("ID")) {
@@ -6566,7 +6578,10 @@ private static String lookupWellDepletionPropValue(String propType, String field
 		}
 		else if (field.equalsIgnoreCase("DelayTableID")) {
 			return "%8d";
-		}	
+		}
+		else if (field.equalsIgnoreCase("Comment")) {
+			return "%s";
+		}
 	}	
 	else if (propType.equalsIgnoreCase("ToolTip")) {
 		if (field.equalsIgnoreCase("ID")) {
@@ -6580,7 +6595,10 @@ private static String lookupWellDepletionPropValue(String propType, String field
 		}
 		else if (field.equalsIgnoreCase("DelayTableID")) {
 			return "Delay table identifier";
-		}	
+		}
+		else if (field.equalsIgnoreCase("Comment")) {
+			return "Explanation of delay table assignment";
+		}
 	}
 	return null;
 }
@@ -6605,6 +6623,9 @@ private static String lookupWellReturnFlowPropValue(String propType, String fiel
 		else if (field.equalsIgnoreCase("DelayTableID")) {
 			return "DELAY TABLE ID";
 		}
+		else if (field.equalsIgnoreCase("Comment")) {
+			return "COMMENT";
+		}
 	}
 	else if (propType.equalsIgnoreCase("FieldNameHeader")) {	
 		if (field.equalsIgnoreCase("ID")) {
@@ -6618,7 +6639,10 @@ private static String lookupWellReturnFlowPropValue(String propType, String fiel
 		}
 		else if (field.equalsIgnoreCase("DelayTableID")) {
 			return "\n\n\nDELAY\nTABLE ID";
-		}	
+		}
+		else if (field.equalsIgnoreCase("Comment")) {
+			return "\n\n\n\nCOMMENT";
+		}
 	}	
 	else if (propType.equalsIgnoreCase("Format")) {
 		if (field.equalsIgnoreCase("ID")) {
@@ -6632,7 +6656,10 @@ private static String lookupWellReturnFlowPropValue(String propType, String fiel
 		}
 		else if (field.equalsIgnoreCase("DelayTableID")) {
 			return "%8d";
-		}	
+		}
+		else if (field.equalsIgnoreCase("Comment")) {
+			return "%s";
+		}
 	}	
 	else if (propType.equalsIgnoreCase("ToolTip")) {
 		if (field.equalsIgnoreCase("ID")) {
@@ -6646,7 +6673,10 @@ private static String lookupWellReturnFlowPropValue(String propType, String fiel
 		}
 		else if (field.equalsIgnoreCase("DelayTableID")) {
 			return "Delay table identifier";
-		}	
+		}
+		else if (field.equalsIgnoreCase("Comment")) {
+			return "Explanation of delay assignment";
+		}
 	}
 	return null;
 }
