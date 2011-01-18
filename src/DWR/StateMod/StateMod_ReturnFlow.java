@@ -556,8 +556,6 @@ throws Exception {
 
 			out.println(buffer.toString());
 		}
-		out.flush();
-		out.close();
 	}
 	finally {
 		if (out != null) {
