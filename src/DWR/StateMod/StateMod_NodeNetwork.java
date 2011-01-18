@@ -497,9 +497,9 @@ private void append_RemoveNodesUpstreamOfDownstreamNode ( String routine,
 }
 
 /**
-Creates a HydroBase_NodeNetwork from a Vector of StateMod_RiverNetworkNodes.
+Creates a HydroBase_NodeNetwork from a list of StateMod_RiverNetworkNodes.
 @param nodes the nodes from which to create a HydroBase_NodeNetwork.
-@return the HydroBase_NodeNetwork that was built.<p>
+@return the HydroBase_NodeNetwork that was built.
 TODO (JTS - 2004-07-03) should not be a static returning a method, I think ...
 */
 public static StateMod_NodeNetwork createFromStateModVector(List<StateMod_RiverNetworkNode> nodes) {
