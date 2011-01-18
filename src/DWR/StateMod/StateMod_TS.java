@@ -1937,8 +1937,7 @@ Time series with shorter periods will be filled with "MissingDV."
 @param tslist A list of time series.
 @param date1 Start of period to write.
 @param date2 End of period to write.
-@param output_format "CYR" (default) or "WYR", 
-for calendar and water years, respectively.
+@param outputYearType output year type
 @param MissingDV Value to be printed when missing values are encountered.
 @param req_precision Requested precision of output (number of digits after the decimal
 point).  The default is generally 2.  This should be set according to the
@@ -1949,7 +1948,7 @@ in the file header, or false to omit from the header.
 @exception Exception if there is an error writing the file.
 */
 private static void writeTimeSeriesList ( PrintWriter out, List tslist, 
-	DateTime date1, DateTime date2, String output_format, double MissingDV,
+	DateTime date1, DateTime date2, YearType outputYearType, double MissingDV,
 	int req_precision, boolean print_genesis )
 throws Exception
 {	String rtn	= "StateMod_TS.writeTimeSeriesList";
@@ -2060,10 +2059,10 @@ throws Exception
 	out.println ( cmnt + " StateMod time series" );
 	out.println ( cmnt + " ********************" );
 	out.println ( cmnt );
-	if ( output_format.equalsIgnoreCase( "WYR" )) {
+	if ( outputYearType == YearType.WATER) {
 		out.println ( cmnt + " Years Shown = Water Years (Oct to Sep)" );
 	}
-	else if ( output_format.equalsIgnoreCase( "IYR" )) {
+	else if ( outputYearType == YearType.NOV_TO_OCT) {
 		out.println ( cmnt + " Years Shown = Irrigation Years (Nov to Oct)" );
 	}
 	else {
@@ -2165,12 +2164,12 @@ throws Exception
 	out.println( cmnt + "EndHeader" );
 	out.println( cmnt );
 	if ( req_interval_base == TimeInterval.MONTH ) {
-		if ( output_format.equalsIgnoreCase( "WYR" )) {
+		if ( outputYearType == YearType.WATER ) {
 			out.println( cmnt + " Yr ID            Oct     Nov     Dec     Jan" +
 			"     Feb     Mar     Apr     May     Jun     Jul" +
 			"     Aug     Sep     " + year_title );
 		}
-		else if ( output_format.equalsIgnoreCase( "IYR" )) {
+		else if ( outputYearType == YearType.NOV_TO_OCT ) {
 			out.println( cmnt + " Yr ID            Nov     Dec     Jan     Feb" +
 			"     Mar     Apr     May     Jun     Jul     Aug" +
 			"     Sep     Oct     " + year_title );
@@ -2260,7 +2259,7 @@ throws Exception
 
 		// Set req_date* to the appropriate month if req_date* doesn't
 		// agree with output_format (e.g., if "WYR" requested but req_date1 != 10)
-		if ( output_format.equalsIgnoreCase ( "WYR" )) {
+		if ( outputYearType == YearType.WATER ) {
 			while ( req_date1.getMonth() != 10 ) {
 				req_date1.addMonth ( -1 );
 			}
@@ -2270,7 +2269,7 @@ throws Exception
 			year = req_date1.getYear() + 1;
 			yeartype = "WYR";
 		}
-		else if ( output_format.equalsIgnoreCase ( "IYR" )) {
+		else if ( outputYearType == YearType.NOV_TO_OCT ) {
 			while ( req_date1.getMonth() != 11 ) {
 				req_date1.addMonth ( -1 );
 			}
@@ -2303,14 +2302,14 @@ throws Exception
 	}
 	else {
 		// Average monthly...
-		if ( output_format.equalsIgnoreCase ( "WYR" )) {
+		if ( outputYearType == YearType.WATER ) {
 			req_date1.setMonth ( 10 );
 			req_date1.setYear ( 0 );
 			req_date2.setMonth ( 9 );
 			req_date2.setYear ( 1 );
 			yeartype = "WYR";
 		}
-		else if ( output_format.equalsIgnoreCase ( "IYR" )) {
+		else if ( outputYearType == YearType.NOV_TO_OCT ) {
 			req_date1.setMonth ( 11 );
 			req_date1.setYear ( 0 );
 			req_date2.setMonth ( 10 );
@@ -2600,7 +2599,7 @@ The IOUtil.getPathUsingWorkingDir() method is applied to the filename.
 @param tslist A vector of time series (MonthTS objects).
 @param date1 Start of period to write.
 @param date2 End of period to write.
-@param output_format "CYR", "WYR", or "IYR".
+@param outputYearType output year type
 @param MissingDV Value to be printed when missing values are encountered.
 @param precision Requested precision of output (number of digits after the decimal
 point).  The default is is 2.  This should be set according to the datatype
@@ -2608,7 +2607,7 @@ in calling routines and is not automatically set here.  The full width for time 
 @exception Exception if there is an error writing the file.
 */
 public static void writeTimeSeriesList ( String infile, String outfile, List<String> newcomments, List<TS> tslist, 
-	DateTime date1, DateTime date2, String output_format, double MissingDV, int precision )
+	DateTime date1, DateTime date2, YearType outputYearType, double MissingDV, int precision )
 throws Exception
 {	List<String> commentIndicators = new Vector(1);
 	commentIndicators.add ( "#" );
@@ -2621,27 +2620,30 @@ throws Exception
 
 	// Process the header from the old file...
 
-	PrintWriter out = IOUtil.processFileHeaders (
-		IOUtil.getPathUsingWorkingDir(infile), IOUtil.getPathUsingWorkingDir(outfile),
-			newcomments, commentIndicators, ignoredCommentIndicators, 0 );
-	if ( out == null ) {
-		Message.printWarning ( 3, rtn, "Error writing time series to \"" + outfile + "\"" );
-		throw new Exception ( "Error writing time series to \"" + outfile + "\"" );
+	PrintWriter out = null;
+	try {
+		out = IOUtil.processFileHeaders (
+			IOUtil.getPathUsingWorkingDir(infile), IOUtil.getPathUsingWorkingDir(outfile),
+				newcomments, commentIndicators, ignoredCommentIndicators, 0 );
+		if ( out == null ) {
+			Message.printWarning ( 3, rtn, "Error writing time series to \"" + outfile + "\"" );
+			throw new Exception ( "Error writing time series to \"" + outfile + "\"" );
+		}
+	
+		//
+		// Now write the new data...
+		//
+		if ( Message.isDebugOn ) {
+			Message.printDebug ( 1, rtn, "Calling writeTimeSeriesList" );
+		}
+		writeTimeSeriesList (out, tslist, date1, date2, outputYearType, MissingDV, precision, false );
 	}
-
-	//
-	// Now write the new data...
-	//
-	if ( Message.isDebugOn ) {
-		Message.printDebug ( 1, rtn, "Calling writeTimeSeriesList" );
+	finally {
+		if ( out != null ) {
+			out.flush();
+			out.close();
+		}
 	}
-	writeTimeSeriesList (out, tslist, date1, date2, output_format, MissingDV, precision, false );
-
-	//
-	// Success...
-	//
-	out.flush();
-	out.close();
 }
 
 /**
@@ -2741,19 +2743,12 @@ throws Exception
 	// Get the calendar type...
 
 	prop_value = props.getValue ( "CalendarType" );
-	String output_format = "CYR";	// Default
 	if ( prop_value == null ) {
 		prop_value = "" + YearType.CALENDAR;
 	}
 	YearType yearType = YearType.valueOfIgnoreCase(prop_value);
-	if ( yearType == YearType.CALENDAR ) {
-		output_format = "CYR";
-	}
-	else if ( yearType == YearType.WATER ) {
-		output_format = "WYR";
-	}
-	else if ( yearType == YearType.NOV_TO_OCT ) {
-		output_format = "IYR";
+	if ( yearType == null ) {
+		yearType = YearType.CALENDAR;
 	}
 
 	// Get the input file...
@@ -2815,11 +2810,11 @@ throws Exception
 
 	// Get new comments for the file...
 
-	List newComments = null;	// Default
+	List<String> newComments = null;	// Default
 	Object prop_contents = props.getContents ( "NewComments" );
 	if ( prop_contents != null ) {
 	    if ( prop_contents instanceof List ) {
-	        newComments = (List)prop_contents;
+	        newComments = (List<String>)prop_contents;
 	    }
 	    else if ( prop_contents instanceof String[] ) {
 	        newComments = StringUtil.toList((String [])prop_contents);
@@ -2863,31 +2858,35 @@ throws Exception
 		"\" using \"" + infile + "\" header..." );
 
 	PrintWriter out = null;
-	List commentIndicators = new Vector(1);
-	commentIndicators.add ( "#" );
-	List ignoredCommentIndicators = new Vector(1);
-	ignoredCommentIndicators.add ( "#>");
-	out = IOUtil.processFileHeaders (
-		IOUtil.getPathUsingWorkingDir(infile),
-		IOUtil.getPathUsingWorkingDir(outfile),
-		newComments, commentIndicators, ignoredCommentIndicators, 0 );
-	if ( out == null ) {
-		Message.printWarning ( 3, routine, "Error writing time series to \"" + 
-		IOUtil.getPathUsingWorkingDir(outfile) + "\"" );
-		throw new Exception ( 
-		"Error writing time series to \"" + IOUtil.getPathUsingWorkingDir(outfile) + "\"" );
+	try {
+		List<String> commentIndicators = new Vector(1);
+		commentIndicators.add ( "#" );
+		List<String> ignoredCommentIndicators = new Vector(1);
+		ignoredCommentIndicators.add ( "#>");
+		out = IOUtil.processFileHeaders (
+			IOUtil.getPathUsingWorkingDir(infile),
+			IOUtil.getPathUsingWorkingDir(outfile),
+			newComments, commentIndicators, ignoredCommentIndicators, 0 );
+		if ( out == null ) {
+			Message.printWarning ( 3, routine, "Error writing time series to \"" + 
+			IOUtil.getPathUsingWorkingDir(outfile) + "\"" );
+			throw new Exception ( 
+			"Error writing time series to \"" + IOUtil.getPathUsingWorkingDir(outfile) + "\"" );
+		}
+	
+		// Now write the new data...
+		if ( Message.isDebugOn ) {
+			Message.printDebug ( 1, routine, "Calling writeTimeSeriesList");
+		}
+		writeTimeSeriesList ( out, tslist, date1, date2, yearType,
+			MissingDV, precision, print_genesis_flag );
 	}
-
-	// Now write the new data...
-	if ( Message.isDebugOn ) {
-		Message.printDebug ( 1, routine, "Calling writeTimeSeriesList");
+	finally {
+		if ( out != null ) {
+			out.flush();
+			out.close();
+		}
 	}
-	writeTimeSeriesList ( out, tslist, date1, date2, output_format,
-		MissingDV, precision, print_genesis_flag );
-
-	// Success...
-	out.flush();
-	out.close();
 }
 
 }

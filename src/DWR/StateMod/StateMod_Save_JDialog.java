@@ -51,13 +51,12 @@ import RTi.TS.TS;
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.JScrollWorksheet;
 import RTi.Util.GUI.JWorksheet;
-import RTi.Util.GUI.ResponseJDialog;
 import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
-import RTi.Util.String.StringUtil;
+import RTi.Util.Time.YearType;
 
 /**
 This dialog displays a list of all the data set components that have been changed
@@ -580,15 +579,15 @@ throws Exception {
 		case StateMod_DataSet.COMP_WELL_PUMPING_TS_DAILY:
 		case StateMod_DataSet.COMP_WELL_PUMPING_TS_MONTHLY:
 			double missing = -999.0;
-			String year = null;
+			YearType yearType = null;
 			if (__dataset.getCyrl() == StateMod_DataSet.SM_CYR) {
-				year = "CYR";
+				yearType = YearType.CALENDAR;
 			}
 			else if (__dataset.getCyrl() == StateMod_DataSet.SM_WYR) {
-				year = "WYR";
+				yearType = YearType.WATER;
 			}
 			else if (__dataset.getCyrl() == StateMod_DataSet.SM_IYR) {
-				year = "IYR";
+				yearType = YearType.NOV_TO_OCT;
 			}
 			int precision = 2;
 
@@ -598,7 +597,7 @@ throws Exception {
 			}
 			
 			StateMod_TS.writeTimeSeriesList(oldFilename,
-				newFilename, comments, (List)data, null, null, year, missing, precision);
+				newFilename, comments, (List)data, null, null, yearType, missing, precision);
 			name = "TS (" + type + ")";
 			break;
 

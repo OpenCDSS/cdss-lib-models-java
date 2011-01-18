@@ -137,6 +137,7 @@ import RTi.Util.Message.Message;
 import RTi.Util.Message.MessageUtil;
 import RTi.Util.String.StringUtil;
 import RTi.Util.Time.TimeUtil;
+import RTi.Util.Time.YearType;
 
 /**
 This class stores all relevant data for a StateMod well.  
@@ -1156,24 +1157,17 @@ Return the system efficiency for the specified month index, where the month
 is always for calendar year (0=January).
 @param index 0-based monthly index (0=January).
 @param yeartype The year type for the well stations file (consistent with
-the control file for a full data set).  Recognized values are:
-<ol>
-<li>	"Calendar", "CYR" (Jan - Dec).</li>
-<li>	"Irrigation", "IYR" (Oct - Sep).</li>
-<li>	"Water", "WYR" (Nov - Oct).</li>
-</ol>
+the control file for a full data set).
 */
-public double getDiveff ( int index, String yeartype )
+public double getDiveff ( int index, YearType yeartype )
 {	// Adjust the index if necessary based on the year type...
 	if ( yeartype == null ) {
 		// Assume calendar.
 	}
-	else if ( yeartype.equalsIgnoreCase("Water") ||
-		yeartype.equalsIgnoreCase("WYR") ) {
+	else if ( yeartype == YearType.WATER ) {
 		index = TimeUtil.convertCalendarMonthToCustomMonth ( (index + 1), 10 ) - 1;
 	}
-	else if ( yeartype.equalsIgnoreCase("Irrigation") ||
-		yeartype.equalsIgnoreCase("IYR") ) {
+	else if ( yeartype == YearType.NOV_TO_OCT ) {
 		index = TimeUtil.convertCalendarMonthToCustomMonth ( (index + 1), 11 ) - 1;
 	}
 	return _diveff[index];
@@ -2095,25 +2089,18 @@ Set the system efficiency for a particular month.
 The efficiencies are specified with month 0 being January.
 @param index month index (0=January).
 @param diveff monthly efficiency
-@param yeartype The yeartype for the diversion stations file (consistent with
-the control file for a full data set).  Recognized values are:
-<ol>
-<li>	null, "Calendar", "CYR" (Jan - Dec).</li>
-<li>	"Irrigation", "IYR" (Oct - Sep).</li>
-<li>	"Water", "WYR" (Nov - Oct).</li>
-</ol>
+@param yeartype The year type for the diversion stations file (consistent with
+the control file for a full data set).
 */
-public void setDiveff(int index, double diveff, String yeartype )
+public void setDiveff(int index, double diveff, YearType yeartype )
 {	// Adjust the index if necessary based on the year type...
 	if ( yeartype == null ) {
 		// Assume calendar.
 	}
-	else if ( yeartype.equalsIgnoreCase("Water") ||
-		yeartype.equalsIgnoreCase("WYR") ) {
+	else if ( yeartype == YearType.WATER ) {
 		index = TimeUtil.convertCalendarMonthToCustomMonth ( (index + 1), 10 ) - 1;
 	}
-	else if ( yeartype.equalsIgnoreCase("Irrigation") ||
-		yeartype.equalsIgnoreCase("IYR") ) {
+	else if ( yeartype == YearType.NOV_TO_OCT ) {
 		index = TimeUtil.convertCalendarMonthToCustomMonth ( (index + 1), 11 ) - 1;
 	}
 	if (_diveff[index] != diveff) {

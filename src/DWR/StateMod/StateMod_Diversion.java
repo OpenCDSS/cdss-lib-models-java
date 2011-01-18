@@ -178,11 +178,12 @@ import RTi.Util.IO.IOUtil;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 import RTi.Util.Time.TimeUtil;
+import RTi.Util.Time.YearType;
 
 /**
 Object used to store diversion information.  All set routines set
 the COMP_DIVERSION_STATIONS flag dirty.  A new object will have empty non-null
-Vectors, null time series, and defaults for all other data.
+lists, null time series, and defaults for all other data.
 */
 public class StateMod_Diversion extends StateMod_Data
 implements Cloneable, Comparable, StateMod_ComponentValidator, HasGeoRecord
@@ -1314,25 +1315,18 @@ public double getDiveff(int index) {
 Return the system efficiency for the specified month index, where the month
 is always for calendar year (0=January).
 @param index 0-based monthly index (0=January).
-@param yeartype The yeartype for the diversion stations file (consistent with
-the control file for a full data set).  Recognized values are:
-<ol>
-<li>	"Calendar", "CYR" (Jan - Dec).</li>
-<li>	"Irrigation", "IYR" (Nov - Oct).</li>
-<li>	"Water", "WYR" (Oct - Sep).</li>
-</ol>
+@param yeartype The year type for the diversion stations file (consistent with
+the control file for a full data set).
 */
-public double getDiveff ( int index, String yeartype )
+public double getDiveff ( int index, YearType yeartype )
 {	// Adjust the index if necessary based on the year type...
 	if ( yeartype == null ) {
 		// Assume calendar.
 	}
-	else if ( yeartype.equalsIgnoreCase("Water") ||
-		yeartype.equalsIgnoreCase("WYR") ) {
+	else if ( yeartype == YearType.WATER ) {
 		index = TimeUtil.convertCalendarMonthToCustomMonth ((index + 1), 10 ) - 1;
 	}
-	else if ( yeartype.equalsIgnoreCase("Irrigation") ||
-		yeartype.equalsIgnoreCase("IYR") ) {
+	else if ( yeartype == YearType.NOV_TO_OCT ) {
 		index = TimeUtil.convertCalendarMonthToCustomMonth ((index + 1), 11 ) - 1;
 	}
 	return _diveff[index];
@@ -2249,23 +2243,17 @@ The efficiencies are specified with month 0 being January.
 @param index month index (0=January).
 @param diveff monthly efficiency
 @param yeartype The year type for the diversion stations file (consistent with
-the control file for a full data set).  Recognized values are:
-<ol>
-<li>	"Calendar", "CYR" (Jan - Dec).</li>
-<li>	"Irrigation", "IYR" (Nov - Oct).</li>
-<li>	"Water", "WYR" (Oct - Sep).</li>
-</ol>
+the control file for a full data set). 
 */
-public void setDiveff(int index, double diveff, String yeartype )
+public void setDiveff(int index, double diveff, YearType yeartype )
 {	// Adjust the index if necessary based on the year type...
 	if ( yeartype == null ) {
 		// Assume calendar.
 	}
-	else if ( yeartype.equalsIgnoreCase("Water") ||
-		yeartype.equalsIgnoreCase("WYR") ) {
+	else if ( yeartype == YearType.WATER ) {
 		index = TimeUtil.convertCalendarMonthToCustomMonth ((index + 1), 10 ) - 1;
 	}
-	else if ( yeartype.equalsIgnoreCase("Irrigation") ||yeartype.equalsIgnoreCase("IYR") ) {
+	else if ( yeartype == YearType.NOV_TO_OCT ) {
 		index = TimeUtil.convertCalendarMonthToCustomMonth ((index + 1), 11 ) - 1;
 	}
 	if (_diveff[index] != diveff) {
@@ -2835,8 +2823,8 @@ header (true) or to create a new file with a new header.
 filenames.
 @throws Exception if an error occurs.
 */
-public static List writeListFile(String filename, String delimiter, boolean update,
-	List data, List newComments ) 
+public static List<File> writeListFile(String filename, String delimiter, boolean update,
+	List<StateMod_Diversion> data, List<String> newComments ) 
 throws Exception
 {	String routine = "StateMod_Diversion.writeListFile";
 	int size = 0;
@@ -2844,7 +2832,7 @@ throws Exception
 		size = data.size();
 	}
 	
-	List fields = new Vector();
+	List<String> fields = new Vector();
 	fields.add("ID");
 	fields.add("Name");
 	fields.add("RiverNodeID");
@@ -2877,7 +2865,7 @@ throws Exception
 	int comp = StateMod_DataSet.COMP_DIVERSION_STATIONS;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.get(i);
+		s = fields.get(i);
 		names[i] = StateMod_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateMod_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -2890,22 +2878,22 @@ throws Exception
 	int j = 0;
 	int size2 = 0;
 	PrintWriter out = null;
-	List commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector(1);
 	commentIndicators.add ( "#" );
-	List ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector(1);
 	ignoredCommentIndicators.add ( "#>");
 	String[] line = new String[fieldCount];
 	String id = null;
 	StringBuffer buffer = new StringBuffer();
 	StateMod_Diversion div = null;
 	StateMod_ReturnFlow rf = null;
-	List returnFlows = new Vector();
-	List temp = null;
+	List<StateMod_ReturnFlow> returnFlows = new Vector();
+	List<StateMod_ReturnFlow> temp = null;
 	
 	try {
 		// Add some basic comments at the top of the file.  Do this to a copy of the
 		// incoming comments so that they are not modified in the calling code.
-		List newComments2 = null;
+		List<String> newComments2 = null;
 		if ( newComments == null ) {
 			newComments2 = new Vector();
 		}
@@ -2929,7 +2917,7 @@ throws Exception
 		out.println(buffer.toString());
 		
 		for (int i = 0; i < size; i++) {
-			div = (StateMod_Diversion)data.get(i);
+			div = data.get(i);
 			
 			line[0] = StringUtil.formatString(div.getID(), formats[0]).trim();
 			line[1] = StringUtil.formatString(div.getName(), formats[1]).trim();
@@ -2974,7 +2962,7 @@ throws Exception
 			size2 = temp.size();
 			id = div.getID();
 			for (j = 0; j < size2; j++) {
-				rf = (StateMod_ReturnFlow)temp.get(j);
+				rf = temp.get(j);
 				rf.setID(id);
 				returnFlows.add(rf);
 			}
@@ -2989,7 +2977,6 @@ throws Exception
 			out.flush();
 			out.close();
 		}
-		out = null;
 	}
 
 	int lastIndex = filename.lastIndexOf(".");
@@ -3003,7 +2990,7 @@ throws Exception
 	String collectionFilename = front + "_Collections." + end;
 	writeCollectionListFile(collectionFilename, delimiter, update, data, newComments);
 	
-	List filesWritten = new Vector();
+	List<File> filesWritten = new Vector();
 	filesWritten.add ( new File(filename) );
 	filesWritten.add ( new File(returnFlowFilename) );
 	filesWritten.add ( new File(collectionFilename) );
