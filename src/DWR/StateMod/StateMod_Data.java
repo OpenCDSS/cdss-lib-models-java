@@ -62,6 +62,7 @@
 
 package DWR.StateMod;
 
+import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 import RTi.Util.Time.DateTime;
 
@@ -199,10 +200,10 @@ public Object clone() {
 Compares this object to another StateMod_Data object based on _id, _name,
 _cgoto, _switch, _utm_x, _utm_y, in that order.  The comment is not compared.
 @param o the object to compare against.
-@return 0 if they are the same, 1 if this object is greater than the other
-object, or -1 if it is less.
+@return 0 if they are the same, 1 if this object is greater than the other object, or -1 if it is less.
 */
-public int compareTo(Object o) {
+public int compareTo(Object o)
+{
 	StateMod_Data data = (StateMod_Data)o;
 	
 	String name = data.getName();
@@ -213,38 +214,68 @@ public int compareTo(Object o) {
 	double utm_y = data.getUTMy();
 
 	int res = _id.compareTo(id);
+	// Set as needed for troubleshooting during development, especially StateMod GUI
+	boolean debug = false;//Message.isDebugOn;
 	if (res != 0) {
+		if ( debug ) {
+			Message.printDebug(1,"compareTo","smdata ID are different");
+		}
 		return res;
 	}
 	
 	res = _name.compareTo(name);
 	if (res != 0) {
+		if ( debug ) {
+			Message.printDebug(1,"compareTo","smdata name are different");
+		}
 		return res;
 	}
 	
 	res = _cgoto.compareTo(cgoto);
 	if (res != 0) {
+		if ( debug ) {
+			Message.printDebug(1,"compareTo","smdata cgoto are different, old=\"" + _cgoto + "\", new=\"" +
+				cgoto + "\"");
+		}
 		return res;
 	}
 
 	if (_switch < swhich) {
+		if ( debug ) {
+			Message.printDebug(1,"compareTo","smdata switch are different");
+		}
 		return -1;
 	}
 	else if (_switch > swhich) {
+		if ( debug ) {
+			Message.printDebug(1,"compareTo","smdata switch are different");
+		}
 		return 1;
 	}
 
-	if (_utm_x < utm_x) {	
+	if (_utm_x < utm_x) {
+		if ( debug ) {
+			Message.printDebug(1,"compareTo","smdata utmx are different");
+		}
 		return -1;
 	}
 	else if (_utm_x > utm_x) {
+		if ( debug ) {
+			Message.printDebug(1,"compareTo","smdata utmx are different");
+		}
 		return 1;
 	}
 
 	if (_utm_y < utm_y) {
+		if ( debug ) {
+			Message.printDebug(1,"compareTo","smdata utmy are different");
+		}
 		return -1;
 	}
 	else if (_utm_y > utm_y) {
+		if ( debug ) {
+			Message.printDebug(1,"compareTo","smdata utmy are different");
+		}
 		return 1;
 	}
 

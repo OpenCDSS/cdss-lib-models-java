@@ -1,20 +1,3 @@
-// ----------------------------------------------------------------------------
-// StateMod_OperationalRight_TableModel - Table model for displaying data
-//	for Operational Right-related tables
-// ----------------------------------------------------------------------------
-// Copyright:   See the COPYRIGHT file
-// ----------------------------------------------------------------------------
-// History:
-// 2003-06-24	J. Thomas Sapienza, RTi	Initial version.
-// 2003-07-29	JTS, RTi		JWorksheet_RowTableModel changed to
-//					JWorksheet_AbstractRowTableModel.
-// 2004-01-21	JTS, RTi		Removed the row count column and 
-//					changed all the other column numbers.
-// 2004-10-28	SAM, RTi		Change setValueAt() to support sort.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-// ----------------------------------------------------------------------------
-// EndHeader
-
 package DWR.StateMod;
 
 import java.util.List;
@@ -22,7 +5,8 @@ import java.util.List;
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 
 /**
-This class displays operational right data.
+This class displays operational right data, in particular the list of rights in the StateMod GUI
+editor, and also the list of intervening structures (in which case the first two columns are hidden).
 */
 public class StateMod_OperationalRight_TableModel 
 extends JWorksheet_AbstractRowTableModel {
@@ -30,15 +14,16 @@ extends JWorksheet_AbstractRowTableModel {
 /**
 Number of columns in the table model.
 */
-private final int __COLUMNS = 3;
+private final int __COLUMNS = 4;
 
 /**
 References to columns.
 */
 public final static int
-	COL_ID =		0,
-	COL_NAME =		1,
-	COL_STRUCTURE_ID =	2;
+	COL_ID = 0,
+	COL_NAME = 1,
+	COL_TYPE = 2,
+	COL_STRUCTURE_ID = 3;
 
 /**
 Whether the gui data is editable or not.
@@ -51,20 +36,19 @@ The parent diversion under which the right and return flow is stored.
 private StateMod_OperationalRight __parentOperationalRight = null;
 
 /**
-A 10-element Vector of an Operational Right's intern data.
+A 10-element list of an Operational Right's intern data (identifiers).
 */
-private List __interns = null;
+private List<String> __interns = null;
 
 /**
 Constructor.  This builds the Model for displaying the diversion data.
 @param data the data that will be displayed in the table.
-@param editable whether the gui data is editable or not.
-@throws Exception if an invalid data or dmi was passed in.
+@param editable whether the gui data are editable or not.
 */
 public StateMod_OperationalRight_TableModel(List data, boolean editable)
 throws Exception {
 	if (data == null) {
-		throw new Exception ("Invalid data Vector passed to " 
+		throw new Exception ("Invalid data list passed to " 
 			+ "StateMod_OperationalRight_TableModel constructor.");
 	}
 	_rows = data.size();
@@ -79,9 +63,10 @@ Returns the class of the data stored in a given column.
 */
 public Class getColumnClass (int columnIndex) {
 	switch (columnIndex) {
-		case COL_ID:		return String.class;
-		case COL_NAME:		return String.class;
-		case COL_STRUCTURE_ID:	return String.class;
+		case COL_ID: return String.class;
+		case COL_NAME: return String.class;
+		case COL_TYPE: return String.class;
+		case COL_STRUCTURE_ID: return String.class;
 	}
 	return String.class;
 }
@@ -100,9 +85,10 @@ Returns the name of the column at the given position.
 */
 public String getColumnName(int columnIndex) {
 	switch (columnIndex) {
-		case COL_ID:		return "ID";
-		case COL_NAME:		return "NAME";
-		case COL_STRUCTURE_ID:	return "STRUCTURE ID";
+		case COL_ID: return "ID";
+		case COL_NAME: return "NAME";
+		case COL_TYPE: return "TYPE";
+		case COL_STRUCTURE_ID: return "STRUCTURE ID";
 	}
 	return " ";
 }
@@ -115,9 +101,10 @@ the table is being displayed in the given table format.
 */
 public String getFormat(int column) {
 	switch (column) {
-		case COL_ID:		return "%-40s";
-		case COL_NAME:		return "%-40s";
-		case COL_STRUCTURE_ID:	return "%-40s";
+		case COL_ID: return "%-40s";
+		case COL_NAME: return "%-40s";
+		case COL_TYPE: return "%s";
+		case COL_STRUCTURE_ID: return "%-40s";
 	}
 	return "%8s";
 }
@@ -139,15 +126,11 @@ public Object getValueAt(int row, int col) {
 	if (_sortOrder != null) {
 		row = _sortOrder[row];
 	}
-
+	StateMod_OperationalRight smo = (StateMod_OperationalRight)_data.get(row);
 	switch (col) {
-		case COL_ID:	
-		case COL_NAME:
-			StateMod_OperationalRight smo = (StateMod_OperationalRight)_data.get(row);
-			switch (col) {
-				case COL_ID:	return smo.getID();
-				case COL_NAME: 	return smo.getName();
-			}
+		case COL_ID: return smo.getID();
+		case COL_NAME: return smo.getName();
+		case COL_TYPE: return "" + smo.getItyopr();
 		case COL_STRUCTURE_ID:
 			return "N/A";
 			//return (String)__interns.elementAt(row);		
@@ -165,8 +148,9 @@ public int[] getColumnWidths() {
 	for (int i = 0; i < __COLUMNS; i++) {
 		widths[i] = 0;
 	}
-	widths[COL_ID] = 		12;
-	widths[COL_NAME] = 		23;
+	widths[COL_ID] = 8;
+	widths[COL_NAME] = 18;
+	widths[COL_TYPE] = 4;
 	widths[COL_STRUCTURE_ID] =	15;
 
 	return widths;
@@ -176,8 +160,7 @@ public int[] getColumnWidths() {
 Returns whether the cell is editable or not.  In this model, all the cells in
 columns 3 and greater are editable.
 @param rowIndex unused.
-@param columnIndex the index of the column to check whether it is editable
-or not.
+@param columnIndex the index of the column to check whether it is editable or not.
 @return whether the cell is editable or not.
 */
 public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -203,7 +186,7 @@ public void setValueAt(Object value, int row, int col)
 
 	switch (col) {
 		case COL_STRUCTURE_ID:	
-			__interns.set(row, value);
+			__interns.set(row, (String)value);
 			__parentOperationalRight.setInterns(__interns);
 		break;
 	}
@@ -221,9 +204,9 @@ public void setParentOperationalRight(StateMod_OperationalRight parent) {
 
 /**
 The list of intern data associated with a specific Operational Right.
-@param interns a Vector of 10 elements containing an Operational Right's intern data.
+@param interns a list of 10 elements containing an Operational Right's intern data.
 */
-public void setInterns(List interns) {
+public void setInterns(List<String> interns) {
 	_rows = 10;
 	__interns = interns;
 }

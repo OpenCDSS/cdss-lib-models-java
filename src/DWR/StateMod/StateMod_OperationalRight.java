@@ -104,18 +104,15 @@ import RTi.Util.IO.IOUtil;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 
-public class StateMod_OperationalRight 
-extends StateMod_Data
+/**
+StateMod operational right (operating rule) data.
+Not all operational right types may be handled by the software.  See the the
+StateMod_OperationalRight_Metadata.getFullEditingSupported() for information.
+*/
+public class StateMod_OperationalRight extends StateMod_Data
 implements Cloneable, Comparable
-
 {
 
-/**
-Maximum handled operational right type (those that the software has been coded to handle).
-Ideally this should be the same as those listed in the operational right metadata, but some metadata may
-be added at runtime to account for rights added to the model but not the Java code.
-*/
-public static int MAX_HANDLED_TYPE = 23;
 /**
 Administration number.
 */
@@ -235,7 +232,7 @@ private int __ioEnd;
 The operational right as a list of strings (lines after right comments and prior to the comments for
 the next right.
 */
-private List<String> __rightStringsVector = new Vector();
+private List<String> __rightStringsList = new Vector();
 
 /**
 Used with monthly and annual limitation.
@@ -288,7 +285,7 @@ Clones the data object.
 public Object clone() {
 	StateMod_OperationalRight op = (StateMod_OperationalRight)super.clone();
 	op._isClone = true;
-
+	// Handle more complex types that will not automatically be cloned
 	if (_intern != null) {
 		op._intern = (String[])_intern.clone();
 	}
@@ -302,33 +299,80 @@ public Object clone() {
 	else {
 		_imonsw = null;
 	}
+	op.__commentsBeforeData = new Vector();
+	for ( String comment: __commentsBeforeData ) {
+		op.__commentsBeforeData.add(comment);
+	}
+	op.__rightStringsList = new Vector();
+	for ( String string: __rightStringsList ) {
+		op.__rightStringsList.add(string);
+	}
 
 	return op;
 }
 
 /**
-Compares this object to another StateMod_OperationalRight object.
+Compares this object to another StateMod_OperationalRight object.  Because there is so much variability
+in the operational rights data, two instances that are of the same type should have the same non-used
+extra data.  Therefore, only significant information should be compared if the types are the same.
 @param o the object to compare against.
-@return 0 if they are the same, 1 if this object is greater than the other
-object, or -1 if it is less.
+@return 0 if they are the same, 1 if this object is greater than the other object, or -1 if it is less.
 */
-public int compareTo(Object o) {
-	int res = super.compareTo(o);
+public int compareTo(Object o)
+{	int res; // result of compareTo calls
+	StateMod_OperationalRight op = (StateMod_OperationalRight)o;
+	if ( !__metadata.getFullEditingSupported() ) {
+		// Only text is used so compare the text.
+		if ( __rightStringsList.size() < op.__rightStringsList.size() ) {
+			if ( Message.isDebugOn ) {
+				Message.printDebug(1,"compareTo","op rights text size are different");
+			}
+			return -1;
+		}
+		else if ( __rightStringsList.size() > op.__rightStringsList.size() ) {
+			if ( Message.isDebugOn ) {
+				Message.printDebug(1,"compareTo","op rights text size are different");
+			}
+			return 1;
+		}
+		// Lists are the same size...
+		for ( int i = 0; i < __rightStringsList.size(); i++ ) {
+			res = __rightStringsList.get(i).compareTo(op.__rightStringsList.get(i));
+			if ( res != 0 ) {
+				if ( Message.isDebugOn ) {
+					Message.printDebug(1,"compareTo","op rights text string is different");
+				}
+				return res;
+			}
+		}
+	}
+	// Else, compare the data members...
+	res = super.compareTo(o);
 	if (res != 0) {
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"compareTo","op rights parent data are different");
+		}
 		return res;
 	}
 
-	StateMod_OperationalRight op = (StateMod_OperationalRight)o;
-
 	res = _rtem.compareTo(op._rtem);
 	if (res != 0) {
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"compareTo","op rights rtem are different");
+		}
 		return res;
 	}
 
 	if (_dumx < op._dumx) {
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"compareTo","op rights dumx are different");
+		}
 		return -1;
 	}
 	else if (_dumx > op._dumx) {
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"compareTo","op rights dumx are different");
+		}
 		return 1;
 	}
 	
@@ -520,6 +564,38 @@ public int compareTo(Object o) {
 	else if (__ioEnd > op.__ioEnd) {
 		return 1;
 	}
+	
+	if ( __commentsBeforeData.size() < op.__commentsBeforeData.size() ) {
+		return -1;
+	}
+	else if ( __commentsBeforeData.size() > op.__commentsBeforeData.size() ) {
+		return 1;
+	}
+	// Lists are the same size...
+	int compareResult;
+	for ( int i = 0; i < __commentsBeforeData.size(); i++ ) {
+		compareResult = __commentsBeforeData.get(i).compareTo(op.__commentsBeforeData.get(i));
+		if ( compareResult != 0 ) {
+			return compareResult;
+		}
+	}
+	
+	// This is only relevant if text representation is used...
+	if ( __commentsBeforeData.size() < op.__commentsBeforeData.size() ) {
+		return -1;
+	}
+	else if ( __commentsBeforeData.size() > op.__commentsBeforeData.size() ) {
+		return 1;
+	}
+	// Lists are the same size...
+	for ( int i = 0; i < __commentsBeforeData.size(); i++ ) {
+		res = __commentsBeforeData.get(i).compareTo(op.__commentsBeforeData.get(i));
+		if ( res != 0 ) {
+			return res;
+		}
+	}
+	
+	// Instances are the same
 
 	return 0;
 }
@@ -832,7 +908,7 @@ public double getOprLoss() {
  */
 public List<String> getRightStrings()
 {
-	return __rightStringsVector;
+	return __rightStringsList;
 }
 
 /**
@@ -908,11 +984,12 @@ handle.  If false, the right should be treated as strings on read.
 */
 public static boolean isRightUnderstoodByCode( int rightType )
 {
-	if ( rightType <= MAX_HANDLED_TYPE ) {
-		return true;
+	StateMod_OperationalRight_Metadata metadata = StateMod_OperationalRight_Metadata.getMetadata(rightType);
+	if ( (metadata == null) || !metadata.getFullEditingSupported()) {
+		return false;
 	}
 	else {
-		return false;
+		return true;
 	}
 }
 
@@ -1311,7 +1388,8 @@ throws Exception {
 			Message.printStatus( 2, routine, "Reading operating rule type " + type +
 					" starting at line " + linecount );
 			
-			if ( type > MAX_HANDLED_TYPE ) {
+			StateMod_OperationalRight_Metadata metadata = StateMod_OperationalRight_Metadata.getMetadata(type);
+			if ( (metadata == null) || !metadata.getFullEditingSupported() ) {
 				// The type is not known so read in as strings and set the type to negative.
 				// Most of the reading will occur at the top of the loop.
 				reading_unknown_right = true;
@@ -1627,6 +1705,40 @@ throws Exception {
 				anOprit.setRightStrings ( rightStringsList );
 				Message.printWarning ( 2, routine, "Unknown right type " + rightType + " at line " + linecount +
 						".  Reading as text to continue reading file." );
+				// Add metadata so that code in the GUI for example will be able to list the right type, but
+				// treat as text
+				StateMod_OperationalRight_Metadata metadata =
+					StateMod_OperationalRight_Metadata.getMetadata(rightType);
+				if ( metadata == null ) {
+					StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source1Array_1 =
+			    		new StateMod_OperationalRight_Metadata_SourceOrDestinationType[0];
+					StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source2Array_1 =
+						new StateMod_OperationalRight_Metadata_SourceOrDestinationType[0];
+					StateMod_OperationalRight_Metadata_SourceOrDestinationType [] destinationArray_1 =
+						new StateMod_OperationalRight_Metadata_SourceOrDestinationType[0];
+					StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_1 =
+						new StateMod_OperationalRight_Metadata_DestinationLocationType[0];
+					StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_1 =
+						new StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType[0];
+					StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_1 =
+						new StateMod_OperationalRight_Metadata_DiversionType[0];
+					StateMod_OperationalRight_Metadata.getAllMetadata().add(
+						new StateMod_OperationalRight_Metadata( rightType, false,
+							"Unknown Type",
+							StateMod_OperationalRight_Metadata_RuleType.NA,
+							source1Array_1,
+							source2Array_1,
+							StateMod_OperationalRight_Metadata_Source2AllowedType.NA,
+							destinationArray_1,
+							destinationLocationArray_1,
+							StateMod_OperationalRight_Metadata_DeliveryMethodType.NA,
+							StateMod_OperationalRight_Metadata_CarrierAllowedType.NA,
+							false,
+							associatedPlanAllowedArray_1,
+							diversionTypeArray_1,
+							StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
+							"" ) );
+				}
 				continue;
 			}
 
@@ -1814,6 +1926,9 @@ public void setCdivtyp(String cdivtyp) {
 	if ( (cdivtyp != null) && !cdivtyp.equals(__cdivtyp) ) {
 		__cdivtyp = cdivtyp;
 		setDirty ( true );
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"","Setting cdivtyp dirty");
+		}
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS,true);
 		}
@@ -1827,6 +1942,9 @@ public void setCiopde(String ciopde) {
 	if ( (ciopde != null) && !ciopde.equals(_ciopde) ) {
 		_ciopde = ciopde;
 		setDirty ( true );
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"","Setting ciopde dirty");
+		}
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS,true);
 		}
@@ -1840,6 +1958,9 @@ public void setCiopso1(String ciopso1) {
 	if ( (ciopso1 != null) && !ciopso1.equals(_ciopso1)) {
 		_ciopso1 = ciopso1;
 		setDirty ( true );
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"","Setting ciopso1 dirty");
+		}
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
@@ -1853,6 +1974,9 @@ public void setCiopso2(String ciopso2) {
 	if ( (ciopso2 != null) && !ciopso2.equals(_ciopso2)) {
 		_ciopso2 = ciopso2;
 		setDirty ( true );
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"","Setting ciopso2 dirty");
+		}
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
@@ -1866,6 +1990,9 @@ public void setCiopso3(String ciopso3) {
 	if ( (ciopso3 != null) && !ciopso3.equals(_ciopso3)) {
 		_ciopso3 = ciopso3;
 		setDirty ( true );
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"","Setting ciopso3 dirty");
+		}
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
@@ -1879,6 +2006,9 @@ public void setCiopso4(String ciopso4) {
 	if ( (ciopso4 != null) && !ciopso4.equals(_ciopso4)) {
 		_ciopso4 = ciopso4;
 		setDirty ( true );
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"","Setting ciopso4 dirty");
+		}
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
@@ -1892,6 +2022,9 @@ public void setCiopso5(String ciopso5) {
 	if ( (ciopso5 != null) && !ciopso5.equals(_ciopso5)) {
 		_ciopso5 = ciopso5;
 		setDirty ( true );
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"","Setting ciopso5 dirty");
+		}
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
@@ -1908,6 +2041,10 @@ public void setCommentsBeforeData(List<String> commentsBeforeData)
 	List<String> commentsBeforeData0 = getCommentsBeforeData();
 	if ( size != commentsBeforeData0.size() ) {
 		dirty = true;
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"","commentsBeforeData old size=" + commentsBeforeData0.size() +
+				" new size=" + size );
+		}
 	}
 	else {
 		// Lists are the same size and there may not have been any changes
@@ -1915,6 +2052,10 @@ public void setCommentsBeforeData(List<String> commentsBeforeData)
 		for ( int i = 0; i < size; i++ ) {
 			if ( !commentsBeforeData.get(i).equals(commentsBeforeData0.get(i))) {
 				dirty = true;
+				if ( Message.isDebugOn ) {
+					Message.printDebug(1,"","commentsBeforeData old string \"" + commentsBeforeData0.get(i) +
+						"\" is different from new string \"" + commentsBeforeData.get(i) + "\"" );
+				}
 				break;
 			}
 		}
@@ -1923,6 +2064,9 @@ public void setCommentsBeforeData(List<String> commentsBeforeData)
 		// Something was different so set the comments and change the dirty flag
 		__commentsBeforeData = commentsBeforeData;
 		setDirty ( true );
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"","Setting commentsBeforeData dirty");
+		}
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS,true);
 		}
@@ -1936,6 +2080,9 @@ public void setCreuse(String creuse) {
 	if ( (creuse != null) && !creuse.equals(__creuse) ) {
 		__creuse = creuse;
 		setDirty ( true );
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"","Setting creuse dirty");
+		}
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS,true);
 		}
@@ -1949,6 +2096,9 @@ public void setCx(String cx) {
 	if ( (cx != null) && !cx.equals(__cx) ) {
 		__cx = cx;
 		setDirty ( true );
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"","Setting cx dirty");
+		}
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS,true);
 		}
@@ -1962,6 +2112,9 @@ public void setDumx(int dumx) {
 	if (dumx != _dumx) {
 		_dumx = dumx;
 		setDirty ( true );
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"","Setting dumx dirty");
+		}
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
@@ -1993,6 +2146,9 @@ public void setIoBeg(int ioBeg) {
 	if (ioBeg != __ioBeg) {
 		__ioBeg = ioBeg;
 		setDirty ( true );
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"","Setting ioBeg dirty");
+		}
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
@@ -2022,6 +2178,9 @@ public void setIoEnd(int ioEnd) {
 	if (ioEnd != __ioEnd) {
 		__ioEnd = ioEnd;
 		setDirty ( true );
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"","Setting ioEnd dirty");
+		}
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
@@ -2051,6 +2210,9 @@ public void setImonsw(int index, int imonsw) {
 	if (imonsw != _imonsw[index]) {
 		_imonsw[index] = imonsw;
 		setDirty ( true );
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"","Setting imonsw[" + index + "] dirty");
+		}
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
@@ -2086,6 +2248,9 @@ public void setIntern(int index, String intern, boolean adjustDumx) {
 		// Only set if not already set - otherwise will trigger dirty flag
 		_intern[index] = intern;
 		setDirty ( true );
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"","Setting intern[" + index + "] dirty");
+		}
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
@@ -2122,6 +2287,9 @@ public void setIopdes(String iopdes) {
 	if ( (iopdes != null) && !iopdes.equals(_iopdes) ) {
 		_iopdes = iopdes;
 		setDirty ( true );
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"","Setting iopdes dirty");
+		}
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
@@ -2142,6 +2310,9 @@ public void setIopsou1(String iopsou1) {
 	if ( (iopsou1 != null) && !iopsou1.equals(_iopsou1) ) {
 		_iopsou1 = iopsou1;
 		setDirty ( true );
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"","Setting iopsou1 dirty");
+		}
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
@@ -2155,6 +2326,9 @@ public void setIopsou2(String iopsou2) {
 	if ( (iopsou2 != null) && !iopsou2.equals(_iopsou2) ) {
 		_iopsou2 = iopsou2;
 		setDirty ( true );
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"","Setting iopsou2 dirty");
+		}
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
@@ -2168,6 +2342,9 @@ public void setIopsou3(String iopsou3) {
 	if ( (iopsou3 != null) && !iopsou3.equals(_iopsou3) ) {
 		_iopsou3 = iopsou3;
 		setDirty ( true );
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"","Setting iopsou3 dirty");
+		}
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
@@ -2181,6 +2358,9 @@ public void setIopsou4(String iopsou4) {
 	if ( (iopsou4 != null) && !iopsou4.equals(_iopsou4) ) {
 		_iopsou4 = iopsou4;
 		setDirty ( true );
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"","Setting iopsou4 dirty");
+		}
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
@@ -2194,6 +2374,9 @@ public void setIopsou5(String iopsou5) {
 	if ( (iopsou5 != null) && !iopsou5.equals(_iopsou5) ) {
 		_iopsou5 = iopsou5;
 		setDirty ( true );
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"","Setting iopsou5 dirty");
+		}
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
@@ -2205,8 +2388,11 @@ Set the ityopr
 */
 public void setItyopr(int ityopr) {
 	if (ityopr != __ityopr) {
-		__ityopr = ityopr;
 		setDirty ( true );
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"","Setting ityopr dirty, old=" + __ityopr + ", new =" + ityopr );
+		}
+		__ityopr = ityopr;
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
@@ -2239,6 +2425,9 @@ public void setOprLimit(double oprLimit) {
 	if (oprLimit != __oprLimit) {
 		__oprLimit = oprLimit;
 		setDirty ( true );
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"","Setting oprLimit dirty");
+		}
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
@@ -2252,6 +2441,9 @@ public void setOprLoss(double oprLoss) {
 	if (oprLoss != __oprLoss) {
 		__oprLoss = oprLoss;
 		setDirty ( true );
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"","Setting oprLoss dirty");
+		}
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
@@ -2265,6 +2457,9 @@ public void setQdebt(double qdebt) {
 	if (qdebt != _qdebt) {
 		_qdebt = qdebt;
 		setDirty ( true );
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"","Setting qdebt dirty");
+		}
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
@@ -2294,6 +2489,9 @@ public void setQdebtx(double qdebtx) {
 	if (qdebtx != _qdebtx) {
 		_qdebtx = qdebtx;
 		setDirty ( true );
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"","Setting qdebtx dirty");
+		}
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
@@ -2319,9 +2517,42 @@ public void setQdebtx(String qdebtx) {
 /**
 Set the operating rule strings, when read as text because an unknown right type.
 */
-private void setRightStrings ( List<String> right_strings_Vector )
-{
-	__rightStringsVector = right_strings_Vector;
+public void setRightStrings ( List<String> rightStringList )
+{	boolean dirty = false;
+	int size = rightStringList.size();
+	List<String> rightStringList0 = getRightStrings();
+	if ( size != rightStringList0.size() ) {
+		dirty = true;
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"","rightStringList old size=" + rightStringList0.size() +
+				" new size=" + size );
+		}
+	}
+	else {
+		// Lists are the same size and there may not have been any changes
+		// Need to check each string in the data
+		for ( int i = 0; i < size; i++ ) {
+			if ( !rightStringList.get(i).equals(rightStringList0.get(i))) {
+				dirty = true;
+				if ( Message.isDebugOn ) {
+					Message.printDebug(1,"","commentsBeforeData old string \"" + rightStringList0.get(i) +
+						"\" is different from new string \"" + rightStringList.get(i) + "\"" );
+				}
+				break;
+			}
+		}
+	}
+	if ( dirty ) {
+		// Something was different so set the strings and change the dirty flag
+		__rightStringsList = rightStringList;
+		setDirty ( true );
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"","Setting rightStringList dirty");
+		}
+		if ( !_isClone && _dataset != null ) {
+			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS,true);
+		}
+	}
 }
 
 /**
@@ -2331,6 +2562,9 @@ public void setRtem(String rtem) {
 	if (!_rtem.equals(rtem)) {
 		_rtem = rtem;
 		setDirty ( true );
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"","Setting rtem dirty");
+		}
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
@@ -2344,6 +2578,9 @@ public void setSjmina(double sjmina) {
 	if (sjmina != _sjmina) {
 		_sjmina = sjmina;
 		setDirty ( true );
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"","Setting sjmina dirty");
+		}
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
@@ -2373,6 +2610,9 @@ public void setSjrela(double sjrela) {
 	if (sjrela != _sjrela) {
 		_sjrela = sjrela;
 		setDirty ( true );
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"","Setting sjrela dirty");
+		}
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
@@ -2698,12 +2938,12 @@ throws Exception {
 		out.println(cmnt);*/
 		
 		out.println(cmnt );
-		out.println(cmnt + "           OPERATING RULE TYPES (types 1 through " + MAX_HANDLED_TYPE +
-			" are understood by the software that wrote this file)" );
+		out.println(cmnt + "           OPERATING RULE TYPES (types that are not fully handled are read as text by the software)" );
 		out.println(cmnt + "  =======================================================================================================================" );
 		for ( StateMod_OperationalRight_Metadata metadata: StateMod_OperationalRight_Metadata.getAllMetadata() ) {
 			out.println(cmnt + "	" + StringUtil.formatString(metadata.getRightTypeNumber(),"%2d") +
-				"   " + metadata.getRightTypeName() );
+				"   " + metadata.getRightTypeName() + " (fully handled=" +
+				(metadata.getFullEditingSupported() ? "yes" : "no") + ")");
 		}
 		out.println(cmnt + "");
 		out.println(cmnt + "            GUIDE TO COLUMN ENTRIES (see StateMod documentation for details, using variable names)" );
@@ -2725,7 +2965,7 @@ throws Exception {
 		out.println(cmnt + "   Sou2 ID    ciopso(2)  ID of Plan where reusable storage water or reusable ditch credits is accounted" );
 		out.println(cmnt + "   Sou2 Ac    iopsou(2)  Percentage of Plan supplies available for operation" );
 		out.println(cmnt + "   Type       ityopr     Rule type corresponding with definitions in StateMod documentation (see list above" );	
-		out.println(cmnt + "                         Note that this data processing software explicitly understands up to type " + MAX_HANDLED_TYPE );
+		out.println(cmnt + "                         Note that this data processing software may not explicitly understand all types." );
 		out.println(cmnt + "                         Other rule types are read as text assuming that each operating rule has comments above the data." );
 		out.println(cmnt + "   ReusePlan  creuse     ID of Plan where reusable return flows or diversions to storage are accounted" );
 		out.println(cmnt + "   Div Type   cdivtyp    'Diversion' indicates pro-rata diversion of source water right priority or exchange of reusable credits to Dest1" );

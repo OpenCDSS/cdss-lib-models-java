@@ -107,10 +107,11 @@ The worksheet displayed in the gui.
 */
 private JWorksheet __worksheet;
 
-private boolean __something_changed = false;	// Indicates if a file name
-						// changed.  This is used to
-						// know whether to show the user
-						// more information at Close.
+/**
+Indicates if a file name changed.  This is used to know whether to show the user
+more information at Close.
+*/
+private boolean __something_changed = false;
 
 /**
 GUI buttons.
@@ -126,10 +127,11 @@ The dataset for which to display the data set components in the gui.
 */
 private StateMod_DataSet __dataset;
 
-private StateMod_DataSet __dataset_copy;	// This will be edited in the
-						// worksheet and will be
-						// committed to __dataset only
-						// when apply occurs.
+/**
+This will be edited in the worksheet and will be committed to __dataset only when apply occurs.
+*/
+private StateMod_DataSet __dataset_copy;
+
 /**
 The dataset's window manager.
 */
@@ -185,7 +187,7 @@ public void actionPerformed(ActionEvent ae) {
 		}
 	}
 	else if (action.equals(__BUTTON_HELP)) {
-		// REVISIT HELP(JTS - 2003-09-10)
+		// TODO HELP(JTS - 2003-09-10)
 	}
 }
 
@@ -195,12 +197,10 @@ private String browseForFile() {
 
 	JFileChooser fc = JFileChooserFactory.createJFileChooser ( directory );
 
-	String compName = __tableModel.getComponentName(
-		__worksheet.getSelectedRow());
+	String compName = __tableModel.getComponentName(__worksheet.getSelectedRow());
 	
 	String ext = __dataset.getComponentFileExtension(
-		__tableModel.getComponentTypeForRow(
-		__worksheet.getSelectedRow()));
+		__tableModel.getComponentTypeForRow(__worksheet.getSelectedRow()));
 
 	fc.setDialogTitle("Select " + compName + " File");
 	SimpleFileFilter ff = new SimpleFileFilter(ext, compName + " files");
@@ -226,10 +226,8 @@ private String browseForFile() {
 }
 
 /**
-Checks the text fields for validity before they are saved back into the
-data object.
-@return 0 if the text fields are okay, 1 if fatal errors exist, and -1 if only
-non-fatal errors exist.
+Checks the text fields for validity before they are saved back into the data object.
+@return 0 if the text fields are okay, 1 if fatal errors exist, and -1 if only non-fatal errors exist.
 */
 private int checkInput()
 {	String routine = "StateMod_Response_JFrame.checkInput";
@@ -245,17 +243,12 @@ private int checkInput()
 	for ( int i = 0; i < size; i++ ) {
 		// Get the component corresponding to the line.
 		comp = __dataset_copy.getComponentForComponentType (
-			((StateMod_Response_TableModel)__worksheet.getModel()).
-			getComponentTypeForRow ( i ) );
+			((StateMod_Response_TableModel)__worksheet.getModel()).getComponentTypeForRow ( i ) );
 		file_name = ((String)
-			__worksheet.getValueAt(i,
-			StateMod_Response_TableModel.COL_NAME )).trim();
-		if (	file_name.equalsIgnoreCase(
-			__dataset_copy.BLANK_FILE_NAME) && comp.hasData() ) {
-			if (	comp.getComponentType() !=
-				StateMod_DataSet.COMP_NETWORK ) {
-				warning += "\n" + comp.getComponentName() +
-				" has data but no file name is specified.";
+			__worksheet.getValueAt(i, StateMod_Response_TableModel.COL_NAME )).trim();
+		if ( file_name.equalsIgnoreCase(__dataset_copy.BLANK_FILE_NAME) && comp.hasData() ) {
+			if ( comp.getComponentType() != StateMod_DataSet.COMP_NETWORK ) {
+				warning += "\n" + comp.getComponentName() + " has data but no file name is specified.";
 				++fatal_count;
 			}
 		}
@@ -266,43 +259,23 @@ private int checkInput()
 				continue;
 			}
 			comp2 = __dataset_copy.getComponentForComponentType (
-				((StateMod_Response_TableModel)
-				__worksheet.getModel()).
-				getComponentTypeForRow ( j ) );
-			file_name2 = ((String)
-				__worksheet.getValueAt(j,
-				StateMod_Response_TableModel.COL_NAME)).
-				trim();
-			if (	file_name2.equalsIgnoreCase(file_name) &&
-				!file_name2.equalsIgnoreCase(
-				__dataset_copy.BLANK_FILE_NAME) ) {
-				// Stream gage and stream estimate stations can
-				// be the same file name...
-				if (	((comp.getComponentType() ==
-					StateMod_DataSet.
-					COMP_STREAMGAGE_STATIONS) &&
-					(comp2.getComponentType() ==
-					StateMod_DataSet.
-					COMP_STREAMESTIMATE_STATIONS)) ||
-					((comp.getComponentType() ==
-					StateMod_DataSet.
-					COMP_STREAMESTIMATE_STATIONS) &&
-					(comp2.getComponentType() ==
-					StateMod_DataSet.
-					COMP_STREAMGAGE_STATIONS)) ) {
-					// REVISIT SAM 2006-03-04
-					// Need to finalize how the gage and
-					// estimate files are handled.
+				((StateMod_Response_TableModel)__worksheet.getModel()).getComponentTypeForRow ( j ) );
+			file_name2 = ((String)__worksheet.getValueAt(j, StateMod_Response_TableModel.COL_NAME)).trim();
+			if ( file_name2.equalsIgnoreCase(file_name) &&
+				!file_name2.equalsIgnoreCase(__dataset_copy.BLANK_FILE_NAME) ) {
+				// Stream gage and stream estimate stations can be the same file name...
+				if ( ((comp.getComponentType() == StateMod_DataSet.COMP_STREAMGAGE_STATIONS) &&
+					(comp2.getComponentType() == StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS)) ||
+					((comp.getComponentType() == StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS) &&
+					(comp2.getComponentType() == StateMod_DataSet.COMP_STREAMGAGE_STATIONS)) ) {
+					// TODO SAM 2006-03-04 Need to finalize how the gage and estimate files are handled.
 					//&&
 					//!__dataset_copy.isFreeFormat() ) {
-					// No need for a warning because the
-					// single file is split internally when
-					// read...
+					// No need for a warning because the single file is split internally when read...
 				}
-				else {	warning += "\n" +
-					comp.getComponentName() +
-					" file name (" + file_name +
-					") is the same as another component.";
+				else {
+					warning += "\n" + comp.getComponentName() +
+					" file name (" + file_name + ") is the same as another component.";
 					++fatal_count;
 				}
 				// No need to look at more files...
@@ -312,57 +285,50 @@ private int checkInput()
 		// Compare against the original copy...
 		// Warn that time series file names cannot be changed from the
 		// original because time series were not read in...
-		comp2 = __dataset.getComponentForComponentType (
-			comp.getComponentType() );
+		comp2 = __dataset.getComponentForComponentType ( comp.getComponentType() );
 		file_name2 = comp2.getDataFileName();
-		if (	!file_name.equals(file_name2) &&
-			!__dataset.areTSRead() &&
-			__dataset.isDynamicTSComponent(
-			comp.getComponentType()) ) {
-			warning += "\n" +
-			comp.getComponentName() +
-			" time series were not read in - " +
-			"cannot change file name.";
+		if ( !file_name.equals(file_name2) &&
+			!__dataset.areTSRead() && __dataset.isDynamicTSComponent(comp.getComponentType()) ) {
+			warning += "\n" + comp.getComponentName() +
+			" time series were not read in - cannot change file name.";
 			++fatal_count;
 		}
 	}
 
 	if ( warning.length() > 0 ) {
-		warning = "\nResponse file:  " +
-			warning + "\nCorrect or Cancel.";
+		warning = "\nResponse file:  " + warning + "\nCorrect or Cancel.";
 		Message.printWarning ( 1, routine, warning, this );
 		if ( fatal_count > 0 ) {
 			// Fatal errors...
 			return 1;
 		}
-		else {	// Nonfatal errors...
+		else {
+			// Nonfatal errors...
 			return -1;
 		}
 	}
-	else {	// No errors...
+	else {
+		// No errors...
 		return 0;
 	}
 }
 
 /**
-Closes the window, using the data set window manager to handle all the closing
-operations.
+Closes the window, using the data set window manager to handle all the closing operations.
 */
 protected void closeWindow()
 {	if ( __something_changed ) {
 		new ResponseJDialog(this,
 			"Response File Contents",
-			"Changing file names here will not actually save " +
-			"files.\n" +
-			"Use the File...Save menu to save files, which will " +
-			"reflect data and file name changes.",
+			"Changing file names here will not actually save files.\n" +
+			"Use the File...Save menu to save files, which will reflect data and file name changes.",
 			ResponseJDialog.OK);
 	}
 	if ( __dataset_wm != null ) {
-		__dataset_wm.closeWindow (
-			StateMod_DataSet_WindowManager.WINDOW_RESPONSE);
+		__dataset_wm.closeWindow (StateMod_DataSet_WindowManager.WINDOW_RESPONSE);
 	}
-	else {	JGUIUtil.close ( this );
+	else {
+		JGUIUtil.close ( this );
 	}
 }
 
@@ -420,11 +386,8 @@ private boolean saveData ()
 	int comp_type;
 	for ( int i = 0; i < size; i++ ) {
 		// Get the component corresponding to the line...
-		comp_type = ((StateMod_Response_TableModel)__worksheet.
-				getModel()).getComponentTypeForRow ( i );
-		file_name = ((String)
-			__worksheet.getValueAt(i,
-			StateMod_Response_TableModel.COL_NAME )).trim();
+		comp_type = ((StateMod_Response_TableModel)__worksheet.getModel()).getComponentTypeForRow ( i );
+		file_name = ((String)__worksheet.getValueAt(i, StateMod_Response_TableModel.COL_NAME )).trim();
 		// Get the component from the original data...
 		comp2 =__dataset.getComponentForComponentType ( comp_type);
 		file_name2 = comp2.getDataFileName();
@@ -438,8 +401,7 @@ private boolean saveData ()
 	}
 
 	if (dirty) {
-		__dataset.getComponentForComponentType(StateMod_DataSet.COMP_RESPONSE)
-			.setDirty(true);
+		__dataset.getComponentForComponentType(StateMod_DataSet.COMP_RESPONSE).setDirty(true);
 	}
 	
 	return true;
@@ -460,11 +422,10 @@ private void setupGUI() {
 
 	int[] widths = null;
 	JScrollWorksheet jsw = null;
-	try {	// Operate on a copy of the table model...
-		__tableModel = new
-			StateMod_Response_TableModel(__dataset_copy);
-		StateMod_Response_CellRenderer crr = new
-			StateMod_Response_CellRenderer(__tableModel);
+	try {
+		// Operate on a copy of the table model...
+		__tableModel = new StateMod_Response_TableModel(__dataset_copy);
+		StateMod_Response_CellRenderer crr = new StateMod_Response_CellRenderer(__tableModel);
 	
 		jsw = new JScrollWorksheet(crr, __tableModel, p);
 		__worksheet = jsw.getJWorksheet();
@@ -496,15 +457,13 @@ private void setupGUI() {
 	int y = 0;
 	JGUIUtil.addComponent(top_panel, 
 		new JLabel("To rename a data set component, select a row and "
-			+ "either type a new file name or use the Browse "
-			+ "button."),
+			+ "either type a new file name or use the Browse button."),
 		0, y++, 2, 1, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.NORTHWEST);
 
 	JGUIUtil.addComponent(top_panel, 
 		new JLabel("If ARE DATA MODIFIED? is YES, data for the "
-			+ "component have been modified byt the file has not "
-			+ "been written"),
+			+ "component have been modified by the file has not been written"),
 		0, y++, 2, 1, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.NORTHWEST);
 		
@@ -520,8 +479,7 @@ private void setupGUI() {
 		0, y++, 2, 1, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.NORTHWEST);
 
-	JGUIUtil.addComponent(top_panel, new JLabel("Data set base name"
-		+ " (from *.rsp):  "),
+	JGUIUtil.addComponent(top_panel, new JLabel("Data set base name (from *.rsp):  "),
 		0, y, 1, 1, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.NORTHEAST);
 	JGUIUtil.addComponent(top_panel, new JLabel(__dataset.getBaseName()),
@@ -547,8 +505,7 @@ private void setupGUI() {
 	button_panel.add(__browse_JButton);
 	__apply_JButton = new SimpleJButton(__BUTTON_APPLY, this);
 	//__apply_JButton.setEnabled(false);
-	__apply_JButton.setToolTipText("Set the file names.  File...Save is "
-		+ "still required to save files.");
+	__apply_JButton.setToolTipText("Set the file names.  File...Save is still required to save files.");
 	button_panel.add(__apply_JButton);
 	__cancel_JButton = new SimpleJButton(__BUTTON_CANCEL, this);
 	__cancel_JButton.setToolTipText("Cancel file name changes.");
@@ -570,8 +527,7 @@ private void setupGUI() {
 	pack();
 
 	if ( __dataset_wm != null ) {
-		__dataset_wm.setWindowOpen (
-			StateMod_DataSet_WindowManager.WINDOW_RESPONSE, this );
+		__dataset_wm.setWindowOpen ( StateMod_DataSet_WindowManager.WINDOW_RESPONSE, this );
 	}
 
 	setSize(700, 500);
@@ -591,14 +547,13 @@ Responds to Window Activated events; does nothing.
 public void windowActivated(WindowEvent event) {
 	if (IOUtil.testing()) {
 		__dataset_copy = new StateMod_DataSet (__dataset, false);
-	try {	
-		__tableModel = new
-			StateMod_Response_TableModel(__dataset_copy);
-		__worksheet.setModel(__tableModel);
-	}
-	catch (Exception e) {
-		e.printStackTrace();
-	}
+		try {	
+			__tableModel = new StateMod_Response_TableModel(__dataset_copy);
+			__worksheet.setModel(__tableModel);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }
 
@@ -609,8 +564,7 @@ Responds to Window closed events; does nothing.
 public void windowClosed(WindowEvent event) {}
 
 /**
-Responds to Window closing events; closes the window and marks it closed
-in StateMod_GUIUtil.
+Responds to Window closing events; closes the window and marks it closed in StateMod_GUIUtil.
 @param event the WindowEvent that happened.
 */
 public void windowClosing(WindowEvent event) {
@@ -647,4 +601,4 @@ Responds to Window opening events; does nothing.
 */
 public void windowOpening(WindowEvent event) {}
 
-} // End StateMod_Response_JFrame
+}

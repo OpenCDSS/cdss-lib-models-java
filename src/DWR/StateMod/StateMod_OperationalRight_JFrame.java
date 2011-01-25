@@ -1,73 +1,6 @@
-//------------------------------------------------------------------------------
-// StateMod_OperationalRight_JFrame - JFrame to edit the operational rights 
-//	information.
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-// 
-// 12 Jan 1998	Catherine E. 		Created initial version of class
-//		Nutting-Lane, RTi
-// 22 Sep 1998	CEN, RTi		Changed list to multilist
-// 08 Mar 2000	CEN, Rti		Added radio button to search
-// 01 Apr 2001	Steven A. Malers, RTi	Change GUI to JGUIUtil.  Add finalize().
-//					Remove import *.
-// 15 Aug 2001	SAM, RTi		Select the first item automatically.
-//------------------------------------------------------------------------------
-// 2003-06-24	J. Thomas Sapienza, RTi	Initial Swing version.
-// 2003-07-15	JTS, RTi		* Added checkInput() framework for 
-//					validating user input prior to the 
-//					values being saved.
-// 					* Added status bar.
-//					* Changed to use new dataset design.
-// 2003-07-16	JTS, RTi		Added constructor that allows an
-//					operational right to be initially
-//					selected.
-// 2003-07-17	JTS, RTI		Change so that constructor takes a 
-//					boolean that says whether the form's
-//					data can be modified.
-// 2003-07-23	JTS, RTi		Updated JWorksheet code following
-//					JWorksheet revisions.
-// 2003-08-03	SAM, RTi		* isMissing(), indexOf() methods are now
-//					  in StateMod_Util.
-//					* Force title parameter in constructor.
-// 2003-08-16	SAM, RTi		Change the window type to
-//					WINDOW_OPERATIONAL_RIGHT.
-// 2003-08-25	SAM, RTi		Change global operational right types
-//					array from oprightsOptions to TYPES.
-// 2003-08-26	SAM, RTi		Enable StateMod_DataSet_WindowManager.
-// 2003-08-27	JTS, RTi		Added selectID() to select an ID 
-//					on the worksheet from outside the GUI.
-// 2003-09-16	SAM, RTi		Update becuase of changes in
-//					StateMod_OperationalRight to handle
-//					types up to 23.
-// 2003-09-17	JTS, RTi		Rule type option now displays the
-//					the value of the rule.
-// 2003-09-17	JTS, RTI		Began implementing new code for
-//					destination, source and constraint
-//					boxes.
-// 2003-09-18	JTS, RTI		* Continued work on the destination, 
-//					  source, and constaint boxes.
-//					* Changed the title-handling code.
-// 2004-01-21	JTS, RTi		Updated to use JScrollWorksheet and
-//					the new row headers.
-// 2004-07-15	JTS, RTi		* For data changes, enabled the
-//					  Apply and Cancel buttons through new
-//					  methods in the data classes.
-//					* Changed layout of buttons to be
-//					  aligned in the lower-right.
-// 					* windowDeactivated() no longer saves
-//					  data as it was causing problems with
-//					  the cancel code.
-// 2006-01-19	JTS, RTi		* Now implements JWorksheet_SortListener
-//					* Reselects the record that was selected
-//					  when the worksheet is sorted.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-//------------------------------------------------------------------------------
-// EndHeader
-
 package DWR.StateMod;
 
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -90,6 +23,9 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import cdss.domain.hydrology.network.HydrologyNode;
@@ -109,6 +45,8 @@ import RTi.Util.GUI.SimpleJComboBox;
 import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
+import RTi.Util.String.StringUtil;
+import RTi.Util.Time.TimeUtil;
 
 /**
 This class is a gui for displaying and editing operational right data.
@@ -176,15 +114,19 @@ Array of JComponents that should be disabled when nothing is selected from the l
 private JComponent[] __disables;
 
 /**
-GUI panels.
+Panels containing groups of data.
 */
-private JPanel 
-	__additionalPanel,
+private JPanel
+	__destination_JPanel,
+	__source_JPanel,
+	__rioGrande_JPanel,
 	__opr8Panel,
 	__opr20Panel,
-	__opSwitchPanel,
+	__monthlySwitch_JPanel,
 	__qdebtPanel,
-	__gridPanel;
+	__interveningStructures_JPanel,
+	__comments_JPanel,
+	__textEditor_JPanel;
 
 /**
 Radio buttons for selecting the kind of search to do.
@@ -197,13 +139,21 @@ private JRadioButton
 GUI text fields.
 */
 private JTextField 
-	__oprLocation_JTextField,
+	__oprAdminNumber_JTextField,
 	__oprName_JTextField,
-	__oprStationID_JTextField,
+	__ruleTypeFullyEditable_JTextField,
+	__oprID_JTextField,
 	__opr20Sjmina_JTextField,
 	__opr20Sjrela_JTextField,
 	__qdebt_JTextField,
 	__qdebtx_JTextField;
+
+/**
+Text area for editing the operational right, when right type is not supported.
+*/
+private JTextArea
+	__comments_JTextArea,
+	__textEditor_JTextArea;
 
 /**
 Status bar textfields 
@@ -226,7 +176,7 @@ private JWorksheet __worksheet;
 /**
 The worksheet for displaying specific data about a selected operational right.
 */
-private JWorksheet __opRightWorksheet;
+private JWorksheet __interveningStructuresWorksheet;
 
 /**
 Combobox for holding the rule type switch.
@@ -251,7 +201,7 @@ private SimpleJComboBox
 /**
 Combobox array for holding month switches.
 */
-private SimpleJComboBox[] __monthSwitch;
+private SimpleJComboBox[] __monthSwitch_JComboBox = new SimpleJComboBox[12];
 
 /**
 The dataset of data for the StateMod run.
@@ -361,10 +311,9 @@ public StateMod_OperationalRight_JFrame ( StateMod_DataSet dataset,
 Responds to action events.
 @param e the ActionEvent that happened.
 */
-public void actionPerformed(ActionEvent e) {
-
+public void actionPerformed(ActionEvent e)
+{
 	String action = e.getActionCommand();
-
 	Object source = e.getSource();
 
 	if (action.equals(__BUTTON_HELP)) {
@@ -378,11 +327,14 @@ public void actionPerformed(ActionEvent e) {
 		for (int i = 0; i < size; i++) {
 			o = __operationalRights.get(i);
 			if (!changed && o.changed()) {
+				Message.printStatus(2, "", "Operational right [" + i + "] \"" + o.getID() +
+					"\" has changed - accepting changes (discarding backup).");
 				changed = true;
 			}
 			o.acceptChanges();
 		}				
 		if (changed) {
+			// TODO SAM 2011-01-24 Why isn't this automatically triggered with set methods?
 			__dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}		
 		if ( __dataset_wm != null ) {
@@ -401,6 +353,8 @@ public void actionPerformed(ActionEvent e) {
 			o = __operationalRights.get(i);
 			if (!changed && o.changed()) {
 				changed = true;
+				Message.printStatus(2, "", "Operational right [" + i + "] \"" + o.getID() +
+				"\" has changed - accepting changes (discarding backup).");
 			}
 			o.createBackup();
 		}		
@@ -558,14 +512,13 @@ public void actionPerformed(ActionEvent e) {
 	}
 	else if (source == __source1_JComboBox) {
 		StateMod_OperationalRight opr = __operationalRights.get(__currentOpRightsIndex);
-		opr.setCiopso1(trim(__source1_JComboBox.getSelected()));
+		opr.setCiopso1(getFirstToken(__source1_JComboBox.getSelected()));
 		fillSourceAccount1(__currentItyopr, opr);
 	}
 	else if (source == __ruleTypeSwitch_JComboBox) {
 		StateMod_OperationalRight opr = __operationalRights.get(__currentOpRightsIndex);
-		opr.setItyopr(trim(__ruleTypeSwitch_JComboBox.getSelected()));
-		populateOperationalRightInformation(opr);
-		populateAdditionalData(opr);
+		opr.setItyopr(getFirstToken(__ruleTypeSwitch_JComboBox.getSelected()));
+		populateOperationalRight(opr);
 	}	
 }
 
@@ -758,12 +711,12 @@ Enables the monthly switch panel, or disables it, depending on the value passed 
 private void enableOpPanel(boolean enable) {
 	for (int i = 0; i < 12; i++) {
 		if (enable) {
-			__monthSwitch[i].setEnabled(true);
+			__monthSwitch_JComboBox[i].setEnabled(true);
 		}
 		else {
-			__monthSwitch[i].removeAllItems();
-			__monthSwitch[i].setEditable(false);
-			__monthSwitch[i].setEnabled(false);
+			__monthSwitch_JComboBox[i].removeAllItems();
+			__monthSwitch_JComboBox[i].setEditable(false);
+			__monthSwitch_JComboBox[i].setEnabled(false);
 		}
 	}
 }
@@ -774,7 +727,7 @@ Fills the destination account field based on the value in the destination field.
 @param value the value in the destination field.
 */
 private void fillDestinationAccount(int ityopr, String value) {
-	value = trim(value);
+	value = getFirstToken(value);
 //	System.out.println("fillDestinationAccount: " + ityopr + " '" + value + "'");
 	int index = 0;
 	List accounts = null;
@@ -898,8 +851,8 @@ throws Throwable {
 	__closeJButton = null;
 	__applyJButton = null;
 	__cancelJButton = null;
-	__opSwitchPanel = null;
-	__gridPanel = null;
+	__monthlySwitch_JPanel = null;
+	__interveningStructures_JPanel = null;
 	__searchIDJRadioButton = null;
 	__searchNameJRadioButton = null;
 	__destination_JComboBox = null;
@@ -914,16 +867,16 @@ throws Throwable {
 	__sourceAccount3_JComboBox = null;
 	__sourceAccount4_JComboBox = null;
 	__sourceAccount5_JComboBox = null;
-	__oprLocation_JTextField = null;
+	__oprAdminNumber_JTextField = null;
 	__oprName_JTextField = null;
-	__oprStationID_JTextField = null;
+	__oprID_JTextField = null;
 	__oprSwitch_JComboBox = null;
 	__searchID = null;
 	__searchName = null;
 	__worksheet = null;
-	__opRightWorksheet = null;
+	__interveningStructuresWorksheet = null;
 	__ruleTypeSwitch_JComboBox = null;
-	__monthSwitch = null;
+	__monthSwitch_JComboBox = null;
 	__dataset = null;
 	__operationalRightsComponent = null;
 	__operationalRights = null;
@@ -937,6 +890,24 @@ throws Throwable {
 	__qdebtPanel = null;
 
 	super.finalize();
+}
+
+/**
+Trims a string in the format "XXX - YYY" by removing everything after 'XXX'.
+@param s the String to trim.
+@return a trimmed string.
+*/
+private String getFirstToken(String s) {
+	if (s == null) {
+		return "";
+	}
+	int index = s.indexOf(" - ");
+	String s2 = new String(s);
+	if (index > -1) {
+		s2 = s2.substring(0, index);
+	}
+	s2 = s2.trim();
+	return s2;
 }
 
 /**
@@ -955,10 +926,10 @@ selectTableIndex().
 private void initializeDisables() {
 	__disables = new JComponent[36];
 	int i = 0;
-	__disables[i++] = __oprStationID_JTextField;
+	__disables[i++] = __oprID_JTextField;
 	__disables[i++] = __oprName_JTextField;
 	__disables[i++] = __applyJButton;
-	__disables[i++] = __gridPanel;
+	__disables[i++] = __interveningStructures_JPanel;
 	__disables[i++] = __ruleTypeSwitch_JComboBox;
 	__disables[i++] = __oprSwitch_JComboBox;
 	__disables[i++] = __destination_JComboBox;
@@ -973,14 +944,14 @@ private void initializeDisables() {
 	__disables[i++] = __sourceAccount3_JComboBox;
 	__disables[i++] = __sourceAccount4_JComboBox;
 	__disables[i++] = __sourceAccount5_JComboBox;
-	__disables[i++] = __oprLocation_JTextField;
+	__disables[i++] = __oprAdminNumber_JTextField;
 	__disables[i++] = __opr8_JComboBox;
 	__disables[i++] = __opr20Sjmina_JTextField;
 	__disables[i++] = __opr20Sjrela_JTextField;
 	__disables[i++] = __qdebt_JTextField;
 	__disables[i++] = __qdebtx_JTextField;
 	for (int j = 0; j < 12; j++) {
-		__disables[i + j] = __monthSwitch[j];
+		__disables[i + j] = __monthSwitch_JComboBox[j];
 	}
 
 	__textUneditables = new int[2];
@@ -1061,19 +1032,19 @@ private void populateAdditionalData(StateMod_OperationalRight opr) {
 			else {
 				enableOpPanel(false);
 			}
-			__gridPanel.setVisible(true);			
-			__additionalPanel.setVisible(false);
+			__interveningStructures_JPanel.setVisible(true);			
+			__rioGrande_JPanel.setVisible(false);
 			break;
 		case 3:
 			enableOpPanel(false);
-			__gridPanel.setVisible(true);
-			__additionalPanel.setVisible(false);
+			__interveningStructures_JPanel.setVisible(true);
+			__rioGrande_JPanel.setVisible(false);
 			break;
 		case 6:
 			setupMonthlyChoices(opr);
 			enableOpPanel(true);
-			__gridPanel.setVisible(false);
-			__additionalPanel.setVisible(false);
+			__interveningStructures_JPanel.setVisible(false);
+			__rioGrande_JPanel.setVisible(false);
 			break;
 		case 8:
 			enableOpPanel(false);
@@ -1082,36 +1053,36 @@ private void populateAdditionalData(StateMod_OperationalRight opr) {
 			// REVISIT (JTS - 2003-09-22)
 			// what goes here?
 //			__opr8JComboBox.add("" + opr.getIntern());
-			__additionalPanel.setVisible(true);
-			__gridPanel.setVisible(false);
+			__rioGrande_JPanel.setVisible(true);
+			__interveningStructures_JPanel.setVisible(false);
 			break;
 		case 11:
 			enableOpPanel(false);
-			__gridPanel.setVisible(true);
-			__additionalPanel.setVisible(false);
+			__interveningStructures_JPanel.setVisible(true);
+			__rioGrande_JPanel.setVisible(false);
 			break;
 		case 13:
 			setupMonthlyChoices(opr);
 			enableOpPanel(true);
-			__gridPanel.setVisible(true);
-			__additionalPanel.setVisible(false);
+			__interveningStructures_JPanel.setVisible(true);
+			__rioGrande_JPanel.setVisible(false);
 			break;
 		case 14:
 			enableOpPanel(false);
-			__gridPanel.setVisible(false);
-			__additionalPanel.setVisible(false);
+			__interveningStructures_JPanel.setVisible(false);
+			__rioGrande_JPanel.setVisible(false);
 			break;
 		case 15:
 			setupMonthlyChoices(opr);
 			enableOpPanel(true);
-			__gridPanel.setVisible(false);
-			__additionalPanel.setVisible(false);
+			__interveningStructures_JPanel.setVisible(false);
+			__rioGrande_JPanel.setVisible(false);
 			break;
 		case 16:
 			setupMonthlyChoices(opr);
 			enableOpPanel(true);
-			__gridPanel.setVisible(true);
-			__additionalPanel.setVisible(false);
+			__interveningStructures_JPanel.setVisible(true);
+			__rioGrande_JPanel.setVisible(false);
 			break;
 		case 17:
 		case 18:
@@ -1122,22 +1093,22 @@ private void populateAdditionalData(StateMod_OperationalRight opr) {
 			else {
 				enableOpPanel(false);
 			}
-			__gridPanel.setVisible(false);
+			__interveningStructures_JPanel.setVisible(false);
 			__qdebtPanel.setVisible(true);
 			__qdebt_JTextField.setText("" + opr.getQdebt());
 			__qdebtx_JTextField.setText("" + opr.getQdebtx());
-			__additionalPanel.setVisible(true);
+			__rioGrande_JPanel.setVisible(true);
 			break;
 		case 19:
 			enableOpPanel(false);
-			__gridPanel.setVisible(false);
-			__additionalPanel.setVisible(false);
+			__interveningStructures_JPanel.setVisible(false);
+			__rioGrande_JPanel.setVisible(false);
 			break;
 		case 20:
 			__opr20Panel.setVisible(true);
 			__opr20Sjmina_JTextField.setText("" + opr.getSjmina());
 			__opr20Sjrela_JTextField.setText("" + opr.getSjrela());
-			__additionalPanel.setVisible(true);
+			__rioGrande_JPanel.setVisible(true);
 			if (dumx == 12) {
 				setupMonthlyChoices(opr);
 				enableOpPanel(true);
@@ -1145,18 +1116,18 @@ private void populateAdditionalData(StateMod_OperationalRight opr) {
 			else {
 				enableOpPanel(false);
 			}
-			__gridPanel.setVisible(false);
+			__interveningStructures_JPanel.setVisible(false);
 			break;
 		case 23:
 			setupMonthlyChoices(opr);
 			enableOpPanel(true);
-			__gridPanel.setVisible(false);
-			__additionalPanel.setVisible(false);
+			__interveningStructures_JPanel.setVisible(false);
+			__rioGrande_JPanel.setVisible(false);
 			break;
 		default:
 			enableOpPanel(false);
-			__gridPanel.setVisible(false);
-			__additionalPanel.setVisible(false);
+			__interveningStructures_JPanel.setVisible(false);
+			__rioGrande_JPanel.setVisible(false);
 			break;
 	}
 }
@@ -1165,8 +1136,31 @@ private void populateAdditionalData(StateMod_OperationalRight opr) {
 Fills in the display information for the specified operational right.
 @param opr the operational right to use to populate the fields for right information.
 */
-private void populateOperationalRightInformation(StateMod_OperationalRight opr)
+private void populateOperationalRight(StateMod_OperationalRight opr)
 {
+	// Get the metadata for the right type
+	StateMod_OperationalRight_Metadata metadata =
+		StateMod_OperationalRight_Metadata.getMetadata(opr.getItyopr());
+	boolean useTextEditor = false;
+	if ( (metadata == null) || !metadata.getFullEditingSupported() ) {
+		useTextEditor = true;
+	}
+	
+	// Populate the various panels/controls depending on right metadata
+	
+	populateOperationalRightAttributes ( opr, metadata, useTextEditor );
+	populateOperationalRightDestination ( opr, metadata, useTextEditor );
+	populateOperationalRightSource ( opr, metadata, useTextEditor );
+	populateOperationalRightMonthSwitch ( opr, metadata, useTextEditor );
+	populateOperationalRightInterveningStructures ( opr, metadata, useTextEditor );
+	populateOperationalRightRioGrande ( opr, metadata, useTextEditor );
+	populateOperationalRightComments ( opr, metadata, useTextEditor );
+	populateOperationalRightTextEditor ( opr, metadata, useTextEditor );
+	
+	// Legacy code...
+	
+	populateAdditionalData(opr);
+	
 	__ruleTypeSwitch_JComboBox.setEditable(false);
 	__oprSwitch_JComboBox.setEditable(false);
 	int ityopr = opr.getItyopr();
@@ -1193,7 +1187,7 @@ private void populateOperationalRightInformation(StateMod_OperationalRight opr)
 	// whenever the rules for rule type #19 are determined, removed
 	// the check for 19 from this if statement.
 	// Also disable when a right is not fully handled.
-	if ( (ityopr == 0) || (ityopr == 19) || (ityopr > StateMod_OperationalRight.MAX_HANDLED_TYPE) ) {
+	if ( useTextEditor ) {
 		// Make sure that even basic information is not editable...
 		//__irtem.setEditable (false);
 		// More specific information
@@ -1232,7 +1226,7 @@ private void populateOperationalRightInformation(StateMod_OperationalRight opr)
 		__source5_JComboBox.setEditable(false);
 		__sourceAccount5_JComboBox.removeAllItems();
 		__sourceAccount5_JComboBox.setEnabled(false);
-		__sourceAccount5_JComboBox.setEditable(false);		
+		__sourceAccount5_JComboBox.setEditable(false);
 		return;
 	}
 	else {
@@ -2177,12 +2171,148 @@ private void populateOperationalRightInformation(StateMod_OperationalRight opr)
 }
 
 /**
+Populate operational right for the destination data panel.
+*/
+private void populateOperationalRightAttributes ( StateMod_OperationalRight opr,
+	StateMod_OperationalRight_Metadata metadata, boolean useTextEditor )
+{
+	boolean enabled = false; // Whether editor components should be enabled
+	__ruleTypeFullyEditable_JTextField.setEditable(false);
+	__ruleTypeFullyEditable_JTextField.setEnabled(true);
+	if ( useTextEditor ) {
+		__ruleTypeFullyEditable_JTextField.setText("No - use text editor");
+	}
+	else {
+		__ruleTypeFullyEditable_JTextField.setText("Yes - use data fields");
+	}
+}
+
+/**
+Populate operational right for the text editor panel.
+*/
+private void populateOperationalRightComments ( StateMod_OperationalRight opr,
+	StateMod_OperationalRight_Metadata metadata, boolean useTextEditor )
+{
+	// Always enabled
+	// Set up the text editor text
+	StringBuffer b = new StringBuffer();
+	String nl = "\n"; // As per java doc this should be used in memory
+	for ( String s : opr.getCommentsBeforeData() ) {
+		b.append(s + nl);
+	}
+	__comments_JTextArea.setText(b.toString());
+	__comments_JPanel.setVisible(true);
+}
+
+/**
+Populate operational right for the text editor panel.
+*/
+private void populateOperationalRightDestination ( StateMod_OperationalRight opr,
+	StateMod_OperationalRight_Metadata metadata, boolean useTextEditor )
+{
+	if ( useTextEditor ) {
+		__destination_JPanel.setVisible(false);
+		__destination_JPanel.setEnabled(false);
+	}
+	else {
+		__destination_JPanel.setVisible(true);
+		__destination_JPanel.setEnabled(true);
+	}
+}
+
+/**
+Populate operational right for the intervening structures data panel.
+*/
+private void populateOperationalRightInterveningStructures ( StateMod_OperationalRight opr,
+	StateMod_OperationalRight_Metadata metadata, boolean useTextEditor )
+{
+	if ( useTextEditor ) {
+		__interveningStructures_JPanel.setVisible(false);
+		__interveningStructures_JPanel.setEnabled(false);
+	}
+	else {
+		__interveningStructures_JPanel.setVisible(true);
+		__interveningStructures_JPanel.setEnabled(true);
+	}
+}
+
+/**
+Populate operational right for the month switch data panel.
+*/
+private void populateOperationalRightMonthSwitch ( StateMod_OperationalRight opr,
+	StateMod_OperationalRight_Metadata metadata, boolean useTextEditor )
+{
+	if ( useTextEditor ) {
+		__monthlySwitch_JPanel.setVisible(false);
+		__monthlySwitch_JPanel.setEnabled(false);
+	}
+	else {
+		__monthlySwitch_JPanel.setVisible(true);
+		__monthlySwitch_JPanel.setEnabled(true);
+	}
+}
+
+/**
+Populate operational right for the Rio Grande data panel.
+*/
+private void populateOperationalRightRioGrande ( StateMod_OperationalRight opr,
+	StateMod_OperationalRight_Metadata metadata, boolean useTextEditor )
+{
+	if ( useTextEditor ) {
+		__rioGrande_JPanel.setVisible(false);
+		__rioGrande_JPanel.setEnabled(false);
+	}
+	else {
+		__rioGrande_JPanel.setVisible(true);
+		__rioGrande_JPanel.setEnabled(true);
+	}
+}
+
+/**
+Populate operational right for the source data panel.
+*/
+private void populateOperationalRightSource ( StateMod_OperationalRight opr,
+	StateMod_OperationalRight_Metadata metadata, boolean useTextEditor )
+{
+	if ( useTextEditor ) {
+		__source_JPanel.setVisible(false);
+		__source_JPanel.setEnabled(false);
+	}
+	else {
+		__source_JPanel.setVisible(true);
+		__source_JPanel.setEnabled(true);
+	}
+}
+
+/**
+Populate operational right for the text editor panel.
+*/
+private void populateOperationalRightTextEditor ( StateMod_OperationalRight opr,
+	StateMod_OperationalRight_Metadata metadata, boolean useTextEditor )
+{
+	if ( useTextEditor ) {
+		// Set up the text editor text
+		StringBuffer b = new StringBuffer();
+		String nl = "\n"; // As per Java doc, this should be used in memory
+		for ( String s : opr.getRightStrings() ) {
+			b.append(s + nl);
+		}
+		__textEditor_JTextArea.setText(b.toString());
+		__textEditor_JPanel.setVisible(true);
+	}
+	else {
+		__textEditor_JPanel.setVisible(false);
+	}
+}
+
+/**
 Processes a table selection (either via a mouse press or programmatically 
 from selectTableIndex() by writing the old data back to the data set component
 and getting the next selection's data out of the data and displaying it on the form.
 @param index the index of the reservoir to display on the form.
 */
-private void processTableSelection(int index) {
+private void processTableSelection(int index)
+{
 	__lastOpRightsIndex = __currentOpRightsIndex;
 	__currentOpRightsIndex = __worksheet.getOriginalRowNumber(index);
 
@@ -2196,12 +2326,13 @@ private void processTableSelection(int index) {
 	JGUIUtil.enableComponents(__disables, __textUneditables, __editable);
 
 	StateMod_OperationalRight opr = __operationalRights.get(__currentOpRightsIndex);
-	__oprStationID_JTextField.setText(opr.getID());
+	__oprID_JTextField.setText(opr.getID());
 	__oprName_JTextField.setText(opr.getName());
-	__oprLocation_JTextField.setText(opr.getRtem());
-	if (opr.getCgoto().equals("")) {	
-		setOriginalCgoto(opr, opr.getRtem());
-	}
+	__oprAdminNumber_JTextField.setText(opr.getRtem());
+	//FIXME SAM 2011-01-24 Need to use admin number
+	//if (opr.getCgoto().equals("")) {	
+	//	setOriginalCgoto(opr, opr.getRtem());
+	//}
 
 	// switch
 	if (opr.getSwitch() == 1) {
@@ -2213,25 +2344,29 @@ private void processTableSelection(int index) {
 
 	// rule type
 	int ityopr = opr.getItyopr();
-	if ( ityopr > 0 && ityopr <= StateMod_OperationalRight.MAX_HANDLED_TYPE ) {
-		__ruleTypeSwitch_JComboBox.select(ityopr);
-		if ( ityopr > StateMod_OperationalRight.MAX_HANDLED_TYPE) {
-			setMessageText ( "Rule type " + ityopr +
-			" is known but is not fully handled by the software (some information may not display)." );
-		}	
-		else {
-			// Clear out message.
-			setMessageText ( "" );
-		}
+	try {
+		JGUIUtil.selectTokenMatches(__ruleTypeSwitch_JComboBox,
+			true, // Ignore case
+			"-",
+			0, // No special parse flag
+			0, // match first token
+			("" + ityopr), // Match the rule type
+			null, // No default
+			true); // Trim tokens before comparing
+	}
+	catch ( Exception e ) {
+		// This should not happen because even unknown operational rights are now handled
+	}
+	//__ruleTypeSwitch_JComboBox.select(ityopr);
+	StateMod_OperationalRight_Metadata metadata = StateMod_OperationalRight_Metadata.getMetadata(ityopr);
+	if ( metadata != null && metadata.getFullEditingSupported() ) {
+		setMessageText ( "" );
 	}
 	else {
-		__ruleTypeSwitch_JComboBox.select(0); // UNKNOWN
-		setMessageText ( "Rule type " + ityopr +
-				" is unknown and was read as text only (some information may not display)." );
+		setMessageText ( "Rule type " + ityopr + " is supported for text editing only." );
 	}
 	
-	populateOperationalRightInformation(opr);
-	populateAdditionalData(opr);
+	populateOperationalRight(opr);
 	checkViewButtonState();
 }
 
@@ -2253,11 +2388,12 @@ private void saveCurrentRecord() {
 /**
 Saves the information associated with the currently-selected operational right.
 The user doesn't need to hit the return key for the gui to recognize changes.
-The info is saved each time the user selects a differents tation or pressed
-the close button.
+The info is saved each time the user selects a different operational right or when the close button is pressed.
 */
-private void saveInformation(int record) {
+private void saveInformation(int record)
+{
 	if (!__editable || record == -1) {
+		// Do not save anything (consequently nothing will be set as dirty in the object)
 		return;
 	}
 
@@ -2265,53 +2401,80 @@ private void saveInformation(int record) {
 		return;
 	}
 
-	__opRightWorksheet.stopEditing();
+	__interveningStructuresWorksheet.stopEditing();
 
 	StateMod_OperationalRight opr = __operationalRights.get(record);
-	opr.setName(__oprName_JTextField.getText());
-	opr.setSwitch(__oprSwitch_JComboBox.getSelectedIndex());
-	opr.setCgoto(__oprLocation_JTextField.getText());
+	// Comments are always set
+	List<String> commentsBeforeData = new Vector();
+	String comments = __comments_JTextArea.getText(); // Do not trim because blank lines will be lost
+	if ( comments.length() > 0 ) {
+		commentsBeforeData = StringUtil.breakStringList(comments, "\n", 0);
+	}
+	opr.setCommentsBeforeData(commentsBeforeData);
 
-	opr.setCiopde(trim(__destination_JComboBox.getSelected()));
-	opr.setIopdes(trim(__destinationAccount_JComboBox.getSelected()));
-	opr.setCiopso1(trim(__source1_JComboBox.getSelected()));
-	opr.setIopsou1(trim(__sourceAccount1_JComboBox.getSelected()));
-	opr.setCiopso2(trim(__source2_JComboBox.getSelected()));
-	opr.setIopsou2(trim(__sourceAccount2_JComboBox.getSelected()));
-
-	int ityopr = __ruleTypeSwitch_JComboBox.getSelectedIndex();
-	opr.setItyopr(ityopr);
-
-	if (__monthSwitch[0].isEnabled()) {
-		String value = null;
-		for (int i = 0; i < 12; i++) {
-			value = __monthSwitch[i].getSelected();
-			value = trim(value);
-			opr.setImonsw(i, value);
+	// The rest of the data depends on whether editing as text or not
+	StateMod_OperationalRight_Metadata metadata =
+		StateMod_OperationalRight_Metadata.getMetadata(opr.getItyopr());
+	boolean useTextEditor = false;
+	if ( (metadata == null) || !metadata.getFullEditingSupported() ) {
+		useTextEditor = true;
+	}
+	if ( useTextEditor ) {
+		List<String> rightStringList = new Vector();
+		String textData = __textEditor_JTextArea.getText(); // Do not trim because blank lines will be lost
+		if ( textData.length() > 0 ) {
+			rightStringList = StringUtil.breakStringList(textData, "\n", 0);
 		}
+		opr.setRightStrings(rightStringList);
 	}
+	else {
+		opr.setCommentsBeforeData(commentsBeforeData);
+		opr.setName(__oprName_JTextField.getText());
+		opr.setSwitch(__oprSwitch_JComboBox.getSelectedIndex());
+		// FIXME SAM 2011-01-24 cgoto is not used in version 2 opr
+		//opr.setCgoto(__oprAdminNumber_JTextField.getText());
+	
+		opr.setCiopde(getFirstToken(__destination_JComboBox.getSelected()));
+		opr.setIopdes(getFirstToken(__destinationAccount_JComboBox.getSelected()));
+		opr.setCiopso1(getFirstToken(__source1_JComboBox.getSelected()));
+		opr.setIopsou1(getFirstToken(__sourceAccount1_JComboBox.getSelected()));
+		opr.setCiopso2(getFirstToken(__source2_JComboBox.getSelected()));
+		opr.setIopsou2(getFirstToken(__sourceAccount2_JComboBox.getSelected()));
 
-	if (__opr8Panel.isVisible()) {
-	// REVISIT (JTS - 2003-09-22)
-	// what goes here?
-//		opr.set??(__opr8JComboBox.getSelected().trim());
-	}
-	else if (__opr20Panel.isVisible()) {
-		opr.setSjmina(__opr20Sjmina_JTextField.getText().trim());
-		opr.setSjrela(__opr20Sjrela_JTextField.getText().trim());
-	}
-	else if (__qdebtPanel.isVisible()) {
-		opr.setQdebt(__qdebt_JTextField.getText().trim());
-		opr.setQdebtx(__qdebtx_JTextField.getText().trim());
-	}
-
-	if (__source3_JComboBox.isEnabled()) {
-		opr.setCiopso3(trim(__source3_JComboBox.getSelected()));
-		opr.setIopsou3(trim(__sourceAccount3_JComboBox.getSelected()));
-		opr.setCiopso4(trim(__source4_JComboBox.getSelected()));
-		opr.setIopsou4(trim(__sourceAccount4_JComboBox.getSelected()));
-		opr.setCiopso5(trim(__source5_JComboBox.getSelected()));
-		opr.setIopsou5(trim(__sourceAccount5_JComboBox.getSelected()));
+		opr.setItyopr(getFirstToken(__ruleTypeSwitch_JComboBox.getSelected()));
+		//int ityopr = opr.getItyopr();
+	
+		if (__monthSwitch_JComboBox[0].isEnabled()) {
+			String value = null;
+			for (int i = 0; i < 12; i++) {
+				value = __monthSwitch_JComboBox[i].getSelected();
+				value = getFirstToken(value);
+				opr.setImonsw(i, value);
+			}
+		}
+	
+		if (__opr8Panel.isVisible()) {
+		// REVISIT (JTS - 2003-09-22)
+		// what goes here?
+	//		opr.set??(__opr8JComboBox.getSelected().trim());
+		}
+		else if (__opr20Panel.isVisible()) {
+			opr.setSjmina(__opr20Sjmina_JTextField.getText().trim());
+			opr.setSjrela(__opr20Sjrela_JTextField.getText().trim());
+		}
+		else if (__qdebtPanel.isVisible()) {
+			opr.setQdebt(__qdebt_JTextField.getText().trim());
+			opr.setQdebtx(__qdebtx_JTextField.getText().trim());
+		}
+	
+		if (__source3_JComboBox.isEnabled()) {
+			opr.setCiopso3(getFirstToken(__source3_JComboBox.getSelected()));
+			opr.setIopsou3(getFirstToken(__sourceAccount3_JComboBox.getSelected()));
+			opr.setCiopso4(getFirstToken(__source4_JComboBox.getSelected()));
+			opr.setIopsou4(getFirstToken(__sourceAccount4_JComboBox.getSelected()));
+			opr.setCiopso5(getFirstToken(__source5_JComboBox.getSelected()));
+			opr.setIopsou5(getFirstToken(__sourceAccount5_JComboBox.getSelected()));
+		}
 	}
 }
 
@@ -2369,7 +2532,8 @@ Selects the desired index in the table, but also displays the appropriate data
 in the remainder of the window.
 @param index the index to select in the list.
 */
-public void selectTableIndex(int index) {
+public void selectTableIndex(int index)
+{
 	int rowCount = __worksheet.getRowCount();
 	if (rowCount == 0) {
 		return;
@@ -2394,9 +2558,10 @@ private void setMessageText ( String text )
 	__message_JTextField.setText ( text );
 }
 
-private void setOriginalCgoto(StateMod_OperationalRight o, String cgoto) {
-	((StateMod_OperationalRight)o._original)._cgoto = cgoto;
-}
+// FIXME SAM Need to figure out if needed in version 2 format
+//private void setOriginalCgoto(StateMod_OperationalRight o, String cgoto) {
+//	((StateMod_OperationalRight)o._original)._cgoto = cgoto;
+//}
 
 /**
 Sets up the GUI.
@@ -2407,102 +2572,139 @@ private void setupGUI(int index) {
 
 	addWindowListener(this);
 
-	JPanel p1 = new JPanel();	// user name -> rule type switch
-	JPanel p2 = new JPanel();	// source -> final account
-	__opSwitchPanel = new JPanel();	// month operation switches
-	__gridPanel = new JPanel();
-	JPanel psearch = new JPanel();	// search area
+	GridBagLayout gb = new GridBagLayout();
+	JPanel mainJPanel = new JPanel(); // Holds left and right panels
+	mainJPanel.setLayout(gb);
+	JPanel leftJPanel = new JPanel (); // Left side (list and search)
+	leftJPanel.setLayout(gb);
+	JPanel rightJPanel = new JPanel(); // Right side (all data)
+	rightJPanel.setLayout(gb);
 
-	__oprStationID_JTextField = new JTextField(12);
-	__oprName_JTextField = new JTextField(24);
-	__oprName_JTextField.setEditable(false);
-	__oprLocation_JTextField = new JTextField(12);
-	__oprSwitch_JComboBox = new SimpleJComboBox();
-	__oprSwitch_JComboBox.add("0 - Off");
-	__oprSwitch_JComboBox.add("1 - On");	
-	__oprSwitch_JComboBox.setEditable(false);
+	// Operational right list...
 
-	__destination_JComboBox = new SimpleJComboBox();
-	__destination_JComboBox.setPrototypeDisplayValue("                    "
-		+ "                                                  ");
-	__destinationAccount_JComboBox = new SimpleJComboBox();
-	__destinationAccount_JComboBox.setPrototypeDisplayValue("          "
-		+ "                                                  ");
-	__source1_JComboBox = new SimpleJComboBox();
-	__source1_JComboBox.setPrototypeDisplayValue("                    "
-		+ "                                                  ");
-	__sourceAccount1_JComboBox = new SimpleJComboBox();
-	__sourceAccount1_JComboBox.setPrototypeDisplayValue("          "
-		+ "                                                  ");
-	__source2_JComboBox = new SimpleJComboBox();
-	__source2_JComboBox.setPrototypeDisplayValue("                    "
-		+ "                                                  ");
-	__sourceAccount2_JComboBox = new SimpleJComboBox();
-	__sourceAccount2_JComboBox.setPrototypeDisplayValue("          "
-		+ "                                                  ");
-	__source3_JComboBox = new SimpleJComboBox();
-	__source3_JComboBox.setPrototypeDisplayValue("                    "
-		+ "                                                  ");
-	__sourceAccount3_JComboBox = new SimpleJComboBox();
-	__sourceAccount3_JComboBox.setPrototypeDisplayValue("          "
-		+ "                                                  ");
-	__source4_JComboBox = new SimpleJComboBox();
-	__source4_JComboBox.setPrototypeDisplayValue("                    "
-		+ "                                                  ");
-	__sourceAccount4_JComboBox = new SimpleJComboBox();
-	__sourceAccount4_JComboBox.setPrototypeDisplayValue("          "
-		+ "                                                  ");
-	__source5_JComboBox = new SimpleJComboBox();
-	__source5_JComboBox.setPrototypeDisplayValue("                    "
-		+ "                                                  ");
-	__sourceAccount5_JComboBox = new SimpleJComboBox();
-	__sourceAccount5_JComboBox.setPrototypeDisplayValue("          "
-		+ "                                                  ");
-
-	__destination_JComboBox.setSelectionFailureFallback("~ - Unknown", 0);
-	__destinationAccount_JComboBox.setSelectionFailureFallback("~ - Unknown", 0);
-
-	__source1_JComboBox.setSelectionFailureFallback("~ - Unknown", 0);
-	__source2_JComboBox.setSelectionFailureFallback("~ - Unknown", 0);
-	__source3_JComboBox.setSelectionFailureFallback("~ - Unknown", 0);
-	__source4_JComboBox.setSelectionFailureFallback("~ - Unknown", 0);
-	__source5_JComboBox.setSelectionFailureFallback("~ - Unknown", 0);
-
-	__sourceAccount1_JComboBox.setSelectionFailureFallback("~ - Unknown", 0);
-	__sourceAccount2_JComboBox.setSelectionFailureFallback("~ - Unknown", 0);
-	__sourceAccount3_JComboBox.setSelectionFailureFallback("~ - Unknown", 0);
-	__sourceAccount4_JComboBox.setSelectionFailureFallback("~ - Unknown", 0);
-	__sourceAccount5_JComboBox.setSelectionFailureFallback("~ - Unknown", 0);
-
-	__monthSwitch = new SimpleJComboBox[12];
-	for (int i = 0; i < 12; i++) {
-		__monthSwitch[i] = new SimpleJComboBox(false);
-		__monthSwitch[i].setPrototypeDisplayValue("                           ");
-	}
+	JGUIUtil.addComponent(leftJPanel, setupGUI_OperationalRightList(routine),
+		0, 0, 1, 5, 1, 1,
+		GridBagConstraints.BOTH, GridBagConstraints.NORTHWEST);
 	
-	__ruleTypeSwitch_JComboBox = new SimpleJComboBox();
-	List<StateMod_OperationalRight_Metadata> metadataList =
-		StateMod_OperationalRight_Metadata.getAllMetadata();
-	__ruleTypeSwitch_JComboBox.add ( "0 - Unknown" ); // Unknown - TODO SAM 2010-12-29 Need to phase out
-	for ( int i = 0; i < metadataList.size(); i++ ) {
-		__ruleTypeSwitch_JComboBox.add("" + metadataList.get(i).getRightTypeNumber() + " - " +
-			metadataList.get(i).getRightTypeName() );
+	// Search control under the main list...
+	
+	JGUIUtil.addComponent(leftJPanel, setupGUI_SearchPanel(routine),
+		0, 5, 1, 1, 0, 0,  	
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
+	
+	// Operational right panels for general and optional parameters...
+	
+	int yRight = 0;
+	JGUIUtil.addComponent(rightJPanel, setupGUI_OperationalRightAttributes ( routine ),
+		0, yRight, 12, 1, 0, 0,
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
+	
+	// Destination on the right...
+	
+	++yRight;
+	JGUIUtil.addComponent(rightJPanel, setupGUI_OperationalRightDestination(routine),
+		0, yRight, 12, 1, 0, 0,  	
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
+	
+	// Sources on the right...
+
+	++yRight;
+	JGUIUtil.addComponent(rightJPanel, setupGUI_OperationalRightSource(routine),
+		0, yRight, 12, 1, 0, 0,  	
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
+	
+	// Monthly switches on the right...
+
+	++yRight;
+	JGUIUtil.addComponent(rightJPanel, setupGUI_OperationalRightMonthSwitch(routine),
+		0, yRight, 12, 1, 0, 0,  
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
+	
+	// Intervening structures the right...
+
+	++yRight;
+	JGUIUtil.addComponent(rightJPanel, setupGUI_OperationalRightInterveningStructures(routine),
+		0, yRight, 12, 1, 0, 0,  	
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
+	
+	// Rio Grande on the right...
+
+	++yRight;
+	JGUIUtil.addComponent(rightJPanel, setupGUI_OperationalRightRioGrande(routine),
+		0, yRight, 12, 1, 0, 0,  	
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
+	
+	// Comments for right, on the right...
+
+	++yRight;
+	JGUIUtil.addComponent(rightJPanel, setupGUI_OperationalRightComments(routine),
+		0, yRight, 20, 1, 1.0, 1.0,  	
+		GridBagConstraints.BOTH, GridBagConstraints.WEST);
+	
+	// Text editor on the right (make it wider than the other panels so everything is
+	// not sized to it...
+
+	++yRight;
+	JGUIUtil.addComponent(rightJPanel, setupGUI_OperationalRightTextEditor(routine),
+		0, yRight, 20, 5, 1.0, 1.0,  	
+		GridBagConstraints.BOTH, GridBagConstraints.WEST);
+	
+	// Add a blank panel to fill space, in particular when panels are disabled
+
+	yRight += 5; // Height of the text editor
+	JGUIUtil.addComponent(rightJPanel, new JPanel(),
+		0, yRight, 20, 5, 1.0, 1.0,  	
+		GridBagConstraints.BOTH, GridBagConstraints.WEST);
+	
+	// Now add the left and right panels to the main panel and add to the center of the window
+	// Use a split pane to better control resizing between list and other data
+	// Redraw as the pane is drawn
+
+	JSplitPane mainSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftJPanel, rightJPanel );
+	mainSplitPane.setResizeWeight(0.0); // Right side gets all resizing when window is resized
+	getContentPane().add(mainSplitPane);
+	/*
+	JGUIUtil.addComponent(mainJPanel, leftJPanel,
+		0, 0, 1, 5, 1.0, 1.0,
+		GridBagConstraints.BOTH, GridBagConstraints.WEST);
+	JGUIUtil.addComponent(mainJPanel, rightJPanel,
+		1, 0, 1, 5, 1.0, 1.0,
+		GridBagConstraints.BOTH, GridBagConstraints.EAST);
+	getContentPane().add(mainJPanel);
+	*/
+	
+	getContentPane().add ("South", setupGUI_BottomPanel(routine, gb));	
+
+	initializeDisables();
+
+	if ( __dataset_wm != null ) {
+		__dataset_wm.setWindowOpen (
+		StateMod_DataSet_WindowManager.WINDOW_OPERATIONAL_RIGHT, this);
 	}
 
-	__ruleTypeSwitch_JComboBox.setEnabled(false);
-	__ruleTypeSwitch_JComboBox.setEditable(false);
+	pack();
+	setSize(1050,700);
+	JGUIUtil.center(this);
+	//setResizable(false);
+	selectTableIndex(index);
+	setVisible(true);
 
-	__searchID = new JTextField(10);
-	__searchName = new JTextField(10);
-	__searchName.setEditable(false);
-	__findNextOpr = new JButton("Find Next");
-	__searchCriteriaGroup = new ButtonGroup();
-	__searchIDJRadioButton = new JRadioButton("ID", true);
-	__searchCriteriaGroup.add(__searchIDJRadioButton);
-	__searchNameJRadioButton = new JRadioButton("Name", false);
-	__searchCriteriaGroup.add(__searchNameJRadioButton);
-	__searchIDJRadioButton.addActionListener(this);
-	__searchNameJRadioButton.addActionListener(this);
+	// Ensure widths in the sheets
+	// TODO SAM 2011-01-24 Why do this here and not in setup code?
+	int [] widths = __worksheet.getCellRenderer().getColumnWidths();
+	if ( widths != null) {
+		__worksheet.setColumnWidths(widths);
+	}
+	int [] widthsR = __interveningStructuresWorksheet.getCellRenderer().getColumnWidths();
+	if (widthsR != null) {
+		__interveningStructuresWorksheet.setColumnWidths(widthsR);
+	}
+
+	__worksheet.addSortListener(this);
+}
+
+private JPanel setupGUI_Buttons ( String routine )
+{
 
 	__showOnMap_JButton = new SimpleJButton(__BUTTON_SHOW_ON_MAP, this);
 	__showOnMap_JButton.setToolTipText(
@@ -2514,281 +2716,237 @@ private void setupGUI(int index) {
 	__helpJButton = new JButton(__BUTTON_HELP);
 	__helpJButton.setEnabled(false);
 	__closeJButton = new JButton(__BUTTON_CLOSE);
+	
+	// add bottom buttons
+	FlowLayout fl = new FlowLayout(FlowLayout.RIGHT);
+	JPanel pfinal = new JPanel();
+	pfinal.setLayout(fl);
+	pfinal.add(__showOnMap_JButton);
+	pfinal.add(__showOnNetwork_JButton);
+	if (__editable) {
+		pfinal.add(__applyJButton);
+		pfinal.add(__cancelJButton);
+	}
+//	pfinal.add(__helpJButton);
+	pfinal.add(__closeJButton);
+	__helpJButton.addActionListener(this);
+	__applyJButton.addActionListener(this);
+	__cancelJButton.addActionListener(this);
+	__closeJButton.addActionListener(this);
+	return pfinal;
+}
 
+private JPanel setupGUI_BottomPanel ( String routine, GridBagLayout gb )
+{
+	JPanel bottomJPanel = new JPanel();
+	bottomJPanel.setLayout (gb);
+	__message_JTextField = new JTextField();
+	__message_JTextField.setEditable(false);
+	JGUIUtil.addComponent(bottomJPanel, setupGUI_Buttons(routine),
+		0, 0, 8, 1, 1, 1,
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.EAST);	
+	JGUIUtil.addComponent(bottomJPanel, __message_JTextField,
+		0, 1, 7, 1, 1.0, 0.0, 
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+	__status_JTextField = new JTextField(5);
+	__status_JTextField.setEditable(false);
+	JGUIUtil.addComponent(bottomJPanel, __status_JTextField,
+		7, 1, 1, 1, 0.0, 0.0, 
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
+	return bottomJPanel;
+}
+
+/**
+Setup the GUI components for the operational rights list.
+@param routine
+*/
+private JPanel setupGUI_OperationalRightAttributes (String routine)
+{
+	JPanel attribute_JPanel = new JPanel();	// Right side of interface for specific right data
 	GridBagLayout gb = new GridBagLayout();
-	JPanel mainJPanel = new JPanel();
-	mainJPanel.setLayout(gb);
-	p1.setLayout(gb);
-	p2.setLayout(gb);
-	psearch.setLayout(gb);
-	__opSwitchPanel.setLayout(gb);
-	__gridPanel.setLayout(gb);
-
-	int y;
-
-	PropList p =new PropList("StateMod_OperationalRight_JFrame.JWorksheet");
-	p.add("JWorksheet.ShowPopupMenu=true");
-	p.add("JWorksheet.AllowCopy=true");
-	p.add("JWorksheet.SelectionMode=SingleRowSelection");
-
-	int[] widths = null;
-	JScrollWorksheet jsw = null;
-	try {
-		StateMod_OperationalRight_TableModel tmo = new
-			StateMod_OperationalRight_TableModel( __operationalRights, __editable);
-		StateMod_OperationalRight_CellRenderer cro = new StateMod_OperationalRight_CellRenderer(tmo);
-	
-		jsw = new JScrollWorksheet(cro, tmo, p);
-		__worksheet = jsw.getJWorksheet();
-		__worksheet.removeColumn(2);
-		widths = cro.getColumnWidths();
-	}
-	catch (Exception e) {
-		Message.printWarning(1, routine, "Error building worksheet.");
-		Message.printWarning(2, routine, e);
-		jsw = new JScrollWorksheet(0, 0, p);
-		__worksheet = jsw.getJWorksheet();
-	}
-	__worksheet.setPreferredScrollableViewportSize(null);
-	__worksheet.setHourglassJFrame(this);
-	__worksheet.addMouseListener(this);	
-	__worksheet.addKeyListener(this);
-	
-	JGUIUtil.addComponent(mainJPanel, jsw,
-		0, 0, 6, 4, 1, 0,
-		10, 10, 1, 1,
-		GridBagConstraints.BOTH, GridBagConstraints.NORTHWEST);
-
-	// add top labels and text areas to panels
-	// assemble panel1, first
-	y=0;
+	attribute_JPanel.setLayout(gb);
+	attribute_JPanel.setBorder(BorderFactory.createTitledBorder("Primary attributes:"));
+	int y = 0;
+	__oprID_JTextField = new JTextField(20);
 	JGUIUtil.addComponent(
-		p1, new JLabel("Op Right Name:"),
+		attribute_JPanel, new JLabel("Operational right ID:"),
+		0, y, 1, 1, 1, 1,
+		0, 0, 0, 0,
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
+	JGUIUtil.addComponent(
+		attribute_JPanel, __oprID_JTextField,
+		1, y, 1, 1, 1.0, 0.0,
+		1, 0, 0, 1,
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+//	__oprStationID.addActionListener(this);
+	__oprID_JTextField.setEditable(false);
+	y++;
+	__oprName_JTextField = new JTextField(24);
+	__oprName_JTextField.setEditable(false);
+	JGUIUtil.addComponent(
+		attribute_JPanel, new JLabel("Operational right name:"),
 		0, y, 1, 1, 0, 0,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(
-		p1, __oprName_JTextField,
+		attribute_JPanel, __oprName_JTextField,
 		1, y, 1, 1, 1, 0,
 		1, 0, 0, 1,
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 //	__oprName.addActionListener(this);
 	y++;
+	__ruleTypeSwitch_JComboBox = new SimpleJComboBox();
+	List<StateMod_OperationalRight_Metadata> metadataList =
+		StateMod_OperationalRight_Metadata.getAllMetadata();
+	for ( int i = 0; i < metadataList.size(); i++ ) {
+		__ruleTypeSwitch_JComboBox.add("" + metadataList.get(i).getRightTypeNumber() + " - " +
+			metadataList.get(i).getRightTypeName() );
+	}
+	__ruleTypeSwitch_JComboBox.setEnabled(false);
+	__ruleTypeSwitch_JComboBox.setEditable(false);
 	JGUIUtil.addComponent(
-		p1, new JLabel("Operational Right ID:"),
+		attribute_JPanel, new JLabel("Operational right type:"),
 		0, y, 1, 1, 0, 0,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(
-		p1, __oprStationID_JTextField,
-		1, y, 1, 1, 1, 0,
+		attribute_JPanel, __ruleTypeSwitch_JComboBox,
+		1, y, 6, 1, 1, 0,
 		1, 0, 0, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
-//	__oprStationID.addActionListener(this);
-	__oprStationID_JTextField.setEditable(false);
+	__ruleTypeSwitch_JComboBox.addActionListener(this);
 	y++;
+	__ruleTypeFullyEditable_JTextField = new JTextField(12);
 	JGUIUtil.addComponent(
-		p1, new JLabel("Administration Number:"),
+		attribute_JPanel, new JLabel("Fully editable?:"),
 		0, y, 1, 1, 0, 0,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(
-		p1, __oprLocation_JTextField,
+		attribute_JPanel, __ruleTypeFullyEditable_JTextField,
 		1, y, 1, 1, 1, 0,
 		1, 0, 0, 1,
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+	__ruleTypeFullyEditable_JTextField.setEnabled(false); // For display only
+	__ruleTypeFullyEditable_JTextField.setEditable(false);
+	y++;
+	__oprAdminNumber_JTextField = new JTextField(12);
+	JGUIUtil.addComponent(
+		attribute_JPanel, new JLabel("Administration number:"),
+		0, y, 1, 1, 0, 0,
+		0, 0, 0, 0,
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
+	JGUIUtil.addComponent(
+		attribute_JPanel, __oprAdminNumber_JTextField,
+		1, y, 1, 1, 1, 0,
+		1, 0, 0, 1,
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 //	__oprLocation.addActionListener(this);
 	y++;
+	__oprSwitch_JComboBox = new SimpleJComboBox();
+	__oprSwitch_JComboBox.setPrototypeDisplayValue(" 0 - Off " );
+	__oprSwitch_JComboBox.add("0 - Off");
+	__oprSwitch_JComboBox.add("1 - On");	
+	__oprSwitch_JComboBox.setEditable(false);
 	JGUIUtil.addComponent(
-		p1, new JLabel("On/Off Switch:"),
+		attribute_JPanel, new JLabel("On/off switch:"),
 		0, y, 1, 1, 0, 0,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(
-		p1, __oprSwitch_JComboBox,
+		attribute_JPanel, __oprSwitch_JComboBox,
 		1, y, 1, 1, 1, 0,
 		1, 0, 0, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
-	y++;
-	JGUIUtil.addComponent(
-		p1, new JLabel("Rule Type:"),
-		0, y, 1, 1, 0, 0,
-		0, 0, 0, 0,
-		GridBagConstraints.NONE, GridBagConstraints.EAST);
-	JGUIUtil.addComponent(
-		p1, __ruleTypeSwitch_JComboBox,
-		1, y, 1, 1, 1, 0,
-		1, 0, 0, 1,
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
+	return attribute_JPanel;
+}
 
-	JPanel dest = new JPanel();
-	dest.setLayout(gb);
+/**
+Setup comments panel.
+@param routine
+*/
+private JPanel setupGUI_OperationalRightComments (String routine)
+{
+	__comments_JPanel = new JPanel();
+	__comments_JPanel.setBorder(BorderFactory.createTitledBorder(
+		"Comments (will be output above operational right data, with # at start of line):"));
+	GridBagLayout gb = new GridBagLayout();
+	__comments_JPanel.setLayout(gb);
+	//__comments_JPanel.setMinimumSize(new Dimension(600,200));
+	__comments_JTextArea = new JTextArea(8,100);
+	JGUIUtil.addComponent(__comments_JPanel, new JScrollPane(__comments_JTextArea),
+		0, 0, 6, 1, 1, 1, 1, 1, 1, 1, GridBagConstraints.BOTH, GridBagConstraints.CENTER);
+	return __comments_JPanel;
+}
+
+private JPanel setupGUI_OperationalRightDestination ( String routine )
+{
+	__destination_JPanel = new JPanel();
+	GridBagLayout gb = new GridBagLayout();
+	__destination_JPanel.setLayout(gb);
+	__destination_JPanel.setBorder(BorderFactory.createTitledBorder("Destination:"));
+	int y = 0;
 	JGUIUtil.addComponent(
-		p2, dest,
-		0, 0, 4, 1, 0, 0, 
-		0, 0, 0, 0,
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
-	dest.setBorder(BorderFactory.createTitledBorder("Destination:"));
-	y = 0;
-	JGUIUtil.addComponent(
-		dest, new JLabel("Destination:"),
+		__destination_JPanel, new JLabel("Destination:"),
 		0, y, 1, 1, 0, 0,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
+	__destination_JComboBox = new SimpleJComboBox();
+	__destination_JComboBox.setPrototypeDisplayValue("                    "
+		+ "                                                  ");
+	__destination_JComboBox.setSelectionFailureFallback("~ - Unknown", 0);
 	JGUIUtil.addComponent(
-		dest, __destination_JComboBox,
+		__destination_JPanel, __destination_JComboBox,
 		1, y, 1, 1, 0, 0,
 		1, 0, 0, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	JGUIUtil.addComponent(
-		dest, new JLabel("Account:"),
+		__destination_JPanel, new JLabel("Account:"),
 		2, y, 1, 1, 0, 0,
 		0, 4, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
+	__destinationAccount_JComboBox = new SimpleJComboBox();
+	__destinationAccount_JComboBox.setPrototypeDisplayValue("          "
+		+ "                                                  ");
+	__destinationAccount_JComboBox.setSelectionFailureFallback("~ - Unknown", 0);
 	JGUIUtil.addComponent(
-		dest, __destinationAccount_JComboBox,
+		__destination_JPanel, __destinationAccount_JComboBox,
 		3, y, 1, 1, 0, 0,
 		1, 0, 0, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
+	__destination_JComboBox.addActionListener(this);
+	return __destination_JPanel;
+}
 
-	// assemble panel2
-	JPanel source = new JPanel();
-	source.setLayout(gb);
+private JPanel setupGUI_OperationalRightInterveningStructures(String routine)
+{
+	JButton addButton = new JButton(__BUTTON_ADD);
+	addButton.addActionListener(this);
+	JButton deleteButton = new JButton(__BUTTON_DELETE);
+	deleteButton.addActionListener(this);
+
+	// TODO (JTS - 2003-09-23) will need enabled later
+	addButton.setEnabled(false);
+	deleteButton.setEnabled(false);
+	__interveningStructures_JPanel = new JPanel();
+	GridBagLayout gb = new GridBagLayout();
+	__interveningStructures_JPanel.setLayout(gb);
 	JGUIUtil.addComponent(
-		p2, source,
-		0, 1, 4, 1, 0, 0, 
+		__interveningStructures_JPanel, addButton,
+		0, 1, 1, 1, 0, 0,
 		0, 0, 0, 0,
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
-	source.setBorder(BorderFactory.createTitledBorder("Sources:"));
+		GridBagConstraints.NONE, GridBagConstraints.NORTHWEST);
+	JGUIUtil.addComponent(
+		__interveningStructures_JPanel, deleteButton,
+		1, 1, 1, 1, 0, 0,
+		0, 0, 0, 0,
+		GridBagConstraints.NONE, GridBagConstraints.NORTHWEST);
 	
-	y=0;
-	JGUIUtil.addComponent(
-		source, new JLabel("Source 1:"),
-		0, y, 1, 1, 0, 0,
-		0, 0, 0, 0,
-		GridBagConstraints.NONE, GridBagConstraints.EAST);
-	JGUIUtil.addComponent(
-		source, __source1_JComboBox,
-		1, y, 1, 1, 0, 0,
-		1, 0, 0, 1,
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
-	JGUIUtil.addComponent(
-		source, new JLabel("Account:"),
-		2, y, 1, 1, 0, 0,
-		0, 4, 0, 0,
-		GridBagConstraints.NONE, GridBagConstraints.EAST);
-	JGUIUtil.addComponent(
-		source, __sourceAccount1_JComboBox,
-		3, y, 1, 1, 0, 0,
-		1, 0, 0, 1,
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
-
-	y++;
-	JGUIUtil.addComponent(
-		source, new JLabel("Source 2:"),
-		0, y, 1, 1, 0, 0,
-		0, 0, 0, 0,
-		GridBagConstraints.NONE, GridBagConstraints.EAST);
-	JGUIUtil.addComponent(
-		source, __source2_JComboBox,
-		1, y, 1, 1, 0, 0,
-		1, 0, 0, 1,
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
-	JGUIUtil.addComponent(
-		source, new JLabel("Account:"),
-		2, y, 1, 1, 0, 0,
-		0, 4, 0, 0,
-		GridBagConstraints.NONE, GridBagConstraints.EAST);
-	JGUIUtil.addComponent(
-		source, __sourceAccount2_JComboBox,
-		3, y, 1, 1, 0, 0,
-		1, 0, 0, 1,
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
-
-	y++;
-	JGUIUtil.addComponent(
-		source, new JLabel("Source 3:"),
-		0, y, 1, 1, 0, 0,
-		0, 0, 0, 0,
-		GridBagConstraints.NONE, GridBagConstraints.EAST);
-	JGUIUtil.addComponent(
-		source, __source3_JComboBox,
-		1, y, 1, 1, 0, 0,
-		1, 0, 0, 1,
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
-	JGUIUtil.addComponent(
-		source, new JLabel("Account:"),
-		2, y, 1, 1, 0, 0,
-		0, 4, 0, 0,
-		GridBagConstraints.NONE, GridBagConstraints.EAST);
-	JGUIUtil.addComponent(
-		source, __sourceAccount3_JComboBox,
-		3, y, 1, 1, 0, 0,
-		1, 0, 0, 1,
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
-
-	y++;
-	JGUIUtil.addComponent(
-		source, new JLabel("Source 4:"),
-		0, y, 1, 1, 0, 0,
-		0, 0, 0, 0,
-		GridBagConstraints.NONE, GridBagConstraints.EAST);
-	JGUIUtil.addComponent(
-		source, __source4_JComboBox,
-		1, y, 1, 1, 0, 0,
-		1, 0, 0, 1,
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
-	JGUIUtil.addComponent(
-		source, new JLabel("Account:"),
-		2, y, 1, 1, 0, 0,
-		0, 4, 0, 0,
-		GridBagConstraints.NONE, GridBagConstraints.EAST);
-	JGUIUtil.addComponent(
-		source, __sourceAccount4_JComboBox,
-		3, y, 1, 1, 0, 0,
-		1, 0, 0, 1,
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
-
-	y++;
-	JGUIUtil.addComponent(
-		source, new JLabel("Source 5:"),
-		0, y, 1, 1, 0, 0,
-		0, 0, 0, 0,
-		GridBagConstraints.NONE, GridBagConstraints.EAST);
-	JGUIUtil.addComponent(
-		source, __source5_JComboBox,
-		1, y, 1, 1, 0, 0,
-		1, 0, 0, 1,
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
-	JGUIUtil.addComponent(
-		source, new JLabel("Account:"),
-		2, y, 1, 1, 0, 0,
-		0, 4, 0, 0,
-		GridBagConstraints.NONE, GridBagConstraints.EAST);
-	JGUIUtil.addComponent(
-		source, __sourceAccount5_JComboBox,
-		3, y, 1, 1, 0, 0,
-		1, 0, 0, 1,
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
-
-	// two top panels of info
-	JGUIUtil.addComponent(
-		mainJPanel, p1,
-		6, 0, 2, 1, 0, 0,
-		10, 10, 0, 0,
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
-	JGUIUtil.addComponent(
-		mainJPanel, p2,
-		6, GridBagConstraints.RELATIVE, 
-		2, 1, 0, 0,
-		0, 10, 0, 0,
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
-
-	__gridPanel.setBorder(BorderFactory.createTitledBorder(
-		"Intervening Structures or Secondary Constraints"));
+	__interveningStructures_JPanel.setBorder(BorderFactory.createTitledBorder(
+	"Intervening Structures or Secondary Constraints"));
 
 	PropList P2=new PropList("StateMod_OperationalRight_JFrame.JWorksheet");
-
+	
 	/*
 	P2.add("JWorksheet.CellFont=Courier");
 	P2.add("JWorksheet.CellStyle=Plain");
@@ -2802,8 +2960,7 @@ private void setupGUI(int index) {
 	P2.add("JWorksheet.ShowRowHeader=true");
 	P2.add("JWorksheet.ShowPopupMenu=true");
 	P2.add("JWorksheet.SelectionMode=SingleRowSelection");
-
-	int[] widthsR = null;
+	
 	JScrollWorksheet opRightJSW = null;
 	try {
 		StateMod_OperationalRight_TableModel tmo = new
@@ -2812,62 +2969,109 @@ private void setupGUI(int index) {
 			StateMod_OperationalRight_CellRenderer(tmo);
 	
 		opRightJSW = new JScrollWorksheet(cro, tmo, P2);
-		__opRightWorksheet = opRightJSW.getJWorksheet();
-		__opRightWorksheet.removeColumn(0);
-		__opRightWorksheet.removeColumn(1);
-//		__opRightWorksheet.setColumnComboBoxValues(2, new Vector());
-		widthsR = cro.getColumnWidths();
+		__interveningStructuresWorksheet = opRightJSW.getJWorksheet();
+		__interveningStructuresWorksheet.removeColumn(StateMod_OperationalRight_TableModel.COL_ID);
+		__interveningStructuresWorksheet.removeColumn(StateMod_OperationalRight_TableModel.COL_NAME);
+		__interveningStructuresWorksheet.removeColumn(StateMod_OperationalRight_TableModel.COL_TYPE);
+		//__opRightWorksheet.setColumnComboBoxValues(2, new Vector());
 	}
 	catch (Exception e) {
-		Message.printWarning(1, routine, "Error building worksheet.");
+		Message.printWarning(1, routine, "Error building intervening structures list.");
 		Message.printWarning(2, routine, e);
-		opRightJSW = new JScrollWorksheet(0, 0, p);
-		__opRightWorksheet = opRightJSW.getJWorksheet();
+		opRightJSW = new JScrollWorksheet(0, 0, P2);
+		__interveningStructuresWorksheet = opRightJSW.getJWorksheet();
 	}
-	__opRightWorksheet.setPreferredScrollableViewportSize(null);
-	__opRightWorksheet.setHourglassJFrame(this);
+	__interveningStructuresWorksheet.setPreferredScrollableViewportSize(null);
+	__interveningStructuresWorksheet.setHourglassJFrame(this);
 	/*
 	__opRightWorksheet.addMouseListener(this);
 	__opRightWorksheet.addKeyListener(this);
 	*/
+	return __interveningStructures_JPanel;
+}
 
-	JGUIUtil.addComponent(
-		__gridPanel, opRightJSW,
-		0, 0, 2, 1, 1, 1,
-		0, 0, 0, 0,
-		GridBagConstraints.BOTH, GridBagConstraints.NORTHWEST);
+/**
+Setup the GUI components for the operational rights list.
+@param routine
+*/
+private JScrollWorksheet setupGUI_OperationalRightList(String routine)
+{
+	PropList p = new PropList("StateMod_OperationalRight_JFrame.JWorksheet");
+	p.add("JWorksheet.ShowPopupMenu=true");
+	p.add("JWorksheet.AllowCopy=true");
+	p.add("JWorksheet.SelectionMode=SingleRowSelection");
 
-	JButton addButton = new JButton(__BUTTON_ADD);
-	addButton.addActionListener(this);
-	JButton deleteButton = new JButton(__BUTTON_DELETE);
-	deleteButton.addActionListener(this);
+	JScrollWorksheet jsw = null;
+	try {
+		StateMod_OperationalRight_TableModel tmo = new
+			StateMod_OperationalRight_TableModel( __operationalRights, __editable);
+		StateMod_OperationalRight_CellRenderer cro = new StateMod_OperationalRight_CellRenderer(tmo);
+	
+		jsw = new JScrollWorksheet(cro, tmo, p);
+		__worksheet = jsw.getJWorksheet();
+		// Don't want structure ID to be visible ( this is used for intervening structures)
+		__worksheet.removeColumn(StateMod_OperationalRight_TableModel.COL_STRUCTURE_ID);
+	}
+	catch (Exception e) {
+		Message.printWarning(1, routine, "Error building operational rights list.");
+		Message.printWarning(2, routine, e);
+		jsw = new JScrollWorksheet(0, 0, p);
+		__worksheet = jsw.getJWorksheet();
+	}
+	__worksheet.setPreferredScrollableViewportSize(null);
+	__worksheet.setHourglassJFrame(this);
+	__worksheet.addMouseListener(this);	
+	__worksheet.addKeyListener(this);
+	//jsw.setPreferredSize(new Dimension(300,600));
+	return jsw;
+}
 
-	// REVISIT (JTS - 2003-09-23)
-	// will need enabled later
-	addButton.setEnabled(false);
-	deleteButton.setEnabled(false);
+private JPanel setupGUI_OperationalRightMonthSwitch ( String routine )
+{
 
-	JGUIUtil.addComponent(
-		__gridPanel, addButton,
-		0, 1, 1, 1, 0, 0,
-		0, 0, 0, 0,
-		GridBagConstraints.NONE, GridBagConstraints.NORTHWEST);
-	JGUIUtil.addComponent(
-		__gridPanel, deleteButton,
-		1, 1, 1, 1, 0, 0,
-		0, 0, 0, 0,
-		GridBagConstraints.NONE, GridBagConstraints.NORTHWEST);
-		
-	__additionalPanel = new JPanel();
-	__additionalPanel.setLayout(gb);
-	__additionalPanel.setBorder(BorderFactory.createTitledBorder(
-		"Additional Data"));
+	__monthlySwitch_JPanel = new JPanel();
+	__monthlySwitch_JPanel.setBorder(BorderFactory.createTitledBorder("Monthly on/off switch:"));
+	GridBagLayout gb = new GridBagLayout();
+	__monthlySwitch_JPanel.setLayout(gb);
+	
+	int [] monthsCyr = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+	int [] monthsWyr = { 10, 11, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+	int [] monthsIyr = { 11, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	int [] months = monthsCyr;
+	if ( __dataset.getCyrl() == StateMod_DataSet.SM_WYR ) {
+		months = monthsWyr;
+	}
+	else if ( __dataset.getCyrl() == StateMod_DataSet.SM_IYR ) {
+		months = monthsIyr;
+	}
+	// Put in two rows because one row would be too wide
+	for ( int i = 0; i < 12; i++ ) {
+		__monthSwitch_JComboBox[i] = new SimpleJComboBox(false);
+		__monthSwitch_JComboBox[i].setPrototypeDisplayValue("-9999 - Off Year");
+		JGUIUtil.addComponent(__monthlySwitch_JPanel, new JLabel(TimeUtil.monthAbbreviation(months[i])),
+			i-(i/6)*6, (i/6)*2, 1, 1, 0, 0,
+			1, 0, 0, 1, 
+			GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
+		JGUIUtil.addComponent(__monthlySwitch_JPanel, __monthSwitch_JComboBox[i],
+			i-(i/6)*6, ((i/6)*2 + 1), 1, 1, 0, 0,
+			1, 0, 0, 1, 
+			GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
+	}
+	return __monthlySwitch_JPanel;
+}
+
+private JPanel setupGUI_OperationalRightRioGrande(String routine)
+{
+	__rioGrande_JPanel = new JPanel();
+	GridBagLayout gb = new GridBagLayout();
+	__rioGrande_JPanel.setLayout(gb);
+	__rioGrande_JPanel.setBorder(BorderFactory.createTitledBorder("Additional Data"));
 
 	JPanel lowerPanel = new JPanel();
 	lowerPanel.setLayout(gb);
 
 	JGUIUtil.addComponent(
-		lowerPanel, __gridPanel,
+		lowerPanel, __interveningStructures_JPanel,
 		0, 0, 1, 1, 1, 1,
 		0, 0, 0, 0,
 		GridBagConstraints.BOTH, GridBagConstraints.NORTHWEST);		
@@ -2933,99 +3137,219 @@ private void setupGUI(int index) {
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.NORTHWEST);
 		
-	JGUIUtil.addComponent(__additionalPanel, __opr8Panel,
+	JGUIUtil.addComponent(__rioGrande_JPanel, __opr8Panel,
 		0, 0, 1, 1, 1, 1,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.NORTHWEST);
-	JGUIUtil.addComponent(__additionalPanel, __qdebtPanel,
+	JGUIUtil.addComponent(__rioGrande_JPanel, __qdebtPanel,
 		0, 0, 1, 1, 1, 1,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.NORTHWEST);
-	JGUIUtil.addComponent(__additionalPanel, __opr20Panel,
+	JGUIUtil.addComponent(__rioGrande_JPanel, __opr20Panel,
 		0, 0, 1, 1, 1, 1,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.NORTHWEST);
 		
 	JGUIUtil.addComponent(
-		lowerPanel, __additionalPanel,
+		lowerPanel, __rioGrande_JPanel,
 		1, 0, 1, 1, 1, 1,
 		0, 0, 0, 0,		
 		GridBagConstraints.BOTH, GridBagConstraints.NORTHWEST);
-	__additionalPanel.setVisible(false);
+	__rioGrande_JPanel.setVisible(false);
+	return __rioGrande_JPanel;
+}
 
-	JGUIUtil.addComponent(
-		mainJPanel, lowerPanel,
-		6, 2, 1, 1, 1, 1,
-		0, 0, 0, 0,
-		GridBagConstraints.BOTH, GridBagConstraints.NORTHWEST);
-
-
-	// add bottom buttons
-	FlowLayout fl = new FlowLayout(FlowLayout.RIGHT);
-	JPanel pfinal = new JPanel();
-	pfinal.setLayout(fl);
-	pfinal.add(__showOnMap_JButton);
-	pfinal.add(__showOnNetwork_JButton);
-	if (__editable) {
-		pfinal.add(__applyJButton);
-		pfinal.add(__cancelJButton);
-	}
-//	pfinal.add(__helpJButton);
-	pfinal.add(__closeJButton);
-	__helpJButton.addActionListener(this);
-	__applyJButton.addActionListener(this);
-	__cancelJButton.addActionListener(this);
-	__closeJButton.addActionListener(this);
-	/*
-	JGUIUtil.addComponent(
-		mainJPanel, pfinal,
-		6, 8,
-		2, 1, 0, 0,
-		0, 0, 0, 0,
-		GridBagConstraints.NONE, GridBagConstraints.SOUTH);
-	*/
+private JPanel setupGUI_OperationalRightSource(String routine)
+{
+	// assemble panel2
+	__source_JPanel = new JPanel();
+	GridBagLayout gb = new GridBagLayout();
+	__source_JPanel.setLayout(gb);
+	__source_JPanel.setBorder(BorderFactory.createTitledBorder("Sources:"));
 	
-	// assemble panel3 - monthly operations
-	y=0;
-	JGUIUtil.addComponent(
-		__opSwitchPanel, new JLabel("Month Op.:"),
-		0, y, 2, 1, 0, 0,
-		0, 0, 0, 0,
-		GridBagConstraints.NONE, GridBagConstraints.CENTER);
-	y++;
-	for (int i=0; i<12; i++) {
-		JGUIUtil.addComponent(
-			__opSwitchPanel, new JLabel("" + (i + 1) + ")  "),
-			0, y, 1, 1, 1, 0,
-			1, 0, 0, -2,
-			GridBagConstraints.NONE, GridBagConstraints.EAST);
-		JGUIUtil.addComponent(
-			__opSwitchPanel, __monthSwitch[i],
-			1, y, 1, 1, 1, 0,
-			1, 0, 0, 0,
-			GridBagConstraints.NONE, GridBagConstraints.WEST);
-		y++;
-	}
-	JGUIUtil.addComponent(
-		mainJPanel, __opSwitchPanel,
-		GridBagConstraints.RELATIVE, 0, 1, 4, 0, 0,
-		0, 5, 0, 0,
-		GridBagConstraints.NONE, GridBagConstraints.NORTHWEST);
+	__source1_JComboBox = new SimpleJComboBox();
+	__source1_JComboBox.setPrototypeDisplayValue("                    "
+		+ "                                                  ");
+	__sourceAccount1_JComboBox = new SimpleJComboBox();
+	__sourceAccount1_JComboBox.setPrototypeDisplayValue("          "
+		+ "                                                  ");
+	__source2_JComboBox = new SimpleJComboBox();
+	__source2_JComboBox.setPrototypeDisplayValue("                    "
+		+ "                                                  ");
+	__sourceAccount2_JComboBox = new SimpleJComboBox();
+	__sourceAccount2_JComboBox.setPrototypeDisplayValue("          "
+		+ "                                                  ");
+	__source3_JComboBox = new SimpleJComboBox();
+	__source3_JComboBox.setPrototypeDisplayValue("                    "
+		+ "                                                  ");
+	__sourceAccount3_JComboBox = new SimpleJComboBox();
+	__sourceAccount3_JComboBox.setPrototypeDisplayValue("          "
+		+ "                                                  ");
+	__source4_JComboBox = new SimpleJComboBox();
+	__source4_JComboBox.setPrototypeDisplayValue("                    "
+		+ "                                                  ");
+	__sourceAccount4_JComboBox = new SimpleJComboBox();
+	__sourceAccount4_JComboBox.setPrototypeDisplayValue("          "
+		+ "                                                  ");
+	__source5_JComboBox = new SimpleJComboBox();
+	__source5_JComboBox.setPrototypeDisplayValue("                    "
+		+ "                                                  ");
+	__sourceAccount5_JComboBox = new SimpleJComboBox();
+	__sourceAccount5_JComboBox.setPrototypeDisplayValue("          "
+		+ "                                                  ");
+	__source1_JComboBox.setSelectionFailureFallback("~ - Unknown", 0);
+	__source2_JComboBox.setSelectionFailureFallback("~ - Unknown", 0);
+	__source3_JComboBox.setSelectionFailureFallback("~ - Unknown", 0);
+	__source4_JComboBox.setSelectionFailureFallback("~ - Unknown", 0);
+	__source5_JComboBox.setSelectionFailureFallback("~ - Unknown", 0);
 
-	// add search areas
-	//y=5;
-	y=0;
+	__sourceAccount1_JComboBox.setSelectionFailureFallback("~ - Unknown", 0);
+	__sourceAccount2_JComboBox.setSelectionFailureFallback("~ - Unknown", 0);
+	__sourceAccount3_JComboBox.setSelectionFailureFallback("~ - Unknown", 0);
+	__sourceAccount4_JComboBox.setSelectionFailureFallback("~ - Unknown", 0);
+	__sourceAccount5_JComboBox.setSelectionFailureFallback("~ - Unknown", 0);
+	int y=0;
+	JGUIUtil.addComponent(
+		__source_JPanel, new JLabel("Source 1:"),
+		0, y, 1, 1, 0, 0,
+		0, 0, 0, 0,
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
+	JGUIUtil.addComponent(
+		__source_JPanel, __source1_JComboBox,
+		1, y, 1, 1, 0, 0,
+		1, 0, 0, 1,
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
+	JGUIUtil.addComponent(
+		__source_JPanel, new JLabel("Account:"),
+		2, y, 1, 1, 0, 0,
+		0, 4, 0, 0,
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
+	JGUIUtil.addComponent(
+		__source_JPanel, __sourceAccount1_JComboBox,
+		3, y, 1, 1, 0, 0,
+		1, 0, 0, 1,
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
+
+	y++;
+	JGUIUtil.addComponent(
+		__source_JPanel, new JLabel("Source 2:"),
+		0, y, 1, 1, 0, 0,
+		0, 0, 0, 0,
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
+	JGUIUtil.addComponent(
+		__source_JPanel, __source2_JComboBox,
+		1, y, 1, 1, 0, 0,
+		1, 0, 0, 1,
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
+	JGUIUtil.addComponent(
+		__source_JPanel, new JLabel("Account:"),
+		2, y, 1, 1, 0, 0,
+		0, 4, 0, 0,
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
+	JGUIUtil.addComponent(
+		__source_JPanel, __sourceAccount2_JComboBox,
+		3, y, 1, 1, 0, 0,
+		1, 0, 0, 1,
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
+
+	y++;
+	JGUIUtil.addComponent(
+		__source_JPanel, new JLabel("Source 3:"),
+		0, y, 1, 1, 0, 0,
+		0, 0, 0, 0,
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
+	JGUIUtil.addComponent(
+		__source_JPanel, __source3_JComboBox,
+		1, y, 1, 1, 0, 0,
+		1, 0, 0, 1,
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
+	JGUIUtil.addComponent(
+		__source_JPanel, new JLabel("Account:"),
+		2, y, 1, 1, 0, 0,
+		0, 4, 0, 0,
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
+	JGUIUtil.addComponent(
+		__source_JPanel, __sourceAccount3_JComboBox,
+		3, y, 1, 1, 0, 0,
+		1, 0, 0, 1,
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
+
+	y++;
+	JGUIUtil.addComponent(
+		__source_JPanel, new JLabel("Source 4:"),
+		0, y, 1, 1, 0, 0,
+		0, 0, 0, 0,
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
+	JGUIUtil.addComponent(
+		__source_JPanel, __source4_JComboBox,
+		1, y, 1, 1, 0, 0,
+		1, 0, 0, 1,
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
+	JGUIUtil.addComponent(
+		__source_JPanel, new JLabel("Account:"),
+		2, y, 1, 1, 0, 0,
+		0, 4, 0, 0,
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
+	JGUIUtil.addComponent(
+		__source_JPanel, __sourceAccount4_JComboBox,
+		3, y, 1, 1, 0, 0,
+		1, 0, 0, 1,
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
+
+	y++;
+	JGUIUtil.addComponent(
+		__source_JPanel, new JLabel("Source 5:"),
+		0, y, 1, 1, 0, 0,
+		0, 0, 0, 0,
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
+	JGUIUtil.addComponent(
+		__source_JPanel, __source5_JComboBox,
+		1, y, 1, 1, 0, 0,
+		1, 0, 0, 1,
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
+	JGUIUtil.addComponent(
+		__source_JPanel, new JLabel("Account:"),
+		2, y, 1, 1, 0, 0,
+		0, 4, 0, 0,
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
+	JGUIUtil.addComponent(
+		__source_JPanel, __sourceAccount5_JComboBox,
+		3, y, 1, 1, 0, 0,
+		1, 0, 0, 1,
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
+	__source1_JComboBox.addActionListener(this);
+	return __source_JPanel;
+}
+
+private JPanel setupGUI_SearchPanel(String routine)
+{
+	int y = 0;
+	JPanel psearch = new JPanel();
+	psearch.setMinimumSize(new Dimension(250,100));
+	psearch.setPreferredSize(new Dimension(250,100));
+	GridBagLayout gb = new GridBagLayout();
+	psearch.setLayout(gb);
 	psearch.setBorder(BorderFactory.createTitledBorder("Search above list for:"));
+	__searchCriteriaGroup = new ButtonGroup();
+	__searchIDJRadioButton = new JRadioButton("ID", true);
+	__searchIDJRadioButton.addActionListener(this);
+	__searchCriteriaGroup.add(__searchIDJRadioButton);
 	JGUIUtil.addComponent(psearch, __searchIDJRadioButton,
 		0, y, 1, 1, 0, 0,
 		1, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
+	__searchID = new JTextField(10);
 	JGUIUtil.addComponent(psearch, __searchID,
-		1, y, 1, 1, 1, 1,
+		1, y, 1, 1, 1.0, 0.0,
 		1, 0, 0, 0,
-		GridBagConstraints.NONE, GridBagConstraints.EAST);
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.EAST);
 	__searchID.addActionListener(this);
 	y++;
+	__searchNameJRadioButton = new JRadioButton("Name", false);
+	__searchNameJRadioButton.addActionListener(this);
+	__searchCriteriaGroup.add(__searchNameJRadioButton);
+	__searchName = new JTextField(10);
+	__searchName.setEditable(false);
 	JGUIUtil.addComponent(
 		psearch, __searchNameJRadioButton,
 		0, y, 1, 1, 0, 0,
@@ -3033,70 +3357,64 @@ private void setupGUI(int index) {
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	JGUIUtil.addComponent(
 		psearch, __searchName,
-		1, y, 1, 1, 1, 1,
+		1, y, 1, 1, 1.0, 1.0,
 		1, 0, 0, 0,
-		GridBagConstraints.NONE, GridBagConstraints.EAST);
+		GridBagConstraints.HORIZONTAL, GridBagConstraints.EAST);
 	__searchName.addActionListener(this);
 	y++;
+	__findNextOpr = new JButton("Find Next");
 	JGUIUtil.addComponent(
 		psearch, __findNextOpr,
 		0, y, 4, 1, 0, 0,
 		5, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	__findNextOpr.addActionListener(this);
-	JGUIUtil.addComponent(
-		mainJPanel, psearch,
-		0, 5, 4, 1, 0, 0,
-		3, 10, 3, 0,
-		GridBagConstraints.NONE, GridBagConstraints.CENTER);
 
-	getContentPane().add(mainJPanel);
-	
-	JPanel bottomJPanel = new JPanel();
-	bottomJPanel.setLayout (gb);
-	__message_JTextField = new JTextField();
-	__message_JTextField.setEditable(false);
-	JGUIUtil.addComponent(bottomJPanel, pfinal,
-		0, 0, 8, 1, 1, 1,
-		GridBagConstraints.HORIZONTAL, GridBagConstraints.EAST);	
-	JGUIUtil.addComponent(bottomJPanel, __message_JTextField,
-		0, 1, 7, 1, 1.0, 0.0, 
-		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
-	__status_JTextField = new JTextField(5);
-	__status_JTextField.setEditable(false);
-	JGUIUtil.addComponent(bottomJPanel, __status_JTextField,
-		7, 1, 1, 1, 0.0, 0.0, 
-		GridBagConstraints.NONE, GridBagConstraints.WEST);
-	getContentPane().add ("South", bottomJPanel);	
+	return psearch;
+}
 
-	initializeDisables();
-
-	if ( __dataset_wm != null ) {
-		__dataset_wm.setWindowOpen (
-		StateMod_DataSet_WindowManager.WINDOW_OPERATIONAL_RIGHT, this);
-	}
-
-	pack();
-	setSize(1050,700);
-	JGUIUtil.center(this);
-	//setResizable(false);
-	selectTableIndex(index);
-	setVisible(true);
-
-	if (widths != null) {
-		__worksheet.setColumnWidths(widths);
-	}
-	if (widthsR != null) {
-		__opRightWorksheet.setColumnWidths(widthsR);
-	}
-
-	// put these here so any changes while the GUI is initializing 
-	// don't cause itemStateChanged events.
-	__destination_JComboBox.addActionListener(this);
-	__source1_JComboBox.addActionListener(this);
-	__ruleTypeSwitch_JComboBox.addActionListener(this);
-
-	__worksheet.addSortListener(this);
+/**
+Setup text editor panel, used when the GUI does not know how to handle the details of an operational right.
+@param routine
+*/
+private JPanel setupGUI_OperationalRightTextEditor (String routine)
+{
+	__textEditor_JPanel = new JPanel();
+	__textEditor_JPanel.setBorder(BorderFactory.createTitledBorder(
+		"Operational right text (for types where detailed editing has not been implemented):"));
+	GridBagLayout gb = new GridBagLayout();
+	__textEditor_JPanel.setLayout(gb);
+	__textEditor_JPanel.setMinimumSize(new Dimension(600,200));
+    JTextArea ref_JTextArea = new JTextArea (2, 100);
+    // Add a string buffer with reference positions - similar to TSTool comments
+    // 206 characters from record 1 so put for 210
+    //0        10        20
+    //12345678901234567890...
+    int n10 = 21; // number to repeat.
+    // TODO SAM 2007-04-22 REVISIT layout for n10=20
+    StringBuffer b = new StringBuffer();
+    b.append ( StringUtil.formatString(0,"%-9d"));
+    for ( int i = 1; i < n10; i++ ) {
+    	b.append( StringUtil.formatString(i*10,"%-10d"));
+    }
+    b.append ( "\n");
+    b.append ( "1234567890");
+    for ( int i = 1; i < n10; i++ ) {
+    	b.append( "1234567890");
+    }
+    ref_JTextArea.setText( b.toString() );
+	ref_JTextArea.setEditable (false);
+	ref_JTextArea.setEnabled ( false );
+	__textEditor_JTextArea = new JTextArea(8,100);
+	JPanel combined_JPanel = new JPanel();
+	combined_JPanel.setLayout(gb);
+	JGUIUtil.addComponent(combined_JPanel, ref_JTextArea,
+			0, 0, 6, 1, 1, 1, 1, 1, 1, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
+	JGUIUtil.addComponent(combined_JPanel, __textEditor_JTextArea,
+			0, 1, 6, 1, 1, 1, 1, 1, 1, 1, GridBagConstraints.BOTH, GridBagConstraints.CENTER);
+	JGUIUtil.addComponent(__textEditor_JPanel, new JScrollPane(combined_JPanel),
+		0, 0, 6, 1, 1, 1, 1, 1, 1, 1, GridBagConstraints.BOTH, GridBagConstraints.CENTER);
+	return __textEditor_JPanel;
 }
 
 /**
@@ -3121,9 +3439,9 @@ private void setupMonthlyChoices(StateMod_OperationalRight opr) {
 			v.add("0 - Off");
 			v.add("1 - On");
 			for (int i = 0; i < 12; i++) {
-				__monthSwitch[i].setData(v);
-				__monthSwitch[i].setEditable(false);
-				__monthSwitch[i].select(opr.getImonsw(i));
+				__monthSwitch_JComboBox[i].setData(v);
+				__monthSwitch_JComboBox[i].setEditable(false);
+				__monthSwitch_JComboBox[i].select(opr.getImonsw(i));
 			}
 			break;
 
@@ -3139,10 +3457,10 @@ private void setupMonthlyChoices(StateMod_OperationalRight opr) {
 			v.add("1 - On");
 			v.add("2 - On / Month to Check");
 			for (int i = 0; i < 12; i++) {
-				__monthSwitch[i].setData(v);
-				__monthSwitch[i].setEditable(false);
+				__monthSwitch_JComboBox[i].setData(v);
+				__monthSwitch_JComboBox[i].setEditable(false);
 				imonsw = opr.getImonsw(i);
-				__monthSwitch[i].select(imonsw + 1);
+				__monthSwitch_JComboBox[i].select(imonsw + 1);
 			}
 			break;
 
@@ -3150,24 +3468,6 @@ private void setupMonthlyChoices(StateMod_OperationalRight opr) {
 			return;
 	}
 }
-
-/**
-Trims a string in the format "XXX - YYY" by removing everything after 'XXX'.
-@param s the String to trim.
-@return a trimmed string.
-*/
-private String trim(String s) {
-	if (s == null) {
-		return "";
-	}
-	int index = s.indexOf(" - ");
-	String s2 = new String(s);
-	if (index > -1) {
-		s2 = s2.substring(0, index);
-	}
-	s2 = s2.trim();
-	return s2;
-}	
 
 /**
 Responds to Window Activated events; does nothing.

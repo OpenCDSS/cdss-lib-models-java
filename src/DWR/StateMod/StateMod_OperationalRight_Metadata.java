@@ -1,9 +1,7 @@
 package DWR.StateMod;
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
@@ -15,7 +13,9 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 */
 
+import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
+import RTi.Util.Table.DataTable;
 
 /**
 Class to hold operational right metadata, which helps the software with error checks and visualization.
@@ -25,6 +25,12 @@ can be search for when annotating the network diagram.
 */
 public class StateMod_OperationalRight_Metadata
 {
+	
+/**
+Indicate whether the editing class supports the right (true) - if false, a text editor will
+be used for the operational right.
+*/
+private boolean __fullEditingSupported = false;
 
 /**
 Operational right (operating rule) type - to group rules for editing.
@@ -71,7 +77,8 @@ private boolean __usesInterveningStructures = false;
 /**
 Constructor for metadata.
 */
-public StateMod_OperationalRight_Metadata ( int rightTypeNumber, String rightName,
+public StateMod_OperationalRight_Metadata ( int rightTypeNumber, boolean fullEditingSupported,
+	String rightName,
 	StateMod_OperationalRight_Metadata_RuleType ruleTypeCategory,
 	StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source1Types,
 	StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source2Types,
@@ -87,6 +94,7 @@ public StateMod_OperationalRight_Metadata ( int rightTypeNumber, String rightNam
 	String comment )
 {
 	setRightTypeNumber ( rightTypeNumber );
+	setFullEditingSupported ( fullEditingSupported );
 	setRightTypeName ( rightName );
 	setRuleTypeCategory ( ruleTypeCategory );
 	setDestinationTypes ( destinationTypes );
@@ -110,6 +118,14 @@ Return the allowed destination types for the right.
 public StateMod_OperationalRight_Metadata_SourceOrDestinationType [] getDestinationTypes ()
 {
 	return __destinationTypes;
+}
+
+/**
+Return whether full editing is supported for the right.
+*/
+public boolean getFullEditingSupported ()
+{
+	return __fullEditingSupported;
 }
 
 /**
@@ -224,7 +240,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_1 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Reservoir Release to an Instream Flow",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_RESERVOIR,
 					source1Array_1,
@@ -254,7 +270,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_2 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Reservoir Release to a Diversion, Reservoir, or Carrier",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_RESERVOIR,
 					source1Array_2,
@@ -285,7 +301,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_3 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Reservoir Release to a Direct Diversion or Reservoir by a Carrier",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_RESERVOIR,
 					source1Array_3,
@@ -315,7 +331,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_4 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Reservoir Release to a Direct Diversion by Exchange with the River",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_RESERVOIR,
 					source1Array_4,
@@ -344,7 +360,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_5 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Reservoir Storage by Exchange",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_RESERVOIR,
 					source1Array_5,
@@ -373,7 +389,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_6 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Paper Exchange Between Reservoirs",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_RESERVOIR,
 					source1Array_6,
@@ -402,7 +418,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_7 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Reservoir to a Carrier by Exchange",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_RESERVOIR,
 					source1Array_7,
@@ -431,7 +447,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_8 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Out of Priority Reservoir Bookover",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_RESERVOIR,
 					source1Array_8,
@@ -460,7 +476,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_9 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Reservoir Release to Meet Target",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_RESERVOIR,
 					source1Array_9,
@@ -490,7 +506,7 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_10 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION,
 					StateMod_OperationalRight_Metadata_DiversionType.DEPLETION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"General Replacement Reservoir to a Diversion by a Direct Release or Exchange",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_RESERVOIR,
 					source1Array_10,
@@ -521,7 +537,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_11 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Carrier to a Ditch or Reservoir",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_DIRECT_FLOW_RIGHT,
 					source1Array_11,
@@ -550,7 +566,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_12 =
 					{StateMod_OperationalRight_Metadata_DiversionType.NA};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Reoperate Water Rights",
 					StateMod_OperationalRight_Metadata_RuleType.OTHER,
 					source1Array_12,
@@ -579,7 +595,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_13 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"La Plata Compact (Index Flow Contraint on Stream Gage)",
 					StateMod_OperationalRight_Metadata_RuleType.COMPACT,
 					source1Array_13,
@@ -609,7 +625,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_14 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Carrier Right with Constrained Demand",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_DIRECT_FLOW_RIGHT,
 					source1Array_14,
@@ -638,7 +654,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_15 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Interruptible Supply",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_DIRECT_FLOW_RIGHT,
 					source1Array_15,
@@ -667,7 +683,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_16 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Direct Flow Storage",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_DIRECT_FLOW_RIGHT,
 					source1Array_16,
@@ -696,7 +712,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_17 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Rio Grande Compact (Rio Grande)",
 					StateMod_OperationalRight_Metadata_RuleType.COMPACT,
 					source1Array_17,
@@ -725,7 +741,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_18 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Rio Grande Compact (Conejos)",
 					StateMod_OperationalRight_Metadata_RuleType.COMPACT,
 					source1Array_18,
@@ -754,7 +770,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_19 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Split Channel Operation",
 					StateMod_OperationalRight_Metadata_RuleType.OTHER,
 					source1Array_19,
@@ -783,7 +799,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_20 =
 					{StateMod_OperationalRight_Metadata_DiversionType.NA};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"San Juan Reservoir RIP Operation",
 					StateMod_OperationalRight_Metadata_RuleType.COMPACT,
 					source1Array_20,
@@ -812,7 +828,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_21 =
 					{StateMod_OperationalRight_Metadata_DiversionType.NA};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Wells with Sprinkler Use",
 					StateMod_OperationalRight_Metadata_RuleType.OTHER,
 					source1Array_21,
@@ -842,7 +858,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_22 =
 					{StateMod_OperationalRight_Metadata_DiversionType.NA};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Soil Moisture Use",
 					StateMod_OperationalRight_Metadata_RuleType.SOIL_MOISTURE,
 					source1Array_22,
@@ -871,7 +887,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_23 =
 					{StateMod_OperationalRight_Metadata_DiversionType.NA};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Downstream Call",
 					StateMod_OperationalRight_Metadata_RuleType.OTHER,
 					source1Array_23,
@@ -903,7 +919,7 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_24 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DEPLETION,
 					StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Direct Flow Exchange of a Pro-rata Water Right",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_DIRECT_FLOW_RIGHT,
 					source1Array_24,
@@ -935,7 +951,7 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_25 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DEPLETION,
 					StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Direct Flow Bypass of a Pro-rata Water Right",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_DIRECT_FLOW_RIGHT,
 					source1Array_25,
@@ -964,7 +980,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_26 =
 					{StateMod_OperationalRight_Metadata_DiversionType.NA};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Not currently used - see type 48, 49",
 					StateMod_OperationalRight_Metadata_RuleType.NA,
 					source1Array_26,
@@ -1004,7 +1020,7 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_27 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DEPLETION,
 					StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Reservoir, Reuse, or Accounting Plan to a Diversion, Reservoir, or Carrier, with Reuse",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_PLAN_STRUCTURE,
 					source1Array_27,
@@ -1044,7 +1060,7 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_28 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DEPLETION,
 					StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Reuse Plan to a Diversion or Reservoir by Exchange with or without Destination Reuse",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_PLAN_STRUCTURE,
 					source1Array_28,
@@ -1080,7 +1096,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_29 =
 					{StateMod_OperationalRight_Metadata_DiversionType.NA};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Reuse or Accounting Plan Spill",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_PLAN_STRUCTURE,
 					source1Array_29,
@@ -1110,7 +1126,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_30 =
 					{StateMod_OperationalRight_Metadata_DiversionType.NA};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Rservoir Re-diversion",
 					StateMod_OperationalRight_Metadata_RuleType.OTHER,
 					source1Array_30,
@@ -1149,7 +1165,7 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_31 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DEPLETION,
 					StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Carrier Right to a Ditch or Reservoir with Reuseable Return Flows",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_DIRECT_FLOW_RIGHT,
 					source1Array_31,
@@ -1189,7 +1205,7 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_32 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DEPLETION,
 					StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Reservoir and Plan to a Direct Flow or Reservoir or Carrier Direct with or without Destination Reuse",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_PLAN_STRUCTURE,
 					source1Array_32,
@@ -1229,7 +1245,7 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_33 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DEPLETION,
 					StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Reservoir and Plan to a Direct Flow or Reservoir or Carrier by Exchange with or without Destination Reuse",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_RESERVOIR,
 					source1Array_33,
@@ -1269,7 +1285,7 @@ private static void initialize ()
 					StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_RESERVOIR_FROM_TRANSMOUNTAIN};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_34 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Reservoir to Reservoir Transfer (Bookover) with Reuse",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_RESERVOIR,
 					source1Array_34,
@@ -1303,7 +1319,7 @@ private static void initialize ()
 					StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_RESERVOIR_FROM_TRANSMOUNTAIN};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_35 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Import to a Diversion, Reservoir, or Carrier with or without Reuse",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_PLAN_STRUCTURE,
 					source1Array_35,
@@ -1332,7 +1348,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_36 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Seasonal (daily) On/Off Capability (e.g., Meadow Rights)",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_DIRECT_FLOW_RIGHT,
 					source1Array_36,
@@ -1365,7 +1381,7 @@ private static void initialize ()
 					StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_RESERVOIR_FROM_TRANSMOUNTAIN};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_37 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Augmentation Well",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_GROUNDWATER,
 					source1Array_37,
@@ -1398,7 +1414,7 @@ private static void initialize ()
 					StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_RESERVOIR_FROM_TRANSMOUNTAIN};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_38 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Out of Priority Diversion (addresses the upstream storage statute)",
 					StateMod_OperationalRight_Metadata_RuleType.STORAGE_OPERATIONS,
 					source1Array_38,
@@ -1428,7 +1444,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO };
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_39 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Alternate Point Diversion",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_DIRECT_FLOW_RIGHT,
 					source1Array_39,
@@ -1457,7 +1473,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO };
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_40 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"South Platte Compact",
 					StateMod_OperationalRight_Metadata_RuleType.COMPACT,
 					source1Array_40,
@@ -1486,7 +1502,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO };
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_41 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Reservoir Storage with Special Limits",
 					StateMod_OperationalRight_Metadata_RuleType.STORAGE_OPERATIONS,
 					source1Array_41,
@@ -1517,7 +1533,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO };
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_42 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Plan Demand Reset",
 					StateMod_OperationalRight_Metadata_RuleType.STORAGE_OPERATIONS,
 					source1Array_42,
@@ -1546,7 +1562,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_WELL_AUGMENTATION };
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_43 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"In-Priority Well Depletion",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_PLAN_STRUCTURE,
 					source1Array_43,
@@ -1575,7 +1591,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_WELL_AUGMENTATION };
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_44 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Recharge Well",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_GROUNDWATER,
 					source1Array_44,
@@ -1605,7 +1621,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_RECHARGE };
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_45 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Carrier with Transit Loss (allows multiple carriers and associated losses)",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_DIRECT_FLOW_RIGHT,
 					source1Array_45,
@@ -1634,7 +1650,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO };
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_46 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Multiple Ownership Plans (distributes plan contents to multiple plans)",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_PLAN_STRUCTURE,
 					source1Array_46,
@@ -1665,7 +1681,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO };
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_47 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Administration Plan Limits",
 					StateMod_OperationalRight_Metadata_RuleType.STORAGE_OPERATIONS,
 					source1Array_47,
@@ -1703,7 +1719,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.YES };
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_48 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Plan or Reservoir Reuse to a Plan Direct",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_PLAN_STRUCTURE,
 					source1Array_48,
@@ -1741,7 +1757,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.YES };
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_49 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i,
+				metaData = new StateMod_OperationalRight_Metadata( i, false,
 					"Plan or Reservoir Reuse to a Plan by Exchange",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_PLAN_STRUCTURE,
 					source1Array_49,
@@ -1767,12 +1783,35 @@ Read the global public metadata.  This is intended to supply metadata only for r
 understood by the code.  For example, it is possible that new rights will be added to the FORTRAN model
 but the Java will not be updated.  Consequently, the external file helps the software implement advanced
 features such as drawing the operational right on the network.
+Currently the only data read indicate whether full editing for the right is supported.
+@param filename name of operational rights metadata
 */
 public static void readGlobalData ( String filename )
 throws FileNotFoundException, IOException
-{
-	//List<StateMod_OperationalRight_Metadata> metadataList = readSpreadsheet ( filename );
-
+{	String routine = "StateMod_OperationalRight_Metadata.readGlobalData";
+	try {
+		PropList props = new PropList("opr");
+		props.set("CommentLineIndicator=#");
+		props.set("Delimiter=,");
+		props.set("ColumnDataTypes=Auto");
+		props.set("TrimStrigs=true");
+		DataTable table = DataTable.parseFile(filename, props);
+		// Loop through the table rows and reset if any rights are not supported for editing
+		int nrows = table.getNumberOfRecords();
+		String fullEditingSupported;
+		Integer ruleType;
+		for ( int iRow = 0; iRow < nrows; iRow++ ) {
+			ruleType = (Integer)table.getFieldValue(iRow,"Type");
+			fullEditingSupported = (String)table.getFieldValue(iRow, "EditingSupported" );
+			if ( (fullEditingSupported != null) && fullEditingSupported.equalsIgnoreCase("no") ) {
+				Message.printStatus(2, routine, "Turning off full editing for operational right type " + ruleType );
+				StateMod_OperationalRight_Metadata.getMetadata(ruleType).setFullEditingSupported(false);
+			}
+		}
+	}
+	catch ( Exception e ) {
+		throw new IOException ( "Error reading operational right configuruation file \"" + filename + "\"", e );
+	}
 }
 	
 /**
@@ -1824,6 +1863,15 @@ Make private because objects should be immutable.
 private void setDestinationTypes ( StateMod_OperationalRight_Metadata_SourceOrDestinationType [] destinationTypes )
 {
 	__destinationTypes = destinationTypes;
+}
+
+/**
+Set whether full editing is supported.
+@param fullEditingSupported whether full editing is supported
+*/
+private void setFullEditingSupported ( boolean fullEditingSupported )
+{
+	__fullEditingSupported = fullEditingSupported;
 }
 
 /**

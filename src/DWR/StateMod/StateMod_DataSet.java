@@ -5093,20 +5093,18 @@ Set a component dirty (edited).  This method is usually called by the set
 methods in the individual StateMod_Data classes.  This marks the component as
 dirty independent of the state of the individual data objects in the component.
 If a component is dirty, it needs to be written to a file because data or the file name have changed.
-@param component_type The component type within the data set(see COMP*).
-@param is_dirty true if the component should be marked as dirty (edited), false
+@param componentType The component type within the data set(see COMP*).
+@param isDirty true if the component should be marked as dirty (edited), false
 if the component should be marked clean (from data read, or edits saved).
 */
-public void setDirty(int component_type, boolean is_dirty)
-{	DataSetComponent comp = getComponentForComponentType ( component_type );
-	// TODO SAM 2006-08-22 What is this?  Left over from Tom???
-/*
-	if (DUMP_DIRTY && component_type == COMP_OPERATION_RIGHTS) {
-		RTi.Util.GUI.JWorksheet.except(2, 4);
-	}
-*/
+public void setDirty(int componentType, boolean isDirty)
+{	DataSetComponent comp = getComponentForComponentType ( componentType );
 	if ( comp != null ) {
-		comp.setDirty(is_dirty);
+		comp.setDirty(isDirty);
+		//if ( Message.isDebugOn ) {
+		//	Message.printDebug(1, "", "Setting component \"" + comp.getComponentName() + "\" dirty=" + isDirty);
+		//	throw new RuntimeException ( "Find this");
+		//}
 	}
 }
 
