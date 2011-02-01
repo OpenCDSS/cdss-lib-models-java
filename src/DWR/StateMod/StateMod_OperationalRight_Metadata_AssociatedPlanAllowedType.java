@@ -7,13 +7,9 @@ which can be used to perform checks and visualization.
 public enum StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType
 {
     /**
-     * Not applicable.
+     * Not applicable (associated plan not allowed).
      */
     NA("NA"),
-    /**
-     * NO.
-     */
-    NO("No"),
     /**
      * Reuse plans
      */
@@ -24,11 +20,7 @@ public enum StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType
     PLAN_REUSE_TO_DIVERSION("Plan (Reuse to Diversion)"),
     PLAN_REUSE_TO_DIVERSION_FROM_TRANSMOUNTAIN("Plan (Reuse to Diversion from Transmountain)"),
     PLAN_TC("Plan (Terms & Conditions)"),
-    PLAN_WELL_AUGMENTATION("Plan (Well Augmentation)"),
-    /**
-     * Yes.
-     */
-    YES("Yes");
+    PLAN_WELL_AUGMENTATION("Plan (Well Augmentation)");
     
     /**
      * The name that should be displayed when the best fit type is used in UIs and reports.

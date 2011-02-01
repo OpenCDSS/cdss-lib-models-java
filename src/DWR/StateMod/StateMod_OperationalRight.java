@@ -229,6 +229,13 @@ Ending year of operation.
 private int __ioEnd;
 
 /**
+TODO SAM 2011-01-29 Phase out when operational rights as documented have been fully tested in code.
+A list of strings indicating errors at read.  This is checked to determine if the right should be edited
+as text (yes if any errors) or detailed (no if any errors).
+*/
+private List<String> __readErrorList = new Vector();
+
+/**
 The operational right as a list of strings (lines after right comments and prior to the comments for
 the next right.
 */
@@ -245,6 +252,7 @@ private String __cx = "";
 
 /**
 The metadata that corresponds to the operational right type, or null if the right type is not recognized.
+The metadata is set when the operational right type is set.
 */
 private StateMod_OperationalRight_Metadata __metadata = null;
 
@@ -787,7 +795,7 @@ public List<String> getInterveningStructureIDs()
 	if ( __metadata == null ) {
 		return structureIDList;
 	}
-	else if ( __metadata.getUsesInterveningStructures() ) {
+	else if ( __metadata.getRightTypeUsesInterveningStructures() ) {
 		String[] intern = getIntern();
 		if ( (intern == null) || (intern.length == 0) ) {
 			return structureIDList;
@@ -903,9 +911,22 @@ public double getOprLoss() {
 }
 
 /**
- * @return the list of strings that containing the operating rule data when the
- * right is not understood.
- */
+Return the list of strings that contain read error messages, when the first line of the right is
+inconsistent with the documentation.  This may indicate that the documentation is wrong or the code is
+wrong, but may be that the data file is wrong and needs to be cleaner.  For example, a hand-edited
+operational right may be inaccurate and StateMod allows.  This right can be treated as text until the
+error in documentation/code/data are corrected.
+@return the list of strings that contain read error messages, when the first line of the right is
+inconsistent with the documentation.
+*/
+public List<String> getReadErrors()
+{
+	return __readErrorList;
+}
+
+/**
+@return the list of strings that contain the operating rule data when the right is not understood.
+*/
 public List<String> getRightStrings()
 {
 	return __rightStringsList;
@@ -938,37 +959,44 @@ public double getSjmina() {
 /**
 Initializes member variables.
 */
-private void initialize() {
+private void initialize()
+{
 	_smdata_type = StateMod_DataSet.COMP_OPERATION_RIGHTS;
-	_rtem = "0";
-	_dumx = 0;
+	_rtem = "";
+	_dumx = StateMod_Util.MISSING_INT;
 	_ciopde = "";
-	_iopdes = "0";
+	_iopdes = "";
 	_ciopso1 = "";
-	_iopsou1 = "0";
+	_iopsou1 = "";
 	_ciopso2 = "";
-	_iopsou2 = "0";
+	_iopsou2 = "";
 	_ciopso3 = "";
-	_iopsou3 = "0";
+	_iopsou3 = "";
 	_ciopso4 = "";
-	_iopsou4 = "0";
+	_iopsou4 = "";
 	_ciopso5 = "";
-	_iopsou5 = "0";
-	setItyopr ( 0 );	// Unknown
-	_imonsw = null;	// Define in constructor or when reading
-	_intern = null;	// Define in constructor or when reading
-	__commentsBeforeData = new Vector(1);
-	_qdebt = 0.0;
-	_qdebtx = 0.0;
-	_sjmina = 0.0;
-	_sjrela = 0.0;
-	// Newer data
+	_iopsou5 = "";
+	__ityopr = StateMod_Util.MISSING_INT;
+	_imonsw = new int[12];
+	for ( int i = 0; i < 12; i++ ) {
+		_imonsw[i] = StateMod_Util.MISSING_INT;
+	}
+	_intern = new String[10]; // Maximum defined by StateMod
+	for ( int i = 0; i < 10; i++ ) {
+		_intern[i] = "";
+	}
+	__commentsBeforeData = new Vector();
+	_qdebt = StateMod_Util.MISSING_DOUBLE;
+	_qdebtx = StateMod_Util.MISSING_DOUBLE;
+	_sjmina = StateMod_Util.MISSING_DOUBLE;
+	_sjrela = StateMod_Util.MISSING_DOUBLE;
+	// Newer data - if not specified, the following should display OK and not trigger a dirty
 	__creuse = "";
 	__cdivtyp = "";
-	__oprLoss = 0.0;
-	__oprLimit = 0.0;
-	__ioBeg = 0;
-	__ioEnd = 0;
+	__oprLoss = StateMod_Util.MISSING_DOUBLE;
+	__oprLimit = StateMod_Util.MISSING_DOUBLE;
+	__ioBeg = StateMod_Util.MISSING_INT;
+	__ioEnd = StateMod_Util.MISSING_INT;
 }
 
 public boolean hasImonsw() {
@@ -985,7 +1013,7 @@ handle.  If false, the right should be treated as strings on read.
 public static boolean isRightUnderstoodByCode( int rightType )
 {
 	StateMod_OperationalRight_Metadata metadata = StateMod_OperationalRight_Metadata.getMetadata(rightType);
-	if ( (metadata == null) || !metadata.getFullEditingSupported()) {
+	if ( (metadata == null) || !metadata.getFullEditingSupported() ) {
 		return false;
 	}
 	else {
@@ -1547,8 +1575,10 @@ throws Exception {
 	// - administration number is read as a string (not float) to prevent roundoff since this
 	//   is an important number
 	// - iopdes (destination account) is treated as a string (not integer) for flexibility
+	// - creuse, cdivtyp, OprLoss, OprLimit, IoBeg, and IoEnd are read as strings and allowed to be
+	//   missing, which will use StateMod internal defaults
 	// 
-	String formatLine1 = "a12a24x12x4a12f8i8x1a12a8x1a12a8x1a12a8i8x1a12x1a12x1f8f8i8i8";
+	String formatLine1 = "a12a24x12x4a12f8i8x1a12a8x1a12a8x1a12a8i8x1a12x1a12x1a8a8a8a8";
 	// Rio Grande additional data...
 	// StateMod doc treats last part as numbers but treat as strings here consistent with source ID/account
 	//String format_17 = "x64f8f8x1a12i8x1a12i8x1a12i8";
@@ -1679,16 +1709,28 @@ throws Exception {
 			// Diversion type
 			anOprit.setCdivtyp(((String)v.get(13)).trim());
 			// Conveyance loss...
-			anOprit.setOprLoss ( (Float)v.get(14) );
+			String OprLoss = ((String)v.get(14)).trim();
+			if ( StringUtil.isDouble(OprLoss)) {
+				anOprit.setOprLoss ( OprLoss );
+			}
 			// Miscellaneous limits...
-			anOprit.setOprLimit ( (Float)v.get(15) );
+			String OprLimit = ((String)v.get(15)).trim();
+			if ( StringUtil.isDouble(OprLimit)) {
+				anOprit.setOprLimit( OprLimit );
+			}
 			oprLimit = anOprit.getOprLimit();
 			// Beginning year...
-			anOprit.setIoBeg ( (Integer)v.get(16) );
+			String IoBeg = ((String)v.get(16)).trim();
+			if ( StringUtil.isInteger(IoBeg) ) {
+				anOprit.setIoBeg ( IoBeg );
+			}
 			// Ending year...
-			anOprit.setIoEnd ( (Integer)v.get(17) );
+			String IoEnd = ((String)v.get(17)).trim();
+			if ( StringUtil.isInteger(IoEnd) ) {
+				anOprit.setIoEnd ( IoEnd );
+			}
 			Message.printStatus( 2, routine, "Reading operating rule type " + rightType +
-					" starting at line " + linecount );
+				" starting at line " + linecount );
 			
 			boolean rightUnderstoodByCode = isRightUnderstoodByCode(rightType);
 			
@@ -1750,6 +1792,8 @@ throws Exception {
 			// May have monthly switch and intervening structures.  For now check the value.
 			// FIXME SAM 2008-03-17 Will read in a file that indicates what is allowed so it is
 			// easier to dynamically check.
+			
+			// TODO SAM 2011-01-29 Evaluate whether to do a check here, set error string, and treat as text
 			
 			if ( dumxInt == 12 ) {
 				// Only have monthly switches
@@ -2106,7 +2150,9 @@ public void setCx(String cx) {
 }
 
 /**
-Set dumx
+Set dumx.  This method should only be called when reading the StateMod operational rights file and otherwise
+dumx is calculated internally.
+@param dumx monthly/intervening structures switch
 */
 public void setDumx(int dumx) {
 	if (dumx != _dumx) {
@@ -2122,7 +2168,9 @@ public void setDumx(int dumx) {
 }
 
 /**
-Set dumx
+Set dumx.  This method should only be called when reading the StateMod operational rights file and otherwise
+dumx is calculated internally.
+@param dumx monthly/intervening structures switch
 */
 public void setDumx(Integer dumx) {
 	setDumx(dumx.intValue());
@@ -2131,12 +2179,62 @@ public void setDumx(Integer dumx) {
 /**
 Set dumx.  Note that sometimes the integer has a . at the end.  To resolve this,
 convert to a double and then cast as an integer.
+This method should only be called when reading the StateMod operational rights file and otherwise
+dumx is calculated internally.
+@param dumx monthly/intervening structures switch
 */
 public void setDumx(String dumx)
 {	if (dumx != null) {
 		Double d = (Double.parseDouble(dumx.trim()));
 		setDumx((int)d.doubleValue());
 	}
+}
+
+/**
+Set dumx from the monthly switch and intervening structure values.  For example this is used when
+editing data in the GUI and dumx is not set directly.
+*/
+private void setDumxFromMonthlySwitchAndInterveningStructures ()
+{
+	// All of the monthly switches need to have values -31 to +31.  Otherwise, the monthly
+	// switches are assumed to be not used for the right
+	int nValidImonsw = 0;
+	StateMod_OperationalRight_Metadata metadata = getMetadata();
+	if ( metadata.getRightTypeUsesMonthlySwitch() ) {
+		int [] imonsw = getImonsw();
+		if ( imonsw != null ) {
+			for ( int i = 0; i < imonsw.length; i++ ) {
+				if ( (imonsw[i] >= -31) && (imonsw[i] <= 31) ) {
+					++nValidImonsw;
+				}
+			}
+		}
+	}
+	int nValidInterveningStructures = 0;
+	if ( metadata.getRightTypeUsesInterveningStructures() ) {
+		String [] intern = getIntern();
+		if ( intern != null ) {
+			for ( int i = 0; i < intern.length; i++ ) {
+				if ( intern[i].length() > 0 ) {
+					++nValidInterveningStructures;
+				}
+			}
+		}
+	}
+	int dumx = 0;
+	if ( nValidImonsw == 12 ) {
+		dumx = 12;
+	}
+	if ( nValidInterveningStructures > 0 ) {
+		if ( dumx > 0 ) {
+			// Have monthly switches so start with -12 value
+			dumx = -12; 
+		}
+		// Now subtract the number of intervening structures
+		dumx -= nValidInterveningStructures;
+	}
+	// Finally set the value
+	setDumx ( dumx );
 }
 
 /**
@@ -2216,6 +2314,8 @@ public void setImonsw(int index, int imonsw) {
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
+		// Also reset the dumx
+		setDumxFromMonthlySwitchAndInterveningStructures();
 	}
 }
 
@@ -2237,10 +2337,11 @@ public void setImonsw(int index, String imonsw) {
 
 /**
 Set an "intern".
-@param adjustDumx if true, adjust the dumx by increasing the count of intern.  If false, just set the
-intervening ID but do not change dumX.
+@param setDumx if true, reset the dumx value based on the monthly switches and intervening structures
+(typically done when setting the intervening structures from the GUI, since dumx is not edited directly).
+If false, just set the intervening ID but do not change dumx (typically done when reading the data file).
 */
-public void setIntern(int index, String intern, boolean adjustDumx) {
+public void setIntern(int index, String intern, boolean setDumx) {
 	if (intern == null) {
 		return;
 	}
@@ -2258,12 +2359,8 @@ public void setIntern(int index, String intern, boolean adjustDumx) {
 			Message.printDebug(30, 
 				"StateMod_OperationalRight.setIntern", "Old Dumx: " + getDumx()+ ", New Dumx: " + index+1);
 		}
-		if ( adjustDumx ) {
-			if (index+1 > getDumx()) {
-				// Need to increment dumX
-				// FIXME SAM 2010-12-13 Is this code needed and deal with negatives
-				setDumx(index+1);
-			}
+		if ( setDumx ) {
+			setDumxFromMonthlySwitchAndInterveningStructures();
 		}
 		if (Message.isDebugOn) {
 			Message.printDebug(30, "StateMod_OperationalRight.setInter", "Dumx: " + getDumx());
@@ -2272,11 +2369,14 @@ public void setIntern(int index, String intern, boolean adjustDumx) {
 }
 
 /**
-Sets the interns from a list.
+Sets the interns from a list, for example when setting from the StateMod GUI.
 */
-public void setInterns(List<String> v) {
-	for (int i = 0; i < 10; i++) {
-		setIntern(i, v.get(i), false);
+public void setInterns(List<String> v)
+{
+	if ( v != null ) {
+		for (int i = 0; i < v.size(); i++) {
+			setIntern(i, v.get(i), false);
+		}
 	}
 }
 
@@ -2405,7 +2505,7 @@ Set the ityopr
 public void setItyopr(Integer ityopr)
 {
 	setItyopr(ityopr.intValue());
-	// Also get the metadata for the right
+	// Also set the metadata for the right
 	__metadata = StateMod_OperationalRight_Metadata.getMetadata(ityopr);
 }
 
@@ -2415,6 +2515,15 @@ Set the ityopr
 public void setItyopr(String ityopr) {
 	if (ityopr != null) {
 		setItyopr(Integer.parseInt(ityopr.trim()));
+	}
+}
+
+/**
+Set the OprLimit 
+*/
+public void setOprLimit(String oprLimit) {
+	if ( (oprLimit != null) && !oprLimit.equals("") ) {
+		setOprLimit(Double.parseDouble(oprLimit.trim()));
 	}
 }
 
@@ -2431,6 +2540,15 @@ public void setOprLimit(double oprLimit) {
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
+	}
+}
+
+/**
+Set the OprLoss 
+*/
+public void setOprLoss(String oprLoss) {
+	if ( (oprLoss != null) && !oprLoss.equals("") ) {
+		setOprLoss(Double.parseDouble(oprLoss.trim()));
 	}
 }
 
@@ -3012,7 +3130,7 @@ throws Exception {
 			for (int j = 0; j < numComments; j++) {
 				out.println("#" + commentsBeforeData.get(j));
 			}
-			if ( !isRightUnderstoodByCode(opr.getItyopr()) ) {
+			if ( !isRightUnderstoodByCode(opr.getItyopr()) || (opr.getReadErrors().size() > 0) ) {
 				// The operational right is not explicitly understood so print the original contents
 				// and go to the next right
 				List<String> rightStringsList = opr.getRightStrings();

@@ -61,6 +61,21 @@ private StateMod_OperationalRight_Metadata_SourceOrDestinationType [] __source1T
 Types of data that can be used as the source2 for an operational right.
 */
 private StateMod_OperationalRight_Metadata_SourceOrDestinationType [] __source2Types = null;
+
+/**
+Types of plans that that can be used as the associated plan for an operational right.
+*/
+private StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] __associatedPlanAllowedTypes = null;
+
+/**
+Types of diversion that that can be used for an operational right.
+*/
+private StateMod_OperationalRight_Metadata_DiversionType [] __diversionTypes = null;
+
+/**
+Whether transit and conveyance loss are allowed for an operational right.
+*/
+private StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType __transitAndConveyanceLossAllowed = null;
 	
 /**
 List of static global metadata, meant to be initialized once and shared within the application.
@@ -72,7 +87,7 @@ Whether the operational right uses intervening structures.  These are usually in
 and are provided in separate records.  This might be the same as whether the carrier is allowed
 but Ray Bennett was going to check on it.
 */
-private boolean __usesInterveningStructures = false;
+private boolean __rightTypeUsesInterveningStructures = false;
 
 /**
 Constructor for metadata.
@@ -101,6 +116,9 @@ public StateMod_OperationalRight_Metadata ( int rightTypeNumber, boolean fullEdi
 	setSource1Types ( source1Types );
 	setSource2Types ( source2Types );
 	setUsesInterveningStructures ( usesInterveningStructures );
+	setAssociatedPlanAllowedTypes ( associatedPlanAllowedTypes );
+	setDiversionTypes ( diversionTypes );
+	setTransitAndConveyanceLossAllowed ( transitAndConveyanceLossAllowedType );
 }
 
 /**
@@ -113,11 +131,27 @@ public static List<StateMod_OperationalRight_Metadata> getAllMetadata ()
 }
 
 /**
+Return the allowed associated plan types for the right.
+*/
+public StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] getAssociatedPlanAllowedTypes ()
+{
+	return __associatedPlanAllowedTypes;
+}
+
+/**
 Return the allowed destination types for the right.
 */
 public StateMod_OperationalRight_Metadata_SourceOrDestinationType [] getDestinationTypes ()
 {
 	return __destinationTypes;
+}
+
+/**
+Return the diversion types for the right.
+*/
+public StateMod_OperationalRight_Metadata_DiversionType [] getDiversionTypes ()
+{
+	return __diversionTypes;
 }
 
 /**
@@ -186,6 +220,180 @@ public StateMod_OperationalRight_Metadata_RuleType getRuleTypeCategory()
 }
 
 /**
+Indicate whether the operational right uses an associated plan.
+*/
+public boolean getRightTypeUsesAssociatedPlan ()
+{	StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedTypes =
+		getAssociatedPlanAllowedTypes();
+	if ( (associatedPlanAllowedTypes.length == 0) ||
+		(associatedPlanAllowedTypes[0] == StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA) ) {
+		return false;
+	}
+	else {
+		return true;
+	}
+}
+
+/**
+Indicate whether the operational right uses conveyance loss.
+*/
+public boolean getRightTypeUsesConveyanceLoss ()
+{
+	StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType transitAndConveyanceLossAllowed =
+		getTransitAndConveyanceLossAllowedType();
+	if ( (transitAndConveyanceLossAllowed ==
+		StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA) ) {
+		return false;
+	}
+	else {
+		return true;
+	}
+}
+
+/**
+Indicate whether the operational right uses the destination.
+*/
+public boolean getRightTypeUsesDestination ()
+{	StateMod_OperationalRight_Metadata_SourceOrDestinationType [] allowedDestinationTypes =
+		getDestinationTypes();
+	if ( (allowedDestinationTypes.length == 0) ||
+		(allowedDestinationTypes[0] == StateMod_OperationalRight_Metadata_SourceOrDestinationType.NA) ) {
+		return false;
+	}
+	else {
+		return true;
+	}
+}
+
+/**
+Indicate whether the operational right uses a diversion type.
+*/
+public boolean getRightTypeUsesDiversionType ()
+{	StateMod_OperationalRight_Metadata_DiversionType [] diversionTypes = getDiversionTypes();
+	if ( (diversionTypes.length == 0) ||
+		(diversionTypes[0] == StateMod_OperationalRight_Metadata_DiversionType.NA) ) {
+		return false;
+	}
+	else {
+		return true;
+	}
+}
+
+/**
+Indicate whether the operational right uses intervening structures.  Intervening structures are not required
+but may be used.
+*/
+public boolean getRightTypeUsesInterveningStructures ()
+{
+	return __rightTypeUsesInterveningStructures;
+}
+
+/**
+Indicate whether the operational right uses limits.
+*/
+public boolean getRightTypeUsesLimits ()
+{
+	return false; // FIXME SAM 2011-01-31 Need to check when other rights are enabled
+	/*
+	StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType transitAndConveyanceLossAllowed =
+		getTransitAndConveyanceLossAllowedType();
+	if ( (transitAndConveyanceLossAllowed ==
+		StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA) ) {
+		return false;
+	}
+	else {
+		return true;
+	}
+	*/
+}
+
+/**
+Indicate whether the operational right uses monthly switches.  Switches are not required, but may be used.
+*/
+public boolean getRightTypeUsesMonthlySwitch ()
+{
+	// TODO SAM 2011-01-29 For now always return true.  If any right types are enabled that do not
+	// use the monthly switch, add to the metadata and return the corresponding data member
+	return true;
+}
+
+/**
+Indicate whether the operational right uses negative reservoir destination accounts.
+For now hard code here but once list is known, may add to metadata.
+*/
+public boolean getRightTypeUsesNegativeDestinationAccounts ()
+{
+	int rightTypeNumber = getRightTypeNumber();
+	if ( rightTypeNumber == 2 ) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+/**
+Indicate whether the operational right uses the source 1.
+*/
+public boolean getRightTypeUsesSource1 ()
+{	StateMod_OperationalRight_Metadata_SourceOrDestinationType [] allowedSourceTypes =
+		getSource1Types();
+	if ( (allowedSourceTypes.length == 0) ||
+		(allowedSourceTypes[0] == StateMod_OperationalRight_Metadata_SourceOrDestinationType.NA) ) {
+		return false;
+	}
+	else {
+		return true;
+	}
+}
+
+/**
+Indicate whether the operational right uses the source 2.
+*/
+public boolean getRightTypeUsesSource2 ()
+{	StateMod_OperationalRight_Metadata_SourceOrDestinationType [] allowedSourceTypes =
+		getSource2Types();
+	if ( (allowedSourceTypes.length == 0) ||
+		(allowedSourceTypes[0] == StateMod_OperationalRight_Metadata_SourceOrDestinationType.NA) ) {
+		return false;
+	}
+	else {
+		return true;
+	}
+}
+
+/**
+Indicate whether the operational right uses the special source account 2 choices.
+*/
+public boolean getRightTypeUsesSpecialSourceAccount2 ()
+{	int rightTypeNumber = getRightTypeNumber();
+	if ( rightTypeNumber == 2 ) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+/**
+TODO SAM 2011-01-31 Move to metadata if a pattern emerges
+Return the special source2 types for the right.
+*/
+public List<String> getSourceAccount2SpecialChoices ()
+{
+	List<String> specialChoices = new Vector();
+	int rightTypeNumber = getRightTypeNumber();
+	if ( rightTypeNumber == 2 ) {
+		specialChoices.add("0 - Reservoir demand is not adjusted");
+		specialChoices.add("-1 - Provide depletion replacement");
+		for ( int i = 1; i <= 100; i++ ) {
+			specialChoices.add("" + i + " - Limit reservoir demand to CIR/n");
+		}
+	}
+	return specialChoices;
+}
+
+/**
 Return the allowed source1 types for the right.
 */
 public StateMod_OperationalRight_Metadata_SourceOrDestinationType [] getSource1Types ()
@@ -202,11 +410,11 @@ public StateMod_OperationalRight_Metadata_SourceOrDestinationType [] getSource2T
 }
 
 /**
-Indicate whether the operational right uses intervening structures.
+Return whether transit and conveyance loss is allowed for the right type.
 */
-public boolean getUsesInterveningStructures ()
+public StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType getTransitAndConveyanceLossAllowedType ()
 {
-	return __usesInterveningStructures;
+	return __transitAndConveyanceLossAllowed;
 }
 
 /**
@@ -237,10 +445,12 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_1 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.DOWNSTREAM};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_1 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_1 =
-					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i, false,
+					{StateMod_OperationalRight_Metadata_DiversionType.NA};
+					// Summary has...
+					//{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
+				metaData = new StateMod_OperationalRight_Metadata( i, true,
 					"Reservoir Release to an Instream Flow",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_RESERVOIR,
 					source1Array_1,
@@ -253,7 +463,7 @@ private static void initialize ()
 					false,
 					associatedPlanAllowedArray_1,
 					diversionTypeArray_1,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"" );
 				break;
 			case 2:
@@ -267,10 +477,12 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_2 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.DOWNSTREAM};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_2 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_2 =
-					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i, false,
+					{StateMod_OperationalRight_Metadata_DiversionType.NA};
+					// Summary has the following...
+					//{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
+				metaData = new StateMod_OperationalRight_Metadata( i, true,
 					"Reservoir Release to a Diversion, Reservoir, or Carrier",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_RESERVOIR,
 					source1Array_2,
@@ -283,7 +495,7 @@ private static void initialize ()
 					true,
 					associatedPlanAllowedArray_2,
 					diversionTypeArray_2,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"" );
 				break;
 			case 3:
@@ -298,7 +510,7 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_3 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.DOWNSTREAM};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_3 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_3 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
 				metaData = new StateMod_OperationalRight_Metadata( i, false,
@@ -314,7 +526,7 @@ private static void initialize ()
 					false,
 					associatedPlanAllowedArray_3,
 					diversionTypeArray_3,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"" );
 				break;
 			case 4:
@@ -328,7 +540,7 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_4 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.UPSTREAM};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_4 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_4 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
 				metaData = new StateMod_OperationalRight_Metadata( i, false,
@@ -344,7 +556,7 @@ private static void initialize ()
 					false,
 					associatedPlanAllowedArray_4,
 					diversionTypeArray_4,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"" );
 				break;
 			case 5:
@@ -357,7 +569,7 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_5 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.DOWNSTREAM};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_5 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_5 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
 				metaData = new StateMod_OperationalRight_Metadata( i, false,
@@ -373,7 +585,7 @@ private static void initialize ()
 					false,
 					associatedPlanAllowedArray_5,
 					diversionTypeArray_5,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"" );
 				break;
 			case 6:
@@ -386,7 +598,7 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_6 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.SOURCE};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_6 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_6 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
 				metaData = new StateMod_OperationalRight_Metadata( i, false,
@@ -402,7 +614,7 @@ private static void initialize ()
 					false,
 					associatedPlanAllowedArray_6,
 					diversionTypeArray_6,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"" );
 				break;
 			case 7:
@@ -415,7 +627,7 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_7 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.UPSTREAM};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_7 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_7 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
 				metaData = new StateMod_OperationalRight_Metadata( i, false,
@@ -431,7 +643,7 @@ private static void initialize ()
 					true,
 					associatedPlanAllowedArray_7,
 					diversionTypeArray_7,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"" );
 				break;
 			case 8:
@@ -444,7 +656,7 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_8 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.DOWNSTREAM};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_8 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_8 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
 				metaData = new StateMod_OperationalRight_Metadata( i, false,
@@ -460,7 +672,7 @@ private static void initialize ()
 					false,
 					associatedPlanAllowedArray_8,
 					diversionTypeArray_8,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"" );
 				break;
 			case 9:
@@ -473,7 +685,7 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_9 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.DOWNSTREAM};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_9 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_9 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
 				metaData = new StateMod_OperationalRight_Metadata( i, false,
@@ -489,7 +701,7 @@ private static void initialize ()
 					false,
 					associatedPlanAllowedArray_9,
 					diversionTypeArray_9,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"" );
 				break;
 			case 10:
@@ -502,7 +714,7 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_10 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.DOWNSTREAM};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_10 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_10 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION,
 					StateMod_OperationalRight_Metadata_DiversionType.DEPLETION};
@@ -519,7 +731,7 @@ private static void initialize ()
 					false,
 					associatedPlanAllowedArray_10,
 					diversionTypeArray_10,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"StateMod determines if the supply is the river or by exchange" );
 				break;
 			case 11:
@@ -534,7 +746,7 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_11 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.DOWNSTREAM};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_11 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_11 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
 				metaData = new StateMod_OperationalRight_Metadata( i, false,
@@ -550,7 +762,7 @@ private static void initialize ()
 					true,
 					associatedPlanAllowedArray_11,
 					diversionTypeArray_11,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"Same as type 32 but does not allow reuse and loss" );
 				break;
 			case 12:
@@ -563,7 +775,7 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_12 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.DOWNSTREAM};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_12 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_12 =
 					{StateMod_OperationalRight_Metadata_DiversionType.NA};
 				metaData = new StateMod_OperationalRight_Metadata( i, false,
@@ -579,7 +791,7 @@ private static void initialize ()
 					false,
 					associatedPlanAllowedArray_12,
 					diversionTypeArray_12,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"" );
 				break;
 			case 13:
@@ -592,7 +804,7 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_13 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.DOWNSTREAM};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_13 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_13 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
 				metaData = new StateMod_OperationalRight_Metadata( i, false,
@@ -608,7 +820,7 @@ private static void initialize ()
 					false,
 					associatedPlanAllowedArray_13,
 					diversionTypeArray_13,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"" );
 				break;
 			case 14:
@@ -622,7 +834,7 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_14 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.DOWNSTREAM};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_14 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_14 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
 				metaData = new StateMod_OperationalRight_Metadata( i, false,
@@ -638,7 +850,7 @@ private static void initialize ()
 					true,
 					associatedPlanAllowedArray_14,
 					diversionTypeArray_14,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"" );
 				break;
 			case 15:
@@ -651,7 +863,7 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_15 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.DOWNSTREAM};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_15 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_15 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
 				metaData = new StateMod_OperationalRight_Metadata( i, false,
@@ -667,7 +879,7 @@ private static void initialize ()
 					true,
 					associatedPlanAllowedArray_15,
 					diversionTypeArray_15,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"" );
 				break;
 			case 16:
@@ -680,7 +892,7 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_16 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.UPSTREAM};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_16 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_16 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
 				metaData = new StateMod_OperationalRight_Metadata( i, false,
@@ -696,7 +908,7 @@ private static void initialize ()
 					true,
 					associatedPlanAllowedArray_16,
 					diversionTypeArray_16,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"" );
 				break;
 			case 17:
@@ -709,7 +921,7 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_17 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.DOWNSTREAM};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_17 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_17 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
 				metaData = new StateMod_OperationalRight_Metadata( i, false,
@@ -725,7 +937,7 @@ private static void initialize ()
 					false,
 					associatedPlanAllowedArray_17,
 					diversionTypeArray_17,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"Compact Data" );
 				break;
 			case 18:
@@ -738,7 +950,7 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_18 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.DOWNSTREAM};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_18 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_18 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
 				metaData = new StateMod_OperationalRight_Metadata( i, false,
@@ -754,7 +966,7 @@ private static void initialize ()
 					false,
 					associatedPlanAllowedArray_18,
 					diversionTypeArray_18,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"Compact Data" );
 				break;
 			case 19:
@@ -767,7 +979,7 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_19 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.DOWNSTREAM};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_19 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_19 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
 				metaData = new StateMod_OperationalRight_Metadata( i, false,
@@ -783,7 +995,7 @@ private static void initialize ()
 					false,
 					associatedPlanAllowedArray_19,
 					diversionTypeArray_19,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"" );
 				break;
 			case 20:
@@ -796,7 +1008,7 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_20 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.SOURCE};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_20 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_20 =
 					{StateMod_OperationalRight_Metadata_DiversionType.NA};
 				metaData = new StateMod_OperationalRight_Metadata( i, false,
@@ -812,7 +1024,7 @@ private static void initialize ()
 					false,
 					associatedPlanAllowedArray_20,
 					diversionTypeArray_20,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"" );
 				break;
 			case 21:
@@ -825,7 +1037,7 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_21 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.SOURCE};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_21 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_21 =
 					{StateMod_OperationalRight_Metadata_DiversionType.NA};
 				metaData = new StateMod_OperationalRight_Metadata( i, false,
@@ -841,7 +1053,7 @@ private static void initialize ()
 					false,
 					associatedPlanAllowedArray_21,
 					diversionTypeArray_21,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"" );
 				break;
 			case 22:
@@ -855,7 +1067,7 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_22 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.SOURCE};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_22 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_22 =
 					{StateMod_OperationalRight_Metadata_DiversionType.NA};
 				metaData = new StateMod_OperationalRight_Metadata( i, false,
@@ -871,7 +1083,7 @@ private static void initialize ()
 					false,
 					associatedPlanAllowedArray_22,
 					diversionTypeArray_22,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"" );
 				break;
 			case 23:
@@ -884,7 +1096,7 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_23 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.DOWNSTREAM};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_23 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_23 =
 					{StateMod_OperationalRight_Metadata_DiversionType.NA};
 				metaData = new StateMod_OperationalRight_Metadata( i, false,
@@ -900,7 +1112,7 @@ private static void initialize ()
 					false,
 					associatedPlanAllowedArray_23,
 					diversionTypeArray_23,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"" );
 				break;
 			case 24:
@@ -1093,7 +1305,7 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_29 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.UPSTREAM};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_29 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_29 =
 					{StateMod_OperationalRight_Metadata_DiversionType.NA};
 				metaData = new StateMod_OperationalRight_Metadata( i, false,
@@ -1109,7 +1321,7 @@ private static void initialize ()
 					false,
 					associatedPlanAllowedArray_29,
 					diversionTypeArray_29,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"" );
 				break;
 			case 30:
@@ -1123,7 +1335,7 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_30 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.SOURCE};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_30 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_30 =
 					{StateMod_OperationalRight_Metadata_DiversionType.NA};
 				metaData = new StateMod_OperationalRight_Metadata( i, false,
@@ -1139,7 +1351,7 @@ private static void initialize ()
 					true,
 					associatedPlanAllowedArray_30,
 					diversionTypeArray_30,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"" );
 				break;
 			case 31:
@@ -1298,7 +1510,7 @@ private static void initialize ()
 					true,
 					associatedPlanAllowedArray_34,
 					diversionTypeArray_34,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"" );
 				break;
 			case 35:
@@ -1332,7 +1544,7 @@ private static void initialize ()
 					true,
 					associatedPlanAllowedArray_35,
 					diversionTypeArray_35,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"" );
 				break;
 			case 36:
@@ -1345,7 +1557,7 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_36 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.SOURCE};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_36 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO};
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_36 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
 				metaData = new StateMod_OperationalRight_Metadata( i, false,
@@ -1361,7 +1573,7 @@ private static void initialize ()
 					true,
 					associatedPlanAllowedArray_36,
 					diversionTypeArray_36,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"Limits a diversion to part of the year (season)" );
 				break;
 			case 37:
@@ -1394,7 +1606,7 @@ private static void initialize ()
 					true,
 					associatedPlanAllowedArray_37,
 					diversionTypeArray_37,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"" );
 				break;
 			case 38:
@@ -1427,7 +1639,7 @@ private static void initialize ()
 					true,
 					associatedPlanAllowedArray_38,
 					diversionTypeArray_38,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"" );
 				break;
 			case 39:
@@ -1441,7 +1653,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.DOWNSTREAM,
 					StateMod_OperationalRight_Metadata_DestinationLocationType.UPSTREAM};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_39 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO };
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA };
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_39 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
 				metaData = new StateMod_OperationalRight_Metadata( i, false,
@@ -1457,7 +1669,7 @@ private static void initialize ()
 					true,
 					associatedPlanAllowedArray_39,
 					diversionTypeArray_39,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"" );
 				break;
 			case 40:
@@ -1470,7 +1682,7 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_40 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.DOWNSTREAM};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_40 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO };
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA };
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_40 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
 				metaData = new StateMod_OperationalRight_Metadata( i, false,
@@ -1486,7 +1698,7 @@ private static void initialize ()
 					true,
 					associatedPlanAllowedArray_40,
 					diversionTypeArray_40,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"" );
 				break;
 			case 41:
@@ -1499,7 +1711,7 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_41 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.SOURCE};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_41 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO };
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA };
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_41 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
 				metaData = new StateMod_OperationalRight_Metadata( i, false,
@@ -1515,7 +1727,7 @@ private static void initialize ()
 					true,
 					associatedPlanAllowedArray_41,
 					diversionTypeArray_41,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"OOP Plan Limits" );
 				break;
 			case 42:
@@ -1530,7 +1742,7 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_42 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.SOURCE};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_42 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO };
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA };
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_42 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
 				metaData = new StateMod_OperationalRight_Metadata( i, false,
@@ -1546,7 +1758,7 @@ private static void initialize ()
 					false,
 					associatedPlanAllowedArray_42,
 					diversionTypeArray_42,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"" );
 				break;
 			case 43:
@@ -1575,7 +1787,7 @@ private static void initialize ()
 					false,
 					associatedPlanAllowedArray_43,
 					diversionTypeArray_43,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"" );
 				break;
 			case 44:
@@ -1604,7 +1816,7 @@ private static void initialize ()
 					true,
 					associatedPlanAllowedArray_44,
 					diversionTypeArray_44,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"" );
 				break;
 			case 45:
@@ -1647,7 +1859,7 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_46 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.SOURCE};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_46 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO };
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA };
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_46 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
 				metaData = new StateMod_OperationalRight_Metadata( i, false,
@@ -1663,7 +1875,7 @@ private static void initialize ()
 					true,
 					associatedPlanAllowedArray_46,
 					diversionTypeArray_46,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"Multiple Ownership" );
 				break;
 			case 47:
@@ -1678,7 +1890,7 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_47 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.SOURCE};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_47 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NO };
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA };
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_47 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
 				metaData = new StateMod_OperationalRight_Metadata( i, false,
@@ -1694,7 +1906,7 @@ private static void initialize ()
 					true,
 					associatedPlanAllowedArray_47,
 					diversionTypeArray_47,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"" );
 				break;
 			case 48:
@@ -1715,8 +1927,9 @@ private static void initialize ()
 					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_WELL_AUGMENTATION};
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_48 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.DOWNSTREAM};
+				// FIXME SAM 2011-01-31 the following was YES but need list of specific plans
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_48 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.YES };
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA };
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_48 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
 				metaData = new StateMod_OperationalRight_Metadata( i, false,
@@ -1732,7 +1945,7 @@ private static void initialize ()
 					false,
 					associatedPlanAllowedArray_48,
 					diversionTypeArray_48,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"" );
 				break;
 			case 49:
@@ -1754,7 +1967,8 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_49 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.UPSTREAM};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_49 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.YES };
+					// FIXME SAM 2011-01-31 the following was YES but need list of specific plans	
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA };
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_49 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
 				metaData = new StateMod_OperationalRight_Metadata( i, false,
@@ -1770,7 +1984,7 @@ private static void initialize ()
 					false,
 					associatedPlanAllowedArray_49,
 					diversionTypeArray_49,
-					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NO,
+					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"" );
 				break;
 		}
@@ -1856,6 +2070,17 @@ throws FileNotFoundException, IOException
 */
 
 /**
+Set the allowed associated plan types (in agreement with StateMod documentation).
+Make private because objects should be immutable.
+@param associatedPlanAllowedTypes types of destinations allowed for the right
+*/
+private void setAssociatedPlanAllowedTypes (
+	StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedTypes )
+{
+	__associatedPlanAllowedTypes = associatedPlanAllowedTypes;
+}
+
+/**
 Set the destination types (in agreement with StateMod documentation).
 Make private because objects should be immutable.
 @param destinationTypes types of destinations allowed for the right
@@ -1863,6 +2088,17 @@ Make private because objects should be immutable.
 private void setDestinationTypes ( StateMod_OperationalRight_Metadata_SourceOrDestinationType [] destinationTypes )
 {
 	__destinationTypes = destinationTypes;
+}
+
+/**
+Set the allowed diversion types (in agreement with StateMod documentation).
+Make private because objects should be immutable.
+@param diversionTypes types of diversions allowed for the right
+*/
+private void setDiversionTypes (
+	StateMod_OperationalRight_Metadata_DiversionType [] diversionTypes )
+{
+	__diversionTypes = diversionTypes;
 }
 
 /**
@@ -1925,13 +2161,24 @@ private void setSource2Types ( StateMod_OperationalRight_Metadata_SourceOrDestin
 }
 
 /**
+Set whether transit and conveyance loss are allowed.
+Make private because objects should be immutable.
+@param diversionTypes types of diversions allowed for the right
+*/
+private void setTransitAndConveyanceLossAllowed (
+	StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType transitAndConveyanceLossAllowed )
+{
+	__transitAndConveyanceLossAllowed = transitAndConveyanceLossAllowed;
+}
+
+/**
 Set whether the operational right uses intervening structures.
 Make private because objects should be immutable.
 @param usesInterveningStructures whether intervening structures are used
 */
 private void setUsesInterveningStructures ( boolean usesInterveningStructures )
 {
-	__usesInterveningStructures = usesInterveningStructures;
+	__rightTypeUsesInterveningStructures = usesInterveningStructures;
 }
 
 }

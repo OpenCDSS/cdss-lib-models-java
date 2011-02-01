@@ -1149,6 +1149,52 @@ public static DayTS createDailyEstimateTS (	String id, String desc,
 }
 
 /**
+Create a list of strings for use in operating rule associated plan choices.
+@return a list of String containing formatted identifiers and names.  A
+non-null list is guaranteed; however, the list may have zero items.
+@param associatedPlanAllowedTypes a list of allowed plan types
+@param includeName If false, each string will consist of only the value
+returned from StateMod_Data.getID().  If true the string will contain the ID,
+followed by " - xxxx", where xxxx is the value returned from StateMod_Data.getName().
+@param type if non-null and non-blank, include as "(type)" before the name, to indicate a location type,
+for example "ID - (T&C Plan) Name".
+*/
+public static List<String> createIdentifierList ( StateMod_DataSet dataset,
+	StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedTypes,
+	boolean includeName )
+{	List<String> idList = new Vector();
+	return idList;
+}
+
+/**
+Create a list of strings for use in operating rule source/destination choices.
+@return a list of String containing formatted identifiers and names.  A
+non-null list is guaranteed; however, the list may have zero items.
+@param smdataList a list of StateMod_Data or TS objects
+@param includeName If false, each string will consist of only the value
+returned from StateMod_Data.getID().  If true the string will contain the ID,
+followed by " - xxxx", where xxxx is the value returned from StateMod_Data.getName().
+@param type if non-null and non-blank, include as "(type)" before the name, to indicate a location type,
+for example "ID - (Reservoir) Name".
+*/
+public static List<String> createIdentifierList ( StateMod_DataSet dataset,
+	StateMod_OperationalRight_Metadata_SourceOrDestinationType [] sourceOrDestTypes,
+	boolean includeName )
+{	List<String> idList = new Vector();
+	// Loop through the source/destination types...
+	for ( int i = 0; i < sourceOrDestTypes.length; i++ ) {
+		// Get the data objects
+		List dataList = getDataList(sourceOrDestTypes[i], dataset, null, true);
+		// Format the identifiers...
+		String type = "" + sourceOrDestTypes[i];
+		List<String> idList2 = createIdentifierList(dataList, includeName, type);
+		// Add to the list (probably no need to sort, especially since type is included
+		idList.addAll(idList2);
+	}
+	return idList;
+}
+
+/**
 Create a list of strings for use in choices, etc.
 @return a list of String containing formatted identifiers and names.  A
 non-null list is guaranteed; however, the list may have zero items.
@@ -1157,6 +1203,22 @@ returned from StateMod_Data.getID().  If true the string will contain the ID,
 followed by " - xxxx", where xxxx is the value returned from StateMod_Data.getName().
 */
 public static List<String> createIdentifierList ( List smdataList, boolean includeName )
+{
+	return createIdentifierList(smdataList, includeName, null );
+}
+
+/**
+Create a list of strings for use in choices, etc.
+@return a list of String containing formatted identifiers and names.  A
+non-null list is guaranteed; however, the list may have zero items.
+@param smdataList a list of StateMod_Data or TS objects
+@param includeName If false, each string will consist of only the value
+returned from StateMod_Data.getID().  If true the string will contain the ID,
+followed by " - xxxx", where xxxx is the value returned from StateMod_Data.getName().
+@param type if non-null and non-blank, include as "(type)" before the name, to indicate a location type,
+for example "ID - (Reservoir) Name".
+*/
+public static List<String> createIdentifierList ( List smdataList, boolean includeName, String type )
 {	List<String> v = null;
 	if ( smdataList == null ) {
 		v = new Vector();
@@ -1171,6 +1233,7 @@ public static List<String> createIdentifierList ( List smdataList, boolean inclu
 	String id = "", name = "";
 	TS ts;
 	Object o;
+	String typeString = "";
 	for ( int i = 0; i < size; i++ ) {
 		o = smdataList.get(i);
 		if ( o == null ) {
@@ -1189,11 +1252,11 @@ public static List<String> createIdentifierList ( List smdataList, boolean inclu
 		else {
 		    Message.printWarning ( 2,"StateMod_Util.createDataList", "Unrecognized StateMod data." );
 		}
-		if ( id.equalsIgnoreCase(name) ) {
-			v.add ( id );
+		if ( (type != null) && (type.length() > 0) ) {
+			typeString = "(" + type + ") ";
 		}
-		else if ( includeName ) {
-			v.add ( id + " - " + name );
+		if ( includeName ) {
+			v.add ( id + " - " + typeString + name );
 		}
 		else {
 		    v.add ( id );
@@ -1203,7 +1266,7 @@ public static List<String> createIdentifierList ( List smdataList, boolean inclu
 }
 
 /**
-Create a sum of the time series in a Vector, representing the total water for
+Create a sum of the time series in a list, representing the total water for
 a data set.  This time series can be used for summaries.
 The period of the time series is the maximum of the time series in the list.
 The total value will be set if one or more values in the parts is available.  If
@@ -1217,7 +1280,7 @@ no value is available, the total will be missing.
 information for the new time series.
 @exception Exception if there is an error creating the time series.
 */
-public static TS createTotalTS ( List tslist, String dataset_location,
+public static TS createTotalTS ( List<? extends TS> tslist, String dataset_location,
 					String dataset_datasource, String dataset_description, int comp_type )
 throws Exception
 {	String routine = "StateMod_Util.createTotalTS";

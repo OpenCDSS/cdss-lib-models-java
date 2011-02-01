@@ -11,10 +11,6 @@ public enum StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedTy
      */
     NA("NA"),
     /**
-     * NO.
-     */
-	NO("No"),
-    /**
      * Yes.
      */
     YES("Yes");
