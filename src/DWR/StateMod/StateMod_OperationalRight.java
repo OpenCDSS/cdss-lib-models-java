@@ -781,10 +781,15 @@ public String [] getIntern()
 }
 
 /**
-Return the "intern" at an index.
+Return the "intern" at an index, or blank if not set.
 */
 public String getIntern(int index) {
-	return _intern[index];
+	if ( (index < 0) || (index >= _intern.length) ) {
+		return "";
+	}
+	else {
+		return _intern[index];
+	}
 }
 
 /**
@@ -1182,9 +1187,11 @@ private static int readStateModFile_InterveningStructures ( int ninterv, String 
 throws IOException
 {	// One line has up to 10 intervening structure identifiers
 	String iline = in.readLine().trim();
+	++linecount;
 	int errorCount = 0;
 	try {
-		Message.printStatus ( 2, routine, "Processing operating rule line " + (linecount + 1) + ": " + iline );
+		Message.printStatus ( 2, routine, "Processing operating rule " + anOprit.getItyopr() +
+			" intervening structures line " + (linecount + 1) + ": " + iline );
 		List<String> tokens = StringUtil.breakStringList( iline, " \t", StringUtil.DELIM_SKIP_BLANKS );
 		int ntokens = 0;
 		if ( tokens != null ) {
@@ -1255,8 +1262,10 @@ private static int readStateModFile_MonthlySwitches ( int nmonsw, String routine
 throws IOException
 {
 	String iline = in.readLine().trim();
+	++linecount;
 	try {
-		Message.printStatus ( 2, routine, "Processing operating rule line " + (linecount + 1) + ": " + iline );
+		Message.printStatus ( 2, routine, "Processing operating rule " + anOprit.getItyopr() +
+			" monthly switch line " + (linecount + 1) + ": " + iline );
 		// Switches are free format
 		List<String> tokens = StringUtil.breakStringList( iline, " \t", StringUtil.DELIM_SKIP_BLANKS );
 		int ntokens = 0;
@@ -1280,10 +1289,53 @@ throws IOException
 }
 
 /**
+ * Read the StateMod operational rights file Rio Grande data.
+ * @param routine to use for logging.
+ * @param linecount Line count (1+) before reading in this method.
+ * @param in BufferedReader to read.
+ * @param anOprit Operational right for which to read data.
+ * @return the number of errors.
+ * @exception IOException if there is an error reading the file
+ */
+private static int readStateModFile_RioGrande ( String routine, int linecount,
+		BufferedReader in, StateMod_OperationalRight anOprit )
+throws IOException
+{
+	int errorCount = 0;
+	// Rio Grande additional data...
+	// StateMod doc treats last part as numbers but treat as strings here consistent with source ID/account
+	//String formatRioGrande = "x64f8f8x1a12i8x1a12i8x1a12i8";
+	String formatRioGrande = "x64f8f8x1a12a8x1a12a8x1a12a8";
+	List v = null;
+	String iline = in.readLine();
+	++linecount;
+	try {
+		Message.printStatus ( 2, routine, "Processing operating rule " + anOprit.getItyopr() +
+			" Rio Grande data line " + (linecount + 1) + ": " + iline );
+		v = StringUtil.fixedRead(iline, formatRioGrande);
+		anOprit.setQdebt( (Float)v.get(0) );
+		anOprit.setQdebtx( (Float)v.get(1) );
+		anOprit.setCiopso3(	((String)v.get(2)).trim());
+		anOprit.setIopsou3(	((String)v.get(3)).trim());
+		anOprit.setCiopso4(	((String)v.get(4)).trim());
+		anOprit.setIopsou4(	((String)v.get(5)).trim());
+		anOprit.setCiopso5(	((String)v.get(6)).trim());
+		anOprit.setIopsou5(	((String)v.get(7)).trim());
+	}
+	catch ( Exception e ) {
+		// TODO SAM 2010-12-13 Need to handle errors and provide feedback
+		Message.printWarning(3, routine, "Error reading intervening structures at line " + (linecount + 1) +
+			": " + iline + " (" + e + ")" );
+	}
+	return errorCount;
+}
+
+/**
 Read operational right information in and store in a list.
 @param filename Name of file to read - the file should be the older "version 1" format.
 @exception Exception if there is an error reading the file.
 */
+/*
 private static List<StateMod_OperationalRight> readStateModFileVersion1(String filename)
 throws Exception {
 	String routine = "StateMod_OperationalRight.readStateModFileVersion1";
@@ -1344,12 +1396,11 @@ throws Exception {
 			if ( iline.startsWith("#>") ) {
 				continue;
 			}
-			/* TODO SAM 2008-03-10 Evaluate whether needed
-			else if ((iline.startsWith("#") && !readingTmpComments)	|| iline.trim().length()==0) {
-				// A general comment line not associated with an operational right...
-				continue;
-			}
-			*/
+			// TODO SAM 2008-03-10 Evaluate whether needed
+			//else if ((iline.startsWith("#") && !readingTmpComments)	|| iline.trim().length()==0) {
+			//	// A general comment line not associated with an operational right...
+			//	continue;
+			//}
 			else if (iline.startsWith("#")) { 
 				// A comment line specific to an individual operational right...
 				if (Message.isDebugOn) {
@@ -1471,7 +1522,8 @@ throws Exception {
 				// Rio Grande compact data...
 				iline = in.readLine().trim();
 				++linecount;
-				Message.printStatus ( 2, routine, "Processing operating rule line " + linecount + ": " + iline );
+				Message.printStatus ( 2, routine, "Processing operating rule " + type +
+					" Rio Grande data line " + linecount + ": " + iline );
 				v = StringUtil.fixedRead(iline, format_rg);
 				anOprit.setQdebt( ((String)v.get(0)).trim() );
 				anOprit.setQdebtx( ((String)v.get(1)).trim() );
@@ -1552,6 +1604,7 @@ throws Exception {
 	}
 	return theOprits;
 }
+*/
 
 /**
 Read operational right information in and store in a list.
@@ -1564,7 +1617,7 @@ throws Exception {
 	String iline = null;
 	List v = null;
 	List<StateMod_OperationalRight> theOprits = new Vector();
-	List<String> commentsBeforeData = new Vector(1);	// Will be used prior to finding an operational right
+	List<String> commentsBeforeData = new Vector(); // Will be used prior to finding an operational right
 	// Formats use strings for many variables because files may have extra
 	// whitespace or be used for numeric and character data...
 	// Consistent among all operational rights...
@@ -1579,10 +1632,6 @@ throws Exception {
 	//   missing, which will use StateMod internal defaults
 	// 
 	String formatLine1 = "a12a24x12x4a12f8i8x1a12a8x1a12a8x1a12a8i8x1a12x1a12x1a8a8a8a8";
-	// Rio Grande additional data...
-	// StateMod doc treats last part as numbers but treat as strings here consistent with source ID/account
-	//String format_17 = "x64f8f8x1a12i8x1a12i8x1a12i8";
-	String format_17 = "x64f8f8x1a12a8x1a12a8x1a12a8";
 	// San Juan additional data...
 	String format_20 = "x64f8f8";
 	StateMod_OperationalRight anOprit = null;
@@ -1635,12 +1684,11 @@ throws Exception {
 			*/
 			else if (iline.startsWith("#")) { 
 				// A comment line specific to an individual operational right...
-				if (Message.isDebugOn) {
-					Message.printDebug(10, routine, "Opright comments: " + iline);
-				}
+				String comment = iline.substring(1);
+				Message.printStatus(2, routine, "Treating as comment before right: \"" + comment + "\"");
 				// Don't trim because may want to compare output during testing
 				// Do trim the initial #, which will get added on output.
-				commentsBeforeData.add(iline.substring(1));
+				commentsBeforeData.add(comment);
 				continue;
 			}
 
@@ -1658,7 +1706,8 @@ throws Exception {
 				for ( int iComment = commentsBeforeData.size() - 1; iComment >= 0; --iComment ) {
 					comment = commentsBeforeData.get(iComment).toUpperCase();
 					if ( (comment.indexOf("FILEFORMATVERSION") >= 0) ||
-						(comment.indexOf("ENDHEADER") >= 0) || (comment.indexOf("--E") >= 0) ) {
+						(comment.indexOf("ENDHEADER") >= 0) ) { //|| (comment.indexOf("--E") >= 0) ) {
+						// TODO SAM 2011-02-05 Problem --E often found intermingled in file to help users
 						// Remove the comments above the position.
 						while ( iComment >= 0 ) {
 							commentsBeforeData.remove(iComment--);
@@ -1735,8 +1784,6 @@ throws Exception {
 			boolean rightUnderstoodByCode = isRightUnderstoodByCode(rightType);
 			
 			if ( !rightUnderstoodByCode ) {
-				// FIXME SAM 2010-12-11 Need to use config data to know characteristics of right -
-				// number of lines?
 				// The type is not known so read in as strings and set the type to negative.
 				// Most of the reading will occur at the top of the loop.
 				readingUnknownRight = true;
@@ -1746,7 +1793,7 @@ throws Exception {
 				// this will ensure that all lines are set for the right.
 				anOprit.setRightStrings ( rightStringsList );
 				Message.printWarning ( 2, routine, "Unknown right type " + rightType + " at line " + linecount +
-						".  Reading as text to continue reading file." );
+					".  Reading as text to continue reading file." );
 				// Add metadata so that code in the GUI for example will be able to list the right type, but
 				// treat as text
 				StateMod_OperationalRight_Metadata metadata =
@@ -1765,7 +1812,8 @@ throws Exception {
 					StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_1 =
 						new StateMod_OperationalRight_Metadata_DiversionType[0];
 					StateMod_OperationalRight_Metadata.getAllMetadata().add(
-						new StateMod_OperationalRight_Metadata( rightType, false,
+						new StateMod_OperationalRight_Metadata( rightType,
+							false, // Right is not fully understood for editing
 							"Unknown Type",
 							StateMod_OperationalRight_Metadata_RuleType.NA,
 							source1Array_1,
@@ -1775,7 +1823,7 @@ throws Exception {
 							destinationLocationArray_1,
 							StateMod_OperationalRight_Metadata_DeliveryMethodType.NA,
 							StateMod_OperationalRight_Metadata_CarrierAllowedType.NA,
-							false,
+							false, // No intervening structures
 							associatedPlanAllowedArray_1,
 							diversionTypeArray_1,
 							StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -1790,68 +1838,19 @@ throws Exception {
 			ninterv = 0;
 			
 			// May have monthly switch and intervening structures.  For now check the value.
-			// FIXME SAM 2008-03-17 Will read in a file that indicates what is allowed so it is
-			// easier to dynamically check.
-			
-			// TODO SAM 2011-01-29 Evaluate whether to do a check here, set error string, and treat as text
-			
-			if ( dumxInt == 12 ) {
-				// Only have monthly switches
-				nmonsw = 12;
-			}
-			else if ( dumxInt >= 0 ) {
-				// Only have intervening structures...
-				ninterv = dumxInt;
-			}
-			else if ( dumxInt < 0 ){
-				// Have monthly switches and intervening structures.
-				// -12 of the total count toward the monthly switch and the remainder is
-				// the number of intervening structures
-				// Check the value because some rules like 17 - Rio Grande Compact use -8
-				if ( dumxInt < -12 ) {
-					ninterv = -1*(dumxInt + 12);
-					nmonsw = 12;
-				}
-				else {
-					ninterv = -1*dumxInt;
-				}
-			}
+			StateMod_OperationalRight_Metadata metadata =
+				StateMod_OperationalRight_Metadata.getMetadata(rightType);
 			
 			// FIXME SAM 2008-03-17 Need some more checks for things like invalid -11 and + 13
 			
 			// Start reading additional information before monthly and intervening structure data)...
+			
+			if ( metadata.getRightTypeUsesRioGrande() ) {	
+				errorCount += readStateModFile_RioGrande ( routine, linecount, in, anOprit );
+				++linecount; // Increment here because copy passed in to above call is local to that method
+			}
 
-			if ( rightType == 17 ) {
-				// Rio Grande compact data...
-				iline = in.readLine();
-				++linecount;
-				Message.printStatus ( 2, routine, "Processing operating rule 17 line " + linecount + ": " + iline );
-				v = StringUtil.fixedRead(iline, format_17);
-				anOprit.setQdebt( (Float)v.get(0) );
-				anOprit.setQdebtx( (Float)v.get(1) );
-				anOprit.setCiopso3(	((String)v.get(2)).trim());
-				anOprit.setIopsou3(	((String)v.get(3)).trim());
-				anOprit.setCiopso4(	((String)v.get(4)).trim());
-				anOprit.setIopsou4(	((String)v.get(5)).trim());
-				anOprit.setCiopso5(	((String)v.get(6)).trim());
-				anOprit.setIopsou5(	((String)v.get(7)).trim());
-			}
-			else if ( rightType == 18 ) {
-				// Rio Grande Compact - Conejos River
-				iline = in.readLine();
-				++linecount;
-				Message.printStatus ( 2, routine, "Processing operating rule 18 line " + linecount + ": " + iline );
-				v = StringUtil.fixedRead(iline, format_17);
-				anOprit.setQdebt( (Float)v.get(0) );
-				anOprit.setQdebtx( (Float)v.get(1) );
-				anOprit.setCiopso3(	((String)v.get(2)).trim());
-				anOprit.setIopsou3(	((String)v.get(3)).trim());
-				anOprit.setCiopso4(	((String)v.get(4)).trim());
-				anOprit.setIopsou4(	((String)v.get(5)).trim());
-				anOprit.setCiopso5(	((String)v.get(6)).trim());
-				anOprit.setIopsou5(	((String)v.get(7)).trim());
-			}
-			else if ( rightType == 20 ) {
+			if ( rightType == 20 ) {
 				// San Juan RIP...
 				iline = in.readLine();
 				++linecount;
@@ -1863,40 +1862,67 @@ throws Exception {
 			
 			// ...end reading additional data before monthly and intervening structure data
 			
-			// Start reading the monthly and intervening structure data...
-			
+			// Start reading the monthly and intervening structure data - first split the "dumx"
+			// value into parts...
+		
+			// Special case for type 17 and 18, where -8 means no monthly switches and -20 = use switches
+			if ( (rightType == 17) || (rightType == 18) ) {
+				nmonsw = 0; // Default
+				ninterv = 0;
+				if ( dumxInt == -20 ) {
+					nmonsw = 12;
+				}
+			}
+			else {
+				// Normal interpretation of dumx
+				if ( dumxInt == 12 ) {
+					// Only have monthly switches
+					nmonsw = 12;
+				}
+				else if ( dumxInt >= 0 ) {
+					// Only have intervening structures...
+					ninterv = dumxInt;
+				}
+				else if ( dumxInt < 0 ){
+					// Have monthly switches and intervening structures.
+					// -12 of the total count toward the monthly switch and the remainder is
+					// the number of intervening structures
+					if ( dumxInt < -12 ) {
+						ninterv = -1*(dumxInt + 12);
+						nmonsw = 12;
+					}
+					else {
+						ninterv = -1*dumxInt;
+					}
+				}
+			}
+
 			Message.printStatus ( 2, routine, "Dumx=" + dumxInt + ", number of intervening structures = " +
 				ninterv + " month switch = " + nmonsw );
-			if ( nmonsw > 0 ) {
-				errorCount += readStateModFile_MonthlySwitches ( nmonsw, routine, linecount, in, anOprit );
-				++linecount;
+
+			if ( metadata.getRightTypeUsesMonthlySwitch() ) {	
+				if ( nmonsw > 0 ) {
+					errorCount += readStateModFile_MonthlySwitches ( nmonsw, routine, linecount, in, anOprit );
+					++linecount; // Increment here because copy passed in to above call is local to that method
+				}
 			}
-			// Only read intervening structures if allowed (otherwise assume user error in input)
-			// TODO SAM 2010-12-13 can metadata carriers allowed be checked here (same as intervening structures)?
-			if ( (ninterv > 0) && (rightType != 17) && (rightType != 18) ) {
-				errorCount += readStateModFile_InterveningStructures (
-					ninterv, routine, linecount, in, anOprit );
-				++linecount;
+			if ( metadata.getRightTypeUsesInterveningStructures() ) {	
+				// Only read intervening structures if allowed (otherwise assume user error in input)
+				if ( ninterv > 0 ) {
+					errorCount += readStateModFile_InterveningStructures (
+						ninterv, routine, linecount, in, anOprit );
+					++linecount; // Increment here because copy passed in to above call is local to that method
+				}
 			}
 			
 			// ...end reading monthly and intervening structure data.
-			
-			// Start reading additional data after monthly and intervening structure data...
-			
-			if ( rightType == 10 ) {
-				// Monthly and annual limitation data...
-				if ( (oprLimit > 0) ) {
-					errorCount += readStateModFile_MonthlyAndAnnualLimitationData (
-						routine, linecount, in, anOprit );
-					++linecount;
-				}
-			}
 			
 			// ...end reading additional data after monthly and intervening structure data
 
 			// add the operational right to the vector of rights
 			Message.printStatus ( 2, routine, "Adding recognized operational right type " + rightType +
-			    " \"" + anOprit.getID() + "\" from full read.");
+			    " \"" + anOprit.getID() + "\" from full read - " + anOprit.getCommentsBeforeData().size() +
+			    " comments before data");
 			theOprits.add(anOprit);
 		}
 		// All lines have been read.
@@ -3115,6 +3141,7 @@ throws Exception {
 		int dumx;
 		int ruleType;
 		double oprLimit;
+		StateMod_OperationalRight_Metadata metadata;
 		for (int i = 0; i < num ; i++) {
 			opr = theOpr.get(i);
 			if (opr == null) {
@@ -3130,6 +3157,7 @@ throws Exception {
 			for (int j = 0; j < numComments; j++) {
 				out.println("#" + commentsBeforeData.get(j));
 			}
+			metadata = opr.getMetadata();
 			if ( !isRightUnderstoodByCode(opr.getItyopr()) || (opr.getReadErrors().size() > 0) ) {
 				// The operational right is not explicitly understood so print the original contents
 				// and go to the next right
@@ -3171,7 +3199,7 @@ throws Exception {
 				
 				// Write records before monthly switches and intervening structures
 				
-				if ( (ruleType == 17) || (ruleType == 18) ) {
+				if ( metadata.getRightTypeUsesRioGrande() ) {
 					out.println ( "                                                                " +
 						StringUtil.formatString(opr.getQdebt(), "%7.0f.") +
 						StringUtil.formatString(opr.getQdebtx(), "%7.0f.") + " " +
@@ -3190,27 +3218,29 @@ throws Exception {
 				
 				// Write the monthly switches if used
 	
-				if ((dumx == 12) || (dumx < -12)) {
-					if (Message.isDebugOn) {
-						Message.printDebug(50, routine,
-							"in area 1: getDumx = " + opr.getDumx()+ "getItyopr = " + opr.getItyopr());
+				if ( metadata.getRightTypeUsesMonthlySwitch() ) {
+					if ((dumx == 12) || (dumx < -12)) {
+						if (Message.isDebugOn) {
+							Message.printDebug(50, routine,
+								"in area 1: getDumx = " + opr.getDumx()+ "getItyopr = " + opr.getItyopr());
+						}
+						vMonthlySwitches.clear();
+						for (int j = 0; j < 12; j++) {
+							vMonthlySwitches.add(new Integer( opr.getImonsw(j)));
+						}
+						iline = StringUtil.formatString(vMonthlySwitches, formatMonthlySwitches);
+						out.println(iline);
 					}
-					vMonthlySwitches.clear();
-					for (int j = 0; j < 12; j++) {
-						vMonthlySwitches.add(new Integer( opr.getImonsw(j)));
-					}
-					iline = StringUtil.formatString(vMonthlySwitches, formatMonthlySwitches);
-					out.println(iline);
 				}
 				
 				// Write the intervening structures if used
 	
-				if (Message.isDebugOn) {
-					Message.printDebug(50, routine, "in area 3 (" + opr.getID() + "): getDumx = " + opr.getDumx()
-						+ ", getItyopr = " + opr.getItyopr());
-				}
-				if ( (ruleType != 17) && (ruleType != 18) ) {
-					if ((dumx > 0 && dumx <= 10)|| dumx < -12) {
+				if ( metadata.getRightTypeUsesInterveningStructures() ) {
+					if (Message.isDebugOn) {
+						Message.printDebug(50, routine, "in area 3 (" + opr.getID() + "): getDumx = " + opr.getDumx()
+							+ ", getItyopr = " + opr.getItyopr());
+					}
+					if ((dumx > 0 && dumx <= 10) || (dumx < -12) ) {
 						if (Message.isDebugOn) {
 							Message.printDebug(50, routine,
 								"in area 2: getDumx = " + opr.getDumx() + "getItyopr = " + opr.getItyopr());
@@ -3234,14 +3264,6 @@ throws Exception {
 							out.print(iline);
 						}
 						out.println();
-					}
-				}
-				
-				// Write more records for specific operating rules
-				
-				if ( ruleType == 10 ) {
-					if ( oprLimit > 0.0 ) {
-						writeStateModFile_MonthlyAndAnnualLimitationData ( routine, out, opr );
 					}
 				}
 			}

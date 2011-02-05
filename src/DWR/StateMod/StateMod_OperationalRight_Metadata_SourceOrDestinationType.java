@@ -38,6 +38,10 @@ public enum StateMod_OperationalRight_Metadata_SourceOrDestinationType
      */
     OPERATIONAL_RIGHT("Operational Right"),
     /**
+     * Other node - in network but not any specific station type.
+     */
+    OTHER("Other"),
+    /**
      * Plans as per StateMod documentation.
      */
     PLAN_ACCOUNTING("Plan (Accounting Plan)"),

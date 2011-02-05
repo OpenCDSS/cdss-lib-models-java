@@ -13,13 +13,17 @@ public enum StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType
     /**
      * Reuse plans
      */
+    PLAN_ACCOUNTING("Plan (Accounting)"),
     PLAN_OUT_OF_PRIORITY("Plan (Out of Priority Diversion or Storage)"),
     PLAN_RECHARGE("Plan (Recharge)"),
+    PLAN_RELEASE_LIMIT("Plan (Release Limit)"),
     PLAN_REUSE_TO_RESERVOIR("Plan (Reuse to Reservoir)"),
     PLAN_REUSE_TO_RESERVOIR_FROM_TRANSMOUNTAIN("Plan (Reuse to Diversion from Transmountain)"),
     PLAN_REUSE_TO_DIVERSION("Plan (Reuse to Diversion)"),
     PLAN_REUSE_TO_DIVERSION_FROM_TRANSMOUNTAIN("Plan (Reuse to Diversion from Transmountain)"),
+    PLAN_SPECIAL_WELL_AUGMENTATION("Plan (Special Well Augmentation)"),
     PLAN_TC("Plan (Terms & Conditions)"),
+    PLAN_TRANSMOUNTAIN_IMPORT("Plan (Transmountain Import)"),
     PLAN_WELL_AUGMENTATION("Plan (Well Augmentation)");
     
     /**
@@ -34,6 +38,43 @@ public enum StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType
     private StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType(String displayName) {
         this.displayName = displayName;
     }
+    
+/**
+Lookup the source or destination type from a plan type.
+@return the matching source or destination type, or null if not matched.
+*/
+public StateMod_OperationalRight_Metadata_SourceOrDestinationType getMatchingSourceOrDestinationType ()
+{
+	switch ( this ) {
+		// List in StateMod documentation order
+		case PLAN_TC:
+			return StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_TC;
+		case PLAN_WELL_AUGMENTATION:
+			return StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_WELL_AUGMENTATION;
+		case PLAN_REUSE_TO_RESERVOIR:
+			return StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_REUSE_TO_RESERVOIR;
+		case PLAN_REUSE_TO_DIVERSION:
+			return StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_REUSE_TO_DIVERSION;
+		case PLAN_REUSE_TO_RESERVOIR_FROM_TRANSMOUNTAIN:
+			return StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_REUSE_TO_RESERVOIR_FROM_TRANSMOUNTAIN;
+		case PLAN_REUSE_TO_DIVERSION_FROM_TRANSMOUNTAIN:
+			return StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_REUSE_TO_DIVERSION_FROM_TRANSMOUNTAIN;
+		case PLAN_TRANSMOUNTAIN_IMPORT:
+			return StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_TRANSMOUNTAIN_IMPORT;
+		case PLAN_RECHARGE:
+			return StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_RECHARGE;
+		case PLAN_OUT_OF_PRIORITY:
+			return StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_OUT_OF_PRIORITY;
+		case PLAN_SPECIAL_WELL_AUGMENTATION:
+			return StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_SPECIAL_WELL_AUGMENTATION;
+		case PLAN_ACCOUNTING:
+			return StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_ACCOUNTING;
+		case PLAN_RELEASE_LIMIT:
+			return StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_RELEASE_LIMIT;
+	}
+	// No match
+	return null;
+}
 
 /**
  * Return the display name for the statistic.  This is usually the same as the

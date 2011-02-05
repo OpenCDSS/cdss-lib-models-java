@@ -354,10 +354,10 @@ Parses the diversion rights file and returns a Vector of StateMod_DiversionRight
 @return a Vector of StateMod_DiversionRight objects.
 @throws Exception if an error occurs
 */
-public static List readStateModFile(String filename)
+public static List<StateMod_DiversionRight> readStateModFile(String filename)
 throws Exception {
 	String routine = "StateMod_DiversionRight.readStateModFile";
-	List theDivRights = new Vector();
+	List<StateMod_DiversionRight> theDivRights = new Vector();
 
 	int format_0[] = {
 		StringUtil.TYPE_STRING,

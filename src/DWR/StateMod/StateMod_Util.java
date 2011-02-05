@@ -1163,6 +1163,19 @@ public static List<String> createIdentifierList ( StateMod_DataSet dataset,
 	StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedTypes,
 	boolean includeName )
 {	List<String> idList = new Vector();
+	// Return a list of plans identifiers that match the requested types
+	// Loop through the source/destination types...
+	StateMod_OperationalRight_Metadata_SourceOrDestinationType sourceOrDestType;
+	for ( int i = 0; i < associatedPlanAllowedTypes.length; i++ ) {
+		// Get the data objects
+		sourceOrDestType = associatedPlanAllowedTypes[i].getMatchingSourceOrDestinationType ();
+		List dataList = getDataList(sourceOrDestType, dataset, null, false);
+		// Format the identifiers...
+		String type = "" + associatedPlanAllowedTypes[i];
+		List<String> idList2 = createIdentifierList(dataList, includeName, type);
+		// Add to the list (probably no need to sort, especially since type is included
+		idList.addAll(idList2);
+	}
 	return idList;
 }
 
@@ -1184,7 +1197,9 @@ public static List<String> createIdentifierList ( StateMod_DataSet dataset,
 	// Loop through the source/destination types...
 	for ( int i = 0; i < sourceOrDestTypes.length; i++ ) {
 		// Get the data objects
-		List dataList = getDataList(sourceOrDestTypes[i], dataset, null, true);
+		// TODO SAM 2011-02-02 Why was true added below?
+		//List dataList = getDataList(sourceOrDestTypes[i], dataset, null, true);
+		List dataList = getDataList(sourceOrDestTypes[i], dataset, null, false);
 		// Format the identifiers...
 		String type = "" + sourceOrDestTypes[i];
 		List<String> idList2 = createIdentifierList(dataList, includeName, type);
@@ -2582,6 +2597,62 @@ public static List getDataList (
 		// All operational rights
 		dataList = (List<StateMod_OperationalRight>)dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_OPERATION_RIGHTS).getData();
+	}
+	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.OTHER ) {
+		// Stations in the network that are not in any other list
+		dataList = (List<StateMod_RiverNetworkNode>)dataset.getComponentForComponentType(
+			StateMod_DataSet.COMP_RIVER_NETWORK).getData();
+		List divList = (List<StateMod_Diversion>)dataset.getComponentForComponentType(
+			StateMod_DataSet.COMP_DIVERSION_STATIONS).getData();
+		List resList = (List<StateMod_Reservoir>)dataset.getComponentForComponentType(
+			StateMod_DataSet.COMP_RESERVOIR_STATIONS).getData();
+		List ifsList = (List<StateMod_InstreamFlow>)dataset.getComponentForComponentType(
+			StateMod_DataSet.COMP_INSTREAM_STATIONS).getData();
+		List wellList = (List<StateMod_Well>)dataset.getComponentForComponentType(
+			StateMod_DataSet.COMP_WELL_STATIONS).getData();
+		List gageList = (List<StateMod_StreamGage>)dataset.getComponentForComponentType(
+			StateMod_DataSet.COMP_STREAMGAGE_STATIONS).getData();
+		List estList = (List<StateMod_StreamEstimate>)dataset.getComponentForComponentType(
+			StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS).getData();
+		List planList = (List<StateMod_Plan>)dataset.getComponentForComponentType(
+			StateMod_DataSet.COMP_PLANS).getData();
+		List<StateMod_RiverNetworkNode> returnList = new Vector();
+		for ( StateMod_RiverNetworkNode node: (List<StateMod_RiverNetworkNode>)dataList ) {
+			// Check the other lists
+			if ( StateMod_Util.indexOf(divList, node.getID()) >= 0 ) {
+				// Diversion so not other
+				continue;
+			}
+			else if ( StateMod_Util.indexOf(resList, node.getID()) >= 0 ) {
+				// Reservoir so not other
+				continue;
+			}
+			else if ( StateMod_Util.indexOf(ifsList, node.getID()) >= 0 ) {
+				// Instream flow so not other
+				continue;
+			}
+			else if ( StateMod_Util.indexOf(wellList, node.getID()) >= 0 ) {
+				// Well so not other
+				continue;
+			}
+			else if ( StateMod_Util.indexOf(gageList, node.getID()) >= 0 ) {
+				// Stream gage so not other
+				continue;
+			}
+			else if ( StateMod_Util.indexOf(estList, node.getID()) >= 0 ) {
+				// Stream estimate so not other
+				continue;
+			}
+			else if ( StateMod_Util.indexOf(planList, node.getID()) >= 0 ) {
+				// Plan so not other
+				continue;
+			}
+			else {
+				// Did not match any stations so must be other
+				returnList.add ( node );
+			}
+		}
+		return returnList;
 	}
 	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_ACCOUNTING ) {
 		// Plan where iPlnTyp = 11
