@@ -11,6 +11,10 @@ public enum StateMod_OperationalRight_Metadata_DiversionType
      */
     DEPLETION("Depletion"),
     /**
+     * Direct (?)
+     */
+    DIRECT("Direct"),
+    /**
      * Diversion
      */
     DIVERSION("Diversion"),

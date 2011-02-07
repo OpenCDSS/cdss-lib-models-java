@@ -88,11 +88,20 @@ List of static global metadata, meant to be initialized once and shared within t
 private static List<StateMod_OperationalRight_Metadata> __opRightsMetadataList = null;
 
 /**
-Whether the operational right uses intervening structures.  These are usually indicated in the dumx value
+Whether the operational right uses intervening structures with loss.
+These are usually indicated in the dumx value
 and are provided in separate records.  This might be the same as whether the carrier is allowed
 but Ray Bennett was going to check on it.
 */
-private boolean __rightTypeUsesInterveningStructures = false;
+private boolean __rightTypeUsesInterveningStructuresWithLoss = false;
+
+/**
+Whether the operational right uses intervening structures without loss.
+These are usually indicated in the dumx value
+and are provided in separate records.  This might be the same as whether the carrier is allowed
+but Ray Bennett was going to check on it.
+*/
+private boolean __rightTypeUsesInterveningStructuresWithoutLoss = false;
 
 /**
 Constructor for metadata.
@@ -107,7 +116,8 @@ public StateMod_OperationalRight_Metadata ( int rightTypeNumber, boolean fullEdi
 	StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationType,
 	StateMod_OperationalRight_Metadata_DeliveryMethodType deliveryMethodType,
 	StateMod_OperationalRight_Metadata_CarrierAllowedType carrierAllowedType,
-	boolean usesInterveningStructures,
+	boolean usesInterveningStructuresWithoutLoss,
+	boolean usesInterveningStructuresWithLoss,
 	StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedTypes,
 	StateMod_OperationalRight_Metadata_DiversionType [] diversionTypes,
 	StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType transitAndConveyanceLossAllowedType,
@@ -120,7 +130,8 @@ public StateMod_OperationalRight_Metadata ( int rightTypeNumber, boolean fullEdi
 	setDestinationTypes ( destinationTypes );
 	setSource1Types ( source1Types );
 	setSource2Types ( source2Types );
-	setUsesInterveningStructures ( usesInterveningStructures );
+	setUsesInterveningStructuresWithoutLoss ( usesInterveningStructuresWithoutLoss );
+	setUsesInterveningStructuresWithLoss ( usesInterveningStructuresWithLoss );
 	setAssociatedPlanAllowedTypes ( associatedPlanAllowedTypes );
 	setDiversionTypes ( diversionTypes );
 	setTransitAndConveyanceLossAllowed ( transitAndConveyanceLossAllowedType );
@@ -157,6 +168,12 @@ public List<String> getDestinationAccountSpecialChoices ()
 	}
 	else if ( rightTypeNumber == 18 ) {
 		specialChoices.add("1.0 - Coefficient");
+	}
+	else if ( rightTypeNumber == 48 ) {
+		specialChoices.add("0 - Not used");
+	}
+	else if ( rightTypeNumber == 49 ) {
+		specialChoices.add("0 - Not used");
 	}
 	return specialChoices;
 }
@@ -195,7 +212,28 @@ public String getLimitsNotes ()
 {
 	int rightTypeNumber = getRightTypeNumber();
 	if ( rightTypeNumber == 11 ) {
-		return "Specify 0 for no carrier limitation, or specify carrier limit (up to structure capacity)";
+		return "<html>0 = no carrier limitation<br>" +
+				"+n = carrier limit (up to structure capacity)</html>";
+	}
+	else if ( rightTypeNumber == 29 ) {
+		return "<html>0 = do not adjust monthly and annual operational limits<br>" +
+			"1 = adjust monthly and annual limits specified by associated operating rule</html>";
+	}
+	else if ( rightTypeNumber == 34 ) {
+		return "<html>0 = do not adjust monthly or annual operational limits<br>" +
+			"2 = limit monthly or annual limits specified by associated operating rule</html>";
+	}
+	else if ( rightTypeNumber == 45 ) {
+		return "<html>0 = no carrier limitation<br>" +
+				"-1 = water right is shared with another operating rule with the same administration number<br>" +
+				"+n = water right is not shared with another operating rule with the same administration number</html>";
+	}
+	else if ( rightTypeNumber == 46 ) {
+		return "Number of destinations";
+	}
+	if ( rightTypeNumber == 47 ) {
+		return "<html>0 = do not include monthly and annual operational limits<br>" +
+				"1 = monthly and annual diversion operational limits are provided</html>";
 	}
 	else {
 		return "";
@@ -260,13 +298,41 @@ public StateMod_OperationalRight_Metadata_RuleType getRuleTypeCategory()
 }
 
 /**
+Indicate whether the operational right uses an associated operating rule (cx).
+*/
+public boolean getRightTypeUsesAssociatedOperatingRule ( double oprLimits )
+{	int rightTypeNumber = getRightTypeNumber();
+	int oprLimitsInt = 0;
+	if ( oprLimits > 0.0 ) {
+		oprLimitsInt = (int)(oprLimits + .1);
+	}
+	else if ( oprLimits < 0.0 ) {
+		oprLimitsInt = (int)(oprLimits - .1);
+	}
+	int rightTypesThatUseMonthlyOprLimits [] = { 29, 34 };
+	for ( int i = 0; i < rightTypesThatUseMonthlyOprLimits.length; i++ ) {
+		if ( rightTypeNumber == rightTypesThatUseMonthlyOprLimits[i] ) {
+			// TODO SAM 2011-02-06 Need to confirm this since documentation is not consistent
+			if ( (rightTypeNumber == 29) && (oprLimitsInt == 1) ) {
+				return true;
+			}
+			else if ( (rightTypeNumber == 34) && (oprLimitsInt == 2) ) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+/**
 Indicate whether the operational right uses an associated plan.
 */
 public boolean getRightTypeUsesAssociatedPlan ()
 {	StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedTypes =
 		getAssociatedPlanAllowedTypes();
 	if ( (associatedPlanAllowedTypes.length == 0) ||
-		(associatedPlanAllowedTypes[0] == StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA) ) {
+		((associatedPlanAllowedTypes.length == 1) &&
+		(associatedPlanAllowedTypes[0] == StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA)) ) {
 		return false;
 	}
 	else {
@@ -320,6 +386,41 @@ public boolean getRightTypeUsesDiversionType ()
 }
 
 /**
+Indicate whether the operational right uses intervening structures with loss.
+For now hard code here but once list is known, may add to metadata.
+@param oprLoss the single value oprLoss from the first record, needed because some right types allow
+intervening structures with and without loss
+*/
+public boolean getRightTypeUsesInterveningStructuresWithLoss ( double oprLoss )
+{
+	int rightTypeNumber = getRightTypeNumber();
+	int rightTypesThatUseInterveningStructuresWithLossCheckOprLoss [] = {};
+	int oprLossInt = 0; // Use integer for check to guard against roundoff
+	if ( oprLoss > 0.0 ) {
+		oprLossInt = (int)(oprLoss + .1);
+	}
+	else if ( oprLoss < 0.0 ) {
+		oprLossInt = (int)(oprLoss - .1);
+	}
+	if ( __rightTypeUsesInterveningStructuresWithLoss ) {
+		// Additionally check the OprLoss value (only return true if 1)...
+		for ( int i = 0; i < rightTypesThatUseInterveningStructuresWithLossCheckOprLoss.length; i++ ) {
+			if ( rightTypeNumber == rightTypesThatUseInterveningStructuresWithLossCheckOprLoss[i] ) {
+				if ( oprLossInt != 0 ) {
+					// See right type 24, for example
+					return true;
+				}
+				else {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+	return false;
+}
+
+/**
 FIXME SAM 2011-02-02 Can the "Carrier Allowed" information from the metadata be used?  These values
 were taken from the Operating Rule Summary but Ray was not clear on whether this is equivalent to the
 intervening structures.  For now handle separately.
@@ -328,9 +429,9 @@ Indicate whether the operational right uses intervening structures.  Intervening
 but may be used.
 </p>
 */
-public boolean getRightTypeUsesInterveningStructures ()
+public boolean getRightTypeUsesInterveningStructuresWithoutLoss ()
 {
-	return __rightTypeUsesInterveningStructures;
+	return __rightTypeUsesInterveningStructuresWithoutLoss;
 }
 
 /**
@@ -339,10 +440,35 @@ Indicate whether the operational right uses limits.
 public boolean getRightTypeUsesLimits ()
 {
 	int rightTypeNumber = getRightTypeNumber();
-	int rightTypesThatUseLimits [] = { 11 };
+	int rightTypesThatUseLimits [] = { 11, 29, 34, 45, 46, 47 };
 	for ( int i = 0; i < rightTypesThatUseLimits.length; i++ ) {
 		if ( rightTypeNumber == rightTypesThatUseLimits[i] ) {
 			return true;
+		}
+	}
+	return false;
+}
+
+/**
+Indicate whether the operational right uses monthly operational limits.
+For now hard code here but once list is known, may add to metadata.
+*/
+public boolean getRightTypeUsesMonthlyOprLimits ( double oprLimits )
+{
+	int rightTypeNumber = getRightTypeNumber();
+	int oprLimitsInt = 0;
+	if ( oprLimits > 0.0 ) {
+		oprLimitsInt = (int)(oprLimits + .1);
+	}
+	else if ( oprLimits < 0.0 ) {
+		oprLimitsInt = (int)(oprLimits - .1);
+	}
+	int rightTypesThatUseMonthlyOprLimits [] = { 47 };
+	for ( int i = 0; i < rightTypesThatUseMonthlyOprLimits.length; i++ ) {
+		if ( rightTypeNumber == rightTypesThatUseMonthlyOprLimits[i] ) {
+			if ( oprLimitsInt == 1 ) {
+				return true;
+			}
 		}
 	}
 	return false;
@@ -365,7 +491,7 @@ For now hard code here but once list is known, may add to metadata.
 public boolean getRightTypeUsesNegativeDestinationAccounts ()
 {
 	int rightTypeNumber = getRightTypeNumber();
-	int rightTypesThatUseNegative [] = { 2, 3, 5, 6, 7, 11, 14 };
+	int rightTypesThatUseNegative [] = { 2, 3, 5, 6, 7, 11, 14, 31, 32, 33, 34, 35, 38, 41, 45 };
 	for ( int i = 0; i < rightTypesThatUseNegative.length; i++ ) {
 		if ( rightTypeNumber == rightTypesThatUseNegative[i] ) {
 			return true;
@@ -384,6 +510,22 @@ public boolean getRightTypeUsesRioGrande ()
 	int rightTypesThatUseRioGrande [] = { 17, 18 };
 	for ( int i = 0; i < rightTypesThatUseRioGrande.length; i++ ) {
 		if ( rightTypeNumber == rightTypesThatUseRioGrande[i] ) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
+Indicate whether the operational right uses San Juan data.
+For now hard code here but once list is known, may add to metadata.
+*/
+public boolean getRightTypeUsesSanJuan ()
+{
+	int rightTypeNumber = getRightTypeNumber();
+	int rightTypesThatUseSanJuan [] = { 20 };
+	for ( int i = 0; i < rightTypesThatUseSanJuan.length; i++ ) {
+		if ( rightTypeNumber == rightTypesThatUseSanJuan[i] ) {
 			return true;
 		}
 	}
@@ -411,6 +553,14 @@ Indicate whether the operational right uses the source 2.
 public boolean getRightTypeUsesSource2 ()
 {	StateMod_OperationalRight_Metadata_SourceOrDestinationType [] allowedSourceTypes =
 		getSource2Types();
+	// Special cases (dynamic data expected)
+	int rightTypeNumber = getRightTypeNumber();
+	int rightTypesThatUseDynamicSource2Data [] = { 48, 49 };
+	for ( int i = 0; i < rightTypesThatUseDynamicSource2Data.length; i++ ) {
+		if ( rightTypeNumber == rightTypesThatUseDynamicSource2Data[i] ) {
+			return true;
+		}
+	}
 	if ( (allowedSourceTypes.length == 0) ||
 		(allowedSourceTypes[0] == StateMod_OperationalRight_Metadata_SourceOrDestinationType.NA) ) {
 		return false;
@@ -425,7 +575,7 @@ Indicate whether the operational right uses special destination account choices.
 */
 public boolean getRightTypeUsesSpecialDestinationAccount ()
 {	int rightTypeNumber = getRightTypeNumber();
-	int rightsThatUseSpecialDestinationAccount [] = { 17, 18 };
+	int rightsThatUseSpecialDestinationAccount [] = { 17, 18, 46, 48, 49 };
 	for ( int i = 0; i < rightsThatUseSpecialDestinationAccount.length; i++ ) {
 		if ( rightTypeNumber == rightsThatUseSpecialDestinationAccount[i] ) {
 			return true;
@@ -439,7 +589,7 @@ Indicate whether the operational right uses the special source 2 choices.
 */
 public boolean getRightTypeUsesSpecialSource2 ()
 {	int rightTypeNumber = getRightTypeNumber();
-	int rightsThatUseSpecialSource2 [] = { 6 };
+	int rightsThatUseSpecialSource2 [] = { 6, 34 };
 	for ( int i = 0; i < rightsThatUseSpecialSource2.length; i++ ) {
 		if ( rightTypeNumber == rightsThatUseSpecialSource2[i] ) {
 			return true;
@@ -453,7 +603,7 @@ Indicate whether the operational right uses the special source account 1 choices
 */
 public boolean getRightTypeUsesSpecialSourceAccount1 ()
 {	int rightTypeNumber = getRightTypeNumber();
-	int rightsThatUseSpecialSourceAccount1 [] = { 9, 11, 14, 15, 16, 17, 18 };
+	int rightsThatUseSpecialSourceAccount1 [] = { 9, 11, 14, 15, 16, 17, 18, 20, 39, 45 };
 	for ( int i = 0; i < rightsThatUseSpecialSourceAccount1.length; i++ ) {
 		if ( rightTypeNumber == rightsThatUseSpecialSourceAccount1[i] ) {
 			return true;
@@ -467,7 +617,7 @@ Indicate whether the operational right uses the special source account 2 choices
 */
 public boolean getRightTypeUsesSpecialSourceAccount2 ()
 {	int rightTypeNumber = getRightTypeNumber();
-	int rightsThatUseSpecialSourceAccount2 [] = { 2, 3, 4, 6, 7, 14, 15, 16, 17, 18 };
+	int rightsThatUseSpecialSourceAccount2 [] = { 2, 3, 4, 6, 7, 14, 15, 16, 17, 18, 32, 33, 39, 45 };
 	for ( int i = 0; i < rightsThatUseSpecialSourceAccount2.length; i++ ) {
 		if ( rightTypeNumber == rightsThatUseSpecialSourceAccount2[i] ) {
 			return true;
@@ -518,6 +668,17 @@ public List<String> getSourceAccount1SpecialChoices ()
 		specialChoices.add("1 - Coefficient");
 		specialChoices.add("1. - Coefficient");
 		specialChoices.add("1.0 - Coefficient");
+	}
+	else if ( rightTypeNumber == 20 ) {
+		specialChoices.add("0 - Meet target by releasing from each account");
+	}
+	else if ( rightTypeNumber == 39 ) {
+		specialChoices.add("0 - Source water right is left on");
+		specialChoices.add("1 - Source water right is turned off");
+	}
+	else if ( rightTypeNumber == 45 ) {
+		specialChoices.add("0 - Source water right is left on");
+		specialChoices.add("1 - Source water right is turned off");
 	}
 	return specialChoices;
 }
@@ -587,6 +748,26 @@ public List<String> getSourceAccount2SpecialChoices ()
 		specialChoices.add("1. - Coefficient");
 		specialChoices.add("1.0 - Coefficient");
 	}
+	else if ( rightTypeNumber == 32 ) {
+		specialChoices.add("0 - Reservoir demand is not adjusted");
+		for ( int i = 1; i <= 100; i++ ) {
+			specialChoices.add("" + i + " - Limit reservoir demand to CIR/n");
+		}
+	}
+	else if ( rightTypeNumber == 33 ) {
+		specialChoices.add("0 - Reservoir demand is not adjusted");
+		for ( int i = 1; i <= 100; i++ ) {
+			specialChoices.add("" + i + " - Limit reservoir demand to CIR/n");
+		}
+	}
+	else if ( rightTypeNumber == 39 ) {
+		specialChoices.add("1 - Required");
+	}
+	else if ( rightTypeNumber == 45 ) {
+		for ( int i = 1; i <= 100; i++ ) {
+			specialChoices.add("" + i + " - Percent of water right to use as source");
+		}
+	}
 	return specialChoices;
 }
 
@@ -608,6 +789,9 @@ public List<String> getSource2SpecialChoices ()
 	List<String> specialChoices = new Vector();
 	int rightTypeNumber = getRightTypeNumber();
 	if ( rightTypeNumber == 6 ) {
+		specialChoices.add("0 - Not required");
+	}
+	else if ( rightTypeNumber == 34 ) {
 		specialChoices.add("0 - Not required");
 	}
 	return specialChoices;
@@ -672,7 +856,8 @@ private static void initialize ()
 					destinationLocationArray_1,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NA,
-					false, // No intervening structures
+					false, // No intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_1,
 					diversionTypeArray_1,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -704,7 +889,8 @@ private static void initialize ()
 					destinationLocationArray_2,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
-					true, // Uses intervening structures
+					true, // Yes intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_2,
 					diversionTypeArray_2,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -735,7 +921,8 @@ private static void initialize ()
 					destinationLocationArray_3,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
-					true,  // Uses intervening structures
+					true, // Yes intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_3,
 					diversionTypeArray_3,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -767,7 +954,8 @@ private static void initialize ()
 					destinationLocationArray_4,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NA,
-					false, // No intervening structures
+					false, // No intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_4,
 					diversionTypeArray_4,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -798,7 +986,8 @@ private static void initialize ()
 					destinationLocationArray_5,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NA,
-					false, // No intervening structures
+					false, // No intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_5,
 					diversionTypeArray_5,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -829,7 +1018,8 @@ private static void initialize ()
 					destinationLocationArray_6,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.BOOKOVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NA,
-					false, // No intervening structures
+					false, // No intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_6,
 					diversionTypeArray_6,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -860,7 +1050,8 @@ private static void initialize ()
 					destinationLocationArray_7,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
-					true, // Uses intervening structures
+					true, // Yes intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_7,
 					diversionTypeArray_7,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -889,7 +1080,8 @@ private static void initialize ()
 					destinationLocationArray_8,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NA,
-					false,
+					false, // No intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_8,
 					diversionTypeArray_8,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -919,7 +1111,8 @@ private static void initialize ()
 					destinationLocationArray_9,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NA,
-					false, // No intervening structures
+					false, // No intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_9,
 					diversionTypeArray_9,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -949,7 +1142,8 @@ private static void initialize ()
 					destinationLocationArray_10,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NA,
-					false,
+					false, // No intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_10,
 					diversionTypeArray_10,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -982,7 +1176,8 @@ private static void initialize ()
 					destinationLocationArray_11,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.CARRIER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
-					true, // Uses intervening structures
+					true, // Yes intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_11,
 					diversionTypeArray_11,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -1011,7 +1206,8 @@ private static void initialize ()
 					destinationLocationArray_12,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NA,
-					false, // No intermediate structures
+					false, // No intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_12,
 					diversionTypeArray_12,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -1041,7 +1237,8 @@ private static void initialize ()
 					destinationLocationArray_13,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NA,
-					false, // No intervening structures
+					false, // No intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_13,
 					diversionTypeArray_13,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -1072,7 +1269,8 @@ private static void initialize ()
 					destinationLocationArray_14,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
-					true, // Uses intervening structures
+					true, // Yes intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_14,
 					diversionTypeArray_14,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -1102,7 +1300,8 @@ private static void initialize ()
 					destinationLocationArray_15,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NA,
-					true, // Uses intervening structures
+					true, // Yes intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_15,
 					diversionTypeArray_15,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -1132,7 +1331,8 @@ private static void initialize ()
 					destinationLocationArray_16,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NA,
-					true,
+					true, // Yes intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_16,
 					diversionTypeArray_16,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -1162,7 +1362,8 @@ private static void initialize ()
 					destinationLocationArray_17,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NA,
-					false, // No intervening structures
+					false, // No intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_17,
 					diversionTypeArray_17,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -1192,7 +1393,8 @@ private static void initialize ()
 					destinationLocationArray_18,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NA,
-					false, // No intervening structures
+					false, // No intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_18,
 					diversionTypeArray_18,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -1221,7 +1423,8 @@ private static void initialize ()
 					destinationLocationArray_19,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NA,
-					false,
+					false, // No intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_19,
 					diversionTypeArray_19,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -1240,7 +1443,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_20 =
 					{StateMod_OperationalRight_Metadata_DiversionType.NA};
-				metaData = new StateMod_OperationalRight_Metadata( i, false,
+				metaData = new StateMod_OperationalRight_Metadata( i, true,
 					"San Juan Reservoir RIP Operation",
 					StateMod_OperationalRight_Metadata_RuleType.COMPACT,
 					source1Array_20,
@@ -1250,7 +1453,8 @@ private static void initialize ()
 					destinationLocationArray_20,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NA,
-					false,
+					false, // No intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_20,
 					diversionTypeArray_20,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -1261,15 +1465,16 @@ private static void initialize ()
 			    	{StateMod_OperationalRight_Metadata_SourceOrDestinationType.NA};
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source2Array_21 =
 					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.NA};
+				// TODO SAM 2011-02-05 Summary had Well
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] destinationArray_21 =
-					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.WELL};
+					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.NA};
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_21 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.SOURCE};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_21 =
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_21 =
 					{StateMod_OperationalRight_Metadata_DiversionType.NA};
-				metaData = new StateMod_OperationalRight_Metadata( i, false,
+				metaData = new StateMod_OperationalRight_Metadata( i, true,
 					"Wells with Sprinkler Use",
 					StateMod_OperationalRight_Metadata_RuleType.OTHER,
 					source1Array_21,
@@ -1279,7 +1484,8 @@ private static void initialize ()
 					destinationLocationArray_21,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NA,
-					false,
+					false, // No intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_21,
 					diversionTypeArray_21,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -1290,16 +1496,16 @@ private static void initialize ()
 			    	{StateMod_OperationalRight_Metadata_SourceOrDestinationType.NA};
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source2Array_22 =
 					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.NA};
+				// TODO SAM 2011-02-05 Summary has Diversion and Well
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] destinationArray_22 =
-					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.DIVERSION,
-					StateMod_OperationalRight_Metadata_SourceOrDestinationType.WELL};
+					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.NA };
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_22 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.SOURCE};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_22 =
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_22 =
 					{StateMod_OperationalRight_Metadata_DiversionType.NA};
-				metaData = new StateMod_OperationalRight_Metadata( i, false,
+				metaData = new StateMod_OperationalRight_Metadata( i, true,
 					"Soil Moisture Use",
 					StateMod_OperationalRight_Metadata_RuleType.SOIL_MOISTURE,
 					source1Array_22,
@@ -1309,26 +1515,28 @@ private static void initialize ()
 					destinationLocationArray_22,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NA,
-					false,
+					false, // No intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_22,
 					diversionTypeArray_22,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
 					"" );
 				break;
 			case 23:
+				// TODO SAM 2011-02-05 Summary had Stream
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source1Array_23 =
-			    	{StateMod_OperationalRight_Metadata_SourceOrDestinationType.STREAM_GAGE};
+			    	{StateMod_OperationalRight_Metadata_SourceOrDestinationType.NA};
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source2Array_23 =
 					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.NA};
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] destinationArray_23 =
-					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.DOWNSTREAM_CALL};
+					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.NA};
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_23 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.DOWNSTREAM};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_23 =
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_23 =
 					{StateMod_OperationalRight_Metadata_DiversionType.NA};
-				metaData = new StateMod_OperationalRight_Metadata( i, false,
+				metaData = new StateMod_OperationalRight_Metadata( i, true,
 					"Downstream Call",
 					StateMod_OperationalRight_Metadata_RuleType.OTHER,
 					source1Array_23,
@@ -1338,7 +1546,8 @@ private static void initialize ()
 					destinationLocationArray_23,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NA,
-					false,
+					false, // No intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_23,
 					diversionTypeArray_23,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -1370,7 +1579,8 @@ private static void initialize ()
 					destinationLocationArray_24,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
-					true,
+					true, // Yes intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_24,
 					diversionTypeArray_24,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.YES,
@@ -1402,7 +1612,8 @@ private static void initialize ()
 					destinationLocationArray_25,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
-					true,
+					true, // Yes intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_25,
 					diversionTypeArray_25,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.YES,
@@ -1431,7 +1642,8 @@ private static void initialize ()
 					destinationLocationArray_26,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.NA,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NA,
-					false,
+					false, // No intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_26,
 					diversionTypeArray_26,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -1471,7 +1683,8 @@ private static void initialize ()
 					destinationLocationArray_27,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
-					true,
+					true, // Yes intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_27,
 					diversionTypeArray_27,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.YES,
@@ -1511,7 +1724,8 @@ private static void initialize ()
 					destinationLocationArray_28,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
-					true,
+					true, // Yes intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_28,
 					diversionTypeArray_28,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.YES,
@@ -1520,7 +1734,7 @@ private static void initialize ()
 			case 29:
 				// TODO SAM 2010-12-13 Need to check the following
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source1Array_29 =
-			    	{StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_ACCOUNTING,
+			    	{StateMod_OperationalRight_Metadata_SourceOrDestinationType.RESERVOIR,
 					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_REUSE_TO_DIVERSION,
 					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_REUSE_TO_DIVERSION_FROM_TRANSMOUNTAIN,
 					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_REUSE_TO_RESERVOIR,
@@ -1528,9 +1742,7 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source2Array_29 =
 					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_TC};
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] destinationArray_29 =
-					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.CARRIER,
-					StateMod_OperationalRight_Metadata_SourceOrDestinationType.DIVERSION,
-					StateMod_OperationalRight_Metadata_SourceOrDestinationType.RESERVOIR};
+					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.NA};
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_29 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.UPSTREAM};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_29 =
@@ -1547,7 +1759,8 @@ private static void initialize ()
 					destinationLocationArray_29,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NA,
-					false,
+					false, // No intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_29,
 					diversionTypeArray_29,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -1567,7 +1780,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_30 =
 					{StateMod_OperationalRight_Metadata_DiversionType.NA};
-				metaData = new StateMod_OperationalRight_Metadata( i, false,
+				metaData = new StateMod_OperationalRight_Metadata( i, true,
 					"Rservoir Re-diversion",
 					StateMod_OperationalRight_Metadata_RuleType.OTHER,
 					source1Array_30,
@@ -1577,7 +1790,8 @@ private static void initialize ()
 					destinationLocationArray_30,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NA,
-					true,
+					true, // Yes intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_30,
 					diversionTypeArray_30,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -1588,25 +1802,21 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source1Array_31 =
 			    	{StateMod_OperationalRight_Metadata_SourceOrDestinationType.DIVERSION_RIGHT };
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source2Array_31 =
-					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_REUSE_TO_DIVERSION,
-					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_REUSE_TO_DIVERSION_FROM_TRANSMOUNTAIN,
-					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_REUSE_TO_RESERVOIR,
-					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_REUSE_TO_RESERVOIR_FROM_TRANSMOUNTAIN};
+					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.NA};
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] destinationArray_31 =
-					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.CARRIER,
-					StateMod_OperationalRight_Metadata_SourceOrDestinationType.DIVERSION,
+					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.DIVERSION,
 					StateMod_OperationalRight_Metadata_SourceOrDestinationType.RESERVOIR};
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_31 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.DOWNSTREAM};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_31 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_DIVERSION,
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA,
+					StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_DIVERSION,
 					StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_DIVERSION_FROM_TRANSMOUNTAIN,
 					StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_RESERVOIR,
 					StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_RESERVOIR_FROM_TRANSMOUNTAIN};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_31 =
-					{StateMod_OperationalRight_Metadata_DiversionType.DEPLETION,
-					StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i, false,
+					{StateMod_OperationalRight_Metadata_DiversionType.NA};
+				metaData = new StateMod_OperationalRight_Metadata( i, true,
 					"Carrier Right to a Ditch or Reservoir with Reuseable Return Flows",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_DIRECT_FLOW_RIGHT,
 					source1Array_31,
@@ -1616,7 +1826,8 @@ private static void initialize ()
 					destinationLocationArray_31,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.CARRIER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
-					true,
+					true, // Yes intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_31,
 					diversionTypeArray_31,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.YES,
@@ -1639,14 +1850,16 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.DOWNSTREAM};
 				// TODO SAM 2010-12-13 Should reservoir account be added?
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_32 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_DIVERSION,
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA,
+					StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_DIVERSION,
 					StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_DIVERSION_FROM_TRANSMOUNTAIN,
 					StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_RESERVOIR,
 					StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_RESERVOIR_FROM_TRANSMOUNTAIN};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_32 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DEPLETION,
+					StateMod_OperationalRight_Metadata_DiversionType.DIRECT,
 					StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i, false,
+				metaData = new StateMod_OperationalRight_Metadata( i, true,
 					"Reservoir and Plan to a Direct Flow or Reservoir or Carrier Direct with or without Destination Reuse",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_PLAN_STRUCTURE,
 					source1Array_32,
@@ -1656,7 +1869,8 @@ private static void initialize ()
 					destinationLocationArray_32,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
-					true,
+					true, // Yes intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_32,
 					diversionTypeArray_32,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.YES,
@@ -1679,14 +1893,15 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.UPSTREAM};
 				// TODO SAM 2010-12-13 Should reservoir account be added?
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_33 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_DIVERSION,
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA,
+					StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_DIVERSION,
 					StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_DIVERSION_FROM_TRANSMOUNTAIN,
 					StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_RESERVOIR,
 					StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_RESERVOIR_FROM_TRANSMOUNTAIN};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_33 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DEPLETION,
 					StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i, false,
+				metaData = new StateMod_OperationalRight_Metadata( i, true,
 					"Reservoir and Plan to a Direct Flow or Reservoir or Carrier by Exchange with or without Destination Reuse",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_RESERVOIR,
 					source1Array_33,
@@ -1696,7 +1911,8 @@ private static void initialize ()
 					destinationLocationArray_33,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
-					true,
+					true, // Yes intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_33,
 					diversionTypeArray_33,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.YES,
@@ -1706,27 +1922,24 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source1Array_34 =
 			    	{StateMod_OperationalRight_Metadata_SourceOrDestinationType.RESERVOIR };
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source2Array_34 =
-					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_OUT_OF_PRIORITY,
-					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_REUSE_TO_DIVERSION,
-					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_REUSE_TO_DIVERSION_FROM_TRANSMOUNTAIN,
-					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_REUSE_TO_RESERVOIR,
-					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_REUSE_TO_RESERVOIR_FROM_TRANSMOUNTAIN};
+					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.DIVERSION,
+					StateMod_OperationalRight_Metadata_SourceOrDestinationType.OPERATIONAL_RIGHT,
+					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_OUT_OF_PRIORITY};
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] destinationArray_34 =
-					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.CARRIER,
-					StateMod_OperationalRight_Metadata_SourceOrDestinationType.DIVERSION,
-					StateMod_OperationalRight_Metadata_SourceOrDestinationType.RESERVOIR};
+					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.RESERVOIR};
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_34 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.SOURCE};
 				// TODO SAM 2010-12-13 Should reservoir account be added?
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_34 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_OUT_OF_PRIORITY,
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA,
+					StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_OUT_OF_PRIORITY,
 					StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_DIVERSION,
 					StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_DIVERSION_FROM_TRANSMOUNTAIN,
 					StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_RESERVOIR,
 					StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_RESERVOIR_FROM_TRANSMOUNTAIN};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_34 =
-					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i, false,
+					{StateMod_OperationalRight_Metadata_DiversionType.NA};
+				metaData = new StateMod_OperationalRight_Metadata( i, true,
 					"Reservoir to Reservoir Transfer (Bookover) with Reuse",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_RESERVOIR,
 					source1Array_34,
@@ -1736,7 +1949,8 @@ private static void initialize ()
 					destinationLocationArray_34,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.BOOKOVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
-					true,
+					true, // Yes intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_34,
 					diversionTypeArray_34,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -1744,7 +1958,7 @@ private static void initialize ()
 				break;
 			case 35:
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source1Array_35 =
-			    	{StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_TRANSMOUNTAIN_IMPORT };
+			    	{StateMod_OperationalRight_Metadata_SourceOrDestinationType.DIVERSION};
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source2Array_35 =
 					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.NA };
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] destinationArray_35 =
@@ -1754,13 +1968,14 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_35 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.DOWNSTREAM};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_35 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_DIVERSION,
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA,
+					StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_DIVERSION,
 					StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_DIVERSION_FROM_TRANSMOUNTAIN,
 					StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_RESERVOIR,
 					StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_RESERVOIR_FROM_TRANSMOUNTAIN};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_35 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i, false,
+				metaData = new StateMod_OperationalRight_Metadata( i, true,
 					"Import to a Diversion, Reservoir, or Carrier with or without Reuse",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_PLAN_STRUCTURE,
 					source1Array_35,
@@ -1770,7 +1985,8 @@ private static void initialize ()
 					destinationLocationArray_35,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
-					true,
+					true, // Yes intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_35,
 					diversionTypeArray_35,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -1789,7 +2005,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_36 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i, false,
+				metaData = new StateMod_OperationalRight_Metadata( i, true,
 					"Seasonal (daily) On/Off Capability (e.g., Meadow Rights)",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_DIRECT_FLOW_RIGHT,
 					source1Array_36,
@@ -1799,7 +2015,8 @@ private static void initialize ()
 					destinationLocationArray_36,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
-					true,
+					true, // Yes intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_36,
 					diversionTypeArray_36,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -1816,13 +2033,10 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_37 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.DOWNSTREAM};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_37 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_DIVERSION,
-					StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_DIVERSION_FROM_TRANSMOUNTAIN,
-					StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_RESERVOIR,
-					StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_RESERVOIR_FROM_TRANSMOUNTAIN};
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_37 =
-					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i, false,
+					{StateMod_OperationalRight_Metadata_DiversionType.NA};
+				metaData = new StateMod_OperationalRight_Metadata( i, true,
 					"Augmentation Well",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_GROUNDWATER,
 					source1Array_37,
@@ -1832,7 +2046,8 @@ private static void initialize ()
 					destinationLocationArray_37,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
-					true,
+					true, // Yes intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_37,
 					diversionTypeArray_37,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -1842,20 +2057,23 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source1Array_38 =
 			    	{StateMod_OperationalRight_Metadata_SourceOrDestinationType.RESERVOIR_RIGHT };
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source2Array_38 =
-					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.RESERVOIR_RIGHT };
+					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.DIVERSION_RIGHT,
+					StateMod_OperationalRight_Metadata_SourceOrDestinationType.RESERVOIR_RIGHT };
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] destinationArray_38 =
 					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.DIVERSION,
 					StateMod_OperationalRight_Metadata_SourceOrDestinationType.RESERVOIR};
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_38 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.SOURCE};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_38 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_DIVERSION,
-					StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_DIVERSION_FROM_TRANSMOUNTAIN,
-					StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_RESERVOIR,
-					StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_RESERVOIR_FROM_TRANSMOUNTAIN};
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_OUT_OF_PRIORITY };
+					// TODO SAM 2011-02-06 Doc says "reuse plan" in one place and OOP plan in another
+					//StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_DIVERSION,
+					//StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_DIVERSION_FROM_TRANSMOUNTAIN,
+					//StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_RESERVOIR,
+					//StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_RESERVOIR_FROM_TRANSMOUNTAIN};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_38 =
-					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i, false,
+					{StateMod_OperationalRight_Metadata_DiversionType.NA};
+				metaData = new StateMod_OperationalRight_Metadata( i, true,
 					"Out of Priority Diversion (addresses the upstream storage statute)",
 					StateMod_OperationalRight_Metadata_RuleType.STORAGE_OPERATIONS,
 					source1Array_38,
@@ -1865,7 +2083,8 @@ private static void initialize ()
 					destinationLocationArray_38,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
-					true,
+					true, // Yes intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_38,
 					diversionTypeArray_38,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -1875,7 +2094,8 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source1Array_39 =
 			    	{StateMod_OperationalRight_Metadata_SourceOrDestinationType.DIVERSION_RIGHT };
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source2Array_39 =
-					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.DIVERSION };
+					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.DIVERSION,
+					StateMod_OperationalRight_Metadata_SourceOrDestinationType.WELL};
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] destinationArray_39 =
 					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.DIVERSION};
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_39 =
@@ -1885,7 +2105,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA };
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_39 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i, false,
+				metaData = new StateMod_OperationalRight_Metadata( i, true,
 					"Alternate Point Diversion",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_DIRECT_FLOW_RIGHT,
 					source1Array_39,
@@ -1895,7 +2115,8 @@ private static void initialize ()
 					destinationLocationArray_39,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
-					true,
+					true, // Yes intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_39,
 					diversionTypeArray_39,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -1924,7 +2145,8 @@ private static void initialize ()
 					destinationLocationArray_40,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NA,
-					true,
+					true, // Yes intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_40,
 					diversionTypeArray_40,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -1943,7 +2165,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA };
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_41 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i, false,
+				metaData = new StateMod_OperationalRight_Metadata( i, true,
 					"Reservoir Storage with Special Limits",
 					StateMod_OperationalRight_Metadata_RuleType.STORAGE_OPERATIONS,
 					source1Array_41,
@@ -1953,7 +2175,8 @@ private static void initialize ()
 					destinationLocationArray_41,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NA,
-					true,
+					true, // Yes intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_41,
 					diversionTypeArray_41,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -1973,8 +2196,8 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_42 =
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA };
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_42 =
-					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i, false,
+					{StateMod_OperationalRight_Metadata_DiversionType.NA};
+				metaData = new StateMod_OperationalRight_Metadata( i, true,
 					"Plan Demand Reset",
 					StateMod_OperationalRight_Metadata_RuleType.STORAGE_OPERATIONS,
 					source1Array_42,
@@ -1984,7 +2207,8 @@ private static void initialize ()
 					destinationLocationArray_42,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NA,
-					false,
+					false, // No intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_42,
 					diversionTypeArray_42,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -1996,14 +2220,15 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source2Array_43 =
 					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.NA };
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] destinationArray_43 =
-					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.NA};
+					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_TC,
+					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_WELL_AUGMENTATION};
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_43 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.SOURCE};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_43 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_WELL_AUGMENTATION };
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA };
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_43 =
-					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i, false,
+					{StateMod_OperationalRight_Metadata_DiversionType.NA};
+				metaData = new StateMod_OperationalRight_Metadata( i, true,
 					"In-Priority Well Depletion",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_PLAN_STRUCTURE,
 					source1Array_43,
@@ -2013,7 +2238,8 @@ private static void initialize ()
 					destinationLocationArray_43,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NA,
-					false,
+					false, // No intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_43,
 					diversionTypeArray_43,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -2029,10 +2255,12 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_44 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.SOURCE};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_44 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_WELL_AUGMENTATION };
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA,
+					StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_WELL_AUGMENTATION };
+				// TODO SAM 2011-02-05 Summary has Diversion
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_44 =
-					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i, false,
+					{StateMod_OperationalRight_Metadata_DiversionType.NA};
+				metaData = new StateMod_OperationalRight_Metadata( i, true,
 					"Recharge Well",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_GROUNDWATER,
 					source1Array_44,
@@ -2042,7 +2270,8 @@ private static void initialize ()
 					destinationLocationArray_44,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
-					true,
+					true, // Yes intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_44,
 					diversionTypeArray_44,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -2050,7 +2279,8 @@ private static void initialize ()
 				break;
 			case 45:
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source1Array_45 =
-			    	{StateMod_OperationalRight_Metadata_SourceOrDestinationType.DIVERSION_RIGHT};
+			    	{StateMod_OperationalRight_Metadata_SourceOrDestinationType.DIVERSION_RIGHT,
+					StateMod_OperationalRight_Metadata_SourceOrDestinationType.RESERVOIR_RIGHT};
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source2Array_45 =
 					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.NA };
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] destinationArray_45 =
@@ -2059,10 +2289,11 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_45 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.SOURCE};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_45 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_RECHARGE };
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA,
+					StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_RECHARGE };
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_45 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i, false,
+				metaData = new StateMod_OperationalRight_Metadata( i, true,
 					"Carrier with Transit Loss (allows multiple carriers and associated losses)",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_DIRECT_FLOW_RIGHT,
 					source1Array_45,
@@ -2072,13 +2303,15 @@ private static void initialize ()
 					destinationLocationArray_45,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
-					true,
+					false, // No intervening structures (without loss)
+					true, // Yes intervening structures (with loss)
 					associatedPlanAllowedArray_45,
 					diversionTypeArray_45,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.YES,
 					"" );
 				break;
 			case 46:
+				// TODO SAM 2011-02-05 Need to enable - too many questions about documentation
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source1Array_46 =
 			    	{StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_ACCOUNTING};
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source2Array_46 =
@@ -2101,7 +2334,8 @@ private static void initialize ()
 					destinationLocationArray_46,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
-					true,
+					false, // No intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_46,
 					diversionTypeArray_46,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -2109,20 +2343,20 @@ private static void initialize ()
 				break;
 			case 47:
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source1Array_47 =
-			    	{StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_ACCOUNTING};
+			    	{StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_ACCOUNTING,
+					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_RELEASE_LIMIT};
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source2Array_47 =
 					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.NA };
+				// TODO SAM 2011-02-05 Summary had diversion, reservoir, or carrier
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] destinationArray_47 =
-					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.CARRIER,
-					StateMod_OperationalRight_Metadata_SourceOrDestinationType.DIVERSION,
-					StateMod_OperationalRight_Metadata_SourceOrDestinationType.RESERVOIR};
+					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.NA };
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_47 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.SOURCE};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_47 =
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA };
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_47 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i, false,
+				metaData = new StateMod_OperationalRight_Metadata( i, true,
 					"Administration Plan Limits",
 					StateMod_OperationalRight_Metadata_RuleType.STORAGE_OPERATIONS,
 					source1Array_47,
@@ -2132,7 +2366,8 @@ private static void initialize ()
 					destinationLocationArray_47,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.YES,
-					true,
+					false, // No intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_47,
 					diversionTypeArray_47,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -2140,16 +2375,17 @@ private static void initialize ()
 				break;
 			case 48:
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source1Array_48 =
-			    	{StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_RECHARGE,
+		    		{StateMod_OperationalRight_Metadata_SourceOrDestinationType.RESERVOIR,
+					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_RECHARGE,
 					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_REUSE_TO_DIVERSION,
 					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_REUSE_TO_DIVERSION_FROM_TRANSMOUNTAIN,
 					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_REUSE_TO_RESERVOIR,
 					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_REUSE_TO_RESERVOIR_FROM_TRANSMOUNTAIN,
-					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_TC,
-					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_SPECIAL_WELL_AUGMENTATION,
-					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_WELL_AUGMENTATION};
+					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_TRANSMOUNTAIN_IMPORT,
+					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_SPECIAL_WELL_AUGMENTATION };
+				// TODO SAM 2011-02-05 Handled dynamically in code...
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source2Array_48 =
-					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_TC };
+					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.NA };
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] destinationArray_48 =
 					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_TC,
 					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_SPECIAL_WELL_AUGMENTATION,
@@ -2161,7 +2397,7 @@ private static void initialize ()
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA };
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_48 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i, false,
+				metaData = new StateMod_OperationalRight_Metadata( i, true,
 					"Plan or Reservoir Reuse to a Plan Direct",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_PLAN_STRUCTURE,
 					source1Array_48,
@@ -2171,7 +2407,8 @@ private static void initialize ()
 					destinationLocationArray_48,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NA,
-					false,
+					false, // No intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_48,
 					diversionTypeArray_48,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -2179,16 +2416,17 @@ private static void initialize ()
 				break;
 			case 49:
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source1Array_49 =
-			    	{StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_RECHARGE,
+			    	{StateMod_OperationalRight_Metadata_SourceOrDestinationType.RESERVOIR,
+					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_RECHARGE,
 					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_REUSE_TO_DIVERSION,
 					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_REUSE_TO_DIVERSION_FROM_TRANSMOUNTAIN,
 					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_REUSE_TO_RESERVOIR,
 					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_REUSE_TO_RESERVOIR_FROM_TRANSMOUNTAIN,
-					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_TC,
-					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_SPECIAL_WELL_AUGMENTATION,
-					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_WELL_AUGMENTATION};
+					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_TRANSMOUNTAIN_IMPORT,
+					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_SPECIAL_WELL_AUGMENTATION };
+				// TODO SAM 2011-02-05 This is handled dynamically based on source 1
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source2Array_49 =
-					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_TC };
+					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.NA };
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] destinationArray_49 =
 					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_TC,
 					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_SPECIAL_WELL_AUGMENTATION,
@@ -2196,11 +2434,10 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_49 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.UPSTREAM};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_49 =
-					// FIXME SAM 2011-01-31 the following was YES but need list of specific plans	
 					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA };
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_49 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};
-				metaData = new StateMod_OperationalRight_Metadata( i, false,
+				metaData = new StateMod_OperationalRight_Metadata( i, true,
 					"Plan or Reservoir Reuse to a Plan by Exchange",
 					StateMod_OperationalRight_Metadata_RuleType.SOURCE_PLAN_STRUCTURE,
 					source1Array_49,
@@ -2210,7 +2447,8 @@ private static void initialize ()
 					destinationLocationArray_49,
 					StateMod_OperationalRight_Metadata_DeliveryMethodType.RIVER,
 					StateMod_OperationalRight_Metadata_CarrierAllowedType.NA,
-					false,
+					false, // No intervening structures (without loss)
+					false, // No intervening structures (with loss)
 					associatedPlanAllowedArray_49,
 					diversionTypeArray_49,
 					StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -2401,13 +2639,23 @@ private void setTransitAndConveyanceLossAllowed (
 }
 
 /**
-Set whether the operational right uses intervening structures.
+Set whether the operational right uses intervening structures with loss.
 Make private because objects should be immutable.
-@param usesInterveningStructures whether intervening structures are used
+@param usesInterveningStructuresWithoutLoss whether intervening structures are used
 */
-private void setUsesInterveningStructures ( boolean usesInterveningStructures )
+private void setUsesInterveningStructuresWithLoss ( boolean usesInterveningStructuresWithLoss )
 {
-	__rightTypeUsesInterveningStructures = usesInterveningStructures;
+	__rightTypeUsesInterveningStructuresWithLoss = usesInterveningStructuresWithLoss;
+}
+
+/**
+Set whether the operational right uses intervening structures without loss.
+Make private because objects should be immutable.
+@param usesInterveningStructuresWithoutLoss whether intervening structures are used
+*/
+private void setUsesInterveningStructuresWithoutLoss ( boolean usesInterveningStructuresWithoutLoss )
+{
+	__rightTypeUsesInterveningStructuresWithoutLoss = usesInterveningStructuresWithoutLoss;
 }
 
 }

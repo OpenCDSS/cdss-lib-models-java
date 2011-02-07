@@ -818,7 +818,8 @@ public void renderStateModNetworkAnnotation ( StateMod_Network_JComponent networ
 				size, labelSource2, 0.0, textPosition, 0, 0);
 		}
 		// Draw the intervening structures specifically mentioned in the operational right
-		if ( metadata.getRightTypeUsesInterveningStructures() ) {
+		if ( metadata.getRightTypeUsesInterveningStructuresWithoutLoss() ||
+			metadata.getRightTypeUsesInterveningStructuresWithLoss(opr.getOprLimit())) {
 			List<String> structureIDList = opr.getInterveningStructureIDs ();
 			for ( String structureID : structureIDList ) {
 				HydrologyNode nodeIntervening = network.findNode ( structureID,

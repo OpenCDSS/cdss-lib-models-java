@@ -112,7 +112,7 @@ StateMod_OperationalRight_Metadata.getFullEditingSupported() for information.
 public class StateMod_OperationalRight extends StateMod_Data
 implements Cloneable, Comparable
 {
-
+	
 /**
 Administration number.
 */
@@ -179,7 +179,15 @@ Intervening structure IDs (up to 10 in StateMod doc but no limit here) - used by
 */
 private String _intern[] = null;
 /**
-Monthly switch, for some rights, null if not used.
+Intervening structure carrier loss, %.
+*/
+private double __oprLossC[] = null;
+/**
+Intervening structure types, used when have loss.
+*/
+private String __internT[] = null;
+/**
+Monthly switch, for some rights, null if not used (months in order of data set control file).
 */
 private int _imonsw[] = null;
 /**
@@ -227,6 +235,12 @@ private int __ioBeg;
 Ending year of operation.
 */
 private int __ioEnd;
+
+/**
+Monthly operational limits (12 values in order of data set control file plus annual at end),
+only used by some rights like 47.
+*/
+private double[] __oprMax;
 
 /**
 TODO SAM 2011-01-29 Phase out when operational rights as documented have been fully tested in code.
@@ -300,6 +314,20 @@ public Object clone() {
 	else {
 		op._intern = null;
 	}
+	
+	if (__oprLossC != null) {
+		op.__oprLossC = (double[])__oprLossC.clone();
+	}
+	else {
+		op.__oprLossC = null;
+	}
+	
+	if (__internT != null) {
+		op.__internT = (String[])__internT.clone();
+	}
+	else {
+		op.__internT = null;
+	}
 
 	if (_imonsw != null) {
 		op._imonsw = (int[])_imonsw.clone();
@@ -307,6 +335,14 @@ public Object clone() {
 	else {
 		_imonsw = null;
 	}
+
+	if (__oprMax != null) {
+		op.__oprMax = (double[])__oprMax.clone();
+	}
+	else {
+		__oprMax = null;
+	}
+	
 	op.__commentsBeforeData = new Vector();
 	for ( String comment: __commentsBeforeData ) {
 		op.__commentsBeforeData.add(comment);
@@ -573,6 +609,104 @@ public int compareTo(Object o)
 		return 1;
 	}
 	
+	// Some rules use this (otherwise will be equally missing)...
+	
+	res = __cx.compareTo(op.__cx);
+	if (res != 0) {
+		return res;
+	}
+	
+	// Some rules use this (otherwise will be equally missing)...
+	
+	if (__oprMax == null && op.__oprMax == null) {
+		// ok
+	}
+	else if (__oprMax == null) {
+		return -1;
+	}
+	else if (op.__oprMax == null) {
+		return 1;
+	}
+	else {
+		int size1 = __oprMax.length;
+		int size2 = op.__oprMax.length;
+		if (size1 < size2) {
+			return -1;
+		}
+		else if (size1 > size2) {
+			return 1;
+		}
+
+		for (int i = 0; i < size1; i++) {
+			if (__oprMax[i] < op.__oprMax[i]) {
+				return -1;
+			}
+			else if (__oprMax[i] > op.__oprMax[i]) {
+				return 1;
+			}
+		}
+	}
+	
+	// Some rules use this (otherwise will be equally missing)...
+	
+	if (__internT == null && op.__internT == null) {
+		// ok
+	}
+	else if (__internT == null) {
+		return -1;
+	}
+	else if (op.__internT == null) {
+		return 1;
+	}
+	else {
+		int size1 = __internT.length;
+		int size2 = op.__internT.length;
+		if (size1 < size2) {
+			return -1;
+		}
+		else if (size1 > size2) {
+			return 1;
+		}
+
+		for (int i = 0; i < size1; i++) {
+			res = __internT[i].compareTo(op.__internT[i]);
+			if (res != 0) {
+				return res;
+			}
+		}
+	}
+	
+	// Some rules use this (otherwise will be equally missing)...
+	
+	if (__oprLossC == null && op.__oprLossC == null) {
+		// ok
+	}
+	else if (__oprLossC == null) {
+		return -1;
+	}
+	else if (op.__oprLossC == null) {
+		return 1;
+	}
+	else {
+		int size1 = __oprLossC.length;
+		int size2 = op.__oprLossC.length;
+		if (size1 < size2) {
+			return -1;
+		}
+		else if (size1 > size2) {
+			return 1;
+		}
+
+		for (int i = 0; i < size1; i++) {
+			if (__oprLossC[i] < op.__oprLossC[i]) {
+				return -1;
+			}
+			else if (__oprLossC[i] > op.__oprLossC[i]) {
+				return 1;
+			}
+		}
+	}
+	
 	if ( __commentsBeforeData.size() < op.__commentsBeforeData.size() ) {
 		return -1;
 	}
@@ -793,6 +927,26 @@ public String getIntern(int index) {
 }
 
 /**
+Return the array of "internT".
+*/
+public String [] getInternT()
+{
+	return __internT;
+}
+
+/**
+Return the "internT" at an index, or blank if not set.
+*/
+public String getInternT(int index) {
+	if ( (index < 0) || (index >= __internT.length) ) {
+		return "";
+	}
+	else {
+		return __internT[index];
+	}
+}
+
+/**
 Return the intervening structure identifiers, guaranteed to be non-null but may be empty.
 */
 public List<String> getInterveningStructureIDs()
@@ -800,7 +954,7 @@ public List<String> getInterveningStructureIDs()
 	if ( __metadata == null ) {
 		return structureIDList;
 	}
-	else if ( __metadata.getRightTypeUsesInterveningStructures() ) {
+	else if ( __metadata.getRightTypeUsesInterveningStructuresWithoutLoss() ) {
 		String[] intern = getIntern();
 		if ( (intern == null) || (intern.length == 0) ) {
 			return structureIDList;
@@ -830,10 +984,10 @@ public int getIoEnd() {
 
 /**
 Get the interns as a list.
-@return the intervening structure identifiers or an empty Vector.
+@return the intervening structure identifiers or an empty list.
 */
 public List<String> getInternsVector() {
-	List v = new Vector();
+	List<String> v = new Vector();
 	if ( _intern != null ) {
 		for ( int i = 0; i < _intern.length; i++) {
 			v.add(getIntern(i));
@@ -913,6 +1067,42 @@ Return OprLoss.
 */
 public double getOprLoss() {
 	return __oprLoss;
+}
+
+/**
+Return the array of "oprLossC".
+*/
+public double [] getOprLossC()
+{
+	return __oprLossC;
+}
+
+/**
+Return the "oprLossC" at an index, or missing if not set.
+*/
+public double getOprLossC(int index) {
+	if ( (index < 0) || (index >= __oprLossC.length) ) {
+		return StateMod_Util.MISSING_DOUBLE;
+	}
+	else {
+		return __oprLossC[index];
+	}
+}
+
+/**
+Return the array of monthly max limits.
+*/
+public double [] getOprMax() {
+	return __oprMax;
+}
+
+/**
+Return a monthly switch at an index.
+@param index month to get switch for (0-11), where the index is a position, not
+a month (actual month is controlled by the year type for the data set).
+*/
+public double getOprMax(int index) {
+	return __oprMax[index];
 }
 
 /**
@@ -1002,13 +1192,19 @@ private void initialize()
 	__oprLimit = StateMod_Util.MISSING_DOUBLE;
 	__ioBeg = StateMod_Util.MISSING_INT;
 	__ioEnd = StateMod_Util.MISSING_INT;
-}
-
-public boolean hasImonsw() {
-	if (_imonsw != null) {
-		return true;
+	// Only used by some rights, but setup data to avoid memory management checks
+	__oprMax = new double[13];
+	for ( int i = 0; i < 13; i++ ) {
+		__oprMax[i] = StateMod_Util.MISSING_DOUBLE;
 	}
-	return false;
+	__internT = new String[10]; // Maximum defined by StateMod
+	for ( int i = 0; i < 10; i++ ) {
+		__internT[i] = "";
+	}
+	__oprLossC = new double[10]; // Maximum defined by StateMod
+	for ( int i = 0; i < 10; i++ ) {
+		__oprLossC[i] = StateMod_Util.MISSING_DOUBLE;
+	}
 }
 
 /**
@@ -1173,7 +1369,38 @@ throws Exception
 }
 
 /**
- * Read the StateMod operational rights file intervening structures.
+ * Read the StateMod operational rights file associated operating rule.
+ * @param routine to use for logging.
+ * @param linecount Line count (1+) before reading in this method.
+ * @param in BufferedReader to read.
+ * @param anOprit Operational right for which to read data.
+ * @return the number of errors.
+ * @exception IOException if there is an error reading the file
+ */
+private static int readStateModFile_AssociatedOperatingRule ( String routine, int linecount,
+	BufferedReader in, StateMod_OperationalRight anOprit )
+throws IOException
+{
+	String iline = null;
+	try {
+		iline = in.readLine();
+		++linecount;
+		Message.printStatus ( 2, routine, "Processing operating rule " + anOprit.getItyopr() +
+			" associated operating rule " + (linecount + 1) + ": " + iline );
+		anOprit.setCx(iline.trim());
+	}
+	catch ( Exception e ) {
+		// TODO SAM 2010-12-13 Need to handle errors and provide feedback
+		Message.printWarning(3, routine,
+			"Error reading associated operating rule at line " + (linecount + 1) + ": " + iline +
+		    " (" + e + ")" );
+		return 1;
+	}
+	return 0;
+}
+
+/**
+ * Read the StateMod operational rights file intervening structures, with loss.
  * @param ninterv Intervening structures switch.
  * @param routine to use for logging.
  * @param linecount Line count (1+) before reading in this method.
@@ -1182,26 +1409,72 @@ throws Exception
  * @return the number of errors.
  * @exception IOException if there is an error reading the file
  */
-private static int readStateModFile_InterveningStructures ( int ninterv, String routine, int linecount,
+private static int readStateModFile_InterveningStructuresWithLoss ( int ninterv, String routine, int linecount,
 		BufferedReader in, StateMod_OperationalRight anOprit )
 throws IOException
 {	// One line has up to 10 intervening structure identifiers
+	int errorCount = 0;
+	String iline = "";
+	try {
+		for ( int i = 0; i < ninterv; i++ ) {
+			iline = in.readLine().trim();
+			++linecount;
+			Message.printStatus ( 2, routine, "Processing operating rule " + anOprit.getItyopr() +
+				" intervening structures with loss line " + (linecount + 1) + ": " + iline );
+			List<String> tokens = StringUtil.breakStringList( iline, " \t", StringUtil.DELIM_SKIP_BLANKS );
+			int ntokens = 0;
+			if ( tokens != null ) {
+				ntokens = tokens.size();
+			}
+			if ( ntokens > 0 ) {
+				anOprit.setIntern(i, tokens.get(0), false);
+			}
+			if ( ntokens > 1 ) {
+				if ( StringUtil.isDouble(tokens.get(1))) {
+					anOprit.setOprLossC(i, tokens.get(1));
+				}
+				else {
+					Message.printWarning(3,routine,"Intervening structure " + (i + 1) +
+						" loss percent (" + tokens.get(1) + " is not a number.");
+				}
+			}
+			if ( ntokens > 2 ) {
+				anOprit.setInternT(i, tokens.get(2));
+			}
+		}
+	}
+	catch ( Exception e ) {
+		// TODO SAM 2010-12-13 Need to handle errors and provide feedback
+		Message.printWarning(3, routine, "Error reading intervening structures at line " + (linecount + 1) +
+			": " + iline + " (" + e + ")" );
+	}
+	return errorCount;
+}
+
+/**
+ * Read the StateMod operational rights file intervening structures, without loss.
+ * @param ninterv Intervening structures switch.
+ * @param routine to use for logging.
+ * @param linecount Line count (1+) before reading in this method.
+ * @param in BufferedReader to read.
+ * @param anOprit Operational right for which to read data.
+ * @return the number of errors.
+ * @exception IOException if there is an error reading the file
+ */
+private static int readStateModFile_InterveningStructuresWithoutLoss ( int ninterv, String routine, int linecount,
+		BufferedReader in, StateMod_OperationalRight anOprit )
+throws IOException
+{	// One line has up to 10 intervening structure identifiers - format 10a12
 	String iline = in.readLine().trim();
+	String format = "x36a12a12a12a12a12a12a12a12a12a12";
 	++linecount;
 	int errorCount = 0;
 	try {
 		Message.printStatus ( 2, routine, "Processing operating rule " + anOprit.getItyopr() +
-			" intervening structures line " + (linecount + 1) + ": " + iline );
-		List<String> tokens = StringUtil.breakStringList( iline, " \t", StringUtil.DELIM_SKIP_BLANKS );
-		int ntokens = 0;
-		if ( tokens != null ) {
-			ntokens = tokens.size();
-		}
-		if ( ntokens > 0 ) {
-			anOprit._intern = new String[ninterv];
-		}
-		for ( int i=0; i<ntokens; i++) {
-			anOprit.setIntern(i, tokens.get(i).trim(), false);
+			" intervening structures without loss line " + (linecount + 1) + ": " + iline );
+		List v = StringUtil.fixedRead(iline, format);
+		for ( int i=0; i<ninterv; i++) {
+			anOprit.setIntern(i, ((String)v.get(i)).trim(), false);
 		}
 	}
 	catch ( Exception e ) {
@@ -1245,6 +1518,55 @@ throws IOException
 			": " + iline + " (" + e + ")" );
 	}
 	return errorCount;
+}
+
+/**
+ * Read the StateMod operational rights file monthly operational limits.
+ * @param routine to use for logging.
+ * @param linecount Line count (1+) before reading in this method.
+ * @param in BufferedReader to read.
+ * @param anOprit Operational right for which to read data.
+ * @return the number of errors.
+ * @exception IOException if there is an error reading the file
+ */
+private static int readStateModFile_MonthlyOprMax ( String routine, int linecount,
+		BufferedReader in, StateMod_OperationalRight anOprit )
+throws IOException
+{
+	double oprLimits = anOprit.getOprLimit();
+	int oprLimitsInt = 0;
+	if ( oprLimits > 0 ) {
+		oprLimitsInt = (int)(oprLimits + .1);
+	}
+	else if ( oprLimits < 0 ) {
+		oprLimitsInt = (int)(oprLimits - .1);
+	}
+	String iline = null;
+	try {
+		if ( oprLimitsInt == 1 ) {
+			iline = in.readLine().trim();
+			++linecount;
+			Message.printStatus ( 2, routine, "Processing operating rule " + anOprit.getItyopr() +
+				" monthly operating limits " + (linecount + 1) + ": " + iline );
+			// Limits are free format, but 13 are expected
+			List<String> tokens = StringUtil.breakStringList( iline, " \t", StringUtil.DELIM_SKIP_BLANKS );
+			int ntokens = 0;
+			if ( tokens != null ) {
+				ntokens = tokens.size();
+			}
+			for ( int i=0; i<ntokens; i++) {
+				anOprit.setOprMax(i, tokens.get(i).trim());
+			}
+		}
+	}
+	catch ( Exception e ) {
+		// TODO SAM 2010-12-13 Need to handle errors and provide feedback
+		Message.printWarning(3, routine,
+			"Error reading monthly operational limits at line " + (linecount + 1) + ": " + iline +
+		    " (" + e + ")" );
+		return 1;
+	}
+	return 0;
 }
 
 /**
@@ -1324,7 +1646,41 @@ throws IOException
 	}
 	catch ( Exception e ) {
 		// TODO SAM 2010-12-13 Need to handle errors and provide feedback
-		Message.printWarning(3, routine, "Error reading intervening structures at line " + (linecount + 1) +
+		Message.printWarning(3, routine, "Error reading Rio Grande data at line " + (linecount + 1) +
+			": " + iline + " (" + e + ")" );
+	}
+	return errorCount;
+}
+
+/**
+ * Read the StateMod operational rights file San Juan data.
+ * @param routine to use for logging.
+ * @param linecount Line count (1+) before reading in this method.
+ * @param in BufferedReader to read.
+ * @param anOprit Operational right for which to read data.
+ * @return the number of errors.
+ * @exception IOException if there is an error reading the file
+ */
+private static int readStateModFile_SanJuan ( String routine, int linecount,
+		BufferedReader in, StateMod_OperationalRight anOprit )
+throws IOException
+{
+	int errorCount = 0;
+	// San Juan additional data...
+	String formatSanJuan = "x64f8f8";
+	List v = null;
+	String iline = in.readLine();
+	++linecount;
+	try {
+		Message.printStatus ( 2, routine, "Processing operating rule " + anOprit.getItyopr() +
+			" San Juan data line " + (linecount + 1) + ": " + iline );
+		v = StringUtil.fixedRead(iline, formatSanJuan);
+		anOprit.setSjmina( (Float)v.get(0));
+		anOprit.setSjrela( (Float)v.get(1));
+	}
+	catch ( Exception e ) {
+		// TODO SAM 2010-12-13 Need to handle errors and provide feedback
+		Message.printWarning(3, routine, "Error reading San Juan data at line " + (linecount + 1) +
 			": " + iline + " (" + e + ")" );
 	}
 	return errorCount;
@@ -1632,8 +1988,6 @@ throws Exception {
 	//   missing, which will use StateMod internal defaults
 	// 
 	String formatLine1 = "a12a24x12x4a12f8i8x1a12a8x1a12a8x1a12a8i8x1a12x1a12x1a8a8a8a8";
-	// San Juan additional data...
-	String format_20 = "x64f8f8";
 	StateMod_OperationalRight anOprit = null;
 	BufferedReader in = null;
 	int linecount = 0;
@@ -1762,6 +2116,8 @@ throws Exception {
 			if ( StringUtil.isDouble(OprLoss)) {
 				anOprit.setOprLoss ( OprLoss );
 			}
+			double oprLossDouble = anOprit.getOprLoss();
+			
 			// Miscellaneous limits...
 			String OprLimit = ((String)v.get(15)).trim();
 			if ( StringUtil.isDouble(OprLimit)) {
@@ -1823,7 +2179,8 @@ throws Exception {
 							destinationLocationArray_1,
 							StateMod_OperationalRight_Metadata_DeliveryMethodType.NA,
 							StateMod_OperationalRight_Metadata_CarrierAllowedType.NA,
-							false, // No intervening structures
+							false, // No intervening structures without loss
+							false, // No intervening structures with loss
 							associatedPlanAllowedArray_1,
 							diversionTypeArray_1,
 							StateMod_OperationalRight_Metadata_TransitAndConveyanceLossAllowedType.NA,
@@ -1834,9 +2191,6 @@ throws Exception {
 
 			// If here the operational right is understood and additional lines of data may be provided.
 
-			nmonsw = 0;
-			ninterv = 0;
-			
 			// May have monthly switch and intervening structures.  For now check the value.
 			StateMod_OperationalRight_Metadata metadata =
 				StateMod_OperationalRight_Metadata.getMetadata(rightType);
@@ -1849,22 +2203,18 @@ throws Exception {
 				errorCount += readStateModFile_RioGrande ( routine, linecount, in, anOprit );
 				++linecount; // Increment here because copy passed in to above call is local to that method
 			}
-
-			if ( rightType == 20 ) {
-				// San Juan RIP...
-				iline = in.readLine();
-				++linecount;
-				Message.printStatus ( 2, routine, "Processing operating rule 20 line " + linecount + ": " + iline );
-				v = StringUtil.fixedRead(iline, format_20);
-				anOprit.setSjmina( (Float)v.get(0));
-				anOprit.setSjrela( (Float)v.get(1));
-			}
 			
+			if ( metadata.getRightTypeUsesSanJuan() ) {	
+				errorCount += readStateModFile_SanJuan ( routine, linecount, in, anOprit );
+				++linecount; // Increment here because copy passed in to above call is local to that method
+			}
+
 			// ...end reading additional data before monthly and intervening structure data
 			
 			// Start reading the monthly and intervening structure data - first split the "dumx"
 			// value into parts...
-		
+			nmonsw = 0;
+			ninterv = 0;
 			// Special case for type 17 and 18, where -8 means no monthly switches and -20 = use switches
 			if ( (rightType == 17) || (rightType == 18) ) {
 				nmonsw = 0; // Default
@@ -1906,16 +2256,38 @@ throws Exception {
 					++linecount; // Increment here because copy passed in to above call is local to that method
 				}
 			}
-			if ( metadata.getRightTypeUsesInterveningStructures() ) {	
+			
+			if ( metadata.getRightTypeUsesAssociatedOperatingRule(oprLimit) ) {	
+				errorCount += readStateModFile_AssociatedOperatingRule ( routine, linecount, in, anOprit );
+				++linecount; // Increment here because copy passed in to above call is local to that method
+			}
+			
+			if ( metadata.getRightTypeUsesInterveningStructuresWithoutLoss() ) {	
 				// Only read intervening structures if allowed (otherwise assume user error in input)
 				if ( ninterv > 0 ) {
-					errorCount += readStateModFile_InterveningStructures (
+					errorCount += readStateModFile_InterveningStructuresWithoutLoss (
+						ninterv, routine, linecount, in, anOprit );
+					++linecount; // Increment here because copy passed in to above call is local to that method
+				}
+			}
+			if ( metadata.getRightTypeUsesInterveningStructuresWithLoss(oprLossDouble) ) {	
+				// Only read intervening structures if allowed (otherwise assume user error in input)
+				if ( ninterv > 0 ) {
+					errorCount += readStateModFile_InterveningStructuresWithLoss (
 						ninterv, routine, linecount, in, anOprit );
 					++linecount; // Increment here because copy passed in to above call is local to that method
 				}
 			}
 			
 			// ...end reading monthly and intervening structure data.
+			// Start reading additional records after monthly and intervening structure...
+			
+			if ( metadata.getRightTypeUsesMonthlyOprLimits(oprLimit) ) {
+				if ( (int)(oprLimit + .1) == 1 ) {
+					errorCount += readStateModFile_MonthlyOprMax( routine, linecount, in, anOprit );
+					++linecount; // Increment here because copy passed in to above call is local to that method
+				}
+			}
 			
 			// ...end reading additional data after monthly and intervening structure data
 
@@ -1985,6 +2357,13 @@ public void restoreOriginal() {
 	__oprLimit = op.__oprLimit;
 	__ioBeg = op.__ioBeg;
 	__ioEnd = op.__ioEnd;
+	// Additional new data after core attributes...
+	__oprMax = op.__oprMax;
+	// Comments, etc...
+	__rightStringsList = op.__rightStringsList;
+	__commentsBeforeData = op.__commentsBeforeData;
+	__readErrorList = op.__readErrorList;
+	// Controlling info...
 	_isClone = false;
 	_original = null;
 }
@@ -2237,7 +2616,7 @@ private void setDumxFromMonthlySwitchAndInterveningStructures ()
 		}
 	}
 	int nValidInterveningStructures = 0;
-	if ( metadata.getRightTypeUsesInterveningStructures() ) {
+	if ( metadata.getRightTypeUsesInterveningStructuresWithoutLoss() ) {
 		String [] intern = getIntern();
 		if ( intern != null ) {
 			for ( int i = 0; i < intern.length; i++ ) {
@@ -2402,6 +2781,26 @@ public void setInterns(List<String> v)
 	if ( v != null ) {
 		for (int i = 0; i < v.size(); i++) {
 			setIntern(i, v.get(i), false);
+		}
+	}
+}
+
+/**
+Set an "internT".
+*/
+public void setInternT(int index, String internT ) {
+	if (internT == null) {
+		return;
+	}
+	if (!internT.equals(__internT[index])) {
+		// Only set if not already set - otherwise will trigger dirty flag
+		__internT[index] = internT;
+		setDirty ( true );
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"","Setting internT[" + index + "] dirty");
+		}
+		if ( !_isClone && _dataset != null ) {
+			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
 	}
 }
@@ -2591,6 +2990,64 @@ public void setOprLoss(double oprLoss) {
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
 		}
+	}
+}
+
+/**
+Set an oprLossC 
+*/
+public void setOprLossC(int index, String oprLossC) {
+	if ( (oprLossC != null) && !oprLossC.equals("") ) {
+		setOprLossC(index, Double.parseDouble(oprLossC.trim()));
+	}
+}
+
+/**
+Set an "oprLossC".
+*/
+public void setOprLossC(int index, double oprLossC )
+{
+	if ( oprLossC != __oprLossC[index] ) {
+		__oprLossC[index] = oprLossC;
+		setDirty ( true );
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"","Setting oprLossC dirty");
+		}
+		if ( !_isClone && _dataset != null ) {
+			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
+		}
+	}
+}
+
+/**
+Set a monthly operational limit.
+*/
+public void setOprMax(int index, double oprMax) {
+	if (oprMax != __oprMax[index]) {
+		__oprMax[index] = oprMax;
+		setDirty ( true );
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"","Setting oprMax[" + index + "] dirty");
+		}
+		if ( !_isClone && _dataset != null ) {
+			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
+		}
+	}
+}
+
+/**
+Set a monthly operational limit.
+*/
+public void setOprMax(int index, Double oprMax) {
+	setOprMax(index, oprMax.doubleValue());
+}
+
+/**
+Set a monthly operational limit.
+*/
+public void setOprMax(int index, String oprMax) {
+	if (oprMax != null) {
+		setOprMax(index, Double.parseDouble(oprMax.trim()));
 	}
 }
 
@@ -3139,7 +3596,7 @@ throws Exception {
 		int num_intern;
 		int numComments;
 		int dumx;
-		int ruleType;
+		int rightType;
 		double oprLimit;
 		StateMod_OperationalRight_Metadata metadata;
 		for (int i = 0; i < num ; i++) {
@@ -3147,7 +3604,7 @@ throws Exception {
 			if (opr == null) {
 				continue;
 			}
-			ruleType = opr.getItyopr();
+			rightType = opr.getItyopr();
 
 			commentsBeforeData = opr.getCommentsBeforeData();
 			numComments = commentsBeforeData.size();
@@ -3185,7 +3642,7 @@ throws Exception {
 				v.add(opr.getIopsou1());
 				v.add(opr.getCiopso2());
 				v.add(opr.getIopsou2());
-				v.add(new Integer(ruleType));
+				v.add(new Integer(rightType));
 				v.add(opr.getCreuse());
 				v.add(opr.getCdivtyp());
 				v.add(new Double(opr.getOprLoss()));
@@ -3210,20 +3667,54 @@ throws Exception {
 						StringUtil.formatString(opr.getCiopso5(), "%-12.12s") +
 						StringUtil.formatString(opr.getIopsou5(), "%8.8s") );
 				}
-				else if ( ruleType == 20 ) {
+				if ( metadata.getRightTypeUsesSanJuan() ) {
 					out.println ( "                                                                " +
-							StringUtil.formatString(opr.getSjmina(), "%8.0f") +
-							StringUtil.formatString(opr.getSjrela(), "%8.0f") );
+						StringUtil.formatString(opr.getSjmina(), "%8.0f") +
+						StringUtil.formatString(opr.getSjrela(), "%8.0f") );
+				}
+				
+				// This code is the same as the readStateModFileVersion2()...
+				
+				// Start reading the monthly and intervening structure data - first split the "dumx"
+				// value into parts...
+				int nmonsw = 0;
+				int ninterv = 0;
+				// Special case for type 17 and 18, where -8 means no monthly switches and -20 = use switches
+				if ( (rightType == 17) || (rightType == 18) ) {
+					nmonsw = 0; // Default
+					ninterv = 0;
+					if ( dumx == -20 ) {
+						nmonsw = 12;
+					}
+				}
+				else {
+					// Normal interpretation of dumx
+					if ( dumx == 12 ) {
+						// Only have monthly switches
+						nmonsw = 12;
+					}
+					else if ( dumx >= 0 ) {
+						// Only have intervening structures...
+						ninterv = dumx;
+					}
+					else if ( dumx < 0 ){
+						// Have monthly switches and intervening structures.
+						// -12 of the total count toward the monthly switch and the remainder is
+						// the number of intervening structures
+						if ( dumx < -12 ) {
+							ninterv = -1*(dumx + 12);
+							nmonsw = 12;
+						}
+						else {
+							ninterv = -1*dumx;
+						}
+					}
 				}
 				
 				// Write the monthly switches if used
 	
 				if ( metadata.getRightTypeUsesMonthlySwitch() ) {
-					if ((dumx == 12) || (dumx < -12)) {
-						if (Message.isDebugOn) {
-							Message.printDebug(50, routine,
-								"in area 1: getDumx = " + opr.getDumx()+ "getItyopr = " + opr.getItyopr());
-						}
+					if ( nmonsw == 12 ) {
 						vMonthlySwitches.clear();
 						for (int j = 0; j < 12; j++) {
 							vMonthlySwitches.add(new Integer( opr.getImonsw(j)));
@@ -3233,37 +3724,50 @@ throws Exception {
 					}
 				}
 				
-				// Write the intervening structures if used
+				// Write the intervening structures (without loss) if used
 	
-				if ( metadata.getRightTypeUsesInterveningStructures() ) {
-					if (Message.isDebugOn) {
-						Message.printDebug(50, routine, "in area 3 (" + opr.getID() + "): getDumx = " + opr.getDumx()
-							+ ", getItyopr = " + opr.getItyopr());
-					}
-					if ((dumx > 0 && dumx <= 10) || (dumx < -12) ) {
-						if (Message.isDebugOn) {
-							Message.printDebug(50, routine,
-								"in area 2: getDumx = " + opr.getDumx() + "getItyopr = " + opr.getItyopr());
-						}
+				if ( metadata.getRightTypeUsesInterveningStructuresWithoutLoss() ) {
+					if ( ninterv > 0 ) {
 						vsp.clear();
 						vsp.add(" ");
-						iline = StringUtil.formatString(vsp, formatsp);
-						out.print(iline);
-		
-						num_intern = opr.getDumx();
-						if (opr.getDumx() < -12) {
-							num_intern = -12 - opr.getDumx();
-						}
-						for (int j = 0; j < num_intern; j++) {
-							if (Message.isDebugOn) {
-								Message.printDebug(50, routine, "in area 3: " + num_intern);
-							}
+						StringBuffer b = new StringBuffer();
+						b.append(StringUtil.formatString(vsp, formatsp));
+						for (int j = 0; j < ninterv; j++) {
 							vI.clear();
 							vI.add(opr.getIntern(j));
-							iline = StringUtil.formatString( vI, formatI);
-							out.print(iline);
+							b.append(StringUtil.formatString( vI, formatI));
 						}
-						out.println();
+						out.println(b.toString());
+					}
+				}
+				
+				// Write associated operating rule if used
+				
+				if ( metadata.getRightTypeUsesAssociatedOperatingRule(opr.getOprLimit()) ) {
+					out.println ( "                                    " + opr.getCx() );
+				}
+				
+				// Write the intervening structures (with loss) if used
+				
+				if ( metadata.getRightTypeUsesInterveningStructuresWithLoss(opr.getOprLoss()) ) {
+					StringBuffer b = new StringBuffer();
+					for (int j = 0; j < ninterv; j++) {
+						b.setLength(0);
+						b.append("                                   ");
+						b.append( StringUtil.formatString( opr.getIntern(i), "%-12.12s") );
+						b.append( " " );
+						b.append( StringUtil.formatString( opr.getOprLossC(i), "%8.0f") );
+						b.append( " " );
+						b.append( StringUtil.formatString( opr.getInternT(i), "%s") );
+						out.println(b.toString());
+					}
+				}
+				
+				// Write operating limits if used
+				
+				if ( metadata.getRightTypeUsesMonthlyOprLimits(opr.getOprLimit()) ) {
+					for ( int iLim = 0; iLim < 13; iLim++ ) {
+						out.println ( StringUtil.formatString(opr.getOprMax(iLim), "%8.0f") );
 					}
 				}
 			}

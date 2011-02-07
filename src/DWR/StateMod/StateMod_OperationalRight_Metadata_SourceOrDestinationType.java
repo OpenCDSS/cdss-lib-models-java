@@ -42,20 +42,20 @@ public enum StateMod_OperationalRight_Metadata_SourceOrDestinationType
      */
     OTHER("Other"),
     /**
-     * Plans as per StateMod documentation.
+     * Plans as per StateMod documentation (shorten names because show up in UI choices with limited space)
      */
-    PLAN_ACCOUNTING("Plan (Accounting Plan)"),
-    PLAN_OUT_OF_PRIORITY("Plan (Out of Priority Diversion or Storage)"),
-    PLAN_RECHARGE("Plan (Recharge)"),
-    PLAN_RELEASE_LIMIT("Plan (Release Limit Plan)"),
-    PLAN_REUSE_TO_RESERVOIR("Plan (Reuse to Reservoir)"),
-    PLAN_REUSE_TO_RESERVOIR_FROM_TRANSMOUNTAIN("Plan (Reuse to Diversion from Transmountain)"),
-    PLAN_REUSE_TO_DIVERSION("Plan (Reuse to Diversion)"),
-    PLAN_REUSE_TO_DIVERSION_FROM_TRANSMOUNTAIN("Plan (Reuse to Diversion from Transmountain)"),
-    PLAN_SPECIAL_WELL_AUGMENTATION("Plan (Special Well Augmentation)"),
-    PLAN_TC("Plan (Terms & Conditions)"),
-    PLAN_TRANSMOUNTAIN_IMPORT("Plan (Transmountain Import)"),
-    PLAN_WELL_AUGMENTATION("Plan (Well Augmentation)"),
+    PLAN_ACCOUNTING("Plan (Accounting)"), // Type 11
+    PLAN_OUT_OF_PRIORITY("Plan (OutOfPriority Div, Strg)"), // Type 9
+    PLAN_RECHARGE("Plan (Recharge)"), // Type 8
+    PLAN_RELEASE_LIMIT("Plan (Release Limit)"), // Type 12
+    PLAN_REUSE_TO_RESERVOIR("Plan (Reuse to Res)"), // Type 3
+    PLAN_REUSE_TO_RESERVOIR_FROM_TRANSMOUNTAIN("Plan (Reuse to Res Transmtn)"), // Type 5
+    PLAN_REUSE_TO_DIVERSION("Plan (Reuse to Div)"), // Type 4
+    PLAN_REUSE_TO_DIVERSION_FROM_TRANSMOUNTAIN("Plan (Reuse to Div Transmtn)"), // Type 6
+    PLAN_SPECIAL_WELL_AUGMENTATION("Plan (Special Well Aug)"), // Type 10
+    PLAN_TC("Plan (T&C)"), // Type 1
+    PLAN_TRANSMOUNTAIN_IMPORT("Plan (Transmtn Import)"), // Type 7
+    PLAN_WELL_AUGMENTATION("Plan (Well Aug)"), // Type 2
     /**
      * Reservoir station.
      */
