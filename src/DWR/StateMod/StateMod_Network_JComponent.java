@@ -4553,10 +4553,10 @@ public void setOrientation(String orientation) {
 	try {
 		__pageFormat = PrintUtil.getPageFormat( PrintUtil.pageFormatToString(__pageFormat));
 		if (orientation.trim().equalsIgnoreCase("Landscape")) {
-			PrintUtil.setPageFormatOrientation(__pageFormat, PrintUtil.LANDSCAPE);
+			PrintUtil.setPageFormatOrientation(__pageFormat, PageFormat.LANDSCAPE);
 		}
 		else {
-			PrintUtil.setPageFormatOrientation(__pageFormat, PrintUtil.PORTRAIT);
+			PrintUtil.setPageFormatOrientation(__pageFormat, PageFormat.PORTRAIT);
 		}
 		PrintUtil.setPageFormatMargins(__pageFormat,.75, .75, .75, .75);
 		int hPixels = (int)(__pageFormat.getWidth() / __printScale);
@@ -4596,7 +4596,7 @@ public void setPaperSize(String size) {
 	}
 	try {
 		__pageFormat = PrintUtil.getPageFormat(size);
-		PrintUtil.setPageFormatOrientation(__pageFormat, PrintUtil.LANDSCAPE);
+		PrintUtil.setPageFormatOrientation(__pageFormat, PageFormat.LANDSCAPE);
 		PrintUtil.setPageFormatMargins(__pageFormat,.75, .75, .75, .75);
 		int hPixels = (int)(__pageFormat.getWidth() / __printScale);
 		int vPixels = (int)(__pageFormat.getHeight() / __printScale);

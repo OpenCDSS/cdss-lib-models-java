@@ -1476,7 +1476,7 @@ private void setupGUI() {
 	// read in the pageformat from the network here!
 		
 	PageFormat pageFormat = PrintUtil.getPageFormat(__DEFAULT_PAPER_SIZE);
-	PrintUtil.setPageFormatOrientation(pageFormat, PrintUtil.LANDSCAPE);
+	PrintUtil.setPageFormatOrientation(pageFormat, PageFormat.LANDSCAPE);
 	PrintUtil.setPageFormatMargins(pageFormat, .75, .75, .75, .75);	
 	__device.setPageFormat(pageFormat);
 
