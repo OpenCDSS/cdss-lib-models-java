@@ -458,10 +458,10 @@ public void actionPerformed(ActionEvent event)
 		__device.setDirty(false);
 	}
 	else if (command.equals(__BUTTON_SaveEntireNetworkAsImage)) {
-		__device.saveNetwork();
+		__device.saveNetworkAsImage();
 	}
 	else if (command.equals(__BUTTON_SaveScreenAsImage)) {
-		__device.saveScreen();
+		__device.saveScreenAsImage();
 	}
 	else if (command.equals(__BUTTON_PrintEntireNetwork)) {
 		Message.printStatus(2, routine, "Printing entire network.");
@@ -896,6 +896,30 @@ public StateMod_Network_JComponent getNetworkJComponent ()
 }
 
 /**
+Return the selected orientation.
+*/
+public String getSelectedOrientation ()
+{
+	return __orientationComboBox.getSelected();
+}
+
+/**
+Return the selected page layout.
+*/
+public String getSelectedPageLayout ()
+{
+	return __layoutComboBox.getSelected();
+}
+
+/**
+Return the selected paper size.
+*/
+public String getSelectedPaperSize ()
+{
+	return __paperSizeComboBox.getSelected();
+}
+
+/**
 Initializes class settings for a network in a net file.  
 @param nodeDataProvider the data provider to use for communicating with the database.
 @param filename the file from which the network will be read.
@@ -944,8 +968,8 @@ throws Exception {
 		__device.forceRepaint();
 		__device.setPaperSize(__paperSize);
 		__device.setOrientation(__orient);	
-		__device.setPrintNodeSize(__nodeSize);
-		__device.setPrintFontSize(__fontSize);
+		__device.setPrintNodeSize(__nodeSize, true);
+		__device.setPrintFontSize(__fontSize, true);
 
 		__nodeSizeComboBox.select("" + __nodeSize);
 		__orientationComboBox.select(__orient);
@@ -1013,8 +1037,8 @@ throws Exception {
 	__device.forceRepaint();
 	__device.setPaperSize(__paperSize);
 	__device.setOrientation(__orient);
-	__device.setPrintNodeSize(__nodeSize);
-	__device.setPrintFontSize(__fontSize);
+	__device.setPrintNodeSize(__nodeSize, true);
+	__device.setPrintFontSize(__fontSize, true);
 
 	__nodeSizeComboBox.select("" + __nodeSize);
 	__orientationComboBox.select(__orient);
@@ -1066,7 +1090,7 @@ public void itemStateChanged(ItemEvent event)
 		PropList p = __layouts.get(index);
 		try {
 			int i = Integer.decode(	__textSizeComboBox.getSelected()).intValue();
-			__device.setPrintFontSize(i);
+			__device.setPrintFontSize(i, true);
 			p.set("NodeLabelFontSize=\"" + value + "\"");
 		}
 		catch (Exception e) {}
@@ -1127,17 +1151,14 @@ public void itemStateChanged(ItemEvent event)
 	}
 	else if (event.getSource() == __defaultLayoutCheckBox) {
 		int index = __layoutComboBox.getSelectedIndex();
-		PropList p = null;
 		boolean set = __defaultLayoutCheckBox.isSelected();
 		if (set) {
-			int size = __layouts.size();
-			for (int i = 0; i < size; i++) {
-				p = __layouts.get(i);
+			for (PropList p : __layouts) {
 				p.set("IsDefault=\"False\"");
 			}
 		}
 
-		p = __layouts.get(index);
+		PropList p = __layouts.get(index);
 		p.set("IsDefault=\"" + set + "\"");
 	}
 }
@@ -1514,27 +1535,23 @@ private void setupGUI() {
 		GRLimits.DEVICE, refLimits);	
 
 	// Find the maximum and minimum coordinates to be plotted, considering the nodes...
-	double 	xmax,
-		xmin,
-		ymax, 
-		ymin;
+	double xmax, xmin, ymax, ymin;
 
 	xmin = ymin = 10000000.0;
 	xmax = ymax = -10000000.0;
 
 	if (!__isXML) {
+		// Don't have limits in legacy network so need to compute
 		StateMod_NodeNetwork network = __device.getNetwork();
 
 		HydrologyNode node = null;
 		HydrologyNode nodeTop = network.getMostUpstreamNode();
 	
 		if (Message.isDebugOn) {
-			Message.printDebug(dl, routine, "Start with node \"" +
-			nodeTop.getCommonID() + "\"");
+			Message.printDebug(dl, routine, "Start with node \"" + nodeTop.getCommonID() + "\"");
 		}
 		for (node = nodeTop; node != null;
-		    node = StateMod_NodeNetwork.getDownstreamNode(node, 
-		    		StateMod_NodeNetwork.POSITION_COMPUTATIONAL)) {
+		    node = StateMod_NodeNetwork.getDownstreamNode(node, StateMod_NodeNetwork.POSITION_COMPUTATIONAL)) {
 			// Break if we are at the end of the list...
 			if (node == null) {
 				break;
@@ -1962,8 +1979,8 @@ private void setupPaper() {
 	__device.forceRepaint();
 	__device.setPaperSize(__paperSize);
 	__device.setOrientation(__orient);	
-	__device.setPrintNodeSize(__nodeSize);
-	__device.setPrintFontSize(__fontSize);
+	__device.setPrintNodeSize(__nodeSize, true);
+	__device.setPrintFontSize(__fontSize, true);
 
 	__nodeSizeComboBox.select("" + __nodeSize);
 	__orientationComboBox.select(__orient);
@@ -1972,7 +1989,7 @@ private void setupPaper() {
 }
 
 /**
-Called when the display zooms 1:1.
+Called when the display zooms 1:1 to enable/disable the 1:1 button.
 @param zoomed if the zoom is something other than 1:1, this is true.
 */
 public void setZoomedOneToOne(boolean zoomed) {
@@ -1985,11 +2002,10 @@ public void setZoomedOneToOne(boolean zoomed) {
 }
 
 /**
-Checks to see if a String contains a dash, and if so, strips off the text
-before the dash and returns it.  Otherwise just returns the String.
+Checks to see if a string contains a dash, and if so, strips off the text
+before the dash and returns it.  Otherwise just returns the string.
 @param s the String to check.
-@return the entire String if it does not contain a dash, otherwise return
-what comes before the dash.
+@return the entire String if it does not contain a dash, otherwise return what comes before the dash.
 */
 public String shorten(String s) {
 	int index = s.indexOf("-");
