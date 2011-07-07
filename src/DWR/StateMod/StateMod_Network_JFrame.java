@@ -73,6 +73,8 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
@@ -94,6 +96,7 @@ import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.ResponseJDialog;
 import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.GUI.SimpleJComboBox;
+import RTi.Util.GUI.SimpleJMenuItem;
 import RTi.Util.GUI.SimpleJToggleButton;
 import RTi.Util.GUI.TextResponseJDialog;
 import RTi.Util.IO.PrintUtil;
@@ -152,9 +155,21 @@ private final String
 Button labels.
 */
 private final String
-	__BUTTON_ADD = "Add Layout",
-	__BUTTON_DELETE = "Delete Layout",
-	__BUTTON_SET_NAME = "Set Name";
+	__BUTTON_ADD_LAYOUT = "Add Layout",
+	__BUTTON_DELETE_LAYOUT = "Delete Layout",
+	__BUTTON_SET_LAYOUT_NAME = "Set Name";
+
+/**
+Menu labels.
+*/
+private final String
+	__Menu_File_String = "File",
+		__Menu_File_Close_String = "Close",
+	__Menu_Tools = "Tools",
+		__Menu_Tools_SetXToConfluenceX_String = "Set X to Confluence X",
+		__Menu_Tools_SetYToConfluenceY_String = "Set Y to Confluence Y",
+		__Menu_Tools_PositionNodesEvenlyBetweenEndNodes_String = "Position Nodes Evenly Between End Nodes",
+		__Menu_Tools_WriteNetworkAsListFiles_String = "Write Network as List Files";
 
 /**
 Whether the network is running in StateModGUI or not.  If true, then the network cannot be edited
@@ -168,7 +183,7 @@ Whether the network that is read is in an XML file or not.
 private boolean __isXML = false;
 
 /**
-Variables used when reading in an XML file that make sure that everything is set properly.
+Checks used when reading in an XML file that make sure that everything is set properly.
 */
 private boolean 
 	__lxSet = false, 
@@ -178,6 +193,11 @@ private boolean
 
 private boolean __ignoreEvents = false;
 
+/**
+Whether a check should occur when saving.
+TODO SAM 2011-07-07 Can this be removed since the close() method has a flag?  Normally
+the check should be done unless an application like the StateMod GUI controls saving files.
+*/
 private boolean __saveOnExit = false;
 
 /**
@@ -253,10 +273,10 @@ private JToolBar __toolBar;
 Toolbar buttons.
 */
 private SimpleJButton 
-	__printJButton,
+	__printEntireNetworkJButton,
 	__printScreenJButton,
 	__refreshJButton,
-	__saveAsImageJButton,
+	__saveEntireNetworkAsImageJButton,
 	__saveScreenAsImageJButton,
 	__saveXMLJButton,
 	__undoJButton,
@@ -388,7 +408,9 @@ public void actionPerformed(ActionEvent event)
 	}
 
 	String command = event.getActionCommand();
-	if (command.equals(__BUTTON_ADD)) {
+
+	// Properties area buttons...
+	if (command.equals(__BUTTON_ADD_LAYOUT)) {
 		PropList p = new PropList("Layout");
 		String id = "Page Layout #" + (__layouts.size() + 1);
 		p.set("ID=\"" + id + "\"");
@@ -405,7 +427,7 @@ public void actionPerformed(ActionEvent event)
 		__deleteButton.setEnabled(true);
 		__defaultLayoutCheckBox.setSelected(false);
 	}
-	else if (command.equals(__BUTTON_DELETE)) {
+	else if (command.equals(__BUTTON_DELETE_LAYOUT)) {
 		int index = __layoutComboBox.getSelectedIndex();
 		int count = __layoutComboBox.getItemCount();
 		__layouts.remove(index);
@@ -421,9 +443,8 @@ public void actionPerformed(ActionEvent event)
 			__deleteButton.setEnabled(false);
 		}
 	}
-	else if (command.equals(__BUTTON_SET_NAME)) {
-		String name = new TextResponseJDialog(
-			this, "Enter Page Layout Name", 
+	else if (command.equals(__BUTTON_SET_LAYOUT_NAME)) {
+		String name = new TextResponseJDialog(this, "Enter Page Layout Name", 
 			"Enter the name for the current page layout:",
 			ResponseJDialog.OK | ResponseJDialog.CANCEL).response();
 		if (name == null) {
@@ -444,6 +465,41 @@ public void actionPerformed(ActionEvent event)
 		__layoutComboBox.select(index);
 		__ignoreEvents = false;
 	}
+	// Menus...
+	else if (command.equals(__Menu_File_Close_String)) {
+		// This will prompt the user if the network is dirty and needs to be saved.
+		close(true);
+	}
+	else if (command.equals(__Menu_Tools_SetXToConfluenceX_String)) {
+		// Set the X coordinates for the selected nodes to the X coordinate of the confluence
+		StateMod_Network_EditorToolkit tk = new StateMod_Network_EditorToolkit ( this, this.__device, getNetwork() );
+		if ( tk.setNodeXToConfluenceX ( this.__device.getSelectedNodes() ) > 0 ) {
+			// Redraw the network
+			this.__device.forceRepaint();
+		}
+	}
+	else if (command.equals(__Menu_Tools_SetYToConfluenceY_String)) {
+		// Set the Y coordinates for the selected nodes to the Y coordinate of the confluence
+		StateMod_Network_EditorToolkit tk = new StateMod_Network_EditorToolkit ( this, this.__device, getNetwork() );
+		if ( tk.setNodeYToConfluenceY ( this.__device.getSelectedNodes() ) > 0 ) {
+			// Redraw the network
+			this.__device.forceRepaint();
+		}
+	}
+	else if (command.equals(__Menu_Tools_PositionNodesEvenlyBetweenEndNodes_String)) {
+		// Space the nodes evenly between the selected end nodes
+		StateMod_Network_EditorToolkit tk = new StateMod_Network_EditorToolkit ( this, this.__device, getNetwork() );
+		if ( tk.positionNodesEvenlyBetweenEndNodes ( this.__device.getSelectedNodes() ) > 0 ) {
+			// Redraw the network
+			this.__device.forceRepaint();
+		}
+	}
+	else if (command.equals(__Menu_Tools_WriteNetworkAsListFiles_String)) {
+		// Space the nodes evenly between the selected end nodes
+		StateMod_Network_EditorToolkit tk = new StateMod_Network_EditorToolkit ( this, this.__device, getNetwork() );
+		tk.writeListFiles();
+	}
+	// Tool bar buttons...
 	else if (command.equals("Zoom Out")) {
 		__device.zoomOut();
 	}
@@ -539,22 +595,46 @@ boolean isNaturalFlow, boolean isImport) {
 }
 
 /**
+Builds the menu bar along the top of the network window.
+*/
+private void buildMenuBar ()
+{
+	JMenuBar menuBar = new JMenuBar();
+	// File...
+	JMenu file_JMenu = new JMenu( __Menu_File_String, true );
+	menuBar.add(file_JMenu);
+	file_JMenu.add( new SimpleJMenuItem( __Menu_File_Close_String, this ) );
+	// Tools...
+	JMenu tools_JMenu = new JMenu( __Menu_Tools, true );
+	menuBar.add(tools_JMenu);
+	tools_JMenu.add( new SimpleJMenuItem( __Menu_Tools_SetYToConfluenceY_String, this ) );
+	tools_JMenu.add( new SimpleJMenuItem( __Menu_Tools_SetXToConfluenceX_String, this ) );
+	tools_JMenu.add( new SimpleJMenuItem( __Menu_Tools_PositionNodesEvenlyBetweenEndNodes_String, this ) );
+	tools_JMenu.addSeparator();
+	tools_JMenu.add( new SimpleJMenuItem( __Menu_Tools_WriteNetworkAsListFiles_String, this ) );
+	// TODO SAM 2011-07-07 Determine whether to enable/disable menus based on UI state, add menu tooltips
+	setJMenuBar ( menuBar );
+}
+
+/**
 Builds the toolbar along the top of the network window.
 */
-public void buildToolBar() {
+private void buildToolBar() {
 	String routine = "buildToolBar";
 	__toolBar = new JToolBar("Network Control Buttons");
 	Insets none = new Insets(0, 0, 0, 0);
 	URL url = this.getClass().getResource( __RESOURCE_PATH + "/icon_print.gif" );
 	String buttonLabel = __BUTTON_PrintEntireNetwork;
 	if (url != null) {
-		__printJButton = new SimpleJButton(
+		__printEntireNetworkJButton = new SimpleJButton(
 			new ImageIcon(url), buttonLabel, buttonLabel, none, false, this);
 	}
 	else {
-		__printJButton = new SimpleJButton("Print", buttonLabel, buttonLabel, none, false, this);		
+		__printEntireNetworkJButton = new SimpleJButton("Print", buttonLabel, buttonLabel, none, false, this);		
 	}
-	__toolBar.add(__printJButton);
+	__printEntireNetworkJButton.setToolTipText (
+		"Print the entire network, full-scale (select a page size that matches the network page layout)" );
+	__toolBar.add(__printEntireNetworkJButton);
 
 	url = this.getClass().getResource( __RESOURCE_PATH + "/icon_printScreen.gif");
 	buttonLabel = __BUTTON_PrintScreen;
@@ -565,18 +645,22 @@ public void buildToolBar() {
 	else {
 		__printScreenJButton = new SimpleJButton( "Print", buttonLabel, buttonLabel, none, false, this);
 	}	
+	// TODO SAM 2011-07-07 Re-enable
+	__printScreenJButton.setEnabled(false);
+	__printScreenJButton.setToolTipText("Print the network shown in the editor - CURRENTLY DISABLED.");
 	__toolBar.add(__printScreenJButton);
 
 	url = this.getClass().getResource( __RESOURCE_PATH + "/icon_saveAsImage.gif");
 	buttonLabel = __BUTTON_SaveEntireNetworkAsImage;
 	if (url != null) {
-		__saveAsImageJButton = new SimpleJButton(new ImageIcon(url),
-				buttonLabel, buttonLabel, none, false, this);	
+		__saveEntireNetworkAsImageJButton = new SimpleJButton(new ImageIcon(url),
+			buttonLabel, buttonLabel, none, false, this);	
 	}
 	else {
-		__saveAsImageJButton = new SimpleJButton("Save", buttonLabel, buttonLabel, none, false, this);	
+		__saveEntireNetworkAsImageJButton = new SimpleJButton("Save", buttonLabel, buttonLabel, none, false, this);	
 	}
-	__toolBar.add(__saveAsImageJButton);
+	__saveEntireNetworkAsImageJButton.setToolTipText ( "Save entire network as image file, full-scale." );
+	__toolBar.add(__saveEntireNetworkAsImageJButton);
 	
 	url = this.getClass().getResource( __RESOURCE_PATH + "/icon_saveScreenAsImage.gif");
 	buttonLabel = __BUTTON_SaveScreenAsImage;
@@ -586,7 +670,8 @@ public void buildToolBar() {
 	}
 	else {
 		__saveScreenAsImageJButton = new SimpleJButton("Save",buttonLabel, buttonLabel, none, false, this);
-	}	
+	}
+	__saveScreenAsImageJButton.setToolTipText("Save the network shown in the editor." );
 	__toolBar.add(__saveScreenAsImageJButton);	
 
 	__toolBar.addSeparator();
@@ -599,7 +684,8 @@ public void buildToolBar() {
 	else {
 		__saveXMLJButton = new SimpleJButton("Save", "Save XML", 
 			"Save XML Network File", none, false, this);
-	}	
+	}
+	__saveXMLJButton.setToolTipText("Save the network to an XML file." );
 	__toolBar.add(__saveXMLJButton);	
 
 	__toolBar.addSeparator();
@@ -612,6 +698,7 @@ public void buildToolBar() {
 		__refreshJButton = new SimpleJButton("Refresh", "Refresh", "Refresh", none, false, this);
 	}	
 	__refreshJButton.setActionCommand("Refresh");
+	__refreshJButton.setToolTipText("Refresh (redraw) the network." );
 	__toolBar.add(__refreshJButton);
 	
 	url = this.getClass().getResource( __RESOURCE_PATH + "/icon_zoomOut.gif");
@@ -620,7 +707,8 @@ public void buildToolBar() {
 	}
 	else {
 		__zoomOutJButton = new SimpleJButton("Zoom Out", "Zoom Out", "Zoom Out", none, false, this);
-	}	
+	}
+	__zoomOutJButton.setToolTipText ( "Zoom out to twice the area.");
 	__zoomOutJButton.setActionCommand("Zoom Out");	
 
 	__zoom1JButton = new SimpleJButton( "1:1", "1:1", "Draw at 1:1 scale for page layout", 
@@ -635,6 +723,7 @@ public void buildToolBar() {
 		__zoomInJButton = new SimpleJButton("Zoom In", "Zoom In", "Zoom In", none, false, this);
 	}	
 	__zoomInJButton.setActionCommand("Zoom In");
+	__zoomInJButton.setToolTipText ( "Zoom in to half the area.");
 	__toolBar.add(__zoomOutJButton);	
 	__toolBar.add(__zoom1JButton);
 	__toolBar.add(__zoomInJButton);	
@@ -643,25 +732,29 @@ public void buildToolBar() {
 	__undoJButton = new SimpleJButton( "Undo", "Undo", "Undo", none, false, this);
 	__undoJButton.setActionCommand("Undo");
 	__undoJButton.setEnabled(false);
+	__undoJButton.setToolTipText ( "Undo the previous move action(s)." );
 	__toolBar.add(__undoJButton);
 
 	__redoJButton = new SimpleJButton( "Redo", "Redo", "Redo", none, false, this);
 	__redoJButton.setActionCommand("Redo");
 	__redoJButton.setEnabled(false);
+	__redoJButton.setToolTipText ( "Redo the previous move action(s)." );
+	__toolBar.addSeparator();
 	__toolBar.add(__redoJButton);
 	
 	url = this.getClass().getResource( __RESOURCE_PATH + "/icon_hand.gif");
 	if (url != null) {
 		__panJButton = new SimpleJToggleButton(new ImageIcon(url),
 			MODE_PAN, "Enter Pan Mode", none, false, this, true);
-		Message.printDebug(10, routine,
-			"Enter Pan Mode icon loaded from Jar file.");
+		Message.printDebug(10, routine, "Enter Pan Mode icon loaded from Jar file.");
 	}
 	else {
 		__panJButton = new SimpleJToggleButton("Pan Mode",
 			MODE_PAN, "Enter Pan Mode", none, false, this, true);
-	}	
+	}
+	__toolBar.addSeparator();
 	__panJButton.setActionCommand(MODE_PAN);
+	__panJButton.setToolTipText ( "Enter pan mode - network can be scrolled by dragging the mouse." );
 	__toolBar.add(__panJButton);	
 	
 	url = this.getClass().getResource( __RESOURCE_PATH + "/icon_infoMode.gif");
@@ -674,6 +767,7 @@ public void buildToolBar() {
 			MODE_INFO, "Enter Info Mode", none, false, this, false);
 	}	
 	__infoJButton.setActionCommand(MODE_INFO);
+	__infoJButton.setToolTipText ( "Enter information mode - CURRENTLY DISABLED." );
 	__infoJButton.setEnabled(false);
 	__toolBar.add(__infoJButton);	
 	
@@ -687,12 +781,14 @@ public void buildToolBar() {
 			MODE_SELECT, "Enter Select Mode", none, false, this, false);
 	}	
 	__selectJButton.setActionCommand(MODE_SELECT);
-	__toolBar.add(__selectJButton);	
+	__selectJButton.setToolTipText ( "Enter select mode - select node and right-click for node properties, " +
+		"or drag node to reposition." );
+	__toolBar.add(__selectJButton);
 	
-	__printJButton.addKeyListener(__device);
+	__printEntireNetworkJButton.addKeyListener(__device);
 	__printScreenJButton.addKeyListener(__device);
 	__refreshJButton.addKeyListener(__device);
-	__saveAsImageJButton.addKeyListener(__device);
+	__saveEntireNetworkAsImageJButton.addKeyListener(__device);
 	__saveScreenAsImageJButton.addKeyListener(__device);
 	__saveXMLJButton.addKeyListener(__device);
 	__undoJButton.addKeyListener(__device);
@@ -705,12 +801,32 @@ public void buildToolBar() {
 	__infoJButton.addKeyListener(__device);
 }
 
+// TODO SAM 2011-07-07 Need to combine logic of various close methods - not sure if this work is done.
+// Calling with false seems to be what is expected by the StateMod GUI
 /**
 Closes the GUI and frees resources.  This method is called, for example, from the StateMod GUI when
 a new data set is opened and the old network editor needs to be closed down.
+@param checkForChanges if true, then the user is allowed to save if changes have occurred;
+if false, then the network editor is closed regardless of whether changes have occurred
 */
-public void close()
+public void close ( boolean checkForChanges )
 {
+	if ( checkForChanges ) {
+		if (__saveOnExit) {
+			if (__device.isDirty()) {
+				int x = (new ResponseJDialog(this, "Save network?",
+					"The network has not been saved.  Save?",
+					ResponseJDialog.YES | ResponseJDialog.NO | ResponseJDialog.CANCEL)).response();
+				if (x == ResponseJDialog.YES) {
+					__device.saveXML(getFilename());
+					__device.setDirty(false);
+				}
+				else if (x == ResponseJDialog.CANCEL) {
+					return;
+				}
+			}
+		}
+	}
 	closeClicked(true);
 }
 
@@ -819,10 +935,10 @@ throws Throwable {
 	__panJButton = null;
 	__selectJButton = null;
 	__toolBar = null;
-	__printJButton = null;
+	__printEntireNetworkJButton = null;
 	__printScreenJButton = null;
 	__refreshJButton = null;
-	__saveAsImageJButton = null;
+	__saveEntireNetworkAsImageJButton = null;
 	__saveScreenAsImageJButton = null;
 	__saveXMLJButton = null;
 	__undoJButton = null;
@@ -1743,7 +1859,7 @@ private void setupGUI() {
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	y++;
 
-	JButton setNameButton = new JButton(__BUTTON_SET_NAME);
+	JButton setNameButton = new JButton(__BUTTON_SET_LAYOUT_NAME);
 	setNameButton.addActionListener(this);
 
 	JGUIUtil.addComponent(pagePanel, setNameButton,
@@ -1791,9 +1907,9 @@ private void setupGUI() {
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	y++;
 
-	JButton addButton = new JButton(__BUTTON_ADD);
+	JButton addButton = new JButton(__BUTTON_ADD_LAYOUT);
 	addButton.addActionListener(this);
-	__deleteButton = new JButton(__BUTTON_DELETE);
+	__deleteButton = new JButton(__BUTTON_DELETE_LAYOUT);
 	__deleteButton.addActionListener(this);
 	JGUIUtil.addComponent(pagePanel, addButton,
 		0, y, 1, 1, 1, 1,
@@ -1883,6 +1999,7 @@ private void setupGUI() {
 		1, 2, 1, 1, 0, 0, 
 		GridBagConstraints.BOTH, GridBagConstraints.CENTER);
 
+	buildMenuBar();
 	buildToolBar();
 	getContentPane().add("North", __toolBar);
 
@@ -2047,7 +2164,8 @@ public void windowClosing(WindowEvent event) {
 		}
 	}
 	if (event.getSource() == this) {
-		// Does not dispose
+		// TODO SAM 2011-07-07 What is the rationale?  To speed up redisplay of windows in StateDMI?
+		// Event was generated from within this class - do not dispose
 		closeClicked( false );
 	}
 }

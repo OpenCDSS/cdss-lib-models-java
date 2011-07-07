@@ -2,7 +2,21 @@
 // Need to isolate UI interactions in a separate class or at least make less intermingled here
 // Need to have all setup calculations done in one place (e.g., height/width/scale) rather than
 // throughout the code.  This will allow the logic to be simpler and likely also will reduce the amount
-// of code.
+// of code.  Changes have occurred recently to ensure that printing and saving images occurs without interfering
+// with the network objects in the interactive editor.  Current behavior is as follows:
+// * Interactive drawing uses legacy code, but the code has checks for printing etc.  This is because the
+//   previous design did all the work in-line whereas the current design splits printing into a setup step
+//   with calls to the basic rendering methods.
+// * Printing the entire network - occurs with a call to printNetwork() which for new printing calls print() -
+//   a simpler sequence of steps occurs, bypassing the interactive code in paint().
+// * Printing the partial network - currently is not supported (may or may not work) - this needs revisited.
+//   Ideally this could work like printing the full network, but set the imageable area to the selected paper
+//   size and the data limits to a subset of the network.
+// * Saving the entire network to an image file - to be implemented ASAP - do similar to printing the entire network
+//   but render to a buffer and then save the buffer
+// * Saving the visible network to an image file - need to do something similar to TSTool where the active buffer
+//   is saved - this may need rework in the future if batch image saving is implemented in StateDMI and a visible
+//   window/buffer cannot be dumped
 // ----------------------------------------------------------------------------
 // StateMod_Network_JComponent - class to control drawing of the network
 // ----------------------------------------------------------------------------
@@ -166,8 +180,7 @@ private final String
 	__MENU_SAVE_SCREEN = "Save Screen as Image",
 	__MENU_SAVE_XML = "Save XML Network File",
 	__MENU_SHADED_RIVERS = "Shaded Rivers",
-	__MENU_SNAP_TO_GRID = "Snap to Grid",
-	__MENU_WRITE_LIST_FILES = "Write Network as List Files";
+	__MENU_SNAP_TO_GRID = "Snap to Grid";
 
 /**
 Modes that the network can be placed in for responding to mouse presses.
@@ -716,24 +729,7 @@ private List<PropList> __links = new Vector();
 /**
 List to hold change operations.
 */
-private List<UndoData> __undoOperations = new Vector();
-
-/**
-A private class to hold undo data.
-*/
-private class UndoData {
-	public int nodeNum;
-	public double oldX;
-	public double oldY;
-	public double newX;
-	public double newY;
-
-	public int[] otherNodes = null;
-	public double[] oldXs = null;
-	public double[] oldYs = null;
-	public double[] newXs = null;
-	public double[] newYs = null;
-}
+private List<StateMod_Network_UndoData> __undoOperations = new Vector();
 
 /**
 Constructor used for headless operations, in particular printing.
@@ -958,9 +954,6 @@ public void actionPerformed(ActionEvent event) {
 			__snapToGrid = true;
 		}
 	}
-	else if (action.equals(__MENU_WRITE_LIST_FILES)) {
-		writeListFiles();
-	}
 }
 
 /**
@@ -1115,7 +1108,7 @@ Adds a node change operation to the undo list.
 private void addNodeChangeOperation(int nodeNum, double x, double y)
 {
 	// Create a new UndoData object to store the location of the node before and 
-	UndoData data = new UndoData();
+	StateMod_Network_UndoData data = new StateMod_Network_UndoData();
 	data.nodeNum = nodeNum;
 	if ( __isLastSelectedAnAnnotation ) {
 		// TODO SAM 2008-01-25 Figure out if undo applies to annotations also
@@ -1138,8 +1131,8 @@ Adds a change operation to the undo data.  This is called when a node is dragged
 so that the operation can be undone.
 @param data the UndoData detailing what happened in the operation.
 */
-private void addNodeChangeOperation(UndoData data) {
-	// undoPos tracks the current position within the undo Vector and
+private void addNodeChangeOperation(StateMod_Network_UndoData data) {
+	// undoPos tracks the current position within the undo list and
 	// is used to allow undos and redos.  If a user has made changes,
 	// and then undoes them, and then makes a new change, the previous
 	// undos are made unavailable and are lost.  The following gets
@@ -1294,9 +1287,12 @@ private void buildPopupMenus() {
 	mi = new JMenuItem(__MENU_FIND_NODE);
 	mi.addActionListener(this);
 	__networkPopup.add(mi);
-	jcbmi = new JCheckBoxMenuItem(__MENU_SHADED_RIVERS);
-	jcbmi.addActionListener(this);
-	__networkPopup.add(jcbmi);	
+	__networkPopup.addSeparator();
+	// -------------------------
+	// TODO SAM 2011-07-07 Enable - apparently data don't support now that migrated away from Makenet
+	//jcbmi = new JCheckBoxMenuItem(__MENU_SHADED_RIVERS);
+	//jcbmi.addActionListener(this);
+	//__networkPopup.add(jcbmi);	
 	jcbmi = new JCheckBoxMenuItem(__MENU_DRAW_NODE_LABELS, true);
 	jcbmi.addActionListener(this);
 	__networkPopup.add(jcbmi);	
@@ -1315,10 +1311,6 @@ private void buildPopupMenus() {
 	jcbmi = new JCheckBoxMenuItem(__MENU_SNAP_TO_GRID);
 	jcbmi.addActionListener(this);
 	__networkPopup.add(jcbmi);
-	__networkPopup.addSeparator();
-	mi = new JMenuItem(__MENU_WRITE_LIST_FILES);
-	mi.addActionListener(this);
-	__networkPopup.add(mi);
 
 	// Popup menu for when a node is clicked on
 	__addNodeMenuItem = new JMenuItem(__MENU_ADD_NODE);
@@ -1342,9 +1334,10 @@ private void buildPopupMenus() {
 	mi.addActionListener(this);
 	__nodePopup.add(mi);
 	__nodePopup.addSeparator();
-	jcbmi = new JCheckBoxMenuItem(__MENU_SHADED_RIVERS);
-	jcbmi.addActionListener(this);
-	__nodePopup.add(jcbmi);	
+	// TODO SAM 2011-07-07 Enable - apparently data don't support now that migrated away from Makenet
+	//jcbmi = new JCheckBoxMenuItem(__MENU_SHADED_RIVERS);
+	//jcbmi.addActionListener(this);
+	//__nodePopup.add(jcbmi);	
 	jcbmi = new JCheckBoxMenuItem(__MENU_DRAW_NODE_LABELS, true);
 	jcbmi.addActionListener(this);
 	__nodePopup.add(jcbmi);	
@@ -1363,10 +1356,6 @@ private void buildPopupMenus() {
 	jcbmi = new JCheckBoxMenuItem(__MENU_SNAP_TO_GRID);
 	jcbmi.addActionListener(this);
 	__nodePopup.add(jcbmi);	
-	__nodePopup.addSeparator();
-	mi = new JMenuItem(__MENU_WRITE_LIST_FILES);
-	mi.addActionListener(this);
-	__nodePopup.add(mi);	
 }
 
 /**
@@ -1374,7 +1363,7 @@ Builds limits and sets up the starting position for a drag for multiple nodes.
 This is done prior to dragging starting.
 */
 private void buildSelectedNodesLimits() {
-	List v = new Vector();
+	List<Integer> v = new Vector();
 
 	// First get a list comprising the indices of the nodes in the
 	// __nodes array that are being dragged.  This method is only called
@@ -1406,7 +1395,7 @@ private void buildSelectedNodesLimits() {
 	// created above with the respective nodes' limits and starting X and Y positions.  
 	
 	for (int i = 0; i < size; i++) {
-		I = (Integer)v.get(i);
+		I = v.get(i);
 		num = I.intValue();
 
 		__dragNodesLimits[i] = __nodes[num].getLimits();
@@ -1673,7 +1662,7 @@ private void createMultiNodeChangeOperation() {
 	double dx = mainX - __mouseDownX;
 	double dy = mainY - __mouseDownY;
 
-	UndoData data = new UndoData();
+	StateMod_Network_UndoData data = new StateMod_Network_UndoData();
 	data.nodeNum = __clickedNodeNum;
 	data.oldX = __nodes[__clickedNodeNum].getX();
 	data.oldY = __nodes[__clickedNodeNum].getY();
@@ -2308,15 +2297,13 @@ private void drawNetworkLines()
 		y[1] = ds.getY();		
 	
 		if (__shadedRivers) {
-			// must show a shaded wide line for the rivers
+			// Show a shaded wide line for the rivers
 			GRDrawingAreaUtil.setColor(__drawingArea, GRColor.gray);
 			GRDrawingAreaUtil.setLineWidth(__drawingArea,
 				(double)(__maxReachLevel - node.getReachLevel() + 1) * __lineThickness);
-			/*
-			Message.printStatus(1, "", "MRL: " + __maxReachLevel
-				+ "   NRL: " + node.getReachLevel() + "   == " 
-				+ ((__maxReachLevel - node.getReachLevel() + 1)) + "");
-			*/
+			//Message.printStatus(1, "", "MaxReachLevel: " + __maxReachLevel
+			//	+ "   NodeReachLevel: " + node.getReachLevel() + ", line width multiplier = " 
+			//	+ ((__maxReachLevel - node.getReachLevel() + 1)) );
 			GRDrawingAreaUtil.drawLine(__drawingArea, x, y);
 		}
 
@@ -2852,6 +2839,23 @@ protected double getPrintScale() {
 }
 
 /**
+Return the list of selected nodes, presumably so that specific actions can be taken in coordination
+with editing.  Major adjustments to the nodes will require rebuilding the node list by calling
+buildNodeArray() and possibly refreshing the network display.
+@return the list of selected nodes
+*/
+protected List<HydrologyNode> getSelectedNodes ()
+{	HydrologyNode [] nodeArray = getNodesArray();
+	List<HydrologyNode> nodeList = new Vector();
+	for ( int i = 0; i < nodeArray.length; i++ ) {
+		if ( nodeArray[i].isSelected() ) {
+			nodeList.add(nodeArray[i]);
+		}
+	}
+	return nodeList;
+}
+
+/**
 Returns the data limits from the absolute bottom left to the total data width
 and total data height (which may or may not match up with the size of the paper)
 due to network size requirements.
@@ -3041,6 +3045,8 @@ Does nothing.
 */
 public void mouseClicked(MouseEvent event) {}
 
+// TODO SAM 2011-07-07 The drag of multiple objects distorts the placement of the objects in the group
+// and it gets worse as multiple drags occur
 /**
 Responds to mouse dragged events and moves around the legend, a node, or 
 the screen, depending on what is being dragged.
@@ -3060,8 +3066,7 @@ public void mouseDragged(MouseEvent event) {
 			double[] p = findNearestGridXY(event);
 
 			// if the nearest grid position is not where the node currently is located ...
-			if (p[0] != (int)__mouseDataX 
-				|| p[1] != (int)__mouseDataY) {
+			if (p[0] != (int)__mouseDataX || p[1] != (int)__mouseDataY) {
 				// move the node to be situated on that grid point
 				__mouseDataX = p[0];
 				__mouseDataY = p[1];
@@ -4239,6 +4244,10 @@ protected void printNetwork()
 {	String routine = "StateMod_Network_JComponent.printNetwork";
 	Message.printStatus( 2, routine, "Printing entire network" );
 	if ( !__useOldPrinting ) {
+		new ResponseJDialog ( __parent, "Print Network",
+			"You must select a printer and page size that match the network page layout.\n" +
+			"The printer dialog will take a few seconds to display.",
+				ResponseJDialog.OK);
 		print();
 		return;
 	}
@@ -4438,7 +4447,7 @@ protected void redo() {
 		return;
 	}
 
-	UndoData data = (UndoData)__undoOperations.get(__undoPos);
+	StateMod_Network_UndoData data = (StateMod_Network_UndoData)__undoOperations.get(__undoPos);
 	__undoPos++;
 	__nodes[data.nodeNum].setX(data.newX);
 	__nodes[data.nodeNum].setY(data.newY);
@@ -5017,7 +5026,7 @@ protected void undo() {
 	}
 
 	__undoPos--;
-	UndoData data = (UndoData)__undoOperations.get(__undoPos);
+	StateMod_Network_UndoData data = (StateMod_Network_UndoData)__undoOperations.get(__undoPos);
 	__nodes[data.nodeNum].setX(data.oldX);
 	__nodes[data.nodeNum].setY(data.oldY);
 
@@ -5041,8 +5050,7 @@ protected void undo() {
 /**
 Given a certain annotation, updates the proplist that holds the annotation
 info in reaction to the annotation being moved on the screen.
-@param annotation the number of the annotation in the __annotations Vector
-to have the proplist updated.
+@param annotation the number of the annotation in the __annotations list to have the proplist updated.
 */
 private void updateAnnotationLocation(int annotation) {
 	HydrologyNode node = __annotations.get(annotation);
@@ -5222,122 +5230,6 @@ private boolean within(GRLimits rect, HydrologyNode node) {
 	}
 
 	return false;
-}
-
-/**
-Write list files for the main station lists.  These can then be used with
-list-based commands in StateDMI.
-The user is prompted for a list file name.
-*/
-private void writeListFiles()
-{	String routine = "StateMod_Network_JComponent.writeListFiles";
-
-	String lastDirectorySelected = JGUIUtil.getLastFileDialogDirectory();
-	JFileChooser fc = JFileChooserFactory.createJFileChooser( lastDirectorySelected);
-	fc.setDialogTitle("Select Base Filename for List Files");
-	SimpleFileFilter tff = new SimpleFileFilter("txt", "Text Files");
-	fc.addChoosableFileFilter(tff);
-	SimpleFileFilter csv_ff = new SimpleFileFilter("csv", "Comma-separated Values");
-	fc.addChoosableFileFilter(csv_ff);
-	fc.setFileFilter(csv_ff);
-	fc.setDialogType(JFileChooser.SAVE_DIALOG);	
-
-	int retVal = fc.showSaveDialog(this);
-	if (retVal != JFileChooser.APPROVE_OPTION) {
-		return;
-	}
-	
-	String currDir = (fc.getCurrentDirectory()).toString();
-	
-	if (!currDir.equalsIgnoreCase(lastDirectorySelected)) {
-		JGUIUtil.setLastFileDialogDirectory(currDir);
-	}
-	String filename = fc.getSelectedFile().getPath();
-
-	// Station types...
-
-	int[] types = {
-		-1, // All nodes
-		HydrologyNode.NODE_TYPE_FLOW, // Stream gage
-		HydrologyNode.NODE_TYPE_DIV, // Diversion
-		HydrologyNode.NODE_TYPE_DIV_AND_WELL,// Diversion + Well
-		HydrologyNode.NODE_TYPE_PLAN, // Plan stations
-		HydrologyNode.NODE_TYPE_RES, // Reservoir
-		HydrologyNode.NODE_TYPE_ISF, // Instream flow
-		HydrologyNode.NODE_TYPE_WELL, // Well
-		HydrologyNode.NODE_TYPE_OTHER // Not other stations
-	};
-	
-	/* TODO SAM 2006-01-03 Just use node abbreviations from network
-	// Suffix for output, to be added to file basename...
-
-	String[] nodetype_string = {
-		"All",
-		"StreamGage",
-		"Diversion",
-		"DiversionAndWell",
-		"Plan",
-		"Reservoir",
-		"InstreamFlow",
-		"Well",
-		// TODO SAM 2006-01-03 Evaluate similar to node type above.
-		//"StreamEstimate",
-		"Other"
-	};
-	*/
-
-	// Put the extension on the file (user may or may not have added)...
-
-	if ( fc.getFileFilter() == tff ) {
-		filename = IOUtil.enforceFileExtension ( filename, "txt" );
-	}
-	else if ( fc.getFileFilter() == csv_ff ) {
-		filename = IOUtil.enforceFileExtension ( filename, "csv" );
-	}
-
-	// Now get the base name and remaining extension so that the basename can be adjusted below...
-
-	int lastIndex = filename.lastIndexOf(".");
-	String front = filename.substring(0, lastIndex);
-	String end = filename.substring((lastIndex + 1), filename.length());
-
-	String outputFilename = null;
-	List<HydrologyNode> v = null;
-
-	String warning = "";
-	String [] comments = null;
-	for (int i = 0; i < types.length; i++) {
-		v = getNodesForType(types[i]);
-		
-		if (v != null && v.size() > 0) {
-
-			comments = new String[1];
-			if ( types[i] == -1 ) {
-				comments[0] = "The following list contains data for all node types.";
-				outputFilename = front + "_All." + end;
-			}
-			else {
-				comments[0] = "The following list contains data for the following node type:  " +
-					HydrologyNode.getTypeString( types[i], HydrologyNode.ABBREVIATION) +
-					" (" + HydrologyNode.getTypeString(types[i], HydrologyNode.FULL) + ")";
-				outputFilename = front + "_" +
-					HydrologyNode.getTypeString(types[i], HydrologyNode.ABBREVIATION) + "." + end;
-			}
-	
-			try {
-				StateMod_NodeNetwork.writeListFile( outputFilename, ",", false, v, comments, false );
-			}
-			catch (Exception e) {
-				Message.printWarning(3, routine, e);
-				warning += "\nUnable to create list file \"" + outputFilename + "\"";
-			}
-		}
-	}
-	// TODO SAM 2006-01-03 Write at level 1 since this is currently triggered from an
-	// interactive action.  However, may need to change if executed in batch mode.
-	if ( warning.length() > 0 ) {
-		Message.printWarning(1, routine, warning );
-	}
 }
 
 /**
