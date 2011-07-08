@@ -411,7 +411,7 @@ applied after the graphics have been initialized.
 private double __holdPrintNodeSize = -1;
 
 /**
-The size of the nodes drawn in the legend, in device units.
+The size of the nodes drawn in the legend, in device units (e.g., pixels for screen drawing).
 */
 private double __legendNodeDiameter = 20;
 
@@ -1899,9 +1899,9 @@ private void drawLegend() {
 	GRLimits limits = null;
 	
 	int by = 0;
-	int col2x = 0;		// the X value of the point where the second column begins
-	int dividerY = 0;	// the Y value of the line dividing the legend title from the rest
-	int height = 0;		// running total of the height of the legend
+	int col2x = 0; // the X value of the point where the second column begins
+	int dividerY = 0; // the Y value of the line dividing the legend title from the rest
+	int height = 0; // running total of the height of the legend
 	int tempW = 0;
 	int lx = 0;
 
@@ -1926,8 +1926,8 @@ private void drawLegend() {
 	// Hold this point for calculating the exact divider Y point later
 	dividerY = height;
 
-	double id = 0;
-	double bd = 0;
+	double id = 0; // Inside diameter
+	double bd = 0; 
 	if (__fitWidth) {
 		id = convertX(__legendNodeDiameter);
 		int third = (int)(__legendNodeDiameter / 3);
@@ -1941,7 +1941,7 @@ private void drawLegend() {
 		}
 	}
 	else {
-		// Get the icon size from the first node
+		// Get the icon size from the first node (there will always be an end node)
 		id = convertY(__nodes[0].getIconDiameter());
 		int third = (int)(__legendNodeDiameter / 3);
 		if ((third % 2) == 1) {
@@ -2050,6 +2050,8 @@ private void drawLegend() {
 
 	// End of network
 	HydrologyNode node = new HydrologyNode();
+	node.setIconDiameter(__nodes[0].getIconDiameter());
+	node.setDecoratorDiameter(__nodes[0].getDecoratorDiameter());
 	// FIXME SAM 2003-08-15 Need to remove WIS code
 	//node.setInWis(false);
 	node.setX(col1x);
@@ -4851,7 +4853,7 @@ Sets the size (in data points) that nodes should be printed at.
 */
 public void setPrintNodeSize ( double size, boolean doCalcs )
 {
-		if ( doCalcs ) {
+	if ( doCalcs ) {
 		if (_graphics == null) {
 			__holdPrintNodeSize = size;
 			return;
@@ -5285,7 +5287,8 @@ protected void zoomIn() {
 }
 
 /**
-Zooms so that the network as shown on the screen is how it will look when printed.  
+Zooms so that the network as shown on the screen is how it will look when printed at full scale.
+Although not all of the network may be shown on the screen, it will be at full scale.
 */
 protected void zoomOneToOne() {
 	//__screenLeftX = __dataLeftX;
