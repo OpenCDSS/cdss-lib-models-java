@@ -1723,53 +1723,33 @@ throws Exception {
 	// Loop through and process the document nodes, starting with the root node.
 	// Pass data needed during processing but keep handing within static code
 
-	// LeftX, LowerY, RightX, TopY, LegendX, LegendY
+	// LeftX, LowerY, RightX, TopY, LegendX, LegendY - from network properties
 	Double [] extentData = { Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN };
+	// LeftX, LowerY, RightX, TopY, from checking network coordinates
+	Double [] extentDataFromNodes = { Double.NaN, Double.NaN, Double.NaN, Double.NaN };
+	
+	// Left, right, top, bottom
+	Double [] edgeBuffer = { Double.NaN, Double.NaN, Double.NaN, Double.NaN };
 	
 	readXMLNetworkFile_ProcessDocumentNode(doc, networkNodeList, networkLinkList, networkLayoutList,
-		networkAnnotationList, extentData );
+		networkAnnotationList, extentData, extentDataFromNodes, edgeBuffer );
+	
+	// Check the extent data for the network against the extents from the nodes...
+	// Legacy code adjusts the data limits to page size so for example a wide network will have its Y
+	// limits adjusted to be higher
+	Message.printStatus(2, routine, "Extents from network properties:  (" +
+		extentData[0] + "," + extentData[1] + ") to (" + extentData[2] + "," + extentData[3] + ")");
+	// True data limits are what we really want so that the page can be properly sized as needed...
+	Message.printStatus(2, routine, "Extents from node data:  (" +
+		extentDataFromNodes[0] + "," + extentDataFromNodes[1] + ") to (" + extentDataFromNodes[2] + "," + extentDataFromNodes[3] + ")");
+	// TODO SAM 2011-07-08 However, the issue is with a new network, where the node data would be limiting
+	// Need to resolve this - need a network editor tool to "recenter" with an edge buffer.
+	//extentData[0] = extentDataFromNodes[0];
+	//extentData[1] = extentDataFromNodes[1];
+	//extentData[2] = extentDataFromNodes[2];
+	//extentData[3] = extentDataFromNodes[3];
 
-	// This just checks that XMin, YMin, Xmax, YMax were set in the original XML
-	// The limits are bigger than the extent of the data, accounting for page size (and generally set
-	// from the UI.  Therefore, it is important to use the limits that were interactively saved to
-	// preserve consistency with the editor.  After initializing, the user may edit and cause the limits
-	// to change after which they will be saved again with new values.
-	String missingElements = "";
-	if ( extentData[0].isNaN() ) {
-		missingElements += "XMin\n";
-	}
-	if ( extentData[1].isNaN() ) {
-		missingElements += "YMin\n";
-	}
-	if ( extentData[2].isNaN() ) {
-		missingElements += "XMax\n";
-	}
-	if ( extentData[3].isNaN() ) {
-		missingElements += "YMax\n";
-	}
 	HydrologyNode node = networkNodeList.get(0);
-	if (!missingElements.equals("")) {
-		/*
-		// Original limits were not set.  Try to get from the data
-		GRLimits nodeLimits = determineExtentFromNetworkData ( __aggregateNodes );
-		if ( nodeLimits != null ) {
-			__staticLX = nodeLimits.getLeftX();
-			__staticBY = nodeLimits.getBottomY();
-			__staticRX = nodeLimits.getRightX();
-			__staticTY = nodeLimits.getTopY();
-			This does not preserve the limits for page layout.
-			FIXME SAM 2011-01-03 need to figure this out so that StateDMI test to read and write network
-			results in comparable file.
-		}
-		else {
-			throw new Exception("Extent for node plotting coordinates was not defined and unable to " +
-				"determine from network data.  " +
-				"The following XML network properties must be defined: " + missingElements);
-			
-		}*/
-			throw new Exception("Extent for node plotting coordinates was not defined.  " +
-				"The following XML network properties must be defined: " + missingElements);
-	}
 
 	StateMod_NodeNetwork network = null;
 	if (node.getComputationalOrder() == -1) {
@@ -1853,6 +1833,9 @@ private static StateMod_NodeNetwork readXMLNetworkFile_BuildNetworkFromXMLNodes(
 
 	StateMod_NodeNetwork network = new StateMod_NodeNetwork();
 	network.setNetworkFromNodes(v);
+	// TODO SAM 2011-07-08 Why does the shading in the network diagram not seem to work?
+	// Also calculate secondary information like stream level.
+	//network.calculateNetworkNodeData(networkNodeList, false);
 	return network;
 }
 
@@ -1887,31 +1870,39 @@ throws Exception {
 }
 
 /**
-Processes a document node while reading from an XML file.
-@param node the node to process.
+Processes a document node while reading from an XML file, the data lists and arrays will be populated during
+the read.
+@param node the node to process
+@param networkNodeList empty list of nodes
+@param networkLinkList empty list of link data
+@param networkLayoutList empty list of page layout data
+@param networkAnnotationList empty list of annotations,
+@param extentData empty array of extent data (xmin, xmax, ymin, ymax, legendx, legendy)
+@param edgeBuffer empty array of buffer values (left, right, top, bottom)
 @throws Exception if an error occurs.
 */
 private static void readXMLNetworkFile_ProcessDocumentNode(Node node, List<HydrologyNode> networkNodeList,
 	List<PropList> networkLinkList, List<PropList> networkLayoutList, List<HydrologyNode> networkAnnotationList,
-	Double[] extentData )
+	Double[] extentData, Double[] extentDataFromNodes, Double [] edgeBuffer )
 throws Exception {
 	NodeList children;
 	switch (node.getNodeType()) {
 		case Node.DOCUMENT_NODE:
 			// The main data set node.  Get the data set type, etc.
 			readXMLNetworkFile_ProcessDocumentNode(((Document)node).getDocumentElement(), networkNodeList,
-				networkLinkList, networkLayoutList, networkAnnotationList, extentData );
+				networkLinkList, networkLayoutList, networkAnnotationList, extentData, extentDataFromNodes,
+				edgeBuffer );
 			children = node.getChildNodes();
 			if (children != null) {
 				readXMLNetworkFile_ProcessDocumentNode(children.item(0), networkNodeList, networkLinkList,
-					networkLayoutList, networkAnnotationList, extentData );
+					networkLayoutList, networkAnnotationList, extentData, extentDataFromNodes, edgeBuffer );
 			}				
 			break;
 		case Node.ELEMENT_NODE:
 			// Data set components.  Print the basic information...
 			String elementName = node.getNodeName();
 			if (elementName.equalsIgnoreCase("StateMod_Network")) {
-				readXMLNetworkFile_ProcessStateMod_NetworkNode(node, extentData);
+				readXMLNetworkFile_ProcessStateMod_NetworkNode(node, extentData, edgeBuffer);
 				// The main document node will have a list 
 				// of children but components will not.
 				// Recursively process each node...
@@ -1920,7 +1911,8 @@ throws Exception {
 					int len = children.getLength();
 					for (int i = 0; i < len; i++) {
 						readXMLNetworkFile_ProcessDocumentNode(children.item(i),networkNodeList,
-							networkLinkList, networkLayoutList, networkAnnotationList, extentData );
+							networkLinkList, networkLayoutList, networkAnnotationList, extentData,
+							extentDataFromNodes, edgeBuffer );
 					}
 				}
 			}
@@ -1928,7 +1920,7 @@ throws Exception {
 				readXMLNetworkFile_ProcessLayoutNode(node, networkLayoutList);
 			}
 			else if (elementName.equalsIgnoreCase("Node")) {
-				readXMLNetworkFile_ProcessNode(node, networkNodeList, extentData );
+				readXMLNetworkFile_ProcessNode(node, networkNodeList, extentData, extentDataFromNodes );
 			}
 			else if (elementName.equalsIgnoreCase("Annotation")) {
 				readXMLNetworkFile_ProcessAnnotation(node, networkAnnotationList );
@@ -2036,11 +2028,14 @@ throws Exception {
 
 /**
 Process the data attributes of a HydroBase_Node in the XML file.
-@param node the XML document node being processed.
+@param node the XML document node being processed
+@param networkNodeList the list of nodes from the network
+@param extentData the network extent (from network properties)
+@param extentDataFromNodes the network extent from node coordinates
 @throws Exception if an error occurs.
 */
 private static void readXMLNetworkFile_ProcessNode(Node node, List<HydrologyNode> networkNodeList,
-		Double [] extentData ) 
+		Double [] extentData, Double [] extentDataFromNodes ) 
 throws Exception {
 	NamedNodeMap attributes = node.getAttributes();;
 	Node attributeNode;
@@ -2173,9 +2168,37 @@ throws Exception {
 		}						
 		else if (name.equalsIgnoreCase("X")) {
 			hnode.setX(new Double(value).doubleValue());
+			// Left...
+			if ( Double.isNaN(extentDataFromNodes[0]) ) {
+				extentDataFromNodes[0] = hnode.getX();
+			}
+			else {
+				extentDataFromNodes[0] = Math.min(extentDataFromNodes[0], hnode.getX());
+			}
+			// Right...
+			if ( Double.isNaN(extentDataFromNodes[2]) ) {
+				extentDataFromNodes[2] = hnode.getX();
+			}
+			else {
+				extentDataFromNodes[2] = Math.max(extentDataFromNodes[2], hnode.getX());
+			}
 		}
 		else if (name.equalsIgnoreCase("Y")) {
 			hnode.setY(new Double(value).doubleValue());
+			// Bottom...
+			if ( Double.isNaN(extentDataFromNodes[1]) ) {
+				extentDataFromNodes[1] = hnode.getY();
+			}
+			else {
+				extentDataFromNodes[1] = Math.min(extentDataFromNodes[1], hnode.getY());
+			}
+			// Top...
+			if ( Double.isNaN(extentDataFromNodes[3]) ) {
+				extentDataFromNodes[3] = hnode.getY();
+			}
+			else {
+				extentDataFromNodes[3] = Math.max(extentDataFromNodes[3], hnode.getY());
+			}
 		}
 	}
 
@@ -2215,9 +2238,13 @@ throws Exception {
 
 /**
 Called by the readXML code when processing a StateMod_Network node.
-@param node the XML node being read.
+@param node the XML node being read
+@param extentData the maximum data coordinates of the network, considering node coordinates
+@param edgeBuffer the additional edge buffer, in node coordinate units, that should be added to the
+edges of the network when rendering
 */
-private static void readXMLNetworkFile_ProcessStateMod_NetworkNode(Node node, Double [] extentData ) 
+private static void readXMLNetworkFile_ProcessStateMod_NetworkNode(Node node, Double [] extentData,
+	Double [] edgeBuffer ) 
 throws Exception {
 	String routine = "StateMod_NodeNetwork.processStateMod_NetworkNode";
 	NamedNodeMap attributes;
@@ -2247,6 +2274,22 @@ throws Exception {
 		else if (name.equalsIgnoreCase("YMax")) {
 			extentData[3] = new Double(value);
 			Message.printStatus(2, routine, "Read Ymax=" + extentData[3] );
+		}
+		else if (name.equalsIgnoreCase("EdgeBufferLeft")) {
+			edgeBuffer[0] = new Double(value);
+			Message.printStatus(2, routine, "Read EdgeBufferLeft=" + edgeBuffer[0] );
+		}
+		else if (name.equalsIgnoreCase("EdgeBufferRight")) {
+			edgeBuffer[1] = new Double(value);
+			Message.printStatus(2, routine, "Read EdgeBufferRight=" + edgeBuffer[1] );
+		}
+		else if (name.equalsIgnoreCase("EdgeBufferTop")) {
+			edgeBuffer[2] = new Double(value);
+			Message.printStatus(2, routine, "Read EdgeBufferTop=" + edgeBuffer[2] );
+		}
+		else if (name.equalsIgnoreCase("EdgeBufferBottom")) {
+			edgeBuffer[3] = new Double(value);
+			Message.printStatus(2, routine, "Read EdgeBufferBottom=" + edgeBuffer[3] );
 		}
 		else if (name.equalsIgnoreCase("LegendX")) {
 			extentData[4] = new Double(value);

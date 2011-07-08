@@ -524,6 +524,8 @@ The array of limits of the nodes being dragged.
 private GRLimits[] __dragNodesLimits = null;
 
 // TODO SAM 2011-07-05 This should not be needed but there are some circular references that need to be unwound
+// Is this the data limits of actual data before calculateDataLimits() adjusts to what should be used in the
+// drawing area?  One is data and one is media?
 /**
 Backup of the data limits for the visible network.  Stored here so as to 
 avoid lots of calls to __drawingArea.getDataLimits();
@@ -616,7 +618,7 @@ private int __networkMouseMode = MODE_PAN;
 /**
 The node size as set by the GUI at 1:1 zoom, in pixels.
 */
-private int __nodeSize = 20;
+private int __nodeSizeFullScale = 20;
 
 /**
 The number of the node that had a popup menu opened on it.
@@ -786,9 +788,9 @@ public StateMod_Network_JComponent(StateMod_Network_JFrame parent, double scale)
 
 	buildPopupMenus();
 
-	// set the default print font size for when the network is first displayed.
+	// Set the default print font size for when the network is first displayed.
 	// TODO (JTS - 2004-07-13) remove this call?
-	setPrintFontSize(10, true);	
+	setPrintFontSize(10);
 
 	__undoOperations = new Vector();
 }
@@ -1289,10 +1291,9 @@ private void buildPopupMenus() {
 	__networkPopup.add(mi);
 	__networkPopup.addSeparator();
 	// -------------------------
-	// TODO SAM 2011-07-07 Enable - apparently data don't support now that migrated away from Makenet
-	//jcbmi = new JCheckBoxMenuItem(__MENU_SHADED_RIVERS);
-	//jcbmi.addActionListener(this);
-	//__networkPopup.add(jcbmi);	
+	jcbmi = new JCheckBoxMenuItem(__MENU_SHADED_RIVERS);
+	jcbmi.addActionListener(this);
+	__networkPopup.add(jcbmi);	
 	jcbmi = new JCheckBoxMenuItem(__MENU_DRAW_NODE_LABELS, true);
 	jcbmi.addActionListener(this);
 	__networkPopup.add(jcbmi);	
@@ -1334,10 +1335,9 @@ private void buildPopupMenus() {
 	mi.addActionListener(this);
 	__nodePopup.add(mi);
 	__nodePopup.addSeparator();
-	// TODO SAM 2011-07-07 Enable - apparently data don't support now that migrated away from Makenet
-	//jcbmi = new JCheckBoxMenuItem(__MENU_SHADED_RIVERS);
-	//jcbmi.addActionListener(this);
-	//__nodePopup.add(jcbmi);	
+	jcbmi = new JCheckBoxMenuItem(__MENU_SHADED_RIVERS);
+	jcbmi.addActionListener(this);
+	__nodePopup.add(jcbmi);	
 	jcbmi = new JCheckBoxMenuItem(__MENU_DRAW_NODE_LABELS, true);
 	jcbmi.addActionListener(this);
 	__nodePopup.add(jcbmi);	
@@ -1484,6 +1484,96 @@ protected void calculateDataLimits() {
 	}
 	__drawingArea.setDataLimits(setLimits);
 	// TODO (JTS - 2004-07-13) why are the __dataLimits not reset here??
+}
+
+/**
+Calculates the data limits necessary to line up the corners of the drawing area with data values.
+This ensures that the requested "view window" is drawn with 1:1 aspect for the given media size.
+For example, for printing, this ensures that the network is centered and fits on the page.
+This method should be called after the drawing area is set in this device (the drawing limits determine the
+aspect ratio).
+TODO SAM 2011-07-08 This method was adapted from calculateDataLimits() for printing, but may be used
+for other drawing modes in the future.
+@param dataLimitsOrig the data limits of the network data, based on the nodes and legend (typically taken from
+the XMin,Ymin,Xmax,Ymax coordinates from the network.
+@param buffer an additional buffer to be added to the data limits, for example to allow for labels, in data units.
+These values will be used to adjust the dataLimits before computations occur.  The buffer should not be confused
+with the margin, which is a non-printable area around the edge of the page.  When printing, the margin is
+taken out of the page size, resulting in the imageable area.  The buffer is an additional edge inside the
+printable area.  The order of the buffer values is left, right, top, bottom.  If the length of the array is 1,
+then the same value is added to all sides.
+*/
+protected void calculateDataLimitsForMedia ( GRLimits dataLimitsOrig, double [] buffer )
+{	// Copy the data limits so as to not interfere with calling code
+	GRLimits dataLimits = new GRLimits(dataLimitsOrig);
+	// Add to the limits
+	if ( buffer != null ) {
+		if ( buffer.length == 1 ) {
+			dataLimits.setLeftX(dataLimits.getLeftX() - buffer[0]);
+			dataLimits.setRightX(dataLimits.getRightX() + buffer[0]);
+			dataLimits.setTopY(dataLimits.getTopY() + buffer[0]);
+			dataLimits.setBottomY(dataLimits.getBottomY() - buffer[0]);
+		}
+		else if ( buffer.length == 4 ) {
+			dataLimits.setLeftX(dataLimits.getLeftX() - buffer[0]);
+			dataLimits.setRightX(dataLimits.getRightX() + buffer[1]);
+			dataLimits.setTopY(dataLimits.getTopY() + buffer[2]);
+			dataLimits.setBottomY(dataLimits.getBottomY() - buffer[3]);
+		}
+	}
+	GRLimits drawingLimits = getDrawingArea().getDrawingLimits();
+	GRLimits dataLimitsMedia = new GRLimits (dataLimits); // Copy because only one dimension will be adjusted
+
+	// Next, the ratio of the width to the height of the media is
+	// checked and if the ratio is not sufficient to allow the data
+	// to be all printed on the page without distortion, the data limits
+	// will be reset so that there is extra room in the drawing area for the "skinny" dimension
+	if (dataLimits.getWidth() >= dataLimits.getHeight()) {
+		__fitWidth = true;
+		__totalDataWidth = dataLimits.getWidth();
+		__dataLeftX = dataLimits.getLeftX();
+		// size __totalDataHeight to be proportional to __totalDataWidth, given the media proportions
+		__totalDataHeight =
+			((double)drawingLimits.getHeight()/(double)drawingLimits.getWidth())*__totalDataWidth;
+
+		if (dataLimits.getHeight() > __totalDataHeight) {
+			// If the data limits are greater than the total data height that can fit on the paper, then 
+			// reset the total data height to be the height of the data limits.  
+			__dataBottomY = dataLimits.getBottomY();
+			__totalDataHeight = dataLimits.getHeight();
+		}
+		else {
+			// Otherwise, if the height of the network can 
+			// fit within the paper entirely, center the network vertically on the paper
+			double diff = __totalDataHeight - dataLimits.getHeight();
+			__dataBottomY = dataLimits.getBottomY() - (diff / 2);
+			dataLimitsMedia.setBottomY(__dataBottomY);
+			dataLimitsMedia.setTopY(dataLimitsMedia.getBottomY() + __totalDataHeight);
+		}
+	}
+	else {
+		__fitWidth = false;
+		__totalDataHeight = dataLimits.getHeight();
+		__dataBottomY = dataLimits.getBottomY();
+		// size __totalDataWidth to be proportional to __totalDataHeight, given the screen proportions		
+		__totalDataWidth = ((double)drawingLimits.getWidth() /
+			(double)drawingLimits.getHeight())* __totalDataHeight;
+		if (dataLimits.getWidth() > __totalDataWidth) {
+			// If the data limits are greater than the total data width that can fit on the paper, then 
+			// reset the total data width to be the width of the data limits. 
+			__dataLeftX = dataLimits.getLeftX();
+			__totalDataWidth = dataLimits.getWidth();
+		}
+		else {
+			// otherwise, if the width of the network can fit within the paper entirely, center the network
+			// horizontally on the paper.  This is when the network is zoomed out.
+			double diff = __totalDataWidth - dataLimits.getWidth();
+			__dataLeftX = dataLimits.getLeftX() - (diff / 2);
+			dataLimitsMedia.setLeftX(__dataLeftX);
+			dataLimitsMedia.setRightX(__dataLeftX + __totalDataWidth);
+		}
+	}
+	__drawingArea.setDataLimits(dataLimitsMedia);
 }
 
 /**
@@ -2937,7 +3027,7 @@ protected void initializeForNetworkPageLayout ( String pageLayout )
     */
     setDataLimits ( new GRLimits(net.getLX(), net.getBY(), net.getRX(), net.getTY()) );
 	//setPaperSize(paperSize);
-	//setOrientation(orientation);	
+	//setOrientation(orientation);
 	//setPrintNodeSize(nodeSize);
 	//setPrintFontSize(nodeFontSize);
 	//forceRepaint();
@@ -3633,6 +3723,12 @@ public void paint(Graphics g) {
 		// The font size in points for full-scale printing is from the network
 		this.__drawingArea.setFont("Helvetica", "Plain", this.__printFontPixelSize );
 		setAntiAlias(__antiAlias);
+		setPrintNodeSize(__currNodeSize);
+		// The following does bad things
+		//scaleUnscalables();
+		for (int i = 0; i < __nodes.length; i++) {
+			__nodes[i].calculateExtents(__drawingArea);
+		}
 		drawNodes();
 		drawNetworkLines();
 		drawLinks();
@@ -3720,7 +3816,7 @@ public void paint(Graphics g) {
 
 		// and that doesn't even BEGIN to get into the problems with points vs. pixels ...
 
-		setPrintNodeSize(__currNodeSize, true);
+		setPrintNodeSize(__currNodeSize );
 
 		for (int i = 0; i < __nodes.length; i++) {
 			__nodes[i].calculateExtents(__drawingArea);
@@ -3774,11 +3870,11 @@ public void paint(Graphics g) {
 		repaint = true;
 	}
 	if (__holdPrintNodeSize != -1) {
-		setPrintNodeSize(__holdPrintNodeSize, true);
+		setPrintNodeSize(__holdPrintNodeSize);
 		repaint = true;
 	}
 	if (__holdPrintFontSize != -1) {
-		setPrintFontSize(__holdPrintFontSize, true);
+		setPrintFontSize(__holdPrintFontSize);
 		repaint = true;
 	}
 
@@ -4087,6 +4183,7 @@ public void print()
 	        StateMod_Network_JComponent networkPrintable = new StateMod_Network_JComponent(getNetwork(),
 	        	__parent.getSelectedPageLayout() );
 	        networkPrintable.initializeForPrinting();
+	        // Get the attributes needed for the printer job
 	        networkPrintable.initializeForNetworkPageLayout ( null );
 	        String orientation = __parent.getSelectedOrientation();
 	        String paperSizeFromLayout = __parent.getSelectedPaperSize();
@@ -4095,6 +4192,8 @@ public void print()
 	        	paperSizeFromLayout = StringUtil.getToken(paperSizeFromLayout, " ", 0, 0).trim();
 	        }
 	        double margin = networkPrintable.getMargin();
+	        // Open the printer job, which will display the print dialog and allow the user to change
+	        // settings (mostly they should just pick the printer.
             new GraphicsPrinterJob (
             	networkPrintable, // Current object is printable
                 "Network",
@@ -4159,8 +4258,9 @@ public int print(Graphics g, PageFormat pageFormat, int pageIndex)
 	Message.printStatus(2, routine, "Print data limits (from network data): " + getDataLimits() );
 	Message.printStatus(2, routine, "Print font: " + this.__drawingArea.getFont() );
 	// Calculate the data limits necessary to maintain aspect of the data and fit the page
-	// This causes the printout not to work
-	// calculateDataLimits();
+    double [] buffer = { 0.0, 0.0, 0.0, 0.0 };
+    calculateDataLimitsForMedia ( getDataLimits(), getNetwork().getEdgeBuffer() );
+    // Set the font size for the scale...
 	int fontSize = this.__drawingArea.calculateFontSize(g2d, this.__fontPixelSize);
 	
 	// TODO SAM 2011-07-05 Adjust the drawing limits accordingly to center on the imageable area when
@@ -4246,6 +4346,8 @@ protected void printNetwork()
 {	String routine = "StateMod_Network_JComponent.printNetwork";
 	Message.printStatus( 2, routine, "Printing entire network" );
 	if ( !__useOldPrinting ) {
+		// New printing creates a new instance of the component so that printint does not intermingle
+		// with the interactive rendering
 		new ResponseJDialog ( __parent, "Print Network",
 			"You must select a printer and page size that match the network page layout.\n" +
 			"The printer dialog will take a few seconds to display.",
@@ -4587,10 +4689,11 @@ protected void saveXML(String filename) {
 	p.set("PaperSize=\"" + PrintUtil.pageFormatToString(__pageFormat) + "\"");
 	p.set("PageOrientation=\"" + PrintUtil.getOrientationAsString(__pageFormat) + "\"");
 	p.set("NodeLabelFontPointSize=" + __printFontPixelSize);
-	p.set("NodeSize=" + __nodeSize);
-
+	p.set("NodeSize=" + __nodeSizeFullScale);
+	double [] edgeBuffer = { 0, 0, 0, 0 };
 	try {
-		__network.writeXML(selectedFilename, limits, __parent.getLayouts(), __annotations, __links, __legendLimits);
+		__network.writeXML(selectedFilename, limits, __parent.getLayouts(), __annotations, __links, __legendLimits,
+			edgeBuffer );
 	}
 	catch (Exception e) {
 		String routine = "StateMod_Network_JComponent.saveXML()";
@@ -4723,8 +4826,8 @@ Sets the size of the nodes (in pixels) at the 1:1 zoom level.
 @param size the size of the nodes.
 */
 public void setNodeSize(double size) {
-	__nodeSize = (int)size;
-	setPrintNodeSize(size, true);
+	__nodeSizeFullScale = (int)size;
+	setPrintNodeSize(size);
 }
 
 /**
@@ -4829,21 +4932,17 @@ Sets the size in pixels that fonts should be printed at when printed at 1:1.
 @param size the pixel size of fonts when printed at 1:1.
 @param doCalcs if true, do extra legacy calculations, if false, just set the value
 */
-public void setPrintFontSize( int size, boolean doCalcs ) {
-	if ( !doCalcs ) {
-		if (_graphics == null) {
-			__holdPrintFontSize = size;
-			return;
-		}
-		else {
-			__holdPrintFontSize = -1;
-		}
+public void setPrintFontSize( int size ) {
+	if (_graphics == null) {
+		__holdPrintFontSize = size;
+		return;
+	}
+	else {
+		__holdPrintFontSize = -1;
 	}
 	__printFontPixelSize = size;
-	if ( !doCalcs ) {
-		scaleUnscalables();
-		forceRepaint();
-	}
+	scaleUnscalables();
+	forceRepaint();
 }
 
 /**
@@ -4851,16 +4950,14 @@ Sets the size (in data points) that nodes should be printed at.
 @param size the size (in pixels) of nodes when printed at 1:1.
 @param doCalcs if true, perform the legacy calculations; if false, just set basic data (for printing).
 */
-public void setPrintNodeSize ( double size, boolean doCalcs )
+public void setPrintNodeSize ( double size )
 {
-	if ( doCalcs ) {
-		if (_graphics == null) {
-			__holdPrintNodeSize = size;
-			return;
-		}
-		else {
-			__holdPrintNodeSize = -1;
-		}
+	if (_graphics == null) {
+		__holdPrintNodeSize = size;
+		return;
+	}
+	else {
+		__holdPrintNodeSize = -1;
 	}
 	
 	__currNodeSize = size;
@@ -4882,9 +4979,7 @@ public void setPrintNodeSize ( double size, boolean doCalcs )
 		__nodes[i].setDataDiameter(diam);
 		__nodes[i].calculateExtents(__drawingArea);
 	}
-	if ( doCalcs ) {
-		forceRepaint();
-	}
+	forceRepaint();
 }
 
 /**
@@ -5264,7 +5359,7 @@ protected void zoomIn() {
 	__screenLeftX = cx - (__screenDataWidth / 2);
 	__screenBottomY = cy - (__screenDataHeight / 2);
 
-	setPrintNodeSize(__currNodeSize * 2, true);
+	setPrintNodeSize(__currNodeSize * 2);
 	scaleUnscalables();
 	if (!__ignoreRepaint) {
 		forceRepaint();
@@ -5319,7 +5414,7 @@ protected void zoomOneToOne() {
 		data.setRightX(__screenLeftX + width);
 		data.setTopY(__screenBottomY + height);
 		__drawingArea.setDataLimits(data);
-		setPrintNodeSize(__nodeSize, true);
+		setPrintNodeSize(__nodeSizeFullScale);
 		scaleUnscalables();
 		forceRepaint();
 	}
@@ -5346,7 +5441,7 @@ protected void zoomOneToOne() {
 		data.setRightX(__screenLeftX + width);
 		data.setTopY(__screenBottomY + height);
 		__drawingArea.setDataLimits(data);
-		setPrintNodeSize(__nodeSize, true);
+		setPrintNodeSize(__nodeSizeFullScale);
 		scaleUnscalables();
 		forceRepaint();
 	}
@@ -5377,7 +5472,7 @@ protected void zoomOut() {
 	__screenLeftX = cx - (__screenDataWidth / 2);
 	__screenBottomY = cy - (__screenDataHeight / 2);
 	
-	setPrintNodeSize(__currNodeSize / 2, true);
+	setPrintNodeSize(__currNodeSize / 2);
 	scaleUnscalables();
 	if (!__ignoreRepaint) {
 		forceRepaint();

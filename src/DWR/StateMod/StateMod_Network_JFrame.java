@@ -76,6 +76,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
+import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
@@ -238,6 +239,19 @@ private JButton __deleteButton;
 Checkbox for selecting the default page layout.
 */
 private JCheckBox __defaultLayoutCheckBox;
+
+/**
+Text fields for network information (column 2).
+*/
+private JTextField
+	__xminJTextField,
+	__yminJTextField,
+	__xmaxJTextField,
+	__ymaxJTextField,
+	__edgeBufferLeftJTextField,
+	__edgeBufferRightJTextField,
+	__edgeBufferTopJTextField,
+	__edgeBufferBottomJTextField;
 
 /**
 Textfields for displaying node information.
@@ -1071,6 +1085,10 @@ throws Exception {
 	if (__isXML) {
 		readXML(filename);
 	}
+	// Display the coordinate limits
+	StateMod_NodeNetwork network = getNetwork();
+	updateNetworkLayoutExtents(network.getLX(), network.getBY(), network.getRX(), network.getTY(), 
+		network.getEdgeBuffer());
 
 	setVisible(true);
 
@@ -1084,8 +1102,8 @@ throws Exception {
 		__device.forceRepaint();
 		__device.setPaperSize(__paperSize);
 		__device.setOrientation(__orient);	
-		__device.setPrintNodeSize(__nodeSize, true);
-		__device.setPrintFontSize(__fontSize, true);
+		__device.setPrintNodeSize(__nodeSize);
+		__device.setPrintFontSize(__fontSize);
 
 		__nodeSizeComboBox.select("" + __nodeSize);
 		__orientationComboBox.select(__orient);
@@ -1132,13 +1150,16 @@ throws Exception {
 
 	StateMod_NodeNetwork network = new StateMod_NodeNetwork(true);
 	__device.setNetwork(network, false, true);
-	List v = network.getNodesForType(HydrologyNode.NODE_TYPE_END);
-	// change the "5" to something better if a different default paper size than "C" is used.
-	((HydrologyNode)v.get(0)).setX(__rx / 4.3);
-	((HydrologyNode)v.get(0)).setY(__ty / 5);
+	List<HydrologyNode> v = network.getNodesForType(HydrologyNode.NODE_TYPE_END);
+	// Change the "5" to something better if a different default paper size than "C" is used.
+	v.get(0).setX(__rx / 4.3);
+	v.get(0).setY(__ty / 5);
 
 	__device.setXMLDataLimits(__lx, __by, __rx - __lx, __ty - __by);
 	__reference.setNewDataLimits(new GRLimits(__lx, __by, __rx, __ty));
+	// Display the coordinate limits
+	updateNetworkLayoutExtents(network.getLX(), network.getRX(), network.getTY(), network.getBY(),
+		network.getEdgeBuffer());
 	
 	setVisible(true);
 
@@ -1153,8 +1174,8 @@ throws Exception {
 	__device.forceRepaint();
 	__device.setPaperSize(__paperSize);
 	__device.setOrientation(__orient);
-	__device.setPrintNodeSize(__nodeSize, true);
-	__device.setPrintFontSize(__fontSize, true);
+	__device.setPrintNodeSize(__nodeSize);
+	__device.setPrintFontSize(__fontSize);
 
 	__nodeSizeComboBox.select("" + __nodeSize);
 	__orientationComboBox.select(__orient);
@@ -1206,7 +1227,7 @@ public void itemStateChanged(ItemEvent event)
 		PropList p = __layouts.get(index);
 		try {
 			int i = Integer.decode(	__textSizeComboBox.getSelected()).intValue();
-			__device.setPrintFontSize(i, true);
+			__device.setPrintFontSize(i);
 			p.set("NodeLabelFontSize=\"" + value + "\"");
 		}
 		catch (Exception e) {}
@@ -1850,6 +1871,7 @@ private void setupGUI() {
 	int y = 0;
 	JPanel pagePanel = new JPanel();
 	pagePanel.setLayout(new GridBagLayout());
+	pagePanel.setBorder(BorderFactory.createTitledBorder("Network and Page Layout Properties"));
 	JGUIUtil.addComponent(pagePanel, new JLabel("Page layout: "),
 		0, y, 1, 1, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -1918,7 +1940,6 @@ private void setupGUI() {
 		1, y, 1, 1, 1, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
-	pagePanel.setBorder(BorderFactory.createTitledBorder("Page Properties"));
 	JGUIUtil.addComponent(panel, pagePanel,
 		0, 1, 10, 1, 0, 0,
 		GridBagConstraints.BOTH, GridBagConstraints.CENTER);
@@ -1937,7 +1958,7 @@ private void setupGUI() {
 	__nodeDBXYTextField = new JTextField(20);
 	__nodeDBXYTextField.setToolTipText("Alternate node coordinates (e.g., geographic coordinates).");
 	__nodeCommonIDTextField = new JTextField(20);
-	__nodeCommonIDTextField.setToolTipText("Short identifier used in modeling and labelling the network.");
+	__nodeCommonIDTextField.setToolTipText("Short identifier used in modeling and labeling the network.");
 
 	__nodeDescriptionTextField.setEditable(false);
 	__nodeTypeTextField.setEditable(false);
@@ -1950,6 +1971,99 @@ private void setupGUI() {
 	__nodeXYTextField.addKeyListener(__device);
 	__nodeDBXYTextField.addKeyListener(__device);
 	__nodeCommonIDTextField.addKeyListener(__device);
+	
+	// Vertical separator
+	
+	JGUIUtil.addComponent(pagePanel, new JSeparator(JSeparator.VERTICAL),
+		11, 0, 1, 8, 0, 0,
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
+	
+	// Right column of network properties. x=11 for label, x=12-21 for data field
+	
+	y = 0;
+	int xLabel = 12;
+	int xData = 13;
+	JGUIUtil.addComponent(pagePanel, new JLabel("Xmin: "),
+		xLabel, y, 1, 1, 0, 0,
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
+	__xminJTextField = new JTextField ( 10 );
+	__xminJTextField.setEnabled(false); // Display only
+	__xminJTextField.setToolTipText ( "Minimum x-coordinate calculated from node positions" );
+	JGUIUtil.addComponent(pagePanel, __xminJTextField,
+		xData, y, 9, 1, 1, 1,
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
+	
+	JGUIUtil.addComponent(pagePanel, new JLabel("Ymin: "),
+		xLabel, ++y, 1, 1, 0, 0,
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
+	__yminJTextField = new JTextField ( 10 );
+	__yminJTextField.setEnabled(false); // Display only
+	__yminJTextField.setToolTipText ( "Minimum y-coordinate calculated from node positions" );
+	JGUIUtil.addComponent(pagePanel, __yminJTextField,
+		xData, y, 9, 1, 1, 1,
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
+	
+	JGUIUtil.addComponent(pagePanel, new JLabel("Xmax: "),
+		xLabel, ++y, 1, 1, 0, 0,
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
+	__xmaxJTextField = new JTextField ( 10 );
+	__xmaxJTextField.setEnabled(false); // Display only
+	__xmaxJTextField.setToolTipText ( "Maximum x-coordinate calculated from node positions" );
+	JGUIUtil.addComponent(pagePanel, __xmaxJTextField,
+		xData, y, 9, 1, 1, 1,
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
+
+	JGUIUtil.addComponent(pagePanel, new JLabel("Ymax: "),
+		xLabel, ++y, 1, 1, 0, 0,
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
+	__ymaxJTextField = new JTextField ( 10 );
+	__ymaxJTextField.setEnabled(false); // Display only
+	__ymaxJTextField.setToolTipText ( "Maximum y-coordinate calculated from node positions" );
+	JGUIUtil.addComponent(pagePanel, __ymaxJTextField,
+		xData, y, 9, 1, 1, 1,
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
+	
+	JGUIUtil.addComponent(pagePanel, new JLabel("Left edge buffer: "),
+		xLabel, ++y, 1, 1, 0, 0,
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
+	__edgeBufferLeftJTextField = new JTextField ( 10 );
+	__edgeBufferLeftJTextField.setEnabled(false); // Display only
+	__edgeBufferLeftJTextField.setToolTipText ( "Additional width added to left of Xmin" );
+	JGUIUtil.addComponent(pagePanel, __edgeBufferLeftJTextField,
+		xData, y, 9, 1, 1, 1,
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
+	
+	JGUIUtil.addComponent(pagePanel, new JLabel("Right edge buffer: "),
+		xLabel, ++y, 1, 1, 0, 0,
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
+	__edgeBufferRightJTextField = new JTextField ( 10 );
+	__edgeBufferRightJTextField.setEnabled(false); // Display only
+	__edgeBufferRightJTextField.setToolTipText ( "Additional width added to right of Xmax" );
+	JGUIUtil.addComponent(pagePanel, __edgeBufferRightJTextField,
+		xData, y, 9, 1, 1, 1,
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
+	
+	JGUIUtil.addComponent(pagePanel, new JLabel("Top edge buffer: "),
+		xLabel, ++y, 1, 1, 0, 0,
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
+	__edgeBufferTopJTextField = new JTextField ( 10 );
+	__edgeBufferTopJTextField.setEnabled(false); // Display only
+	__edgeBufferTopJTextField.setToolTipText ( "Additional height added to top of Ymax" );
+	JGUIUtil.addComponent(pagePanel, __edgeBufferTopJTextField,
+		xData, y, 9, 1, 1, 1,
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
+		
+	JGUIUtil.addComponent(pagePanel, new JLabel("Bottom edge buffer: "),
+		xLabel, ++y, 1, 1, 0, 0,
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
+	__edgeBufferBottomJTextField = new JTextField ( 10 );
+	__edgeBufferBottomJTextField.setEnabled(false); // Display only
+	__edgeBufferBottomJTextField.setToolTipText ( "Additional height added to bottom of Ymin" );
+	JGUIUtil.addComponent(pagePanel, __edgeBufferBottomJTextField,
+		xData, y, 9, 1, 1, 1,
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
+	
+	// Node properties...
 
 	nodePanel.setLayout(new GridBagLayout());
 	JGUIUtil.addComponent(nodePanel, new JLabel("Type: "),
@@ -2096,8 +2210,8 @@ private void setupPaper() {
 	__device.forceRepaint();
 	__device.setPaperSize(__paperSize);
 	__device.setOrientation(__orient);	
-	__device.setPrintNodeSize(__nodeSize, true);
-	__device.setPrintFontSize(__fontSize, true);
+	__device.setPrintNodeSize(__nodeSize);
+	__device.setPrintFontSize(__fontSize);
 
 	__nodeSizeComboBox.select("" + __nodeSize);
 	__orientationComboBox.select(__orient);
@@ -2131,6 +2245,40 @@ public String shorten(String s) {
 	}
 	s = s.substring(0, index);
 	return s.trim();
+}
+
+/**
+Update the network display information (Xmin, etc., and edgeBuffer).
+Only the limits should be changed external to this interface but update all to allow initialization from
+the network.
+*/
+public void updateNetworkLayoutExtents ( double xmin, double ymin, double xmax, double ymax,
+	double [] edgeBuffer )
+{
+	if ( !Double.isNaN(xmin) ) {
+		this.__xminJTextField.setText ( StringUtil.formatString(xmin,"%0.6f") );
+	}
+	if ( !Double.isNaN(ymin) ) {
+		this.__yminJTextField.setText ( StringUtil.formatString(ymin,"%0.6f") );
+	}
+	if ( !Double.isNaN(xmax) ) {
+		this.__xmaxJTextField.setText ( StringUtil.formatString(xmax,"%0.6f") );
+	}
+	if ( !Double.isNaN(ymax) ) {
+		this.__ymaxJTextField.setText ( StringUtil.formatString(ymax,"%0.6f") );
+	}
+	if ( !Double.isNaN(edgeBuffer[0]) ) {
+		this.__edgeBufferLeftJTextField.setText ( StringUtil.formatString(edgeBuffer[0],"%0.6f") );
+	}
+	if ( !Double.isNaN(edgeBuffer[1]) ) {
+		this.__edgeBufferRightJTextField.setText ( StringUtil.formatString(edgeBuffer[1],"%0.6f") );
+	}
+	if ( !Double.isNaN(edgeBuffer[2]) ) {
+		this.__edgeBufferTopJTextField.setText ( StringUtil.formatString(edgeBuffer[2],"%0.6f") );
+	}
+	if ( !Double.isNaN(edgeBuffer[3]) ) {
+		this.__edgeBufferBottomJTextField.setText ( StringUtil.formatString(edgeBuffer[3],"%0.6f") );
+	}
 }
 
 /**
