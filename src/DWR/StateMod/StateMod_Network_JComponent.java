@@ -17,6 +17,11 @@
 // * Saving the visible network to an image file - need to do something similar to TSTool where the active buffer
 //   is saved - this may need rework in the future if batch image saving is implemented in StateDMI and a visible
 //   window/buffer cannot be dumped
+// TODO SAM 2011-07-09 The font size and node size are documented to be in points, but in the code they
+// are sometimes treated as pixels.  Since 72 points = 1 inch and many screens are 72+ DPI, this is not a
+// horrible error but does lead to the screen output looking different that printed.  Need to scrub the code
+// and make sure that configuration information in points is converted accurately to pixels.  The configuration
+// should be in absolute coordinates (points) rather than pixels, which can vary between devices
 // ----------------------------------------------------------------------------
 // StateMod_Network_JComponent - class to control drawing of the network
 // ----------------------------------------------------------------------------
@@ -124,6 +129,7 @@ import cdss.domain.hydrology.network.HydrologyNode;
 
 import RTi.GR.GRAspect;
 import RTi.GR.GRColor;
+import RTi.GR.GRDrawingArea;
 import RTi.GR.GRDrawingAreaUtil;
 import RTi.GR.GRJComponentDevice;
 import RTi.GR.GRJComponentDrawingArea;
@@ -519,9 +525,15 @@ The graphics context that should be used for drawing to the temporary BufferedIm
 private Graphics2D __bufferGraphics = null;
 
 /**
-The drawing area on which the network is drawn.
+The drawing area on which the network is drawn, which corresponds to the chosen media (or visible screen area).
 */
 private GRJComponentDrawingArea __drawingArea = null;
+
+/**
+The drawing area used if rendering were to the full scale media.  This is used only to store the drawing and
+data limits at full scale so that the current rendering scale can be computed.
+*/
+private GRJComponentDrawingArea __drawingAreaFullScale = null;
 
 /**
 The array of limits of the nodes being dragged.
@@ -656,6 +668,12 @@ The thickness that lines should be printed at.
 private int __printLineThickness = 1;
 
 /**
+TODO SAM 2011-07-09 Evaluate whether to make the properties a class.
+Selected page layout properties (either from network being edited or batch job).
+*/
+private PropList __selectedPageLayoutPropList = null;
+
+/**
 The total height of the screen buffer.
 */
 private int __totalBufferHeight;
@@ -763,9 +781,11 @@ public StateMod_Network_JComponent ( StateMod_NodeNetwork net, String requestedP
 
 	// Setup the initial drawing areas and other information based on the layout.  Final setup will
 	// occur in the print() method based on the chosen printer and paper size
-	
-	initializeForNetworkPageLayout ( requestedPageLayout );
+	// First tell the class that printing is occurring and set some data
 	initializeForPrinting ();
+	// Set the page size, etc. from the requested layout (defaults for printing/layout
+	// but may be modified when print() gets called from the printJob
+	initializeForNetworkPageLayout ( requestedPageLayout );
 }
 
 /**
@@ -1778,6 +1798,48 @@ private double convertDrawingYToDataY(double y) {
 	else {
 		return y * (__screenDataWidth / getBounds().width);
 	}
+}
+
+/**
+Create a drawing area representing the full-scale rendering of the network.  This is used to calculate the
+scale when rendering occurs for different media than the layout, or a part of the full layout.
+@param network the StateMod network that is being rendered
+@param pageLayoutPropList page layout properties
+@return the drawing area that is configured for full scale rendering - the drawing and data limits from the
+drawing area can be used to compute the scale when compared to the current rendering drawing area
+*/
+private GRJComponentDrawingArea createDrawingAreaFullScale ( StateMod_NodeNetwork network,
+	PropList pageLayoutPropList )
+{
+	// Determine the full drawing limits for the page layout media (portrait mode).
+	String paperSize = pageLayoutPropList.getValue("PaperSize");
+	PageFormat pageFormat = PrintUtil.getPageFormat(paperSize); // This is portrait
+	// Initialize a device using the full page size (margins=0).  Setting the limits will not actually
+	// size the JComponent, just keep the limits in memory for calculations
+	GRLimits deviceLimits = new GRLimits ( 0, 0, pageFormat.getWidth(), pageFormat.getHeight() );
+	if ( pageLayoutPropList.getValue("PageOrientation").equalsIgnoreCase("Landscape")) {
+		// Swap the dimensions
+		deviceLimits = new GRLimits ( 0, 0, pageFormat.getHeight(), pageFormat.getWidth() );
+	}
+	GRJComponentDevice dev = new GRJComponentDevice("Virtual device for full scale limits.");
+	dev.setLimits(deviceLimits);
+	// Initialize the drawing area using the full page but subtract the margin from the imageable area
+	// TODO SAM 2011-07-09 does the actual margin need to be used?  For example, when printing
+	// the user may specify a different margin than the defaults - for now it is a minor error
+	double margin = getMargin();
+	GRLimits drawingLimits = new GRLimits (
+		deviceLimits.getLeftX() + margin, deviceLimits.getBottomY() + margin,
+		deviceLimits.getRightX() - margin, deviceLimits.getTopY() - margin );
+	// Determine the data limits for the media
+	GRLimits dataLimitsOrig = new GRLimits(network.getLX(),network.getBY(),network.getRX(),network.getTY());
+	double[] buffer = network.getEdgeBuffer();
+	// Calculate the data limits required to fill the media
+	GRLimits dataLimits = calculateDataLimitsForMedia(drawingLimits, dataLimitsOrig, buffer, false );
+	// Create a drawing area that matches the drawing (media) and data (fill media at full scale) limits
+	GRJComponentDrawingArea drawingAreaFullScale = new GRJComponentDrawingArea(
+		this, "StateMod_Network DrawingArea full scale", GRAspect.TRUE, 
+		drawingLimits, GRUnits.DEVICE, GRLimits.DEVICE, dataLimits );
+	return drawingAreaFullScale;
 }
 
 /**
@@ -2999,6 +3061,38 @@ protected GRLimits getTotalDataLimits() {
 }
 
 /**
+Return the scale, relative to a full 1:1 rendering for the page layout.
+A value of 2 means that the rendered graphics are twice as big as the full-size rendering.
+A value of .5 means that the rendered graphics are 1/2 as big as the full-size rendering.
+@return the scale, relative to a full 1:1 rendering for the page layout
+*/
+public double getScale ()
+{	String routine = getClass().getName() + ".getScale";
+	double scale = Double.NaN;
+	// The scale is determined by mapping the current drawing area to the full scale drawing area
+	// The resulting data range is then compared to the full scale data range.
+	// In other words, how big would the full-scale drawing area be if the current rendering settings were
+	// used to do a full rendering?  The scale is then the ratio of the full scale drawing area height to
+	// the drawing area that would result from the full rendering at current settings.
+	double drawingAreaHeightRendered = this.getDrawingArea().getDrawingLimits().getHeight()*
+		(this.getDrawingArea().getDataLimits().getHeight()/
+		this.__drawingAreaFullScale.getDataLimits().getHeight());
+	double drawingAreaHightFullScale = this.__drawingAreaFullScale.getDrawingLimits().getHeight();
+	scale = drawingAreaHeightRendered/drawingAreaHightFullScale;
+	Message.printStatus(2, "", "Scale is: " + scale );
+	return scale;
+}
+
+/**
+Return the selected network page layout properties to use for rendering.
+@return the selected network page layout properties to use for rendering
+*/
+public PropList getSelectedPageLayoutPropList ()
+{
+	return this.__selectedPageLayoutPropList;
+}
+
+/**
 Returns the total height of the entire network.
 @return the total height of the entire network.
 */
@@ -3036,7 +3130,7 @@ initiate printing.  The print() and paint() methods will adjust to the printer j
 and imageable area.
 */
 protected void initializeForNetworkPageLayout ( String pageLayout )
-{
+{	String routine = getClass().getName() + ".initializeForNetworkPageLayout";
 	StateMod_NodeNetwork net = getNetwork();
     //String orientation = null;
     //String paperSize = null;
@@ -3047,10 +3141,13 @@ protected void initializeForNetworkPageLayout ( String pageLayout )
     for (PropList p : layouts ) {
         String id = p.getValue("ID");
         if ( id.equalsIgnoreCase(pageLayout)) {
+        	setSelectedPageLayoutPropList ( p );
             //orientation = p.getValue("PageOrientation");
             //paperSize = p.getValue("PaperSize");
             nodeSize = Double.parseDouble(p.getValue("NodeSize"));
-            setPrintNodeSize(nodeSize);
+            Message.printStatus(2,routine,"Node size from layout is " + nodeSize + " points.");
+            // This does not work here because it needs graphics from print/paint time
+            //setPrintNodeSize(nodeSize);
             nodeFontSize = Integer.parseInt(p.getValue("NodeLabelFontSize"));
             setPrintFontSize(nodeFontSize);
             found = true;
@@ -3757,9 +3854,20 @@ public void paint(Graphics g) {
 		// Graphics2D object was already set in the print() method before calling this method.
 		//drawTestPage ( g );
 		// The font size in points for full-scale printing is from the network
-		this.__drawingArea.setFont("Helvetica", "Plain", this.__printFontSizePixels );
+		String nodeLabelFontSizeString = getSelectedPageLayoutPropList().getValue("NodeLabelFontSize");
+		if ( nodeLabelFontSizeString == null ) {
+			nodeLabelFontSizeString = "10";
+		}
+		double fontSize = Double.parseDouble(nodeLabelFontSizeString);
+		this.__drawingArea.setFont("Helvetica", "Plain", (int)fontSize );
 		setAntiAlias(__antiAlias);
-		setPrintNodeSize(__currNodeSize);
+		// Set the node size
+		String nodeSizeString = getSelectedPageLayoutPropList().getValue("NodeSize");
+		if ( nodeSizeString == null ) {
+			nodeSizeString = "10";
+		}
+		double nodeSize = Double.parseDouble(nodeSizeString);
+		setPrintNodeSize(nodeSize);
 		// The following does bad things
 		//scaleUnscalables();
 		for (int i = 0; i < __nodes.length; i++) {
@@ -4293,9 +4401,14 @@ public int print(Graphics g, PageFormat pageFormat, int pageIndex)
 	Message.printStatus(2, routine, "Print drawing area limits (from printer imageable area): " + drawingLimits );
 	Message.printStatus(2, routine, "Print data limits (from network data): " + getDataLimits() );
 	Message.printStatus(2, routine, "Print font: " + this.__drawingArea.getFont() );
+	StateMod_NodeNetwork network = getNetwork();
+	// Calculate the data limits necessary to maintain aspect of the data and fit the page for full scale
+	this.__drawingAreaFullScale = createDrawingAreaFullScale ( network, getSelectedPageLayoutPropList() );
 	// Calculate the data limits necessary to maintain aspect of the data and fit the page
-	__drawingArea.setDataLimits( calculateDataLimitsForMedia ( getDrawingArea().getDrawingLimits(),
-		getDataLimits(), getNetwork().getEdgeBuffer(), true ) );
+	// Use the actual network data
+	this.__drawingArea.setDataLimits( calculateDataLimitsForMedia ( getDrawingArea().getDrawingLimits(),
+		new GRLimits(network.getLX(),network.getBY(),network.getRX(),network.getTY()),
+		network.getEdgeBuffer(), true ) );
     // Set the node icon size based on the scale.
     
     // Set the font size for the scale...
@@ -4967,56 +5080,71 @@ private void setPrintingScale(double scale) {
 */
 
 /**
-Sets the size in pixels that fonts should be printed at when printed at 1:1.
-@param size the pixel size of fonts when printed at 1:1.
+Sets the size in points that fonts should be printed at when printed at 1:1.
+@param fontSizePoints the pixel size of fonts when printed at 1:1.
 @param doCalcs if true, do extra legacy calculations, if false, just set the value
 */
-public void setPrintFontSize( int size ) {
+public void setPrintFontSize( int fontSizePoints ) {
 	if (_graphics == null) {
-		__holdPrintFontSize = size;
+		__holdPrintFontSize = fontSizePoints;
 		return;
 	}
 	else {
 		__holdPrintFontSize = -1;
 	}
-	__printFontSizePixels = size;
+	__printFontSizePixels = fontSizePoints;
 	scaleUnscalables();
 	forceRepaint();
 }
 
 /**
 Sets the size (in points) that nodes should be printed at.
-@param size the size (in points) of nodes when printed at 1:1.
+@param nodeSizePoints the size (in points) of nodes when printed at 1:1.
 */
-public void setPrintNodeSize ( double size )
-{
-	if (_graphics == null) {
-		__holdPrintNodeSize = size;
+public void setPrintNodeSize ( double nodeSizePoints )
+{	String routine = getClass().getName() + ".setPrintNodeSize";
+	if ( __printingNetwork ) {
+		Message.printStatus ( 2, routine, "Setting print node size=" + nodeSizePoints + " points." );
+	}
+	if (_graphics == null ) {
+		__holdPrintNodeSize = nodeSizePoints;
 		return;
 	}
 	else {
 		__holdPrintNodeSize = -1;
 	}
 	
-	__currNodeSize = size;
-	if (size < 1) {
-		size = 1;
+	__currNodeSize = nodeSizePoints;
+	if (nodeSizePoints < 1) {
+		nodeSizePoints = 1;
 	}
-	__legendNodeDiameter = size;
+	__legendNodeDiameter = nodeSizePoints;
 	double diam = 0;
+	if ( __printingNetwork ) {
+		// TODO SAM 2011-07-09 Some of this method code seems not right.  The node expects to have the size
+		// in data coordinates, which is what the following code does.
+		// The diam seems to be what should be calculated in data units, but why is it not set for the
+		// node icon diameter?
+		// A more straightforward way of setting the size for rendering?
+		// For now try the following.  When printing, the node diameter size (points) agrees with the
+		// drawing limits units, so can use the standard method to convert to data units
+		//nodeSizePoints = getDrawingArea().scaleXData(nodeSizePoints);
+	}
 	if (__fitWidth) {
-		diam = convertDrawingXToDataX(size);
+		diam = convertDrawingXToDataX(nodeSizePoints);
 	}
 	else {
-		diam = convertDrawingYToDataY(size);
+		diam = convertDrawingYToDataY(nodeSizePoints);
 	}
-	Message.printStatus ( 2, "", "Node size drawing=" + size + ", data=" + diam );
+	if ( __printingNetwork ) {
+		Message.printStatus ( 2, routine, "Node size drawing=" + nodeSizePoints + ", data=" + diam );
+	}
 	for (int i = 0; i < __nodes.length; i++) {
-		__nodes[i].setIconDiameter((int)(size));
+		__nodes[i].setIconDiameter((int)(nodeSizePoints));
 		__nodes[i].setSymbol(null);
 		__nodes[i].setBoundsCalculated(false);
 		__nodes[i].setDataDiameter(diam);
-		__nodes[i].calculateExtents(__drawingArea);
+		__nodes[i].calculateExtents(getDrawingArea());
 	}
 	forceRepaint();
 }
@@ -5027,6 +5155,16 @@ Sets the reference display to use in conjunction with this display.
 */
 protected void setReference(StateMod_NetworkReference_JComponent reference) {
 	__referenceJComponent = reference;
+}
+
+/**
+Set the selected network page layout properties for rendering.  This generally will either come from the
+network editor UI, or from a command parameter when batch printing.
+@param selectedPageLayoutPropList the page layout that should be used for rendering
+*/
+public void setSelectedPageLayoutPropList ( PropList selectedPageLayoutPropList )
+{
+	this.__selectedPageLayoutPropList = selectedPageLayoutPropList;
 }
 
 /**
