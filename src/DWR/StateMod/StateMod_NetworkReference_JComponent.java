@@ -200,7 +200,7 @@ private void drawBounds() {
 Draws the outline of the legend.
 */
 public void drawLegend() {
-	GRLimits l = __networkJComponent.getLegendLimits();
+	GRLimits l = __networkJComponent.getLegendDataLimits();
 	if (l == null) {
 		return;
 	}

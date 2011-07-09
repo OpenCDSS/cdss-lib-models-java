@@ -356,23 +356,26 @@ private double[]
 	__draggedNodesYs = null;
 
 /**
-The current node size (as drawn for the current zoom level), in data units.
+The current node size (as drawn for the current scale), in data units.
 */
 private double __currNodeSize = 20;
 
 // TODO SAM 2010-12-29 Evaluate how this can be rectified with __dataLimitsMax
 /**
 The absolute Bottom Y of the data limits.
+TODO SAM 2011-07-09 Why not use getDrawingArea().getDataLimits().getBottomY() to avoid redundant data?
 */
 private double __dataBottomY;
 
 /**
 The absolute Left X of the data limits.
+TODO SAM 2011-07-09 Why not use getDrawingArea().getDataLimits().getLeftX() to avoid redundant data?
 */
 private double __dataLeftX;
 
 /**
-Values to keep track of where a mouse drag started and where it is now.
+Values to keep track of where a mouse drag started and where it is now
+(TODO SAM 2011-07-09, in screen coordinates?).
 */
 private double 
 	__currDragX,
@@ -475,12 +478,14 @@ private double __screenDataWidth;
 /**
 The total data height necessary to draw the entire network on the paper.  If
 the network is taller than the paper, then the height is the height of the entire network.
+TODO SAM 2011-07-09 Why not use getDrawingArea().getDataLimits().getHeight() to avoid redundant data?
 */
 private double __totalDataHeight;
 
 /**
 The total data width necessary to draw the entire network on the paper.  If
 the network is wider than the paper, then the width is the width of the entire network.
+TODO SAM 2011-07-09 Why not use getDrawingArea().getDataLimits().getWidth() to avoid redundant data?
 */
 private double __totalDataWidth;
 
@@ -533,7 +538,7 @@ avoid lots of calls to __drawingArea.getDataLimits();
 private GRLimits __dataLimits;
 
 /**
-Backup of the data limits for the network as initially opened.
+Backup of the data limits for the network as initially opened, for zoom out.
 */
 private GRLimits __dataLimitsMax;
 
@@ -552,7 +557,7 @@ private GRLimits __holdLimits;
 /**
 The limits of the legend, in data units.
 */
-private GRLimits __legendLimits = new GRLimits(0, 0, 0, 0);
+private GRLimits __legendDataLimits = new GRLimits(0, 0, 0, 0);
 
 /**
 Array of all the nodes in the node network.  Stored here for quick access,
@@ -578,19 +583,20 @@ The node that was last clicked on.
 private int __clickedNodeNum = -1;
 
 /**
-The dpi of the screen or paper.  System-dependent.  On PCs, it should be 96 dpi.  For Macs, it should be 72.
+The dpi of the screen or paper.  System-dependent.
 */
 private int __dpi = 0;
 
 /**
-The height in pixels that the node label font should be on the screen.
+The height in pixels that the node label font should be on the screen, for the current scale, using __dpi
+to convert between pixels and points.
 */
-private int __fontPixelSize = 10;
+private int __fontSizePixels = 10;
 
 /**
-The height in points that the font should be on the screen.
+The height in points that the font should be on the screen, for the current scale.
 */
-private int __fontPointSize;
+private int __fontSizePoints;
 
 /**
 Used when reading in an XML network to hold certain values so they can be
@@ -633,14 +639,16 @@ redrawing the network for the print each time is inefficient.
 private int __printCount = 0;
 
 /**
-The size in pixels that the printed font should be.
+The size in pixels that the printed font should be, for full scale layout paper size.
+The __printFontSizePoints is converted to pixels using the screen __dpi.
 */
-private int __printFontPixelSize = 10;
+private int __printFontSizePixels = 10;
 
 /**
-The size in points that the printed font should be.
+The size in points that the printed font should be, for full scale layout paper size, determined
+from the layout "NodeLabelFontSize".
 */
-private int __printFontPointSize;
+private int __printFontSizePoints;
 
 /**
 The thickness that lines should be printed at.
@@ -995,8 +1003,8 @@ protected void addAnnotation(double x, double y)
 	PropList p = PropList.parse(props, "", ";");
 	node.setAssociatedObject(p);
 	GRLimits limits = GRDrawingAreaUtil.getTextExtents(__drawingArea, text, GRUnits.DEVICE);	
-	double w = convertX(limits.getWidth());
-	double h = convertY(limits.getHeight());
+	double w = convertDrawingXToDataX(limits.getWidth());
+	double h = convertDrawingYToDataY(limits.getHeight());
 
 	// Calculate the actual limits for the from the lower-left corner to the upper-right,
 	// in order to know when the text has been clicked on (for dragging, or popup menus).
@@ -1240,10 +1248,10 @@ private void buildNodeArray() {
 
 		double diam = 0;
 		if (__fitWidth) {
-			diam = convertX(__legendNodeDiameter);
+			diam = convertDrawingXToDataX(__legendNodeDiameter);
 		}
 		else {
-			diam = convertY(__legendNodeDiameter);
+			diam = convertDrawingYToDataY(__legendNodeDiameter);
 		}
 		__nodes[i].setSymbol(null);
 		__nodes[i].setBoundsCalculated(false);
@@ -1494,6 +1502,7 @@ This method should be called after the drawing area is set in this device (the d
 aspect ratio).
 TODO SAM 2011-07-08 This method was adapted from calculateDataLimits() for printing, but may be used
 for other drawing modes in the future.
+@param drawingLimits the drawing limits of the media (imageable area on paper or screen drawing area).
 @param dataLimitsOrig the data limits of the network data, based on the nodes and legend (typically taken from
 the XMin,Ymin,Xmax,Ymax coordinates from the network.
 @param buffer an additional buffer to be added to the data limits, for example to allow for labels, in data units.
@@ -1502,8 +1511,12 @@ with the margin, which is a non-printable area around the edge of the page.  Whe
 taken out of the page size, resulting in the imageable area.  The buffer is an additional edge inside the
 printable area.  The order of the buffer values is left, right, top, bottom.  If the length of the array is 1,
 then the same value is added to all sides.
+@param setInternalData if true, then internal variables used for rendering are set; if false, the calculations
+occur but are not set in the class; therefore false does not interfere with rendering
+@return the new data limits considering the media - the data limits will align with the edges of the media.
 */
-protected void calculateDataLimitsForMedia ( GRLimits dataLimitsOrig, double [] buffer )
+protected GRLimits calculateDataLimitsForMedia ( GRLimits drawingLimits, GRLimits dataLimitsOrig,
+	double [] buffer, boolean setInternalData )
 {	// Copy the data limits so as to not interfere with calling code
 	GRLimits dataLimits = new GRLimits(dataLimitsOrig);
 	// Add to the limits
@@ -1521,59 +1534,69 @@ protected void calculateDataLimitsForMedia ( GRLimits dataLimitsOrig, double [] 
 			dataLimits.setBottomY(dataLimits.getBottomY() - buffer[3]);
 		}
 	}
-	GRLimits drawingLimits = getDrawingArea().getDrawingLimits();
 	GRLimits dataLimitsMedia = new GRLimits (dataLimits); // Copy because only one dimension will be adjusted
 
 	// Next, the ratio of the width to the height of the media is
 	// checked and if the ratio is not sufficient to allow the data
 	// to be all printed on the page without distortion, the data limits
 	// will be reset so that there is extra room in the drawing area for the "skinny" dimension
+	boolean fitWidth = false;
+	double totalDataWidth = 0.0;
+	double totalDataHeight = 0.0;
+	double dataLeftX = 0.0;
+	double dataBottomY = 0.0;
 	if (dataLimits.getWidth() >= dataLimits.getHeight()) {
-		__fitWidth = true;
-		__totalDataWidth = dataLimits.getWidth();
-		__dataLeftX = dataLimits.getLeftX();
+		fitWidth = true;
+		totalDataWidth = dataLimits.getWidth();
+		dataLeftX = dataLimits.getLeftX();
 		// size __totalDataHeight to be proportional to __totalDataWidth, given the media proportions
-		__totalDataHeight =
-			((double)drawingLimits.getHeight()/(double)drawingLimits.getWidth())*__totalDataWidth;
+		totalDataHeight = ((double)drawingLimits.getHeight()/(double)drawingLimits.getWidth())*totalDataWidth;
 
-		if (dataLimits.getHeight() > __totalDataHeight) {
+		if (dataLimits.getHeight() > totalDataHeight) {
 			// If the data limits are greater than the total data height that can fit on the paper, then 
 			// reset the total data height to be the height of the data limits.  
-			__dataBottomY = dataLimits.getBottomY();
-			__totalDataHeight = dataLimits.getHeight();
+			dataBottomY = dataLimits.getBottomY();
+			totalDataHeight = dataLimits.getHeight();
 		}
 		else {
 			// Otherwise, if the height of the network can 
 			// fit within the paper entirely, center the network vertically on the paper
-			double diff = __totalDataHeight - dataLimits.getHeight();
-			__dataBottomY = dataLimits.getBottomY() - (diff / 2);
-			dataLimitsMedia.setBottomY(__dataBottomY);
-			dataLimitsMedia.setTopY(dataLimitsMedia.getBottomY() + __totalDataHeight);
+			double diff = totalDataHeight - dataLimits.getHeight();
+			dataBottomY = dataLimits.getBottomY() - (diff / 2);
+			dataLimitsMedia.setBottomY(dataBottomY);
+			dataLimitsMedia.setTopY(dataLimitsMedia.getBottomY() + totalDataHeight);
 		}
 	}
 	else {
-		__fitWidth = false;
-		__totalDataHeight = dataLimits.getHeight();
-		__dataBottomY = dataLimits.getBottomY();
+		fitWidth = false;
+		totalDataHeight = dataLimits.getHeight();
+		dataBottomY = dataLimits.getBottomY();
 		// size __totalDataWidth to be proportional to __totalDataHeight, given the screen proportions		
-		__totalDataWidth = ((double)drawingLimits.getWidth() /
-			(double)drawingLimits.getHeight())* __totalDataHeight;
-		if (dataLimits.getWidth() > __totalDataWidth) {
+		totalDataWidth = ((double)drawingLimits.getWidth() /
+			(double)drawingLimits.getHeight())* totalDataHeight;
+		if (dataLimits.getWidth() > totalDataWidth) {
 			// If the data limits are greater than the total data width that can fit on the paper, then 
 			// reset the total data width to be the width of the data limits. 
-			__dataLeftX = dataLimits.getLeftX();
-			__totalDataWidth = dataLimits.getWidth();
+			dataLeftX = dataLimits.getLeftX();
+			totalDataWidth = dataLimits.getWidth();
 		}
 		else {
 			// otherwise, if the width of the network can fit within the paper entirely, center the network
 			// horizontally on the paper.  This is when the network is zoomed out.
-			double diff = __totalDataWidth - dataLimits.getWidth();
-			__dataLeftX = dataLimits.getLeftX() - (diff / 2);
-			dataLimitsMedia.setLeftX(__dataLeftX);
-			dataLimitsMedia.setRightX(__dataLeftX + __totalDataWidth);
+			double diff = totalDataWidth - dataLimits.getWidth();
+			dataLeftX = dataLimits.getLeftX() - (diff / 2);
+			dataLimitsMedia.setLeftX(dataLeftX);
+			dataLimitsMedia.setRightX(dataLeftX + totalDataWidth);
 		}
 	}
-	__drawingArea.setDataLimits(dataLimitsMedia);
+	if ( setInternalData ) {
+		this.__fitWidth = fitWidth;
+		this.__totalDataWidth = totalDataWidth;
+		this.__totalDataHeight = totalDataHeight;
+		this.__dataLeftX = dataLeftX;
+		this.__dataBottomY = dataBottomY;
+	}
+	return dataLimitsMedia;
 }
 
 /**
@@ -1720,26 +1743,41 @@ protected double convertAbsY(double y) {
 	return (y / __totalBufferHeight) * __totalDataHeight;
 }
 
+// TODO SAM 2011-07-08 Shouldn't this be operating on width?
 /**
-Converts an X value from being scaled for screen units to be scaled for 
+Converts an X value from being scaled for drawing units to be scaled for 
 data units.  The X value passed in to this method will run from 0 to 
-the number of pixels across the GUI screen.
+the number of pixels across the GUI screen.  This is used for scaling fonts and node sizes.
 @param x the x value to scale.
 @return the x value scaled to fit in the data units.
 */
-private double convertX(double x) {
-	return x * (__screenDataHeight / getBounds().height);
+private double convertDrawingXToDataX(double x)
+{
+	if ( __printingNetwork ) {
+		// In-memory component is not used for drawing
+		return x * (__screenDataHeight / getDrawingArea().getDrawingLimits().getHeight());
+	}
+	else {
+		return x * (__screenDataHeight / getBounds().height);
+	}
 }
 
+//TODO SAM 2011-07-08 Shouldn't this be operating on height?
 /**
-Converts an Y value from being scaled for screen units to be scaled for 
+Converts an Y value from being scaled for drawing units to be scaled for 
 data units.  The Y value passed in to this method will run from 0 to 
-the number of pixels up the GUI screen.
+the number of pixels up the GUI screen.  This is used for scaling fonts and node sizes.
 @param y the y value to scale.
 @return the y value scaled to fit in the data units.
 */
-private double convertY(double y) {
-	return y * (__screenDataWidth / getBounds().width);
+private double convertDrawingYToDataY(double y) {
+	if ( __printingNetwork ) {
+		// In-memory component is not used for drawing
+		return y * (__screenDataWidth / getDrawingArea().getDrawingLimits().getWidth());
+	}
+	else {
+		return y * (__screenDataWidth / getBounds().width);
+	}
 }
 
 /**
@@ -2000,11 +2038,11 @@ private void drawLegend() {
 	////////////////////////////////////////////////////////////////
 	// Spacing parameters
 	////////////////////////////////////////////////////////////////
-	double colsp = convertX(15); // spacing between columns 1 and 2
-	double edge = convertX(2); // spacing between the edge lines and the interior boundary line width
+	double colsp = convertDrawingXToDataX(15); // spacing between columns 1 and 2
+	double edge = convertDrawingXToDataX(2); // spacing between the edge lines and the interior boundary line width
 	int line = 1;
-	double tsp = convertX(4); // spacing between nodes and node text
-	double vsp = convertY(4); // vertical spacing between lines
+	double tsp = convertDrawingXToDataX(4); // spacing between nodes and node text
+	double vsp = convertDrawingYToDataY(4); // vertical spacing between lines
 	
 	String text = "Legend";
 	limits = GRDrawingAreaUtil.getTextExtents(__drawingArea, text, GRUnits.DATA);
@@ -2019,12 +2057,12 @@ private void drawLegend() {
 	double id = 0; // Inside diameter
 	double bd = 0; 
 	if (__fitWidth) {
-		id = convertX(__legendNodeDiameter);
+		id = convertDrawingXToDataX(__legendNodeDiameter);
 		int third = (int)(__legendNodeDiameter / 3);
 		if ((third % 2) == 1) {
 			third++;
 		}
-		bd = convertX(third);
+		bd = convertDrawingXToDataX(third);
 
 		if (id < limits.getHeight()) {
 			id = limits.getHeight() * 1.2;
@@ -2032,12 +2070,12 @@ private void drawLegend() {
 	}
 	else {
 		// Get the icon size from the first node (there will always be an end node)
-		id = convertY(__nodes[0].getIconDiameter());
+		id = convertDrawingYToDataY(__nodes[0].getIconDiameter());
 		int third = (int)(__legendNodeDiameter / 3);
 		if ((third % 2) == 1) {
 			third++;
 		}		
-		bd = convertY(third);
+		bd = convertDrawingYToDataY(third);
 
 		if (id < limits.getHeight()) {
 			id = limits.getHeight() * 1.2;
@@ -2070,8 +2108,8 @@ private void drawLegend() {
 	
 	// the legend's limits will be not null if the legend has already been drawn once.
 	if (__legendLimitsDetermined) {
-		lx = (int)__legendLimits.getLeftX();
-		by = (int)__legendLimits.getBottomY();
+		lx = (int)__legendDataLimits.getLeftX();
+		by = (int)__legendDataLimits.getBottomY();
 	}
 	// they will be null if the legend has not been drawn yet, or if the paper size has changed
 	else {
@@ -2090,7 +2128,7 @@ private void drawLegend() {
 		}
 		__legendLimitsDetermined = true;
 	}	
-	__legendLimits = new GRLimits(lx, by, lx + width, by + height);
+	__legendDataLimits = new GRLimits(lx, by, lx + width, by + height);
 
 	// block out with white the area over which the legend will be drawn.
 	// This means no nodes can be drawn over the top of the legend.
@@ -2487,7 +2525,7 @@ throws Throwable {
 	__dataLimits = null;
 	__draggedNodeLimits = null;
 	__holdLimits = null;
-	__legendLimits = null;
+	__legendDataLimits = null;
 	IOUtil.nullArray(__nodes);
 	__network = null;
 	__draggedNodes = null;
@@ -2566,8 +2604,8 @@ private double[] findNearestGridXY(MouseEvent event) {
 	double[] p = new double[2];
 
 	// Turn both the X and Y mouse locations into data units
-	double x = convertX(event.getX()) + __screenLeftX;
-	double y = (int)convertY(invertY(event.getY())) + __screenBottomY;
+	double x = convertDrawingXToDataX(event.getX()) + __screenLeftX;
+	double y = (int)convertDrawingYToDataY(invertY(event.getY())) + __screenBottomY;
 
 	// Determine how far off the mouse position is from a grid step
 
@@ -2849,8 +2887,8 @@ public GRJComponentDrawingArea getDrawingArea ()
 Returns the limits of the legend, which are in data units.
 @return the limits of the legend.
 */
-protected GRLimits getLegendLimits() {	
-	return __legendLimits;
+protected GRLimits getLegendDataLimits() {
+	return __legendDataLimits;
 }
 
 /**
@@ -3000,9 +3038,8 @@ and imageable area.
 protected void initializeForNetworkPageLayout ( String pageLayout )
 {
 	StateMod_NodeNetwork net = getNetwork();
-	/*
-    String orientation = null;
-    String paperSize = null;
+    //String orientation = null;
+    //String paperSize = null;
     double nodeSize = 10;
     int nodeFontSize = 10;
     List<PropList> layouts = net.getLayoutList();
@@ -3010,12 +3047,12 @@ protected void initializeForNetworkPageLayout ( String pageLayout )
     for (PropList p : layouts ) {
         String id = p.getValue("ID");
         if ( id.equalsIgnoreCase(pageLayout)) {
-            orientation = p.getValue("PageOrientation");
-            paperSize = p.getValue("PaperSize");
+            //orientation = p.getValue("PageOrientation");
+            //paperSize = p.getValue("PaperSize");
             nodeSize = Double.parseDouble(p.getValue("NodeSize"));
-            setPrintNodeSize(nodeSize,false);
+            setPrintNodeSize(nodeSize);
             nodeFontSize = Integer.parseInt(p.getValue("NodeLabelFontSize"));
-            setPrintFontSize(nodeFontSize, false);
+            setPrintFontSize(nodeFontSize);
             found = true;
             break;
         }
@@ -3024,7 +3061,6 @@ protected void initializeForNetworkPageLayout ( String pageLayout )
     	throw new RuntimeException (
     		"Layout \"" + pageLayout + "\" was not found in network.  Cannot initialize network.");
     }
-    */
     setDataLimits ( new GRLimits(net.getLX(), net.getBY(), net.getRX(), net.getTY()) );
 	//setPaperSize(paperSize);
 	//setOrientation(orientation);
@@ -3145,8 +3181,8 @@ the screen, depending on what is being dragged.
 @param event the MouseEvent that happened.
 */
 public void mouseDragged(MouseEvent event) {
-	double xx = convertX(event.getX()) + __screenLeftX;
-	double yy = convertY(invertY(event.getY())) + __screenBottomY;
+	double xx = convertDrawingXToDataX(event.getX()) + __screenLeftX;
+	double yy = convertDrawingYToDataY(invertY(event.getY())) + __screenBottomY;
 	__parent.setLocation(xx, yy);
 	if (!__editable && !__screenDrag) {
 		return;
@@ -3168,8 +3204,8 @@ public void mouseDragged(MouseEvent event) {
 		else {
 			// convert the mouse click to data units so that the
 			// node bounding box can be drawn on the screen
-			__mouseDataX = convertX(event.getX()) + __screenLeftX;
-			__mouseDataY = convertY(invertY(event.getY())) + __screenBottomY;
+			__mouseDataX = convertDrawingXToDataX(event.getX()) + __screenLeftX;
+			__mouseDataY = convertDrawingYToDataY(invertY(event.getY())) + __screenBottomY;
 			repaint();
 		}
 		__parent.displayNodeXY(__mouseDataX, __mouseDataY);
@@ -3178,8 +3214,8 @@ public void mouseDragged(MouseEvent event) {
 		if (__snapToGrid) {
 			// this version of findNearestGridXY assumes already-
 			// converted X and Y values are passed in.  Use them
-			double cx = convertX(event.getX()) + __screenLeftX;
-			double cy = convertY(invertY(event.getY())) + __screenBottomY;
+			double cx = convertDrawingXToDataX(event.getX()) + __screenLeftX;
+			double cy = convertDrawingYToDataY(invertY(event.getY())) + __screenBottomY;
 			double[] p = findNearestGridXY((int)cx - (int)__xAdjust, (int)cy - (int)__yAdjust);
 
 			// if the nearest grid location is different from where the legend was last ...
@@ -3191,14 +3227,14 @@ public void mouseDragged(MouseEvent event) {
 			repaint();
 		}
 		else {
-			__mouseDataX = convertX(event.getX()) + __screenLeftX;
-			__mouseDataY = convertY(invertY(event.getY())) + __screenBottomY;
+			__mouseDataX = convertDrawingXToDataX(event.getX()) + __screenLeftX;
+			__mouseDataY = convertDrawingYToDataY(invertY(event.getY())) + __screenBottomY;
 			repaint();
 		}
 	}
 	else if (__screenDrag) {
-		double mouseX = convertX(event.getX()) + __screenLeftX;
-		double mouseY = convertY(invertY(event.getY())) +  __screenBottomY;
+		double mouseX = convertDrawingXToDataX(event.getX()) + __screenLeftX;
+		double mouseY = convertDrawingYToDataY(invertY(event.getY())) +  __screenBottomY;
 
 		double dx = __mouseDataX - mouseX;
 		double dy = __mouseDataY - mouseY;
@@ -3229,8 +3265,8 @@ public void mouseDragged(MouseEvent event) {
 			__screenLeftX += (dx * __DX);
 
 			// Don't allow the screen to be moved too far right or left.
-			if (__screenLeftX >(__dataLeftX + __totalDataWidth) - convertX(getBounds().width)) {
-				__screenLeftX = (__dataLeftX + __totalDataWidth) - convertX(getBounds().width);
+			if (__screenLeftX >(__dataLeftX + __totalDataWidth) - convertDrawingXToDataX(getBounds().width)) {
+				__screenLeftX = (__dataLeftX + __totalDataWidth) - convertDrawingXToDataX(getBounds().width);
 			}	
 
 			if (__screenLeftX < __dataLeftX) {
@@ -3264,8 +3300,8 @@ public void mouseDragged(MouseEvent event) {
 			__screenBottomY += (dy * __DY);
 
 			// don't allow the screen to be moved too far up or down.
-			if (__screenBottomY > (__dataBottomY + __totalDataHeight) - convertY(getBounds().height)) {
-				__screenBottomY = (__dataBottomY + __totalDataHeight) - convertY(getBounds().height);
+			if (__screenBottomY > (__dataBottomY + __totalDataHeight) - convertDrawingYToDataY(getBounds().height)) {
+				__screenBottomY = (__dataBottomY + __totalDataHeight) - convertDrawingYToDataY(getBounds().height);
 			}
 
 			if (__screenBottomY < __dataBottomY) {
@@ -3278,8 +3314,8 @@ public void mouseDragged(MouseEvent event) {
 		forceRepaint();
 	}
 	else if (__drawingBox) {
-		__currDragX = convertX(event.getX()) + __screenLeftX;
-		__currDragY = convertY(invertY(event.getY())) + __screenBottomY;
+		__currDragX = convertDrawingXToDataX(event.getX()) + __screenLeftX;
+		__currDragY = convertDrawingYToDataY(invertY(event.getY())) + __screenBottomY;
 		repaint();
 	}
 }
@@ -3299,8 +3335,8 @@ Updates the current mouse location in the parent frame's status bar.
 @param event the MouseEvent that happened.
 */
 public void mouseMoved(MouseEvent event) {
-	double xx = convertX(event.getX()) + __screenLeftX;
-	double yy = convertY(invertY(event.getY())) + __screenBottomY;
+	double xx = convertDrawingXToDataX(event.getX()) + __screenLeftX;
+	double yy = convertDrawingYToDataY(invertY(event.getY())) + __screenBottomY;
 	__parent.setLocation(xx, yy);
 }
 
@@ -3317,8 +3353,8 @@ public void mousePressed(MouseEvent event) {
 	}
 	
 	// determine first whether a node was clicked on
-	__clickedNodeNum = findNodeOrAnnotationAtXY(convertX(event.getX()) + __screenLeftX,
-		convertY(invertY(event.getY())) + __screenBottomY);
+	__clickedNodeNum = findNodeOrAnnotationAtXY(convertDrawingXToDataX(event.getX()) + __screenLeftX,
+		convertDrawingYToDataY(invertY(event.getY())) + __screenBottomY);
 
 	// if a node was clicked on ...
 	if (__clickedNodeNum > -1) {
@@ -3345,8 +3381,8 @@ public void mousePressed(MouseEvent event) {
 				__mouseDataY = p[1];
 			}
 			else {
-				__mouseDataX = convertX(event.getX()) + __screenLeftX;
-				__mouseDataY = convertY(invertY(event.getY())) + __screenBottomY;
+				__mouseDataX = convertDrawingXToDataX(event.getX()) + __screenLeftX;
+				__mouseDataY = convertDrawingYToDataY(invertY(event.getY())) + __screenBottomY;
 			}
 			__xAdjust = __mouseDataX- __draggedNodeLimits.getMinX();
 			__yAdjust = __mouseDataY- __draggedNodeLimits.getMinY();
@@ -3365,13 +3401,13 @@ public void mousePressed(MouseEvent event) {
 				__yAdjust =__nodes[__clickedNodeNum].getHeight()/ 2;
 			}
 			else {
-				__mouseDataX = convertX(event.getX()) + __screenLeftX;
+				__mouseDataX = convertDrawingXToDataX(event.getX()) + __screenLeftX;
 				__mouseDownX = __mouseDataX;
-				__mouseDataY = convertY(invertY(event.getY())) + __screenBottomY;
+				__mouseDataY = convertDrawingYToDataY(invertY(event.getY())) + __screenBottomY;
 				__mouseDownY = __mouseDataY;
 				__draggedNodeLimits = __nodes[__clickedNodeNum].getLimits();
-				__xAdjust = convertX(event.getX()) + __screenLeftX - __draggedNodeLimits.getMinX();
-				__yAdjust = convertY(invertY(event.getY())) +__screenBottomY - __draggedNodeLimits.getMinY();
+				__xAdjust = convertDrawingXToDataX(event.getX()) + __screenLeftX - __draggedNodeLimits.getMinX();
+				__yAdjust = convertDrawingYToDataY(invertY(event.getY())) +__screenBottomY - __draggedNodeLimits.getMinY();
 			}
 
 			if (__nodes[__clickedNodeNum].isSelected()) {
@@ -3392,18 +3428,18 @@ public void mousePressed(MouseEvent event) {
 	}
 	else {
 		// otherwise, check to ese if the legend was clicked on
-		double x = convertX(event.getX()) + __screenLeftX;
-		double y = convertY(invertY(event.getY())) + __screenBottomY;
-		if (__legendLimits.contains(x, y)) {
+		double x = convertDrawingXToDataX(event.getX()) + __screenLeftX;
+		double y = convertDrawingYToDataY(invertY(event.getY())) + __screenBottomY;
+		if (__legendDataLimits.contains(x, y)) {
 			if (!__editable) {
 				return;
 			}
 			// ... if so, set everything up so it can be dragged.
 			__legendDrag = true;
-			__mouseDataX = convertX(event.getX()) + __screenLeftX;
-			__mouseDataY = convertY(invertY(event.getY())) + __screenBottomY;
-			__xAdjust = convertX(event.getX()) + __screenLeftX - __legendLimits.getMinX();
-			__yAdjust = convertY(invertY(event.getY()))+__screenBottomY - __legendLimits.getMinY();
+			__mouseDataX = convertDrawingXToDataX(event.getX()) + __screenLeftX;
+			__mouseDataY = convertDrawingYToDataY(invertY(event.getY())) + __screenBottomY;
+			__xAdjust = convertDrawingXToDataX(event.getX()) + __screenLeftX - __legendDataLimits.getMinX();
+			__yAdjust = convertDrawingYToDataY(invertY(event.getY()))+__screenBottomY - __legendDataLimits.getMinY();
 			__eraseLegend = true;
 			forceRepaint();
 		}
@@ -3411,14 +3447,14 @@ public void mousePressed(MouseEvent event) {
 			if (__networkMouseMode == MODE_PAN) {
 				// otherwise, prepare the screen to be moved around
 				__screenDrag = true;
-				__mouseDataX = convertX(event.getX()) + __screenLeftX;
-				__mouseDataY = convertY(invertY(event.getY())) + __screenBottomY;
+				__mouseDataX = convertDrawingXToDataX(event.getX()) + __screenLeftX;
+				__mouseDataY = convertDrawingYToDataY(invertY(event.getY())) + __screenBottomY;
 				repaint();
 			}
 			else {
 				__drawingBox = true;
-				__dragStartX = convertX(event.getX()) + __screenLeftX;
-				__dragStartY = convertY(invertY(event.getY())) + __screenBottomY;
+				__dragStartX = convertDrawingXToDataX(event.getX()) + __screenLeftX;
+				__dragStartY = convertDrawingYToDataY(invertY(event.getY())) + __screenBottomY;
 			}
 		}
 	}
@@ -3432,10 +3468,10 @@ legend in its new position, or by showing a popup menu.
 public void mouseReleased(MouseEvent event) {
 	if (event.isPopupTrigger()) {
 		// find the node on which the popup menu was triggered
-		int nodeNum = findNodeOrAnnotationAtXY(convertX(event.getX()) + __screenLeftX,
-			convertY(invertY(event.getY())) + __screenBottomY);
-		__popupX = convertX(event.getX()) + __screenLeftX;
-		__popupY = convertY(invertY(event.getY())) + __screenBottomY;
+		int nodeNum = findNodeOrAnnotationAtXY(convertDrawingXToDataX(event.getX()) + __screenLeftX,
+			convertDrawingYToDataY(invertY(event.getY())) + __screenBottomY);
+		__popupX = convertDrawingXToDataX(event.getX()) + __screenLeftX;
+		__popupY = convertDrawingYToDataY(invertY(event.getY())) + __screenBottomY;
 		
 		if (nodeNum > -1) {
 			// if nodeNum > -1 then a node was clicked on.
@@ -3489,8 +3525,8 @@ public void mouseReleased(MouseEvent event) {
 		}
 		
 		if (!__snapToGrid) {
-			__mouseDataX = convertX(event.getX()) + __screenLeftX;
-			__mouseDataY = convertY(invertY(event.getY())) + __screenBottomY;
+			__mouseDataX = convertDrawingXToDataX(event.getX()) + __screenLeftX;
+			__mouseDataY = convertDrawingYToDataY(invertY(event.getY())) + __screenBottomY;
 		}
 			
 		if (__isLastSelectedAnAnnotation) {
@@ -3538,8 +3574,8 @@ public void mouseReleased(MouseEvent event) {
 			//__mouseDataY = __mouseDataY;
 		} 
 		else {
-			__mouseDataX = convertX(event.getX()) + __screenLeftX - __xAdjust;
-			__mouseDataY = convertY(invertY(event.getY())) + __screenBottomY - __yAdjust;
+			__mouseDataX = convertDrawingXToDataX(event.getX()) + __screenLeftX - __xAdjust;
+			__mouseDataY = convertDrawingYToDataY(invertY(event.getY())) + __screenBottomY - __yAdjust;
 		}
 
 		// prevent the legend from being dragged off the edge of the screen
@@ -3557,12 +3593,12 @@ public void mouseReleased(MouseEvent event) {
 			__mouseDataY = data.getTopY() + 10;
 		}
 		if (__snapToGrid) {
-			__legendLimits.setLeftX(__mouseDataX - __xAdjust);
-			__legendLimits.setBottomY(__mouseDataY - __yAdjust);
+			__legendDataLimits.setLeftX(__mouseDataX - __xAdjust);
+			__legendDataLimits.setBottomY(__mouseDataY - __yAdjust);
 		}
 		else {
-			__legendLimits.setLeftX(__mouseDataX);
-			__legendLimits.setBottomY(__mouseDataY);
+			__legendDataLimits.setLeftX(__mouseDataX);
+			__legendDataLimits.setBottomY(__mouseDataY);
 		}
 		forceRepaint();
 	}			
@@ -3721,7 +3757,7 @@ public void paint(Graphics g) {
 		// Graphics2D object was already set in the print() method before calling this method.
 		//drawTestPage ( g );
 		// The font size in points for full-scale printing is from the network
-		this.__drawingArea.setFont("Helvetica", "Plain", this.__printFontPixelSize );
+		this.__drawingArea.setFont("Helvetica", "Plain", this.__printFontSizePixels );
 		setAntiAlias(__antiAlias);
 		setPrintNodeSize(__currNodeSize);
 		// The following does bad things
@@ -3745,9 +3781,9 @@ public void paint(Graphics g) {
 	// if doing double-buffered drawing, single-buffered if not)
 	if (__printingNetwork) {
 		Font f = __drawingArea.getFont();
-		__bufferGraphics.setFont(new Font(f.getName(), f.getStyle(), __printFontPointSize));
+		__bufferGraphics.setFont(new Font(f.getName(), f.getStyle(), __printFontSizePoints));
 		forceGraphics(__bufferGraphics);
-		__bufferGraphics.setFont(new Font(f.getName(), f.getStyle(), __printFontPointSize));
+		__bufferGraphics.setFont(new Font(f.getName(), f.getStyle(), __printFontSizePoints));
 	}
 	else if (__printingScreen || __savingNetwork || __savingScreen) {
 		// force the graphics to use the double-buffer graphics
@@ -3831,10 +3867,10 @@ public void paint(Graphics g) {
 
 		// set the grid step to be 1/8s of an inch
 		if (__fitWidth) {
-			__gridStep = convertX(__dpi / 8);
+			__gridStep = convertDrawingXToDataX(__dpi / 8);
 		}
 		else {
-			__gridStep = convertY(__dpi / 8);
+			__gridStep = convertDrawingYToDataY(__dpi / 8);
 		}
 		
 		repaint();
@@ -3888,7 +3924,7 @@ public void paint(Graphics g) {
 		// A normal paint() call -- translate the screen so the proper
 		// portion is drawn in the screen and set up the drawing limits.
 		if (!__printingNetwork && !__printingScreen && !__savingNetwork && !__savingScreen) {
-			__drawingArea.setFont(f.getName(), f.getStyle(), __fontPointSize);
+			__drawingArea.setFont(f.getName(), f.getStyle(), __fontSizePoints);
 			setLimits(getLimits(true));			
 			__drawingArea.setDataLimits(new GRLimits(
 				__screenLeftX,
@@ -3913,7 +3949,7 @@ public void paint(Graphics g) {
 			scaleUnscalables();
 			clear();
 			if ( this.__useOldPrinting ) {
-				__bufferGraphics.setFont(new Font(f.getName(), f.getStyle(), __printFontPointSize));
+				__bufferGraphics.setFont(new Font(f.getName(), f.getStyle(), __printFontSizePoints));
 			}
             //  Message.printDebug(dl, routine, "dataLimits: " + __drawingArea.getDataLimits().toString());
             //  Message.printDebug(dl, routine, "drawingLimits: " + __drawingArea.getDrawingLimits().toString());
@@ -3933,13 +3969,13 @@ public void paint(Graphics g) {
 				* (72.0 / (double)__dpi))  
 				- getBounds().height);
 			clear();
-			__drawingArea.setFont(f.getName(), f.getStyle(), __fontPointSize);			
+			__drawingArea.setFont(f.getName(), f.getStyle(), __fontSizePoints);			
 		}		
 		// if just the current screen is drawn, the same translation 
 		// can be done that was done for normal drawing.
 		else if (__printingScreen || __savingScreen) {
 			clear();
-			__drawingArea.setFont(f.getName(), f.getStyle(), __fontPointSize);			
+			__drawingArea.setFont(f.getName(), f.getStyle(), __fontSizePoints);			
 		}
 		
 		// Draw annotations below the network since node size is exaggerated
@@ -3960,7 +3996,7 @@ public void paint(Graphics g) {
 		setAntiAlias(__antiAlias);
 		drawLinks();
 		setAntiAlias(__antiAlias);
-		__drawingArea.setFont(f.getName(), f.getStyle(), __fontPointSize);
+		__drawingArea.setFont(f.getName(), f.getStyle(), __fontSizePoints);
 		drawNodes();
 
 		setAntiAlias(__antiAlias);
@@ -4127,23 +4163,23 @@ public void paint(Graphics g) {
 		GRDrawingAreaUtil.drawLine(__drawingArea, 
 			__mouseDataX - __xAdjust, 
 			__mouseDataY - __yAdjust, 
-			__legendLimits.getWidth() + __mouseDataX - __xAdjust, 
+			__legendDataLimits.getWidth() + __mouseDataX - __xAdjust, 
 			__mouseDataY - __yAdjust);
 		GRDrawingAreaUtil.drawLine(__drawingArea, 
 			__mouseDataX - __xAdjust, 
-			__mouseDataY + __legendLimits.getHeight() - __yAdjust,
-			__legendLimits.getWidth() + __mouseDataX - __xAdjust,
-			__mouseDataY + __legendLimits.getHeight() - __yAdjust);
+			__mouseDataY + __legendDataLimits.getHeight() - __yAdjust,
+			__legendDataLimits.getWidth() + __mouseDataX - __xAdjust,
+			__mouseDataY + __legendDataLimits.getHeight() - __yAdjust);
 		GRDrawingAreaUtil.drawLine(__drawingArea, 
 			__mouseDataX - __xAdjust, 
 			__mouseDataY - __yAdjust,
 			__mouseDataX - __xAdjust, 
-			__mouseDataY + __legendLimits.getHeight() - __yAdjust);
+			__mouseDataY + __legendDataLimits.getHeight() - __yAdjust);
 		GRDrawingAreaUtil.drawLine(__drawingArea,
-			__mouseDataX + __legendLimits.getWidth() - __xAdjust,	
+			__mouseDataX + __legendDataLimits.getWidth() - __xAdjust,	
 			__mouseDataY - __yAdjust, 
-			__mouseDataX + __legendLimits.getWidth() - __xAdjust,
-			__mouseDataY + __legendLimits.getHeight() - __yAdjust);
+			__mouseDataX + __legendDataLimits.getWidth() - __xAdjust,
+			__mouseDataY + __legendDataLimits.getHeight() - __yAdjust);
 	}
 	else if (__drawingBox) {
 		g.setXORMode(Color.white);
@@ -4258,10 +4294,13 @@ public int print(Graphics g, PageFormat pageFormat, int pageIndex)
 	Message.printStatus(2, routine, "Print data limits (from network data): " + getDataLimits() );
 	Message.printStatus(2, routine, "Print font: " + this.__drawingArea.getFont() );
 	// Calculate the data limits necessary to maintain aspect of the data and fit the page
-    double [] buffer = { 0.0, 0.0, 0.0, 0.0 };
-    calculateDataLimitsForMedia ( getDataLimits(), getNetwork().getEdgeBuffer() );
+	__drawingArea.setDataLimits( calculateDataLimitsForMedia ( getDrawingArea().getDrawingLimits(),
+		getDataLimits(), getNetwork().getEdgeBuffer(), true ) );
+    // Set the node icon size based on the scale.
+    
     // Set the font size for the scale...
-	int fontSize = this.__drawingArea.calculateFontSize(g2d, this.__fontPixelSize);
+    // TODO SAM 2011-07-08 Only full scale printing currently is supported
+	int fontSize = this.__drawingArea.calculateFontSize(g2d, this.__fontSizePixels);
 	
 	// TODO SAM 2011-07-05 Adjust the drawing limits accordingly to center on the imageable area when
 	// the selected page size does not match the layout size
@@ -4487,8 +4526,8 @@ private void processAnnotationsFromNetwork()
 		GRLimits limits = GRDrawingAreaUtil.getTextExtents(
 			__drawingArea, text, GRUnits.DEVICE,
 			p.getValue("FontName"), p.getValue("FontStyle"), fontSize);	
-		double w = convertX(limits.getWidth());
-		double h = convertY(limits.getHeight());
+		double w = convertDrawingXToDataX(limits.getWidth());
+		double h = convertDrawingYToDataY(limits.getHeight());
 
 		// Calculate the actual limits for the from the lower-left  corner
 		// to the upper-right, in order to know when the text has been 
@@ -4688,12 +4727,12 @@ protected void saveXML(String filename) {
 	p.set("ID=\"Main\"");
 	p.set("PaperSize=\"" + PrintUtil.pageFormatToString(__pageFormat) + "\"");
 	p.set("PageOrientation=\"" + PrintUtil.getOrientationAsString(__pageFormat) + "\"");
-	p.set("NodeLabelFontPointSize=" + __printFontPixelSize);
+	p.set("NodeLabelFontPointSize=" + __printFontSizePixels);
 	p.set("NodeSize=" + __nodeSizeFullScale);
 	double [] edgeBuffer = { 0, 0, 0, 0 };
 	try {
-		__network.writeXML(selectedFilename, limits, __parent.getLayouts(), __annotations, __links, __legendLimits,
-			edgeBuffer );
+		__network.writeXML(selectedFilename, limits, __parent.getLayouts(), __annotations, __links,
+			__legendDataLimits, edgeBuffer );
 	}
 	catch (Exception e) {
 		String routine = "StateMod_Network_JComponent.saveXML()";
@@ -4721,11 +4760,11 @@ private void scaleUnscalables() {
 		double height = __totalDataHeight * pct;
 		scale = height / __screenDataHeight;
 	}
-	__fontPixelSize = (int)(__printFontPixelSize * scale);
-	__fontPointSize = __drawingArea.calculateFontSize(__fontPixelSize);
-	double temp = (double)__fontPointSize * ((double)__dpi / 72.0);
+	__fontSizePixels = (int)(__printFontSizePixels * scale);
+	__fontSizePoints = __drawingArea.calculateFontSize(__fontSizePixels);
+	double temp = (double)__fontSizePoints * ((double)__dpi / 72.0);
 	temp += 0.5;
-	__printFontPointSize = (int)temp + 2;
+	__printFontSizePoints = (int)temp + 2;
 	__lineThickness = (int)(__printLineThickness * scale);
 }
 
@@ -4940,15 +4979,14 @@ public void setPrintFontSize( int size ) {
 	else {
 		__holdPrintFontSize = -1;
 	}
-	__printFontPixelSize = size;
+	__printFontSizePixels = size;
 	scaleUnscalables();
 	forceRepaint();
 }
 
 /**
-Sets the size (in data points) that nodes should be printed at.
-@param size the size (in pixels) of nodes when printed at 1:1.
-@param doCalcs if true, perform the legacy calculations; if false, just set basic data (for printing).
+Sets the size (in points) that nodes should be printed at.
+@param size the size (in points) of nodes when printed at 1:1.
 */
 public void setPrintNodeSize ( double size )
 {
@@ -4967,11 +5005,12 @@ public void setPrintNodeSize ( double size )
 	__legendNodeDiameter = size;
 	double diam = 0;
 	if (__fitWidth) {
-		diam = convertX(size);
+		diam = convertDrawingXToDataX(size);
 	}
 	else {
-		diam = convertY(size);
+		diam = convertDrawingYToDataY(size);
 	}
+	Message.printStatus ( 2, "", "Node size drawing=" + size + ", data=" + diam );
 	for (int i = 0; i < __nodes.length; i++) {
 		__nodes[i].setIconDiameter((int)(size));
 		__nodes[i].setSymbol(null);
@@ -5021,15 +5060,15 @@ protected void setViewPosition(int x, int y) {
 	__screenLeftX = x;
 
 	// make sure the view position is not moved beyond the network drawing boundaries
-	if (__screenLeftX > (__dataLeftX + __totalDataWidth) - convertX(getBounds().width)) {
-		__screenLeftX = (__dataLeftX + __totalDataWidth) - convertX(getBounds().width);
+	if (__screenLeftX > (__dataLeftX + __totalDataWidth) - convertDrawingXToDataX(getBounds().width)) {
+		__screenLeftX = (__dataLeftX + __totalDataWidth) - convertDrawingXToDataX(getBounds().width);
 	}	
 	if (__screenLeftX < __dataLeftX)  {
 		__screenLeftX = __dataLeftX;
 	}
 
-	if (__screenBottomY > (__dataBottomY + __totalDataHeight) - convertY(getBounds().height)) {
-		__screenBottomY = (__dataBottomY + __totalDataHeight) - convertY(getBounds().height);
+	if (__screenBottomY > (__dataBottomY + __totalDataHeight) - convertDrawingYToDataY(getBounds().height)) {
+		__screenBottomY = (__dataBottomY + __totalDataHeight) - convertDrawingYToDataY(getBounds().height);
 	}	
 	if (__screenBottomY < __dataBottomY) {
 		__screenBottomY = __dataBottomY;
@@ -5228,8 +5267,8 @@ protected void updateAnnotation(int nodeNum, HydrologyNode node) {
 		GRLimits limits = GRDrawingAreaUtil.getTextExtents(	__drawingArea, text, GRUnits.DEVICE,
 			p.getValue("FontName"), p.getValue("FontStyle"), size);	
 
-		double w = convertX(limits.getWidth());
-		double h = convertY(limits.getHeight());
+		double w = convertDrawingXToDataX(limits.getWidth());
+		double h = convertDrawingYToDataY(limits.getHeight());
 
 		if (!val.equals(vp.getValue("Point"))) {
 			vp.setValue("Point", val);
