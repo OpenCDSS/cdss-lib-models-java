@@ -165,6 +165,9 @@ Menu labels.
 */
 private final String
 	__Menu_File_String = "File",
+		__Menu_File_Save_Network_String = "Save Network...",
+		__Menu_File_Save_VisibleNetworkAsImage_String = "Save Visible Network as Image...",
+		__Menu_File_Print_EntireNetwork_String = "Print Entire Network...",
 		__Menu_File_Close_String = "Close",
 	__Menu_Tools = "Tools",
 		__Menu_Tools_SetXToConfluenceX_String = "Set X to Confluence X",
@@ -307,7 +310,7 @@ private SimpleJComboBox
 	__nodeSizeComboBox,
 	__orientationComboBox,
 	__paperSizeComboBox,
-	__textSizeComboBox;
+	__printedFontSizeComboBox;
 
 /**
 The device that draws the network.
@@ -523,17 +526,24 @@ public void actionPerformed(ActionEvent event)
 	else if (command.equals("1:1")) {
 		__device.zoomOneToOne();
 	}
-	else if (command.equals("Save XML")) {
+	else if (command.equals("Save XML") || command.equals(__Menu_File_Save_Network_String)) {
 		__device.saveXML(getFilename());
 		__device.setDirty(false);
 	}
-	else if (command.equals(__BUTTON_SaveEntireNetworkAsImage)) {
+	else if (command.equals(__BUTTON_SaveEntireNetworkAsImage) ) {
 		__device.saveNetworkAsImage();
 	}
-	else if (command.equals(__BUTTON_SaveScreenAsImage)) {
-		__device.saveScreenAsImage();
+	else if (command.equals(__BUTTON_SaveScreenAsImage) ||
+		command.equals(__Menu_File_Save_VisibleNetworkAsImage_String)) {
+		try {
+			__device.saveScreenAsImage();
+		}
+		catch ( Exception e ) {
+			Message.printWarning(1,routine,"Error saving image file (" + e + ")." );
+		}
 	}
-	else if (command.equals(__BUTTON_PrintEntireNetwork)) {
+	else if (command.equals(__BUTTON_PrintEntireNetwork) ||
+		command.equals(__Menu_File_Print_EntireNetwork_String)) {
 		Message.printStatus(2, routine, "Printing entire network.");
 		__device.printNetwork();
 	}
@@ -617,6 +627,11 @@ private void buildMenuBar ()
 	// File...
 	JMenu file_JMenu = new JMenu( __Menu_File_String, true );
 	menuBar.add(file_JMenu);
+	file_JMenu.add( new SimpleJMenuItem( __Menu_File_Save_Network_String, this ) );
+	file_JMenu.add( new SimpleJMenuItem( __Menu_File_Save_VisibleNetworkAsImage_String, this ) );
+	file_JMenu.addSeparator();
+	file_JMenu.add( new SimpleJMenuItem( __Menu_File_Print_EntireNetwork_String, this ) );
+	file_JMenu.addSeparator();
 	file_JMenu.add( new SimpleJMenuItem( __Menu_File_Close_String, this ) );
 	// Tools...
 	JMenu tools_JMenu = new JMenu( __Menu_Tools, true );
@@ -673,7 +688,9 @@ private void buildToolBar() {
 	else {
 		__saveEntireNetworkAsImageJButton = new SimpleJButton("Save", buttonLabel, buttonLabel, none, false, this);	
 	}
-	__saveEntireNetworkAsImageJButton.setToolTipText ( "Save entire network as image file, full-scale." );
+	__saveEntireNetworkAsImageJButton.setEnabled ( false );
+	__saveEntireNetworkAsImageJButton.setToolTipText (
+		"Save entire network as image file, full-scale - CURRENTLY DISABLED." );
 	__toolBar.add(__saveEntireNetworkAsImageJButton);
 	
 	url = this.getClass().getResource( __RESOURCE_PATH + "/icon_saveScreenAsImage.gif");
@@ -685,7 +702,7 @@ private void buildToolBar() {
 	else {
 		__saveScreenAsImageJButton = new SimpleJButton("Save",buttonLabel, buttonLabel, none, false, this);
 	}
-	__saveScreenAsImageJButton.setToolTipText("Save the network shown in the editor." );
+	__saveScreenAsImageJButton.setToolTipText("Save the network shown in the editor to an image file." );
 	__toolBar.add(__saveScreenAsImageJButton);	
 
 	__toolBar.addSeparator();
@@ -964,7 +981,7 @@ throws Throwable {
 	__nodeSizeComboBox = null;
 	__orientationComboBox = null;
 	__paperSizeComboBox = null;
-	__textSizeComboBox = null;
+	__printedFontSizeComboBox = null;
 	__device = null;
 	__reference = null;
 	__filename = null;
@@ -1108,7 +1125,7 @@ throws Exception {
 		__nodeSizeComboBox.select("" + __nodeSize);
 		__orientationComboBox.select(__orient);
 		__paperSizeComboBox.setSelectedPrefixItem(__paperSize + " -");
-		__textSizeComboBox.select("" + __fontSize);
+		__printedFontSizeComboBox.select("" + __fontSize);
 	}	
 	else {
 		createFirstLayout();
@@ -1180,7 +1197,7 @@ throws Exception {
 	__nodeSizeComboBox.select("" + __nodeSize);
 	__orientationComboBox.select(__orient);
 	__paperSizeComboBox.setSelectedPrefixItem(__paperSize + " -");
-	__textSizeComboBox.select("" + __fontSize);
+	__printedFontSizeComboBox.select("" + __fontSize);
 	__layoutComboBox.select(0);
 	__deleteButton.setEnabled(false);
 }
@@ -1221,12 +1238,12 @@ public void itemStateChanged(ItemEvent event)
 		PropList p = __layouts.get(index);
 		p.set("PaperSize=\"" + value + "\"");
 	}
-	else if (event.getSource() == __textSizeComboBox) {	
+	else if (event.getSource() == __printedFontSizeComboBox) {	
 		int index = __layoutComboBox.getSelectedIndex();
-		String value = __textSizeComboBox.getSelected();
+		String value = __printedFontSizeComboBox.getSelected();
 		PropList p = __layouts.get(index);
 		try {
-			int i = Integer.decode(	__textSizeComboBox.getSelected()).intValue();
+			int i = Integer.decode(	__printedFontSizeComboBox.getSelected()).intValue();
 			__device.setPrintFontSize(i);
 			p.set("NodeLabelFontSize=\"" + value + "\"");
 		}
@@ -1260,7 +1277,7 @@ public void itemStateChanged(ItemEvent event)
 		int fontSize = 10;
 		try {
 			fontSize = (Integer.decode(sFontSize)).intValue();
-			__textSizeComboBox.select("" + fontSize);
+			__printedFontSizeComboBox.select("" + fontSize);
 		}
 		catch (Exception e) {}
 		String sNodeSize = p.getValue("NodeSize");
@@ -1784,40 +1801,40 @@ private void setupGUI() {
 	__layoutComboBox.addItemListener(this);
 	__layoutComboBox.setToolTipText("Page layout name (e.g., \"11x17 Landscape\")." );
 	
-	__textSizeComboBox = new SimpleJComboBox(true);
-	__textSizeComboBox.add("3");
-	__textSizeComboBox.add("4");
-	__textSizeComboBox.add("5");
-	__textSizeComboBox.add("6");
-	__textSizeComboBox.add("7");
-	__textSizeComboBox.add("8");
-	__textSizeComboBox.add("9");
-	__textSizeComboBox.add("10");
-	__textSizeComboBox.add("11");
-	__textSizeComboBox.add("12");
-	__textSizeComboBox.add("13");
-	__textSizeComboBox.add("14");
-	__textSizeComboBox.add("15");
-	__textSizeComboBox.add("16");
-	__textSizeComboBox.add("17");
-	__textSizeComboBox.add("18");
-	__textSizeComboBox.add("19");
-	__textSizeComboBox.add("20");
-	__textSizeComboBox.add("21");
-	__textSizeComboBox.add("22");
-	__textSizeComboBox.add("23");
-	__textSizeComboBox.add("24");
-	__textSizeComboBox.add("25");
-	__textSizeComboBox.add("26");
-	__textSizeComboBox.add("27");
-	__textSizeComboBox.add("28");
-	__textSizeComboBox.add("29");
-	__textSizeComboBox.add("30");
-	__textSizeComboBox.setToolTipText("Node label size in points for the printed network, " +
+	__printedFontSizeComboBox = new SimpleJComboBox(false); // Do not allow text edits
+	__printedFontSizeComboBox.add("3");
+	__printedFontSizeComboBox.add("4");
+	__printedFontSizeComboBox.add("5");
+	__printedFontSizeComboBox.add("6");
+	__printedFontSizeComboBox.add("7");
+	__printedFontSizeComboBox.add("8");
+	__printedFontSizeComboBox.add("9");
+	__printedFontSizeComboBox.add("10");
+	__printedFontSizeComboBox.add("11");
+	__printedFontSizeComboBox.add("12");
+	__printedFontSizeComboBox.add("13");
+	__printedFontSizeComboBox.add("14");
+	__printedFontSizeComboBox.add("15");
+	__printedFontSizeComboBox.add("16");
+	__printedFontSizeComboBox.add("17");
+	__printedFontSizeComboBox.add("18");
+	__printedFontSizeComboBox.add("19");
+	__printedFontSizeComboBox.add("20");
+	__printedFontSizeComboBox.add("21");
+	__printedFontSizeComboBox.add("22");
+	__printedFontSizeComboBox.add("23");
+	__printedFontSizeComboBox.add("24");
+	__printedFontSizeComboBox.add("25");
+	__printedFontSizeComboBox.add("26");
+	__printedFontSizeComboBox.add("27");
+	__printedFontSizeComboBox.add("28");
+	__printedFontSizeComboBox.add("29");
+	__printedFontSizeComboBox.add("30");
+	__printedFontSizeComboBox.setToolTipText("Node label size in points for the printed network, " +
 			"for the specified page layout." );
-	__textSizeComboBox.select("" + __DEFAULT_FONT_SIZE);
-	__textSizeComboBox.addKeyListener(__device);
-	__textSizeComboBox.addItemListener(this);
+	__printedFontSizeComboBox.select("" + __DEFAULT_FONT_SIZE);
+	__printedFontSizeComboBox.addKeyListener(__device);
+	__printedFontSizeComboBox.addItemListener(this);
 
 	__orientationComboBox = new SimpleJComboBox();
 	__orientationComboBox.add("Landscape");
@@ -1828,8 +1845,16 @@ private void setupGUI() {
 	__orientationComboBox.addKeyListener(__device);
 	__orientationComboBox.addItemListener(this);
 	
-	__nodeSizeComboBox = new SimpleJComboBox(true);
+	__nodeSizeComboBox = new SimpleJComboBox(false); // Do not allow text edits
+	__nodeSizeComboBox.add("3");
+	__nodeSizeComboBox.add("4");
+	__nodeSizeComboBox.add("5");
+	__nodeSizeComboBox.add("6");
+	__nodeSizeComboBox.add("7");
+	__nodeSizeComboBox.add("8");
+	__nodeSizeComboBox.add("9");
 	__nodeSizeComboBox.add("10");
+	__nodeSizeComboBox.add("11");
 	__nodeSizeComboBox.add("12");
 	__nodeSizeComboBox.add("14");
 	__nodeSizeComboBox.add("16");
@@ -1889,7 +1914,7 @@ private void setupGUI() {
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	y++;
 
-	JGUIUtil.addComponent(pagePanel, new JLabel("Default layout? "),
+	JGUIUtil.addComponent(pagePanel, new JLabel("Layout for editing? "),
 		0, y, 1, 1, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(pagePanel, __defaultLayoutCheckBox,
@@ -1916,7 +1941,7 @@ private void setupGUI() {
 	JGUIUtil.addComponent(pagePanel, new JLabel("Printed font size: "),
 		0, y, 1, 1, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
-	JGUIUtil.addComponent(pagePanel, __textSizeComboBox,
+	JGUIUtil.addComponent(pagePanel, __printedFontSizeComboBox,
 		1, y, 9, 1, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	y++;
@@ -2216,7 +2241,7 @@ private void setupPaper() {
 	__nodeSizeComboBox.select("" + __nodeSize);
 	__orientationComboBox.select(__orient);
 	__paperSizeComboBox.setSelectedPrefixItem(__paperSize + " -");
-	__textSizeComboBox.select("" + __fontSize);
+	__printedFontSizeComboBox.select("" + __fontSize);
 }
 
 /**

@@ -17,11 +17,16 @@
 // * Saving the visible network to an image file - need to do something similar to TSTool where the active buffer
 //   is saved - this may need rework in the future if batch image saving is implemented in StateDMI and a visible
 //   window/buffer cannot be dumped
+//
 // TODO SAM 2011-07-09 The font size and node size are documented to be in points, but in the code they
 // are sometimes treated as pixels.  Since 72 points = 1 inch and many screens are 72+ DPI, this is not a
 // horrible error but does lead to the screen output looking different that printed.  Need to scrub the code
 // and make sure that configuration information in points is converted accurately to pixels.  The configuration
-// should be in absolute coordinates (points) rather than pixels, which can vary between devices
+// should be in absolute coordinates (points) rather than pixels, which can vary between devices.  Making the
+// change may require changing data sets to use a different font and node size... so wait for now.
+//
+// TODO SAM 2011-07-09 Need to figure out how to set the overall network limits... can't just use node
+// data because a new network with one node is a singularity.
 // ----------------------------------------------------------------------------
 // StateMod_Network_JComponent - class to control drawing of the network
 // ----------------------------------------------------------------------------
@@ -117,6 +122,8 @@ import java.awt.print.PageFormat;
 import java.awt.print.Printable;
 import java.awt.print.PrinterJob;
 import java.io.File;
+import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
 
@@ -129,7 +136,6 @@ import cdss.domain.hydrology.network.HydrologyNode;
 
 import RTi.GR.GRAspect;
 import RTi.GR.GRColor;
-import RTi.GR.GRDrawingArea;
 import RTi.GR.GRDrawingAreaUtil;
 import RTi.GR.GRJComponentDevice;
 import RTi.GR.GRJComponentDrawingArea;
@@ -175,6 +181,7 @@ private final String
 	__MENU_DRAW_NODE_LABELS = "Draw Text",
 	__MENU_EDITABLE = "Editable",
 	__MENU_FIND_NODE = "Find Node",
+	__MENU_FIND_ANNOTATION = "Find Annotation",
 	__MENU_INCH_GRID = "Show Half-Inch Grid",
 	__MENU_MARGIN = "Show Margins",
 	__MENU_PIXEL_GRID = "Show 25 Pixel Grid",
@@ -827,7 +834,8 @@ public StateMod_Network_JComponent(StateMod_Network_JFrame parent, double scale)
 Responds to action events.
 @param event the ActionEvent that happened.
 */
-public void actionPerformed(ActionEvent event) {
+public void actionPerformed(ActionEvent event)
+{	String routine = getClass().getName() + "actionPerformed";
 	String action = event.getActionCommand();
 
 	if (action.equals(__MENU_ADD_ANNOTATION)) {
@@ -899,6 +907,9 @@ public void actionPerformed(ActionEvent event) {
 			__editable = true;
 		}
 	}
+	else if (action.equals(__MENU_FIND_ANNOTATION)) {
+		findAnnotation();
+	}
 	else if (action.equals(__MENU_FIND_NODE)) {
 		findNode();
 	}
@@ -960,7 +971,12 @@ public void actionPerformed(ActionEvent event) {
 		setDirty(false);
 	}
 	else if (action.equals(__MENU_SAVE_SCREEN)) {
-		saveScreenAsImage();
+		try {
+			saveScreenAsImage();
+		}
+		catch ( Exception e ) {
+			Message.printWarning(1,routine,"Error saving image file (" + e + ")." );
+		}
 	}
 	else if (action.equals(__MENU_SAVE_XML)) {
 		saveXML(__parent.getFilename());
@@ -1317,6 +1333,9 @@ private void buildPopupMenus() {
 	mi = new JMenuItem(__MENU_FIND_NODE);
 	mi.addActionListener(this);
 	__networkPopup.add(mi);
+	mi = new JMenuItem(__MENU_FIND_ANNOTATION);
+	mi.addActionListener(this);
+	__networkPopup.add(mi);
 	__networkPopup.addSeparator();
 	// -------------------------
 	jcbmi = new JCheckBoxMenuItem(__MENU_SHADED_RIVERS);
@@ -1360,6 +1379,9 @@ private void buildPopupMenus() {
 	__nodePopup.addSeparator();
 	// -------------------------
 	mi = new JMenuItem(__MENU_FIND_NODE);
+	mi.addActionListener(this);
+	__nodePopup.add(mi);
+	mi = new JMenuItem(__MENU_FIND_ANNOTATION);
 	mi.addActionListener(this);
 	__nodePopup.add(mi);
 	__nodePopup.addSeparator();
@@ -1989,6 +2011,11 @@ private void drawAnnotations() {
 		double height = __totalDataHeight * pct;
 		scale = height / __screenDataHeight;
 	}
+	if (__printingNetwork) {
+		if ( !__useOldPrinting ) {
+			scale = getScale();
+		}
+	}
 
 	double fontSize = -1;
 	double temp = -1;
@@ -2021,7 +2048,7 @@ private void drawAnnotations() {
 			}
 			else {
 				// For now do not scale
-				printFontSize = (int)(origFontSizeInt*this.__printScale);
+				printFontSize = (int)(origFontSizeInt*scale);
 			}
 			p.set("FontSize", "" + printFontSize);
 		}
@@ -2754,6 +2781,99 @@ private double[] findNearestGridXY(double x, double y) {
 	}
 
 	return p;
+}
+
+/**
+Displays a dialog containing all the annotations on the network; the user can 
+select one and the annotation will be highlighted and zoomed to.
+*/
+public HydrologyNode findAnnotation()
+{
+	// Compile a list of all the annotations in the network
+	List<String> annotationListTextSorted = new Vector();
+	PropList props = null;
+	String propValue;
+	for ( HydrologyNode annotation: getNetwork().getAnnotationList() ) {
+		props = (PropList)annotation.getAssociatedObject();
+		if ( props != null ) {
+			propValue = props.getValue("Text");
+			if ( propValue != null ) {
+				annotationListTextSorted.add(propValue);
+			}
+		}
+	}
+
+	// Sort to ascending String order
+	Collections.sort(annotationListTextSorted, String.CASE_INSENSITIVE_ORDER);	
+
+	// Display a dialog from which the user can choose the annotation to find
+	JComboBoxResponseJDialog j = new JComboBoxResponseJDialog(__parent,
+		"Select the Annotation to Find", "Select the network annotation to find", annotationListTextSorted,
+		ResponseJDialog.OK | ResponseJDialog.CANCEL, true);
+		
+	String s = j.response();
+	if (s == null) {
+		// If s is null, then the user pressed CANCEL
+		return null;
+	}
+
+	// Find the annotation in the network and center the display window around it.
+	HydrologyNode foundAnnotation = findAnnotation ( s, true, true );
+
+	if ( foundAnnotation == null ) {
+		new ResponseJDialog(__parent, "Annotation '" + s + "' not found",
+			"The annotation with text '" + s + "' could not be found.\n"
+			+ "The annotation text must match exactly, including case\n"
+			+ "sensitivity.", ResponseJDialog.OK).response();
+		return null;
+	}
+
+	return foundAnnotation;
+}
+
+/**
+Find an annotation given its common identifier.
+@param changeSelection if true, then change the selection of the annotation as the identifier is checked
+@param center if true, center on the found node; if false do not change position
+@return the found node, or null if not found
+*/
+public HydrologyNode findAnnotation ( String s, boolean changeSelection, boolean center )
+{
+	double x = 0;
+	double y = 0;
+	HydrologyNode foundAnnotation = null;
+	PropList props = null;
+	String propValue = null;
+	for ( HydrologyNode annotation: getNetwork().getAnnotationList() ) {
+		props = (PropList)annotation.getAssociatedObject();
+		if ( props != null ) {
+			propValue = props.getValue("Text");
+			if ( propValue != null ) {
+				if ( propValue.equals(s)) {
+					x = annotation.getX();
+					y = annotation.getY();
+					if ( changeSelection ) {
+						annotation.setSelected(true);
+					}
+					foundAnnotation = annotation;
+				}
+			}
+		}
+		else {
+			if ( changeSelection ) {
+				annotation.setSelected(false);
+			}
+		}
+	}
+	
+	if ( center ) {
+		// center the screen around the node
+		__screenLeftX = x - (__screenDataWidth / 2);
+		__screenBottomY = y - (__screenDataHeight / 2);
+		forceRepaint();
+	}
+	
+	return foundAnnotation;
 }
 
 /**
@@ -4328,7 +4448,7 @@ public void print()
 	        	__parent.getSelectedPageLayout() );
 	        networkPrintable.initializeForPrinting();
 	        // Get the attributes needed for the printer job
-	        networkPrintable.initializeForNetworkPageLayout ( null );
+	        networkPrintable.initializeForNetworkPageLayout ( __parent.getSelectedPageLayout() );
 	        String orientation = __parent.getSelectedOrientation();
 	        String paperSizeFromLayout = __parent.getSelectedPaperSize();
 	        if ( paperSizeFromLayout.indexOf(" " ) > 0 ) {
@@ -4498,7 +4618,7 @@ protected void printNetwork()
 {	String routine = "StateMod_Network_JComponent.printNetwork";
 	Message.printStatus( 2, routine, "Printing entire network" );
 	if ( !__useOldPrinting ) {
-		// New printing creates a new instance of the component so that printint does not intermingle
+		// New printing creates a new instance of the component so that printing does not intermingle
 		// with the interactive rendering
 		new ResponseJDialog ( __parent, "Print Network",
 			"You must select a printer and page size that match the network page layout.\n" +
@@ -4782,17 +4902,49 @@ protected void saveNetworkAsImage() {
 }
 
 /**
-Saves what is currently visible on screen to a graphic file.
+Saves what is currently visible on screen to a graphic file by dumping the canvas area.
 */
-protected void saveScreenAsImage() {
-	__savingScreen = true;
-	__tempBuffer = new BufferedImage(getBounds().width,
-	getBounds().height, BufferedImage.TYPE_4BYTE_ABGR);
-	__bufferGraphics = (Graphics2D)(__tempBuffer.createGraphics());
-	forceRepaint();
-	new RTi.Util.GUI.SaveImageGUI(__tempBuffer, __parent);
-	__tempBuffer = null;
-	__savingScreen = false;
+protected void saveScreenAsImage()
+throws IOException
+{	boolean useNewCode = true;
+	if ( useNewCode ) {
+		String last_directory = JGUIUtil.getLastFileDialogDirectory();
+		JFileChooser fc = JFileChooserFactory.createJFileChooser(last_directory);
+		fc.setDialogTitle ( "Save Visible Network as Image File" );
+		fc.setAcceptAllFileFilterUsed ( false );
+		SimpleFileFilter jpg_sff = new SimpleFileFilter("jpeg", "JPEG Image File" );
+		fc.addChoosableFileFilter ( jpg_sff );
+		SimpleFileFilter png_sff = new SimpleFileFilter("png", "PNG Image File" );
+		fc.setFileFilter(png_sff);
+		if ( fc.showSaveDialog(this) != JFileChooser.APPROVE_OPTION ) {
+			// Canceled...
+			return;
+		}
+		// Else figure out the file format and location and then do the save...
+		last_directory = fc.getSelectedFile().getParent();
+		String path = fc.getSelectedFile().getPath();
+		JGUIUtil.setLastFileDialogDirectory(last_directory);
+		//__parent.setWaitCursor(true);
+		if (fc.getFileFilter() == png_sff) {
+		    path = IOUtil.enforceFileExtension ( path, "png" );
+		}
+		// Leave *.jpeg alone but by default enforce *.jpg
+		else if ( (fc.getFileFilter() == jpg_sff) && !StringUtil.endsWithIgnoreCase(path,"jpeg")) {
+            path = IOUtil.enforceFileExtension ( path, "jpg" );
+        }
+		// The following will examine the extension and save as PNG or JPG accordingly
+ 		saveAsFile(path);
+	}
+	else {
+		__savingScreen = true;
+		__tempBuffer = new BufferedImage(getBounds().width,
+		getBounds().height, BufferedImage.TYPE_4BYTE_ABGR);
+		__bufferGraphics = (Graphics2D)(__tempBuffer.createGraphics());
+		forceRepaint();
+		new RTi.Util.GUI.SaveImageGUI(__tempBuffer, __parent);
+		__tempBuffer = null;
+		__savingScreen = false;
+	}
 }
 
 // FIXME SAM 2008-12-11 Need a way to save the selected filename so that it can be the default
