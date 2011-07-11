@@ -134,14 +134,17 @@ import javax.swing.JPopupMenu;
 
 import cdss.domain.hydrology.network.HydrologyNode;
 
+import RTi.GR.GRArrowStyleType;
 import RTi.GR.GRAspect;
 import RTi.GR.GRColor;
+import RTi.GR.GRDrawingArea;
 import RTi.GR.GRDrawingAreaUtil;
 import RTi.GR.GRJComponentDevice;
 import RTi.GR.GRJComponentDrawingArea;
 import RTi.GR.GRLimits;
 import RTi.GR.GRText;
 import RTi.GR.GRUnits;
+import RTi.GR.GRLineStyleType;
 import RTi.Util.GUI.JComboBoxResponseJDialog;
 import RTi.Util.GUI.JFileChooserFactory;
 import RTi.Util.GUI.JGUIUtil;
@@ -152,6 +155,7 @@ import RTi.Util.IO.GraphicsPrinterJob;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.PrintUtil;
 import RTi.Util.IO.PropList;
+import RTi.Util.Math.MathUtil;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 import javax.swing.RepaintManager;
@@ -176,7 +180,7 @@ private final String
 	__MENU_ADD_LINK = "Add Link",
 	__MENU_ADD_NODE = "Add Upstream Node",
 	__MENU_DELETE_ANNOTATION = "Delete Annotation",
-	__MENU_DELETE_LINK = "Delete Link",
+	__MENU_DELETE_LINK = "Delete Link for Node",
 	__MENU_DELETE_NODE = "Delete Node",
 	__MENU_DRAW_NODE_LABELS = "Draw Text",
 	__MENU_EDITABLE = "Editable",
@@ -757,7 +761,8 @@ Note that these are complex annotations whereas the __annotations list contains 
 private List<StateMod_Network_AnnotationData> __annotationDataList = new Vector();
 
 /**
-List of all the links drawn on the network.
+List of all the links drawn on the network.  Each link is managed as a PropList with link properties.
+See the HydrologyNodeNetwork.writeXML() method for supported properties.
 */
 private List<PropList> __links = new Vector();
 
@@ -1107,16 +1112,20 @@ public StateMod_Network_AnnotationData addAnnotationRenderer ( StateMod_Network_
 
 /**
 Adds a link to the network.
-@param id1 the ID of the node from which the link is drawn.
-@param id2 the ID of the node to which the link is drawn.
+@param fromNodeId the ID of the node from which the link is drawn.
+@param toNodeId the ID of the node to which the link is drawn.
 */
-protected void addLink(String id1, String id2)
+protected void addLink(String fromNodeId, String toNodeId, String linkId, String lineStyle,
+	String fromArrowStyle, String toArrowStyle )
 {
 	PropList p = new PropList("");
+	p.set("ID", linkId );
 	p.set("ShapeType", "Link");
-	p.set("LineStyle", "Dashed");
-	p.set("FromNodeID", id1);
-	p.set("ToNodeID", id2);
+	p.set("FromNodeID", fromNodeId);
+	p.set("ToNodeID", toNodeId);
+	p.set("LineStyle", lineStyle );
+	p.set("FromArrowStyle", fromArrowStyle );
+	p.set("ToArrowStyle", toArrowStyle );
 	__links.add(p);
 	forceRepaint();
 }
@@ -2404,36 +2413,142 @@ TODO (JTS - 2004-07-13) This would be faster if the nodes were not looked up eve
 position of the nodes within the node array.  The positions would have to be
 recomputed every time a node is added or deleted.
 */
-private void drawLinks() {
-	if (__links == null) {
+private void drawLinks ( GRJComponentDrawingArea drawingArea, List<PropList> links, HydrologyNode [] nodes,
+	float [] dashes )
+{
+	if (links == null) {
 		return;
 	}
 	float offset = 0;
 	HydrologyNode node1 = null;
 	HydrologyNode node2 = null;
-	String id1 = null;
-	String id2 = null;
-	for ( PropList p : __links ) {
-		id1 = p.getValue("FromNodeID");
-		id2 = p.getValue("ToNodeID");
+	String fromNodeId = null;
+	String toNodeId = null;
+	String propValue = null;
+	double [] dashPattern = new double[dashes.length];
+	for ( int i = 0; i < dashes.length; i++ ) {
+		dashPattern[i] = dashes[i];
+	}
+	double [] linePattern = null;
+	GRLineStyleType lineStyle = GRLineStyleType.DASHED; // Default
+	GRArrowStyleType fromArrowStyle = GRArrowStyleType.NONE;
+	GRArrowStyleType toArrowStyle = GRArrowStyleType.NONE;
+	double arrowWidth = 0; // Arrow head width and length
+	double arrowLength = 0;
+	for ( PropList p : links ) {
+		fromNodeId = p.getValue("FromNodeID");
+		toNodeId = p.getValue("ToNodeID");
+		propValue = p.getValue("LineStyle");
+		lineStyle = GRLineStyleType.valueOfIgnoreCase(propValue);
+		if ( lineStyle == null ) {
+			lineStyle = GRLineStyleType.DASHED;
+			linePattern = dashPattern;
+		}
+		propValue = p.getValue("FromArrowStyle");
+		fromArrowStyle = GRArrowStyleType.valueOfIgnoreCase(propValue);
+		if ( fromArrowStyle == null ) {
+			fromArrowStyle = GRArrowStyleType.NONE;
+		}
+		propValue = p.getValue("ToArrowStyle");
+		toArrowStyle = GRArrowStyleType.valueOfIgnoreCase(propValue);
+		if ( toArrowStyle == null ) {
+			toArrowStyle = GRArrowStyleType.NONE;
+		}
 		node1 = null;
 		node2 = null;
-		for (int j = 0; j < __nodes.length; j++) {
-			if (__nodes[j].getCommonID().equals(id1)) {
-				node1 = __nodes[j];
+		for (int j = 0; j < nodes.length; j++) {
+			if (nodes[j].getCommonID().equals(fromNodeId)) {
+				node1 = nodes[j];
 			}
-			if (__nodes[j].getCommonID().equals(id2)) {
-				node2 = __nodes[j];
+			if (nodes[j].getCommonID().equals(toNodeId)) {
+				node2 = nodes[j];
 			}
 			if (node1 != null && node2 != null) {
-				j = __nodes.length + 1;
+				j = nodes.length + 1;
 			}
 		}
-		__drawingArea.setFloatLineDash(__dashes, offset);
-		GRDrawingAreaUtil.drawLine(__drawingArea, 
-			node1.getX(), node1.getY(), node2.getX(), node2.getY());
+		if ( lineStyle == GRLineStyleType.DASHED ) {
+			// Set line style to dashes
+			linePattern = dashPattern;
+		}
+		else {
+			// Draw line solid
+			linePattern = null;
+		}
+		drawingArea.setLineDash(linePattern, offset);
+		if ( (fromArrowStyle == GRArrowStyleType.NONE) && (toArrowStyle == GRArrowStyleType.NONE) ) {
+			// Connect nodes with a line...
+			GRDrawingAreaUtil.drawLine(drawingArea, 
+				node1.getX(), node1.getY(), node2.getX(), node2.getY());
+		}
+		else {
+			// Connect nodes with an arrow.  Because the arrow may obscure or be obscured by the
+			// node symbol, back off the length of the line to ensure that the arrow will only point
+			// to the symbol.  Make the size of the arrow the length of the symbol but only 2/3 the width
+			double x1 = node1.getX();
+			double y1 = node1.getY();
+			double x2 = node2.getX();
+			double y2 = node2.getY();
+			double diamData = 0.0; // Diameter if node icon in data units
+			if ( fromArrowStyle != GRArrowStyleType.NONE ) {
+				// Adjust the "from" node coordinates.
+				double diamDrawing = node1.getIconDiameter(); // Drawing units
+				diamData = GRDrawingAreaUtil.getDataExtents(drawingArea,
+					new GRLimits(0,0,diamDrawing,diamDrawing), 0).getWidth();
+				double xDiff = node2.getX() - node1.getX();
+				double yDiff = node2.getY() - node1.getY();
+				double lineLength = Math.sqrt(xDiff+xDiff + yDiff*yDiff);
+				double xAdjust = MathUtil.interpolate(diamData/2, 0, lineLength, 0, Math.abs(xDiff));
+				double yAdjust = MathUtil.interpolate(diamData/2, 0, lineLength, 0, Math.abs(yDiff));
+				if ( xDiff >= 0 ) {
+					x1 += xAdjust;
+				}
+				else {
+					x1 -= xAdjust;
+				}
+				if ( yDiff >= 0 ) {
+					y1 += yAdjust;
+				}
+				else {
+					y1 -= yAdjust;
+				}
+			}
+			if ( toArrowStyle != GRArrowStyleType.NONE ) {
+				// Adjust the "to" node coordinates.
+				double diamDrawing = node2.getIconDiameter(); // Drawing units
+				diamData = GRDrawingAreaUtil.getDataExtents(drawingArea,
+					new GRLimits(0,0,diamDrawing,diamDrawing), 0).getWidth();
+				double xDiff = node1.getX() - node2.getX();
+				double yDiff = node1.getY() - node2.getY();
+				double lineLength = Math.sqrt(xDiff+xDiff + yDiff*yDiff);
+				double xAdjust = MathUtil.interpolate(diamData/2, 0, lineLength, 0, Math.abs(xDiff));
+				double yAdjust = MathUtil.interpolate(diamData/2, 0, lineLength, 0, Math.abs(yDiff));
+				if ( xDiff >= 0 ) {
+					x2 += xAdjust;
+				}
+				else {
+					x2 -= xAdjust;
+				}
+				if ( yDiff >= 0 ) {
+					y2 += yAdjust;
+				}
+				else {
+					y2 -= yAdjust;
+				}
+			}
+			arrowLength = diamData;
+			arrowWidth = diamData/2;
+			// Exaggerate to troubleshoot
+			//arrowLength = diamData*2;
+			//arrowWidth = diamData;
+			GRDrawingAreaUtil.drawArrow(drawingArea, 
+				x1, y1, x2, y2,
+				lineStyle, linePattern, 0.0, // Line properties
+				fromArrowStyle, toArrowStyle, arrowWidth, arrowLength ); // Arrow properties
+		}
 	}
-	__drawingArea.setFloatLineDash(null, (float)0);
+	// Set back to solid line for drawing area
+	drawingArea.setFloatLineDash(null, (float)0);
 }
 
 /**
@@ -2547,9 +2662,9 @@ private void drawNetworkLines()
 /**
 Draws the nodes on the screen.
 */
-private void drawNodes() {
-	for (int i = 0; i < __nodes.length; i++) {
-		__nodes[i].draw(__drawingArea);
+private void drawNodes( GRJComponentDrawingArea drawingArea, HydrologyNode [] nodes ) {
+	for (int i = 0; i < nodes.length; i++) {
+		nodes[i].draw(drawingArea);
 	}
 }
 
@@ -3026,6 +3141,14 @@ protected HydrologyNode getAnnotationNode(int nodeNum) {
 }
 
 /**
+Return the dash pattern used for dashed lines.
+*/
+protected float [] getDashPattern ()
+{
+	return __dashes;
+}
+
+/**
 Returns the bottom Y value of the data.
 @return the bottom Y value of the data.
 */
@@ -3071,6 +3194,14 @@ Returns the limits of the legend, which are in data units.
 */
 protected GRLimits getLegendDataLimits() {
 	return __legendDataLimits;
+}
+
+/**
+Return the link list.
+*/
+protected List<PropList> getLinkList()
+{
+	return __links;
 }
 
 /**
@@ -3993,9 +4124,9 @@ public void paint(Graphics g) {
 		for (int i = 0; i < __nodes.length; i++) {
 			__nodes[i].calculateExtents(__drawingArea);
 		}
-		drawNodes();
+		drawNodes( getDrawingArea(), getNodesArray() );
 		drawNetworkLines();
-		drawLinks();
+		drawLinks( getDrawingArea(), getLinkList(), getNodesArray(), getDashPattern() );
 		drawLegend();
 		drawAnnotations();
 		return;
@@ -4222,10 +4353,10 @@ public void paint(Graphics g) {
 		setAntiAlias(__antiAlias);
 		drawNetworkLines();
 		setAntiAlias(__antiAlias);
-		drawLinks();
+		drawLinks(getDrawingArea(), getLinkList(), getNodesArray(), getDashPattern());
 		setAntiAlias(__antiAlias);
 		__drawingArea.setFont(f.getName(), f.getStyle(), __fontSizePoints);
-		drawNodes();
+		drawNodes( getDrawingArea(), getNodesArray() );
 
 		setAntiAlias(__antiAlias);
 		if (!__eraseLegend) {

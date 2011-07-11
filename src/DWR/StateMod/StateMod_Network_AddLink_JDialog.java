@@ -1,15 +1,3 @@
-// ----------------------------------------------------------------------------
-// StateMod_Network_AddLink_JDialog - class for adding links interactively to
-//	the network.
-// ----------------------------------------------------------------------------
-// Copyright:   See the COPYRIGHT file
-// ----------------------------------------------------------------------------
-// History:
-//
-// 2004-07-12	J. Thomas Sapienza, RTi	Initial version.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-// ----------------------------------------------------------------------------
-
 package DWR.StateMod;
 
 import java.awt.GridBagConstraints;
@@ -25,8 +13,11 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import cdss.domain.hydrology.network.HydrologyNode;
+import RTi.GR.GRArrowStyleType;
+import RTi.GR.GRLineStyleType;
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleJComboBox;
 
@@ -41,8 +32,8 @@ implements ActionListener, ItemListener {
 Button labels.
 */
 private final String
-	__BUTTON_CANCEL = 	"Cancel",
-	__BUTTON_OK = 		"OK";
+	__BUTTON_CANCEL = "Cancel",
+	__BUTTON_OK = "OK";
 
 private HydrologyNode[] __nodes = null;
 
@@ -56,7 +47,13 @@ Dialog combo boxes.
 */
 private SimpleJComboBox
 	__node1ComboBox,
-	__node2ComboBox;
+	__node2ComboBox,
+	__lineStyleComboBox,
+	__fromArrowStyleComboBox,
+	__toArrowStyleComboBox;
+
+private JTextField
+	__linkId_JTextField;
 
 private StateMod_Network_JComponent __device = null;
 
@@ -68,7 +65,7 @@ private StateMod_Network_JFrame __parent = null;
 /**
 Constructor.
 @param parent the JFrame on which this dialog will be shown.
-@param ds the Downstream node from where the ndoe should be added.
+@param ds the Downstream node from where the node should be added.
 */
 public StateMod_Network_AddLink_JDialog(StateMod_Network_JFrame parent,
 StateMod_Network_JComponent device, HydrologyNode[] nodes) {
@@ -91,7 +88,9 @@ public void actionPerformed(ActionEvent event) {
 		dispose();
 	}
 	else if (action.equals(__BUTTON_OK)) {
-		__device.addLink(__node1ComboBox.getSelected(), __node2ComboBox.getSelected());
+		__device.addLink(__node1ComboBox.getSelected(), __node2ComboBox.getSelected(),
+			__linkId_JTextField.getText(), __lineStyleComboBox.getSelected(),
+			__fromArrowStyleComboBox.getSelected(), __toArrowStyleComboBox.getSelected() );
 		dispose();
 	}
 	else {
@@ -102,8 +101,7 @@ public void actionPerformed(ActionEvent event) {
 /**
 */
 private void checkValidity() {
-	if (!__node1ComboBox.getSelected().equals(
-		__node2ComboBox.getSelected())) {
+	if (!__node1ComboBox.getSelected().equals(__node2ComboBox.getSelected())) {
 		__okJButton.setEnabled(true);
 	}
 	else {
@@ -132,19 +130,12 @@ private void setupGUI() {
 
 	int y = 0;
 
-	List nodes = new Vector(__nodes.length);
+	List<String> nodeIds = new Vector(__nodes.length);
 	for (int i = 0; i < __nodes.length; i++) {	
-		nodes.add(__nodes[i].getCommonID());
+		nodeIds.add(__nodes[i].getCommonID());
 	}
-	java.util.Collections.sort(nodes);
+	java.util.Collections.sort(nodeIds);
 
-	__node1ComboBox = new SimpleJComboBox(nodes);
-	__node1ComboBox.addItemListener(this);
-	__node1ComboBox.addActionListener(this);
-	__node2ComboBox = new SimpleJComboBox(nodes);
-	__node2ComboBox.addItemListener(this);
-	__node2ComboBox.addActionListener(this);
-	
 	JPanel top = new JPanel();
 	top.setLayout(new GridBagLayout());
 
@@ -153,21 +144,69 @@ private void setupGUI() {
 		GridBagConstraints.BOTH, GridBagConstraints.WEST);
 
 	y = 0;
-	JGUIUtil.addComponent(top, new JLabel("From Node: "),
+	__node1ComboBox = new SimpleJComboBox(nodeIds);
+	__node1ComboBox.addItemListener(this);
+	__node1ComboBox.addActionListener(this);
+	JGUIUtil.addComponent(top, new JLabel("From node: "),
 		0, y, 1, 1, 1, 1,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(top, __node1ComboBox,
 		1, y, 1, 1, 1, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
-	y++;
 
-	JGUIUtil.addComponent(top, new JLabel("To Node: "),
-		0, y, 1, 1, 1, 1,
+	__node2ComboBox = new SimpleJComboBox(nodeIds);
+	__node2ComboBox.addItemListener(this);
+	__node2ComboBox.addActionListener(this);
+	JGUIUtil.addComponent(top, new JLabel("To node: "),
+		0, ++y, 1, 1, 1, 1,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(top, __node2ComboBox,
 		1, y, 1, 1, 1, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
-	y++;
+	
+	__linkId_JTextField = new JTextField(10);
+	JGUIUtil.addComponent(top, new JLabel("Link ID: "),
+		0, ++y, 1, 1, 1, 1,
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
+	JGUIUtil.addComponent(top, __linkId_JTextField,
+		1, y, 1, 1, 1, 1,
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
+	
+	List<String> lineStyleChoices = new Vector();
+	lineStyleChoices.add ( "" + GRLineStyleType.DASHED );
+	lineStyleChoices.add ( "" + GRLineStyleType.SOLID );
+	__lineStyleComboBox = new SimpleJComboBox(lineStyleChoices);
+	__lineStyleComboBox.addItemListener(this);
+	__lineStyleComboBox.addActionListener(this);
+	JGUIUtil.addComponent(top, new JLabel("Line style: "),
+		0, ++y, 1, 1, 1, 1,
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
+	JGUIUtil.addComponent(top, __lineStyleComboBox,
+		1, y, 1, 1, 1, 1,
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
+	
+	List<String> arrowEndChoices = new Vector();
+	arrowEndChoices.add ( "" + GRArrowStyleType.NONE );
+	arrowEndChoices.add ( "" + GRArrowStyleType.SOLID );
+	__fromArrowStyleComboBox = new SimpleJComboBox(arrowEndChoices);
+	__fromArrowStyleComboBox.addItemListener(this);
+	__fromArrowStyleComboBox.addActionListener(this);
+	JGUIUtil.addComponent(top, new JLabel("Arrow (from) style: "),
+		0, ++y, 1, 1, 1, 1,
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
+	JGUIUtil.addComponent(top, __fromArrowStyleComboBox,
+		1, y, 1, 1, 1, 1,
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
+	
+	__toArrowStyleComboBox = new SimpleJComboBox(arrowEndChoices);
+	__toArrowStyleComboBox.addItemListener(this);
+	__toArrowStyleComboBox.addActionListener(this);
+	JGUIUtil.addComponent(top, new JLabel("Arrow (to) style: "),
+		0, ++y, 1, 1, 1, 1,
+		GridBagConstraints.NONE, GridBagConstraints.EAST);
+	JGUIUtil.addComponent(top, __toArrowStyleComboBox,
+		1, y, 1, 1, 1, 1,
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
 	JPanel southPanel = new JPanel();
 	southPanel.setLayout(new GridBagLayout());
