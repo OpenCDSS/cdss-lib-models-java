@@ -41,6 +41,7 @@ import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 import RTi.Util.Time.TimeUtil;
+import RTi.Util.Time.YearType;
 
 // The layout for the GUI is as follows, for the most part using grid bag
 // layout.  Only the button_JPanel and bottom_JPanel use FlowLayout.  In this
@@ -1197,10 +1198,10 @@ private JPanel setupGUI_PlanEfficiency ( String routine )
 	int [] monthsWyr = { 10, 11, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 	int [] monthsIyr = { 11, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 	int [] months = monthsCyr;
-	if ( __dataset.getCyrl() == StateMod_DataSet.SM_WYR ) {
+	if ( __dataset.getCyrl() == YearType.WATER ) {
 		months = monthsWyr;
 	}
-	else if ( __dataset.getCyrl() == StateMod_DataSet.SM_IYR ) {
+	else if ( __dataset.getCyrl() == YearType.NOV_TO_OCT ) {
 		months = monthsIyr;
 	}
 	for ( int i = 0; i < 12; i++ ) {

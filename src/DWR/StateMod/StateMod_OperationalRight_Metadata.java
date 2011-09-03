@@ -5,16 +5,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Vector;
 
-/* TODO SAM 2010-12-09 Evaluate whether want to read from Excel
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.poifs.filesystem.POIFSFileSystem;
-*/
-
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
+import RTi.Util.String.StringUtil;
 import RTi.Util.Table.DataTable;
 
 /**
@@ -154,6 +147,24 @@ public StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] getAssoci
 	return __associatedPlanAllowedTypes;
 }
 
+//TODO SAM 2011-02-02 evaluate whether a choice can be used when all rights have been reviewed
+/**
+Return an explanation of the OprLoss fields.  This is used because sometimes StateMod uses fixed
+values and other times a number.  An editable JComboBox could be used but hold off until more review
+is done.
+*/
+public String getConveyanceLossNotes ()
+{	int rightTypeNumber = getRightTypeNumber();
+	if ( rightTypeNumber == 24 ) {
+		return "<html>0 - no transit loss<b>" +
+				"+n - transit loss n%<b>" +
+				"-1 - no transit loss</html>";
+	}
+	else {
+		return "";
+	}
+}
+
 /**
 TODO SAM 2011-01-31 Move to metadata if a pattern emerges - and are these additional or replacements
 For now interpret as additional (added to empty or non-empty list when used).
@@ -196,9 +207,22 @@ public StateMod_OperationalRight_Metadata_DiversionType [] getDiversionTypes ()
 
 /**
 Return whether full editing is supported for the right.
+@param dataSet StateMod_DataSet, needed to check some relationships during the read (e.g., type 24).
 */
-public boolean getFullEditingSupported ()
+public boolean getFullEditingSupported ( StateMod_DataSet dataSet )
 {
+	int rightTypeNumber = getRightTypeNumber();
+	int rightTypesThatUseDataSet [] = { 24 };
+	for ( int i = 0; i < rightTypesThatUseDataSet.length; i++ ) {
+		if ( rightTypeNumber == rightTypesThatUseDataSet[i] ) {
+			if ( dataSet == null ) {
+				return false;
+			}
+			else {
+				return __fullEditingSupported;
+			}
+		}
+	}
 	return __fullEditingSupported;
 }
 
@@ -253,6 +277,20 @@ public static StateMod_OperationalRight_Metadata getMetadata ( int rightTypeNumb
 		}
 	}
 	return null;
+}
+
+/**
+Get the monthly OprLimits title (data have different application based on right type).
+*/
+public String getMonthlyLimitsTitle ()
+{	int rightTypeNumber = getRightTypeNumber();
+	if ( rightTypeNumber == 24 ) {
+		return "Monthly and annual exchange limits (ACFT)";
+	}
+	else {
+		// Default (and for 47)...
+		return "Monthly and annual operating limits (ACFT)";
+	}
 }
 
 /**
@@ -450,10 +488,41 @@ public boolean getRightTypeUsesLimits ()
 }
 
 /**
+Indicate whether the operational right uses monthly efficiencies.
+For now hard code here but once list is known, may add to metadata.
+*/
+public boolean getRightTypeUsesMonthlyOprEff ( StateMod_DataSet dataSet, String source2, String sourceAccount2 )
+{	if ( StringUtil.isInteger(sourceAccount2) ) {
+		int sourceAccount2Int = Integer.valueOf(sourceAccount2);
+		if ( sourceAccount2Int <= 0 ) {
+			return false;
+		}
+	}
+	List<StateMod_Plan> planList =
+		(List<StateMod_Plan>)dataSet.getComponentForComponentType(StateMod_DataSet.COMP_PLANS).getData();
+	int pos = StateMod_Util.indexOf(planList, source2);
+	if ( pos >= 0 ) {
+		StateMod_Plan plan = planList.get(pos);
+		// Only used with T&C plan types...
+		if ( plan.getIPlnTyp() != 4 ) {
+			return false;
+		}
+	}
+	int rightTypeNumber = getRightTypeNumber();
+	int rightTypesThatUseMonthlyOprEff [] = { 24 };
+	for ( int i = 0; i < rightTypesThatUseMonthlyOprEff.length; i++ ) {
+		if ( rightTypeNumber == rightTypesThatUseMonthlyOprEff[i] ) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
 Indicate whether the operational right uses monthly operational limits.
 For now hard code here but once list is known, may add to metadata.
 */
-public boolean getRightTypeUsesMonthlyOprLimits ( double oprLimits )
+public boolean getRightTypeUsesMonthlyOprMax ( double oprLimits )
 {
 	int rightTypeNumber = getRightTypeNumber();
 	int oprLimitsInt = 0;
@@ -463,11 +532,18 @@ public boolean getRightTypeUsesMonthlyOprLimits ( double oprLimits )
 	else if ( oprLimits < 0.0 ) {
 		oprLimitsInt = (int)(oprLimits - .1);
 	}
-	int rightTypesThatUseMonthlyOprLimits [] = { 47 };
+	int rightTypesThatUseMonthlyOprLimits [] = { 24, 47 };
 	for ( int i = 0; i < rightTypesThatUseMonthlyOprLimits.length; i++ ) {
 		if ( rightTypeNumber == rightTypesThatUseMonthlyOprLimits[i] ) {
-			if ( oprLimitsInt == 1 ) {
+			if ( rightTypeNumber == 24 ) {
+				// Always use record
 				return true;
+			}
+			else if ( (rightTypeNumber == 47) && (oprLimitsInt == 1) ) {
+				return true;
+			}
+			else {
+				return false;
 			}
 		}
 	}
@@ -603,7 +679,7 @@ Indicate whether the operational right uses the special source account 1 choices
 */
 public boolean getRightTypeUsesSpecialSourceAccount1 ()
 {	int rightTypeNumber = getRightTypeNumber();
-	int rightsThatUseSpecialSourceAccount1 [] = { 9, 11, 14, 15, 16, 17, 18, 20, 39, 45 };
+	int rightsThatUseSpecialSourceAccount1 [] = { 9, 11, 14, 15, 16, 17, 18, 20, 24, 39, 45 };
 	for ( int i = 0; i < rightsThatUseSpecialSourceAccount1.length; i++ ) {
 		if ( rightTypeNumber == rightsThatUseSpecialSourceAccount1[i] ) {
 			return true;
@@ -617,7 +693,7 @@ Indicate whether the operational right uses the special source account 2 choices
 */
 public boolean getRightTypeUsesSpecialSourceAccount2 ()
 {	int rightTypeNumber = getRightTypeNumber();
-	int rightsThatUseSpecialSourceAccount2 [] = { 2, 3, 4, 6, 7, 14, 15, 16, 17, 18, 32, 33, 39, 45 };
+	int rightsThatUseSpecialSourceAccount2 [] = { 2, 3, 4, 6, 7, 14, 15, 16, 17, 18, 24, 32, 33, 39, 45 };
 	for ( int i = 0; i < rightsThatUseSpecialSourceAccount2.length; i++ ) {
 		if ( rightTypeNumber == rightsThatUseSpecialSourceAccount2[i] ) {
 			return true;
@@ -671,6 +747,11 @@ public List<String> getSourceAccount1SpecialChoices ()
 	}
 	else if ( rightTypeNumber == 20 ) {
 		specialChoices.add("0 - Meet target by releasing from each account");
+	}
+	else if ( rightTypeNumber == 24 ) {
+		for ( int i = 0; i <= 100; i++ ) {
+			specialChoices.add("" + i + " - Percent of source water right to exchange");
+		}
 	}
 	else if ( rightTypeNumber == 39 ) {
 		specialChoices.add("0 - Source water right is left on");
@@ -747,6 +828,13 @@ public List<String> getSourceAccount2SpecialChoices ()
 		specialChoices.add("1 - Coefficient");
 		specialChoices.add("1. - Coefficient");
 		specialChoices.add("1.0 - Coefficient");
+	}
+	else if ( rightTypeNumber == 24 ) {
+		specialChoices.add("0 - if Source 2 is NA");
+		specialChoices.add("1 - for a stndard return pattern");
+		specialChoices.add("3 - for a mixed return pattern");
+		specialChoices.add("4 - for a default (source) return pattern");
+		specialChoices.add("-1 - the T&C will be calculated upon release");
 	}
 	else if ( rightTypeNumber == 32 ) {
 		specialChoices.add("0 - Reservoir demand is not adjusted");
@@ -1557,15 +1645,21 @@ private static void initialize ()
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source1Array_24 =
 			    	{StateMod_OperationalRight_Metadata_SourceOrDestinationType.DIVERSION_RIGHT};
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] source2Array_24 =
-					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_TC};
+					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.NA,
+					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_TC};
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType [] destinationArray_24 =
-					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.CARRIER,
-					StateMod_OperationalRight_Metadata_SourceOrDestinationType.DIVERSION,
-					StateMod_OperationalRight_Metadata_SourceOrDestinationType.RESERVOIR};
+					{StateMod_OperationalRight_Metadata_SourceOrDestinationType.DIVERSION,
+					StateMod_OperationalRight_Metadata_SourceOrDestinationType.RESERVOIR,
+					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_ACCOUNTING,
+					StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_TC};
 				StateMod_OperationalRight_Metadata_DestinationLocationType [] destinationLocationArray_24 =
 					{StateMod_OperationalRight_Metadata_DestinationLocationType.UPSTREAM};
 				StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedArray_24 =
-					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_TC};
+					{StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA,
+					StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_DIVERSION,
+					StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_DIVERSION_FROM_TRANSMOUNTAIN,
+					StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_RESERVOIR,
+					StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.PLAN_REUSE_TO_RESERVOIR_FROM_TRANSMOUNTAIN};
 				StateMod_OperationalRight_Metadata_DiversionType [] diversionTypeArray_24 =
 					{StateMod_OperationalRight_Metadata_DiversionType.DEPLETION,
 					StateMod_OperationalRight_Metadata_DiversionType.DIVERSION};

@@ -48,10 +48,12 @@ import RTi.GRTS.TSViewJFrame;
 import RTi.TS.TS;
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleFileFilter;
+import RTi.Util.IO.DataSet;
 import RTi.Util.IO.ProcessManager;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 import RTi.Util.Time.TimeInterval;
+import RTi.Util.Time.YearType;
 
 /**
 This class provides static data and methods for user interface methods associated with StateMod, mainly
@@ -339,13 +341,13 @@ public static void displayGraphForTS(List tslist, PropList props, StateMod_DataS
 
 	// CalendarType: Wateryear, IrrigationYear, CalendarYear
 
-	if (dataset.getCyrl() == StateMod_DataSet.SM_CYR) {
+	if (dataset.getCyrl() == YearType.CALENDAR) {
 		proplist.set("CalendarType", "CalendarYear");
 	}
-	else if (dataset.getCyrl() == StateMod_DataSet.SM_WYR) {
+	else if (dataset.getCyrl() == YearType.WATER) {
 		proplist.set("CalendarType", "WaterYear");
 	}
-	else if (dataset.getCyrl() == StateMod_DataSet.SM_IYR) {
+	else if (dataset.getCyrl() == YearType.NOV_TO_OCT) {
 		proplist.set("CalendarType", "IrrigationYear");
 	}
 
@@ -412,7 +414,7 @@ case it won't be included in the title.
 @param status the status of the window.  Can be null or "", in which case 
 it won't be included in the title.
 */
-public static void setTitle(JFrame frame, StateMod_DataSet dataset, String window_title, String status)
+public static void setTitle(JFrame frame, DataSet dataset, String window_title, String status)
 {
 	String title = "";
 	int count = 0;

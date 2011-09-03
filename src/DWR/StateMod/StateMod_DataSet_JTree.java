@@ -277,143 +277,94 @@ public void actionPerformed(ActionEvent event)
 				StateMod_DataSet_WindowManager.WINDOW_DELAY_TABLE_MONTHLY )).selectID (dt.getID() );
 		}
 		else {
-			__dataset_wm.displayWindow (
-				StateMod_DataSet_WindowManager.
-				WINDOW_DELAY_TABLE_DAILY, __editable );
-				((StateMod_DelayTable_JFrame)
-				__dataset_wm.getWindow (
-				StateMod_DataSet_WindowManager.
-				WINDOW_DELAY_TABLE_DAILY )).selectID (
-				dt.getID() );
+			__dataset_wm.displayWindow ( StateMod_DataSet_WindowManager.WINDOW_DELAY_TABLE_DAILY, __editable );
+				((StateMod_DelayTable_JFrame)__dataset_wm.getWindow (
+				StateMod_DataSet_WindowManager.WINDOW_DELAY_TABLE_DAILY )).selectID (dt.getID() );
 		}
 	}
 	else if ( data instanceof StateMod_Diversion ) {
 		if ( action.indexOf ( __SUMMARIZE_HOW1 ) >= 0 ) {
 			PropList props = new PropList ( "Diversion" );
-			props.set ( "Title=" +
-			((StateMod_Diversion)data).getID() +
-			" Diversion use in Data Set" );
-			new ReportJFrame (
-				__dataset.getDataObjectDetails(
-				StateMod_DataSet.COMP_DIVERSION_STATIONS,
-				((StateMod_Diversion)data).getID() ), props );
+			props.set ( "Title=" + ((StateMod_Diversion)data).getID() + " Diversion use in Data Set" );
+			new ReportJFrame ( __dataset.getDataObjectDetails(
+				StateMod_DataSet.COMP_DIVERSION_STATIONS,((StateMod_Diversion)data).getID() ), props );
 		}
 		else {
 			// Assume properties...
 			__dataset_wm.displayWindow (StateMod_DataSet_WindowManager.WINDOW_DIVERSION,__editable);
 			((StateMod_Diversion_JFrame)__dataset_wm.getWindow (
-				StateMod_DataSet_WindowManager.
-				WINDOW_DIVERSION )).selectID (((StateMod_Diversion)data).getID() );
+				StateMod_DataSet_WindowManager.WINDOW_DIVERSION )).selectID (((StateMod_Diversion)data).getID() );
 		}
 	}
 	else if ( data instanceof TS ) {
-		// Might be precipitation or evaporation.  Check the data type
-		// to determine...
+		// Might be precipitation or evaporation.  Check the data type to determine...
 		TS ts = (TS)data;
 		PropList props = new PropList ( "Precipitation/Evaporation" );
 		if ( action.indexOf ( __SUMMARIZE_HOW1 ) >= 0 ) {
-			if (	StringUtil.startsWithIgnoreCase(
-				ts.getDataType(),"e") ) {
-				props.set ( "Title=" + ts.getLocation() +
-				" Evaporation TS use in Data Set" );
-				new ReportJFrame (
-				__dataset.getDataObjectDetails(
-				StateMod_DataSet.COMP_EVAPORATION_TS_MONTHLY,
-				ts.getLocation() ), props );
+			if ( StringUtil.startsWithIgnoreCase( ts.getDataType(),"e") ) {
+				props.set ( "Title=" + ts.getLocation() + " Evaporation TS use in Data Set" );
+				new ReportJFrame ( __dataset.getDataObjectDetails(
+				StateMod_DataSet.COMP_EVAPORATION_TS_MONTHLY, ts.getLocation() ), props );
 			}
-			else if(StringUtil.startsWithIgnoreCase(
-				ts.getDataType(),"p") ) {
-				props.set ( "Title=" + ts.getLocation() +
-				" Precipitation TS use in Data Set" );
-				new ReportJFrame (
-				__dataset.getDataObjectDetails(
-				StateMod_DataSet.COMP_PRECIPITATION_TS_MONTHLY,
-				ts.getLocation() ), props );
+			else if(StringUtil.startsWithIgnoreCase( ts.getDataType(),"p") ) {
+				props.set ( "Title=" + ts.getLocation() + " Precipitation TS use in Data Set" );
+				new ReportJFrame ( __dataset.getDataObjectDetails(
+				StateMod_DataSet.COMP_PRECIPITATION_TS_MONTHLY, ts.getLocation() ), props );
 			}
 		}
 		else if ( action.indexOf ( __PROPERTIES ) >= 0 ) {
-			if (	StringUtil.startsWithIgnoreCase(
-				ts.getDataType(),"e") ) {
+			if ( StringUtil.startsWithIgnoreCase(ts.getDataType(),"e") ) {
 				props.set ( "Title=Evaporation" );
 			}
-			else if ( StringUtil.startsWithIgnoreCase(
-				ts.getDataType(),"p") ) {
+			else if ( StringUtil.startsWithIgnoreCase(ts.getDataType(),"p") ) {
 				props.set ( "Title=Precipitation" );
 			}
 			props.set ( "InitialView=Graph" );
 			props.set ( "GraphType=Bar" );
 			List tslist = new Vector(1);
 			tslist.add ( ts );
-			try {	new TSViewJFrame ( tslist, props );
+			try {
+				new TSViewJFrame ( tslist, props );
 			}
 			catch ( Exception e ) {
-				Message.printWarning ( 1, routine,
-				"Error displaying data." );
+				Message.printWarning ( 1, routine, "Error displaying data." );
 			}
 		}
 	}
 	else if ( data instanceof StateMod_Reservoir ) {
-		__dataset_wm.displayWindow (
-			StateMod_DataSet_WindowManager.
-			WINDOW_RESERVOIR, __editable );
+		__dataset_wm.displayWindow ( StateMod_DataSet_WindowManager.WINDOW_RESERVOIR, __editable );
 		((StateMod_Reservoir_JFrame)__dataset_wm.getWindow (
-			StateMod_DataSet_WindowManager.
-			WINDOW_RESERVOIR )).selectID (
-			((StateMod_Reservoir)data).getID() );
+			StateMod_DataSet_WindowManager.WINDOW_RESERVOIR )).selectID (((StateMod_Reservoir)data).getID() );
 	}
 	else if ( data instanceof StateMod_InstreamFlow ) {
-		__dataset_wm.displayWindow (
-			StateMod_DataSet_WindowManager.
-			WINDOW_INSTREAM, __editable );
+		__dataset_wm.displayWindow ( StateMod_DataSet_WindowManager.WINDOW_INSTREAM, __editable );
 		((StateMod_InstreamFlow_JFrame)__dataset_wm.getWindow (
-			StateMod_DataSet_WindowManager.
-			WINDOW_INSTREAM )).selectID (
-			((StateMod_InstreamFlow)data).getID() );
+			StateMod_DataSet_WindowManager.WINDOW_INSTREAM )).selectID (((StateMod_InstreamFlow)data).getID() );
 	}
 	else if ( data instanceof StateMod_Well ) {
-		__dataset_wm.displayWindow (
-			StateMod_DataSet_WindowManager.
-			WINDOW_WELL, __editable );
+		__dataset_wm.displayWindow ( StateMod_DataSet_WindowManager.WINDOW_WELL, __editable );
 		((StateMod_Well_JFrame)__dataset_wm.getWindow (
-			StateMod_DataSet_WindowManager.
-			WINDOW_WELL )).selectID (
-			((StateMod_Well)data).getID() );
+			StateMod_DataSet_WindowManager.WINDOW_WELL )).selectID (((StateMod_Well)data).getID() );
 	}
 	else if ( data instanceof StateMod_Plan ) {
-		__dataset_wm.displayWindow (
-			StateMod_DataSet_WindowManager.
-			WINDOW_PLAN, __editable );
+		__dataset_wm.displayWindow ( StateMod_DataSet_WindowManager.WINDOW_PLAN, __editable );
 		((StateMod_Plan_JFrame)__dataset_wm.getWindow (
-			StateMod_DataSet_WindowManager.
-			WINDOW_PLAN )).selectID (
-			((StateMod_Plan)data).getID() );
+			StateMod_DataSet_WindowManager.WINDOW_PLAN )).selectID ( ((StateMod_Plan)data).getID() );
 	}
 	else if ( data instanceof StateMod_StreamEstimate ) {
-		__dataset_wm.displayWindow (
-			StateMod_DataSet_WindowManager.
-			WINDOW_STREAMESTIMATE, __editable );
+		__dataset_wm.displayWindow ( StateMod_DataSet_WindowManager.WINDOW_STREAMESTIMATE, __editable );
 		((StateMod_StreamEstimate_JFrame)__dataset_wm.getWindow (
-			StateMod_DataSet_WindowManager.
-			WINDOW_STREAMESTIMATE )).selectID (
-			((StateMod_StreamEstimate)data).getID() );
+			StateMod_DataSet_WindowManager.WINDOW_STREAMESTIMATE )).selectID (((StateMod_StreamEstimate)data).getID() );
 	}
 	else if ( data instanceof StateMod_RiverNetworkNode ) {
-		__dataset_wm.displayWindow (
-			StateMod_DataSet_WindowManager.
-			WINDOW_RIVER_NETWORK, __editable );
+		__dataset_wm.displayWindow ( StateMod_DataSet_WindowManager.WINDOW_RIVER_NETWORK, __editable );
 		((StateMod_RiverNetworkNode_JFrame)__dataset_wm.getWindow (
-			StateMod_DataSet_WindowManager.
-			WINDOW_RIVER_NETWORK )).selectID (
-			((StateMod_RiverNetworkNode)data).getID() );
+			StateMod_DataSet_WindowManager.WINDOW_RIVER_NETWORK )).selectID (((StateMod_RiverNetworkNode)data).getID() );
 	}
 	else if ( data instanceof StateMod_OperationalRight ) {
-		__dataset_wm.displayWindow (
-			StateMod_DataSet_WindowManager.
-			WINDOW_OPERATIONAL_RIGHT, __editable );
+		__dataset_wm.displayWindow ( StateMod_DataSet_WindowManager.WINDOW_OPERATIONAL_RIGHT, __editable );
 		((StateMod_OperationalRight_JFrame)__dataset_wm.getWindow (
-			StateMod_DataSet_WindowManager.
-			WINDOW_OPERATIONAL_RIGHT )).selectID (
-			((StateMod_OperationalRight)data).getID() );
+			StateMod_DataSet_WindowManager.WINDOW_OPERATIONAL_RIGHT )).selectID ( ((StateMod_OperationalRight)data).getID() );
 	}
 }
 
@@ -430,11 +381,11 @@ public void clear() {
 	}
 
 	for (int i = 0; i < size; i++) {
-		try {	removeNode((SimpleJTree_Node)v.get(i), false);
+		try {
+			removeNode((SimpleJTree_Node)v.get(i), false);
 		}
 		catch (Exception e) {
-			Message.printWarning(2, routine,
-				"Cannot remove node " + node.toString());
+			Message.printWarning(2, routine, "Cannot remove node " + node.toString());
 			Message.printWarning(2, routine, e);
 		}
 	}
@@ -469,8 +420,7 @@ public void displayDataSet()
 		type = comp.getComponentType();
 		if ( type == StateMod_DataSet.COMP_GEOVIEW_GROUP ) {
 			// Don't want to list the groups because there is no
-			// way to display edit (or they are displayed
-			// elsewhere)...
+			// way to display edit (or they are displayed elsewhere)...
 			continue;
 		}
 		node = new SimpleJTree_Node(comp.getComponentName());
@@ -482,12 +432,11 @@ public void displayDataSet()
 		
 		// To force groups to be folders, even if no data underneath...
 		node.setIcon(folder_Icon);
-		try {	addNode(node);
+		try {
+			addNode(node);
 		}
 		catch (Exception e) {
-			Message.printWarning(2, routine,
-				"Error adding component group "
-				+ comp.getComponentName());
+			Message.printWarning(2, routine, "Error adding component group " + comp.getComponentName());
 			Message.printWarning(2, routine, e);
 			continue;
 		}
@@ -495,7 +444,8 @@ public void displayDataSet()
 			// Display the primary object in each group
 			hadData = displayDataSetComponent ( comp, node );
 		}
-		else {	// Add the components in the group...
+		else {
+			// Add the components in the group...
 			List v2 = (List)comp.getData();
 			int size2 = 0;
 			if (v2 != null) {
@@ -506,15 +456,13 @@ public void displayDataSet()
 				if ( (comp == null) || !comp.isVisible()) {
 					continue;
 				}
-				node2 = new SimpleJTree_Node(
-					comp.getComponentName() );
+				node2 = new SimpleJTree_Node( comp.getComponentName() );
 				node2.setData(comp);
-				try {	addNode(node2, node);
+				try {
+					addNode(node2, node);
 				}
 				catch (Exception e) {
-					Message.printWarning(2, routine,
-						"Error adding component "
-					+ comp.getComponentName());
+					Message.printWarning(2, routine, "Error adding component " + comp.getComponentName());
 					Message.printWarning(2, routine, e);
 					continue;
 				}
@@ -531,18 +479,15 @@ public void displayDataSet()
 }
 
 /**
-Display the primary data for a component.  This method is called when adding
-nodes under a group node.
+Display the primary data for a component.  This method is called when adding nodes under a group node.
 @param comp Component to display data.
 @param node Parent node to display under.
 */
-private boolean displayDataSetComponent (	DataSetComponent comp,
-						SimpleJTree_Node node )
+private boolean displayDataSetComponent ( DataSetComponent comp, SimpleJTree_Node node )
 {	String routine = "StateMod_DataSet_JTree.displayDataSetComponent";
 	boolean hadData = false;	// No data for component...
 	String label = "";
-	int primary_type = __dataset.lookupPrimaryComponentTypeForComponentGroup
-				(comp.getComponentType());
+	int primary_type = __dataset.lookupPrimaryComponentTypeForComponentGroup(comp.getComponentType());
 	if (primary_type >= 0) {
 		comp = __dataset.getComponentForComponentType( primary_type);
 	}
@@ -559,10 +504,9 @@ private boolean displayDataSetComponent (	DataSetComponent comp,
 	if (data_Object instanceof List) {
 		data = (List)comp.getData();
 	}
-	else {	// Continue (REVISIT - what components would
-		// this happen for?)...
-		Message.printWarning ( 2, routine,
-		"Unexpected non-Vector for " + comp.getComponentName() );
+	else {
+		// Continue (REVISIT - what components would this happen for?)...
+		Message.printWarning ( 2, routine, "Unexpected non-Vector for " + comp.getComponentName() );
 		return hadData;
 	}
 	StateCU_Data cudata;
@@ -577,31 +521,27 @@ private boolean displayDataSetComponent (	DataSetComponent comp,
 		data_Object = data.get(idata);
 		if ( data_Object instanceof StateMod_Data ) {
 			smdata = (StateMod_Data)data.get(idata);
-			label = StateMod_Util.formatDataLabel ( smdata.getID(),
-				smdata.getName() );
+			label = StateMod_Util.formatDataLabel ( smdata.getID(), smdata.getName() );
 			node2 = new SimpleJTree_Node( label );
 			node2.setData(smdata);
 		}
 		else if ( data_Object instanceof StateCU_Data ){
 			cudata = (StateCU_Data)data.get(idata);
-			label = StateMod_Util.formatDataLabel ( cudata.getID(),
-				cudata.getName() );
+			label = StateMod_Util.formatDataLabel ( cudata.getID(), cudata.getName() );
 			node2 = new SimpleJTree_Node( label );
 			node2.setData(cudata);
 		}
 		else if ( data_Object instanceof TS ) {
 			tsdata = (TS)data.get(idata);
-			label = StateMod_Util.formatDataLabel (
-				tsdata.getLocation(),
-				tsdata.getDescription() );
+			label = StateMod_Util.formatDataLabel ( tsdata.getLocation(), tsdata.getDescription() );
 			node2 = new SimpleJTree_Node( label );
 			node2.setData(tsdata);
 		}
-		try {	addNode(node2, node);
+		try {
+			addNode(node2, node);
 		}
 		catch (Exception e) {
-			Message.printWarning(2,
-			routine, "Error adding data \"" + label + "\"" );
+			Message.printWarning(2, routine, "Error adding data \"" + label + "\"" );
 			Message.printWarning(2, routine, e);
 			continue;
 		}
@@ -609,9 +549,9 @@ private boolean displayDataSetComponent (	DataSetComponent comp,
 	if ( dsize > 0 ) {
 		hadData = true;
 	}
-	// Collapse the node because the lists are
-	// usually pretty long...
-	try {	collapseNode(node);
+	// Collapse the node because the lists are usually pretty long...
+	try {
+		collapseNode(node);
 	}
 	catch (Exception e) {
 		// Ignore.
@@ -666,8 +606,7 @@ public void mouseReleased(MouseEvent event) {
 /**
 Refresh a part of the JTree based on the component.  This method is only
 designed to work with the detailed display.  It is currently assumed that all
-components are represented in the tree, even if no data are listed below the
-group node.
+components are represented in the tree, even if no data are listed below the group node.
 @param comp_type Component type being refreshed.  Use the component groups.
 */
 public void refresh ( int comp_type )
@@ -675,19 +614,18 @@ public void refresh ( int comp_type )
 	if ( !__display_data_objects ) {
 		return;
 	}
-	DataSetComponent comp =
-		__dataset.getComponentForComponentType ( comp_type );
+	DataSetComponent comp = __dataset.getComponentForComponentType ( comp_type );
 	// Find the node...
 	SimpleJTree_Node node = findNodeByName(comp.getComponentName());
 	if ( node == null ) {
 		return;
 	}
 	// Remove the sub-nodes...
-	try {	removeChildren(node);
+	try {
+		removeChildren(node);
 	}
 	catch ( Exception e ) {
-		Message.printWarning ( 2, routine,
-		"Error removing old nodes - error should not occur." );
+		Message.printWarning ( 2, routine, "Error removing old nodes - error should not occur." );
 	}
 	// Now redraw the data...
 	setFastAdd(true);
@@ -727,170 +665,118 @@ private void showPopupMenu(MouseEvent e)
 		JMenuItem item;
 		data = __popup_Node.getData();
 		if ( data instanceof DataSetComponent ) {
-			// Specific checks need to be done to identify the
-			// component group...
+			// Specific checks need to be done to identify the component group...
 
 			DataSetComponent comp = (DataSetComponent)data;
 			int comp_type = comp.getComponentType();
 
 			if ( comp_type == StateMod_DataSet.COMP_CONTROL_GROUP ){
-				// For now display the control file information
-				// only...
-				comp2 =	__dataset.getComponentForComponentType(
-					StateMod_DataSet.COMP_CONTROL);
+				// For now display the control file information only...
+				comp2 =	__dataset.getComponentForComponentType(StateMod_DataSet.COMP_CONTROL);
 				if ( comp2.hasData() ) {
-					item = new SimpleJMenuItem (
-						"Control Properties",
-						this );
+					item = new SimpleJMenuItem ("Control Properties",this );
 					__popup_JPopupMenu.add ( item );
 				}
 			}
 
-			else if (comp_type ==
-				StateMod_DataSet.COMP_STREAMGAGE_GROUP ) {
-				comp2 =	__dataset.getComponentForComponentType(
-					StateMod_DataSet.
-					COMP_STREAMGAGE_STATIONS);
+			else if (comp_type == StateMod_DataSet.COMP_STREAMGAGE_GROUP ) {
+				comp2 =	__dataset.getComponentForComponentType(StateMod_DataSet.COMP_STREAMGAGE_STATIONS);
 				if ( (comp2 != null) && comp2.hasData() ) {
-					item = new SimpleJMenuItem (
-					"Stream Gage Station Properties", this);
+					item = new SimpleJMenuItem ("Stream Gage Station Properties", this);
 					__popup_JPopupMenu.add ( item );
 				}
 			}
 
-			else if(comp_type == StateMod_DataSet.
-				COMP_DELAY_TABLE_MONTHLY_GROUP ) {
-				comp2 =	__dataset.getComponentForComponentType(
-					StateMod_DataSet.
-					COMP_DELAY_TABLES_MONTHLY);
+			else if(comp_type == StateMod_DataSet.COMP_DELAY_TABLE_MONTHLY_GROUP ) {
+				comp2 =	__dataset.getComponentForComponentType(StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY);
 				if ( (comp2 != null) && comp2.hasData() ) {
-					item = new SimpleJMenuItem (
-					"Delay Table Properties", this );
+					item = new SimpleJMenuItem ( "Delay Table Properties", this );
 					__popup_JPopupMenu.add ( item );
 				}
 			}
 
-			else if(comp_type == StateMod_DataSet.
-				COMP_DELAY_TABLE_DAILY_GROUP ) {
-				comp2 =	__dataset.getComponentForComponentType(
-					StateMod_DataSet.
-					COMP_DELAY_TABLES_MONTHLY);
+			else if(comp_type == StateMod_DataSet.COMP_DELAY_TABLE_DAILY_GROUP ) {
+				comp2 =	__dataset.getComponentForComponentType(StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY);
 				if ( (comp2 != null) && comp2.hasData() ) {
-					item = new SimpleJMenuItem (
-					"Delay Table Properties", this );
+					item = new SimpleJMenuItem ("Delay Table Properties", this );
 					__popup_JPopupMenu.add ( item );
 				}
 			}
 
-			else if(comp_type == StateMod_DataSet.
-				COMP_DIVERSION_GROUP){
-				comp2 =	__dataset.getComponentForComponentType(
-					StateMod_DataSet.
-					COMP_DIVERSION_STATIONS);
+			else if(comp_type == StateMod_DataSet.COMP_DIVERSION_GROUP){
+				comp2 =	__dataset.getComponentForComponentType(StateMod_DataSet.COMP_DIVERSION_STATIONS);
 				if ( (comp2 != null) && comp2.hasData() ) {
-					item = new SimpleJMenuItem (
-					"Diversion Properties", this );
+					item = new SimpleJMenuItem ( "Diversion Properties", this );
 					__popup_JPopupMenu.add ( item );
 				}
 			}
 
-			else if((comp_type == StateMod_DataSet.
-				COMP_PRECIPITATION_GROUP) ) {
+			else if((comp_type == StateMod_DataSet.COMP_PRECIPITATION_GROUP) ) {
 				comp2 =	__dataset.getComponentForComponentType(
-					StateMod_DataSet.
-					COMP_PRECIPITATION_TS_MONTHLY);
+					StateMod_DataSet.COMP_PRECIPITATION_TS_MONTHLY);
 				if ( (comp2 != null) && comp2.hasData() ) {
-					item = new SimpleJMenuItem (
-						"Precipitation Properties",
-						this );
+					item = new SimpleJMenuItem ( "Precipitation Properties", this );
 					__popup_JPopupMenu.add ( item );
 				}
 			}
 
-			else if(comp_type == StateMod_DataSet.
-				COMP_EVAPORATION_GROUP ) {
-				comp2 =	__dataset.getComponentForComponentType(
-					StateMod_DataSet.
-					COMP_EVAPORATION_TS_MONTHLY);
+			else if(comp_type == StateMod_DataSet.COMP_EVAPORATION_GROUP ) {
+				comp2 =	__dataset.getComponentForComponentType(StateMod_DataSet.COMP_EVAPORATION_TS_MONTHLY);
 				if ( (comp2 != null) && comp2.hasData() ) {
-					item = new SimpleJMenuItem (
-					"Evaporation Properties", this );
+					item = new SimpleJMenuItem ("Evaporation Properties", this );
 					__popup_JPopupMenu.add ( item );
 				}
 			}
 
-			else if(comp_type == StateMod_DataSet.
-				COMP_RESERVOIR_GROUP){
-				comp2 =	__dataset.getComponentForComponentType(
-					StateMod_DataSet.
-					COMP_RESERVOIR_STATIONS);
+			else if(comp_type == StateMod_DataSet.COMP_RESERVOIR_GROUP){
+				comp2 =	__dataset.getComponentForComponentType(StateMod_DataSet.COMP_RESERVOIR_STATIONS);
 				if ( (comp2 != null) && comp2.hasData() ) {
-					item = new SimpleJMenuItem (
-					"Reservoir Properties", this );
+					item = new SimpleJMenuItem ("Reservoir Properties", this );
 					__popup_JPopupMenu.add ( item );
 				}
 			}
 
-			else if(comp_type == StateMod_DataSet.
-				COMP_INSTREAM_GROUP){
-				comp2 =	__dataset.getComponentForComponentType(
-					StateMod_DataSet.
-					COMP_INSTREAM_STATIONS);
+			else if(comp_type == StateMod_DataSet.COMP_INSTREAM_GROUP){
+				comp2 =	__dataset.getComponentForComponentType(StateMod_DataSet.COMP_INSTREAM_STATIONS);
 				if ( (comp2 != null) && comp2.hasData() ) {
-					item = new SimpleJMenuItem (
-					"Instream Flow Properties", this );
+					item = new SimpleJMenuItem ("Instream Flow Properties", this );
 					__popup_JPopupMenu.add ( item );
 				}
 			}
 			else if(comp_type == StateMod_DataSet.COMP_WELL_GROUP){
-				comp2 =	__dataset.getComponentForComponentType(
-					StateMod_DataSet.COMP_WELL_STATIONS);
+				comp2 =	__dataset.getComponentForComponentType(StateMod_DataSet.COMP_WELL_STATIONS);
 				if ( (comp2 != null) && comp2.hasData() ) {
-					item = new SimpleJMenuItem (
-					"Well Properties", this );
+					item = new SimpleJMenuItem ("Well Properties", this );
 					__popup_JPopupMenu.add ( item );
 				}
 			}
 			else if(comp_type == StateMod_DataSet.COMP_PLAN_GROUP){
-				comp2 =	__dataset.getComponentForComponentType(
-					StateMod_DataSet.COMP_PLANS);
+				comp2 =	__dataset.getComponentForComponentType(StateMod_DataSet.COMP_PLANS);
 				if ( (comp2 != null) && comp2.hasData() ) {
-					item = new SimpleJMenuItem (
-					"Plan Properties", this );
+					item = new SimpleJMenuItem ( "Plan Properties", this );
 					__popup_JPopupMenu.add ( item );
 				}
 			}
-			else if(comp_type ==
-				StateMod_DataSet.COMP_STREAMESTIMATE_GROUP){
-				comp2 =	__dataset.getComponentForComponentType(
-					StateMod_DataSet.
-					COMP_STREAMESTIMATE_STATIONS);
+			else if(comp_type == StateMod_DataSet.COMP_STREAMESTIMATE_GROUP){
+				comp2 =	__dataset.getComponentForComponentType(StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS);
 				if ( (comp2 != null) && comp2.hasData() ) {
-					item = new SimpleJMenuItem (
-					"Stream Estimate Station Properties",
-					this );
+					item = new SimpleJMenuItem ( "Stream Estimate Station Properties", this );
 					__popup_JPopupMenu.add ( item );
 				}
 			}
-			else if(comp_type == StateMod_DataSet.
-				COMP_RIVER_NETWORK_GROUP){
+			else if(comp_type == StateMod_DataSet.COMP_RIVER_NETWORK_GROUP){
 				// Only add if data are available...
-				comp2 =	__dataset.getComponentForComponentType(
-					StateMod_DataSet.COMP_RIVER_NETWORK);
+				comp2 =	__dataset.getComponentForComponentType(StateMod_DataSet.COMP_RIVER_NETWORK);
 				if ( (comp2 != null) && comp2.hasData() ) {
-					item = new SimpleJMenuItem (
-					"River Network Properties", this );
+					item = new SimpleJMenuItem ( "River Network Properties", this );
 					__popup_JPopupMenu.add ( item );
 				}
 			}
 
-			else if(comp_type == StateMod_DataSet.
-				COMP_OPERATION_GROUP){
-				comp2 =	__dataset.getComponentForComponentType(
-					StateMod_DataSet.COMP_OPERATION_RIGHTS);
+			else if(comp_type == StateMod_DataSet.COMP_OPERATION_GROUP){
+				comp2 =	__dataset.getComponentForComponentType(StateMod_DataSet.COMP_OPERATION_RIGHTS);
 				if ( (comp2 != null) && comp2.hasData() ) {
-					item = new SimpleJMenuItem (
-					"Operation Rights Properties", this );
+					item = new SimpleJMenuItem ("Operation Rights Properties", this );
 					__popup_JPopupMenu.add ( item );
 				}
 			}
@@ -901,76 +787,61 @@ private void showPopupMenu(MouseEvent e)
 		// Control... nothing for now.
 
 		else if ( data instanceof StateMod_StreamGage ) {
-			item = new SimpleJMenuItem (
-				__popup_Node.getText() + " Properties", this );
+			item = new SimpleJMenuItem ( __popup_Node.getText() + " Properties", this );
 			__popup_JPopupMenu.add ( item );
 		}
 		else if ( data instanceof StateMod_DelayTable ) {
-			item = new SimpleJMenuItem (
-				__popup_Node.getText() + " Properties", this );
+			item = new SimpleJMenuItem ( __popup_Node.getText() + " Properties", this );
 			__popup_JPopupMenu.add ( item );
 		}
 		else if ( data instanceof StateMod_Diversion ) {
-			item = new SimpleJMenuItem (
-				__popup_Node.getText() + " Properties", this );
+			item = new SimpleJMenuItem ( __popup_Node.getText() + " Properties", this );
 			__popup_JPopupMenu.add ( item );
 			__popup_JPopupMenu.add ( new SimpleJMenuItem (
-				__SUMMARIZE_HOW1 + "\"" +__popup_Node.getText()+
-				"\"" + __SUMMARIZE_HOW2, this ));
+				__SUMMARIZE_HOW1 + "\"" +__popup_Node.getText()+ "\"" + __SUMMARIZE_HOW2, this ));
 		}
 		else if ( data instanceof MonthTS ) {
 			// Precipitation or evaporation time series...
+			__popup_JPopupMenu.add ( new SimpleJMenuItem ( __popup_Node.getText() + __PROPERTIES, this ));
 			__popup_JPopupMenu.add ( new SimpleJMenuItem (
-				__popup_Node.getText() + __PROPERTIES, this ));
-			__popup_JPopupMenu.add ( new SimpleJMenuItem (
-				__SUMMARIZE_HOW1 + "\"" +__popup_Node.getText()+
-				"\"" + __SUMMARIZE_HOW2, this ));
+				__SUMMARIZE_HOW1 + "\"" +__popup_Node.getText() + "\"" + __SUMMARIZE_HOW2, this ));
 		}
 		else if ( data instanceof StateMod_Reservoir ) {
-			item = new SimpleJMenuItem (
-				__popup_Node.getText() + " Properties", this );
+			item = new SimpleJMenuItem ( __popup_Node.getText() + " Properties", this );
 			__popup_JPopupMenu.add ( item );
 		}
 		else if ( data instanceof StateMod_InstreamFlow ) {
-			item = new SimpleJMenuItem (
-				__popup_Node.getText() + " Properties", this );
+			item = new SimpleJMenuItem ( __popup_Node.getText() + " Properties", this );
 			__popup_JPopupMenu.add ( item );
 		}
 		else if ( data instanceof StateMod_Well ) {
-			item = new SimpleJMenuItem (
-				__popup_Node.getText() + " Properties", this );
+			item = new SimpleJMenuItem ( __popup_Node.getText() + " Properties", this );
 			__popup_JPopupMenu.add ( item );
 		}
 		else if ( data instanceof StateMod_Plan ) {
-			item = new SimpleJMenuItem (
-				__popup_Node.getText() + " Properties", this );
+			item = new SimpleJMenuItem ( __popup_Node.getText() + " Properties", this );
 			__popup_JPopupMenu.add ( item );
 		}
 		else if ( data instanceof StateMod_StreamEstimate ) {
-			item = new SimpleJMenuItem (
-				__popup_Node.getText() + " Properties", this );
+			item = new SimpleJMenuItem ( __popup_Node.getText() + " Properties", this );
 			__popup_JPopupMenu.add ( item );
 		}
 		else if ( data instanceof StateMod_OperationalRight ) {
-			item = new SimpleJMenuItem (
-				__popup_Node.getText() + " Properties", this );
+			item = new SimpleJMenuItem ( __popup_Node.getText() + " Properties", this );
 			__popup_JPopupMenu.add ( item );
 		}
 		else if ( data instanceof StateMod_RiverNetworkNode ) {
-			item = new SimpleJMenuItem (
-				__popup_Node.getText() + " Properties", this );
+			item = new SimpleJMenuItem ( __popup_Node.getText() + " Properties", this );
 			__popup_JPopupMenu.add ( item );
 		}
 		// Others (e.g., San Juan Sediment) supported later....
-		else {	Message.printWarning ( 2, routine,
-			"Node data is not recognized" );
+		else {
+			Message.printWarning ( 2, routine, "Node data is not recognized" );
 			return;
 		}
 	}
-	// Now display the popup so that the user can select the appropriate
-	// menu item...
-	Point pt = JGUIUtil.computeOptimalPosition (
-		e.getPoint(), e.getComponent(), __popup_JPopupMenu );
+	// Now display the popup so that the user can select the appropriate menu item...
+	Point pt = JGUIUtil.computeOptimalPosition ( e.getPoint(), e.getComponent(), __popup_JPopupMenu );
 	__popup_JPopupMenu.show(e.getComponent(), pt.x, pt.y);
 }
 

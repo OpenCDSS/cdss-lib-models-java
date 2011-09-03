@@ -505,7 +505,8 @@ throws Exception {
 			break;
 		case StateMod_DataSet.COMP_OPERATION_RIGHTS:
 			// 2 is the file version (introduced for StateMod version 12 change)
-			StateMod_OperationalRight.writeStateModFile( oldFilename, newFilename, 2, (List)data, comments);
+			StateMod_OperationalRight.writeStateModFile( oldFilename, newFilename, 2, (List)data, comments,
+				__dataset );
 			name = "Operational Rights";
 			break;
 		case StateMod_DataSet.COMP_RESERVOIR_STATIONS:
@@ -580,13 +581,13 @@ throws Exception {
 		case StateMod_DataSet.COMP_WELL_PUMPING_TS_MONTHLY:
 			double missing = -999.0;
 			YearType yearType = null;
-			if (__dataset.getCyrl() == StateMod_DataSet.SM_CYR) {
+			if (__dataset.getCyrl() == YearType.CALENDAR) {
 				yearType = YearType.CALENDAR;
 			}
-			else if (__dataset.getCyrl() == StateMod_DataSet.SM_WYR) {
+			else if (__dataset.getCyrl() == YearType.WATER) {
 				yearType = YearType.WATER;
 			}
-			else if (__dataset.getCyrl() == StateMod_DataSet.SM_IYR) {
+			else if (__dataset.getCyrl() == YearType.NOV_TO_OCT) {
 				yearType = YearType.NOV_TO_OCT;
 			}
 			int precision = 2;

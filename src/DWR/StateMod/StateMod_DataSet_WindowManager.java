@@ -46,6 +46,8 @@ import javax.swing.JFrame;
 
 import cdss.domain.hydrology.network.HydrologyNode;
 
+import DWR.StateCU.StateCU_DataSet;
+import DWR.StateCU.StateCU_Location_JFrame;
 import RTi.GIS.GeoView.GeoProjection;
 import RTi.GIS.GeoView.GeoRecord;
 import RTi.GIS.GeoView.GeoViewAnnotationRenderer;
@@ -122,12 +124,13 @@ public static final int
 	WINDOW_RUN_REPORT = 20, // Run Statemod -report
 	WINDOW_GRAPHING_TOOL = 21, // Graphing tool?
 	WINDOW_RUN_DELPLT = 22, // Run delplt
-	WINDOW_QUERY_TOOL = 23; // Query tool
+	WINDOW_QUERY_TOOL = 23, // Query tool
+	WINDOW_CONSUMPTIVE_USE = 24; // Consumptive use (StateCU structure)
 
 /**
-The number of windows handled by the methods in this class.
+The number of windows handled by the methods in this class (one more than the last value above).
 */
-private final int __NUM_WINDOWS = 24;
+private final int __NUM_WINDOWS = 25;
 
 /**
 Array to keep track of window status (OPEN or CLOSED)
@@ -140,9 +143,14 @@ Array of all the windows that are open.
 private JFrame __windows[];
 
 /**
-Data set for which windows are being managed.
+StateMod data set for which windows are being managed.
 */
 private StateMod_DataSet __dataset = null;
+
+/**
+StateCU data set for which windows are being managed (to handle structure file).
+*/
+private StateCU_DataSet __datasetStateCU = null;
 
 /**
 Map panel, needed for interaction between editor windows and the map.
@@ -158,14 +166,23 @@ private StateMod_Network_JFrame __networkEditor = null;
 Constructor.
 */
 public StateMod_DataSet_WindowManager ()
-{	this ( null );
+{	this ( null, null );
 }
 
 /**
 Constructor.
 */
 public StateMod_DataSet_WindowManager ( StateMod_DataSet dataset )
+{
+	this ( dataset, null );
+}
+
+/**
+Constructor.
+*/
+public StateMod_DataSet_WindowManager ( StateMod_DataSet dataset, StateCU_DataSet datasetStateCU )
 {	__dataset = dataset;
+	__datasetStateCU = datasetStateCU;
 	__windowStatus = new int[__NUM_WINDOWS];
 	for (int i = 0; i < __NUM_WINDOWS; i++) {
 		__windowStatus[i] = CLOSED;
@@ -178,7 +195,7 @@ public StateMod_DataSet_WindowManager ( StateMod_DataSet dataset )
 }
 
 /**
-Closes all windows.
+Closes all windows, except the main window.
 */
 public void closeAllWindows() {
 	closeWindow(WINDOW_CONTROL);
@@ -204,6 +221,7 @@ public void closeAllWindows() {
 	closeWindow(WINDOW_GRAPHING_TOOL);
 	closeWindow(WINDOW_RUN_DELPLT);
 	closeWindow(WINDOW_QUERY_TOOL);
+	closeWindow(WINDOW_CONSUMPTIVE_USE);
 }
 
 /**
@@ -225,7 +243,7 @@ public void closeWindow ( int win_type )
 	// Set the "soft" data...
 	setWindowStatus ( win_type, CLOSED );
 	setWindow(win_type, null);
-	Message.printStatus ( 1, "closeWindow", "Window closed: " + win_type );
+	Message.printStatus ( 2, "closeWindow", "Window closed: " + win_type );
 }
 
 /**
@@ -302,6 +320,12 @@ public JFrame displayWindow ( int window_type, boolean editable )
 		// printStatus("Initializing response window.", WAIT);
 		win = new StateMod_Response_JFrame (__dataset, this);
 		setWindowOpen(WINDOW_RESPONSE, win);
+	}
+	else if ( window_type == WINDOW_CONSUMPTIVE_USE ) {
+		//printStatus("Initializing consumptive use edit window.", WAIT);
+		setWindowOpen ( WINDOW_CONSUMPTIVE_USE, win );
+		// TODO SAM 2011-06-22 For now disable editing
+		win = new StateCU_Location_JFrame( false, __datasetStateCU, this, false );
 	}
 	else if ( window_type == WINDOW_STREAMGAGE ) {
 		//printStatus("Initializing river station window.", WAIT);
@@ -985,6 +1009,14 @@ Sets the data set for which this class is the window manager.
 */
 public void setDataSet(StateMod_DataSet dataset) {
 	__dataset = dataset;
+}
+
+/**
+Sets the data set for which this class is the window manager.
+@param dataset the dataset for which to manage windows.
+*/
+public void setDataSet(StateCU_DataSet datasetStateCU) {
+	__datasetStateCU = datasetStateCU;
 }
 
 /**

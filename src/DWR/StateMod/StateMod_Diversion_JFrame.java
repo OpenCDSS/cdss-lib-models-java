@@ -244,6 +244,7 @@ import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 import RTi.Util.Time.TimeInterval;
+import RTi.Util.Time.YearType;
 
 // The layout for the GUI is as follows, for the most part using grid bag
 // layout.  Only the button_JPanel and bottom_JPanel use FlowLayout.  In this
@@ -2259,7 +2260,7 @@ private void setupGUI(int index)
 	// Always add the fields so that field [0] corresponds to January...
 	y = 0;
 	int x = 0;
-	if ( __dataset.getCyrl() == StateMod_DataSet.SM_WYR ) {
+	if ( __dataset.getCyrl() == YearType.WATER ) {
 		JGUIUtil.addComponent(moneff_JPanel, new JLabel("Oct"),
 			x, y, 1, 1, 0, 0, 
 			GridBagConstraints.NONE, GridBagConstraints.CENTER);
@@ -2279,7 +2280,7 @@ private void setupGUI(int index)
 			++x, y, 1, 1, 0, 0, 
 			GridBagConstraints.NONE, GridBagConstraints.CENTER);
 	}
-	else if ( __dataset.getCyrl() == StateMod_DataSet.SM_IYR ) {
+	else if ( __dataset.getCyrl() == YearType.NOV_TO_OCT ) {
 		JGUIUtil.addComponent(moneff_JPanel, new JLabel("Nov"),
 			x, y, 1, 1, 0, 0, 
 			GridBagConstraints.NONE, GridBagConstraints.CENTER);
@@ -2328,7 +2329,7 @@ private void setupGUI(int index)
 			GridBagConstraints.NONE,
 			GridBagConstraints.WEST);
 	}
-	if ( __dataset.getCyrl() == StateMod_DataSet.SM_WYR ) {
+	if ( __dataset.getCyrl() == YearType.WATER ) {
 		++y;
 		x = -1;
 		JGUIUtil.addComponent(moneff_JPanel, new JLabel("Apr"),
@@ -2350,7 +2351,7 @@ private void setupGUI(int index)
 			++x, y, 1, 1, 0, 0, 
 			GridBagConstraints.NONE, GridBagConstraints.CENTER);
 	}
-	else if ( __dataset.getCyrl() == StateMod_DataSet.SM_IYR ) {
+	else if ( __dataset.getCyrl() == YearType.NOV_TO_OCT ) {
 		JGUIUtil.addComponent(moneff_JPanel, new JLabel("May"),
 			++x, y, 1, 1, 0, 0, 
 			GridBagConstraints.NONE, GridBagConstraints.CENTER);
@@ -2652,8 +2653,7 @@ private void setupGUI(int index)
 	getContentPane().add ("South", bottom_JPanel);	
 	
 	if ( __dataset_wm != null ) {
-		__dataset_wm.setWindowOpen (
-		StateMod_DataSet_WindowManager.WINDOW_DIVERSION, this );
+		__dataset_wm.setWindowOpen ( StateMod_DataSet_WindowManager.WINDOW_DIVERSION, this );
 	}
 
 	// make sure this is done before the first call to selectTableIndex()
@@ -2704,8 +2704,7 @@ public void windowClosing(WindowEvent e) {
 		__dataset.setDirty(StateMod_DataSet.COMP_DIVERSION_STATIONS, true);
 	}	
 	if ( __dataset_wm != null ) {
-		__dataset_wm.closeWindow (
-		StateMod_DataSet_WindowManager.WINDOW_DIVERSION );
+		__dataset_wm.closeWindow ( StateMod_DataSet_WindowManager.WINDOW_DIVERSION );
 	}
 }
 

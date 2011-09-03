@@ -29,6 +29,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.border.TitledBorder;
 
 import cdss.domain.hydrology.network.HydrologyNode;
 
@@ -50,6 +51,7 @@ import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 import RTi.Util.Time.TimeUtil;
+import RTi.Util.Time.YearType;
 
 /**
 This class is a gui for displaying and editing operational right data.
@@ -125,6 +127,7 @@ private JComponent[] __disables;
 Panels containing groups of data.
 */
 private JPanel
+	__attributes_JPanel,
 	__destination_JPanel,
 	__source_JPanel,
 	__rioGrande_JPanel,
@@ -134,7 +137,8 @@ private JPanel
 	__interveningStructuresWithLoss_JPanel,
 	__comments_JPanel,
 	__textEditor_JPanel,
-	__monthlyOperatingLimits_JPanel,
+	__monthlyOprMax_JPanel,
+	__monthlyOprEff_JPanel,
 	__associatedOperatingRule_JPanel;
 
 /**
@@ -150,7 +154,6 @@ GUI text fields.
 private JTextField 
 	__oprAdminNumber_JTextField,
 	__oprName_JTextField,
-	__ruleTypeFullyEditable_JTextField,
 	__oprID_JTextField,
 	__sanJuanSjmina_JTextField,
 	__sanJuanSjrela_JTextField,
@@ -254,7 +257,12 @@ private JTextField[] __interveningStructuresWithLossPercent_JTextField = new JTe
 /**
 Textfield array for holding month operating limits.
 */
-private JTextField[] __monthlyOperatingLimits_JTextField = new JTextField[13];
+private JTextField[] __monthlyOprMax_JTextField = new JTextField[13];
+
+/**
+Textfield array for holding monthly efficiencies.
+*/
+private JTextField[] __monthlyOprEff_JTextField = new JTextField[12];
 
 /**
 The dataset of data for the StateMod run.
@@ -712,6 +720,42 @@ private StateMod_DataSet getDataSet ()
 }
 
 /**
+Get a data string from a component.  ComboBoxes should generally be non-editable and will be populated
+with predefined choices, with format "XXX - NOTE".  If a data value is not in a list, it should be added
+as something like "UknownValue - NOT MATCHED IN DATA".  In any case, spaces are used for delimiters.
+Values are returned as follows:
+<ol>
+<li>	If the string has " - ", return the token prior to the first space, trimmed.</li>
+<li>	Else, return the string, trimmed.
+</ol>
+*/
+private String getDataString ( SimpleJComboBox comboBox )
+{
+	String dataString = "";
+	String selected = comboBox.getSelected();
+	if ( selected != null ) {
+		if ( selected.indexOf(" - ") >= 0 ) {
+			// Typical string.  Return the first token before the space
+			dataString = selected.split(" ")[0].trim();
+		}
+		else {
+			// For some reason the value is not in the choice so return the text as is
+			dataString = selected.trim();
+		}
+	}
+	// If the combo box is editable and the user has provided non-blank text, use it
+	if ( dataString.equals("") ) {
+		if ( comboBox.isEditable() ) {
+			String fieldText = comboBox.getFieldText();
+			if ( (fieldText != null) && !fieldText.equals("") ) {
+				dataString = fieldText;
+			}
+		}
+	}
+	return dataString;
+}
+
+/**
 Trims a string in the format "XXX - YYY" by removing everything after 'XXX'.
 @param s the String to trim.
 @return a trimmed string.
@@ -851,7 +895,7 @@ private void populateOperationalRight(StateMod_OperationalRight opr)
 	StateMod_OperationalRight_Metadata metadata =
 		StateMod_OperationalRight_Metadata.getMetadata(opr.getItyopr());
 	boolean useTextEditor = false;
-	if ( (metadata == null) || !metadata.getFullEditingSupported() ) {
+	if ( (metadata == null) || !metadata.getFullEditingSupported(getDataSet()) ) {
 		useTextEditor = true;
 	}
 	
@@ -868,11 +912,12 @@ private void populateOperationalRight(StateMod_OperationalRight opr)
 	populateOperationalRightInterveningStructuresWithLoss ( opr, metadata, useTextEditor, __editable );
 	populateOperationalRightRioGrande ( opr, metadata, useTextEditor, __editable );
 	populateOperationalRightSanJuan ( opr, metadata, useTextEditor, __editable );
-	populateOperationalRightMonthlyOperatingLimits ( opr, metadata, useTextEditor, __editable );
+	populateOperationalRightMonthlyOprMax ( opr, metadata, useTextEditor, __editable );
+	populateOperationalRightMonthlyOprEff ( opr, metadata, useTextEditor, __editable );
 	populateOperationalRightComments ( opr, metadata, useTextEditor, __editable );
 	populateOperationalRightTextEditor ( opr, metadata, useTextEditor, __editable );
 	
-	if ( metadata != null && metadata.getFullEditingSupported() ) {
+	if ( metadata != null && metadata.getFullEditingSupported(getDataSet()) ) {
 		setMessageText ( "" );
 	}
 	else {
@@ -1822,7 +1867,7 @@ private void populateOperationalRightAssociatedOperatingRule ( StateMod_Operatio
 			__associatedOperatingRule_JPanel.setVisible(true);
 			__associatedOperatingRule_JPanel.setEnabled(true);
 			__associatedOperatingRule_JComboBox.setEnabled(true);
-			__associatedOperatingRule_JComboBox.setEditable(editable);
+			__associatedOperatingRule_JComboBox.setEditable(false); // User must select from choices
 			// Select the matching operational right and if not in the data set add it
 			String cx = opr.getCx();
 			try {
@@ -1842,7 +1887,8 @@ private void populateOperationalRightAssociatedOperatingRule ( StateMod_Operatio
 				__associatedOperatingRule_JComboBox.select ( choice );
 			}
 			// Now populate the destination account matching the selected destination
-			populateOperationalRightDestinationAccount(opr, __associatedOperatingRule_JComboBox.getSelected(),editable);
+			populateOperationalRightDestinationAccount(
+				opr, __associatedOperatingRule_JComboBox.getSelected(),editable);
 		}
 		else {
 			__associatedOperatingRule_JPanel.setVisible(false);
@@ -1856,14 +1902,14 @@ Populate operational right for the destination data panel.
 private void populateOperationalRightAttributes ( StateMod_OperationalRight opr,
 	StateMod_OperationalRight_Metadata metadata, boolean useTextEditor, boolean editable )
 {
-	__ruleTypeFullyEditable_JTextField.setEditable(false);
 	if ( useTextEditor ) {
-		__ruleTypeFullyEditable_JTextField.setText("No - Use text editor");
-		// Always reset
+		((TitledBorder)__attributes_JPanel.getBorder()).setTitle(
+			"Primary attributes (right is NOT fully editable - use text editor)");
+		// Always reset choices to not be editable
 		editable = false;
 	}
 	else {
-		__ruleTypeFullyEditable_JTextField.setText("Yes - Use enabled data fields");
+		((TitledBorder)__attributes_JPanel.getBorder()).setTitle("Primary attributes");
 	}
 	
 	// Always set the core data items...
@@ -1874,14 +1920,32 @@ private void populateOperationalRightAttributes ( StateMod_OperationalRight opr,
 	__oprName_JTextField.setEditable(editable);
 	__oprName_JTextField.setEnabled(true);
 	
+	// Rule type
+	int ityopr = opr.getItyopr();
+	try {
+		JGUIUtil.selectTokenMatches(__ruleTypeSwitch_JComboBox,
+			true, // Ignore case
+			"-",
+			0, // No special parse flag
+			0, // match first token
+			("" + ityopr), // Match the rule type
+			null, // No default
+			true); // Trim tokens before comparing
+	}
+	catch ( Exception e ) {
+		// This should not happen because even unknown operational rights are now handled
+	}
+	__ruleTypeSwitch_JComboBox.setEditable(false); // User must select from choices
+	__ruleTypeSwitch_JComboBox.setEnabled(true);
+	
 	__oprAdminNumber_JTextField.setText(opr.getRtem());
 	__oprAdminNumber_JTextField.setEditable(editable);
 	__oprAdminNumber_JTextField.setEnabled(true);
-
+	
 	// On/off switch - repopulate with normal choices and also add if an integer is not in the list
 	List<String> oprSwitchChoices = new Vector();
 	oprSwitchChoices.add ( "1 - On" );
-	oprSwitchChoices.add ( "2 - Off" );
+	oprSwitchChoices.add ( "0 - Off" );
 	__oprSwitch_JComboBox.setData(oprSwitchChoices);
 	int ioprsw = opr.getSwitch();
 	try {
@@ -1906,26 +1970,8 @@ private void populateOperationalRightAttributes ( StateMod_OperationalRight opr,
 		oprSwitchChoices.add ( choice );
 		__oprSwitch_JComboBox.select(choice);
 	}
-	__oprSwitch_JComboBox.setEditable(editable);
+	__oprSwitch_JComboBox.setEditable(false); // Force user to select choice (IoBeg, IoEnd better for years)
 	__oprSwitch_JComboBox.setEnabled(true);
-
-	// Rule type
-	int ityopr = opr.getItyopr();
-	try {
-		JGUIUtil.selectTokenMatches(__ruleTypeSwitch_JComboBox,
-			true, // Ignore case
-			"-",
-			0, // No special parse flag
-			0, // match first token
-			("" + ityopr), // Match the rule type
-			null, // No default
-			true); // Trim tokens before comparing
-	}
-	catch ( Exception e ) {
-		// This should not happen because even unknown operational rights are now handled
-	}
-	__ruleTypeSwitch_JComboBox.setEditable(editable);
-	__ruleTypeSwitch_JComboBox.setEnabled(true);
 	
 	// Associated plan - always show, but may be NA if not used
 	if ( metadata.getRightTypeUsesAssociatedPlan() ) {
@@ -1961,7 +2007,7 @@ private void populateOperationalRightAttributes ( StateMod_OperationalRight opr,
 			__associatedPlan_JComboBox.setData(planIDStrings);
 			__associatedPlan_JComboBox.select(choice);
 		}
-		__associatedPlan_JComboBox.setEditable(editable);
+		__associatedPlan_JComboBox.setEditable(false); // Force user to select choice
 		__associatedPlan_JComboBox.setEnabled(true);
 	}
 	else {
@@ -1975,7 +2021,7 @@ private void populateOperationalRightAttributes ( StateMod_OperationalRight opr,
 		planIDStrings.add("" + StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType.NA + " - Not used" );
 		__associatedPlan_JComboBox.setData(planIDStrings);
 		__associatedPlan_JComboBox.select(0);
-		__associatedPlan_JComboBox.setEditable(editable);
+		__associatedPlan_JComboBox.setEditable(false); // Force user to select choice
 		__associatedPlan_JComboBox.setEnabled(true);
 	}
 	
@@ -2002,7 +2048,7 @@ private void populateOperationalRightAttributes ( StateMod_OperationalRight opr,
 			__diversionType_JComboBox.setData(diversionTypeStrings);
 			__diversionType_JComboBox.select(choice);
 		}
-		__diversionType_JComboBox.setEditable(editable);
+		__diversionType_JComboBox.setEditable(false); // Force user to select choice
 		__diversionType_JComboBox.setEnabled(true);
 	}
 	else {
@@ -2016,7 +2062,7 @@ private void populateOperationalRightAttributes ( StateMod_OperationalRight opr,
 		diversionTypeStrings.add("" + StateMod_OperationalRight_Metadata_DiversionType.NA + " - Not used" );
 		__diversionType_JComboBox.setData(diversionTypeStrings);
 		__diversionType_JComboBox.select(0);
-		__diversionType_JComboBox.setEditable(editable);
+		__diversionType_JComboBox.setEditable(false); // Force user to select choice
 		__diversionType_JComboBox.setEnabled(true);
 	}
 	
@@ -2036,6 +2082,7 @@ private void populateOperationalRightAttributes ( StateMod_OperationalRight opr,
 		__conveyanceLoss_JTextField.setEditable(false);
 		__conveyanceLoss_JTextField.setEnabled(false);
 	}
+	__conveyanceLoss_JTextField.setToolTipText(metadata.getConveyanceLossNotes());
 	
 	// Limits - always show file value but may be disabled if not used
 
@@ -2121,9 +2168,9 @@ private void populateOperationalRightDestination ( StateMod_OperationalRight opr
 			__destination_JPanel.setVisible(true);
 			__destination_JPanel.setEnabled(true);
 			__destination_JComboBox.setEnabled(true);
-			__destination_JComboBox.setEditable(editable);
+			__destination_JComboBox.setEditable(false); // Force user to select choice
 			__destinationAccount_JComboBox.setEnabled(true);
-			__destinationAccount_JComboBox.setEditable(editable);
+			__destinationAccount_JComboBox.setEditable(false); // Force user to select choice
 			// Select the matching type and if not in the data set add it
 			String ciopde = opr.getCiopde();
 			try {
@@ -2168,7 +2215,6 @@ private void populateOperationalRightDestinationAccount (
 	__destinationAccount_JComboBox.removeAllItems();
 	if ( destinationSelection.indexOf(
 		"(" + StateMod_OperationalRight_Metadata_SourceOrDestinationType.RESERVOIR + ")") > 0 ) {
-		// Get the accounts for the reservoir
 		// Get the accounts for the reservoir
 		StateMod_DataSet dataset = getDataSet();
 		List<StateMod_Reservoir> reservoirList =
@@ -2232,7 +2278,7 @@ private void populateOperationalRightDestinationAccount (
 			__destinationAccount_JComboBox.select ( choice );
 		}
 	}
-	__destinationAccount_JComboBox.setEditable(editable);
+	__destinationAccount_JComboBox.setEditable(false); // Force user to select choice
 	__destinationAccount_JComboBox.setEnabled(true);
 }
 
@@ -2265,7 +2311,7 @@ private void populateOperationalRightDestinationAccountSpecial ( StateMod_Operat
 		__destinationAccount_JComboBox.select ( choice );
 	}
 	__destinationAccount_JComboBox.setEnabled(true);
-	__destinationAccount_JComboBox.setEditable(editable);
+	__destinationAccount_JComboBox.setEditable(false); // Force user to select choice
 }
 
 /**
@@ -2309,7 +2355,7 @@ private void populateOperationalRightInterveningStructuresWithLoss ( StateMod_Op
 				structureIDStrings.addAll ( StateMod_Util.createIdentifierList( dataset, structureTypes, true ) );
 				__interveningStructuresWithLoss_JComboBox[i].setData(structureIDStrings);
 				__interveningStructuresWithLoss_JComboBox[i].setEnabled(true);
-				__interveningStructuresWithLoss_JComboBox[i].setEditable(editable);
+				__interveningStructuresWithLoss_JComboBox[i].setEditable(false); // Force user to select choice
 				// Select the matching type and if not in the data set add it
 				String intern = opr.getIntern(i);
 				if ( intern.equals("") ) {
@@ -2349,7 +2395,7 @@ private void populateOperationalRightInterveningStructuresWithLoss ( StateMod_Op
 				typeStrings.add("Return");
 				__interveningStructuresWithLossType_JComboBox[i].setData(typeStrings);
 				__interveningStructuresWithLossType_JComboBox[i].setEnabled(true);
-				__interveningStructuresWithLossType_JComboBox[i].setEditable(editable);
+				__interveningStructuresWithLossType_JComboBox[i].setEditable(false); // Force user to select choice
 				// Select the matching type and if not in the data set add it
 				String internT = opr.getInternT(i);
 				if ( internT.equals("") ) {
@@ -2424,7 +2470,7 @@ private void populateOperationalRightInterveningStructuresWithoutLoss ( StateMod
 			for ( int i = 0; i < StateMod_OperationalRight_Metadata.MAXIMUM_INTERVENING_STRUCTURES; i++ ) {
 				__interveningStructuresWithoutLoss_JComboBox[i].setData(structureIDStrings);
 				__interveningStructuresWithoutLoss_JComboBox[i].setEnabled(true);
-				__interveningStructuresWithoutLoss_JComboBox[i].setEditable(editable);
+				__interveningStructuresWithoutLoss_JComboBox[i].setEditable(false); // Force user to select choice
 				// Select the matching type and if not in the data set add it
 				String intern = opr.getIntern(i);
 				if ( intern.equals("") ) {
@@ -2459,36 +2505,73 @@ private void populateOperationalRightInterveningStructuresWithoutLoss ( StateMod
 /**
 Populate operational right for the monthly operating limits data panel.
 */
-private void populateOperationalRightMonthlyOperatingLimits ( StateMod_OperationalRight opr,
+private void populateOperationalRightMonthlyOprEff ( StateMod_OperationalRight opr,
 	StateMod_OperationalRight_Metadata metadata, boolean useTextEditor, boolean editable )
 {
 	if ( useTextEditor ) {
-		__monthlyOperatingLimits_JPanel.setVisible(false);
-		__monthlyOperatingLimits_JPanel.setEnabled(false);
+		__monthlyOprEff_JPanel.setVisible(false);
+		__monthlyOprEff_JPanel.setEnabled(false);
 	}
 	else {
+		String source2 = getDataString ( __source1_JComboBox );
+		String sourceAccount2 = getDataString ( __sourceAccount1_JComboBox );
+		if ( metadata.getRightTypeUsesMonthlyOprEff(__dataset, source2, sourceAccount2) ) {
+			for ( int i = 0; i < 13; i++ ) {
+				if ( StateMod_Util.isMissing(opr.getOprMax(i))) {
+					__monthlyOprEff_JTextField[i].setText("");
+				}
+				else {
+					__monthlyOprEff_JTextField[i].setText("" + opr.getOprMax(i));
+				}
+				__monthlyOprEff_JTextField[i].setEnabled(true);
+				__monthlyOprEff_JTextField[i].setEditable(true);
+			}
+			__monthlyOprEff_JPanel.setVisible(true);
+			__monthlyOprEff_JPanel.setEnabled(true);
+		}
+		else {
+			__monthlyOprEff_JPanel.setVisible(false);
+			__monthlyOprEff_JPanel.setEnabled(false);
+		}
+	}
+}
+
+/**
+Populate operational right for the monthly operating limits data panel.
+*/
+private void populateOperationalRightMonthlyOprMax ( StateMod_OperationalRight opr,
+	StateMod_OperationalRight_Metadata metadata, boolean useTextEditor, boolean editable )
+{
+	if ( useTextEditor ) {
+		__monthlyOprMax_JPanel.setVisible(false);
+		__monthlyOprMax_JPanel.setEnabled(false);
+	}
+	else {
+		// TODO SAM 2011-02-06 Is this a performance hit?
+		((TitledBorder)__monthlyOprMax_JPanel.getBorder()).setTitle(
+			metadata.getMonthlyLimitsTitle());
 		String oprLimitString = __limits_JTextField.getText();
 		double oprLimit = StateMod_Util.MISSING_DOUBLE;
 		if ( StringUtil.isDouble(oprLimitString) ) {
 			oprLimit = Double.valueOf(oprLimitString);
 		}
-		if ( metadata.getRightTypeUsesMonthlyOprLimits(oprLimit) ) {
+		if ( metadata.getRightTypeUsesMonthlyOprMax(oprLimit) ) {
 			for ( int i = 0; i < 13; i++ ) {
 				if ( StateMod_Util.isMissing(opr.getOprMax(i))) {
-					__monthlyOperatingLimits_JTextField[i].setText("");
+					__monthlyOprMax_JTextField[i].setText("");
 				}
 				else {
-					__monthlyOperatingLimits_JTextField[i].setText("" + opr.getOprMax(i));
+					__monthlyOprMax_JTextField[i].setText("" + opr.getOprMax(i));
 				}
-				__monthlyOperatingLimits_JTextField[i].setEnabled(true);
-				__monthlyOperatingLimits_JTextField[i].setEditable(editable);
+				__monthlyOprMax_JTextField[i].setEnabled(true);
+				__monthlyOprMax_JTextField[i].setEditable(editable);
 			}
-			__monthlyOperatingLimits_JPanel.setVisible(true);
-			__monthlyOperatingLimits_JPanel.setEnabled(true);
+			__monthlyOprMax_JPanel.setVisible(true);
+			__monthlyOprMax_JPanel.setEnabled(true);
 		}
 		else {
-			__monthlyOperatingLimits_JPanel.setVisible(false);
-			__monthlyOperatingLimits_JPanel.setEnabled(false);
+			__monthlyOprMax_JPanel.setVisible(false);
+			__monthlyOprMax_JPanel.setEnabled(false);
 		}
 	}
 }
@@ -2520,7 +2603,7 @@ private void populateOperationalRightMonthSwitch ( StateMod_OperationalRight opr
 				__monthSwitch_JComboBox[i].removeAllItems();
 				__monthSwitch_JComboBox[i].setData(choices);
 				__monthSwitch_JComboBox[i].setEnabled(true);
-				__monthSwitch_JComboBox[i].setEditable(editable);
+				__monthSwitch_JComboBox[i].setEditable(false); // User must select from options
 				// Try to select
 				try {
 					if ( StateMod_Util.isMissing(opr.getImonsw(i)) ) {
@@ -2539,7 +2622,7 @@ private void populateOperationalRightMonthSwitch ( StateMod_OperationalRight opr
 				}
 				catch ( Exception e ) {
 					// If here the data includes switch not in the data set so add to the list
-					String choice = "" + opr.getImonsw(i) + " - UNKNOWN MONTHLY SWITCH";
+					String choice = "" + opr.getImonsw(i) + " - UNKNOWN";
 					__monthSwitch_JComboBox[i].add ( choice );
 					__monthSwitch_JComboBox[i].select ( choice );
 				}
@@ -2582,12 +2665,13 @@ private void populateOperationalRightRioGrande ( StateMod_OperationalRight opr,
 			__qdebtx_JTextField.setText("" + qdebtx);
 		}
 		if ( ityopr == 17 ) {
+			// Not used
 			List<String> gageList = new Vector();
 			gageList.add("");
 			__rioGrandeIndexGage_JComboBox.setData(gageList);
 			__rioGrandeIndexGage_JComboBox.select(0);
 			__rioGrandeIndexGage_JComboBox.setEnabled(false);
-			__rioGrandeIndexGage_JComboBox.setEditable(false);
+			__rioGrandeIndexGage_JComboBox.setEditable(false); // Force user to select
 		}
 		else if ( ityopr == 18 ) {
 			String ciopso3 = opr.getCiopso3();
@@ -2599,7 +2683,7 @@ private void populateOperationalRightRioGrande ( StateMod_OperationalRight opr,
 			indexGageIDStrings.addAll ( StateMod_Util.createIdentifierList(
 				dataset, allowedSourceTypes, true ) );
 			__rioGrandeIndexGage_JComboBox.setEnabled(true);
-			__rioGrandeIndexGage_JComboBox.setEditable(editable);
+			__rioGrandeIndexGage_JComboBox.setEditable(false); // Force user to select
 			__rioGrandeIndexGage_JComboBox.setData(indexGageIDStrings);
 			// Select the matching source 1 in the data set
 			try {
@@ -2661,7 +2745,7 @@ Populate operational right for the San Juan data panel.
 private void populateOperationalRightSanJuan ( StateMod_OperationalRight opr,
 	StateMod_OperationalRight_Metadata metadata, boolean useTextEditor, boolean editable )
 {	int ityopr = opr.getItyopr();
-	if ( useTextEditor || ((ityopr != 17) && (ityopr != 18)) ) {
+	if ( useTextEditor || (ityopr != 20) ) {
 		__sanJuan_JPanel.setVisible(false);
 		__sanJuan_JPanel.setEnabled(false);
 	}
@@ -2726,7 +2810,7 @@ private void populateOperationalRightSource ( StateMod_OperationalRight opr,
 				source1IDStrings.addAll ( StateMod_Util.createIdentifierList(
 					dataset, allowedSourceTypes, true ) );
 				__source1_JComboBox.setEnabled(true);
-				__source1_JComboBox.setEditable(editable);
+				__source1_JComboBox.setEditable(false); // Force user to select
 				__source1_JComboBox.setData(source1IDStrings);
 				// Select the matching source 1 in the data set
 				try {
@@ -2755,7 +2839,7 @@ private void populateOperationalRightSource ( StateMod_OperationalRight opr,
 				__source1_JComboBox.setData(source1IDStrings);
 				__source1_JComboBox.select ( 0 );
 				__source1_JComboBox.setEnabled(false);
-				__source1_JComboBox.setEditable(false);
+				__source1_JComboBox.setEditable(false); // Force user to select
 				populateOperationalRightSourceAccount1(opr,editable);
 			}
 			
@@ -2772,7 +2856,7 @@ private void populateOperationalRightSource ( StateMod_OperationalRight opr,
 						StateMod_DataSet.COMP_RESERVOIR_STATIONS).getData();
 					List<String> reservoirChoices = StateMod_Util.createIdentifierList(reservoirList, true);
 					__source2_JComboBox.setEnabled(true);
-					__source2_JComboBox.setEditable(true);
+					__source2_JComboBox.setEditable(false); // Force user to select
 					__source2_JComboBox.setData(reservoirChoices);
 					// Now select
 					String ciopso2 = opr.getCiopso2();
@@ -2809,7 +2893,7 @@ private void populateOperationalRightSource ( StateMod_OperationalRight opr,
 					source2IDStrings.addAll ( StateMod_Util.createIdentifierList(
 						dataset, allowedSourceTypes, true ) );
 					__source2_JComboBox.setEnabled(true);
-					__source2_JComboBox.setEditable(true);
+					__source2_JComboBox.setEditable(false); // Force user to select
 					__source2_JComboBox.setData(source2IDStrings);
 					// Select the matching source 2 in the data set
 					try {
@@ -2839,7 +2923,7 @@ private void populateOperationalRightSource ( StateMod_OperationalRight opr,
 				__source2_JComboBox.setData(source2IDStrings);
 				__source2_JComboBox.select ( 0 );
 				__source2_JComboBox.setEnabled(false);
-				__source2_JComboBox.setEditable(false);
+				__source2_JComboBox.setEditable(false); // Force user to select
 				populateOperationalRightSourceAccount2(opr,editable);
 			}
 		}
@@ -2862,7 +2946,7 @@ private void populateOperationalRightSourceAccount1 ( StateMod_OperationalRight 
 	// The only time that accounts are other than 1 is when a reservoir
 	__sourceAccount1_JComboBox.removeAllItems();
 	__sourceAccount1_JComboBox.setEnabled(true);
-	__sourceAccount1_JComboBox.setEditable(editable);
+	__sourceAccount1_JComboBox.setEditable(false); // Force user to select
 	StateMod_OperationalRight_Metadata metadata = opr.getMetadata();
 	if ( source1Selection.indexOf(
 		"(" + StateMod_OperationalRight_Metadata_SourceOrDestinationType.RESERVOIR + ")") > 0 ) {
@@ -2941,7 +3025,7 @@ private void populateOperationalRightSourceAccount1Special ( StateMod_Operationa
 		__sourceAccount1_JComboBox.select ( choice );
 	}
 	__sourceAccount1_JComboBox.setEnabled(true);
-	__sourceAccount1_JComboBox.setEditable(editable);
+	__sourceAccount1_JComboBox.setEditable(false); // Force user to select
 }
 
 /**
@@ -2955,7 +3039,7 @@ private void populateOperationalRightSourceAccount2 ( StateMod_OperationalRight 
 	String source2ID = getFirstToken(source2Selection);
 	// The only time that accounts are other than 0 is when a reservoir
 	__sourceAccount2_JComboBox.removeAllItems();
-	__sourceAccount2_JComboBox.setEditable(editable);
+	__sourceAccount2_JComboBox.setEditable(false); // Force user to select
 	__sourceAccount2_JComboBox.setEnabled(true);
 	StateMod_OperationalRight_Metadata metadata = opr.getMetadata();
 	if ( source2Selection.indexOf(
@@ -2994,7 +3078,7 @@ private void populateOperationalRightSourceAccount2 ( StateMod_OperationalRight 
 	else {
 		__sourceAccount2_JComboBox.add("0 - Not used");
 		__sourceAccount2_JComboBox.select(0);
-		__sourceAccount2_JComboBox.setEditable(false);
+		__sourceAccount2_JComboBox.setEditable(false); // Force user to select
 		__sourceAccount2_JComboBox.setEnabled(false);
 	}
 	if ( metadata.getRightTypeUsesSpecialSourceAccount2() ) {
@@ -3032,7 +3116,7 @@ private void populateOperationalRightSourceAccount2Special ( StateMod_Operationa
 		__sourceAccount2_JComboBox.select ( choice );
 	}
 	__sourceAccount2_JComboBox.setEnabled(true);
-	__sourceAccount2_JComboBox.setEditable(editable);
+	__sourceAccount2_JComboBox.setEditable(false); // Force user to select
 }
 
 /**
@@ -3131,7 +3215,7 @@ private void saveInformation(int record)
 	StateMod_OperationalRight_Metadata metadata =
 		StateMod_OperationalRight_Metadata.getMetadata(opr.getItyopr());
 	boolean useTextEditor = false;
-	if ( (metadata == null) || !metadata.getFullEditingSupported() ) {
+	if ( (metadata == null) || !metadata.getFullEditingSupported(getDataSet()) ) {
 		useTextEditor = true;
 	}
 	if ( useTextEditor ) {
@@ -3340,7 +3424,14 @@ private void setupGUI(int index) {
 	// Monthly operational limits on the right...
 
 	++yRight;
-	JGUIUtil.addComponent(rightJPanel, setupGUI_OperationalRightMonthlyOperatingLimits(routine),
+	JGUIUtil.addComponent(rightJPanel, setupGUI_OperationalRightMonthlyOprMax(routine),
+		0, yRight, 12, 1, 0, 0,  
+		GridBagConstraints.NONE, GridBagConstraints.WEST);
+	
+	// Monthly efficiencies on the right...
+
+	++yRight;
+	JGUIUtil.addComponent(rightJPanel, setupGUI_OperationalRightMonthlyOprEff(routine),
 		0, yRight, 12, 1, 0, 0,  
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	
@@ -3543,32 +3634,32 @@ Setup the GUI components for the operational rights list.
 */
 private JPanel setupGUI_OperationalRightAttributes (String routine)
 {
-	JPanel attribute_JPanel = new JPanel();	// Right side of interface for specific right data
+	__attributes_JPanel = new JPanel();	// Right side of interface for specific right data
 	GridBagLayout gb = new GridBagLayout();
-	attribute_JPanel.setLayout(gb);
-	attribute_JPanel.setBorder(BorderFactory.createTitledBorder("Primary attributes"));
+	__attributes_JPanel.setLayout(gb);
+	__attributes_JPanel.setBorder(BorderFactory.createTitledBorder("Primary attributes"));
 	int y = 0;
 	int width = 3; // Labels 1, data 3 at most - this allows 2 columns of components if necessary
 	__oprID_JTextField = new JTextField(12);
 	JGUIUtil.addComponent(
-		attribute_JPanel, new JLabel("Operational right ID:"),
+		__attributes_JPanel, new JLabel("Operational right ID:"),
 		0, y, 1, 1, 0, 0,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(
-		attribute_JPanel, __oprID_JTextField,
+		__attributes_JPanel, __oprID_JTextField,
 		1, y, 1, 1, 1, 0,
 		1, 0, 0, 1,
 		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 	__oprName_JTextField = new JTextField(24);
 	__oprName_JTextField.setEditable(false);
 	JGUIUtil.addComponent(
-		attribute_JPanel, new JLabel("Operational right name:"),
+		__attributes_JPanel, new JLabel("Operational right name:"),
 		2, y, 1, 1, 0, 0,
 		0, 1, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(
-		attribute_JPanel, __oprName_JTextField,
+		__attributes_JPanel, __oprName_JTextField,
 		3, y, 1, 1, 1, 0,
 		1, 0, 0, 1,
 		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
@@ -3584,38 +3675,25 @@ private JPanel setupGUI_OperationalRightAttributes (String routine)
 	__ruleTypeSwitch_JComboBox.setEnabled(false);
 	__ruleTypeSwitch_JComboBox.setEditable(false);
 	JGUIUtil.addComponent(
-		attribute_JPanel, new JLabel("Operational right type:"),
+		__attributes_JPanel, new JLabel("Operational right type:"),
 		0, y, 1, 1, 0, 0,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(
-		attribute_JPanel, __ruleTypeSwitch_JComboBox,
+		__attributes_JPanel, __ruleTypeSwitch_JComboBox,
 		1, y, width, 1, 1, 0,
 		1, 0, 0, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	__ruleTypeSwitch_JComboBox.addActionListener(this);
 	y++;
-	__ruleTypeFullyEditable_JTextField = new JTextField(12);
-	JGUIUtil.addComponent(
-		attribute_JPanel, new JLabel("Fully editable?:"),
-		0, y, 1, 1, 0, 0,
-		0, 0, 0, 0,
-		GridBagConstraints.NONE, GridBagConstraints.EAST);
-	JGUIUtil.addComponent(
-		attribute_JPanel, __ruleTypeFullyEditable_JTextField,
-		1, y, width, 1, 1, 0,
-		1, 0, 0, 1,
-		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
-	__ruleTypeFullyEditable_JTextField.setEditable(false); // For display only
-	y++;
 	__oprAdminNumber_JTextField = new JTextField(12);
 	JGUIUtil.addComponent(
-		attribute_JPanel, new JLabel("Administration number:"),
+		__attributes_JPanel, new JLabel("Administration number:"),
 		0, y, 1, 1, 0, 0,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(
-		attribute_JPanel, __oprAdminNumber_JTextField,
+		__attributes_JPanel, __oprAdminNumber_JTextField,
 		1, y, 1, 1, 1, 0,
 		1, 1, 0, 1,
 		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
@@ -3623,12 +3701,12 @@ private JPanel setupGUI_OperationalRightAttributes (String routine)
 	__oprSwitch_JComboBox.setPrototypeDisplayValue(" -9999 - last year off  " );
 	__oprSwitch_JComboBox.setEditable(false);
 	JGUIUtil.addComponent(
-		attribute_JPanel, new JLabel("On/off switch:"),
+		__attributes_JPanel, new JLabel("On/off switch:"),
 		2, y, 1, 1, 0, 0,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(
-		attribute_JPanel, __oprSwitch_JComboBox,
+		__attributes_JPanel, __oprSwitch_JComboBox,
 		3, y, 1, 1, 1, 0,
 		1, 0, 0, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -3638,12 +3716,12 @@ private JPanel setupGUI_OperationalRightAttributes (String routine)
 		" 123456789012 (Plan (Out of Priority Div. or Storage)) - 123456789012345678901234 " );
 	__associatedPlan_JComboBox.setEditable(false);
 	JGUIUtil.addComponent(
-		attribute_JPanel, new JLabel("Associated plan data:"),
+		__attributes_JPanel, new JLabel("Associated plan data:"),
 		0, y, 1, 1, 0, 0,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(
-		attribute_JPanel, __associatedPlan_JComboBox,
+		__attributes_JPanel, __associatedPlan_JComboBox,
 		1, y, width, 1, 1, 0,
 		1, 0, 0, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -3652,12 +3730,12 @@ private JPanel setupGUI_OperationalRightAttributes (String routine)
 	__diversionType_JComboBox.setPrototypeDisplayValue(" ????????? - UNKNOWN DIVERSION TYPE " );
 	__diversionType_JComboBox.setEditable(false);
 	JGUIUtil.addComponent(
-		attribute_JPanel, new JLabel("Diversion type:"),
+		__attributes_JPanel, new JLabel("Diversion type:"),
 		0, y, 1, 1, 0, 0,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(
-		attribute_JPanel, __diversionType_JComboBox,
+		__attributes_JPanel, __diversionType_JComboBox,
 		1, y, width, 1, 1, 0,
 		1, 0, 0, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -3666,12 +3744,12 @@ private JPanel setupGUI_OperationalRightAttributes (String routine)
 	__conveyanceLoss_JTextField.setToolTipText("Blank will default to 0");
 	__conveyanceLoss_JTextField.setEditable(false);
 	JGUIUtil.addComponent(
-		attribute_JPanel, new JLabel("Conveyance loss (%):"),
+		__attributes_JPanel, new JLabel("Conveyance loss (%):"),
 		0, y, 1, 1, 0, 0,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(
-		attribute_JPanel, __conveyanceLoss_JTextField,
+		__attributes_JPanel, __conveyanceLoss_JTextField,
 		1, y, width, 1, 1, 0,
 		1, 0, 0, 1,
 		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
@@ -3680,12 +3758,12 @@ private JPanel setupGUI_OperationalRightAttributes (String routine)
 	__limits_JTextField.setToolTipText("Blank will default to 0");
 	__limits_JTextField.setEditable(false);
 	JGUIUtil.addComponent(
-		attribute_JPanel, new JLabel("Limits:"),
+		__attributes_JPanel, new JLabel("Limits:"),
 		0, y, 1, 1, 0, 0,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(
-		attribute_JPanel, __limits_JTextField,
+		__attributes_JPanel, __limits_JTextField,
 		1, y, width, 1, 1, 0,
 		1, 0, 0, 1,
 		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
@@ -3694,12 +3772,12 @@ private JPanel setupGUI_OperationalRightAttributes (String routine)
 	__firstYear_JTextField.setToolTipText("Blank will default to start of run");
 	__firstYear_JTextField.setEditable(false);
 	JGUIUtil.addComponent(
-		attribute_JPanel, new JLabel("First year of operation:"),
+		__attributes_JPanel, new JLabel("First year of operation:"),
 		0, y, 1, 1, 0, 0,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(
-		attribute_JPanel, __firstYear_JTextField,
+		__attributes_JPanel, __firstYear_JTextField,
 		1, y, 1, 1, 1, 0,
 		1, 0, 0, 1,
 		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
@@ -3707,16 +3785,16 @@ private JPanel setupGUI_OperationalRightAttributes (String routine)
 	__lastYear_JTextField.setToolTipText("Blank will default to end of run");
 	__lastYear_JTextField.setEditable(false);
 	JGUIUtil.addComponent(
-		attribute_JPanel, new JLabel("Last year of operation:"),
+		__attributes_JPanel, new JLabel("Last year of operation:"),
 		2, y, 1, 1, 0, 0,
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(
-		attribute_JPanel, __lastYear_JTextField,
+		__attributes_JPanel, __lastYear_JTextField,
 		3, y, 1, 1, 1, 0,
 		1, 0, 0, 1,
 		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
-	return attribute_JPanel;
+	return __attributes_JPanel;
 }
 
 /**
@@ -3902,51 +3980,89 @@ private JScrollWorksheet setupGUI_OperationalRightList(String routine)
 }
 
 /**
-Set up the monthly operating limits panel.
+Set up the monthly efficiency panel.
 @param routine for logging
-@return the panel for monthly operating limits
+@return the panel for monthly efficiencies
 */
-private JPanel setupGUI_OperationalRightMonthlyOperatingLimits ( String routine )
+private JPanel setupGUI_OperationalRightMonthlyOprEff ( String routine )
 {
-	__monthlyOperatingLimits_JPanel = new JPanel();
-	__monthlyOperatingLimits_JPanel.setBorder(BorderFactory.createTitledBorder(
-		"Monthly and annual operating limits (ACFT)"));
+	__monthlyOprEff_JPanel = new JPanel();
+	__monthlyOprEff_JPanel.setBorder(BorderFactory.createTitledBorder(
+		"T&C consumptive use factors (%)"));
 	GridBagLayout gb = new GridBagLayout();
-	__monthlyOperatingLimits_JPanel.setLayout(gb);
+	__monthlyOprEff_JPanel.setLayout(gb);
 	
 	int [] monthsCyr = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
 	int [] monthsWyr = { 10, 11, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 	int [] monthsIyr = { 11, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 	int [] months = monthsCyr;
-	if ( __dataset.getCyrl() == StateMod_DataSet.SM_WYR ) {
+	if ( __dataset.getCyrl() == YearType.WATER ) {
 		months = monthsWyr;
 	}
-	else if ( __dataset.getCyrl() == StateMod_DataSet.SM_IYR ) {
+	else if ( __dataset.getCyrl() == YearType.NOV_TO_OCT ) {
 		months = monthsIyr;
 	}
 	// Put in two rows because one row would be too wide
 	for ( int i = 0; i < 12; i++ ) {
-		JGUIUtil.addComponent(__monthlyOperatingLimits_JPanel, new JLabel(TimeUtil.monthAbbreviation(months[i])),
+		JGUIUtil.addComponent(__monthlyOprEff_JPanel, new JLabel(TimeUtil.monthAbbreviation(months[i])),
 			i-(i/6)*6, (i/6)*2, 1, 1, 0, 0,
 			1, 0, 0, 1, 
 			GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
-		__monthlyOperatingLimits_JTextField[i] = new JTextField(6);
-		JGUIUtil.addComponent(__monthlyOperatingLimits_JPanel, __monthlyOperatingLimits_JTextField[i],
+		__monthlyOprEff_JTextField[i] = new JTextField(6);
+		JGUIUtil.addComponent(__monthlyOprEff_JPanel, __monthlyOprEff_JTextField[i],
+			i-(i/6)*6, ((i/6)*2 + 1), 1, 1, 0, 0,
+			1, 0, 0, 1, 
+			GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
+	}
+	return __monthlyOprEff_JPanel;
+}
+
+/**
+Set up the monthly operating limits panel.
+@param routine for logging
+@return the panel for monthly operating limits
+*/
+private JPanel setupGUI_OperationalRightMonthlyOprMax ( String routine )
+{
+	__monthlyOprMax_JPanel = new JPanel();
+	__monthlyOprMax_JPanel.setBorder(BorderFactory.createTitledBorder(
+		"Monthly and annual operating limits (ACFT)"));
+	GridBagLayout gb = new GridBagLayout();
+	__monthlyOprMax_JPanel.setLayout(gb);
+	
+	int [] monthsCyr = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+	int [] monthsWyr = { 10, 11, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+	int [] monthsIyr = { 11, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	int [] months = monthsCyr;
+	if ( __dataset.getCyrl() == YearType.WATER ) {
+		months = monthsWyr;
+	}
+	else if ( __dataset.getCyrl() == YearType.NOV_TO_OCT ) {
+		months = monthsIyr;
+	}
+	// Put in two rows because one row would be too wide
+	for ( int i = 0; i < 12; i++ ) {
+		JGUIUtil.addComponent(__monthlyOprMax_JPanel, new JLabel(TimeUtil.monthAbbreviation(months[i])),
+			i-(i/6)*6, (i/6)*2, 1, 1, 0, 0,
+			1, 0, 0, 1, 
+			GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
+		__monthlyOprMax_JTextField[i] = new JTextField(6);
+		JGUIUtil.addComponent(__monthlyOprMax_JPanel, __monthlyOprMax_JTextField[i],
 			i-(i/6)*6, ((i/6)*2 + 1), 1, 1, 0, 0,
 			1, 0, 0, 1, 
 			GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
 	}
 	// Add the annual value at the end.
-	JGUIUtil.addComponent(__monthlyOperatingLimits_JPanel, new JLabel("Annual"),
+	JGUIUtil.addComponent(__monthlyOprMax_JPanel, new JLabel("Annual"),
 		6, 2, 1, 1, 0, 0,
 		1, 0, 0, 1, 
 		GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
-	__monthlyOperatingLimits_JTextField[12] = new JTextField(6);
-	JGUIUtil.addComponent(__monthlyOperatingLimits_JPanel, __monthlyOperatingLimits_JTextField[12],
+	__monthlyOprMax_JTextField[12] = new JTextField(6);
+	JGUIUtil.addComponent(__monthlyOprMax_JPanel, __monthlyOprMax_JTextField[12],
 		6, 3, 1, 1, 0, 0,
 		1, 0, 0, 1, 
 		GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
-	return __monthlyOperatingLimits_JPanel;
+	return __monthlyOprMax_JPanel;
 }
 
 /**
@@ -3966,10 +4082,10 @@ private JPanel setupGUI_OperationalRightMonthSwitch ( String routine )
 	int [] monthsWyr = { 10, 11, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 	int [] monthsIyr = { 11, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 	int [] months = monthsCyr;
-	if ( __dataset.getCyrl() == StateMod_DataSet.SM_WYR ) {
+	if ( __dataset.getCyrl() == YearType.WATER ) {
 		months = monthsWyr;
 	}
-	else if ( __dataset.getCyrl() == StateMod_DataSet.SM_IYR ) {
+	else if ( __dataset.getCyrl() == YearType.NOV_TO_OCT ) {
 		months = monthsIyr;
 	}
 	// Put in two rows because one row would be too wide

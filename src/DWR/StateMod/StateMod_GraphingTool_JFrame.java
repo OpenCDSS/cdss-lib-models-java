@@ -178,6 +178,7 @@ import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 import RTi.Util.Time.DateTime;
+import RTi.Util.Time.YearType;
 
 /**
 This class is a gui for displaying and editing graphing templates.
@@ -417,15 +418,17 @@ public void actionPerformed(ActionEvent ae)
 		JGUIUtil.setWaitCursor(this, true);
 
 		if ( fc.getFileFilter() == stm_ff ) {
-			try {	PropList props = new PropList ( "StateModGUI" );
+			try {
+				PropList props = new PropList ( "StateModGUI" );
 				props.set ( "OutputFile=" + path );
 				// Calendar type from data set...
-				if (	__dataset.getCyrl() ==
-					StateMod_DataSet.SM_WYR) {
+				if ( __dataset.getCyrl() == YearType.WATER ) {
 					props.set ( "CalendarType=WYR" );
 				}
-				StateMod_TS.writeTimeSeriesList (
-					__tsVector, props);
+				else if ( __dataset.getCyrl() == YearType.NOV_TO_OCT ) {
+					props.set ( "CalendarType=IYR" );
+				}
+				StateMod_TS.writeTimeSeriesList ( __tsVector, props);
 			}
 			catch ( Exception e ) {
 				JGUIUtil.setWaitCursor(this, false);
@@ -624,14 +627,14 @@ protected void getTimeSeries ()
 	DateTime run_date1 = new DateTime( DateTime.PRECISION_MONTH);
 	DateTime run_date2 = new DateTime( DateTime.PRECISION_MONTH);
 
-	if (__dataset.getCyrl() == StateMod_DataSet.SM_CYR) {
+	if (__dataset.getCyrl() == YearType.CALENDAR) {
 		// Calendar year...
 		run_date1.setMonth(1);
 		run_date1.setYear(__dataset.getIystr());
 		run_date2.setMonth(12);
 		run_date2.setYear(__dataset.getIyend());
 	}
-	else if (__dataset.getCyrl() == StateMod_DataSet.SM_IYR) {
+	else if (__dataset.getCyrl() == YearType.NOV_TO_OCT) {
 		// Irrigation year...
 		run_date1.setMonth(11);
 		run_date1.setYear(__dataset.getIystr()- 1);

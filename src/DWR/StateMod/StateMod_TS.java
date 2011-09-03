@@ -939,14 +939,14 @@ throws Exception
 		}
 		String units = ((String)v.get(4)).trim();
 		String yeartypes = ((String)v.get(5)).trim();
-		int yeartype = StateMod_DataSet.SM_CYR;
+		YearType yeartype = YearType.CALENDAR;
 		// Year type is used in one place to initialize the year when
 		// transferring data.  However, it is assumed that m1 is always correct for the year type.
 		if ( yeartypes.equalsIgnoreCase("WYR") ) {
-			yeartype = StateMod_DataSet.SM_WYR;
+			yeartype = YearType.WATER;
 		}
 		else if ( yeartypes.equalsIgnoreCase("IYR") ) {
-			yeartype = StateMod_DataSet.SM_IYR;
+			yeartype = YearType.NOV_TO_OCT;
 		}
 		// year that are specified are used to set the period.
 		if ( Message.isDebugOn ) {
@@ -1386,7 +1386,7 @@ throws Exception
 				// Monthly data.  The year is for the calendar type and
 				// therefore the starting year may actually need to
 				// be set to the previous year.  Don't do the shift for average monthly values.
-				if ( standard_ts && (yeartype != StateMod_DataSet.SM_CYR) ) {
+				if ( standard_ts && (yeartype != YearType.CALENDAR) ) {
 					date.setYear ( current_year - 1 );
 				}
 				else {

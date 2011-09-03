@@ -463,7 +463,7 @@ private void setupGUI() {
 
 	JGUIUtil.addComponent(top_panel, 
 		new JLabel("If ARE DATA MODIFIED? is YES, data for the "
-			+ "component have been modified by the file has not been written"),
+			+ "component have been modified by the GUI but the file has not been written."),
 		0, y++, 2, 1, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.NORTHWEST);
 		
@@ -474,7 +474,7 @@ private void setupGUI() {
 		GridBagConstraints.NONE, GridBagConstraints.NORTHWEST);
 
 	JGUIUtil.addComponent(top_panel, 
-		new JLabel("The file with the original filename will remain "
+		new JLabel("If a filename is changed, the file with the original filename will remain "
 			+ "even after the new file is saved."),
 		0, y++, 2, 1, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.NORTHWEST);

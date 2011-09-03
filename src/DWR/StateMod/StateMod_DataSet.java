@@ -13,6 +13,7 @@ import java.util.Vector;
 import javax.swing.JFrame;
 
 import DWR.StateCU.StateCU_IrrigationPracticeTS;
+import DWR.StateCU.StateCU_Location;
 import RTi.TS.DayTS;
 import RTi.TS.MonthTS;
 import RTi.TS.TS;
@@ -30,6 +31,7 @@ import RTi.Util.Time.DateTime;
 import RTi.Util.Time.StopWatch;
 import RTi.Util.Time.TimeInterval;
 import RTi.Util.Time.TimeUtil;
+import RTi.Util.Time.YearType;
 
 /**
 This StateMod_DataSet class manages data components in a StateMod data set, 
@@ -44,22 +46,6 @@ rather than the separate files for gage and estimate stations.</li>
 */
 public class StateMod_DataSet extends DataSet
 {
-
-// TODO SAM 2011-01-16 Need to implement enumerations
-
-/**
-Calendar year. (January - December) Potential parameter in setCyrl.
-*/
-public static final int SM_CYR = 1;
-
-/**
-Water year. (October - September) Potential parameter in setCyrl.
-*/
-public static final int SM_WYR = 2;
-/**
-Irrigation year. (November - October) Potential parameter in setCyrl.
-*/
-public static final int SM_IYR = 3;
 
 /**
 Cubic-feet per second.  Potential parameter in setIresop.
@@ -1182,7 +1168,7 @@ private double __pfacto = 1.0;
 /**
 Calendar/water/irrigation year - default to calendar.
 */
-private int __cyrl = SM_CYR;
+private YearType __cyrl = YearType.CALENDAR;
 /**
 Switch for demand type.  Default to historic approach.
 */
@@ -2253,9 +2239,9 @@ public int[] getComponentGroupNumbers() {
 
 /**
 Get the calendar/water/irrigation year
-@return __cyrl
+@return year type for data set
 */
-public int getCyrl() {
+public YearType getCyrl() {
 	return __cyrl;
 }
 
@@ -3036,10 +3022,10 @@ returned and calendar dates are used.
 */
 public DateTime getRunEnd ()
 {	DateTime d = new DateTime ( DateTime.PRECISION_DAY );
-	if ( __cyrl == SM_WYR ) {
+	if ( __cyrl == YearType.WATER ) {
 		d.setMonth ( 9 );
 	}
-	else if ( __cyrl == SM_IYR) {
+	else if ( __cyrl == YearType.NOV_TO_OCT) {
 		d.setMonth ( 10 );
 	}
 	else {
@@ -3059,11 +3045,11 @@ returned and calendar dates are used.
 public DateTime getRunStart ()
 {	DateTime d = new DateTime ( DateTime.PRECISION_DAY );
 	d.setDay ( 1 );
-	if ( __cyrl == SM_WYR ) {
+	if ( __cyrl == YearType.WATER ) {
 		d.setMonth ( 10 );
 		d.setYear ( __iystr - 1 );
 	}
-	else if ( __cyrl == SM_IYR) {
+	else if ( __cyrl == YearType.NOV_TO_OCT) {
 		d.setMonth ( 11 );
 		d.setYear ( __iystr - 1 );
 	}
@@ -4842,7 +4828,7 @@ public void initializeControlData ()
 	__cfacto = 1.0; // Factor, reservoir content data to AF.
 	__efacto = 1.0; // Factor, evaporation data to FT.
 	__pfacto = 1.0; // Factor, precipitation data to FT.
-	__cyrl = SM_CYR; // Calendar/water/irrigation year - default to calendar.
+	__cyrl = YearType.CALENDAR; // Calendar/water/irrigation year - default to calendar.
 	__icondem = 1; // Switch for demand type.  Default to historic approach.
 	__ichk = 0; // Switch for detailed output.  Default is no detailed output.
 	__ireopx = 0; // Switch for re-operation control.  Default is yes re-operate.
@@ -5260,7 +5246,7 @@ throws IllegalArgumentException, IOException
 	int i = 0;
 	int size = 0;	// For general use
 
-	DataSetComponent comp = null;
+	DataSetComponent comp = null; // Component in StateMod data set
 
 	// Now start reading new scenario...
 	StopWatch totalReadTime = new StopWatch();
@@ -5752,7 +5738,7 @@ throws IllegalArgumentException, IOException
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
 				readStateModFile_Announce1(comp);
-				comp.setData( StateMod_OperationalRight.readStateModFile(fn));
+				comp.setData( StateMod_OperationalRight.readStateModFile(fn, this) );
 			}
 		}
 		catch (Exception e) {
@@ -6471,8 +6457,7 @@ throws IllegalArgumentException, IOException
 			readStateModFile_Announce2(comp, readTime.getSeconds());
 		}
 	
-		// TODO 2011-01-16 - Support reading StateCU STR -
-		// StateMod used to read PAR but the AWC is now in the STR file.
+		// StateMod used to read PAR but the AWC is now in the StateCU STR file.
 	
 		try {
 			fn = response_props.getValue ( "StateCU_Structure" );
@@ -6482,9 +6467,13 @@ throws IllegalArgumentException, IOException
 				comp.setDataFileName ( fn );
 			}
 			// Read the data...
-			//readInputAnnounce1(comp, readTime.getSeconds());
 			if ( readData && (fn != null) && !fileIsEmpty(getDataFilePathAbsolute(fn)) ) {
-				Message.printWarning ( 2, routine, "StateCU structure file - not yet supported.");
+				readTime.clear();
+				readTime.start();
+				fn = getDataFilePathAbsolute ( fn );
+				readStateModFile_Announce1(comp);
+				comp.setData( StateCU_Location.readStateCUFile(fn) );
+				Message.printStatus(2,routine,"Read " + ((List)comp.getData()).size() + " locations.");
 			}
 		}
 		catch (Exception e) {
@@ -6496,7 +6485,7 @@ throws IllegalArgumentException, IOException
 		finally {
 			comp.setDirty ( false );
 			readTime.stop();
-			//readInputAnnounce2(comp, readTime.getSeconds());
+			readStateModFile_Announce2(comp, readTime.getSeconds());
 		}
 
 		// Soil moisture (*.par) file no longer supported (print a warning)...
@@ -7675,12 +7664,12 @@ public void setCyrl(Integer cyrl) {
 Set the calendar/water/irrigation year
 @param  cyrl year type
 */
-public void setCyrl(int cyrl) {
+public void setCyrl(YearType cyrl) {
 	if (cyrl != __cyrl) {
 		__cyrl = cyrl;
 		setDirty(COMP_CONTROL, true);
 	}
-	if (cyrl != SM_CYR && cyrl != SM_WYR && cyrl != SM_IYR) {
+	if (cyrl != YearType.CALENDAR && cyrl != YearType.WATER && cyrl != YearType.NOV_TO_OCT) {
 		Message.printWarning(1, "StateMod_DataSet.setCyrl", 
 			"Setting year type using invalid value(" + cyrl + "); use SM_CYR, SM_WYR, or SM_IYR");
 	}
@@ -7697,18 +7686,18 @@ public void setCyrl(String cyrl) {
 	// expecting "CYR", "WYR", "IYR"
 	cyrl = cyrl.trim();
 	if (cyrl.equalsIgnoreCase("CYR")) {
-		setCyrl(SM_CYR);
+		setCyrl(YearType.CALENDAR);
 	}
 	else if (cyrl.equalsIgnoreCase("WYR")) {
-		setCyrl(SM_WYR);
+		setCyrl(YearType.WATER);
 	}
 	else if (cyrl.equalsIgnoreCase("IYR")) {
-		setCyrl(SM_IYR);
+		setCyrl(YearType.NOV_TO_OCT);
 	}
 	else {
 		Message.printWarning(1, "StateMod_Control.setCyrl", 
 			"Setting year type using invalid value(" + cyrl + "); use \"CYR\", \"WYR\", or \"IYR\"");
-		setCyrl(SM_CYR);
+		setCyrl(YearType.CALENDAR);
 	}
 }
 
@@ -8581,13 +8570,13 @@ throws Exception
 		String formats12 = "%-12.12s";
 		List v = new Vector(1);
 	
-		if (dataset.getCyrl()== SM_CYR) {
+		if (dataset.getCyrl()== YearType.CALENDAR) {
 			month_del = "CYR";
 		}
-		else if (dataset.getCyrl()== SM_WYR) {
+		else if (dataset.getCyrl()== YearType.WATER) {
 			month_del = "WYR";
 		}
-		else if (dataset.getCyrl()== SM_IYR) {
+		else if (dataset.getCyrl()== YearType.NOV_TO_OCT) {
 			month_del = "IYR";
 		}
 	

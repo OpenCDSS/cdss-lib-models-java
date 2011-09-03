@@ -120,6 +120,7 @@ import RTi.Util.GUI.SimpleJComboBox;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 import RTi.Util.Time.DateTime;
+import RTi.Util.Time.YearType;
 
 /**
 This class is a GUI for displaying and editing control file data.
@@ -972,13 +973,13 @@ throws Exception {
 	else {
 		index = __cyr1SimpleJComboBox.getSelectedIndex();
 		if (index == 0) {
-			__dataset.setCyrl(StateMod_DataSet.SM_CYR);
+			__dataset.setCyrl(YearType.CALENDAR);
 		}
 		else if (index == 1) {
-			__dataset.setCyrl(StateMod_DataSet.SM_IYR);
+			__dataset.setCyrl(YearType.NOV_TO_OCT);
 		}
 		else if (index == 2) {
-			__dataset.setCyrl(StateMod_DataSet.SM_WYR);
+			__dataset.setCyrl(YearType.WATER);
 		}
 	}
 
@@ -1099,14 +1100,14 @@ private void setupGUI() {
 	__cyr1SimpleJComboBox.add("IYR - Irrigation Year (Nov - Oct)");
 	__cyr1SimpleJComboBox.add("WYR - Water Year (Oct - Sep)");
 	
-	int cyrl = __dataset.getCyrl();
-	if (cyrl == StateMod_DataSet.SM_CYR) {
+	YearType cyrl = __dataset.getCyrl();
+	if (cyrl == YearType.CALENDAR) {
 		__cyr1SimpleJComboBox.select(0);
 	}
-	else if (cyrl == StateMod_DataSet.SM_IYR) {
+	else if (cyrl == YearType.NOV_TO_OCT) {
 		__cyr1SimpleJComboBox.select(1);
 	}
-	else if (cyrl == StateMod_DataSet.SM_WYR) {
+	else if (cyrl == YearType.WATER) {
 		__cyr1SimpleJComboBox.select(2);
 	}
 	else {	

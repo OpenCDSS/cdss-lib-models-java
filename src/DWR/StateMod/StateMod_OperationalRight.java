@@ -237,6 +237,12 @@ Ending year of operation.
 private int __ioEnd;
 
 /**
+Monthly efficiencies (12 values in order of data set control file),
+only used by some rights like 24.
+*/
+private double[] __oprEff;
+
+/**
 Monthly operational limits (12 values in order of data set control file plus annual at end),
 only used by some rights like 47.
 */
@@ -343,6 +349,13 @@ public Object clone() {
 		__oprMax = null;
 	}
 	
+	if (__oprEff != null) {
+		op.__oprEff = (double[])__oprEff.clone();
+	}
+	else {
+		__oprEff = null;
+	}
+	
 	op.__commentsBeforeData = new Vector();
 	for ( String comment: __commentsBeforeData ) {
 		op.__commentsBeforeData.add(comment);
@@ -365,7 +378,7 @@ extra data.  Therefore, only significant information should be compared if the t
 public int compareTo(Object o)
 {	int res; // result of compareTo calls
 	StateMod_OperationalRight op = (StateMod_OperationalRight)o;
-	if ( !__metadata.getFullEditingSupported() ) {
+	if ( !__metadata.getFullEditingSupported(_dataset) ) {
 		// Only text is used so compare the text.
 		if ( __rightStringsList.size() < op.__rightStringsList.size() ) {
 			if ( Message.isDebugOn ) {
@@ -642,6 +655,37 @@ public int compareTo(Object o)
 				return -1;
 			}
 			else if (__oprMax[i] > op.__oprMax[i]) {
+				return 1;
+			}
+		}
+	}
+	
+	// Some rules use this (otherwise will be equally missing)...
+	
+	if (__oprEff == null && op.__oprEff == null) {
+		// ok
+	}
+	else if (__oprEff == null) {
+		return -1;
+	}
+	else if (op.__oprEff == null) {
+		return 1;
+	}
+	else {
+		int size1 = __oprEff.length;
+		int size2 = op.__oprEff.length;
+		if (size1 < size2) {
+			return -1;
+		}
+		else if (size1 > size2) {
+			return 1;
+		}
+
+		for (int i = 0; i < size1; i++) {
+			if (__oprEff[i] < op.__oprEff[i]) {
+				return -1;
+			}
+			else if (__oprEff[i] > op.__oprEff[i]) {
 				return 1;
 			}
 		}
@@ -1090,6 +1134,22 @@ public double getOprLossC(int index) {
 }
 
 /**
+Return the array of monthly efficiency values.
+*/
+public double [] getOprEff() {
+	return __oprEff;
+}
+
+/**
+Return a monthly efficiency at an index.
+@param index month to get efficiency for (0-11), where the index is a position, not
+a month (actual month is controlled by the year type for the data set).
+*/
+public double getOprEff(int index) {
+	return __oprEff[index];
+}
+
+/**
 Return the array of monthly max limits.
 */
 public double [] getOprMax() {
@@ -1197,6 +1257,11 @@ private void initialize()
 	for ( int i = 0; i < 13; i++ ) {
 		__oprMax[i] = StateMod_Util.MISSING_DOUBLE;
 	}
+	// Only used by some rights, but setup data to avoid memory management checks
+	__oprEff = new double[12];
+	for ( int i = 0; i < 12; i++ ) {
+		__oprEff[i] = StateMod_Util.MISSING_DOUBLE;
+	}
 	__internT = new String[10]; // Maximum defined by StateMod
 	for ( int i = 0; i < 10; i++ ) {
 		__internT[i] = "";
@@ -1210,11 +1275,13 @@ private void initialize()
 /**
 Indicate whether an operational right is known to the software.  If true, then the internal code should
 handle.  If false, the right should be treated as strings on read.
+@param rightTypeNumber the right type number
+@param dataSet StateMod_DataSet, needed to check some relationships during the read (e.g., type 24).
 */
-public static boolean isRightUnderstoodByCode( int rightType )
+public static boolean isRightUnderstoodByCode( int rightTypeNumber, StateMod_DataSet dataSet )
 {
-	StateMod_OperationalRight_Metadata metadata = StateMod_OperationalRight_Metadata.getMetadata(rightType);
-	if ( (metadata == null) || !metadata.getFullEditingSupported() ) {
+	StateMod_OperationalRight_Metadata metadata = StateMod_OperationalRight_Metadata.getMetadata(rightTypeNumber);
+	if ( (metadata == null) || !metadata.getFullEditingSupported(dataSet) ) {
 		return false;
 	}
 	else {
@@ -1349,9 +1416,10 @@ public StateMod_Data lookupSource2DataObject ( StateMod_DataSet dataset )
 /**
 Read operational right information in and store in a list.
 @param filename Name of file to read.
+@param dataSet StateMod_DataSet, needed to check some relationships during the read (e.g., type 24).
 @exception Exception if there is an error reading the file.
 */
-public static List<StateMod_OperationalRight> readStateModFile(String filename)
+public static List<StateMod_OperationalRight> readStateModFile(String filename, StateMod_DataSet dataSet )
 throws Exception
 {
 	int version = determineFileVersion(filename);
@@ -1361,7 +1429,7 @@ throws Exception
 		//return readStateModFileVersion1(filename);
 	}
 	else if ( version == 2 ) {
-		return readStateModFileVersion2(filename);
+		return readStateModFileVersion2(filename, dataSet );
 	}
 	else {
 		throw new Exception ( "Unable to determine StateMod file version to read operational rights." );
@@ -1518,6 +1586,49 @@ throws IOException
 			": " + iline + " (" + e + ")" );
 	}
 	return errorCount;
+}
+
+/**
+ * Read the StateMod operational rights file monthly efficiencies.  This method is only called if the
+ * data line needs to be read.
+ * @param routine to use for logging.
+ * @param linecount Line count (1+) before reading in this method.
+ * @param in BufferedReader to read.
+ * @param anOprit Operational right for which to read data.
+ * @return the number of errors.
+ * @exception IOException if there is an error reading the file
+ */
+private static int readStateModFile_MonthlyOprEff ( String routine, int linecount,
+	BufferedReader in, StateMod_OperationalRight anOprit )
+throws IOException
+{
+	String iline = null;
+	try {
+		iline = in.readLine().trim();
+		++linecount;
+		Message.printStatus ( 2, routine, "Processing operating rule " + anOprit.getItyopr() +
+			" monthly operating limits " + (linecount + 1) + ": " + iline );
+		// Limits are free format, but 13 are expected
+		List<String> tokens = StringUtil.breakStringList( iline, " \t", StringUtil.DELIM_SKIP_BLANKS );
+		int ntokens = 0;
+		if ( tokens != null ) {
+			ntokens = tokens.size();
+		}
+		if ( ntokens > 12 ) {
+			ntokens = 12;
+		}
+		for ( int i=0; i<ntokens; i++) {
+			anOprit.setOprEff(i, tokens.get(i).trim());
+		}
+	}
+	catch ( Exception e ) {
+		// TODO SAM 2010-12-13 Need to handle errors and provide feedback
+		Message.printWarning(3, routine,
+			"Error reading monthly operational limits at line " + (linecount + 1) + ": " + iline +
+		    " (" + e + ")" );
+		return 1;
+	}
+	return 0;
 }
 
 /**
@@ -1965,9 +2076,11 @@ throws Exception {
 /**
 Read operational right information in and store in a list.
 @param filename Name of file to read - the file should be the older "version 2" format.
+@param dataSet StateMod_DataSet, needed to check some relationships during the read (e.g., type 24).
 @exception Exception if there is an error reading the file.
 */
-private static List<StateMod_OperationalRight> readStateModFileVersion2(String filename)
+private static List<StateMod_OperationalRight> readStateModFileVersion2(String filename,
+	StateMod_DataSet dataSet)
 throws Exception {
 	String routine = "StateMod_OperationalRight.readStateModFileVersion2";
 	String iline = null;
@@ -2137,7 +2250,7 @@ throws Exception {
 			Message.printStatus( 2, routine, "Reading operating rule type " + rightType +
 				" starting at line " + linecount );
 			
-			boolean rightUnderstoodByCode = isRightUnderstoodByCode(rightType);
+			boolean rightUnderstoodByCode = isRightUnderstoodByCode(rightType,dataSet);
 			
 			if ( !rightUnderstoodByCode ) {
 				// The type is not known so read in as strings and set the type to negative.
@@ -2282,11 +2395,14 @@ throws Exception {
 			// ...end reading monthly and intervening structure data.
 			// Start reading additional records after monthly and intervening structure...
 			
-			if ( metadata.getRightTypeUsesMonthlyOprLimits(oprLimit) ) {
-				if ( (int)(oprLimit + .1) == 1 ) {
-					errorCount += readStateModFile_MonthlyOprMax( routine, linecount, in, anOprit );
-					++linecount; // Increment here because copy passed in to above call is local to that method
-				}
+			if ( metadata.getRightTypeUsesMonthlyOprMax(oprLimit) ) {
+				errorCount += readStateModFile_MonthlyOprMax( routine, linecount, in, anOprit );
+				++linecount; // Increment here because copy passed in to above call is local to that method
+			}
+			
+			if ( metadata.getRightTypeUsesMonthlyOprEff(dataSet, anOprit.getCiopso2(), anOprit.getIopsou2()) ) {
+				errorCount += readStateModFile_MonthlyOprEff( routine, linecount, in, anOprit );
+				++linecount; // Increment here because copy passed in to above call is local to that method
 			}
 			
 			// ...end reading additional data after monthly and intervening structure data
@@ -3022,6 +3138,38 @@ public void setOprLossC(int index, double oprLossC )
 /**
 Set a monthly operational limit.
 */
+public void setOprEff(int index, double oprEff) {
+	if (oprEff != __oprEff[index]) {
+		__oprEff[index] = oprEff;
+		setDirty ( true );
+		if ( Message.isDebugOn ) {
+			Message.printDebug(1,"","Setting oprEff[" + index + "] dirty");
+		}
+		if ( !_isClone && _dataset != null ) {
+			_dataset.setDirty(StateMod_DataSet.COMP_OPERATION_RIGHTS, true);
+		}
+	}
+}
+
+/**
+Set a monthly operational limit.
+*/
+public void setOprEff(int index, Double oprEff) {
+	setOprEff(index, oprEff.doubleValue());
+}
+
+/**
+Set a monthly operational limit.
+*/
+public void setOprEff(int index, String oprEff) {
+	if (oprEff != null) {
+		setOprEff(index, Double.parseDouble(oprEff.trim()));
+	}
+}
+
+/**
+Set a monthly operational limit.
+*/
 public void setOprMax(int index, double oprMax) {
 	if (oprMax != __oprMax[index]) {
 		__oprMax[index] = oprMax;
@@ -3252,16 +3400,17 @@ is also maintained by calling this routine.
 @param formatVersion the StateMod operational rights format version (1 or 2)
 @param theOpr list of operational right to write
 @param newComments addition comments that should be included at the top of the file
+@param dataSet StateMod_DataSet, needed to check some relationships during the read (e.g., type 24).
 @exception Exception if an error occurs.
 */
 public static void writeStateModFile(String infile, String outfile, int formatVersion,
-	List<StateMod_OperationalRight> theOpr, List<String> newComments)
+	List<StateMod_OperationalRight> theOpr, List<String> newComments, StateMod_DataSet dataSet )
 throws Exception {
 	if ( formatVersion == 1 ) {
 		writeStateModFileVersion1( infile,  outfile, theOpr, newComments);
 	}
 	else if ( formatVersion == 2 ) {
-		writeStateModFileVersion2( infile,  outfile, theOpr, newComments);
+		writeStateModFileVersion2( infile,  outfile, theOpr, newComments, dataSet );
 	}
 }
 
@@ -3465,10 +3614,11 @@ is also maintained by calling this routine.
 @param outfile output file to which to write
 @param theOpr vector of operational right to print
 @param newComments addition comments which should be included in history
+@param dataSet StateMod_DataSet, needed to check some relationships during the read (e.g., type 24).
 @exception Exception if an error occurs.
 */
 public static void writeStateModFileVersion2(String infile, String outfile,
-	List<StateMod_OperationalRight> theOpr, List<String> newComments)
+	List<StateMod_OperationalRight> theOpr, List<String> newComments, StateMod_DataSet dataSet )
 throws Exception {
 	PrintWriter	out = null;
 	List commentIndicators = new Vector(1);
@@ -3544,7 +3694,7 @@ throws Exception {
 		for ( StateMod_OperationalRight_Metadata metadata: StateMod_OperationalRight_Metadata.getAllMetadata() ) {
 			out.println(cmnt + "	" + StringUtil.formatString(metadata.getRightTypeNumber(),"%2d") +
 				"   " + metadata.getRightTypeName() + " (fully handled=" +
-				(metadata.getFullEditingSupported() ? "yes" : "no") + ")");
+				(metadata.getFullEditingSupported(dataSet) ? "yes" : "no") + ")");
 		}
 		out.println(cmnt + "");
 		out.println(cmnt + "            GUIDE TO COLUMN ENTRIES (see StateMod documentation for details, using variable names)" );
@@ -3615,7 +3765,7 @@ throws Exception {
 				out.println("#" + commentsBeforeData.get(j));
 			}
 			metadata = opr.getMetadata();
-			if ( !isRightUnderstoodByCode(opr.getItyopr()) || (opr.getReadErrors().size() > 0) ) {
+			if ( !isRightUnderstoodByCode(opr.getItyopr(),dataSet) || (opr.getReadErrors().size() > 0) ) {
 				// The operational right is not explicitly understood so print the original contents
 				// and go to the next right
 				List<String> rightStringsList = opr.getRightStrings();
@@ -3765,9 +3915,17 @@ throws Exception {
 				
 				// Write operating limits if used
 				
-				if ( metadata.getRightTypeUsesMonthlyOprLimits(opr.getOprLimit()) ) {
+				if ( metadata.getRightTypeUsesMonthlyOprMax(opr.getOprLimit()) ) {
 					for ( int iLim = 0; iLim < 13; iLim++ ) {
 						out.println ( StringUtil.formatString(opr.getOprMax(iLim), "%8.0f") );
+					}
+				}
+				
+				// Write efficiency if used
+				
+				if ( metadata.getRightTypeUsesMonthlyOprEff(dataSet, opr.getCiopso2(), opr.getIopsou2() ) ) {
+					for ( int iEff = 0; iEff < 12; iEff++ ) {
+						out.println ( StringUtil.formatString(opr.getOprEff(iEff), "%8.2f") );
 					}
 				}
 			}
