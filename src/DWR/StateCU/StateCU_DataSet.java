@@ -455,7 +455,6 @@ Construct a blank data set.  It is expected that other information will be set
 during further processing.  Component groups are not initialized until a data set type is set.
 */
 public StateCU_DataSet ()
-throws Exception
 {	// Pass the arrays of information about the data set to the base class
 	// so general methods will work...
 

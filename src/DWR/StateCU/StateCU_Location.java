@@ -456,12 +456,12 @@ public boolean isCollection()
 Read the StateCU STR file and return as a Vector of StateCU_Location.
 @param filename filename containing STR data.
 */
-public static List readStateCUFile ( String filename )
+public static List<StateCU_Location> readStateCUFile ( String filename )
 throws IOException
 {	String rtn = "StateCU_Location.readStateCUFile";
 	String iline = null;
-	List v = new Vector ( 8 );
-	List culoc_Vector = new Vector ( 100 );	// Data to return.
+	List<String> v = new Vector ( 8 );
+	List<StateCU_Location> culoc_Vector = new Vector ( 100 );	// Data to return.
 	int i;
 	int format_0[] = {
 				StringUtil.TYPE_STRING,	// CU Location
@@ -517,23 +517,23 @@ throws IOException
 		culoc = new StateCU_Location();
 
 		StringUtil.fixedRead ( iline, format_0, format_0w, v );
-		culoc.setID ( ((String)v.get(0)).trim() ); 
-		latitude = ((String)v.get(1)).trim();
+		culoc.setID ( v.get(0).trim() ); 
+		latitude = ( v.get(1).trim() );
 		if ((latitude.length() != 0) && StringUtil.isDouble(latitude)) {
 			culoc.setLatitude ( StringUtil.atod(latitude) );
 		}
-		elevation = ((String)v.get(2)).trim();
+		elevation = v.get(2).trim();
 		if ( (elevation.length() != 0) && StringUtil.isDouble(elevation)) {
 			culoc.setElevation ( StringUtil.atod(elevation) );
 		}
-		culoc.setRegion1 ( ((String)v.get(3)).trim() ); 
-		culoc.setRegion2 ( ((String)v.get(4)).trim() ); 
-		culoc.setName ( ((String)v.get(5)).trim() ); 
-		num_climate_stations = ((String)v.get(6)).trim();
+		culoc.setRegion1 ( v.get(3).trim() ); 
+		culoc.setRegion2 ( v.get(4).trim() ); 
+		culoc.setName ( v.get(5).trim() ); 
+		num_climate_stations = ( v.get(6).trim() );
 		if ( (num_climate_stations.length() != 0) && StringUtil.isInteger(num_climate_stations)) {
 			culoc.setNumClimateStations ( StringUtil.atoi(num_climate_stations) );
 		}
-		awc = ((String)v.get(7)).trim();
+		awc = v.get(7).trim();
 		if ( (awc.length() != 0) && StringUtil.isDouble(awc)) {
 			culoc.setAwc ( StringUtil.atod(awc) );
 		}
@@ -545,23 +545,23 @@ throws IOException
 			}
 			StringUtil.fixedRead ( iline, format_1, format_1w, v );
 			vsize = v.size();
-			culoc.setClimateStationID ( ((String)v.get(0)).trim(), i ); 
-			weight = ((String)v.get(1)).trim();
+			culoc.setClimateStationID ( v.get(0).trim(), i ); 
+			weight = v.get(1).trim();
 			if ( (weight.length() != 0) && StringUtil.isDouble(weight)) {
 				culoc.setTemperatureStationWeight ( StringUtil.atod(weight), i );
 			}
-			weight = ((String)v.get(2)).trim();
+			weight = v.get(2).trim();
 			if ( (weight.length() != 0) && StringUtil.isDouble(weight)) {
 				culoc.setPrecipitationStationWeight ( StringUtil.atod(weight), i );
 			}
 			if ( vsize > 3 ) {
-				ota = ((String)v.get(3)).trim();
+				ota = v.get(3).trim();
 				if ( (ota.length() != 0) && StringUtil.isDouble(ota)) {
 					culoc.setOrographicTemperatureAdjustment ( StringUtil.atod(ota), i );
 				}
 			}
 			if ( vsize > 4 ) {
-				opa = ((String)v.get(4)).trim();
+				opa = v.get(4).trim();
 				if ( (opa.length() != 0) &&	StringUtil.isDouble(opa)) {
 					culoc.setOrographicPrecipitationAdjustment ( StringUtil.atod(opa), i );
 				}

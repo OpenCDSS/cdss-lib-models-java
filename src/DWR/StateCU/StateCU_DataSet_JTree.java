@@ -78,16 +78,25 @@ private boolean __display_data_objects = false;	// Indicates whether data
 						// top-level components (false).
 
 /**
+If true then the component is being used with a full StateCU data set.  If false, it is being used
+with the StateMod GUI (CU Locations only).
+*/
+private boolean __isStateCU = true;
+
+/**
 Construct a StateCU_DataSet_JFrame.
 @param parent JFrame from which this instance is constructed.
 @param dataset StateCU_DataSet that is being displayed/managed.
 @param display_data_objects If true, data objects are listed in the tree.  If
 false, only the top-level data set components are listed.
+@param isStateCU indicates whether the display is being used for a full StateCU data set (true) or
+StateMod GUI (false).
 */
-public StateCU_DataSet_JTree (	JFrame parent, StateCU_DataSet dataset,
-				boolean display_data_objects )
+public StateCU_DataSet_JTree ( JFrame parent, StateCU_DataSet dataset,
+				boolean display_data_objects, boolean isStateCU )
 {	__dataset = dataset;
 	__display_data_objects = display_data_objects;
+	__isStateCU = isStateCU;
 	__folderIcon = getClosedIcon();
 	showRootHandles ( true );
 	addMouseListener(this);
@@ -344,9 +353,9 @@ public void actionPerformed(ActionEvent e) {
 			*/
 			}
 		}
-		else if(comp_type ==
-			StateCU_DataSet.COMP_CU_LOCATIONS_GROUP ){
-			new StateCU_Location_JFrame(__dataset,editable);
+		else if(comp_type == StateCU_DataSet.COMP_CU_LOCATIONS_GROUP ){
+			// TODO SAM 2011-06-22 Need a way to pass a window manager
+			new StateCU_Location_JFrame(__isStateCU,__dataset, null, editable);
 		}
 	}
 	// Else, data are specific objects...
@@ -374,8 +383,7 @@ public void actionPerformed(ActionEvent e) {
 		}
 	}
 	else if ( data instanceof StateCU_Location ) {
-		new StateCU_Location_JFrame(__dataset,
-			(StateCU_Location)data, editable);
+		new StateCU_Location_JFrame(false, __dataset, null, (StateCU_Location)data, editable);
 	}
 }
 

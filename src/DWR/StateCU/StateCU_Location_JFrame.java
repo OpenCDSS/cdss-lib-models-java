@@ -14,6 +14,12 @@
 // 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
 //------------------------------------------------------------------------------
 
+// TODO SAM 2011-06-22 This class was initially developed based on the StateMod GUI
+// code to prototype a StateCU GUI.  However, it was never used in production.
+// It is being pressed into service now to display StateCU structure information in the
+// StateMod GUI as read-only.  For this reason some information is disabled because
+// the files are not available from a StateMod data set.
+
 package DWR.StateCU;
 
 import java.awt.FlowLayout;
@@ -44,7 +50,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.text.JTextComponent;
 
+import DWR.StateMod.StateMod_DataSet_WindowManager;
 import DWR.StateMod.StateMod_DiversionRight;
+import DWR.StateMod.StateMod_GUIUtil;
 import RTi.GRTS.TSViewJFrame;
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.JWorksheet;
@@ -74,6 +82,11 @@ private final String
 	__BUTTON_SUMMARY = "Summary",
 	__BUTTON_CANCEL = "Cancel",
 	__BUTTON_GRAPH_ALL = "Graph All Time Series";
+
+/**
+Whether the class is being used in the StateMod GUI or StateCU GUI.
+*/
+private boolean __isStateCU = false; // false since code is only used in StateMod GUI
 
 /**
 Boolean specifying whether the form is editable or not.
@@ -163,9 +176,9 @@ DataSetComponent containing location data.
 private DataSetComponent __locationComponent;
 
 /**
-Vector of locations data in the DataSetComponent.
+List of locations data in the DataSetComponent.
 */
-private List __locationsVector;
+private List<StateCU_Location> __locationsList;
 
 private JWorksheet __delayWorksheet;
 private StateCU_Location_TableModel __delayModel;
@@ -186,30 +199,37 @@ private JTextField
 	__statusJTextField;
 
 /**
+Data set window manager.
+*/
+private StateMod_DataSet_WindowManager __dataset_wm;
+
+/**
 Constructor.
+@param isStateCU if true, the UI is used in a StateCU GUI, if false, the StateMod GUI.
 @param dataset dataset containing data to display
 @param editable whether the display should be editable or not
 */
-public StateCU_Location_JFrame(StateCU_DataSet dataset, boolean editable) {
-	super(dataset.getBaseName() + " - StateCU GUI - Locations");
+public StateCU_Location_JFrame(boolean isStateCU, StateCU_DataSet dataset,
+	StateMod_DataSet_WindowManager dataset_wm, boolean editable) {
+	StateMod_GUIUtil.setTitle(this, dataset, "CU Locations", null);
+	JGUIUtil.setIcon(this, JGUIUtil.getIconImage());
+	__isStateCU = isStateCU;
 	__currentLocationIndex = -1;
 	__editable = editable;
 
 	__dataset = dataset;
-	__locationComponent = __dataset.getComponentForComponentType(
-		StateCU_DataSet.COMP_CU_LOCATIONS);
-	__locationsVector = (List)__locationComponent.getData();
+	__dataset_wm = dataset_wm;
+	__locationComponent = __dataset.getComponentForComponentType( StateCU_DataSet.COMP_CU_LOCATIONS);
+	__locationsList = (List<StateCU_Location>)__locationComponent.getData();
+	Message.printStatus(2, "", "Have " + __locationsList.size() + " locations");
 
-	__delaysComponent = __dataset.getComponentForComponentType(
-		StateCU_DataSet.COMP_DELAY_TABLE_ASSIGNMENT_MONTHLY);
+	__delaysComponent = __dataset.getComponentForComponentType( StateCU_DataSet.COMP_DELAY_TABLE_ASSIGNMENT_MONTHLY);
 	__delaysVector = (List)__delaysComponent.getData();
 
-	__stationsComponent = __dataset.getComponentForComponentType(
-		StateCU_DataSet.COMP_CLIMATE_STATIONS);
+	__stationsComponent = __dataset.getComponentForComponentType( StateCU_DataSet.COMP_CLIMATE_STATIONS);
 	__stationsVector = (List)__stationsComponent.getData();
 
-	__rightsComponent = __dataset.getComponentForComponentType(
-		StateCU_DataSet.COMP_DIVERSION_RIGHTS);
+	__rightsComponent = __dataset.getComponentForComponentType( StateCU_DataSet.COMP_DIVERSION_RIGHTS);
 
 	setupGUI(0);
 }
@@ -219,19 +239,22 @@ Constructor.
 @param location StateCU_Location object to display
 @param editable whether the display should be editable or not.
 */
-public StateCU_Location_JFrame(StateCU_DataSet dataset, 
-StateCU_Location location, boolean editable) {
-	super(dataset.getBaseName() + " - StateCU GUI - Locations");
+public StateCU_Location_JFrame(boolean isStateCU, StateCU_DataSet dataset,
+	StateMod_DataSet_WindowManager dataset_wm, StateCU_Location location, boolean editable) {
+	super();
+	StateMod_GUIUtil.setTitle(this, dataset, "CU Locations", null);
+	JGUIUtil.setIcon(this, JGUIUtil.getIconImage());
+	__isStateCU = isStateCU;
 	__dataset = dataset;
+	__dataset_wm = dataset_wm;
 	__currentLocationIndex = -1;	
-	__locationsVector = new Vector();
+	__locationsList = new Vector();
 
-	__locationComponent = __dataset.getComponentForComponentType(
-		StateCU_DataSet.COMP_CU_LOCATIONS);
-	__locationsVector = (List)__locationComponent.getData();	
+	__locationComponent = __dataset.getComponentForComponentType(StateCU_DataSet.COMP_CU_LOCATIONS);
+	__locationsList = (List)__locationComponent.getData();	
 
 	String id = location.getID();
-	int index = StateCU_Util.indexOf(__locationsVector, id);
+	int index = StateCU_Util.indexOf(__locationsList, id);
 
 	__delaysComponent = __dataset.getComponentForComponentType(
 		StateCU_DataSet.COMP_DELAY_TABLE_ASSIGNMENT_MONTHLY);
@@ -264,13 +287,23 @@ public void actionPerformed(ActionEvent e) {
 	}
 	else if (action.equals(__BUTTON_CLOSE)) {
 		saveCurrentRecord();
-		dispose();
+		if ( __dataset_wm != null ) {
+			__dataset_wm.closeWindow (StateMod_DataSet_WindowManager.WINDOW_CONSUMPTIVE_USE );
+		}
+		else {
+			JGUIUtil.close ( this );
+		}
 	}
 	else if (action.equals(__BUTTON_APPLY)) {
 		saveCurrentRecord();
 	}
 	else if (action.equals(__BUTTON_CANCEL)) {
-		dispose();
+		if ( __dataset_wm != null ) {
+			__dataset_wm.closeWindow (StateMod_DataSet_WindowManager.WINDOW_CONSUMPTIVE_USE );
+		}
+		else {
+			JGUIUtil.close ( this );
+		}
 	}
 	else if (action.equals(__BUTTON_GRAPH) || action.equals(__BUTTON_TABLE)
 		|| action.equals(__BUTTON_SUMMARY)
@@ -411,7 +444,7 @@ throws Throwable {
 	__worksheet = null;
 	__dataset = null;
 	__locationComponent = null;
-	__locationsVector = null;
+	__locationsList = null;
 	__cropPatternCheckBox = null;
 	__irrigationPracticeCheckBox = null;
 	__diversionCheckBox = null;
@@ -475,8 +508,7 @@ public void mouseReleased(MouseEvent e) {
 /**
 Processes a table selection (either via a mouse press or programmatically 
 from selectTableIndex() by writing the old data back to the data set component
-and getting the next selection's data out of the data and displaying it 
-on the form.
+and getting the next selection's data out of the data and displaying it on the form.
 @param index the index of the reservoir to display on the form.
 */
 private void processTableSelection(int index) {
@@ -492,8 +524,7 @@ private void processTableSelection(int index) {
 
 	somethingSelected();
 
-	StateCU_Location location = (StateCU_Location)
-		__locationsVector.get(__currentLocationIndex);
+	StateCU_Location location = (StateCU_Location)__locationsList.get(__currentLocationIndex);
 
 	__locationIDJTextField.setText(location.getID());
 	__nameJTextField.setText(location.getName());
@@ -504,25 +535,29 @@ private void processTableSelection(int index) {
 	StateCU_Util.checkAndSet(location.getAwc(), __awcJTextField);
 
 	int dindex = StateCU_Util.indexOf(__delaysVector, location.getID());
-	if (dindex == -1 || __delaysVector == null) {
-		__delayModel.setDelay(location, null);
-	}
-	else {
-		__delayModel.setDelay(location, (StateCU_DelayTableAssignment)
-			__delaysVector.get(dindex));
+	if ( __delayModel != null ) {
+		if (dindex == -1 || __delaysVector == null) {
+			__delayModel.setDelay(location, null);
+		}
+		else {
+			__delayModel.setDelay(location, (StateCU_DelayTableAssignment)__delaysVector.get(dindex));
+		}
 	}
 
 	__stationModel.setStations(location, __stationsVector);
 
-	List v = (List)__rightsComponent.getData();
+	List<StateMod_DiversionRight> v = new Vector();
+	if ( (__rightsComponent != null) && (__rightsComponent.getData() != null) ) {
+		v = (List)__rightsComponent.getData();
+	}
 	String did = null;
 	String sdid = null;
 	String id = location.getID();
 	int j = 0;
-	List rights = new Vector();
+	List<StateMod_DiversionRight> rights = new Vector();
 	StateMod_DiversionRight right = null;
 	for (int i = 0; i < v.size(); i++) {
-		right = (StateMod_DiversionRight)v.get(i);
+		right = v.get(i);
 		did = right.getID();
 		j = did.indexOf(".");
 		if (j == -1) {
@@ -538,7 +573,9 @@ private void processTableSelection(int index) {
 		}
 	}
 
-	__rightsModel.setRights(location, rights);
+	if ( __rightsModel != null ) {
+		__rightsModel.setRights(location, rights);
+	}
 }
 
 /**
@@ -560,8 +597,7 @@ private void saveCurrentRecord() {
 /**
 Saves the information associated with the currently-selected location.
 The user doesn't need to hit the return key for the gui to recognize changes.
-The info is saved each time the user selects a differents tation or pressed
-the close button.
+The info is saved each time the user selects a different station or pressed the close button.
 */
 private void saveInformation(int record) {	
 	if (!__editable || record == -1) {
@@ -572,19 +608,15 @@ private void saveInformation(int record) {
 		return;
 	}
 
-	StateCU_Location location = 
-		(StateCU_Location)__locationsVector.get(record);
+	StateCU_Location location = (StateCU_Location)__locationsList.get(record);
 
 	location.setName(__nameJTextField.getText());
 	location.setID(__locationIDJTextField.getText());
-	location.setLatitude(
-		new Double(__latitudeJTextField.getText()).doubleValue());
-	location.setElevation(
-		new Double(__elevationJTextField.getText()).doubleValue());
+	location.setLatitude( new Double(__latitudeJTextField.getText()).doubleValue());
+	location.setElevation( new Double(__elevationJTextField.getText()).doubleValue());
 	location.setRegion1(__region1JTextField.getText());
 	location.setRegion2(__region2JTextField.getText());
-	location.setAwc(
-		new Double(__awcJTextField.getText()).doubleValue());
+	location.setAwc( new Double(__awcJTextField.getText()).doubleValue());
 }
 
 /**
@@ -649,8 +681,8 @@ private void setupGUI(int index) {
 
 	addWindowListener(this);
 
-	JPanel p1 = new JPanel();	// first 6 months' effeciency
-	//JPanel p2 = new JPanel();	// last 6 months' effeciency
+	JPanel p1 = new JPanel();	// first 6 months' efficiency
+	//JPanel p2 = new JPanel();	// last 6 months' efficiency
 	JPanel p3 = new JPanel();	// div sta id -> switch for diversion
 	JPanel p4 = new JPanel();	// user name -> data type switch
 
@@ -679,6 +711,7 @@ private void setupGUI(int index) {
 	JButton cancelJButton = new JButton(__BUTTON_CANCEL);
 	JButton helpJButton = new JButton(__BUTTON_HELP);
 	helpJButton.setEnabled(false);
+	helpJButton.setVisible(false);
 	JButton closeJButton = new JButton(__BUTTON_CLOSE);
 
 	GridBagLayout gb = new GridBagLayout();
@@ -692,29 +725,20 @@ private void setupGUI(int index) {
 
 	int y;
 
-	PropList p = 
-		new PropList("StateCU_Location_JFrame.JWorksheet");
+	PropList p = new PropList("StateCU_Location_JFrame.JWorksheet");
 
-	p.add("JWorksheet.CellFont=Courier");
-	p.add("JWorksheet.CellStyle=Plain");
-	p.add("JWorksheet.CellSize=11");
-	p.add("JWorksheet.HeaderFont=Arial");
-	p.add("JWorksheet.HeaderStyle=Plain");
-	p.add("JWorksheet.HeaderSize=11");
-	p.add("JWorksheet.HeaderBackground=LightGray");
-	p.add("JWorksheet.RowColumnPresent=false");
 	p.add("JWorksheet.ShowPopupMenu=true");
+	p.add("JWorksheet.AllowCopy=true");
 	p.add("JWorksheet.SelectionMode=SingleRowSelection");
 
 	int[] widths = null;
 	try {
-		StateCU_Location_TableModel tmw = new
-			StateCU_Location_TableModel(__locationsVector);
-		StateCU_Location_CellRenderer crw = new
-			StateCU_Location_CellRenderer(tmw);
+		StateCU_Location_TableModel tmw = new StateCU_Location_TableModel(__locationsList);
+		StateCU_Location_CellRenderer crw = new StateCU_Location_CellRenderer(tmw);
 	
 		__worksheet = new JWorksheet(crw, tmw, p);
 
+		__worksheet.removeColumn(0);
 		__worksheet.removeColumn(3);
 		__worksheet.removeColumn(4);
 		__worksheet.removeColumn(5);
@@ -766,7 +790,7 @@ private void setupGUI(int index) {
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	
 	y++;
-	JGUIUtil.addComponent(p3, new JLabel("Latitude (Dec. Deg.):"),
+	JGUIUtil.addComponent(p3, new JLabel("Latitude (decimal degrees):"),
 		0, y, 1, 1, 0, 0, 
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -776,7 +800,7 @@ private void setupGUI(int index) {
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	
 	y++;
-	JGUIUtil.addComponent(p3, new JLabel("Elevation (Feet):"),
+	JGUIUtil.addComponent(p3, new JLabel("Elevation (feet):"),
 		0, y, 1, 1, 0, 0, 
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -786,7 +810,7 @@ private void setupGUI(int index) {
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	
 	y++;
-	JGUIUtil.addComponent(p3, new JLabel("Region 1:"),
+	JGUIUtil.addComponent(p3, new JLabel("Region 1 (typically county):"),
 		0, y, 1, 1, 0, 0, 
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -796,7 +820,7 @@ private void setupGUI(int index) {
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	
 	y++;
-	JGUIUtil.addComponent(p3, new JLabel("Region 2:"),
+	JGUIUtil.addComponent(p3, new JLabel("Region 2 (typically not used):"),
 		0, y, 1, 1, 0, 0, 
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -806,7 +830,7 @@ private void setupGUI(int index) {
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
 	y++;
-	JGUIUtil.addComponent(p3, new JLabel("Available Water Content:"),
+	JGUIUtil.addComponent(p3, new JLabel("Available Water Content (fraction):"),
 		0, y, 1, 1, 0, 0, 
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -824,13 +848,12 @@ private void setupGUI(int index) {
 
 	int[] widths2 = null;
 	try {
-		__stationModel = new
-			StateCU_Location_TableModel(new Vector());
-		StateCU_Location_CellRenderer crw = new
-			StateCU_Location_CellRenderer(__stationModel);
+		__stationModel = new StateCU_Location_TableModel(new Vector());
+		StateCU_Location_CellRenderer crw = new StateCU_Location_CellRenderer(__stationModel);
 	
 		__stationWorksheet = new JWorksheet(crw, __stationModel, p);
 
+		__stationWorksheet.removeColumn(0);
 		__stationWorksheet.removeColumn(1);
 		__stationWorksheet.removeColumn(2);
 		__stationWorksheet.removeColumn(3);
@@ -844,9 +867,8 @@ private void setupGUI(int index) {
 		widths2 = crw.getColumnWidths();
 	}
 	catch (Exception e) {
-		Message.printWarning(2, routine, e);
+		Message.printWarning(3, routine, e);
 		__stationWorksheet = new JWorksheet(0, 0, p);
-		e.printStackTrace();
 	}
 	__stationWorksheet.setPreferredScrollableViewportSize(null);
 	__stationWorksheet.setHourglassJFrame(this);
@@ -860,16 +882,12 @@ private void setupGUI(int index) {
 		GridBagConstraints.BOTH, GridBagConstraints.NORTHWEST);
 	
 	int[] widths3 = null;
-	if (__dataset.getDataSetType() >= 
-		StateCU_DataSet.TYPE_WATER_SUPPLY_LIMITED_BY_WATER_RIGHTS) {
+	if (__dataset.getDataSetType() >= StateCU_DataSet.TYPE_WATER_SUPPLY_LIMITED_BY_WATER_RIGHTS) {
 		try {
-			__rightsModel = new
-				StateCU_Location_TableModel(new Vector());
-			StateCU_Location_CellRenderer crw = new
-				StateCU_Location_CellRenderer(__rightsModel);
+			__rightsModel = new StateCU_Location_TableModel(new Vector());
+			StateCU_Location_CellRenderer crw = new StateCU_Location_CellRenderer(__rightsModel);
 		
-			__rightsWorksheet = new JWorksheet(crw, __rightsModel, 
-				p);
+			__rightsWorksheet = new JWorksheet(crw, __rightsModel, p);
 	
 			__rightsWorksheet.removeColumn(1);
 			__rightsWorksheet.removeColumn(2);
@@ -883,15 +901,13 @@ private void setupGUI(int index) {
 			widths3 = crw.getColumnWidths();
 		}
 		catch (Exception e) {
-			Message.printWarning(2, routine, e);
+			Message.printWarning(3, routine, e);
 			__rightsWorksheet = new JWorksheet(0, 0, p);
-			e.printStackTrace();
 		}
 		__rightsWorksheet.setPreferredScrollableViewportSize(null);
 		__rightsWorksheet.setHourglassJFrame(this);
 		JScrollPane jsp3 = new JScrollPane(__rightsWorksheet);
-		jsp3.setBorder(BorderFactory.createTitledBorder(
-			jsp3.getBorder(), "Diversion Rights"));
+		jsp3.setBorder(BorderFactory.createTitledBorder( jsp3.getBorder(), "Diversion Rights"));
 		JGUIUtil.addComponent(right_panel, jsp3,
 			0, y++, 1, 1, 1, 1, 
 			0, 0, 0, 0,
@@ -900,15 +916,17 @@ private void setupGUI(int index) {
 
 	JPanel graphPanel = new JPanel();
 	graphPanel.setLayout(gb);
-	graphPanel.setBorder(BorderFactory.createTitledBorder(
-		"Time Series"));
+	graphPanel.setBorder(BorderFactory.createTitledBorder("Time Series"));
+	if ( !__isStateCU ) {
+		// Data for graphs are only available when used with a full StateCU data set
+		graphPanel.setVisible(false);
+	}
 	int yy = 0;
 	__precipitationCheckBox = new JCheckBox("Precipitation (Monthly)");
 	__temperatureCheckBox = new JCheckBox("Temperature (Monthly)");
 	__frostDatesCheckBox = new JCheckBox("Frost Dates (Yearly)");
 	__cropPatternCheckBox = new JCheckBox("Crop Pattern (Yearly)");
-	__irrigationPracticeCheckBox = new JCheckBox("Irrigation Practice "
-		+ "(Yearly)");
+	__irrigationPracticeCheckBox = new JCheckBox("Irrigation Practice (Yearly)");
 	__diversionCheckBox = new JCheckBox("Diversion (Monthly)");
 	
 	JGUIUtil.addComponent(graphPanel, __precipitationCheckBox,
@@ -927,15 +945,13 @@ private void setupGUI(int index) {
 		0, yy++, 3, 1, 1, 0, 
 		0, 0, 0, 0,
 		GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
-	if (__dataset.getDataSetType() >= 
-		StateCU_DataSet.TYPE_WATER_SUPPLY_LIMITED) {
+	if (__dataset.getDataSetType() >= StateCU_DataSet.TYPE_WATER_SUPPLY_LIMITED) {
 		JGUIUtil.addComponent(graphPanel, __irrigationPracticeCheckBox,
 			0, yy++, 3, 1, 1, 0, 
 			0, 0, 0, 0,
 			GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 	}
-	if (__dataset.getDataSetType() >=
-		StateCU_DataSet.TYPE_WATER_SUPPLY_LIMITED_BY_WATER_RIGHTS) {
+	if (__dataset.getDataSetType() >= StateCU_DataSet.TYPE_WATER_SUPPLY_LIMITED_BY_WATER_RIGHTS) {
 		JGUIUtil.addComponent(graphPanel, __diversionCheckBox,
 			0, yy++, 3, 1, 1, 0, 
 			0, 0, 0, 0,
@@ -971,13 +987,10 @@ private void setupGUI(int index) {
 		GridBagConstraints.HORIZONTAL, GridBagConstraints.NORTHWEST);	
 
 	int[] widths4 = null;
-	if (__dataset.getDataSetType() >= 
-		StateCU_DataSet.TYPE_RIVER_DEPLETION) {	
+	if (__dataset.getDataSetType() >= StateCU_DataSet.TYPE_RIVER_DEPLETION) {	
 		try {
-			__delayModel = new
-				StateCU_Location_TableModel(new Vector());
-			StateCU_Location_CellRenderer crw = new
-				StateCU_Location_CellRenderer(__delayModel);
+			__delayModel = new StateCU_Location_TableModel(new Vector());
+			StateCU_Location_CellRenderer crw = new StateCU_Location_CellRenderer(__delayModel);
 		
 			__delayWorksheet = new JWorksheet(crw, __delayModel, p);
 	
@@ -1104,12 +1117,22 @@ private void setupGUI(int index) {
 	getContentPane().add ("South", bottomJPanel);	
 
 	getContentPane().add(mainJPanel);
+	
+	if ( __dataset_wm != null ) {
+		__dataset_wm.setWindowOpen ( StateMod_DataSet_WindowManager.WINDOW_CONSUMPTIVE_USE, this );
+	}
 
 	initializeDisables();
 
 //	JGUIUtil.center(this);
 	pack();
-	setSize(800,820);
+	if ( __isStateCU ) {
+		setSize(800,820);
+	}
+	else {
+		setSize(800,420);
+	}
+	JGUIUtil.center(this);
 	selectTableIndex(index);
 	setVisible(true);
 
@@ -1144,6 +1167,9 @@ in StateCU_GUIUtil.
 */
 public void windowClosing(WindowEvent e) {
 	saveCurrentRecord();
+	if ( __dataset_wm != null ) {
+		__dataset_wm.closeWindow ( StateMod_DataSet_WindowManager.WINDOW_DIVERSION );
+	}
 }
 
 /**
