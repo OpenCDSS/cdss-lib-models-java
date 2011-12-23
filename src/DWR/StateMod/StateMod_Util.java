@@ -7228,7 +7228,7 @@ throws Exception
 	double value;
 	String id = "" + ts.getIdentifier();
 	while ( (tsdata = tsi.next()) != null ) {
-		value = tsdata.getData();
+		value = tsdata.getDataValue();
 		if ( ts.isDataMissing(value) ) {
 			if ( checkForMissing ) {
 				// TODO Evaluate whether to create StateMod_TimeSeries or similar class to wrap TS, and
