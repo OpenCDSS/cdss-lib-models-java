@@ -576,7 +576,8 @@ private static String __statemodVersionLatest = "12.20";
 /**
 The program to use when running StateMod.  If relying on the path, this should just be the
 program name.  However, a full path can be specified to override the PATH.
-See the system/StateModGUI.cfg file for configuration properties.
+See the system/StateModGUI.cfg file for configuration properties, which should be used to set
+the executable as soon as the GUI starts.
 */
 private static String __statemodExecutable = "StateMod";
 
@@ -7022,14 +7023,14 @@ throws Exception
 		ProcessManager sp = new ProcessManager(command_array);
 		sp.saveOutput(true);
 		sp.run();
-		List output = sp.getOutputList();
+		List<String> output = sp.getOutputList();
 		int size = 0;
 		if (output != null){
 			size = output.size();	
 		}
 		boolean	versionFound = false;
 		for (int i = 0; i < size; i++){
-			str = (String)output.get(i);
+			str = output.get(i);
 			if (str.indexOf("Version:") >= 0) {
 				String version = StringUtil.getToken( str.trim(),":", StringUtil.DELIM_SKIP_BLANKS,1).trim();
 				// For now treat as a floating point number...

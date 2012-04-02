@@ -2579,7 +2579,8 @@ throws FileNotFoundException, IOException
 			ruleType = (Integer)table.getFieldValue(iRow,"Type");
 			fullEditingSupported = (String)table.getFieldValue(iRow, "EditingSupported" );
 			if ( (fullEditingSupported != null) && fullEditingSupported.equalsIgnoreCase("no") ) {
-				Message.printStatus(2, routine, "Turning off full editing for operational right type " + ruleType );
+				Message.printStatus(2, routine, "Turning off full editing for operational right type " + ruleType +
+				" because EditingSupported=no" );
 				StateMod_OperationalRight_Metadata.getMetadata(ruleType).setFullEditingSupported(false);
 			}
 		}
