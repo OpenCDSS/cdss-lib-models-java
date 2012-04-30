@@ -72,10 +72,10 @@ protected static String _editorPreference = "NotePad";
 Settings for use in relaying data back to the calling application via ProcessListener calls.
 */
 public final static int 
-	STATUS_READ_START =	20,	// Start reading a data file
-	STATUS_READ_COMPLETE =	22,	// End reading a data file
-	STATUS_READ_GVP_START =	50,	// Start reading the GVP file
-	STATUS_READ_GVP_END = 51;	// End reading the GVP file;
+	STATUS_READ_START = 20, // Start reading a data file
+	STATUS_READ_COMPLETE = 22, // End reading a data file
+	STATUS_READ_GVP_START = 50, // Start reading the GVP file
+	STATUS_READ_GVP_END = 51; // End reading the GVP file;
 
 /**
 Add filename filters to the file chooser for time series files.  A general ".stm" entry is added as well
