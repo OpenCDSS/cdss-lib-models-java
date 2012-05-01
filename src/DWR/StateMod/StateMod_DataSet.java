@@ -8821,7 +8821,7 @@ throws Exception
 			out.println(cmnt + " Some possible reasons are:" );
 			out.println(cmnt + " - it is a new file in StateMod and other software has not been updated" );
 			out.println(cmnt + " - it is an old file that is supported in StateMod but not other software" );
-			out.println(cmnt + " - it is a simple configuration property and data do not need to be read" );
+			out.println(cmnt + " - it is a simple configuration property (rather than a file name)" );
 			for ( int i = 0; i < props.size(); i++ ) {
 				out.println(StringUtil.formatString(props.elementAt(i).getKey(),format) + "= " +
 					props.elementAt(i).getValue() );

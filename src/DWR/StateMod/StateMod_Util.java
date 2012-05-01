@@ -123,6 +123,7 @@
 
 package DWR.StateMod;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
@@ -3034,24 +3035,25 @@ public static String getSmDeltaExecutable ( boolean expanded )
 Return the StateMod executable.  This can be a full path or if not, the PATH
 environment variable is relied on to find the executable.
 By default this is expanded if any ${property} tokens are used (e.g., ${Home} for
-the software installation home).
+the software installation home, ${WorkingDir} for the response file folder).
 @return the StateMod executable name.
 */
-public static String getStateModExecutable ()
-{	return getStateModExecutable ( true );
+public static String getStateModExecutable ( String home, String workingDir )
+{	return getStateModExecutable ( home, workingDir, true );
 }
 
 /**
 Return the StateMod executable that is by default used with the GUI.
 This can be a full path or if not, the PATH environment variable is relied on to find the executable.
 By default this is expanded if any ${property} tokens are used (e.g., ${Home} for
-the software installation home).
+the software installation home, ${WorkingDir} for the response file folder).
 @return the StateMod executable name.
+@param home home (installation) folder for StateMod GUI
+@param workingDir response file folder
 @param expanded If false, ${properties} will not be expanded (e.g., use to show in
-configuration dialogs).  If true, properties will be expanced.  Currently ${Home}
-(case-insensitive) is expanced using a call to RTi.Util.IO.IOUtil.getApplicationHomeDir(), if not empty.
+configuration dialogs).  If true, properties will be expanced.
 */
-public static String getStateModExecutable ( boolean expanded )
+public static String getStateModExecutable ( String home, String workingDir, boolean expanded )
 {	
 	if ( __statemodExecutable == null ) {
 		return null;
@@ -3060,18 +3062,22 @@ public static String getStateModExecutable ( boolean expanded )
 		return __statemodExecutable;
 	}
 	// Expand properties if found.
-	String home = IOUtil.getApplicationHomeDir();
+	String statemodExecutable = __statemodExecutable;
 	if ( (home != null) && (home.length() > 0) ) {
 		// Replace ${Home} with supplied value.  Since there is currently no elegant
 		// way to deal with case (and not enforcing on the input end yet), check several variants.
-		String s = StringUtil.replaceString(__statemodExecutable, "${Home}", home );
-		s = StringUtil.replaceString(s, "${HOME}", home );
-		s = StringUtil.replaceString(s, "${home}", home );
-		return s;
+		statemodExecutable = StringUtil.replaceString(statemodExecutable, "${Home}", home );
+		statemodExecutable = StringUtil.replaceString(statemodExecutable, "${HOME}", home );
+		statemodExecutable = StringUtil.replaceString(statemodExecutable, "${home}", home );
 	}
-	else {
-		return __statemodExecutable;
+	if ( (workingDir != null) && (workingDir.length() > 0) ) {
+		// Replace ${WorkingDir} with supplied value.  Since there is currently no elegant
+		// way to deal with case (and not enforcing on the input end yet), check several variants.
+		statemodExecutable = StringUtil.replaceString(statemodExecutable, "${WorkingDir}", workingDir );
+		statemodExecutable = StringUtil.replaceString(statemodExecutable, "${WORKINGDIR}", workingDir );
+		statemodExecutable = StringUtil.replaceString(statemodExecutable, "${workingdir}", workingDir );
 	}
+	return statemodExecutable;
 }
 
 /**
@@ -6939,8 +6945,12 @@ typcially be used for model run options but is normally false when running the S
 */
 public static void runStateMod ( StateMod_DataSet dataset, String option, boolean withGUI, JFrame parent )
 throws Exception
-{	DataSetComponent comp = dataset.getComponentForComponentType(StateMod_DataSet.COMP_RESPONSE );
-	runStateMod ( dataset.getDataFilePathAbsolute(comp.getDataFileName()), option, withGUI, parent, 0 );
+{	String responseFile = null;
+	if ( dataset != null ) {
+		DataSetComponent comp = dataset.getComponentForComponentType(StateMod_DataSet.COMP_RESPONSE );
+		responseFile = dataset.getDataFilePathAbsolute(comp.getDataFileName());
+	}
+	runStateMod ( responseFile, option, withGUI, parent, 0 );
 }
 
 /**
@@ -6978,11 +6988,19 @@ binary model output files but may be needed if reports are viewed immediately af
 public static void runStateMod ( String response_file_name, String option, boolean withGUI, JFrame parent, int wait_after )
 throws Exception
 {	String routine = "StateMod_Util.runStateMod";
+	String workingDir = null;
 	if ( response_file_name == null ) {
 		response_file_name = "";
 	}
+	else {
+		File file = new File(response_file_name);
+		workingDir = file.getParent();
+	}
+	//Message.printStatus(2, routine, "Running StateMod, response_file_name=\"" + response_file_name +
+	//	"\" workingDir=\"" + workingDir + "\" option=\"" + option + "\" withGUI=" + withGUI + " wait_after=" + wait_after );
 
-	String command = getStateModExecutable() + " " + response_file_name + " " + option;
+	String stateModExecutable = getStateModExecutable(IOUtil.getApplicationHomeDir(), workingDir );
+	String command = stateModExecutable + " " + response_file_name + " " + option;
 	String str;
 
 	Message.printStatus(1, routine, "Running \"" + command + "\"");
@@ -7018,7 +7036,7 @@ throws Exception
 	else if (option.equalsIgnoreCase("-v") || option.equalsIgnoreCase("-version")) {
 		// Run StateMod -version and search the output for the version information...
 		String [] command_array = new String[2];
-		command_array[0] = getStateModExecutable();
+		command_array[0] = stateModExecutable;
 		command_array[1] = "-version";
 		ProcessManager sp = new ProcessManager(command_array);
 		sp.saveOutput(true);
@@ -7044,7 +7062,7 @@ throws Exception
 		}
 		if (!versionFound) {
 			Message.printWarning(1, routine, "Unable to determine StateMod version from version output using:\n" +
-			"   " + getStateModExecutable() + "\n" + "StateMod may not run and output may not be accessible.\n"
+			"   " + stateModExecutable + "\n" + "StateMod may not run and output may not be accessible.\n"
 			+"Is statemod.exe in the PATH or specified as a full path (see Tools ... Options)?");
 			return;	// To skip sleep below.
 		}
