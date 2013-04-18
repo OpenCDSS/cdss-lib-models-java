@@ -205,6 +205,9 @@ private StateMod_DataSet_WindowManager __dataset_wm;
 
 /**
 Constructor.
+@param isStateCU whether the UI is being used by the StateCU/StateDMI (true) or StateMod GUI (false).
+@param dataset the StateCU dataset that is managing the data
+@param dataset_wm the StateCU dataset window manager for the data
 @param isStateCU if true, the UI is used in a StateCU GUI, if false, the StateMod GUI.
 @param dataset dataset containing data to display
 @param editable whether the display should be editable or not
@@ -236,6 +239,9 @@ public StateCU_Location_JFrame(boolean isStateCU, StateCU_DataSet dataset,
 
 /**
 Constructor.
+@param isStateCU whether the UI is being used by the StateCU (true) or StateMod/StateDMI GUI (false).
+@param dataset the StateCU dataset that is managing the data
+@param dataset_wm the StateCU dataset window manager for the data
 @param location StateCU_Location object to display
 @param editable whether the display should be editable or not.
 */
