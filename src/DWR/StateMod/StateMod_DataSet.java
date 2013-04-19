@@ -5830,7 +5830,6 @@ throws IllegalArgumentException, IOException
 			fn = response_props.getValue ( "Precipitation_Annual");
 			// Always set the file name in the component...
 			Message.printStatus(2,routine,"StateMod GUI does not yet handle annual precipitation data." );
-			/*
 			comp = getComponentForComponentType( COMP_PRECIPITATION_TS_YEARLY );
 			if ( (comp != null) && (fn != null) ) {
 				comp.setDataFileName ( fn );
@@ -5840,7 +5839,7 @@ throws IllegalArgumentException, IOException
 				readTime.clear();
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
-				readInputAnnounce1(comp);
+				readStateModFile_Announce1(comp);
 				List v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 				if (v == null) {
 					v = new Vector();
@@ -5853,10 +5852,9 @@ throws IllegalArgumentException, IOException
 				}
 				comp.setData(v);
 			}
-			*/
 		}
 		catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading precipitation time series file:\n\"" + fn +
+			Message.printWarning(1, routine, "Error reading annual precipitation time series file:\n\"" + fn +
 				warningEndString + " (See log file for more on error:" + e + ")");
 			Message.printWarning(3, routine, e);
 			comp.setErrorReadingInputFile ( true );
@@ -5912,9 +5910,9 @@ throws IllegalArgumentException, IOException
 		try {
 			fn = response_props.getValue ( "Evaporation_Annual" );
 			Message.printStatus(2,routine,"StateMod GUI does not yet handle annual evaporation data." );
-			/*
+
 			// Always set the file name...
-			comp =getComponentForComponentType(COMP_EVAPORATION_TS_YEARLY);
+			comp = getComponentForComponentType(COMP_EVAPORATION_TS_YEARLY);
 			if ( (comp != null) && (fn != null) ) {
 				comp.setDataFileName ( fn );
 			}
@@ -5923,7 +5921,7 @@ throws IllegalArgumentException, IOException
 				readTime.clear();
 				readTime.start();
 				fn = getDataFilePathAbsolute ( fn );
-				readInputAnnounce1(comp);
+				readStateModFile_Announce1(comp);
 				List v = StateMod_TS.readTimeSeriesList(fn, null, null, null, true);
 				if (v == null) {
 					v = new Vector();
@@ -5932,14 +5930,13 @@ throws IllegalArgumentException, IOException
 				// TODO Old-style data that may be removed in new StateMod...
 				setNumeva ( size );
 				for (i = 0; i < size; i++) {
-					((MonthTS)v.get(i)).setDataType( lookupTimeSeriesDataType( COMP_EVAPORATION_TS_MONTHLY ) );
+					((MonthTS)v.get(i)).setDataType( lookupTimeSeriesDataType( COMP_EVAPORATION_TS_YEARLY ) );
 				}
 				comp.setData(v);
 			}
-			*/
 		}
 		catch (Exception e) {
-			Message.printWarning(1, routine, "Error reading evaporation time series file:\n\"" + fn +
+			Message.printWarning(1, routine, "Error reading annual evaporation time series file:\n\"" + fn +
 				warningEndString + " (See log file for more on error:" + e + ")");
 			Message.printWarning(3, routine, e);
 			comp.setErrorReadingInputFile ( true );
