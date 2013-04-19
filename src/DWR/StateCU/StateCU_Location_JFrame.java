@@ -1174,7 +1174,7 @@ in StateCU_GUIUtil.
 public void windowClosing(WindowEvent e) {
 	saveCurrentRecord();
 	if ( __dataset_wm != null ) {
-		__dataset_wm.closeWindow ( StateMod_DataSet_WindowManager.WINDOW_DIVERSION );
+		__dataset_wm.closeWindow ( StateMod_DataSet_WindowManager.WINDOW_CONSUMPTIVE_USE );
 	}
 }
 
