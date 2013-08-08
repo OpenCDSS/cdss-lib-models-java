@@ -1438,6 +1438,7 @@ maximum period of record for all the time series will be used for output.
 Time series with shorter periods will be filled with "MissingDV."
 Currently this is only enabled for monthly data.
 @param out The PrintWriter to which to write.
+@param comments output comments for top of file (e.g., command file)
 @param tslist A vector of time series.
 @param date1 Start of period to write.
 @param date2 End of period to write.
@@ -1465,7 +1466,7 @@ or "Calendar" (Jan through Dec), consistent with the YearType enumeration.
 </table>
 @exception Exception if there is an error writing the file.
 */
-public static void writePatternTimeSeriesList ( String filename, List tslist,
+public static void writePatternTimeSeriesList ( String filename, List<String> comments, List tslist,
 	DateTime date1, DateTime date2, PropList props )
 throws Exception
 {	String rtn = "StateMod_TS.writePatternTimeSeriesList";
@@ -1584,7 +1585,7 @@ throws Exception
 	PrintWriter out = IOUtil.processFileHeaders (
 		null, // No need to update the old file headers
 		full_filename, // New file to write
-		null, // New comments to add.
+		comments, // New comments to add.
 		commentIndicators, ignoredCommentIndicators, 0 );
 	if ( out == null ) {
 		Message.printWarning ( 3, rtn, "Error writing time series to \"" + full_filename + "\"" );
