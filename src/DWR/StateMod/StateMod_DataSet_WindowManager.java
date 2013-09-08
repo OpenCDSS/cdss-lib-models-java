@@ -718,9 +718,8 @@ public void renderGeoViewAnnotation ( GeoViewJComponent geoview, Object objectTo
 
 /**
 Render an object as an annotation on the network editor.
-@param geoviewPanel the map object
-@param objectToRender the object to render as an annotation on the map
-@param label the string that is used to label the annotation on the map
+@param network the StateMod network object being rendered
+@param annotationData annotation data to render
 */
 public void renderStateModNetworkAnnotation ( StateMod_Network_JComponent network,
 	StateMod_Network_AnnotationData annotationData )
