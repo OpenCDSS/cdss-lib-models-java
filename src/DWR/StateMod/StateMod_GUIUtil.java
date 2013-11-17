@@ -145,6 +145,10 @@ public static void addTimeSeriesFilenameFilters ( JFileChooser fc, int timeInter
         fc.addChoosableFileFilter(sff);
     }
     if ( (timeInterval == TimeInterval.MONTH) || (timeInterval == TimeInterval.UNKNOWN) ) {
+        SimpleFileFilter sff = new SimpleFileFilter( "xop", "StateMod Output - Operational Rights (Monthly)");
+        fc.addChoosableFileFilter(sff);
+    }
+    if ( (timeInterval == TimeInterval.MONTH) || (timeInterval == TimeInterval.UNKNOWN) ) {
         SimpleFileFilter sff = new SimpleFileFilter( "pre", "StateMod Precipitation (Monthly)");
         fc.addChoosableFileFilter(sff);
     }

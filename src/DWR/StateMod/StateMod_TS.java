@@ -71,6 +71,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -152,6 +153,8 @@ public static int getFileDataInterval ( String filename )
 {	String message = null, routine = "StateMod_TS.getFileDataInterval";
 	BufferedReader ifp = null;
 	String iline = null;
+	int intervalUnknown = -999; // Return if can't figure out interval
+	int interval = intervalUnknown;
 	String full_filename = IOUtil.getPathUsingWorkingDir ( filename );
 	try {
 		ifp = new BufferedReader ( new FileReader ( full_filename));
@@ -159,38 +162,60 @@ public static int getFileDataInterval ( String filename )
 	catch ( Exception e ) {
 		message = "Unable to open file \"" + full_filename + "\" to determine data interval.";
 		Message.printWarning ( 2, routine, message );
-		return -999;
+		return intervalUnknown;
 	}
 	try {
-		// Read while a comment or blank line...
-		while ( true ) {
-			iline = ifp.readLine();
-			if ( iline == null ) {
-				throw new Exception ( "end of file" );
-			}
-			iline = iline.trim();
-			if ( (iline.length() != 0) && (iline.charAt(0) != '#')){
-				break; // iline should be the header line
-			}
-		}
-		// Now should have the header.  Read one more to get to a data line...
-		iline = ifp.readLine();
-		if ( iline == null ) {
-			throw new Exception ( "end of file" );
-		}
-		// Should be first data line.  If longer than the threshold, assume daily.
-		if ( iline.length() > 150 ) {
-			ifp.close();
-			return TimeInterval.DAY;
-		}
-		else {
-			ifp.close();
-			return TimeInterval.MONTH;
-		}
+	    if ( filename.toUpperCase().endsWith("XOP") ) {
+	        // The *.xop file will have "Time Step:   Monthly"
+	        while ( true ) {
+                iline = ifp.readLine();
+                if ( iline == null ) {
+                    break;
+                }
+                if ( iline.startsWith("#") && iline.toUpperCase().indexOf("TIME STEP:") > 0 ) {
+                    String [] parts = iline.split(":");
+                    if ( parts.length > 1 ) {
+                        if ( parts[1].trim().equalsIgnoreCase("Monthly") ) {
+                            interval = TimeInterval.MONTH;
+                            break;
+                        }
+                        else if ( parts[1].trim().equalsIgnoreCase("Daily") ) {
+                            interval = TimeInterval.DAY;
+                            break;
+                        }
+                    }
+                }
+	        }
+	    }
+	    else {
+    		// Read while a comment or blank line...
+    		while ( true ) {
+    			iline = ifp.readLine();
+    			if ( iline == null ) {
+    				throw new Exception ( "end of file" );
+    			}
+    			iline = iline.trim();
+    			if ( (iline.length() != 0) && (iline.charAt(0) != '#')){
+    				break; // iline should be the header line
+    			}
+    		}
+    		// Now should have the header.  Read one more to get to a data line...
+    		iline = ifp.readLine();
+    		if ( iline == null ) {
+    			throw new Exception ( "end of file" );
+    		}
+    		// Should be first data line.  If longer than the threshold, assume daily.
+    		if ( iline.length() > 150 ) {
+    			interval = TimeInterval.DAY;
+    		}
+    		else {
+    			interval = TimeInterval.MONTH;
+    		}
+	    }
 	}
 	catch ( Exception e ) {
 		// Could not determine file interval
-		return -999;
+		return intervalUnknown;
 	}
 	finally {
 		if ( ifp != null ) {
@@ -202,6 +227,7 @@ public static int getFileDataInterval ( String filename )
 			}
 		}
 	}
+	return interval;
 }
 
 /**
@@ -731,7 +757,7 @@ The IOUtil.getPathUsingWorkingDir() method is applied to the filename.
 public static TS readTimeSeries ( String tsident_string, String filename,
 	DateTime date1, DateTime date2, String units, boolean read_data )
 throws Exception
-{	TS	ts = null;
+{	TS ts = null;
 	String routine = "StateMod_TS.readTimeSeries";
 
 	if ( filename == null ) {
@@ -762,7 +788,11 @@ throws Exception
 	ts.setIdentifier ( tsident_string );
 	// The specific time series is modified...
 	// TODO SAM 2007-03-01 Evaluate logic
-	readTimeSeriesList ( ts, in, full_fname, data_interval, date1, date2, units, read_data );
+	List<TS> tslist = readTimeSeriesList ( ts, in, full_fname, data_interval, date1, date2, units, read_data );
+	// Get out the first time series because sometimes a new one is created, for example with XOP
+	if ( (tslist != null) && tslist.size() > 0 ) { 
+	    ts = tslist.get(0);
+	}
 	ts.getIdentifier().setInputType("StateMod");
 	ts.setInputName ( full_fname );
 	// Already in the low-level code
@@ -782,9 +812,9 @@ The IOUtil.getPathUsingWorkingDir() method is applied to the filename.
 @param units Units to convert to.
 @param read_data Indicates whether data should be read.
 */
-public static List readTimeSeriesList ( String fname, DateTime date1, DateTime date2, String units, boolean read_data)
+public static List<TS> readTimeSeriesList ( String fname, DateTime date1, DateTime date2, String units, boolean read_data)
 throws Exception
-{	List tslist = null;
+{	List<TS> tslist = null;
     String routine = "StateMod_TS.readTimeSeriesList";
 
 	String input_name = fname;
@@ -807,7 +837,7 @@ throws Exception
 		nts = tslist.size();
 	}
 	for ( int i = 0; i < nts; i++ ) {
-		ts = (TS)tslist.get(i);
+		ts = tslist.get(i);
 		if ( ts != null ) {
 			ts.setInputName ( full_fname );
 			// TODO SAM 2008-05-11 is this needed?
@@ -824,7 +854,7 @@ Read one or more time series from a StateMod format file.
 @return a list of time series if successful, null if not.  The calling code
 is responsible for freeing the memory for the time series.
 @param req_ts Pointer to time series to fill.  If null,
-return all new time series in the vector.  All data are reset, except for the
+return all new time series in the list.  All data are reset, except for the
 identifier, which is assumed to have been set in the calling code.
 @param in Reference to open input stream.
 @param full_filename Full path to filename, used for messages.
@@ -835,16 +865,22 @@ identifier, which is assumed to have been set in the calling code.
 @param readData Indicates whether data should be read.
 @exception Exception if there is an error reading the time series.
 */
-private static List readTimeSeriesList ( TS req_ts, BufferedReader in, String fullFilename,
+private static List<TS> readTimeSeriesList ( TS req_ts, BufferedReader in, String fullFilename,
 	int fileInterval, DateTime reqDate1, DateTime reqDate2, String reqUnits, boolean readData )
 throws Exception
 {	int	dl = 40, i, line_count = 0, m1, m2, y1, y2,
 		currentTSindex, current_month = 1, current_year = 0,
 		doffset = 2, init_month = 1, init_year, ndata_per_line = 12,
 		numts = 0;
-	String	chval, iline, routine="StateMod_TS.readTimeSeriesList";
-	List v = new Vector (15);
+	String chval, iline = "", routine="StateMod_TS.readTimeSeriesList";
+	List<Object> v = new ArrayList<Object>(15);
 	DateTime date = null;
+	if ( fullFilename.toUpperCase().endsWith("XOP") ) {
+	    // XOP file is similar to the normal time series format but has some differences
+	    // in that the header is different, station identifier is provided in the header, and
+	    // time series are listed vertically one after another, not interwoven by interval like *.stm
+	    return readXTimeSeriesList ( req_ts, in, fullFilename, fileInterval, reqDate1, reqDate2, reqUnits, readData);
+	}
 	if ( fileInterval == TimeInterval.DAY ) {
 		date = new DateTime ( DateTime.PRECISION_DAY );
 		doffset = 3; // Used when setting data to skip the leading fields on the data line
@@ -858,7 +894,7 @@ throws Exception
 	boolean	req_id_found = false; // Indicates if we have found the requested TS in the file.
 	boolean standard_ts = true; // Non-standard indicates 12 monthly averages in file.
 
-	List tslist = null; // List of time series to return.
+	List<TS> tslist = null; // List of time series to return.
 	String req_id = null;
 	if ( req_ts != null ) {
 		req_id = req_ts.getLocation();
@@ -963,106 +999,30 @@ throws Exception
 			format[1] = StringUtil.TYPE_INTEGER;
 			format[2] = StringUtil.TYPE_SPACE;
 			format[3] = StringUtil.TYPE_STRING;
-			format[4] = StringUtil.TYPE_DOUBLE;
-			format[5] = StringUtil.TYPE_DOUBLE;
-			format[6] = StringUtil.TYPE_DOUBLE;
-			format[7] = StringUtil.TYPE_DOUBLE;
-			format[8] = StringUtil.TYPE_DOUBLE;
-			format[9] = StringUtil.TYPE_DOUBLE;
-			format[10] = StringUtil.TYPE_DOUBLE;
-			format[11] = StringUtil.TYPE_DOUBLE;
-			format[12] = StringUtil.TYPE_DOUBLE;
-			format[13] = StringUtil.TYPE_DOUBLE;
-			format[14] = StringUtil.TYPE_DOUBLE;
-			format[15] = StringUtil.TYPE_DOUBLE;
-			format[16] = StringUtil.TYPE_DOUBLE;
-			format[17] = StringUtil.TYPE_DOUBLE;
-			format[18] = StringUtil.TYPE_DOUBLE;
-			format[19] = StringUtil.TYPE_DOUBLE;
-			format[20] = StringUtil.TYPE_DOUBLE;
-			format[21] = StringUtil.TYPE_DOUBLE;
-			format[22] = StringUtil.TYPE_DOUBLE;
-			format[23] = StringUtil.TYPE_DOUBLE;
-			format[24] = StringUtil.TYPE_DOUBLE;
-			format[25] = StringUtil.TYPE_DOUBLE;
-			format[26] = StringUtil.TYPE_DOUBLE;
-			format[27] = StringUtil.TYPE_DOUBLE;
-			format[28] = StringUtil.TYPE_DOUBLE;
-			format[29] = StringUtil.TYPE_DOUBLE;
-			format[30] = StringUtil.TYPE_DOUBLE;
-			format[31] = StringUtil.TYPE_DOUBLE;
-			format[32] = StringUtil.TYPE_DOUBLE;
-			format[33] = StringUtil.TYPE_DOUBLE;
-			format[34] = StringUtil.TYPE_DOUBLE;
-	
+			for ( int iFormat = 4; iFormat <= 34; ++iFormat ) {
+			    format[iFormat] = StringUtil.TYPE_DOUBLE;
+			}
 			format_w[0] = 4;
 			format_w[1] = 4;
 			format_w[2] = 1;
 			format_w[3] = 12;
-			format_w[4] = 8;
-			format_w[5] = 8;
-			format_w[6] = 8;
-			format_w[7] = 8;
-			format_w[8] = 8;
-			format_w[9] = 8;
-			format_w[10] = 8;
-			format_w[11] = 8;
-			format_w[12] = 8;
-			format_w[13] = 8;
-			format_w[14] = 8;
-			format_w[15] = 8;
-			format_w[16] = 8;
-			format_w[17] = 8;
-			format_w[18] = 8;
-			format_w[19] = 8;
-			format_w[20] = 8;
-			format_w[21] = 8;
-			format_w[22] = 8;
-			format_w[23] = 8;
-			format_w[24] = 8;
-			format_w[25] = 8;
-			format_w[26] = 8;
-			format_w[27] = 8;
-			format_w[28] = 8;
-			format_w[29] = 8;
-			format_w[30] = 8;
-			format_w[31] = 8;
-			format_w[32] = 8;
-			format_w[33] = 8;
-			format_w[34] = 8;
+			for ( int iFormat = 4; iFormat <= 34; ++iFormat ) {
+			    format_w[iFormat] = 8;
+			}
 		}
 		else {
 			format = new int[14];
 			format[0] = StringUtil.TYPE_INTEGER;
 			format[1] = StringUtil.TYPE_STRING;
-			format[2] = StringUtil.TYPE_DOUBLE;
-			format[3] = StringUtil.TYPE_DOUBLE;
-			format[4] = StringUtil.TYPE_DOUBLE;
-			format[5] = StringUtil.TYPE_DOUBLE;
-			format[6] = StringUtil.TYPE_DOUBLE;
-			format[7] = StringUtil.TYPE_DOUBLE;
-			format[8] = StringUtil.TYPE_DOUBLE;
-			format[9] = StringUtil.TYPE_DOUBLE;
-			format[10] = StringUtil.TYPE_DOUBLE;
-			format[11] = StringUtil.TYPE_DOUBLE;
-			format[12] = StringUtil.TYPE_DOUBLE;
-			format[13] = StringUtil.TYPE_DOUBLE;
-		
+			for ( int iFormat = 2; iFormat <= 13; ++iFormat ) {
+			    format[iFormat] = StringUtil.TYPE_DOUBLE;
+			}
 			format_w = new int[14];
 			format_w[0] = 5;
 			format_w[1] = 12;
-			format_w[2] = 8;
-			format_w[3] = 8;
-			format_w[4] = 8;
-			format_w[5] = 8;
-			format_w[6] = 8;
-			format_w[7] = 8;
-			format_w[8] = 8;
-			format_w[9] = 8;
-			format_w[10] = 8;
-			format_w[11] = 8;
-			format_w[12] = 8;
-			format_w[13] = 8;
+			for ( int iFormat = 2; iFormat <= 13; ++iFormat ) {
+			    format_w[iFormat] = 8;
+			}
 		}
 		if ( y1 == 0 ) {
 			// average monthly series
@@ -1424,11 +1384,256 @@ throws Exception
 		}
 	} // Main try around routine.
 	catch ( Exception e ) {
-		Message.printWarning ( 3, routine, "Error reading file near line " + line_count );
+		Message.printWarning ( 3, routine, "Error reading file near line " + line_count + ": " + iline );
 		Message.printWarning ( 3, routine, e );
 		throw new Exception ( "Error reading StateMod file" );
 	}
 	return tslist;
+}
+
+/**
+Read a StateMod time series in an output format, for example the *xop.  This format has one
+time series listed after each other, with a main file header, time series header, and time series data.
+Currently only the monthly *xop file has been tested.
+*/
+private static List<TS> readXTimeSeriesList ( TS req_ts, BufferedReader in, String fullFilename,
+    int fileInterval, DateTime reqDate1, DateTime reqDate2, String reqUnits, boolean readData )
+throws Exception
+{   String routine = "StateMod_TS.readXTimeSeriesList";
+    List<TS> tslist = new ArrayList<TS>(); // List of time series to return.
+    String req_id = null;
+    if ( req_ts != null ) {
+        // Periods in identifiers are converted to underscores so as to not break period-delimited TSID
+        req_id = req_ts.getLocation().replace('.', '_');
+    }
+    String iline = "";
+    int lineCount = 0;
+    try {// General error handler
+        // Read lines until no more comments are found.  The last line read will
+        // need to be processed as the main header line...
+        boolean inTsHeader = false;
+        boolean inTsData = false;
+        String units = "";
+        String id = "", name = "", oprType = "", adminNum = "", source1 = "", dest = "", yearOn = "", yearOff = "", firstMonth = "";
+        int pos;
+        List<Object> v = new ArrayList<Object>(14);
+        int format[] = null;
+        int format_w[] = null;
+        int dataRowCount = 0; // Initialize for first iteration
+        int maxYears = 500; // Maximum years of data in a time series handled
+        int [] yearArray = new int[maxYears];
+        double [][] dataArray = new double[maxYears][13]; // handles months and year total
+        int year;
+        if ( fileInterval == TimeInterval.MONTH ) {
+            if ( readData ) {
+                format = new int[14];
+                format_w = new int[14];
+            }
+            else {
+                // Only year
+                format = new int[1];
+                format_w = new int[1];
+            }
+            format[0] = StringUtil.TYPE_INTEGER;
+            format_w[0] = 4;
+            if ( readData ) {
+                for ( int iFormat = 1; iFormat <= 13; ++iFormat ) {
+                    format[iFormat] = StringUtil.TYPE_DOUBLE;
+                }
+                for ( int iFormat = 1; iFormat <= 13; ++iFormat ) {
+                    format_w[iFormat] = 8;
+                }
+            }
+        }
+        else {
+            throw new Exception ( "Do not know how to read daily XOP file." );
+        }
+        while ( (iline = in.readLine()) != null ) {
+            ++lineCount;
+            // The first checks are expected at the top of the file but blank lines and comments could be anywhere
+            if ( iline.length() == 0 ) {
+                continue;
+            }
+            else if ( iline.charAt(0) == '#' ) {
+                continue;
+            }
+            else if ( !inTsHeader && iline.startsWith(" Operational Right Summary") ) {
+                // Units are after this string - check below
+                inTsHeader = true;
+            }
+            else if ( !inTsHeader && iline.startsWith(" ID =") ) {
+                // Second check to detect when in time series header, in case main header is not as expected
+                inTsHeader = true;
+                // No continue because want to process the line
+            }
+            if ( inTsHeader ) {
+                // Reading the time series header
+                if ( iline.startsWith("_") ) {
+                    // Last line in time series header section
+                    inTsHeader = false;
+                    inTsData = true;
+                }
+                else if ( iline.startsWith(" Operational Right Summary") ) {
+                    // Units are after this string
+                    units = iline.substring(26).trim();
+                }
+                else if ( iline.startsWith(" ID =") ) {
+                    // Processing:   ID = 01038160.01        Name = Opr_Empire_Store         Opr Type =   45   Admin # =      20226.00000
+                    pos = iline.indexOf("ID =");
+                    id = iline.substring((pos+4),(pos+4+12)).trim();
+                    // Identifier cannot contain periods so replace with underscore
+                    id = id.replace('.', '_');
+                    pos = iline.indexOf("Name =");
+                    name = iline.substring((pos+6),(pos+6+24)).trim();
+                    pos = iline.indexOf("Opr Type =");
+                    oprType = iline.substring((pos+10),(pos+10+5)).trim();
+                    pos = iline.indexOf("Admin # =");
+                    adminNum = iline.substring((pos+9),(pos+9+17)).trim();
+                }
+                else if ( iline.startsWith(" Source 1 =") ) {
+                    // Processing:    Source 1 = 0103816.01   Destination = 0103816           Year On =     0   Year Off =  9999
+                    pos = iline.indexOf("Source 1 =");
+                    source1 = iline.substring((pos+10),(pos+10+12)).trim();
+                    pos = iline.indexOf("Destination =");
+                    dest = iline.substring((pos+13),(pos+13+12)).trim();
+                    pos = iline.indexOf("Year On =");
+                    yearOn = iline.substring((pos+9),(pos+9+6)).trim();
+                    pos = iline.indexOf("Year Off =");
+                    yearOff = iline.substring((pos+10),(pos+10+6)).trim();
+                }
+                else if ( iline.startsWith("YEAR") ) {
+                    // Processing:  YEAR    JAN     FEB     MAR     APR     MAY     JUN     JUL     AUG     SEP     OCT     NOV     DEC     TOT
+                    // Mainly interested in first month to know whether calendar
+                    firstMonth = iline.substring(6,14).trim();
+                }
+            }
+            else if ( inTsData ) {
+                // Reading the time series data
+                if ( iline.startsWith("AVG") ) {
+                    // Last line in time series data section - create time series
+                    String tsid = id + TSIdent.SEPARATOR + "" + TSIdent.SEPARATOR + "Operation" + TSIdent.SEPARATOR +
+                        "Month" + TSIdent.INPUT_SEPARATOR + "StateMod" + TSIdent.INPUT_SEPARATOR + fullFilename;
+                    TS ts = TSUtil.newTimeSeries(tsid, true);
+                    ts.setIdentifier(tsid);
+                    YearType yearType = null;
+                    if ( firstMonth.equalsIgnoreCase("JAN") ) {
+                        yearType = YearType.CALENDAR;
+                    }
+                    else if ( firstMonth.equalsIgnoreCase("OCT") ) {
+                        yearType = YearType.WATER;
+                    }
+                    else if ( firstMonth.equalsIgnoreCase("NOV") ) {
+                        yearType = YearType.NOV_TO_OCT;
+                    }
+                    else {
+                        throw new Exception ( "Do not know how to handle year starting with month " + firstMonth );
+                    }
+                    // First set original period using file dates
+                    DateTime date1 = new DateTime(DateTime.PRECISION_MONTH);
+                    date1.setYear(yearArray[0] + yearType.getStartYearOffset());
+                    date1.setMonth(yearType.getStartMonth());
+                    ts.setDate1Original(date1);
+                    DateTime date2 = new DateTime(DateTime.PRECISION_MONTH);
+                    date2.setYear(yearArray[dataRowCount -1]);
+                    date2.setMonth(yearType.getEndMonth());
+                    ts.setDate2Original(date2);
+                    // Set data period to requested if provided
+                    if ( reqDate1 != null ) {
+                        ts.setDate1(reqDate1);
+                    }
+                    else {
+                        ts.setDate1(ts.getDate1Original());
+                    }
+                    if ( reqDate2 != null ) {
+                        ts.setDate2(reqDate2);
+                    }
+                    else {
+                        ts.setDate2(ts.getDate2Original());
+                    }
+                    ts.setDataUnits(units);
+                    ts.setDataUnitsOriginal(units);
+                    ts.setInputName(fullFilename);
+                    ts.addToGenesis ( "Read StateMod TS for " +
+                         ts.getDate1() + " to " + ts.getDate2() + " from \"" + fullFilename + "\"" );
+                    ts.setDescription(name);
+                    // Be careful renaming the following because they show up in StateMod_TS_TableModel and possibly other classes
+                    ts.setProperty("OprType", new Integer(oprType));
+                    ts.setProperty("AdminNum", adminNum);
+                    ts.setProperty("Source1", source1);
+                    ts.setProperty("Destination",dest);
+                    ts.setProperty("YearOn", new Integer(yearOn) );
+                    ts.setProperty("YearOff", new Integer(yearOff) );
+                    if ( readData ) {
+                        // Transfer the data that was read
+                        ts.allocateDataSpace();
+                    }
+                    DateTime date = new DateTime(DateTime.PRECISION_MONTH);
+                    for ( int iData = 0; iData < dataRowCount; iData++ ) {
+                        date.setYear(yearArray[iData] + yearType.getStartYearOffset());
+                        date.setMonth(yearType.getStartMonth());
+                        if ( readData ) {
+                            for ( int iMonth = 0; iMonth < 12; date.addMonth(1), iMonth++ ) {
+                                ts.setDataValue(date, dataArray[iData][iMonth]);
+                            }
+                        }
+                    }
+                    if ( (req_id != null) && (req_id.length() > 0) ) {
+                        if ( req_id.equalsIgnoreCase(id) ) {
+                            // Found the requested time series so no need to keep reading
+                            tslist.add(ts);
+                            break;
+                        }
+                    }
+                    else {
+                        tslist.add(ts);
+                    }
+                    // Set the flag to read another header and initialize header information to blanks so they
+                    // can be populated by the next header
+                    inTsHeader = true;
+                    inTsData = false;
+                    units = "";
+                    dataRowCount = 0;
+                    id = "";
+                    name = "";
+                    oprType = "";
+                    adminNum = "";
+                    source1 = "";
+                    dest = "";
+                    yearOn = "";
+                    yearOff = "";
+                    firstMonth = "";
+                }
+                else {
+                    // If first 4 characters are a number then it is a data line:
+                    // 1950  12983.   3282.   8086.      0.      0.      0.      0.      0.      0.      0.      0.  15628.  39979.
+                    // Fixed format read and numbers can be squished together
+                    if ( !StringUtil.isInteger(iline.substring(0,4))) {
+                        // Don't know what to do with line
+                        Message.printWarning(3,routine,"Don't know how to parse data line " + lineCount + ": " + iline.trim() );
+                    }
+                    else {
+                        // Always read the year so it can be used to set the period in time series metadata
+                        ++dataRowCount;
+                        if ( dataRowCount <= maxYears ) {
+                            StringUtil.fixedRead ( iline, format, format_w, v );
+                            year = (Integer)v.get(0);
+                            yearArray[dataRowCount - 1] = year;
+                            if ( readData ) {
+                                for ( int iv = 1; iv < 14; iv++ ) {
+                                    dataArray[dataRowCount - 1][iv - 1] = (Double)v.get(iv);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    catch ( Exception e ) {
+        Message.printWarning (3,routine,e);
+        throw new Exception ( "Error reading file near line " + lineCount + ":" + iline + " (" + e + ")", e );
+    }
+    return tslist;
 }
 
 /**
