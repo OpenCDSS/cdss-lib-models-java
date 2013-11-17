@@ -418,10 +418,10 @@ Read the well rights file.
 @param filename name of file containing well rights
 @return list of well rights
 */
-public static List readStateModFile(String filename)
+public static List<StateMod_WellRight> readStateModFile(String filename)
 throws Exception {
 	String routine = "StateMod_WellRight.readStateModFile";
-	List theWellRights = new Vector();
+	List<StateMod_WellRight> theWellRights = new Vector<StateMod_WellRight>();
 	int [] format_0 = {
 				StringUtil.TYPE_STRING,
 				StringUtil.TYPE_STRING,

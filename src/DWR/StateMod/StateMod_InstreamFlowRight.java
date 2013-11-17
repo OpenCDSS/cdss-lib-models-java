@@ -320,14 +320,14 @@ public static boolean isInstreamFlowRightFile ( String filename )
 }
 
 /**
-Read instream flow rights information in and store in a Vector.
+Read instream flow rights information in and store in a list.
 @param filename Name of file to read.
 @exception Exception if there is an error reading the file.
 */
-public static List readStateModFile(String filename)
+public static List<StateMod_InstreamFlowRight> readStateModFile(String filename)
 throws Exception {
 	String routine ="StateMod_InstreamFlowRight.readStateModFile";
-	List theInsfRights = new Vector();
+	List<StateMod_InstreamFlowRight> theInsfRights = new Vector<StateMod_InstreamFlowRight>();
 	int format_0[] = {
 		StringUtil.TYPE_STRING,
 		StringUtil.TYPE_STRING,
