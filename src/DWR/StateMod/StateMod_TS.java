@@ -205,7 +205,8 @@ public static int getFileDataInterval ( String filename )
     			throw new Exception ( "end of file" );
     		}
     		// Should be first data line.  If longer than the threshold, assume daily.
-    		if ( iline.length() > 150 ) {
+    		// Trim because some fixed-format write tools put extra spaces at the end
+    		if ( iline.trim().length() > 150 ) {
     			interval = TimeInterval.DAY;
     		}
     		else {
@@ -881,12 +882,15 @@ throws Exception
 	    // time series are listed vertically one after another, not interwoven by interval like *.stm
 	    return readXTimeSeriesList ( req_ts, in, fullFilename, fileInterval, reqDate1, reqDate2, reqUnits, readData);
 	}
+	String fileIntervalString = "";
 	if ( fileInterval == TimeInterval.DAY ) {
 		date = new DateTime ( DateTime.PRECISION_DAY );
 		doffset = 3; // Used when setting data to skip the leading fields on the data line
+		fileIntervalString = "Day";
 	}
 	else if ( fileInterval == TimeInterval.MONTH ){
 	    date = new DateTime ( DateTime.PRECISION_MONTH );
+	    fileIntervalString = "Month";
 	}
 	else {
 		throw new InvalidParameterException( "Requested file interval is invalid." );
@@ -899,6 +903,10 @@ throws Exception
 	if ( req_ts != null ) {
 		req_id = req_ts.getLocation();
 	}
+	// Declare here so are visible in final catch to provide feedback for bad format files
+    DateTime date1_header = null, date2_header = null;
+    String units = "";
+    YearType yeartype = YearType.CALENDAR;
 	try {// General error handler
 		// read first line of the file
 		++line_count;
@@ -949,7 +957,6 @@ throws Exception
 		y1 = ((Integer)v.get(1)).intValue();
 		m2 = ((Integer)v.get(2)).intValue();
 		y2 = ((Integer)v.get(3)).intValue();
-		DateTime date1_header;
 		if ( fileInterval == TimeInterval.DAY ) {
 			date1_header = new DateTime ( DateTime.PRECISION_DAY );
 			date1_header.setYear ( y1 );
@@ -961,7 +968,6 @@ throws Exception
 			date1_header.setYear ( y1 );
 			date1_header.setMonth ( m1 );
 		}
-		DateTime date2_header;
 		if ( fileInterval == TimeInterval.DAY ) {
 			date2_header = new DateTime ( DateTime.PRECISION_DAY );
 			date2_header.setYear ( y2 );
@@ -973,9 +979,8 @@ throws Exception
 			date2_header.setYear ( y2 );
 			date2_header.setMonth ( m2 );
 		}
-		String units = ((String)v.get(4)).trim();
+		units = ((String)v.get(4)).trim();
 		String yeartypes = ((String)v.get(5)).trim();
-		YearType yeartype = YearType.CALENDAR;
 		// Year type is used in one place to initialize the year when
 		// transferring data.  However, it is assumed that m1 is always correct for the year type.
 		if ( yeartypes.equalsIgnoreCase("WYR") ) {
@@ -1384,9 +1389,11 @@ throws Exception
 		}
 	} // Main try around routine.
 	catch ( Exception e ) {
-		Message.printWarning ( 3, routine, "Error reading file near line " + line_count + ": " + iline );
+	    String message = "Error reading file near line " + line_count + " header indicates interval " + fileIntervalString +
+	    ", period " + date1_header + " to " + date2_header + ", units =\"" + units + "\" line: " + iline;
+		Message.printWarning ( 3, routine, message );
 		Message.printWarning ( 3, routine, e );
-		throw new Exception ( "Error reading StateMod file" );
+		throw new Exception ( message + " (" + e + ") - CHECK DATA FILE FORMAT." );
 	}
 	return tslist;
 }
@@ -1480,7 +1487,8 @@ throws Exception
                 else if ( iline.startsWith(" ID =") ) {
                     // Processing:   ID = 01038160.01        Name = Opr_Empire_Store         Opr Type =   45   Admin # =      20226.00000
                     pos = iline.indexOf("ID =");
-                    id = iline.substring((pos+4),(pos+4+12)).trim();
+                    // Following may need to be +13 as per specification, but do 20 to allow flexibility
+                    id = iline.substring((pos+4),(pos+4+20)).trim();
                     // Identifier cannot contain periods so replace with underscore
                     id = id.replace('.', '_');
                     pos = iline.indexOf("Name =");
