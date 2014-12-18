@@ -185,7 +185,11 @@ public static void addTimeSeriesFilenameFilters ( JFileChooser fc, int timeInter
         fc.addChoosableFileFilter(sff);
     }
     if ( (timeInterval == TimeInterval.MONTH) || (timeInterval == TimeInterval.UNKNOWN) ) {
-        SimpleFileFilter sff = new SimpleFileFilter( "riy", "StateMod Streamflow, Natural (Monthly)");
+        SimpleFileFilter sff = new SimpleFileFilter( "rim", "StateMod Streamflow, Natural (Monthly, as input)");
+        fc.addChoosableFileFilter(sff);
+    }
+    if ( (timeInterval == TimeInterval.MONTH) || (timeInterval == TimeInterval.UNKNOWN) ) {
+        SimpleFileFilter sff = new SimpleFileFilter( "xbm", "StateMod Streamflow, Natural (Monthly, as output)");
         fc.addChoosableFileFilter(sff);
     }
     SimpleFileFilter stm_sff = new SimpleFileFilter( "stm", "StateMod Time Series");
