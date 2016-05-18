@@ -26,7 +26,7 @@ extends JWorksheet_AbstractRowTableModel {
 /**
 Number of columns in the table model.
 */
-private int __COLUMNS = 6;
+private int __COLUMNS = 7;
 
 /**
 Column references.
@@ -37,7 +37,8 @@ private final int
 	__COL_YEAR = 2,
 	__COL_COL_TYPE = 3,
 	__COL_PART_TYPE = 4,
-	__COL_PART_ID = 5;
+	__COL_PART_ID = 5,
+	__COL_PART_ID_TYPE = 6;
 
 /**
 Whether the data are editable or not.
@@ -73,18 +74,18 @@ public StateCU_Location_Collection_TableModel(List data, boolean editable) {
 }
 
 /**
-From AbstractTableModel.  Returns the class of the data stored in a given
-column.
+From AbstractTableModel.  Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 */
 public Class getColumnClass (int columnIndex) {
 	switch (columnIndex) {
-		case __COL_ID:		return String.class;
-		case __COL_DIV:		return Integer.class;
-		case __COL_YEAR:	return Integer.class;
-		case __COL_COL_TYPE:	return String.class;
-		case __COL_PART_TYPE:	return String.class;
-		case __COL_PART_ID:	return String.class;
+		case __COL_ID: return String.class;
+		case __COL_DIV: return Integer.class;
+		case __COL_YEAR: return Integer.class;
+		case __COL_COL_TYPE: return String.class;
+		case __COL_PART_TYPE: return String.class;
+		case __COL_PART_ID: return String.class;
+		case __COL_PART_ID_TYPE: return String.class;
 	}
 	return String.class;
 }
@@ -103,17 +104,34 @@ From AbstractTableMode.  Returns the name of the column at the given position.
 */
 public String getColumnName(int columnIndex) {
 	switch (columnIndex) {
-		case __COL_ID:		return "CU\nLOCATION\nID";
-		case __COL_DIV:		return "\n\nDIVISION";
-		case __COL_YEAR:	return "\n\nYEAR";
-		case __COL_COL_TYPE:	return "\nCOLLECTION\nTYPE";
-		case __COL_PART_TYPE:	return "\nPART\nTYPE";
-		case __COL_PART_ID:	return "\nPART\nID";
+		case __COL_ID: return "CU\nLOCATION\nID";
+		case __COL_DIV: return "\n\nDIVISION";
+		case __COL_YEAR: return "\n\nYEAR";
+		case __COL_COL_TYPE: return "\nCOLLECTION\nTYPE";
+		case __COL_PART_TYPE: return "\nPART\nTYPE";
+		case __COL_PART_ID: return "\nPART\nID";
+		case __COL_PART_ID_TYPE: return "PART\nID\nTYPE";
 	}
 
 	return " ";
 }
 
+/**
+Returns the text to be assigned to worksheet tooltips.
+@return a String array of tool tips.
+*/
+public String[] getColumnToolTips() {
+	String[] tips = new String[__COLUMNS];
+
+	tips[__COL_ID] = "StateCU location ID for aggregate/system";
+	tips[__COL_DIV] = "Water division for aggregate/system (used when aggregating using parcel IDs)";
+	tips[__COL_YEAR] = "Year for aggregate/system (used when aggregating parcels)";
+	tips[__COL_COL_TYPE] = "Aggregate (aggregate water rights) or system (consider water rights individually)";
+	tips[__COL_PART_TYPE] = "Ditch, Well, or Parcel identifiers are specified as parts of aggregate/system";
+	tips[__COL_PART_ID] = "The identifier for the aggregate/system parts";
+	tips[__COL_PART_ID_TYPE] = "The identifier type for the aggregate/system, WDID or Receipt when applied to wells";
+	return tips;
+}
 
 /**
 Returns the format that the specified column should be displayed in when
@@ -124,12 +142,13 @@ column.
 */
 public String getFormat(int column) {
 	switch (column) {
-		case __COL_ID:		return "%-20.20s";
-		case __COL_DIV:		return "%8d";
-		case __COL_YEAR:	return "%8d";
-		case __COL_COL_TYPE:	return "%-20.20s";
-		case __COL_PART_TYPE:	return "%-20.20s"; 
-		case __COL_PART_ID:	return "%-20.20s";
+		case __COL_ID: return "%-20.20s";
+		case __COL_DIV: return "%8d";
+		case __COL_YEAR: return "%8d";
+		case __COL_COL_TYPE: return "%-20.20s";
+		case __COL_PART_TYPE: return "%-20.20s"; 
+		case __COL_PART_ID: return "%-20.20s";
+		case __COL_PART_ID_TYPE: return "%-7.7s"; // Hold Receipt
 	}
 	return "%-8s";	
 }
@@ -166,12 +185,13 @@ public int[] getColumnWidths() {
 	for (int i = 0; i < __COLUMNS; i++) {
 		widths[i] = 0;
 	}
-	widths[__COL_ID] =		8;
-	widths[__COL_DIV] =		6;
-	widths[__COL_YEAR] =		5;
-	widths[__COL_COL_TYPE] =	9;
-	widths[__COL_PART_TYPE] =	5;
-	widths[__COL_PART_ID] =		6;
+	widths[__COL_ID] = 8;
+	widths[__COL_DIV] = 6;
+	widths[__COL_YEAR] = 5;
+	widths[__COL_COL_TYPE] = 9;
+	widths[__COL_PART_TYPE] = 5;
+	widths[__COL_PART_ID] = 6;
+	widths[__COL_PART_ID_TYPE] = 8;
 	return widths;
 }
 
@@ -179,8 +199,7 @@ public int[] getColumnWidths() {
 Returns whether the cell is editable or not.  In this model, all the cells in
 columns 3 and greater are editable.
 @param rowIndex unused.
-@param columnIndex the index of the column to check whether it is editable
-or not.
+@param columnIndex the index of the column to check whether it is editable or not.
 @return whether the cell is editable or not.
 */
 public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -192,20 +211,22 @@ public boolean isCellEditable(int rowIndex, int columnIndex) {
 }
 
 /**
-Sets up the data Vectors to display the location collection data in the
-GUI.
+Sets up the data Vectors to display the location collection data in the GUI.
 */
 private void setupData() {
 	Integer div = null;
 	int[] years = null;
-	int len = 0;
-	int size = _data.size();
-	int size2 = 0;
-	StateCU_Location l = null;
+	int yearArrayLen = 0;
+	int nculoc = _data.size();
+	int nParts = 0;
+	int nIdTypes = 0;
+	StateCU_Location culoc = null;
 	String colType = null;
 	String id = null;
 	String partType = null;
 	List ids = null;
+	List idTypes = null;
+	String idType = null;
 	__data = new List[__COLUMNS];
 	for (int i = 0; i < __COLUMNS; i++) {
 		__data[i] = new Vector();
@@ -213,38 +234,57 @@ private void setupData() {
 	
 	int rows = 0;
 	
-	for (int i = 0; i < size; i++) {
-		l = (StateCU_Location)_data.get(i);
-		id = l.getID();
-		div = new Integer(l.getCollectionDiv());
+	for (int i = 0; i < nculoc; i++) {
+		culoc = (StateCU_Location)_data.get(i);
+		id = culoc.getID();
+		div = new Integer(culoc.getCollectionDiv());
 
-		years = l.getCollectionYears();
-		colType = l.getCollectionType();
-		partType = l.getCollectionPartType();
+		years = culoc.getCollectionYears();
+		colType = culoc.getCollectionType();
+		partType = culoc.getCollectionPartType();
 
 		if (years == null) {
-			len = 0;
+			yearArrayLen = 1; // Cause the loop below to go through once
 		}
 		else {
-			len = years.length;
+			yearArrayLen = years.length;
 		}
 
-		for (int j = 0; j < len; j++) {
-			ids = l.getCollectionPartIDs(years[j]);
-			if (ids == null) {
-				size2 = 0;
+		for (int j = 0; j < yearArrayLen; j++) {
+			// Part IDs for the year
+			if ( (years == null) || (years.length == 0) ) {
+				ids = culoc.getCollectionPartIDsForYear(0);
 			}
 			else {
-				size2 = ids.size();
+				ids = culoc.getCollectionPartIDsForYear(years[j]);
+			}
+			// Part ID types for the year.
+			idTypes = culoc.getCollectionPartIDTypes();
+			if (ids == null) {
+				nParts = 0;
+			}
+			else {
+				nParts = ids.size();
+			}
+			if (idTypes == null) {
+				nIdTypes = 0;
+			}
+			else {
+				nIdTypes = idTypes.size();
 			}
 
-			for (int k = 0; k < size2; k++) {
+			for (int k = 0; k < nParts; k++) {
 				__data[__COL_ID].add(id);
 				__data[__COL_DIV].add(div);
 				__data[__COL_YEAR].add(new Integer(years[j]));
 				__data[__COL_COL_TYPE].add(colType);
 				__data[__COL_PART_TYPE].add(partType);
 				__data[__COL_PART_ID].add(ids.get(k));
+				idType = "";
+				if ( nIdTypes != 0 ) {
+					idType = (String)idTypes.get(k); // Should align with ids.get(k)
+				}
+				__data[__COL_PART_ID_TYPE].add(idType);
 				rows++;
 			}
 		}

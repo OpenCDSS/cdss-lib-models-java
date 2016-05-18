@@ -36,7 +36,7 @@ the data can be edited, if false they can not.
 public StateCU_Location_Collection_Data_JFrame(List data, String titleString, boolean editable)
 throws Exception {
 	super(data, titleString, editable);
-	setSize(486, getHeight());
+	setSize(650, getHeight());
 }
 
 /**

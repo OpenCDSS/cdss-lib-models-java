@@ -71,6 +71,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -98,6 +99,7 @@ Types of collection parts, either Ditch or Parcel
 */
 public static String COLLECTION_PART_TYPE_DITCH = "Ditch";
 public static String COLLECTION_PART_TYPE_PARCEL = "Parcel";
+public static String COLLECTION_PART_TYPE_WELL = "WEll";
 
 private String __collection_type = StateCU_Util.MISSING_STRING;
 
@@ -108,17 +110,26 @@ private String __collection_part_type = StateCU_Util.MISSING_STRING;
 
 /**
 The identifiers for data that are collected - null if not a collection
-location.  This is actually a Vector of Vector's where the
-__collection_year is the first dimension.  This is ugly but need to
-use the code to see if it can be made cleaner.
+location.  This is a List of Lists corresponding to each __collectionYear element.
+If the list of identifiers is consistent for the entire period then the
+__collectionYear array will have a size of 0 and the __collectionIDList will be a single list.
 */
-private List __collection_Vector = null;
+private List<List <String>> __collectionIDList = null;
+
+/**
+The identifiers types for data that are collected - null if not a collection
+location.  This is a List of Lists corresponding to each __collectionYear element.
+If the list of identifiers is consistent for the entire period then the
+__collectionYear array will have a size of 0 and the __collectionIDTypeList will be a single list.
+This list is only used for well collections that use well identifiers for the parts.
+*/
+private List<List <String>> __collectionIDTypeList = null;
 
 /**
 An array of years that correspond to the aggregate/system.  Parcel
 collections can have multiple years but ditches currently only have one year.
 */
-private int [] __collection_year = null;
+private int [] __collectionYear = null;
 
 /**
 The division that corresponds to the aggregate/system.  Currently
@@ -235,26 +246,44 @@ public int getCollectionDiv ()
 Return the collection part ID list for the specific year.  For ditches, only one
 aggregate/system list is currently supported so the same information is returned
 regardless of the year value.  For wells, the collection is done for a specific year.
-@param year The year of interest, only used for well identifiers.
+@param year The year of interest, only used for well identifiers when collection is specified with parcels.
 @return the list of collection part IDS, or null if not defined.
 */
-public List getCollectionPartIDs ( int year )
-{	if ( __collection_Vector.size() == 0 ) {
+public List getCollectionPartIDsForYear ( int year )
+{	if ( (__collectionIDList == null) || (__collectionIDList.size() == 0) ) {
 		return null;
 	}
 	if ( __collection_part_type.equalsIgnoreCase(COLLECTION_PART_TYPE_DITCH) ) {
-		// The list of part IDs will be the first and only list...
-		return (List)__collection_Vector.get(0);
+		// The list of part IDs will be the first and only list (same for all years)...
+		return (List)__collectionIDList.get(0);
+	}
+	else if ( __collection_part_type.equalsIgnoreCase(COLLECTION_PART_TYPE_WELL) ) {
+		// The list of part IDs will be the first and only list (same for all years)...
+		return (List)__collectionIDList.get(0);
 	}
 	else if ( __collection_part_type.equalsIgnoreCase(COLLECTION_PART_TYPE_PARCEL) ) {
 		// The list of part IDs needs to match the year.
-		for ( int i = 0; i < __collection_year.length; i++ ) {
-			if ( year == __collection_year[i] ) {
-				return (List)__collection_Vector.get(i);
+		for ( int i = 0; i < __collectionYear.length; i++ ) {
+			if ( year == __collectionYear[i] ) {
+				return (List)__collectionIDList.get(i);
 			}
 		}
 	}
 	return null;
+}
+
+/**
+Return the collection part ID type list.  This is used with well locations when aggregating
+by well identifiers (WDIDs and permit receipt numbers).
+@return the list of collection part ID types, or null if not defined.
+*/
+public List getCollectionPartIDTypes () {
+	if (__collectionIDTypeList == null ) {
+		return null;
+	}
+	else {
+		return __collectionIDTypeList.get(0); // Currently does not vary by year
+	}
 }
 
 /**
@@ -277,7 +306,7 @@ Return the array of years for the defined collections.
 @return the array of years for the defined collections.
 */
 public int [] getCollectionYears ()
-{	return __collection_year;
+{	return __collectionYear;
 }
 
 /**
@@ -411,7 +440,7 @@ public String getRegion2()
 }
 
 public List getTemp() {
-	return __collection_Vector;
+	return __collectionIDList;
 }
 
 /**
@@ -444,7 +473,7 @@ Indicate whether the CU Location is a collection (an aggregate or system).
 @return true if the CU Location is an aggregate or system.
 */
 public boolean isCollection()
-{	if ( __collection_Vector == null ) {
+{	if ( __collectionIDList == null ) {
 		return false;
 	}
 	else {
@@ -641,17 +670,34 @@ collection applies to all years of data.
 @param ids The identifiers indicating the locations to collection.
 */
 public void setCollectionPartIDs ( List ids )
-{	if ( __collection_Vector == null ) {
-		__collection_Vector = new Vector ( 1 );
-		__collection_year = new int[1];
+{	if ( __collectionIDList == null ) {
+		__collectionIDList = new Vector ( 1 );
+		__collectionYear = new int[1];
 	}
 	else {
 		// Remove the previous contents...
-		__collection_Vector.clear();
+		__collectionIDList.clear();
 	}
 	// Now assign...
-	__collection_Vector.add ( ids );
-	__collection_year[0] = 0;
+	__collectionIDList.add ( ids );
+	__collectionYear[0] = 0;
+}
+
+/**
+Set the collection list for an aggregate/system.  It is assumed that the
+collection applies to all years of data.
+@param ids The identifiers indicating the locations to collection.
+*/
+public void setCollectionPartIDs ( List<String> ids, List<String> idTypes )
+{	
+	__collectionIDList = new ArrayList( 1 );
+	__collectionIDTypeList = new ArrayList( 1 );
+	__collectionYear = new int[1];
+
+	// Now assign...
+	__collectionIDList.add ( ids );
+	__collectionIDTypeList.add ( idTypes );
+	__collectionYear[0] = 0;
 }
 
 /**
@@ -660,19 +706,19 @@ assumed that the collection applies to all years of data.
 @param year The year to which the collection applies.
 @param ids The identifiers indicating the locations in the collection.
 */
-public void setCollectionPartIDs ( int year, List ids )
+public void setCollectionPartIDsForYear ( int year, List ids )
 {	int pos = -1;	// Position of year in data lists.
-	if ( __collection_Vector == null ) {
+	if ( __collectionIDList == null ) {
 		// No previous data so create memory...
-		__collection_Vector = new Vector ( 1 );
-		__collection_Vector.add ( ids );
-		__collection_year = new int[1];
-		__collection_year[0] = year;
+		__collectionIDList = new Vector ( 1 );
+		__collectionIDList.add ( ids );
+		__collectionYear = new int[1];
+		__collectionYear[0] = year;
 	}
 	else {
 		// See if the year matches any previous contents...
-		for ( int i = 0; i < __collection_year.length; i++ ) {
-			if ( year == __collection_year[i] ) {
+		for ( int i = 0; i < __collectionYear.length; i++ ) {
+			if ( year == __collectionYear[i] ) {
 				pos = i;
 				break;
 			}
@@ -680,19 +726,19 @@ public void setCollectionPartIDs ( int year, List ids )
 		// Now assign...
 		if ( pos < 0 ) {
 			// Need to add an item...
-			pos = __collection_year.length;
-			__collection_Vector.add ( ids );
-			int [] temp = new int[__collection_year.length + 1];
-			for ( int i = 0; i < __collection_year.length; i++ ) {
-				temp[i] = __collection_year[i];
+			pos = __collectionYear.length;
+			__collectionIDList.add ( ids );
+			int [] temp = new int[__collectionYear.length + 1];
+			for ( int i = 0; i < __collectionYear.length; i++ ) {
+				temp[i] = __collectionYear[i];
 			}
-			__collection_year = temp;
-			__collection_year[pos] = year;
+			__collectionYear = temp;
+			__collectionYear[pos] = year;
 		}
 		else {
 			// Existing item...
-			__collection_Vector.set ( pos, ids );
-			__collection_year[pos] = year;
+			__collectionIDList.set ( pos, ids );
+			__collectionYear[pos] = year;
 		}
 	}
 }
@@ -1453,6 +1499,7 @@ throws Exception {
 	fields.add("CollectionType");
 	fields.add("PartType");
 	fields.add("PartID");
+	fields.add("PartIDType");
 	int fieldCount = fields.size();
 
 	String[] names = new String[fieldCount];
@@ -1475,7 +1522,7 @@ throws Exception {
 	int div = 0;
 	int j = 0;
 	int k = 0;
-	int num = 0;
+	int numYears = 0;
 	PrintWriter out = null;
 	StateCU_Location loc = null;
 	List commentString = new Vector(1);
@@ -1488,6 +1535,7 @@ throws Exception {
 	String partType = null;	
 	StringBuffer buffer = new StringBuffer();
 	List ids = null;
+	List idTypes = null;
 
 	try {
 		// Add some basic comments at the top of the file.  However, do this to a copy of the
@@ -1502,8 +1550,9 @@ throws Exception {
 		newComments2.add(0,"");
 		newComments2.add(1,"StateCU location collection information as delimited list file.");
 		newComments2.add(2,"See also the associated location and climate station assignment files.");
-		newComments2.add(3,"Division and year are only used with well aggregates.");
-		newComments2.add(4,"");
+		newComments2.add(3,"Division and year are only used with well parcel aggregates/systems.");
+		newComments2.add(4,"ParcelIdType are only used with well aggregates/systems where the part ID is Well.");
+		newComments2.add(5,"");
 		out = IOUtil.processFileHeaders( oldFile, IOUtil.getPathUsingWorkingDir(filename), 
 			newComments2, commentString, ignoreCommentString, 0);
 
@@ -1522,16 +1571,21 @@ throws Exception {
 			div = loc.getCollectionDiv();
 			years = loc.getCollectionYears();
 			if (years == null) {
-				num = 0;
+				numYears = 0; // By this point, collections that span the full period will use 1 year = 0
 			}
 			else {
-				num = years.length;
+				numYears = years.length;
 			}
 			colType = loc.getCollectionType();
 			partType = loc.getCollectionPartType();
 			// Loop through the number of years of collection data
-			for (j = 0; j < num; j++) {
-				ids = loc.getCollectionPartIDs(years[j]);
+			idTypes = loc.getCollectionPartIDTypes(); // Currently crosses all years
+			int numIdTypes = 0;
+			if ( idTypes != null ) {
+				numIdTypes = idTypes.size();
+			}
+			for (j = 0; j < numYears; j++) {
+				ids = loc.getCollectionPartIDsForYear(years[j]);
 				// Loop through the identifiers for the specific year
 				for ( k = 0; k < ids.size(); k++ ) {
 					field[0] = StringUtil.formatString(id,formats[0]).trim();
@@ -1540,6 +1594,11 @@ throws Exception {
 					field[3] = StringUtil.formatString(colType,formats[3]).trim();
 					field[4] = StringUtil.formatString(partType,formats[4]).trim();
 					field[5] = StringUtil.formatString(((String)(ids.get(k))),formats[5]).trim();
+					field[6] = "";
+					if ( numIdTypes > k ) {
+						// Have data to output
+						field[6] = StringUtil.formatString(((String)(idTypes.get(k))),formats[6]).trim();
+					}
 	
 					buffer = new StringBuffer();	
 					for (int ifield = 0; ifield < fieldCount; ifield++) {

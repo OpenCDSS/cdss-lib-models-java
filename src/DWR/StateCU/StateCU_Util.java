@@ -102,7 +102,7 @@ public static StateCU_Location getLocationForPartID ( List CULocation_Vector, St
 			continue;
 		}
 		// Get the part identifiers...
-		part_ids = culoc.getCollectionPartIDs(-1);	// Since ditches, year is irrelevant
+		part_ids = culoc.getCollectionPartIDsForYear(-1);	// Since ditches, year is irrelevant
 		int size2 = part_ids.size();
 		for ( int j = 0; j < size2; j++ ) {
 			if ( part_id.equalsIgnoreCase((String)part_ids.get(j))) {
@@ -1167,6 +1167,9 @@ String field) {
 		else if (field.equalsIgnoreCase("PartID")) {
 			return "PART ID";
 		}
+		else if (field.equalsIgnoreCase("PartIDType")) {
+			return "PART ID TYPE";
+		}
 	}
 	else if (propType.equalsIgnoreCase("FieldNameHeader")) {	
 		if (field.equalsIgnoreCase("LocationID")) {
@@ -1186,26 +1189,32 @@ String field) {
 		}
 		else if (field.equalsIgnoreCase("PartID")) {
 			return "\nPART\nID";
-		}	
+		}
+		else if (field.equalsIgnoreCase("PartIDType")) {
+			return "\nPART\nID TYPE";
+		}
 	}	
 	else if (propType.equalsIgnoreCase("ToolTip")) {
 		if (field.equalsIgnoreCase("LocationID")) {
-			return "";
+			return "StateCU location ID for aggregate/system";
 		}
 		else if (field.equalsIgnoreCase("Division")) {
-			return "";
+			return "Water division for aggregate/system (used when aggregating using parcel IDs)";
 		}
 		else if (field.equalsIgnoreCase("Year")) {
-			return "";
+			return "Year for aggregate/system (used when aggregating parcels)";
 		}
 		else if (field.equalsIgnoreCase("CollectionType")) {
-			return "";
+			return "Aggregate (aggregate water rights) or system (consider water rights individually)";
 		}
 		else if (field.equalsIgnoreCase("PartType")) {
-			return "";
+			return "Ditch, Well, or Parcel identifiers are specified as parts of aggregate/system";
 		}
 		else if (field.equalsIgnoreCase("PartID")) {	
-			return "";
+			return "The identifier for the aggregate/system parts";
+		}
+		else if (field.equalsIgnoreCase("PartIDType")) {	
+			return "The identifier type for the aggregate/system, WDID or Receipt when applied to wells";
 		}
 	}
 	else if (propType.equalsIgnoreCase("Format")) {
@@ -1226,6 +1235,9 @@ String field) {
 		}
 		else if (field.equalsIgnoreCase("PartID")) {	
 			return "%-20.20s";
+		}
+		else if (field.equalsIgnoreCase("PartIDType")) {	
+			return "%-7.7s";
 		}
 	}
 

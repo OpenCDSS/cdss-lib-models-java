@@ -35,7 +35,7 @@ the data can be edited, if false they can not.
 public StateMod_Well_Collection_Data_JFrame(List data, String titleString, boolean editable)
 throws Exception {
 	super(data, titleString, editable);
-	setSize(423, getHeight());
+	setSize(550, getHeight());
 }
 
 /**

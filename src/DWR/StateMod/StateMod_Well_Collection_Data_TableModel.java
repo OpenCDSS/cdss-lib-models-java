@@ -26,7 +26,7 @@ extends JWorksheet_AbstractRowTableModel {
 /**
 Number of columns in the table model.
 */
-private int __COLUMNS = 5;
+private int __COLUMNS = 6;
 
 /**
 Column references.
@@ -36,7 +36,8 @@ private final int
 	__COL_YEAR = 1,
 	__COL_COL_TYPE = 2,
 	__COL_PART_TYPE = 3,
-	__COL_PART_ID = 4;
+	__COL_PART_ID = 4,
+	__COL_PART_ID_TYPE = 5;
 
 /**
 Whether the data are editable or not.
@@ -44,13 +45,13 @@ Whether the data are editable or not.
 private boolean __editable = false;
 
 /**
-The data displayed in the table.
+The data displayed in the table, which is created in this method based on the source StateMod_Well data.
 */
 private List[] __data = null;
 
 /**
 Constructor.  This builds the Model for displaying reservoir data
-@param data the data that will be displayed in the table.
+@param data the StateMod_Well data that will be displayed in the table.
 */
 public StateMod_Well_Collection_Data_TableModel(List data) {
 	this(data, false);
@@ -77,11 +78,12 @@ From AbstractTableModel.  Returns the class of the data stored in a given column
 */
 public Class getColumnClass (int columnIndex) {
 	switch (columnIndex) {
-		case __COL_ID:		return String.class;
-		case __COL_YEAR:	return Integer.class;
-		case __COL_COL_TYPE:	return String.class;
-		case __COL_PART_TYPE:	return String.class;
+		case __COL_ID: return String.class;
+		case __COL_YEAR: return Integer.class;
+		case __COL_COL_TYPE: return String.class;
+		case __COL_PART_TYPE: return String.class;
 		case __COL_PART_ID:	return String.class;
+		case __COL_PART_ID_TYPE: return String.class;
 	}
 	return String.class;
 }
@@ -100,14 +102,31 @@ From AbstractTableMode.  Returns the name of the column at the given position.
 */
 public String getColumnName(int columnIndex) {
 	switch (columnIndex) {
-		case __COL_ID:		return "WELL\nID";
-		case __COL_YEAR:	return "\nYEAR";
-		case __COL_COL_TYPE:	return "COLLECTION\nTYPE";
-		case __COL_PART_TYPE:	return "PART\nTYPE";
-		case __COL_PART_ID:	return "PART\nID";
+		case __COL_ID: return "WELL\nID";
+		case __COL_YEAR: return "\nYEAR";
+		case __COL_COL_TYPE: return "COLLECTION\nTYPE";
+		case __COL_PART_TYPE: return "PART\nTYPE";
+		case __COL_PART_ID: return "PART\nID";
+		case __COL_PART_ID_TYPE: return "PART\nID TYPE";
 	}
 
 	return " ";
+}
+
+/**
+Returns the text to be assigned to worksheet tooltips.
+@return a String array of tool tips.
+*/
+public String[] getColumnToolTips() {
+	String[] tips = new String[__COLUMNS];
+
+	tips[__COL_ID] = "StateMod well ID for aggregate/system";
+	tips[__COL_YEAR] = "Year for aggregate/system (used when aggregating parcels)";
+	tips[__COL_COL_TYPE] = "Aggregate (aggregate water rights) or system (consider water rights individually)";
+	tips[__COL_PART_TYPE] = "Ditch, Well, or Parcel identifiers are specified as parts of aggregate/system";
+	tips[__COL_PART_ID] = "The identifier for the aggregate/system parts";
+	tips[__COL_PART_ID_TYPE] = "The identifier type for the aggregate/system, WDID or Receipt when applied to wells";
+	return tips;
 }
 
 /**
@@ -118,11 +137,12 @@ the table is being displayed in the given table format.
 */
 public String getFormat(int column) {
 	switch (column) {
-		case __COL_ID:		return "%-12.12s";
-		case __COL_YEAR:	return "%8d";
-		case __COL_COL_TYPE:	return "%-12.12s";
-		case __COL_PART_TYPE:	return "%-12.12s"; 
-		case __COL_PART_ID:	return "%-12.12s";
+		case __COL_ID: return "%-12.12s";
+		case __COL_YEAR: return "%8d";
+		case __COL_COL_TYPE: return "%-12.12s";
+		case __COL_PART_TYPE: return "%-12.12s"; 
+		case __COL_PART_ID: return "%-12.12s";
+		case __COL_PART_ID_TYPE: return "%-7.7s";
 	}
 	return "%-8s";	
 }
@@ -158,11 +178,12 @@ public int[] getColumnWidths() {
 	for (int i = 0; i < __COLUMNS; i++) {
 		widths[i] = 0;
 	}
-	widths[__COL_ID] =		8;
-	widths[__COL_YEAR] =		5;
-	widths[__COL_COL_TYPE] =	9;
-	widths[__COL_PART_TYPE] =	5;
-	widths[__COL_PART_ID] =		6;
+	widths[__COL_ID] = 8;
+	widths[__COL_YEAR] = 5;
+	widths[__COL_COL_TYPE] = 9;
+	widths[__COL_PART_TYPE] = 5;
+	widths[__COL_PART_ID] = 6;
+	widths[__COL_PART_ID_TYPE] = 8;
 	return widths;
 }
 
@@ -186,14 +207,17 @@ Sets up the data lists to display the reservoir collection data in the GUI.
 */
 private void setupData() {
 	int[] years = null;
-	int len = 0;
-	int size = _data.size();
-	int size2 = 0;
+	int yearArrayLen = 0;
+	int nwell = _data.size();
+	int nParts = 0;
+	int nIdTypes = 0;
 	StateMod_Well well = null;
 	String colType = null;
 	String id = null;
 	String partType = null;
 	List ids = null;
+	List idTypes = null;
+	String idType = null;
 	__data = new List[__COLUMNS];
 	for (int i = 0; i < __COLUMNS; i++) {
 		__data[i] = new Vector();
@@ -201,7 +225,7 @@ private void setupData() {
 	
 	int rows = 0;
 	
-	for (int i = 0; i < size; i++) {
+	for (int i = 0; i < nwell; i++) {
 		well = (StateMod_Well)_data.get(i);
 		id = well.getID();
 
@@ -210,27 +234,46 @@ private void setupData() {
 		partType = well.getCollectionPartType();
 
 		if (years == null) {
-			len = 0;
+			yearArrayLen = 1; // Cause the loop below to go through once
 		}
 		else {
-			len = years.length;
+			yearArrayLen = years.length;
 		}
 
-		for (int j = 0; j < len; j++) {
-			ids = well.getCollectionPartIDs(years[j]);
-			if (ids == null) {
-				size2 = 0;
+		for (int j = 0; j < yearArrayLen; j++) {
+			// Part IDs for the year
+			if ( (years == null) || (years.length == 0) ) {
+				ids = well.getCollectionPartIDs(0);
 			}
 			else {
-				size2 = ids.size();
+				ids = well.getCollectionPartIDs(years[j]);
+			}
+			if (ids == null) {
+				nParts = 0;
+			}
+			else {
+				nParts = ids.size();
+			}
+			// Part ID types for the year.
+			idTypes = well.getCollectionPartIDTypes();
+			if (idTypes == null) {
+				nIdTypes = 0;
+			}
+			else {
+				nIdTypes = idTypes.size();
 			}
 
-			for (int k = 0; k < size2; k++) {
+			for (int k = 0; k < nParts; k++) {
 				__data[__COL_ID].add(id);
 				__data[__COL_YEAR].add(new Integer(years[j]));
 				__data[__COL_COL_TYPE].add(colType);
 				__data[__COL_PART_TYPE].add(partType);
 				__data[__COL_PART_ID].add(ids.get(k));
+				idType = "";
+				if ( nIdTypes != 0 ) {
+					idType = (String)idTypes.get(k); // Should align with ids.get(k)
+				}
+				__data[__COL_PART_ID_TYPE].add(idType);
 				rows++;
 			}
 		}
