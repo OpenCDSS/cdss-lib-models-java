@@ -949,25 +949,6 @@ public void disconnectRights ()
 }
 
 /**
-Clean up before garbage collection.
-*/
-protected void finalize()
-throws Throwable {
-	_pumping_MonthTS = null;
-	_pumping_DayTS = null;
-	_demand_MonthTS = null;
-	_demand_DayTS = null;
-	_rights = null;
-	_rivret = null;
-	_depl = null;
-	_diveff = null;
-	_idvcow2 = null;
-	_cdividyw = null;
-	_georecord = null;
-	super.finalize();
-}
-
-/**
 @return the area(This is currently not being used but is provided for consistency within this class).
 */
 public double getAreaw() {
@@ -1450,11 +1431,12 @@ public boolean hasAssociatedDiversion ()
 
 /**
 Indicate whether the well has groundwater only supply.  This will
-be the case if the location is a collection with part type of "Parcel".
+be the case if the location is a collection with part type of "Parcel" or "Well".
 */
 public boolean hasGroundwaterOnlySupply ()
-{
-	if ( isCollection() && getCollectionPartType().equalsIgnoreCase("Parcel")) {
+{	String collectionPartType = getCollectionPartType();
+	if ( isCollection() && (collectionPartType.equalsIgnoreCase(COLLECTION_PART_TYPE_PARCEL) ||
+		(collectionPartType.equalsIgnoreCase(COLLECTION_PART_TYPE_WELL))) ) {
 		// TODO SAM 2007-05-11 Rectify part types with StateCU
 		return true;
 	}
@@ -2835,9 +2817,9 @@ is also maintained by calling this routine.
 public static void writeStateModFile(String instrfile, String outstrfile,
 		List theWellStations, List newComments)
 throws Exception {
-	List commentIndicators = new Vector(1);
+	List<String> commentIndicators = new ArrayList<String>(1);
 	commentIndicators.add ( "#" );
-	List ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new ArrayList<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	PrintWriter out = null;
 	try {

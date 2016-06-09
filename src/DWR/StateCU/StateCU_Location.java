@@ -202,22 +202,6 @@ public void createBackup() {
 }
 
 /**
-Clean up for garbage collection.
-@exception Throwable if there is an error.
-*/
-protected void finalize()
-throws Throwable
-{	__region1 = null;
-	__region2 = null;
-	__climate_station_ids = null;
-	__precipitation_station_weights = null;
-	__temperature_station_weights = null;
-	__ota = null;
-	__opa = null;
-	super.finalize();
-}
-
-/**
 Return the AWC.
 @return the AWC.
 */
@@ -448,8 +432,9 @@ Indicate whether the CU Location has groundwater only supply.  This will
 be the case if the location is a collection with part type of "Parcel".
 */
 public boolean hasGroundwaterOnlySupply ()
-{
-	if ( isCollection() && getCollectionPartType().equalsIgnoreCase("Parcel")) {
+{	String collectionPartType = getCollectionPartType();
+	if ( isCollection() && (collectionPartType.equalsIgnoreCase(COLLECTION_PART_TYPE_PARCEL) ||
+		collectionPartType.equalsIgnoreCase(COLLECTION_PART_TYPE_WELL))) {
 		// TODO SAM 2007-05-11 Rectify part types with StateMod
 		return true;
 	}

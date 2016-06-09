@@ -71,6 +71,8 @@ package DWR.StateMod;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 
@@ -81,6 +83,8 @@ import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 import RTi.Util.Message.MessageUtil;
 import RTi.Util.String.StringUtil;
+import RTi.Util.Time.DateTime;
+import RTi.Util.Time.TimeZoneDefaultType;
 
 /**
 This class provides stores all the information associated with a well right.
@@ -91,15 +95,16 @@ implements Cloneable, Comparable, StateMod_ComponentValidator, StateMod_Right {
 /**
 Administration number.
 */
-private String 	_irtem;
+private String _irtem;
 /**
 Decreed amount.
 */
-private double	_dcrdivw;
+private double _dcrdivw;
 
-// Parcel data used in processing and relationships to GIS.
-// This work is exploratory and may or may not be part of the
-// official files.
+// TODO SAM 2016-05-18 Evaluate how to make this more generic, but is tough due to complexity.
+// The following data are not part of the official StateMod specification but are useful
+// to output in order to understand how well rights are determined.
+// The data are specific to the State of Colorado due to its complex data model.
 
 /**
 Year for parcels.
@@ -113,7 +118,82 @@ private String __parcelId;
 Well to parcel matching "class".
 */
 private int __parcelMatchClass;
-	
+
+/**
+ * Collection type (if a collection), StateMod_Well.COLLECTION_TYPE_*.
+ */
+private String __collectionType = "";
+
+/**
+ * Collection part type (if a collection), StateMod_Well.COLLECTION_PART_TYPE_*.
+ */
+private String __collectionPartType = "";
+
+/**
+ * Collection part ID (if a collection), ID corresponding to the part type.
+ */
+private String __collectionPartId = "";
+
+/**
+ * Collection part ID type (if a collection), StateMod_Well.COLLECTION_WELL_PART_ID_TYPE_*.
+ */
+private String __collectionPartIdType = "";
+
+/**
+ * Well WDID.	
+ */
+private String __xWDID = "";
+
+/**
+ * Well permit receipt.	
+ */
+private String __xPermitReceipt = "";
+
+/**
+ * Well yield GPM
+ */
+private double __xYieldGPM = Double.NaN;
+
+/**
+ * Well yield alternate point/exchange (APEX) GPM
+ */
+private double __xYieldApexGPM = Double.NaN;
+
+/**
+ * Well permit date.
+ */
+private Date __xPermitDate = null;
+
+/**
+ * Well permit date as an administration number.
+ */
+private String __xPermitDateAdminNumber = "";
+
+/**
+ * Well right appropriation date.
+ */
+private Date __xApproDate = null;
+
+/**
+ * Well right appropriation date as an administration number.
+ */
+private String __xApproDateAdminNumber = "";
+
+/**
+ * Prorated yield based on parcel area
+ */
+private double __xProratedYield = Double.NaN;
+
+/**
+ * Fraction of yield attributed to ditch (based on area of parcel served by ditch)
+ */
+private double __xDitchFraction = Double.NaN;
+
+/**
+ * Fraction of yield (percent_yield in HydroBase)
+ */
+private double __xFractionYield = Double.NaN;
+
 /**
 Constructor
 */
@@ -246,6 +326,38 @@ public String getAdministrationNumber ()
 }
 
 /**
+Return the collection part ID.
+@return the collection part ID.
+*/
+public String getCollectionPartId ()
+{	return __collectionPartId;
+}
+
+/**
+Return the collection part ID type.
+@return the collection part ID type.
+*/
+public String getCollectionPartIdType ()
+{	return __collectionPartIdType;
+}
+
+/**
+Return the collection part type.
+@return the collection part type.
+*/
+public String getCollectionPartType ()
+{	return __collectionPartType;
+}
+
+/**
+Return the collection type.
+@return the collection type.
+*/
+public String getCollectionType ()
+{	return __collectionType;
+}
+
+/**
 Returns the table header for StateMod_WellRight data tables.
 @return String[] header - Array of header elements.
  */
@@ -329,21 +441,21 @@ public int getParcelYear() {
 /**
 Create summary comments suitable to add to a file header.
 */
-private static List getSummaryCommentList(List rightList)
+private static List<String> getSummaryCommentList(List<StateMod_WellRight> rightList)
 {
-	List summaryList = new Vector();
+	List<String> summaryList = new ArrayList<String>();
 	int size = rightList.size();
-	List parcelMatchClassList = new Vector();
+	List<Integer> parcelMatchClassList = new ArrayList<Integer>();
 	StateMod_WellRight right = null;
 	int parcelMatchClass;
 	// Determine the unique list of water right classes - ok to end up with one class of -999
 	// if class match information is not available.
 	for ( int i = 0; i < size; i++ ) {
-		right = (StateMod_WellRight)rightList.get(i);
+		right = rightList.get(i);
 		parcelMatchClass = right.getParcelMatchClass();
 		boolean found = false;
 		for ( int j = 0; j < parcelMatchClassList.size(); j++ ) {
-			if ( ((Integer)parcelMatchClassList.get(j)).intValue() == parcelMatchClass ) {
+			if ( parcelMatchClassList.get(j) == parcelMatchClass ) {
 				found = true;
 				break;
 			}
@@ -356,6 +468,83 @@ private static List getSummaryCommentList(List rightList)
 	//int parcelMatchClassListSize = parcelMatchClassList.size();
 	//int [] countByClass = new int[parcelMatchClassListSize];
 	return summaryList;
+}
+
+/**
+ * Return the well permit receipt.	
+ */
+public String getXWDID () {
+	return __xWDID;
+}
+
+/**
+ * Return the well permit receipt.	
+ */
+public String getXPermitReceipt () {
+	return __xPermitReceipt;
+}
+
+/**
+ * Return the well yield GPM.
+ */
+public double getXYieldGPM () {
+	return __xYieldGPM;
+}
+
+/**
+ * Return the well yield alternate point/exchange (APEX) GPM
+ */
+public double getXYieldApexGPM () {
+	return __xYieldApexGPM;
+}
+
+/**
+ * Return the well permit date.
+ */
+public Date getXPermitDate () {
+	return __xPermitDate;
+}
+
+/**
+ * Return the well permit date as an administration number.
+ */
+public String getXPermitDateAdminNumber () {
+	return __xPermitDateAdminNumber;
+}
+
+/**
+ * Well right appropriation date.
+ */
+public Date getXApproDate () {
+	return __xApproDate;
+}
+
+/**
+ * Well right appropriation date as an administration number.
+ */
+public String getXApproDateAdminNumber () {
+	return __xApproDateAdminNumber;
+}
+
+/**
+ * Return the fraction of yield attributed to the ditch supply
+ */
+public double getXDitchFraction () {
+	return __xDitchFraction;
+}
+
+/**
+ * Return the fraction of yield (percent_yield in HydroBase)
+ */
+public double getXFractionYield () {
+	return __xFractionYield;
+}
+
+/**
+ * Return the prorated yield based on parcel area
+ */
+public double getXProratedYield () {
+	return __xProratedYield;
 }
 
 private void initialize() {
@@ -421,7 +610,7 @@ Read the well rights file.
 public static List<StateMod_WellRight> readStateModFile(String filename)
 throws Exception {
 	String routine = "StateMod_WellRight.readStateModFile";
-	List<StateMod_WellRight> theWellRights = new Vector<StateMod_WellRight>();
+	List<StateMod_WellRight> theWellRights = new ArrayList<StateMod_WellRight>();
 	int [] format_0 = {
 				StringUtil.TYPE_STRING,
 				StringUtil.TYPE_STRING,
@@ -432,10 +621,43 @@ throws Exception {
 				// If comments used
 				//StringUtil.TYPE_STRING,
 				// Parcel data...
-				StringUtil.TYPE_INTEGER,
-				StringUtil.TYPE_INTEGER,
-				StringUtil.TYPE_STRING
+				StringUtil.TYPE_INTEGER, // Parcel year
+				StringUtil.TYPE_INTEGER, // Class match (how well matched to parcel)
+				StringUtil.TYPE_STRING // Parcel ID
 				};
+	// Extended, which includes parcel data and more
+	// Same as above and additional columns
+	int [] format_0Extended = {
+			StringUtil.TYPE_STRING,
+			StringUtil.TYPE_STRING,
+			StringUtil.TYPE_STRING,
+			StringUtil.TYPE_STRING,
+			StringUtil.TYPE_DOUBLE,
+			StringUtil.TYPE_INTEGER,
+			// If comments used
+			//StringUtil.TYPE_STRING,
+			// Parcel data...
+			StringUtil.TYPE_INTEGER, // Parcel year
+			StringUtil.TYPE_INTEGER, // Class match (how well matched to parcel)
+			StringUtil.TYPE_STRING, // Parcel ID
+			StringUtil.TYPE_STRING, // Collection type (Aggregate, System)
+			StringUtil.TYPE_STRING, // Part type (Ditch, Well, Parcel)
+			StringUtil.TYPE_STRING, // Part ID (a WDID or receipt)
+			StringUtil.TYPE_STRING, // ID type ("WDID" or "Receipt")
+			StringUtil.TYPE_STRING, // WDID (if available)
+			StringUtil.TYPE_STRING, // Appropriation date YYYY-MM-DD
+			StringUtil.TYPE_STRING, // Administration number for appropriation date
+			StringUtil.TYPE_STRING, // Receipt (if available)
+			StringUtil.TYPE_STRING, // Permit date YYYY-MM-DD
+			StringUtil.TYPE_STRING, // Administration number for permit date
+			StringUtil.TYPE_DOUBLE, // Well yield, GPM
+			StringUtil.TYPE_DOUBLE, // Well yield, CFS
+			StringUtil.TYPE_DOUBLE, // APEX, GPM
+			StringUtil.TYPE_DOUBLE, // APEX, CFS
+			StringUtil.TYPE_DOUBLE, // Well fraction
+			StringUtil.TYPE_DOUBLE, // Ditch fraction
+			StringUtil.TYPE_DOUBLE // Yield prorated as * well fraction * ditch fraction, GPM
+			};
 	int [] format_0w = {
 				12,
 				24,
@@ -449,8 +671,42 @@ throws Exception {
 				5,
 				5,
 				7};
+	// Extended, which includes parcel data and more
+	// Same as above and additional columns
+	// x column adds 1 to each column
+	int [] format_0wExtended = {
+			12,
+			24,
+			12,
+			16,
+			8,
+			8,
+			// If comments used
+			//80,
+			// Parcel data
+			5,
+			5,
+			13, // Note longer than older comments
+			15, // Collection type (Aggregate, System)
+			9, // Part type (Ditch, Well, Parcel)
+			21, // Part ID (a WDID or receipt)
+			9, // ID type ("WDID" or "Receipt")
+			9, // WDID (if available)
+			11, // Appropriation date YYYY-MM-DD
+			12, // Administration number for appropriation date
+			9, // Receipt (if available)
+			11, // Permit date YYYY-MM-DD
+			12, // Administration number for permit date
+			9, // Well yield, GPM
+			9, // Well yield, CFS
+			9, // APEX, GPM
+			9, // APEX, CFS
+			9, // Well fraction
+			9, // Ditch fraction
+			9 // Yield prorated as * well fraction * ditch fraction, GPM
+			};
 	String iline = null;
-	List v = new Vector(10);
+	List<Object> v = new ArrayList<Object>(10);
 	BufferedReader in = null;
 	StateMod_WellRight aRight = null;
 
@@ -458,11 +714,24 @@ throws Exception {
 
 	try {
 		in = new BufferedReader(new FileReader(IOUtil.getPathUsingWorkingDir(filename)));
+		boolean formatSet = false;
+		boolean fileHasExtendedComments = false; // Does file have the extended comments (parcel/well/permit/right)?
+		int lineCount = 0;
 		while ((iline = in.readLine()) != null) {
-			// check for comments
-			if (iline.startsWith("#") || 
-				iline.trim().length() == 0) {
+			// Check for extended comments
+			++lineCount;
+			if (iline.startsWith("#") || iline.trim().length() == 0) {
+				// Check to see if extended comments which will be if the line starts with #>----- and is longer than 100
+				if ( iline.startsWith("#>-----") && (iline.length() > 100) ) {
+					fileHasExtendedComments = true;
+				}
 				continue;
+			}
+			if ( !formatSet && fileHasExtendedComments ) {
+				format_0 = format_0Extended;
+				format_0w = format_0wExtended;
+				formatSet = true;
+				Message.printStatus(1, routine, "Detected extended comments in well rights file.");
 			}
 			
 			aRight = new StateMod_WellRight();
@@ -490,6 +759,39 @@ throws Exception {
 			aRight.setParcelYear((Integer)v.get(6));
 			aRight.setParcelMatchClass((Integer)v.get(7));
 			aRight.setParcelID(((String)v.get(8)).trim());
+			if ( fileHasExtendedComments ) {
+				try {
+					aRight.setCollectionType((String)v.get(9));
+					aRight.setCollectionPartType((String)v.get(10));
+					aRight.setCollectionPartId((String)v.get(11));
+					aRight.setCollectionPartIdType((String)v.get(12));
+					aRight.setXWDID((String)v.get(13));
+					try {
+						DateTime dt = DateTime.parse((String)v.get(14));
+						aRight.setXApproDate(dt.getDate(TimeZoneDefaultType.LOCAL));
+					}
+					catch ( Exception e2 ) {
+					}
+					aRight.setXApproDateAdminNumber((String)v.get(15));
+					aRight.setXPermitReceipt((String)v.get(16));
+					try {
+						DateTime dt = DateTime.parse((String)v.get(17));
+						aRight.setXPermitDate(dt.getDate(TimeZoneDefaultType.LOCAL));
+					}
+					catch ( Exception e2 ) {
+					} 
+					aRight.setXPermitDateAdminNumber((String)v.get(18));
+					aRight.setXYieldGPM((Double)v.get(19));
+					aRight.setXYieldApexGPM((Double)v.get(21));
+					aRight.setXFractionYield((Double)v.get(23));
+					aRight.setXDitchFraction((Double)v.get(24));
+					aRight.setXProratedYield((Double)v.get(25));
+				}
+				catch ( Exception e ) {
+					Message.printWarning(3,routine,"Error reading line " + lineCount + " (" + e + "): " + iline );
+				}
+			}
+			// If extended comments
 			theWellRights.add(aRight);
 		}
 	} 
@@ -504,6 +806,74 @@ throws Exception {
 		in = null;
 	}
 	return theWellRights;
+}
+
+/**
+Set the collection part ID.
+@param collectionPartId collection part ID.
+*/
+public void setCollectionPartId(String collectionPartId) {
+	if (collectionPartId == null) {
+		return;
+	}
+	if (!collectionPartId.equals(__collectionPartId)) {
+		__collectionPartId = collectionPartId.trim();
+		setDirty ( true );
+		if ( !_isClone && _dataset != null ) {
+			_dataset.setDirty(StateMod_DataSet.COMP_WELL_RIGHTS, true);
+		}
+	}
+}
+
+/**
+Set the collection part ID type.
+@param collectionPartId collection part ID type.
+*/
+public void setCollectionPartIdType(String collectionPartIdType) {
+	if (collectionPartIdType == null) {
+		return;
+	}
+	if (!collectionPartIdType.equals(__collectionPartIdType)) {
+		__collectionPartIdType = collectionPartIdType.trim();
+		setDirty ( true );
+		if ( !_isClone && _dataset != null ) {
+			_dataset.setDirty(StateMod_DataSet.COMP_WELL_RIGHTS, true);
+		}
+	}
+}
+
+/**
+Set the collection part type.
+@param collectionPartType collection part type.
+*/
+public void setCollectionPartType(String collectionPartType) {
+	if (collectionPartType == null) {
+		return;
+	}
+	if (!collectionPartType.equals(__collectionPartType)) {
+		__collectionPartType = collectionPartType.trim();
+		setDirty ( true );
+		if ( !_isClone && _dataset != null ) {
+			_dataset.setDirty(StateMod_DataSet.COMP_WELL_RIGHTS, true);
+		}
+	}
+}
+
+/**
+Set the collection type.
+@param collectionType collection part type.
+*/
+public void setCollectionType(String collectionType) {
+	if (collectionType == null) {
+		return;
+	}
+	if (!collectionType.equals(__collectionType)) {
+		__collectionType = collectionType.trim();
+		setDirty ( true );
+		if ( !_isClone && _dataset != null ) {
+			_dataset.setDirty(StateMod_DataSet.COMP_WELL_RIGHTS, true);
+		}
+	}
 }
 
 /**
@@ -632,6 +1002,83 @@ public void setParcelYear(int parcel_year) {
 			_dataset.setDirty(StateMod_DataSet.COMP_WELL_RIGHTS, true);
 		}
 	}
+}
+
+/**
+ * Set the well WDID.	
+ */
+public void setXWDID ( String xWDID ) {
+	__xWDID = xWDID;
+}
+
+/**
+ * Set the well permit receipt.	
+ */
+public void setXPermitReceipt ( String xPermitReceipt ) {
+	__xPermitReceipt = xPermitReceipt;
+}
+
+/**
+ * Set the well yield GPM.
+ */
+public void setXYieldGPM ( double xYieldGPM ) {
+	__xYieldGPM = xYieldGPM;
+}
+
+/**
+ * Set the well yield alternate point/exchange (APEX) GPM
+ */
+public void setXYieldApexGPM ( double xYieldApexGPM ) {
+	__xYieldApexGPM = xYieldApexGPM;
+}
+
+/**
+ * Set the well permit date.
+ */
+public void setXPermitDate ( Date xPermitDate ) {
+	__xPermitDate = xPermitDate;
+}
+
+/**
+ * Set the well permit date as an administration number.
+ */
+public void setXPermitDateAdminNumber ( String xPermitDateAdminNumber ) {
+	__xPermitDateAdminNumber = xPermitDateAdminNumber;
+}
+
+/**
+ * Set the well right appropriation date.
+ */
+public void setXApproDate ( Date xApproDate ) {
+	__xApproDate = xApproDate;
+}
+
+/**
+ * Set the well right appropriation date as an administration number.
+ */
+public void setXApproDateAdminNumber ( String xApproDateAdminNumber ) {
+	__xApproDateAdminNumber = xApproDateAdminNumber;
+}
+
+/**
+ * Set the prorated yield based on parcel area
+ */
+public void setXProratedYield ( double xProratedYield ) {
+	__xProratedYield = xProratedYield;
+}
+
+/**
+ * Set the fraction of yield attributed to parcel served by ditch
+ */
+public void setXDitchFraction ( double xDitchFraction) {
+	__xDitchFraction = xDitchFraction;
+}
+
+/**
+ * Set the fraction of yield (percent_yield in HydroBase)
+ */
+public void setXFractionYield ( double xFractionYield) {
+	__xFractionYield = xFractionYield;
 }
 
 /**
@@ -844,11 +1291,11 @@ for evaluation during development but are not a part of the standard file.
 @param outfile name of output file to write.
 @param theRights list of rights to write.
 @param newComments additional comments to print to the comment section
-@param writeProps Properties to control the rights.  Currently only
-WriteDataComments=True/False is recognized
+@param writeProps Properties to control the rights.  Currently only WriteDataComments=True/False
+and WriteExtendedDataComments are recognized
 */
 public static void writeStateModFile(String infile, String outfile,
-		List theRights, List newComments, PropList writeProps )
+		List<StateMod_WellRight> theRights, List<String> newComments, PropList writeProps )
 throws Exception {
 	PrintWriter out = null;
 	String routine = "StateMod_WellRight.writeStateModFile";
@@ -858,9 +1305,14 @@ throws Exception {
 		writeProps = new PropList ( "" );
 	}
 	String WriteDataComments = writeProps.getValue ( "WriteDataComments");
-	boolean WriteDataComments_boolean = false;
+	boolean writeDataComments = false; // Default
 	if ( (WriteDataComments != null) && WriteDataComments.equalsIgnoreCase("True") ) {
-		WriteDataComments_boolean = true;
+		writeDataComments = true;
+	}
+	String WriteExtendedDataComments = writeProps.getValue ( "WriteExtendedDataComments");
+	boolean writeExtendedDataComments = false; // Default
+	if ( (WriteExtendedDataComments != null) && WriteExtendedDataComments.equalsIgnoreCase("True") ) {
+		writeExtendedDataComments = true;
 	}
 
 	if (outfile == null) {
@@ -871,9 +1323,9 @@ throws Exception {
 			
 	Message.printStatus(2, routine, "Writing well rights to: " + outfile);
 
-	List commentIndicators = new Vector(1);
+	List<String> commentIndicators = new ArrayList<String>(1);
 	commentIndicators.add ( "#" );
-	List ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new ArrayList<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	try {	
 		out = IOUtil.processFileHeaders(IOUtil.getPathUsingWorkingDir(infile),
@@ -884,20 +1336,46 @@ throws Exception {
 		String cmnt = "#>";
 		String format_0 = "%-12.12s%-24.24s%-12.12s%16.16s%8.2F%8d";
 		StateMod_WellRight right = null;
-		List v = new Vector(6);
+		List<Object> v = new ArrayList<Object>(6);
 
 		out.println(cmnt);
 		out.println(cmnt + "***************************************************");
 		out.println(cmnt + "  StateMod Well Right File (" + theRights.size() + " rights)");
 		out.println(cmnt);
-		List fileSummary = getSummaryCommentList(theRights);
+		List<String> fileSummary = getSummaryCommentList(theRights);
 		for ( int i = 0; i < fileSummary.size(); i++ ) {
-			out.println(cmnt + (String)fileSummary.get(i));
+			out.println(cmnt + fileSummary.get(i));
 		}
 		out.println(cmnt);
 		String format_add = "";
-		if ( WriteDataComments_boolean ) {
-			format_add = ", 1x, i4, 1x, i4, ix, a6";
+		if ( writeDataComments ) {
+			format_add = ", 1x, i4," // Parcel year
+				+ " 1x, i4," // Parcel match class
+				+ " 1x, a6"; // Parcel ID (note 6 characters for legacy behavior)
+		}
+		else if ( writeExtendedDataComments ) {
+			// Longer parcel ID to allow WD + ID, plus other information that shows the
+			// original source of the right
+			format_add = ", 1x, i4," // Parcel year
+				+ " 1x, i4," // Parcel match class
+				+ " 1x, a12," // Parcel ID (note 12 characters for new behavior)
+				+ ", 1x, a14," // Collection type
+				+ " 1x, a8," // Part type
+				+ " 1x, a20," // Part ID
+				+ " 1x, a8," // Part ID type
+				+ " 1x, a8," // WDID (if available)
+				+ " 1x, a10," // Appropriation date YYYY-MM-DD
+				+ " 1x, a11," // Appropriation date as administration number
+				+ " 1x, a8," // Receipt (if available)
+				+ " 1x, a10," // Receipt date
+				+ " 1x, a11," // Receipt date as administration number
+				+ " 1x, f8.2," // Yield (GPM)
+				+ " 1x, f8.2," // Yield (CFS)
+				+ " 1x, f8.2," // APEX (GPM)
+				+ " 1x, f8.2," // APEX (CFS)
+				+ " 1x, f8.2," // Well fraction
+				+ " 1x, f8.2," // Ditch fraction
+				+ " 1x, f8.2"; // Yield prorated (GPM)
 		}
 		out.println(cmnt + "  Format:  (a12, a24, a12, f16.5, f8.2, i8" + format_add + ")");
 		out.println(cmnt);
@@ -912,17 +1390,53 @@ throws Exception {
 		out.println(cmnt + "                       -YYYY = off for years > YYYY" );
 		String header1_add = "";
 		String header2_add = "";
-		if ( WriteDataComments_boolean ) {
-			header1_add = " PYr--Cls--PID   ";
-			header2_add = "xb--exb--exb----e";
-			out.println(cmnt + " Parcel Year     Pyr:  Parcel year used for parcel/well matching");
-			out.println(cmnt + "Well match class Cls:  Indicates how well matched to parcel");
-			out.println(cmnt + "                       (see CDSS documentation).");
-			out.println(cmnt + "Parcel ID        PID:  Parcel ID for year.");
+		String header3_add = "";
+		if ( writeDataComments || writeExtendedDataComments) {
+			if ( writeExtendedDataComments ) {
+				// Wider ParcelID since more recent includes WD in ID
+				header1_add = "                       ";
+				header2_add = " PYr--Cls----ParcelID  ";
+				header3_add = "xb--exb--exb----------e";
+			}
+			else {
+				header1_add = "                 ";
+				header2_add = " PYr--Cls--PID   ";
+				header3_add = "xb--exb--exb----e";
+			}
+			out.println(cmnt);
+			out.println(cmnt + "The following data are NOT part of the standard StateMod file and StateMod will ignore.");
+			out.println(cmnt + "                 Pyr:  Parcel year used for parcel/well matching (-999 if data applies to full period)");
+			out.println(cmnt + "                 Cls:  Indicates how well was matched to parcel (see CDSS documentation).");
+			out.println(cmnt + "            ParcelID:  Parcel ID for year.");
+		}
+		if ( writeExtendedDataComments ) {
+			header1_add = header1_add + "                                                                                                                                                             Well    Ditch   Prorated";
+			header2_add = header2_add + " CollectionType-PartType--------PartID--------IDType     WDID----ApproDate-ApproDateAN  Receipt-PermitDate-PermtDateAN YieldGPM-YieldCFS-APEXGPM--APEXCFS  Fraction-Fraction-YieldGPM";
+			header3_add = header3_add + "xb------------exb------exb------------------exb------exb------exb--------exb---------exb------exb--------exb---------exb------exb------exb------exb------exb------exb------exb------e";
+			out.println(cmnt);
+			out.println(cmnt + "The following are output if extended data comments are requested and are useful for understanding parcel/well/ditch/right/permit.");
+			out.println(cmnt + "      CollectionType:  Aggregate, System, etc.");
+			out.println(cmnt + "            PartType:  Parcel ID for year.");
+			out.println(cmnt + "              PartID:  Part ID for collection (original source of water right).");
+			out.println(cmnt + "          PartIDType:  Part ID for PartID, if a well (WDID or Receipt).");
+			out.println(cmnt + "                WDID:  Well structure WDID (if available) - part IDType controls initial data lookup.");
+			out.println(cmnt + "           ApproDate:  Well right appropriation date (if available).");
+			out.println(cmnt + "         ApproDateAN:  Well right appropriation date as administration number.");
+			out.println(cmnt + "             Receipt:  Well permit receipt (if available) - part IDType controls initial data lookup.");
+			out.println(cmnt + "          PermitDate:  Permit date (if available).");
+			out.println(cmnt + "         PermtDateAN:  Permit date as administration number.");
+			out.println(cmnt + "            YieldGPM:  Well yield (GPM).");
+			out.println(cmnt + "            YieldCFS:  Well yield (CFS).");
+			out.println(cmnt + "             APEXGPM:  Alternate point/exchange yield, GPM, added to yield if requested during processing.");
+			out.println(cmnt + "             APEXCFS:  Alternate point/exchange yield, CFS.");
+			out.println(cmnt + "      Ditch Fraction:  Fraction of well yield to be used for this right (based on fraction of parcel served by ditch).");
+			out.println(cmnt + "       Well Fraction:  Fraction of well yield to be used for this right (based on number of wells serving parcel).");
+			out.println(cmnt + "   Prorated YieldGPM:  Prorated yield (GPM, Yield*WellFraction*DitchFraction), may contain APEX depending on processing, equivalent to decree (CFS).");
 		}
 		out.println(cmnt);
-		out.println(cmnt + "   ID               Name             Struct          Admin #   Decree  On/Off " + header1_add );
-		out.println(cmnt + "---------eb----------------------eb----------eb--------------eb------eb------e" + header2_add );
+		out.println(cmnt + "                                                                              " + header1_add );
+		out.println(cmnt + "   ID               Name             Struct          Admin #   Decree  On/Off " + header2_add );
+		out.println(cmnt + "---------eb----------------------eb----------eb--------------eb------eb------e" + header3_add );
 		out.println(cmnt);
 		out.println(cmnt + "EndHeader");
 		out.println(cmnt);
@@ -932,9 +1446,9 @@ throws Exception {
 			num = theRights.size();
 		}
 
-		String comment = null;	// Comment for data item
+		String comment = null; // Comment for data item
 		for (int i = 0; i < num; i++) {
-			right = (StateMod_WellRight)theRights.get(i);
+			right = theRights.get(i);
 			if (right == null) {
 				continue;
 			}
@@ -947,20 +1461,149 @@ throws Exception {
 			v.add(new Double(right.getDcrdivw()));
 			v.add(new Integer(right.getSwitch()));
 			iline = StringUtil.formatString(v, format_0);
-			if ( WriteDataComments_boolean ) {
-				comment = right.getComment();
-				// TODO SAM Evaluate how best to set parcel data
-				comment = StringUtil.formatString(right.getParcelYear(),"%4d")+ " "+
-					StringUtil.formatString(right.getParcelMatchClass(),"%4d") +" " +
-					StringUtil.formatString(right.getParcelID(),"%6.6s");
-				//if ( comment.length() > 0 ) {
-					// Append to the line
-					out.println ( iline + " " + comment );
-				//}
+			if ( writeDataComments || writeExtendedDataComments) {
+				comment = right.getComment(); // TODO SAM 2016-05-18 Figure out how this is used
+				String parcelYear = "-999"; // Need to use this because well merging expects -999
+				String parcelMatchClass = "    ";
+				String parcelID = "      ";
+				if ( writeExtendedDataComments ) {
+					parcelID = "            ";
+				}
+				if ( right.getParcelYear() > 0 ) {
+					parcelYear = StringUtil.formatString(right.getParcelYear(),"%4d");
+				}
+				if ( right.getParcelMatchClass() >= 0 ) {
+					// TODO SAM 2016-05-17 Apparently the class does not get set to -999 or zero, etc. and can be -2147483648
+					parcelMatchClass = StringUtil.formatString(right.getParcelMatchClass(),"%4d");
+				}
+				if ( (right.getParcelID() != null) && !right.getParcelID().equals("-999") ) {
+					if ( writeExtendedDataComments ) {
+						parcelID = StringUtil.formatString(right.getParcelID(),"%12.12s");
+					}
+					else {
+						parcelID = StringUtil.formatString(right.getParcelID(),"%6.6s");
+					}
+				}
+				comment = parcelYear + " " + parcelMatchClass + " " + parcelID;
+				iline = iline + " " + comment;
 			}
-			else {
-				out.println(iline);
+			if ( writeExtendedDataComments) {
+				// Also add the additional properties
+				String collectionType = right.getCollectionType();
+				if ( collectionType == null ) {
+					collectionType = "";
+				}
+				collectionType = StringUtil.formatString(collectionType,"%-14.14s");
+				String partType = right.getCollectionPartType();
+				if ( partType == null ) {
+					partType = "";
+				}
+				partType = StringUtil.formatString(partType,"%-8.8s");
+				String partId = right.getCollectionPartId();
+				if ( partId == null ) {
+					partId = "";
+				}
+				partId = StringUtil.formatString(partId,"%-20.20s");
+				String partIdType = right.getCollectionPartIdType();
+				if ( partIdType == null ) {
+					partIdType = "        ";
+				}
+				else {
+					partIdType = StringUtil.formatString(partIdType,"%-8.8s");
+				}
+				String wdid = right.getXWDID();
+				if ( wdid == null ) {
+					wdid = "        ";
+				}
+				else {
+					wdid = StringUtil.formatString(wdid,"%-8.8s");
+				}
+				Date approDate = right.getXApproDate();
+				String approDateString = "";
+				String approDateAdminNumberString = "";
+				if ( approDate == null ) {
+					approDateString = "          ";
+					approDateAdminNumberString = "           ";
+				}
+				else {
+					DateTime dt = new DateTime(approDate);
+					approDateString = dt.toString();
+					approDateAdminNumberString = StringUtil.formatString(right.getXApproDateAdminNumber(), "%-11.11s");
+				}
+				String receipt = right.getXPermitReceipt();
+				if ( receipt == null ) {
+					receipt = "        ";
+				}
+				else {
+					receipt = StringUtil.formatString(receipt,"%-8.8s");
+				}
+				Date permitDate = right.getXPermitDate();
+				String permitDateString = "";
+				String permitDateAdminNumberString = "";
+				if ( permitDate == null ) {
+					permitDateString = "          ";
+					permitDateAdminNumberString = "           ";
+				}
+				else {
+					DateTime dt = new DateTime(permitDate);
+					permitDateString = dt.toString();
+					permitDateAdminNumberString = StringUtil.formatString(right.getXPermitDateAdminNumber(), "%-11.11s");
+				}
+				double yieldGPM = right.getXYieldGPM();
+				String yieldGPMString = "";
+				String yieldCFSString = "";
+				if ( Double.isNaN(yieldGPM) ) {
+					yieldGPMString = "        ";
+					yieldCFSString = "        ";
+				}
+				else {
+					yieldGPMString = String.format("%8.2f", yieldGPM);
+					yieldCFSString = String.format("%8.2f", yieldGPM*.002228);
+				}
+				double apexGPM = right.getXYieldApexGPM();
+				String apexGPMString = "";
+				String apexCFSString = "";
+				if ( Double.isNaN(apexGPM) ) {
+					apexGPMString = "        ";
+					apexCFSString = "        ";
+				}
+				else {
+					apexGPMString = String.format("%8.2f", apexGPM);
+					apexCFSString = String.format("%8.2f", apexGPM*.002228);
+				}
+				double ditchFraction = right.getXDitchFraction();
+				String ditchFractionString = "";
+				if ( Double.isNaN(ditchFraction) ) {
+					ditchFractionString = "        ";
+				}
+				else {
+					ditchFractionString = String.format("%8.2f", ditchFraction);
+				}
+				double wellFraction = right.getXFractionYield();
+				String wellFractionString = "";
+				if ( Double.isNaN(wellFraction) ) {
+					wellFractionString = "        ";
+				}
+				else {
+					wellFractionString = String.format("%8.2f", wellFraction);
+				}
+				//double prorated = right.getXProratedYield();
+				double proratedYield = right.getDcrdivw();
+				String proratedYieldString = "";
+				if ( Double.isNaN(proratedYield) ) {
+					proratedYieldString = "        ";
+				}
+				else {
+					proratedYieldString = String.format("%8.2f", proratedYield/.002228); // Convert decree as CFS to GPM
+				}
+				iline = iline + " " + collectionType + " " + partType + " " + partId + " " + partIdType + " "
+					+ wdid + " " + approDateString + " " + approDateAdminNumberString + " " + receipt + " " + permitDateString
+					+ " " + permitDateAdminNumberString + " " + yieldGPMString + " " + yieldCFSString + " "
+					+ apexGPMString + " " + apexCFSString + " " + ditchFractionString + " "
+					+ wellFractionString + " " + proratedYieldString;
 			}
+			// Print the line to the file
+			out.println(iline);
 		}
 	} 
 	catch(Exception e) {
