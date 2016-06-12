@@ -28,6 +28,9 @@ import java.util.List;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 import RTi.Util.Message.Message;
+import RTi.Util.Time.DateTime;
+
+// TODO SAM 2016-06-09 why does this seem redundant with StateMod_WellRight_Data_TableModel
 
 /**
 This table model displays well right data.  The model can display rights data
@@ -39,23 +42,42 @@ extends JWorksheet_AbstractRowTableModel {
 
 /**
 Number of columns in the table model.  For table models that display rights for
-a single well, the worksheets only have have 6 columns.  Table models that 
-display rights for 1+ wells have 7.  The variable is modified in the 
-constructor.
+a single well, the worksheets only have have 26 columns.  Table models that 
+display rights for 1+ wells have 27.  The variable is modified in the constructor.
 */
-private int __COLUMNS = 6;
+private int __COLUMNS = 26;
 
 /**
 References to columns.
 */
 public final static int
-	COL_WELL_ID =	-1,
-	COL_RIGHT_ID =	0,
-	COL_RIGHT_NAME= 1,
-	COL_STRUCT_ID =	2,
-	COL_ADMIN_NUM =	3,
-	COL_DCR_AMT =	4,
-	COL_ON_OFF =	5;
+	COL_WELL_ID = -1,
+	COL_RIGHT_ID = 0,
+	COL_RIGHT_NAME = 1,
+	COL_STRUCT_ID = 2,
+	COL_ADMIN_NUM = 3,
+	COL_DCR_AMT = 4,
+	COL_ON_OFF = 5,
+	COL_PARCEL_YEAR = 6, // These are optional but core to CDSS processing
+	COL_PARCEL_CLASS = 7,
+	COL_PARCEL_ID = 8,
+	COL_COLLECTION_TYPE= 9,
+	COL_COLLECTION_PART_TYPE = 10,
+	COL_COLLECTION_PART_ID = 11,
+	COL_COLLECTION_PART_ID_TYPE = 12,
+	COL_X_RIGHT_WDID = 13,
+	COL_X_RIGHT_APPROPRIATION_DATE = 14,
+	COL_X_RIGHT_ADMIN_NUMBER = 15,
+	COL_X_PERMIT_RECEIPT = 16,
+	COL_X_PERMIT_DATE = 17,
+	COL_X_PERMIT_ADMIN_NUMBER = 18,
+	COL_X_WELL_YIELD_GPM = 19,
+	COL_X_WELL_YIELD_CFS = 20,
+	COL_X_APEX_GPM = 21,
+	COL_X_APEX_CFS = 22,
+	COL_X_WELL_FRACTION = 23,
+	COL_X_DITCH_FRACTION = 24,
+	COL_X_YIELD_PRORATED_GPM = 25;
 	
 /**
 Whether the table data is editable or not.
@@ -78,12 +100,10 @@ a single well's right data.  This means that the well ID field will
 not be shown.  If false then the well right field will be included.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_WellRight_TableModel(List data, boolean editable,
-boolean singleWell)
+public StateMod_WellRight_TableModel(List data, boolean editable, boolean singleWell)
 throws Exception {
 	if (data == null) {
-		throw new Exception ("Invalid data Vector passed to " 
-			+ "StateMod_WellRight_TableModel constructor.");
+		throw new Exception ("Invalid data list passed to StateMod_WellRight_TableModel constructor.");
 	}
 	_rows = data.size();
 	_data = data;
@@ -92,7 +112,7 @@ throws Exception {
 	__singleWell = singleWell;
 
 	if (!__singleWell) {
-		// this is done because if rights for 1+ wells are shown in 
+		// This is done because if rights for 1+ wells are shown in 
 		// the worksheet the ID for the associated wells needs shown
 		// as well.  So instead of just 6 columns of data, an 
 		// additional one is necessary.
@@ -115,14 +135,34 @@ public Class getColumnClass (int col) {
 	}
 
 	switch (col) {
-		case COL_WELL_ID:	return String.class;
-		case COL_RIGHT_ID:	return String.class;
-		case COL_RIGHT_NAME:	return String.class;
-		case COL_STRUCT_ID:	return String.class;
-		case COL_ADMIN_NUM:	return String.class;
-		case COL_DCR_AMT:	return Double.class;
-		case COL_ON_OFF:	return Integer.class;
-		default:		return String.class;
+		case COL_WELL_ID: return String.class;
+		case COL_RIGHT_ID: return String.class;
+		case COL_RIGHT_NAME: return String.class;
+		case COL_STRUCT_ID: return String.class;
+		case COL_ADMIN_NUM: return String.class;
+		case COL_DCR_AMT: return Double.class;
+		case COL_ON_OFF: return Integer.class;
+		case COL_PARCEL_YEAR: return Integer.class;
+		case COL_PARCEL_CLASS: return Integer.class;
+		case COL_PARCEL_ID: return Integer.class;
+		case COL_COLLECTION_TYPE: return String.class;
+		case COL_COLLECTION_PART_TYPE: return String.class;
+		case COL_COLLECTION_PART_ID: return String.class;
+		case COL_COLLECTION_PART_ID_TYPE: return String.class;
+		case COL_X_RIGHT_WDID: return String.class;
+		case COL_X_RIGHT_APPROPRIATION_DATE: return String.class;
+		case COL_X_RIGHT_ADMIN_NUMBER: return String.class;
+		case COL_X_PERMIT_RECEIPT: return String.class;
+		case COL_X_PERMIT_DATE: return String.class;
+		case COL_X_PERMIT_ADMIN_NUMBER: return String.class;
+		case COL_X_WELL_YIELD_GPM: return Double.class;
+		case COL_X_WELL_YIELD_CFS: return Double.class;
+		case COL_X_APEX_GPM: return Double.class;
+		case COL_X_APEX_CFS: return Double.class;
+		case COL_X_WELL_FRACTION: return Double.class;
+		case COL_X_DITCH_FRACTION: return Double.class;
+		case COL_X_YIELD_PRORATED_GPM: return Double.class;
+		default: return String.class;
 	}
 }
 
@@ -148,17 +188,36 @@ public String getColumnName(int col) {
 	}
 
 	switch (col) {
-		case COL_WELL_ID:	return "\n\nWELL ID";
-		case COL_RIGHT_ID:	return "\n\nRIGHT ID";
-		case COL_RIGHT_NAME:	return "\n\nWELL RIGHT NAME";
-		case COL_STRUCT_ID:	return "WELL ID\nASSOCIATED\nW/ RIGHT";
-		case COL_ADMIN_NUM:	return "\n\nADMIN NUMBER";
-		case COL_DCR_AMT:	return "\nDECREED\nAMOUNT (CFS)";
-		case COL_ON_OFF:	return "\nON/OFF\nSWITCH";
-		default:	return " ";
+		case COL_WELL_ID: return "\n\nWELL ID";
+		case COL_RIGHT_ID: return "\n\nRIGHT ID";
+		case COL_RIGHT_NAME: return "\n\nWELL RIGHT NAME";
+		case COL_STRUCT_ID: return "WELL ID\nASSOCIATED\nW/ RIGHT";
+		case COL_ADMIN_NUM: return "\n\nADMIN NUMBER";
+		case COL_DCR_AMT: return "\nDECREED\nAMOUNT (CFS)";
+		case COL_ON_OFF: return "\nON/OFF\nSWITCH";
+		case COL_PARCEL_YEAR: return "\nPARCEL\nYEAR";
+		case COL_PARCEL_CLASS: return "\nPARCEL\nCLASS";
+		case COL_PARCEL_ID: return "\nPARCEL\nID";
+		case COL_COLLECTION_TYPE: return "\nCOLLECTION\nTYPE";
+		case COL_COLLECTION_PART_TYPE: return "COLLECTION\nPART\nTYPE";
+		case COL_COLLECTION_PART_ID: return "COLLECTION\nPART\nID";
+		case COL_COLLECTION_PART_ID_TYPE: return "COLLECTION\nPART\nID TYPE";
+		case COL_X_RIGHT_WDID: return "\nRIGHT\nWDID";
+		case COL_X_RIGHT_APPROPRIATION_DATE: return "RIGHT\nAPPROPRIATION\nDATE";
+		case COL_X_RIGHT_ADMIN_NUMBER: return "RIGHT\nADMINISTRATION\nNUMBER";
+		case COL_X_PERMIT_RECEIPT: return "\nPERMIT\nID";
+		case COL_X_PERMIT_DATE: return "\nPERMIT\nDATE";
+		case COL_X_PERMIT_ADMIN_NUMBER: return "PERMIT\nADMINISTRATION\nNUMBER";
+		case COL_X_WELL_YIELD_GPM: return "WELL\nYIELD\n(GPM)";
+		case COL_X_WELL_YIELD_CFS: return "WELL\nYIELD\n(CFS)";
+		case COL_X_APEX_GPM: return "WELL APEX\nYIELD\n(GPM)";
+		case COL_X_APEX_CFS: return "WELL APEX\nYIELD\n(CFS)";
+		case COL_X_WELL_FRACTION: return "\nWELL\nFRACTION";
+		case COL_X_DITCH_FRACTION: return "\nDITCH\nFRACTION";
+		case COL_X_YIELD_PRORATED_GPM: return "WELL YIELD\nPRORATED\n(GPM)";
+		default: return " ";
 	}
 }
-
 
 /**
 Returns the text to be assigned to worksheet tooltips.
@@ -170,36 +229,39 @@ public String[] getColumnToolTips() {
 	// the offset is used because in worksheets that have rights data for 1+
 	// wells the first column is numbered -1.  The offset calculation 
 	// allows this column number, which is normally invalid for a worksheet,
-	// to be used only for those worksheets that need to display the -1st
-	// column.
+	// to be used only for those worksheets that need to display the -1st column.
 	int offset = 0;
 	if (!__singleWell) {	
 		offset = 1;
-		tips[COL_WELL_ID + offset] = 
-			"<html>The ID of the well to "
-			+ "which<br>the rights belong.</html>";
+		tips[COL_WELL_ID + offset] = "The ID of the well to which the rights belong.";
 	}
 
-	tips[COL_RIGHT_ID + offset] =
-		"<html>The well right ID is typically the well" +
-		" station ID<br> followed by .01, .02, etc.</html>";
-	tips[COL_RIGHT_NAME + offset] = 
-		"Well right name";
-	tips[COL_STRUCT_ID + offset] = 
-		"<HTML>The well ID is the link between well stations "
-		+ "and their right(s).</HTML>";
-	tips[COL_ADMIN_NUM + offset] = 
-		"<HTML>Lower admininistration numbers indicate greater " +
-		"seniority.<BR>99999 is typical for a very junior" +
-		" right.</html>";
-	tips[COL_DCR_AMT + offset] = 
-		"Decreed amount (CFS)";
-	tips[COL_ON_OFF + offset] = 
-		"<HTML>0 = OFF<BR>1 = ON<BR>" +
-		"YYYY indicates to turn on the right in year YYYY."+
-		"<BR>-YYYY indicates to turn off the right in year" +
-		" YYYY.</HTML>";
-
+	tips[COL_RIGHT_ID + offset] = "The well right ID is typically the well station ID<br> followed by .01, .02, etc.";
+	tips[COL_RIGHT_NAME + offset] = "Well right name";
+	tips[COL_STRUCT_ID + offset] = "The well ID is the link between well stations and their right(s).";
+	tips[COL_ADMIN_NUM + offset] = "Lower admininistration numbers indicate greater seniority.  99999 is typical for a very junior right.";
+	tips[COL_DCR_AMT + offset] = "Decreed amount (CFS)";
+	tips[COL_ON_OFF + offset] = "0 = OFF, 1 = ON, YYYY indicates to turn on the right in year YYYY, -YYYY indicates to turn off the right in year YYYY.";
+	tips[COL_PARCEL_YEAR + offset] = "For irrigated parcels, year of irrigated lands assessment";
+	tips[COL_PARCEL_CLASS + offset] = "For irrigated parcels, indicates how well was matched to parcel";
+	tips[COL_PARCEL_ID + offset] = "For irrigated parcels, parcel identifier";
+	tips[COL_COLLECTION_TYPE + offset] = "Well station collection type when processing the data (blank if not a collection)";
+	tips[COL_COLLECTION_PART_TYPE + offset] = "Well station collection part type (Ditch, Well, Parcel)";
+	tips[COL_COLLECTION_PART_ID + offset] = "Collection part identifier";
+	tips[COL_COLLECTION_PART_ID_TYPE + offset] = "Collection part identifier type";
+	tips[COL_X_RIGHT_WDID + offset] = "For parcel/well cross-reference, the matching well structure WDID";
+	tips[COL_X_RIGHT_APPROPRIATION_DATE + offset] = "For parcel/well cross-reference, the right appropriation date";
+	tips[COL_X_RIGHT_ADMIN_NUMBER + offset] = "For parcel/well cross-reference, the administration number for the right";
+	tips[COL_X_PERMIT_RECEIPT + offset] = "For parcel/well cross-reference, the well permit receipt";
+	tips[COL_X_PERMIT_DATE + offset] = "For parcel/well cross-reference, the permit date";
+	tips[COL_X_PERMIT_ADMIN_NUMBER + offset] = "For parcel/well cross-reference, the permit date administration number";
+	tips[COL_X_WELL_YIELD_GPM + offset] = "For parcel/well cross-reference, the well yield (GPM)";
+	tips[COL_X_WELL_YIELD_CFS + offset] = "For parcel/well cross-reference, the well yield (CFS)";
+	tips[COL_X_APEX_GPM + offset] = "For parcel/well cross-reference, the well right alternate point/exchange (GPM)";
+	tips[COL_X_APEX_CFS + offset] = "For parcel/well cross-reference, the well right alternate point/exchange (CFS)";
+	tips[COL_X_WELL_FRACTION + offset] = "Fraction of full yield for this relationship (due to multiple parcels served by well)";
+	tips[COL_X_DITCH_FRACTION + offset] = "Fraction of full yeild for this relationship (due to proration of parcel served by multiple ditches)";
+	tips[COL_X_YIELD_PRORATED_GPM + offset] = "Well yield prorated by well and ditch fraction (GPM)";
 	return tips;
 }
 
@@ -217,20 +279,39 @@ public int[] getColumnWidths() {
 	// the offset is used because in worksheets that have rights data for 1+
 	// wells the first column is numbered -1.  The offset calculation 
 	// allows this column number, which is normally invalid for a worksheet,
-	// to be used only for those worksheets that need to display the -1st
-	// column.
+	// to be used only for those worksheets that need to display the -1st column.
 	int offset = 0;
 	if (!__singleWell) {
 		offset = 1;
 		widths[COL_WELL_ID + offset] = 8;
 	}
 	
-	widths[COL_RIGHT_ID + offset] = 	10;
-	widths[COL_RIGHT_NAME + offset] = 	20;
-	widths[COL_STRUCT_ID + offset] =	10;
-	widths[COL_ADMIN_NUM + offset] = 	11;
-	widths[COL_DCR_AMT + offset] = 	10;
-	widths[COL_ON_OFF + offset] = 	7;
+	widths[COL_RIGHT_ID + offset] = 10;
+	widths[COL_RIGHT_NAME + offset] = 20;
+	widths[COL_STRUCT_ID + offset] = 10;
+	widths[COL_ADMIN_NUM + offset] = 11;
+	widths[COL_DCR_AMT + offset] = 10;
+	widths[COL_ON_OFF + offset] = 7;
+	widths[COL_PARCEL_YEAR + offset] = 5;
+	widths[COL_PARCEL_CLASS + offset] = 5;
+	widths[COL_PARCEL_ID + offset] = 7;
+	widths[COL_COLLECTION_TYPE + offset] = 9;
+	widths[COL_COLLECTION_PART_TYPE + offset] = 9;
+	widths[COL_COLLECTION_PART_ID + offset] = 10;
+	widths[COL_COLLECTION_PART_ID_TYPE + offset] = 9;
+	widths[COL_X_RIGHT_WDID + offset] = 7;
+	widths[COL_X_RIGHT_APPROPRIATION_DATE + offset] = 11;
+	widths[COL_X_RIGHT_ADMIN_NUMBER + offset] = 11;
+	widths[COL_X_PERMIT_RECEIPT + offset] = 10;
+	widths[COL_X_PERMIT_DATE + offset] = 9;
+	widths[COL_X_PERMIT_ADMIN_NUMBER + offset] = 11;
+	widths[COL_X_WELL_YIELD_GPM + offset] = 7;
+	widths[COL_X_WELL_YIELD_CFS + offset] = 7;
+	widths[COL_X_APEX_GPM + offset] = 7;
+	widths[COL_X_APEX_CFS + offset] = 7;
+	widths[COL_X_WELL_FRACTION + offset] = 7;
+	widths[COL_X_DITCH_FRACTION + offset] = 7;
+	widths[COL_X_YIELD_PRORATED_GPM + offset] = 9;
 	return widths;
 }
 
@@ -238,8 +319,7 @@ public int[] getColumnWidths() {
 Returns the format that the specified column should be displayed in when
 the table is being displayed in the given table format. 
 @param col column for which to return the format.
-@return the format (as used by StringUtil.formatString() in which to display the
-column.
+@return the format (as used by StringUtil.formatString() in which to display the column.
 */
 public String getFormat(int col) {
 	// necessary for table models that display rights for 1+ wells so that
@@ -251,14 +331,34 @@ public String getFormat(int col) {
 	}
 
 	switch (col) {
-		case COL_WELL_ID:	return "%-12s";
-		case COL_RIGHT_ID:	return "%-12s";
-		case COL_RIGHT_NAME:	return "%-24s";
-		case COL_STRUCT_ID:	return "%-40s";
-		case COL_ADMIN_NUM:	return "%-40s";
-		case COL_DCR_AMT:	return "%12.2f";
-		case COL_ON_OFF:	return "%8d";
-		default:		return "%-s";
+		case COL_WELL_ID: return "%-12s";
+		case COL_RIGHT_ID: return "%-12s";
+		case COL_RIGHT_NAME: return "%-24s";
+		case COL_STRUCT_ID: return "%-40s";
+		case COL_ADMIN_NUM: return "%-40s";
+		case COL_DCR_AMT: return "%12.2f";
+		case COL_ON_OFF: return "%8d";
+		case COL_PARCEL_YEAR: return "%8d";
+		case COL_PARCEL_CLASS: return "%8d";
+		case COL_PARCEL_ID: return "%8d";
+		case COL_COLLECTION_TYPE: return "%-12s";
+		case COL_COLLECTION_PART_TYPE: return "%-12s";
+		case COL_COLLECTION_PART_ID: return "%-20s";
+		case COL_COLLECTION_PART_ID_TYPE: return "%-12s";
+		case COL_X_RIGHT_WDID: return "%-12s";
+		case COL_X_RIGHT_APPROPRIATION_DATE: return "%-10s";
+		case COL_X_RIGHT_ADMIN_NUMBER: return "%-12s";
+		case COL_X_PERMIT_RECEIPT: return "%-12s";
+		case COL_X_PERMIT_DATE: return "%-10s";
+		case COL_X_PERMIT_ADMIN_NUMBER: return "%-12s";
+		case COL_X_WELL_YIELD_GPM: return "%12.2f";
+		case COL_X_WELL_YIELD_CFS: return "%12.2f";
+		case COL_X_APEX_GPM: return "%12.2f";
+		case COL_X_APEX_CFS: return "%12.2f";
+		case COL_X_WELL_FRACTION: return "%12.2f";
+		case COL_X_DITCH_FRACTION: return "%12.2f";
+		case COL_X_YIELD_PRORATED_GPM: return "%12.2f";
+		default: return "%-s";
 	}
 }
 
@@ -292,24 +392,57 @@ public Object getValueAt(int row, int col) {
 	}
 	
 	switch (col) {
-		case COL_WELL_ID:	return wellr.getCgoto();
-		case COL_RIGHT_ID:	return wellr.getID();
-		case COL_RIGHT_NAME:	return wellr.getName();
-		case COL_STRUCT_ID:	return wellr.getCgoto();
-		case COL_ADMIN_NUM:	return wellr.getIrtem();
-		case COL_DCR_AMT:	return new Double(wellr.getDcrdivw());
-		case COL_ON_OFF:	return new Integer(wellr.getSwitch());
-		default:		return "";
+		case COL_WELL_ID: return wellr.getCgoto();
+		case COL_RIGHT_ID: return wellr.getID();
+		case COL_RIGHT_NAME: return wellr.getName();
+		case COL_STRUCT_ID: return wellr.getCgoto();
+		case COL_ADMIN_NUM: return wellr.getIrtem();
+		case COL_DCR_AMT: return new Double(wellr.getDcrdivw());
+		case COL_ON_OFF: return new Integer(wellr.getSwitch());
+		case COL_PARCEL_YEAR: return new Integer(wellr.getParcelYear());
+		case COL_PARCEL_CLASS: return new Integer(wellr.getParcelMatchClass());
+		case COL_PARCEL_ID: return new Integer(wellr.getParcelID());
+		case COL_COLLECTION_TYPE: return wellr.getCollectionType();
+		case COL_COLLECTION_PART_TYPE: return wellr.getCollectionPartType();
+		case COL_COLLECTION_PART_ID: return wellr.getCollectionPartId();
+		case COL_COLLECTION_PART_ID_TYPE: return wellr.getCollectionPartIdType();
+		case COL_X_RIGHT_WDID: return wellr.getXWDID();
+		case COL_X_RIGHT_APPROPRIATION_DATE:
+			if ( wellr.getXApproDate() == null ) {
+				return null;
+			}
+			else {
+				DateTime dt = new DateTime(wellr.getXApproDate());
+				return dt.toString();
+			}
+		case COL_X_RIGHT_ADMIN_NUMBER: return wellr.getXApproDateAdminNumber();
+		case COL_X_PERMIT_RECEIPT: return wellr.getXPermitReceipt();
+		case COL_X_PERMIT_DATE:
+			if ( wellr.getXPermitDate() == null ) {
+				return null;
+			}
+			else {
+				DateTime dt = new DateTime(wellr.getXPermitDate());
+				return dt.toString();
+			}
+		case COL_X_PERMIT_ADMIN_NUMBER: return wellr.getXPermitDateAdminNumber();
+		case COL_X_WELL_YIELD_GPM: return wellr.getXYieldGPM();
+		case COL_X_WELL_YIELD_CFS: return wellr.getXYieldGPM()*.002228;
+		case COL_X_APEX_GPM: return wellr.getXYieldApexGPM();
+		case COL_X_APEX_CFS: return wellr.getXYieldApexGPM()*.002228;
+		case COL_X_WELL_FRACTION: return wellr.getXFractionYield();
+		case COL_X_DITCH_FRACTION: return wellr.getXDitchFraction();
+		case COL_X_YIELD_PRORATED_GPM: return new Double(wellr.getDcrdivw()/.002228);
+		default: return "";
 	}
 }
 
 /**
 Returns whether the cell is editable or not.  If the table is editable, only
 the well ID is not editable - this reflects the display being opened from the
-well station widnow and maintaining agreement between the two windows.
+well station window and maintaining agreement between the two windows.
 @param rowIndex unused.
-@param col the index of the column to check whether it is editable
-or not.
+@param col the index of the column to check whether it is editable or not.
 @return whether the cell is editable or not.
 */
 public boolean isCellEditable(int rowIndex, int col) {

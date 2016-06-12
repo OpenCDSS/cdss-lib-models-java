@@ -1011,19 +1011,19 @@ public int getCollectionDiv ()
 Return the collection part ID list for the specific year.  For wells, collections are by year.
 @return the list of collection part IDS, or null if not defined.
 */
-public List getCollectionPartIDs ( int year )
+public List<String> getCollectionPartIDs ( int year )
 {	if ( (__collectionIDList == null) || (__collectionIDList.size() == 0) ) {
 		return null;
 	}
 	if ( __collection_part_type.equalsIgnoreCase("Ditch") || __collection_part_type.equalsIgnoreCase("Well") ) {
-		// The list of part IDs will be the first and only list...
-		return (List)__collectionIDList.get(0);
+		// The list of part IDs will be the first and only list (year irrelevant)...
+		return (List<String>)__collectionIDList.get(0);
 	}
 	else if ( __collection_part_type.equalsIgnoreCase("Parcel") ) {
 		// The list of part IDs needs to match the year.
 		for ( int i = 0; i < __collectionYear.length; i++ ) {
 			if ( year == __collectionYear[i] ) {
-				return (List)__collectionIDList.get(i);
+				return (List<String>)__collectionIDList.get(i);
 			}
 		}
 	}

@@ -1359,7 +1359,7 @@ throws Exception {
 			format_add = ", 1x, i4," // Parcel year
 				+ " 1x, i4," // Parcel match class
 				+ " 1x, a12," // Parcel ID (note 12 characters for new behavior)
-				+ ", 1x, a14," // Collection type
+				+ " 1x, a14," // Collection type
 				+ " 1x, a8," // Part type
 				+ " 1x, a20," // Part ID
 				+ " 1x, a8," // Part ID type
@@ -1410,7 +1410,7 @@ throws Exception {
 			out.println(cmnt + "            ParcelID:  Parcel ID for year.");
 		}
 		if ( writeExtendedDataComments ) {
-			header1_add = header1_add + "                                                                                                                                                             Well    Ditch   Prorated";
+			header1_add = header1_add + "                                                                                                                                                             Ditch    Well   Prorated";
 			header2_add = header2_add + " CollectionType-PartType--------PartID--------IDType     WDID----ApproDate-ApproDateAN  Receipt-PermitDate-PermtDateAN YieldGPM-YieldCFS-APEXGPM--APEXCFS  Fraction-Fraction-YieldGPM";
 			header3_add = header3_add + "xb------------exb------exb------------------exb------exb------exb--------exb---------exb------exb--------exb---------exb------exb------exb------exb------exb------exb------exb------e";
 			out.println(cmnt);
@@ -1429,7 +1429,7 @@ throws Exception {
 			out.println(cmnt + "            YieldCFS:  Well yield (CFS).");
 			out.println(cmnt + "             APEXGPM:  Alternate point/exchange yield, GPM, added to yield if requested during processing.");
 			out.println(cmnt + "             APEXCFS:  Alternate point/exchange yield, CFS.");
-			out.println(cmnt + "      Ditch Fraction:  Fraction of well yield to be used for this right (based on fraction of parcel served by ditch).");
+			out.println(cmnt + "      Ditch Fraction:  Fraction of well yield to be used for this right (based on fraction of parcel served by ditch), 1.0 if no ditch.");
 			out.println(cmnt + "       Well Fraction:  Fraction of well yield to be used for this right (based on number of wells serving parcel).");
 			out.println(cmnt + "   Prorated YieldGPM:  Prorated yield (GPM, Yield*WellFraction*DitchFraction), may contain APEX depending on processing, equivalent to decree (CFS).");
 		}
