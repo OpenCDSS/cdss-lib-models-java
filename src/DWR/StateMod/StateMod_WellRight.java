@@ -180,6 +180,11 @@ private Date __xApproDate = null;
 private String __xApproDateAdminNumber = "";
 
 /**
+ * Well right use corresponding to three-digit concatenated codes.
+ */
+private String __xUse = "";
+
+/**
  * Prorated yield based on parcel area
  */
 private double __xProratedYield = Double.NaN;
@@ -478,6 +483,14 @@ public String getXWDID () {
 }
 
 /**
+ * Return the well right use, for example from HydroBase well right use.
+ */
+public String getXUse () {
+	return __xUse;
+}
+
+
+/**
  * Return the well permit receipt.	
  */
 public String getXPermitReceipt () {
@@ -647,6 +660,7 @@ throws Exception {
 			StringUtil.TYPE_STRING, // WDID (if available)
 			StringUtil.TYPE_STRING, // Appropriation date YYYY-MM-DD
 			StringUtil.TYPE_STRING, // Administration number for appropriation date
+			StringUtil.TYPE_STRING, // Use
 			StringUtil.TYPE_STRING, // Receipt (if available)
 			StringUtil.TYPE_STRING, // Permit date YYYY-MM-DD
 			StringUtil.TYPE_STRING, // Administration number for permit date
@@ -694,6 +708,7 @@ throws Exception {
 			9, // WDID (if available)
 			11, // Appropriation date YYYY-MM-DD
 			12, // Administration number for appropriation date
+			30, // Use
 			9, // Receipt (if available)
 			11, // Permit date YYYY-MM-DD
 			12, // Administration number for permit date
@@ -773,19 +788,20 @@ throws Exception {
 					catch ( Exception e2 ) {
 					}
 					aRight.setXApproDateAdminNumber((String)v.get(15));
-					aRight.setXPermitReceipt((String)v.get(16));
+					aRight.setXUse((String)v.get(16));
+					aRight.setXPermitReceipt((String)v.get(17));
 					try {
-						DateTime dt = DateTime.parse((String)v.get(17));
+						DateTime dt = DateTime.parse((String)v.get(18));
 						aRight.setXPermitDate(dt.getDate(TimeZoneDefaultType.LOCAL));
 					}
 					catch ( Exception e2 ) {
 					} 
-					aRight.setXPermitDateAdminNumber((String)v.get(18));
-					aRight.setXYieldGPM((Double)v.get(19));
+					aRight.setXPermitDateAdminNumber((String)v.get(19));
+					aRight.setXYieldGPM((Double)v.get(20));
 					aRight.setXYieldApexGPM((Double)v.get(21));
-					aRight.setXFractionYield((Double)v.get(23));
-					aRight.setXDitchFraction((Double)v.get(24));
-					aRight.setXProratedYield((Double)v.get(25));
+					aRight.setXFractionYield((Double)v.get(22));
+					aRight.setXDitchFraction((Double)v.get(23));
+					aRight.setXProratedYield((Double)v.get(24));
 				}
 				catch ( Exception e ) {
 					Message.printWarning(3,routine,"Error reading line " + lineCount + " (" + e + "): " + iline );
@@ -1009,6 +1025,13 @@ public void setParcelYear(int parcel_year) {
  */
 public void setXWDID ( String xWDID ) {
 	__xWDID = xWDID;
+}
+
+/**
+ * Set the well right use.	
+ */
+public void setXUse ( String xUse ) {
+	__xUse = xUse;
 }
 
 /**
@@ -1366,6 +1389,7 @@ throws Exception {
 				+ " 1x, a8," // WDID (if available)
 				+ " 1x, a10," // Appropriation date YYYY-MM-DD
 				+ " 1x, a11," // Appropriation date as administration number
+				+ " 1x, a30," // Well right use (30 characters was maximum length in HydroBase as of 2016-10-03)
 				+ " 1x, a8," // Receipt (if available)
 				+ " 1x, a10," // Receipt date
 				+ " 1x, a11," // Receipt date as administration number
@@ -1411,8 +1435,8 @@ throws Exception {
 		}
 		if ( writeExtendedDataComments ) {
 			header1_add = header1_add + "                                                                                                                                                             Ditch    Well   Prorated";
-			header2_add = header2_add + " CollectionType-PartType--------PartID--------IDType     WDID----ApproDate-ApproDateAN  Receipt-PermitDate-PermtDateAN YieldGPM-YieldCFS-APEXGPM--APEXCFS  Fraction-Fraction-YieldGPM";
-			header3_add = header3_add + "xb------------exb------exb------------------exb------exb------exb--------exb---------exb------exb--------exb---------exb------exb------exb------exb------exb------exb------exb------e";
+			header2_add = header2_add + " CollectionType-PartType--------PartID--------IDType     WDID----ApproDate-ApproDateAN---------------Use               Receipt-PermitDate-PermtDateAN-YieldGPM-YieldCFS-APEXGPM--APEXCFS  Fraction-Fraction-YieldGPM";
+			header3_add = header3_add + "xb------------exb------exb------------------exb------exb------exb--------exb---------exb----------------------------exb------exb--------exb---------exb------exb------exb------exb------exb------exb------exb------e";
 			out.println(cmnt);
 			out.println(cmnt + "The following are output if extended data comments are requested and are useful for understanding parcel/well/ditch/right/permit.");
 			out.println(cmnt + "      CollectionType:  Aggregate, System, etc.");
@@ -1422,6 +1446,7 @@ throws Exception {
 			out.println(cmnt + "                WDID:  Well structure WDID (if available) - part IDType controls initial data lookup.");
 			out.println(cmnt + "           ApproDate:  Well right appropriation date (if available).");
 			out.println(cmnt + "         ApproDateAN:  Well right appropriation date as administration number.");
+			out.println(cmnt + "                 Use:  Well right decreed use.");
 			out.println(cmnt + "             Receipt:  Well permit receipt (if available) - part IDType controls initial data lookup.");
 			out.println(cmnt + "          PermitDate:  Permit date (if available).");
 			out.println(cmnt + "         PermtDateAN:  Permit date as administration number.");
@@ -1530,6 +1555,13 @@ throws Exception {
 					approDateString = dt.toString();
 					approDateAdminNumberString = StringUtil.formatString(right.getXApproDateAdminNumber(), "%-11.11s");
 				}
+				String use = right.getXUse();
+				if ( use == null ) {
+					use = "";
+				}
+				else {
+					use = StringUtil.formatString(use,"%-30.30s");
+				}
 				String receipt = right.getXPermitReceipt();
 				if ( receipt == null ) {
 					receipt = "        ";
@@ -1597,7 +1629,7 @@ throws Exception {
 					proratedYieldString = String.format("%8.2f", proratedYield/.002228); // Convert decree as CFS to GPM
 				}
 				iline = iline + " " + collectionType + " " + partType + " " + partId + " " + partIdType + " "
-					+ wdid + " " + approDateString + " " + approDateAdminNumberString + " " + receipt + " " + permitDateString
+					+ wdid + " " + approDateString + " " + approDateAdminNumberString + " " + use + " " + receipt + " " + permitDateString
 					+ " " + permitDateAdminNumberString + " " + yieldGPMString + " " + yieldCFSString + " "
 					+ apexGPMString + " " + apexCFSString + " " + ditchFractionString + " "
 					+ wellFractionString + " " + proratedYieldString;
