@@ -708,7 +708,7 @@ throws Exception {
 			9, // WDID (if available)
 			11, // Appropriation date YYYY-MM-DD
 			12, // Administration number for appropriation date
-			30, // Use
+			31, // Use
 			9, // Receipt (if available)
 			11, // Permit date YYYY-MM-DD
 			12, // Administration number for permit date

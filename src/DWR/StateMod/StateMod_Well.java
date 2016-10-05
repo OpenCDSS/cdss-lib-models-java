@@ -1008,7 +1008,7 @@ public int getCollectionDiv ()
 }
 
 /**
-Return the collection part ID list for the specific year.  For wells, collections are by year.
+Return the collection part ID list for the specific year.  For parcels, collections are by year.
 @return the list of collection part IDS, or null if not defined.
 */
 public List<String> getCollectionPartIDs ( int year )
