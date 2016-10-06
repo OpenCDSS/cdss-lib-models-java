@@ -33,7 +33,7 @@ extends JWorksheet_AbstractRowTableModel implements StateMod_Data_TableModel
 /**
 Number of columns in the table model.
 */
-private int __COLUMNS = 26;
+private int __COLUMNS = 27;
 
 /**
 References to columns.
@@ -55,16 +55,17 @@ public final static int
 	COL_X_RIGHT_WDID = 13,
 	COL_X_RIGHT_APPROPRIATION_DATE = 14,
 	COL_X_RIGHT_ADMIN_NUMBER = 15,
-	COL_X_PERMIT_RECEIPT = 16,
-	COL_X_PERMIT_DATE = 17,
-	COL_X_PERMIT_ADMIN_NUMBER = 18,
-	COL_X_WELL_YIELD_GPM = 19,
-	COL_X_WELL_YIELD_CFS = 20,
-	COL_X_APEX_GPM = 21,
-	COL_X_APEX_CFS = 22,
-	COL_X_WELL_FRACTION = 23,
-	COL_X_DITCH_FRACTION = 24,
-	COL_X_YIELD_PRORATED_GPM = 25;
+	COL_X_RIGHT_USE = 16,
+	COL_X_PERMIT_RECEIPT = 17,
+	COL_X_PERMIT_DATE = 18,
+	COL_X_PERMIT_ADMIN_NUMBER = 19,
+	COL_X_WELL_YIELD_GPM = 20,
+	COL_X_WELL_YIELD_CFS = 21,
+	COL_X_APEX_GPM = 22,
+	COL_X_APEX_CFS = 23,
+	COL_X_WELL_FRACTION = 24,
+	COL_X_DITCH_FRACTION = 25,
+	COL_X_YIELD_PRORATED_GPM = 26;
 	
 /**
 Whether the table data is editable or not.
@@ -111,6 +112,7 @@ public Class getColumnClass (int col) {
 		case COL_X_RIGHT_WDID: return String.class;
 		case COL_X_RIGHT_APPROPRIATION_DATE: return String.class;
 		case COL_X_RIGHT_ADMIN_NUMBER: return String.class;
+		case COL_X_RIGHT_USE: return String.class;
 		case COL_X_PERMIT_RECEIPT: return String.class;
 		case COL_X_PERMIT_DATE: return String.class;
 		case COL_X_PERMIT_ADMIN_NUMBER: return String.class;
@@ -155,6 +157,7 @@ public String getColumnName(int col) {
 		case COL_X_RIGHT_WDID: return "\nRIGHT\nWDID";
 		case COL_X_RIGHT_APPROPRIATION_DATE: return "RIGHT\nAPPROPRIATION\nDATE";
 		case COL_X_RIGHT_ADMIN_NUMBER: return "RIGHT\nADMINISTRATION\nNUMBER";
+		case COL_X_RIGHT_USE: return "RIGHT\nUSE\nTYPE";
 		case COL_X_PERMIT_RECEIPT: return "\nPERMIT\nID";
 		case COL_X_PERMIT_DATE: return "\nPERMIT\nDATE";
 		case COL_X_PERMIT_ADMIN_NUMBER: return "PERMIT\nADMINISTRATION\nNUMBER";
@@ -178,19 +181,14 @@ public String[] getColumnToolTips() {
 	String[] tips = new String[__COLUMNS];
 
 	tips[COL_RIGHT_ID] =
-		"<html>The well right ID is typically the well" +
-		" station ID<br> followed by .01, .02, etc.</html>";
-	tips[COL_RIGHT_NAME] = 
-		"Well right name";
-	tips[COL_STRUCT_ID] = 
-		"<HTML>The well ID is the link between well stations "
-		+ "and their right(s).</HTML>";
+		"The well right ID is typically the well station ID followed by .01, .02, etc.";
+	tips[COL_RIGHT_NAME] = "Well right name";
+	tips[COL_STRUCT_ID] = "The well ID is the link between well stations and their right(s).";
 	tips[COL_ADMIN_NUM] = 
 		"<HTML>Lower admininistration numbers indicate greater " +
 		"seniority.<BR>99999 is typical for a very junior" +
 		" right.</html>";
-	tips[COL_DCR_AMT] = 
-		"Decreed amount (CFS)";
+	tips[COL_DCR_AMT] = "Decreed amount (CFS)";
 	tips[COL_ON_OFF] = 
 		"<HTML>0 = OFF<BR>1 = ON<BR>" +
 		"YYYY indicates to turn on the right in year YYYY."+
@@ -206,6 +204,7 @@ public String[] getColumnToolTips() {
 	tips[COL_X_RIGHT_WDID] = "For parcel/well cross-reference, the matching well structure WDID";
 	tips[COL_X_RIGHT_APPROPRIATION_DATE] = "For parcel/well cross-reference, the right appropriation date";
 	tips[COL_X_RIGHT_ADMIN_NUMBER] = "For parcel/well cross-reference, the administration number for the right";
+	tips[COL_X_RIGHT_USE] = "Water right use type";
 	tips[COL_X_PERMIT_RECEIPT] = "For parcel/well cross-reference, the well permit receipt";
 	tips[COL_X_PERMIT_DATE] = "For parcel/well cross-reference, the permit date";
 	tips[COL_X_PERMIT_ADMIN_NUMBER] = "For parcel/well cross-reference, the permit date administration number";
@@ -247,6 +246,7 @@ public int[] getColumnWidths() {
 	widths[COL_X_RIGHT_WDID] = 7;
 	widths[COL_X_RIGHT_APPROPRIATION_DATE] = 11;
 	widths[COL_X_RIGHT_ADMIN_NUMBER] = 11;
+	widths[COL_X_RIGHT_USE] = 30;
 	widths[COL_X_PERMIT_RECEIPT] = 10;
 	widths[COL_X_PERMIT_DATE] = 9;
 	widths[COL_X_PERMIT_ADMIN_NUMBER] = 11;
@@ -284,6 +284,7 @@ public String getFormat(int col) {
 		case COL_X_RIGHT_WDID: return "%-12s";
 		case COL_X_RIGHT_APPROPRIATION_DATE: return "%-10s";
 		case COL_X_RIGHT_ADMIN_NUMBER: return "%-12s";
+		case COL_X_RIGHT_USE: return "%-30s";
 		case COL_X_PERMIT_RECEIPT: return "%-12s";
 		case COL_X_PERMIT_DATE: return "%-10s";
 		case COL_X_PERMIT_ADMIN_NUMBER: return "%-12s";
@@ -364,6 +365,7 @@ public Object getValueAt(int row, int col)
 				return dt.toString();
 			}
 		case COL_X_RIGHT_ADMIN_NUMBER: return wellr.getXApproDateAdminNumber();
+		case COL_X_RIGHT_USE: return wellr.getXUse();
 		case COL_X_PERMIT_RECEIPT: return wellr.getXPermitReceipt();
 		case COL_X_PERMIT_DATE:
 			if ( wellr.getXPermitDate() == null ) {
