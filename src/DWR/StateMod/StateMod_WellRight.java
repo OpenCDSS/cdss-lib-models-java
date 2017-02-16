@@ -448,7 +448,8 @@ throws Exception {
 				// Parcel data
 				5,
 				5,
-				7};
+				//7}; // When maximum of 6-digit parcel identifiers were used
+				13}; // Now using 12-digit maximum parcel identifiers
 	String iline = null;
 	List v = new Vector(10);
 	BufferedReader in = null;
@@ -913,8 +914,8 @@ throws Exception {
 		String header1_add = "";
 		String header2_add = "";
 		if ( WriteDataComments_boolean ) {
-			header1_add = " PYr--Cls--PID   ";
-			header2_add = "xb--exb--exb----e";
+			header1_add = " PYr--Cls-------PID   ";
+			header2_add = "xb--exb--exb----------e";
 			out.println(cmnt + " Parcel Year     Pyr:  Parcel year used for parcel/well matching");
 			out.println(cmnt + "Well match class Cls:  Indicates how well matched to parcel");
 			out.println(cmnt + "                       (see CDSS documentation).");
@@ -952,7 +953,7 @@ throws Exception {
 				// TODO SAM Evaluate how best to set parcel data
 				comment = StringUtil.formatString(right.getParcelYear(),"%4d")+ " "+
 					StringUtil.formatString(right.getParcelMatchClass(),"%4d") +" " +
-					StringUtil.formatString(right.getParcelID(),"%6.6s");
+					StringUtil.formatString(right.getParcelID(),"%12.12s");
 				//if ( comment.length() > 0 ) {
 					// Append to the line
 					out.println ( iline + " " + comment );
