@@ -56,6 +56,7 @@ import RTi.Util.Time.YearType;
 /**
 This class is a gui for displaying and editing operational right data.
 */
+@SuppressWarnings("serial")
 public class StateMod_OperationalRight_JFrame extends JFrame
 implements ActionListener, KeyListener, MouseListener, WindowListener,
 JWorksheet_SortListener {
@@ -2217,14 +2218,15 @@ private void populateOperationalRightDestinationAccount (
 		"(" + StateMod_OperationalRight_Metadata_SourceOrDestinationType.RESERVOIR + ")") > 0 ) {
 		// Get the accounts for the reservoir
 		StateMod_DataSet dataset = getDataSet();
+		@SuppressWarnings("unchecked")
 		List<StateMod_Reservoir> reservoirList =
 			(List<StateMod_Reservoir>)dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_RESERVOIR_STATIONS).getData();
 		int pos = StateMod_Util.indexOf(reservoirList,destinationID);
-		List<String> accountChoices = new Vector();
+		List<String> accountChoices = new Vector<String>();
 		if ( pos >= 0 ) {
 			StateMod_Reservoir res = reservoirList.get(pos);
-			List<String> positiveAccounts = StateMod_Util.createIdentifierList(res.getAccounts(), true);
+			List<String> positiveAccounts = StateMod_Util.createIdentifierListFromStateModData(res.getAccounts(), true, null);
 			accountChoices.addAll(positiveAccounts);
 			if ( opr.getMetadata().getRightTypeUsesNegativeDestinationAccounts() ) {
 				// Add the accounts with negatives...
@@ -2255,7 +2257,7 @@ private void populateOperationalRightDestinationAccount (
 		}
 	}
 	else {
-		List<String> accountChoices = new Vector();
+		List<String> accountChoices = new Vector<String>();
 		accountChoices.add("0 - Not used");
 		accountChoices.add("1 - Default account is used");
 		__destinationAccount_JComboBox.setData(accountChoices);
@@ -2349,7 +2351,7 @@ private void populateOperationalRightInterveningStructuresWithLoss ( StateMod_Op
 				{ StateMod_OperationalRight_Metadata_SourceOrDestinationType.DIVERSION, 
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType.OTHER };
 			for ( int i = 0; i < StateMod_OperationalRight_Metadata.MAXIMUM_INTERVENING_STRUCTURES; i++ ) {
-				List<String> structureIDStrings = new Vector();
+				List<String> structureIDStrings = new Vector<String>();
 				// Always allow blank...
 				structureIDStrings.add("");
 				structureIDStrings.addAll ( StateMod_Util.createIdentifierList( dataset, structureTypes, true ) );
@@ -2388,7 +2390,7 @@ private void populateOperationalRightInterveningStructuresWithLoss ( StateMod_Op
 					__interveningStructuresWithLossPercent_JTextField[i].setText("" + oprLossC );
 				}
 				// Type...
-				List<String> typeStrings = new Vector();
+				List<String> typeStrings = new Vector<String>();
 				// TODO SAM 2011-02-05 Allow blank?
 				typeStrings.add("");
 				typeStrings.add("Carrier");
@@ -2442,7 +2444,7 @@ private void populateOperationalRightInterveningStructuresWithoutLoss ( StateMod
 			__interveningStructuresWithoutLoss_JPanel.setVisible(true);
 			__interveningStructuresWithoutLoss_JPanel.setEnabled(true);
 			StateMod_DataSet dataset = getDataSet();
-			List<String> structureIDStrings = new Vector();
+			List<String> structureIDStrings = new Vector<String>();
 			// Always allow blank...
 			structureIDStrings.add("");
 			/*
@@ -2589,7 +2591,7 @@ private void populateOperationalRightMonthSwitch ( StateMod_OperationalRight opr
 	else {
 		if ( metadata.getRightTypeUsesMonthlySwitch() ) {
 			// Clear the monthly switches and repopulate with valid choices
-			List<String> choices = new Vector();
+			List<String> choices = new Vector<String>();
 			choices.add("" );
 			choices.add("0 - Off for month" );
 			choices.add("1 - On for month" );
@@ -2666,7 +2668,7 @@ private void populateOperationalRightRioGrande ( StateMod_OperationalRight opr,
 		}
 		if ( ityopr == 17 ) {
 			// Not used
-			List<String> gageList = new Vector();
+			List<String> gageList = new Vector<String>();
 			gageList.add("");
 			__rioGrandeIndexGage_JComboBox.setData(gageList);
 			__rioGrandeIndexGage_JComboBox.select(0);
@@ -2678,7 +2680,7 @@ private void populateOperationalRightRioGrande ( StateMod_OperationalRight opr,
 			StateMod_OperationalRight_Metadata_SourceOrDestinationType []
 			    allowedSourceTypes = { StateMod_OperationalRight_Metadata_SourceOrDestinationType.STREAM_GAGE };
 			StateMod_DataSet dataset = getDataSet();
-			List<String> indexGageIDStrings = new Vector();
+			List<String> indexGageIDStrings = new Vector<String>();
 			// Now add identifier choices...
 			indexGageIDStrings.addAll ( StateMod_Util.createIdentifierList(
 				dataset, allowedSourceTypes, true ) );
@@ -2803,7 +2805,7 @@ private void populateOperationalRightSource ( StateMod_OperationalRight opr,
 				StateMod_OperationalRight_Metadata_SourceOrDestinationType []
 				    allowedSourceTypes = metadata.getSource1Types();
 				StateMod_DataSet dataset = getDataSet();
-				List<String> source1IDStrings = new Vector();
+				List<String> source1IDStrings = new Vector<String>();
 				// Always allow blank...
 				source1IDStrings.add("");
 				// Now add identifier choices...
@@ -2834,7 +2836,7 @@ private void populateOperationalRightSource ( StateMod_OperationalRight opr,
 			}
 			else {
 				// Default and disable
-				List<String> source1IDStrings = new Vector();
+				List<String> source1IDStrings = new Vector<String>();
 				source1IDStrings.add("0 - Not used");
 				__source1_JComboBox.setData(source1IDStrings);
 				__source1_JComboBox.select ( 0 );
@@ -2851,10 +2853,11 @@ private void populateOperationalRightSource ( StateMod_OperationalRight opr,
 					"(" + StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_RECHARGE+ ")") > 0 ) {
 					// Expect a reservoir ID, for example for Type 49
 					StateMod_DataSet dataset = getDataSet();
+					@SuppressWarnings("unchecked")
 					List<StateMod_Reservoir> reservoirList =
 						(List<StateMod_Reservoir>)dataset.getComponentForComponentType(
 						StateMod_DataSet.COMP_RESERVOIR_STATIONS).getData();
-					List<String> reservoirChoices = StateMod_Util.createIdentifierList(reservoirList, true);
+					List<String> reservoirChoices = StateMod_Util.createIdentifierListFromStateModData(reservoirList, true,null);
 					__source2_JComboBox.setEnabled(true);
 					__source2_JComboBox.setEditable(false); // Force user to select
 					__source2_JComboBox.setData(reservoirChoices);
@@ -2883,7 +2886,7 @@ private void populateOperationalRightSource ( StateMod_OperationalRight opr,
 					StateMod_OperationalRight_Metadata_SourceOrDestinationType []
 					    allowedSourceTypes = metadata.getSource2Types();
 					StateMod_DataSet dataset = getDataSet();
-					List<String> source2IDStrings = new Vector();
+					List<String> source2IDStrings = new Vector<String>();
 					// Always allow blank...
 					source2IDStrings.add("");
 					// Add special choices...
@@ -2918,7 +2921,7 @@ private void populateOperationalRightSource ( StateMod_OperationalRight opr,
 			}
 			else {
 				// Default and disable
-				List<String> source2IDStrings = new Vector();
+				List<String> source2IDStrings = new Vector<String>();
 				source2IDStrings.add("0 - Not used");
 				__source2_JComboBox.setData(source2IDStrings);
 				__source2_JComboBox.select ( 0 );
@@ -2952,11 +2955,12 @@ private void populateOperationalRightSourceAccount1 ( StateMod_OperationalRight 
 		"(" + StateMod_OperationalRight_Metadata_SourceOrDestinationType.RESERVOIR + ")") > 0 ) {
 		// Get the accounts for the reservoir
 		StateMod_DataSet dataset = getDataSet();
+		@SuppressWarnings("unchecked")
 		List<StateMod_Reservoir> reservoirList =
 			(List<StateMod_Reservoir>)dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_RESERVOIR_STATIONS).getData();
 		int pos = StateMod_Util.indexOf(reservoirList,source1ID);
-		List<String> accountChoices = new Vector();
+		List<String> accountChoices = new Vector<String>();
 		if ( pos >= 0 ) {
 			// Add special choices...
 			if ( metadata.getRightTypeUsesSpecialSourceAccount1() ) {
@@ -2964,7 +2968,7 @@ private void populateOperationalRightSourceAccount1 ( StateMod_OperationalRight 
 			}
 			StateMod_Reservoir res = reservoirList.get(pos);
 			// Add identifiers...
-			accountChoices.addAll(StateMod_Util.createIdentifierList(res.getAccounts(), true));
+			accountChoices.addAll(StateMod_Util.createIdentifierListFromStateModData(res.getAccounts(), true, null));
 			__sourceAccount1_JComboBox.setData(accountChoices);
 			// Now select
 			String iopsou1 = opr.getIopsou1();
@@ -3046,6 +3050,7 @@ private void populateOperationalRightSourceAccount2 ( StateMod_OperationalRight 
 		"(" + StateMod_OperationalRight_Metadata_SourceOrDestinationType.RESERVOIR + ")") > 0 ) {
 		// Get the accounts for the reservoir
 		StateMod_DataSet dataset = getDataSet();
+		@SuppressWarnings("unchecked")
 		List<StateMod_Reservoir> reservoirList =
 			(List<StateMod_Reservoir>)dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_RESERVOIR_STATIONS).getData();
@@ -3053,7 +3058,7 @@ private void populateOperationalRightSourceAccount2 ( StateMod_OperationalRight 
 		List<String> accountChoices = new Vector();
 		if ( pos >= 0 ) {
 			StateMod_Reservoir res = reservoirList.get(pos);
-			accountChoices.addAll(StateMod_Util.createIdentifierList(res.getAccounts(), true));
+			accountChoices.addAll(StateMod_Util.createIdentifierListFromStateModData(res.getAccounts(), true, null));
 			__sourceAccount2_JComboBox.setData(accountChoices);
 			// Now select
 			String iopsou2 = opr.getIopsou2();
@@ -3204,7 +3209,7 @@ private void saveInformation(int record)
 
 	StateMod_OperationalRight opr = __operationalRights.get(record);
 	// Comments are always set
-	List<String> commentsBeforeData = new Vector();
+	List<String> commentsBeforeData = new Vector<String>();
 	String comments = __comments_JTextArea.getText(); // Do not trim because blank lines will be lost
 	if ( comments.length() > 0 ) {
 		commentsBeforeData = StringUtil.breakStringList(comments, "\n", 0);
@@ -3219,7 +3224,7 @@ private void saveInformation(int record)
 		useTextEditor = true;
 	}
 	if ( useTextEditor ) {
-		List<String> rightStringList = new Vector();
+		List<String> rightStringList = new Vector<String>();
 		String textData = __textEditor_JTextArea.getText(); // Do not trim because blank lines will be lost
 		if ( textData.length() > 0 ) {
 			rightStringList = StringUtil.breakStringList(textData, "\n", 0);

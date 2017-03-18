@@ -30,7 +30,7 @@ protected String	_id;
 protected String	_name;
 protected double 	_x;	// 
 protected double	_y;	// 
-protected List	_z;	// double vector, z components
+protected List<Double>	_z;
 
 /**
 Constructor.
@@ -110,7 +110,7 @@ private void initialize ()
 	_name = "";
 	_x = -999;
 	_y = -999;
-	_z = new Vector (10,10);
+	_z = new Vector<Double>(10,10);
 }
 
 public void setID ( String s )

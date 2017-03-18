@@ -5,6 +5,7 @@ import RTi.Util.GUI.JWorksheet_AbstractExcelCellRenderer;
 /**
 This class is used for rendering cells for Plan station return assignment.
 */
+@SuppressWarnings("serial")
 public class StateMod_Plan_Return_Data_CellRenderer
 extends JWorksheet_AbstractExcelCellRenderer {
 

@@ -141,7 +141,7 @@ StateMod data objects.  It should not be confused with network node objects
 the .rin file into a true network.
 */
 public class StateMod_RiverNetworkNode  extends StateMod_Data
-implements Cloneable, Comparable, HasGeoRecord, StateMod_ComponentValidator {
+implements Cloneable, Comparable<StateMod_Data>, HasGeoRecord, StateMod_ComponentValidator {
 
 /**
 Downstream node identifier - third column of files.
@@ -205,16 +205,16 @@ public boolean changed() {
 
 /**
 Compares this object to another StateMod_RiverNetworkNode object.
-@param o the object to compare against.
+@param data the object to compare against.
 @return 0 if they are the same, 1 if this object is greater than the other object, or -1 if it is less.
 */
-public int compareTo(Object o) {
-	int res = super.compareTo(o);
+public int compareTo(StateMod_Data data) {
+	int res = super.compareTo(data);
 	if (res != 0) {
 		return res;
 	}
 
-	StateMod_RiverNetworkNode r = (StateMod_RiverNetworkNode)o;
+	StateMod_RiverNetworkNode r = (StateMod_RiverNetworkNode)data;
 
 	res = _cstadn.compareTo(r._cstadn);
 	if (res != 0) {
@@ -265,7 +265,7 @@ Creates a backup of the current data object and stores it in _original,
 for use in determining if an object was changed inside of a GUI.
 */
 public void createBackup() {
-	_original = clone();
+	_original = (StateMod_RiverNetworkNode)clone();
 	((StateMod_RiverNetworkNode)_original)._isClone = false;
 	_isClone = true;
 }
@@ -357,12 +357,12 @@ Read river network or stream gage information and return a list of StateMod_Rive
 @param filename Name of file to read.
 @exception Exception if there is an error reading the file.
 */
-public static List readStateModFile ( String filename )
+public static List<StateMod_RiverNetworkNode> readStateModFile ( String filename )
 throws Exception
 {	String rtn = "StateMod_RiverNetworkNode.readStateModFile";
-	List theRivs = new Vector();
+	List<StateMod_RiverNetworkNode> theRivs = new Vector<StateMod_RiverNetworkNode>();
 	String iline, s;
-	List v = new Vector ( 7 );
+	List<Object> v = new Vector<Object>( 7 );
 	int [] format_0;
 	int [] format_0w;
 	format_0 = new int[7];
@@ -589,17 +589,17 @@ Write the new (updated) river network file to the StateMod river network
 file.  If an original file is specified, then the original header is carried into the new file.
 @param infile Name of old file or null if no old file to update.
 @param outfile Name of new file to create (can be the same as the old file).
-@param theRivs list of StateMod_RiverInfo to write.
+@param theRivs list of StateMod_RiverNetworkNode to write.
 @param newcomments New comments to write in the file header.
 @param doWell Indicates whether well modeling fields should be written.
 */
 public static void writeStateModFile( String infile, String outfile,
-		List theRivs, List newcomments, boolean doWell )
+		List<StateMod_RiverNetworkNode> theRivs, List<String> newcomments, boolean doWell )
 throws Exception
 {	PrintWriter	out = null;
-	List commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	String routine = "StateMod_RiverNetworkNode.writeStateModFile";
 
@@ -648,9 +648,9 @@ throws Exception
 		if ( theRivs != null ) {
 			num = theRivs.size();
 		}
-		List v = new Vector ( 5 );
+		List<Object> v = new Vector<Object>( 5 );
 		for ( int i=0; i< num; i++ ) {
-			riv = (StateMod_RiverNetworkNode)theRivs.get(i);
+			riv = theRivs.get(i);
 			v.clear ();
 			v.add ( riv.getID() );
 			v.add ( riv.getName() );
@@ -688,8 +688,8 @@ header (true) or to create a new file with a new header.
 @param newComments new comments to add to the file header.
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter, boolean update, List data,
-	List newComments ) 
+public static void writeListFile(String filename, String delimiter, boolean update, List<StateMod_RiverNetworkNode> data,
+	List<String> newComments ) 
 throws Exception
 {	String routine = "StateMod_RiverNetworkNode.writeListFile";
 	int size = 0;
@@ -697,7 +697,7 @@ throws Exception
 		size = data.size();
 	}
 	
-	List fields = new Vector();
+	List<String> fields = new Vector<String>();
 	fields.add("ID");
 	fields.add("Name");
 	fields.add("DownstreamID");
@@ -710,7 +710,7 @@ throws Exception
 	int comp = StateMod_DataSet.COMP_RIVER_NETWORK;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.get(i);
+		s = fields.get(i);
 		names[i] = StateMod_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateMod_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -724,21 +724,21 @@ throws Exception
 	PrintWriter out = null;
 	StateMod_RiverNetworkNode rnn = null;
 	String[] line = new String[fieldCount];
-	List commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	StringBuffer buffer = new StringBuffer();
 	
 	try {
 		// Add some basic comments at the top of the file.  Do this to a copy of the
 		// incoming comments so that they are not modified in the calling code.
-		List newComments2 = null;
+		List<String> newComments2 = null;
 		if ( newComments == null ) {
-			newComments2 = new Vector();
+			newComments2 = new Vector<String>();
 		}
 		else {
-			newComments2 = new Vector(newComments);
+			newComments2 = new Vector<String>(newComments);
 		}
 		newComments2.add(0,"");
 		newComments2.add(1,"StateMod river network as a delimited list file.");

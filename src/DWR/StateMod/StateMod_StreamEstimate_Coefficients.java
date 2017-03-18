@@ -107,7 +107,7 @@ import RTi.Util.String.StringUtil;
 // lists, which can lead to inconsistencies.
 
 public class StateMod_StreamEstimate_Coefficients extends StateMod_Data 
-implements Cloneable, StateMod_ComponentValidator
+implements Cloneable, Comparable<StateMod_Data>, StateMod_ComponentValidator
 {
 
 // TODO SAM 2009-01-05 Why is this needed?  Apparently for the table model for setting data?
@@ -122,13 +122,13 @@ Number of stations upstream X.
 */
 protected int _N;
 /**
-Factors to weight the gaged flow (Double).
+Factors to weight the gaged flow.
 */
-protected List _coefn;
+protected List<Double> _coefn;
 /**
 Station ids upstream X.
 */
-protected List _upper;
+protected List<String> _upper;
 /**
 Factor to distribute the gain.
 */
@@ -138,13 +138,13 @@ Number of stations used to calculate the gain.
 */
 protected int _M;
 /**
-Factors to weight the flow for gain (Double).
+Factors to weight the flow for gain.
 */
-protected List _coefm;
+protected List<Double> _coefm;
 /**
 Station ids upstream X
 */
-protected List _flowm;
+protected List<String> _flowm;
 	
 /**
 Constructor.
@@ -233,38 +233,38 @@ public Object clone() {
 	StateMod_StreamEstimate_Coefficients c = (StateMod_StreamEstimate_Coefficients)super.clone();
 	c._isClone = true;
 	// Copy contents of lists...
-	c._coefn = new Vector(_coefn.size());
+	c._coefn = new Vector<Double>(_coefn.size());
 	for ( int i = 0; i < _coefn.size(); i++ ) {
-		c._coefn.add(new Double(((Double)_coefn.get(i)).doubleValue()));
+		c._coefn.add(new Double(_coefn.get(i).doubleValue()));
 	}
-	c._upper = new Vector(_upper.size());
+	c._upper = new Vector<String>(_upper.size());
 	for ( int i = 0; i < _upper.size(); i++ ) {
-		c._upper.add(new String((String)_upper.get(i)));
+		c._upper.add(_upper.get(i));
 	}
-	c._coefm = new Vector(_coefm.size());
+	c._coefm = new Vector<Double>(_coefm.size());
 	for ( int i = 0; i < _coefm.size(); i++ ) {
-		c._coefm.add(new Double(((Double)_coefm.get(i)).doubleValue()));
+		c._coefm.add(new Double(_coefm.get(i).doubleValue()));
 	}
-	c._flowm = new Vector(_flowm.size());
+	c._flowm = new Vector<String>(_flowm.size());
 	for ( int i = 0; i < _flowm.size(); i++ ) {
-		c._flowm.add(new String((String)_flowm.get(i)));
+		c._flowm.add(_flowm.get(i));
 	}
 	return c;
 }
 
 /**
 Compares this object to another StateMod_StreamEstimate_Coefficients object.
-@param o the object to compare against.
+@param data the object to compare against.
 @return 0 if they are the same, 1 if this object is greater than the other
 object, or -1 if it is less.
 */
-public int compareTo(Object o) {
-	int res = super.compareTo(o);
+public int compareTo(StateMod_Data data) {
+	int res = super.compareTo(data);
 	if (res != 0) {
 		return res;
 	}
 
-	StateMod_StreamEstimate_Coefficients c = (StateMod_StreamEstimate_Coefficients)o;
+	StateMod_StreamEstimate_Coefficients c = (StateMod_StreamEstimate_Coefficients)data;
 
 	res = _flowX.compareTo(c._flowX);
 	if (res != 0) {
@@ -419,7 +419,7 @@ public int compareTo(Object o) {
 Creates a copy of the object for later use in checking to see if it was changed in a GUI.
 */
 public void createBackup() {
-	_original = clone();
+	_original = (StateMod_StreamEstimate_Coefficients)clone();
 	((StateMod_StreamEstimate_Coefficients)_original)._isClone = false;
 	_isClone = true;
 }
@@ -447,7 +447,7 @@ public double getCoefm(int index) {
 /**
 Retrieve the coefm corresponding to a particular index.
 */
-public List getCoefm() {
+public List<Double> getCoefm() {
 	return _coefm;
 }
 
@@ -455,13 +455,13 @@ public List getCoefm() {
 Return the coefn corresponding to a particular index.
 */
 public double getCoefn(int index) {
-	return ((Double)_coefn.get(index)).doubleValue();
+	return _coefn.get(index).doubleValue();
 }
 
 /**
 Return the coefn corresponding to a particular index.
 */
-public List getCoefn() {
+public List<Double> getCoefn() {
 	return _coefn;
 }
 
@@ -486,7 +486,7 @@ public String getFlowm(int index) {
 /**
 Return the upper id corresponding to a particular index.
 */
-public List getFlowm() {
+public List<String> getFlowm() {
 	return _flowm;
 }
 
@@ -528,7 +528,7 @@ public String getUpper(int index) {
 /**
 Return the upper id corresponding to a particular index.
 */
-public List getUpper() {
+public List<String> getUpper() {
 	return _upper;
 }
 
@@ -540,10 +540,10 @@ private void initialize() {
 	_flowX = "";
 	_N = 0;
 	_M = 0;
-	_coefn = new Vector(5,5);
-	_upper = new Vector(5,5);
-	_coefm = new Vector(5,5);
-	_flowm = new Vector(5,5);
+	_coefn = new Vector<Double>();
+	_upper = new Vector<String>();
+	_coefm = new Vector<Double>();
+	_flowm = new Vector<String>();
 	_proratnf = 0;
 }
 
@@ -794,12 +794,12 @@ the same, or null if not found.
 @param baseflow Vector of StateMod_BaseFlowCoefficients data.
 @param id Baseflow node identifier to locate.
 */
-public static StateMod_StreamEstimate_Coefficients locateBaseNode(List baseflow, String id) {
+public static StateMod_StreamEstimate_Coefficients locateBaseNode(List<StateMod_StreamEstimate_Coefficients> baseflow, String id) {
 	int index = StateMod_Util.locateIndexFromID(id, baseflow);
 	if (index < 0) {
 		return null;
 	}
-	return (StateMod_StreamEstimate_Coefficients)baseflow.get(index);
+	return baseflow.get(index);
 }
 
 /**
@@ -808,13 +808,13 @@ Read stream estimate coefficients and store in a list.
 @return list of streamflow estimate coefficients data
 @exception Exception if there is an error reading the file.
 */
-public static List readStateModFile(String filename)
+public static List<StateMod_StreamEstimate_Coefficients> readStateModFile(String filename)
 throws Exception {
 	String routine ="StateMod_StreamEstimate_Coefficients.readStateModFile";
-	List theBaseflows = new Vector();
+	List<StateMod_StreamEstimate_Coefficients> theBaseflows = new Vector<StateMod_StreamEstimate_Coefficients>();
 	
 	String iline = null;
-	List v = new Vector(2);	// used to retrieve from fixedRead
+	List<Object> v = new Vector<Object>(2);	// used to retrieve from fixedRead
 	String adnl = null;
 	int [] format_0 = {
 		StringUtil.TYPE_STRING,
@@ -943,10 +943,12 @@ public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset 
 		validation.add(new StateMod_ComponentValidationProblem(this,"Stream estimate station identifier is blank.",
 			"Specify a station identifier.") );
 	}
-	List rinList = null;
+	List<StateMod_RiverNetworkNode> rinList = null;
 	if ( dataset != null ) {
 		DataSetComponent comp = dataset.getComponentForComponentType(StateMod_DataSet.COMP_RIVER_NETWORK);
-		rinList = (List)comp.getData();
+		@SuppressWarnings("unchecked")
+		List<StateMod_RiverNetworkNode>rinList0 = (List<StateMod_RiverNetworkNode>)comp.getData();
+		rinList = rinList0;
 	}
 
 	double coefn;
@@ -1006,12 +1008,13 @@ information is also maintained by calling this routine.
 @param newComments addition comments which should be included in history
 @exception Exception if an error occurs.
 */
-public static void writeStateModFile(String infile, String outfile,	List theBaseflows, List newComments)
+public static void writeStateModFile(String infile, String outfile,
+		List<StateMod_StreamEstimate_Coefficients> theBaseflows, List<String> newComments)
 throws Exception {
-	String routine = "StateMod_StreamStation_Coefficients.writeStateModFile";
-	List commentIndicators = new Vector(1);
+	String routine = "StateMod_StreamEstimate_Coefficients.writeStateModFile";
+	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	PrintWriter out = null;
 
@@ -1029,7 +1032,7 @@ throws Exception {
 		String format_1 = "%-12.12s        %8d";
 		String format_2 = "%8.3f %-12.12s";
 		String format_3 = "            %8.3f%8d";
-		List v = new Vector(2);
+		List<Object> v = new Vector<Object>(2);
 
 		out.println(cmnt + "---------------------------------------------------------------------------");
 		out.println(cmnt +"  StateMod Stream Estimate Station Coefficient Data");
@@ -1074,7 +1077,7 @@ throws Exception {
 			num = theBaseflows.size();
 		}
 		for (int i = 0; i < num; i++) {
-			bf = (StateMod_StreamEstimate_Coefficients)theBaseflows.get(i);
+			bf = theBaseflows.get(i);
 			if (bf == null) {
 				continue;
 			}
@@ -1137,15 +1140,15 @@ header (true) or to create a new file with a new header.
 @param newComments list of new comments to add to the header.
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter, boolean update, List data,
-	List newComments ) 
+public static void writeListFile(String filename, String delimiter, boolean update,
+	List<StateMod_StreamEstimate_Coefficients> data, List<String> newComments ) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
 		size = data.size();
 	}
 	
-	List fields = new Vector();
+	List<String> fields = new Vector<String>();
 	fields.add("ID");
 	fields.add("Name");
 	fields.add("UpstreamGage");
@@ -1176,9 +1179,9 @@ throws Exception {
 	int N = 0;
 	PrintWriter out = null;
 	StateMod_StreamEstimate_Coefficients coeff = null;
-	List commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	String[] line = new String[fieldCount];
 	String id = null;
@@ -1187,12 +1190,12 @@ throws Exception {
 	try {
 		// Add some basic comments at the top of the file.  Do this to a copy of the
 		// incoming comments so that they are not modified in the calling code.
-		List newComments2 = null;
+		List<String> newComments2 = null;
 		if ( newComments == null ) {
-			newComments2 = new Vector();
+			newComments2 = new Vector<String>();
 		}
 		else {
-			newComments2 = new Vector(newComments);
+			newComments2 = new Vector<String>(newComments);
 		}
 		newComments2.add(0,"");
 		newComments2.add(1,"StateMod stream estimate coefficients as a delimited list file.");

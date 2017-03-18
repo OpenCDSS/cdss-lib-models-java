@@ -46,6 +46,7 @@ import RTi.Util.String.StringUtil;
 This class displays a query tool interface for selecting information from a
 StateMod data set.
 */
+@SuppressWarnings("serial")
 public class StateMod_QueryTool_JFrame extends JFrame
 implements ActionListener, ItemListener, WindowListener {
 
@@ -79,7 +80,7 @@ private StateMod_DataSet_WindowManager __dataset_wm;
 
 private InputFilter_JPanel __input_filter_diversion_JPanel = null;
 
-private List __matches_Vector = null;	// The list of matching data.
+private List<StateMod_Diversion> __matches_Vector = null;	// The list of matching data.
 
 /** 
 Constructor.
@@ -224,7 +225,8 @@ private void doQuery ()
 		input_string = StateMod_Util.MISSING_STRING;
 		comp = __dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_DIVERSION_STATIONS);
-		List dds_Vector = (List)comp.getData ();
+		@SuppressWarnings("unchecked")
+		List<StateMod_Diversion> dds_Vector = (List<StateMod_Diversion>)comp.getData ();
 		size = 0;
 		if ( dds_Vector != null ) {
 			size = dds_Vector.size();
@@ -453,13 +455,12 @@ private void doQuery ()
 		// Loop through and set up the matches_Vector...
 		__matches_Vector = null;
 		if ( match_count > 0 ) {
-			__matches_Vector = new Vector ( match_count );
+			__matches_Vector = new Vector<StateMod_Diversion> ( match_count );
 			for ( i = 0; i < size; i++ ) {
 				if ( matches[i] ) {
 					// The diversion station matches so add
 					// to the list...
-					__matches_Vector.add(
-						dds_Vector.get(i) );
+					__matches_Vector.add(dds_Vector.get(i) );
 				}
 			}
 		}

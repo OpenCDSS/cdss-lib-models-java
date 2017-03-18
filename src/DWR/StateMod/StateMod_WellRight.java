@@ -90,7 +90,7 @@ import RTi.Util.Time.TimeZoneDefaultType;
 This class provides stores all the information associated with a well right.
 */
 public class StateMod_WellRight extends StateMod_Data
-implements Cloneable, Comparable, StateMod_ComponentValidator, StateMod_Right {
+implements Cloneable, Comparable<StateMod_Data>, StateMod_ComponentValidator, StateMod_Right {
 
 /**
 Administration number.
@@ -232,17 +232,17 @@ public Object clone() {
 Compares this object to another StateMod_Data object based on the sorted
 order from the StateMod_Data variables, and then by rtem, dcrres, iresco,
 ityrstr, n2fill and copid, in that order.
-@param o the object to compare against.
+@param data the object to compare against.
 @return 0 if they are the same, 1 if this object is greater than the other
 object, or -1 if it is less.
 */
-public int compareTo(Object o) {
-	int res = super.compareTo(o);
+public int compareTo(StateMod_Data data) {
+	int res = super.compareTo(data);
 	if (res != 0) {
 		return res;
 	}
 
-	StateMod_WellRight right = (StateMod_WellRight)o;
+	StateMod_WellRight right = (StateMod_WellRight)data;
 
 	res = _irtem.compareTo(right._irtem);
 	if (res != 0) {
@@ -264,37 +264,37 @@ Creates a backup of the current data object and stores it in _original,
 for use in determining if an object was changed inside of a GUI.
 */
 public void createBackup() {
-	_original = clone();
+	_original = (StateMod_WellRight)clone();
 	((StateMod_WellRight)_original)._isClone = false;
 	_isClone = true;
 }
 
 /**
-Compare two rights Vectors and see if they are the same.
-@param v1 the first Vector of StateMod_WellRight s to check.  Cannot be null.
-@param v2 the second Vector of StateMod_WellRight s to check.  Cannot be null.
+Compare two rights lists and see if they are the same.
+@param v1 the first list of StateMod_WellRight to check.  Cannot be null.
+@param v2 the second list of StateMod_WellRight to check.  Cannot be null.
 @return true if they are the same, false if not.
 */
-public static boolean equals(List v1, List v2) {
+public static boolean equals(List<StateMod_WellRight> v1, List<StateMod_WellRight> v2) {
 	String routine = "StateMod_WellRight.equals(Vector, Vector)";
 	StateMod_WellRight r1;	
 	StateMod_WellRight r2;	
 	if (v1.size() != v2.size()) {
-		Message.printStatus(1, routine, "Vectors are different sizes");
+		Message.printStatus(1, routine, "Lists are different sizes");
 		return false;
 	}
 	else {
 		// sort the Vectors and compare item-by-item.  Any differences
 		// and data will need to be saved back into the dataset.
 		int size = v1.size();
-		Message.printStatus(2, routine, "Vectors are of size: " + size);
-		List v1Sort = StateMod_Util.sortStateMod_DataVector(v1);
-		List v2Sort = StateMod_Util.sortStateMod_DataVector(v2);
+		Message.printStatus(2, routine, "Lists are of size: " + size);
+		List<StateMod_WellRight> v1Sort = StateMod_Util.sortStateMod_DataVector(v1);
+		List<StateMod_WellRight> v2Sort = StateMod_Util.sortStateMod_DataVector(v2);
 		Message.printStatus(2, routine, "Vectors have been sorted");
 	
 		for (int i = 0; i < size; i++) {			
-			r1 = (StateMod_WellRight)v1Sort.get(i);	
-			r2 = (StateMod_WellRight)v2Sort.get(i);	
+			r1 = v1Sort.get(i);	
+			r2 = v2Sort.get(i);	
 			Message.printStatus(2, routine, r1.toString());
 			Message.printStatus(2, routine, r2.toString());
 			Message.printStatus(2, routine, "Element " + i + " comparison: " + r1.compareTo(r2));
@@ -1134,7 +1134,8 @@ public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset 
 	else {
 		// Verify that the well station is in the data set, if the network is available
 		DataSetComponent comp2 = dataset.getComponentForComponentType(StateMod_DataSet.COMP_WELL_STATIONS);
-		List wesList = (List)comp2.getData();
+		@SuppressWarnings("unchecked")
+		List<StateMod_Well> wesList = (List<StateMod_Well>)comp2.getData();
 		if ( (wesList != null) && (wesList.size() > 0) ) {
 			if ( StateMod_Util.indexOf(wesList, cgoto) < 0 ) {
 				validation.add(new StateMod_ComponentValidationProblem(this,"Well right \"" + id +
@@ -1174,7 +1175,7 @@ public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset 
 FIXME SAM 2009-06-03 Evaluate how to call from main validate method
 Check the well rights.
 */
-private void validateComponent2 ( List werList, List wesList, String idpattern_Java,
+private void validateComponent2 ( List<StateMod_WellRight> werList, List<StateMod_Well> wesList, String idpattern_Java,
 	int warningCount, int warningLevel, String commandTag, CommandStatus status )
 {	String routine = getClass().getName() + ".checkWellRights";
 	String message;
@@ -1186,7 +1187,7 @@ private void validateComponent2 ( List werList, List wesList, String idpattern_J
 	double wes_parcel_area = 0.0; // Area of parcels for well station
 	int wes_well_parcel_count = 0; // Parcel (with wells) count for well station.
 	double wes_well_parcel_area = 0.0; // Area of parcels with wells for well station.
-	List parcel_Vector; // List of parcels for well station.
+	List<StateMod_Parcel> parcel_Vector; // List of parcels for well station.
 	int count = 0; // Count of well stations with potential problems.
 	String id_i = null;
 	List rightList = null;
@@ -1219,7 +1220,7 @@ private void validateComponent2 ( List werList, List wesList, String idpattern_J
 				// Number of parcels associated with the well station
 				wes_parcel_count = parcel_Vector.size();
 				for ( int j = 0; j < wes_parcel_count; j++ ) {
-					parcel = (StateMod_Parcel)parcel_Vector.get(j);
+					parcel = parcel_Vector.get(j);
 					// Increment parcel area associated with the well station
 					if ( parcel.getArea() > 0.0 ) {
 						wes_parcel_area += parcel.getArea();
@@ -1662,15 +1663,15 @@ header (true) or to create a new file with a new header.
 @param newComments the list of new comments to write to the header.
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter, boolean update, List data,
-	List newComments ) 
+public static void writeListFile(String filename, String delimiter, boolean update, List<StateMod_WellRight> data,
+	List<String> newComments ) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
 		size = data.size();
 	}
 	
-	List fields = new Vector();
+	List<String> fields = new Vector<String>();
 	fields.add("ID");
 	fields.add("Name");
 	fields.add("StationID");
@@ -1697,9 +1698,9 @@ throws Exception {
 	int j = 0;
 	PrintWriter out = null;
 	StateMod_WellRight right = null;
-	List commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	String[] line = new String[fieldCount];
 	StringBuffer buffer = new StringBuffer();
@@ -1707,12 +1708,12 @@ throws Exception {
 	try {
 		// Add some basic comments at the top of the file.  Do this to a copy of the
 		// incoming comments so that they are not modified in the calling code.
-		List newComments2 = null;
+		List<String> newComments2 = null;
 		if ( newComments == null ) {
-			newComments2 = new Vector();
+			newComments2 = new Vector<String>();
 		}
 		else {
-			newComments2 = new Vector(newComments);
+			newComments2 = new Vector<String>(newComments);
 		}
 		newComments2.add(0,"");
 		newComments2.add(1,"StateMod well rights as a delimited list file.");
@@ -1732,7 +1733,7 @@ throws Exception {
 		out.println(buffer.toString());
 		
 		for (int i = 0; i < size; i++) {
-			right = (StateMod_WellRight)data.get(i);
+			right = data.get(i);
 			
 			line[0] = StringUtil.formatString(right.getID(), formats[0]).trim();
 			line[1] = StringUtil.formatString(right.getName(), formats[1]).trim();
@@ -1755,16 +1756,11 @@ throws Exception {
 			out.println(buffer.toString());
 		}
 	}
-	catch (Exception e) {
-		// FIXME SAM 2009-01-12 Log?
-		throw e;
-	}
 	finally {
 		if (out != null) {
 			out.flush();
 			out.close();
 		}
-		out = null;
 	}
 }
 

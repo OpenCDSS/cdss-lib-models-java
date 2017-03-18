@@ -55,6 +55,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -784,9 +785,9 @@ The list source for each group is set to DataSetComponent.LIST_SOURCE_PRIMARY_CO
 @exception Exception if there is an error initializing the component groups.
 */
 private void initializeComponentGroups ()
-{	String routine = getClass().getName() + ".initializeComponentGroups";
+{	String routine = getClass().getSimpleName() + ".initializeComponentGroups";
 	// Always add the control group...
-	DataSetComponent comp,subcomp = null;
+	DataSetComponent comp, subcomp = null;
 	try {
 		comp = new DataSetComponent ( this, COMP_CONTROL_GROUP );
 	
@@ -826,7 +827,7 @@ private void initializeComponentGroups ()
 			comp.setListSource ( DataSetComponent.LIST_SOURCE_PRIMARY_COMPONENT );
 			addComponent ( comp );
 			subcomp = new DataSetComponent( this, COMP_CLIMATE_STATIONS );
-			subcomp.setData ( new Vector() );
+			subcomp.setData ( new ArrayList<StateCU_ClimateStation>() );
 			comp.addComponent( subcomp );
 			// TODO KAT 2007-04-12 
 			// add extra subcomponents for climate stations here
@@ -837,7 +838,7 @@ private void initializeComponentGroups ()
 			addComponent ( comp );
 			addComponent ( comp );
 			subcomp = new DataSetComponent( this, COMP_CROP_CHARACTERISTICS );
-			subcomp.setData ( new Vector() );
+			subcomp.setData ( new Vector<StateCU_CropCharacteristics>() );
 			comp.addComponent( subcomp );
 			// TODO KAT 2007-04-12 need to figure out all subcomponents which go here
 			
@@ -846,23 +847,23 @@ private void initializeComponentGroups ()
 				comp.setListSource ( DataSetComponent.LIST_SOURCE_PRIMARY_COMPONENT );
 				addComponent ( comp );
 				subcomp = new DataSetComponent( this, COMP_DELAY_TABLES_MONTHLY );
-				subcomp.setData ( new Vector() );
+				subcomp.setData ( new Vector<StateCU_DelayTable>() );
 				comp.addComponent( subcomp );
 				subcomp = new DataSetComponent( this, COMP_DELAY_TABLE_ASSIGNMENT_MONTHLY );
-				subcomp.setData ( new Vector() );
+				subcomp.setData ( new Vector<StateCU_DelayTableAssignment>() );
 				comp.addComponent( subcomp );
 			}
 			comp = new DataSetComponent( this, COMP_CU_LOCATIONS_GROUP);
 			comp.setListSource ( DataSetComponent.LIST_SOURCE_PRIMARY_COMPONENT );
 			addComponent ( comp );
 			subcomp = new DataSetComponent( this, COMP_CU_LOCATIONS );
-			subcomp.setData ( new Vector() );
+			subcomp.setData ( new Vector<StateCU_Location>() );
 			comp.addComponent( subcomp );
 			subcomp = new DataSetComponent( this, COMP_CU_LOCATION_CLIMATE_STATIONS );
-			subcomp.setData ( new Vector() );
+			subcomp.setData ( new Vector<>() );
 			comp.addComponent( subcomp );
 			subcomp = new DataSetComponent( this, COMP_CU_LOCATION_COLLECTIONS );
-			subcomp.setData ( new Vector() );
+			subcomp.setData ( new Vector<>() );
 			comp.addComponent( subcomp );
 		}
 		// Always add GIS a separate group...
@@ -1115,7 +1116,7 @@ throws IOException
 	String string;
 	String token1;		// First token on a line
 	int datarec = -1;	// Counter for data records (not comments).
-	List<String> v = null;
+	List<Object> v = null;
 	// Use a while to check for comments.
 	while ( (iline = in.readLine()) != null ) {
 		// check for comments
@@ -1129,13 +1130,13 @@ throws IOException
 			setComment ( string, datarec );
 		}
 		else if ( datarec == 3 ) {
-			v = StringUtil.breakStringList ( string, " \t", StringUtil.DELIM_SKIP_BLANKS );
-			if ( v != null ) {
-				if ( (v.size() >= 1) && StringUtil.isInteger(v.get(0)) ) {
-					setNyr1 ( StringUtil.atoi  (v.get(0)) );
+			List<String> v2 = StringUtil.breakStringList ( string, " \t", StringUtil.DELIM_SKIP_BLANKS );
+			if ( v2 != null ) {
+				if ( (v2.size() >= 1) && StringUtil.isInteger(v2.get(0)) ) {
+					setNyr1 ( StringUtil.atoi(v2.get(0)) );
 				}
-				if ( (v.size() >= 2) && StringUtil.isInteger(v.get(1)) ) {
-					setNyr2 ( StringUtil.atoi(v.get(1)) );
+				if ( (v2.size() >= 2) && StringUtil.isInteger(v2.get(1)) ) {
+					setNyr2 ( StringUtil.atoi(v2.get(1)) );
 				}
 			}
 		}
@@ -1161,13 +1162,13 @@ throws IOException
 			v = StringUtil.fixedRead ( iline, "s5s5s5" );
 			if ( v != null ) {
 				if ( (v.size() >= 1) && StringUtil.isDouble(((String)v.get(0)).trim()) ) {
-					setPsenmo ( StringUtil.atod ( (v.get(0)).trim()) );
+					setPsenmo ( StringUtil.atod ( ((String)v.get(0)).trim()) );
 				}
-				if ( (v.size() >= 2) && StringUtil.isDouble((v.get(1)).trim()) ) {
+				if ( (v.size() >= 2) && StringUtil.isDouble(((String)v.get(1)).trim()) ) {
 					setPjunmo ( StringUtil.atod ( ((String)v.get(1)).trim()) );
 				}
-				if ( (v.size() >= 3) && StringUtil.isDouble((v.get(2)).trim()) ) {
-					setPothmo ( StringUtil.atod ((v.get(2)).trim()) );
+				if ( (v.size() >= 3) && StringUtil.isDouble(((String)v.get(2)).trim()) ) {
+					setPothmo ( StringUtil.atod (((String)v.get(2)).trim()) );
 				}
 			}
 		}
@@ -1241,7 +1242,7 @@ throws Exception
 	// set to be initialized properly (groups, etc.).  This is also necessary
 	// because the control file is not guaranteed to be the first file specified.
 
-	List<String> rcu_strings = new Vector();
+	List<String> rcu_strings = new ArrayList<String>();
 	while ( (iline = in.readLine()) != null ) {
 		// check for comments
 		iline = iline.trim();

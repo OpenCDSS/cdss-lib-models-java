@@ -32,6 +32,7 @@ This StateCU_DataSet_JFrame class displays a StateCU_DataSet and its components.
 Only one instance of this interface should be created.  The setVisible() method
 can be called to hide/show the interface.
 */
+@SuppressWarnings("serial")
 public class StateCU_DataSet_JFrame extends JFrame
 //implements ChangeListener
 {
@@ -116,15 +117,15 @@ private void initialize ( String title, boolean is_visible )
 			insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
 
 	// Now add the contents for each component...
-	List components_Vector = __dataset.getComponents();
+	List<DataSetComponent> components_Vector = __dataset.getComponents();
 	int size = components_Vector.size();
 	DataSetComponent component;
 	y = 0;	// Incremented below.  True row 0 is used for headers above.
-	List data = null;
+	List<DataSetComponent> data = null;
 	int data_size = 0;
 	for ( int i = 0; i < size; i++ ) {
 		x = 0;
-		component = (DataSetComponent)components_Vector.get(i);
+		component = components_Vector.get(i);
 		JTextField component_JTextField = new JTextField(
 			component.getComponentName(), 20 );
 		component_JTextField.setEditable ( false );
@@ -138,7 +139,9 @@ private void initialize ( String title, boolean is_visible )
 			if ( component.getData() == null ) {
 				continue;
 			}
-			data = (List)component.getData();
+			@SuppressWarnings("unchecked")
+			List<DataSetComponent> data0 = (List<DataSetComponent>)component.getData();
+			data = data0;
 			data_size = 0;
 			if ( data != null ) {
 				data_size = data.size();
@@ -177,8 +180,8 @@ private void initialize ( String title, boolean is_visible )
 					insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
 
 				int count = 0;
-				try {	count = ((List)
-					component.getData()).size();
+				try {
+					count = ((List)component.getData()).size();
 				}
 				catch ( Exception e ) {
 					// REVISIT

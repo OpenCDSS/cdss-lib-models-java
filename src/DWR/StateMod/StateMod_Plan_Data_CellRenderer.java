@@ -5,6 +5,7 @@ import RTi.Util.GUI.JWorksheet_AbstractExcelCellRenderer;
 /**
 This class renders cells for plan station tables.
 */
+@SuppressWarnings("serial")
 public class StateMod_Plan_Data_CellRenderer extends JWorksheet_AbstractExcelCellRenderer
 {
 

@@ -81,7 +81,7 @@ import RTi.Util.String.StringUtil;
 This StateMod_InstreamFlowRight class holds information for StateMod instream flow rights.
 */
 public class StateMod_InstreamFlowRight extends StateMod_Data 
-implements Cloneable, Comparable, StateMod_ComponentValidator, StateMod_Right {
+implements Cloneable, Comparable<StateMod_Data>, StateMod_ComponentValidator, StateMod_Right {
 
 /**
 Administration number.  The value is stored as a string to allow exact
@@ -126,7 +126,7 @@ public Object clone() {
 Creates a copy of the object for later use in checking to see if it was changed in a GUI.
 */
 public void createBackup() {
-	_original = clone();
+	_original = (StateMod_InstreamFlowRight)clone();
 	((StateMod_InstreamFlowRight)_original)._isClone = false;
 	_isClone = true;
 }
@@ -134,16 +134,16 @@ public void createBackup() {
 /**
 Compares this object to another StateMod_Data object based on the sorted
 order from the StateMod_Data variables, and then by irtem and dcrifr, in that order.
-@param o the object to compare against.
+@param data the object to compare against.
 @return 0 if they are the same, 1 if this object is greater than the other object, or -1 if it is less.
 */
-public int compareTo(Object o) {
-	int res = super.compareTo(o);
+public int compareTo(StateMod_Data data) {
+	int res = super.compareTo(data);
 	if (res != 0) {
 		return res;
 	}
 
-	StateMod_InstreamFlowRight right = (StateMod_InstreamFlowRight)o;
+	StateMod_InstreamFlowRight right = (StateMod_InstreamFlowRight)data;
 
 	res = _irtem.compareTo(right.getIrtem());
 	if (res == 0) {
@@ -169,12 +169,12 @@ Compare two rights lists and see if they are the same.
 @param v2 the second list of StateMod_InstreamFlowRights to check.  Cannot be null.
 @return true if they are the same, false if not.
 */
-public static boolean equals(List v1, List v2) {
+public static boolean equals(List<StateMod_InstreamFlowRight> v1, List<StateMod_InstreamFlowRight> v2) {
 	String routine = "StateMod_InstreamFlowRight.equals(Vector, Vector)";
 	StateMod_InstreamFlowRight r1;	
 	StateMod_InstreamFlowRight r2;	
 	if (v1.size() != v2.size()) {
-		Message.printStatus(1, routine, "Vectors are different sizes");
+		Message.printStatus(1, routine, "Lists are different sizes");
 		return false;
 	}
 	else {
@@ -182,13 +182,13 @@ public static boolean equals(List v1, List v2) {
 		// and data will need to be saved back into the dataset.
 		int size = v1.size();
 		Message.printStatus(2, routine, "Lists are of size: " + size);
-		List v1Sort = StateMod_Util.sortStateMod_DataVector(v1);
-		List v2Sort = StateMod_Util.sortStateMod_DataVector(v2);
+		List<StateMod_InstreamFlowRight> v1Sort = StateMod_Util.sortStateMod_DataVector(v1);
+		List<StateMod_InstreamFlowRight> v2Sort = StateMod_Util.sortStateMod_DataVector(v2);
 		Message.printStatus(2, routine, "Lists have been sorted");
 	
 		for (int i = 0; i < size; i++) {			
-			r1 = (StateMod_InstreamFlowRight)v1Sort.get(i);	
-			r2 = (StateMod_InstreamFlowRight)v2Sort.get(i);	
+			r1 = v1Sort.get(i);	
+			r2 = v2Sort.get(i);	
 			Message.printStatus(1, routine, r1.toString());
 			Message.printStatus(1, routine, r2.toString());
 			Message.printStatus(1, routine, "Element " + i + " comparison: " + r1.compareTo(r2));
@@ -344,7 +344,7 @@ throws Exception {
 		8 };
 	String iline;
 	StateMod_InstreamFlowRight aRight = null;
-	List v = new Vector(6);
+	List<Object> v = new Vector<Object>(6);
 
 	Message.printStatus(1, routine, "Reading Instream Flow Rights File: " + filename);
 	BufferedReader in = null;
@@ -518,7 +518,7 @@ is also maintained by calling this routine.
 @exception Exception if an error occurs.
 */
 public static void writeStateModFile(String infile, String outfile,
-		List theInsfRights, List newComments)
+		List<StateMod_InstreamFlowRight> theInsfRights, List<String> newComments)
 throws Exception {
 	writeStateModFile(infile, outfile, theInsfRights, newComments, false);
 }
@@ -534,11 +534,11 @@ is also maintained by calling this routine.
 @exception Exception if an error occurs.
 */
 public static void writeStateModFile(String infile, String outfile,
-		List theInsfRights, List newComments, boolean oldAdminNumFormat)
+		List<StateMod_InstreamFlowRight> theInsfRights, List<String> newComments, boolean oldAdminNumFormat)
 throws Exception {
-	List commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	PrintWriter out = null;
 	String routine = "StateMod_InstreamFlowRight.writeStateModFile";
@@ -554,7 +554,7 @@ throws Exception {
 		String iline;
 		String cmnt = "#>";
 		StateMod_InstreamFlowRight right;
-		List v = new Vector(6);
+		List<Object> v = new Vector<Object>(6);
 		String format_0 = null;
 		if (oldAdminNumFormat) {
 			format_0 = "%-12.12s%-24.24s%-12.12s    %-12.12s%8.2F%8d";
@@ -628,8 +628,8 @@ header (true) or to create a new file with a new header.
 @param newComments comments to add to the the file header.
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter, boolean update, List data,
-	List newComments ) 
+public static void writeListFile(String filename, String delimiter, boolean update, List<StateMod_InstreamFlowRight> data,
+	List<String> newComments ) 
 throws Exception {
 	String routine = "StateMod_IntreamFlowRight.writeListFile";
 	int size = 0;
@@ -637,7 +637,7 @@ throws Exception {
 		size = data.size();
 	}
 	
-	List fields = new Vector();
+	List<String> fields = new Vector<String>();
 	fields.add("ID");
 	fields.add("Name");
 	fields.add("StationID");
@@ -651,7 +651,7 @@ throws Exception {
 	int comp = StateMod_DataSet.COMP_INSTREAM_RIGHTS;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.get(i);
+		s = fields.get(i);
 		names[i] = StateMod_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateMod_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -664,9 +664,9 @@ throws Exception {
 	int j = 0;
 	PrintWriter out = null;
 	StateMod_InstreamFlowRight right = null;
-	List commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	String[] line = new String[fieldCount];
 	StringBuffer buffer = new StringBuffer();
@@ -674,12 +674,12 @@ throws Exception {
 	try {
 		// Add some basic comments at the top of the file.  Do this to a copy of the
 		// incoming comments so that they are not modified in the calling code.
-		List newComments2 = null;
+		List<String> newComments2 = null;
 		if ( newComments == null ) {
-			newComments2 = new Vector();
+			newComments2 = new Vector<String>();
 		}
 		else {
-			newComments2 = new Vector(newComments);
+			newComments2 = new Vector<String>(newComments);
 		}
 		newComments2.add(0,"");
 		newComments2.add(1,"StateMod instream flow rights as a delimited list file.");
@@ -699,7 +699,7 @@ throws Exception {
 		out.println(buffer.toString());
 		
 		for (int i = 0; i < size; i++) {
-			right = (StateMod_InstreamFlowRight)data.get(i);
+			right = data.get(i);
 			
 			line[0] = StringUtil.formatString(right.getID(),formats[0]).trim();
 			line[1] = StringUtil.formatString(right.getName(),formats[1]).trim();

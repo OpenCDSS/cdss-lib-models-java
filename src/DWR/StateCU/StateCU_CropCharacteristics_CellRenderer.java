@@ -15,6 +15,7 @@ import RTi.Util.GUI.JWorksheet_AbstractExcelCellRenderer;
 /**
 This class is used to render crop char cells.
 */
+@SuppressWarnings("serial")
 public class StateCU_CropCharacteristics_CellRenderer
 extends JWorksheet_AbstractExcelCellRenderer {
 

@@ -30,6 +30,7 @@ This class is a JFrame for displaying a Vector of StateMod_WellRight data in
 a worksheet.  Well rights for 1+ wells can be displayed in the same worksheet.
 The worksheet data can be exported to a file or printed.
 */
+@SuppressWarnings("serial")
 public class StateMod_WellRight_Data_JFrame 
 extends StateMod_Data_JFrame {
 
@@ -42,7 +43,7 @@ which case an empty worksheet is shown.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_WellRight_Data_JFrame(List data, String titleString, boolean editable)
+public StateMod_WellRight_Data_JFrame(List<StateMod_WellRight> data, String titleString, boolean editable)
 throws Exception {
 	super(data, titleString, editable);
 	setSize(748, getHeight());

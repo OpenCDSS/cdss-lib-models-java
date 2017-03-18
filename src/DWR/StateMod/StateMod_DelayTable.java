@@ -82,7 +82,7 @@ import RTi.Util.String.StringUtil;
 
 public class StateMod_DelayTable 
 extends StateMod_Data 
-implements Cloneable, Comparable, StateMod_ComponentValidator {
+implements Cloneable, Comparable<StateMod_Data>, StateMod_ComponentValidator {
 
 /**
 Number of return values.
@@ -92,7 +92,7 @@ protected int _ndly;
 /**
 Double return values.
 */
-protected List _ret_val;
+protected List<Double> _ret_val;
 
 /**
 Units for the data, as determined at read time.
@@ -176,10 +176,10 @@ public Object clone() {
 		d._ret_val = null;
 	}
 	else {
-		d._ret_val = new Vector();
+		d._ret_val = new Vector<Double>();
 		int size = _ret_val.size();
 		for ( int i = 0; i < size; i++ ) {
-			d._ret_val.add( new Double(((Double)_ret_val.get(i)).doubleValue()) );
+			d._ret_val.add( new Double(_ret_val.get(i).doubleValue()) );
 		}
 	}
 
@@ -188,11 +188,11 @@ public Object clone() {
 
 /**
 Compares this object to another StateMod_DelayTable object.
-@param o the object to compare against.
+@param data the object to compare against.
 @return 0 if they are the same, 1 if this object is greater than the other object, or -1 if it is less.
 */
-public int compareTo(Object o) {
-	int res = super.compareTo(o);
+public int compareTo(StateMod_Data data) {
+	int res = super.compareTo(data);
 	if (res != 0) {
 		return res;
 	}
@@ -228,7 +228,7 @@ public int compareTo(Object o) {
 	}
 */
 
-	StateMod_DelayTable d = (StateMod_DelayTable)o;
+	StateMod_DelayTable d = (StateMod_DelayTable)data;
 
 	if (_ndly < d._ndly) {
 		return -1;
@@ -292,7 +292,7 @@ public int compareTo(Object o) {
 Creates a copy of the object for later use in checking to see if it was changed in a GUI.
 */
 public void createBackup() {
-	_original = clone();
+	_original = (StateMod_DelayTable)clone();
 	((StateMod_DelayTable)_original)._isClone = false;
 	_isClone = true;
 }
@@ -333,9 +333,9 @@ public double getRet_val(int index) {
 }
 
 /**
-Get a entire vector of delays.
+Get a entire list of delays.
 */
-public List getRet_val() {
+public List<Double> getRet_val() {
 	return _ret_val;
 }
 
@@ -362,7 +362,7 @@ private void initialize() {
 	_smdata_type = StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY;
 	_ndly = 0;
 	_units = "PCT";
-	_ret_val = new Vector(1);
+	_ret_val = new Vector<Double>(1);
 }
 
 /**
@@ -459,8 +459,8 @@ public void setNdly(String str) {
 	}
 }
 
-public void setRet_val(List v) {
-	_ret_val = new Vector(v);
+public void setRet_val(List<Double> v) {
+	_ret_val = new Vector<Double>(v);
 	_ndly = _ret_val.size();
 }
 
@@ -553,11 +553,11 @@ added to the end of the previously stored delays.  Returns the delay table infor
 values in each delay pattern.  -1 indicates variable number of values with
 values as percent (0-100).  -100 indicates variable number of values with values as fraction (0-1).
 */
-public static List readStateModFile ( String filename, boolean isMonthly, int interv )
+public static List<StateMod_DelayTable> readStateModFile ( String filename, boolean isMonthly, int interv )
 throws Exception {
 	String routine = "StateMod_DelayTable.readStateModFile";
 	String iline;
-	List theDelays = new Vector(1);
+	List<StateMod_DelayTable> theDelays = new Vector<StateMod_DelayTable>(1);
 	StateMod_DelayTable aDelay = new StateMod_DelayTable ( isMonthly );
 	int numRead=0, totalNumToRead=0;
 	boolean reading=false;
@@ -659,12 +659,12 @@ of entries at the start of each record).
 @throws Exception if an error occurs
 */
 public static void writeStateModFile(String inputFile, String outputFile,
-		List dly, List newcomments, int interv, int precision )
+		List<StateMod_DelayTable> dly, List<String> newcomments, int interv, int precision )
 throws Exception {
 	PrintWriter	out = null;
-	List commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	String routine = "StateMod_DelayTable.writeStateModFile";
 	if ( precision < 0 ) {
@@ -719,7 +719,7 @@ throws Exception {
 		StringBuffer iline = new StringBuffer();
 		StateMod_DelayTable delay = null;
 		for (int i = 0; i < ndly; i++) {
-			delay = (StateMod_DelayTable)dly.get(i);
+			delay = dly.get(i);
 			// Clear out the string buffer for the new delay table
 			iline.setLength(0);
 			// Create one delay table entry with ID, Nvals, and 12 return values per line.
@@ -810,15 +810,15 @@ header (true) or to create a new file with a new header.
 either StateMod_DataSet.COMP_DELAY_TABLES_DAILY or StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY.
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter, boolean update, List data,
-	List newComments, int comp ) 
+public static void writeListFile(String filename, String delimiter, boolean update, List<StateMod_DelayTable> data,
+	List<String> newComments, int comp ) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
 		size = data.size();
 	}
 	
-	List fields = new Vector();
+	List<String> fields = new Vector<String>();
 	fields.add("DelayTableID");
 	fields.add("Date");
 	fields.add("ReturnAmount");
@@ -843,9 +843,9 @@ throws Exception {
 	int num = 0;
 	PrintWriter out = null;
 	StateMod_DelayTable delay = null;
-	List commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	String[] line = new String[fieldCount];	
 	String id = null;
@@ -854,12 +854,12 @@ throws Exception {
 	try {
 		// Add some basic comments at the top of the file.  Do this to a copy of the
 		// incoming comments so that they are not modified in the calling code.
-		List newComments2 = null;
+		List<String> newComments2 = null;
 		if ( newComments == null ) {
-			newComments2 = new Vector();
+			newComments2 = new Vector<String>();
 		}
 		else {
-			newComments2 = new Vector(newComments);
+			newComments2 = new Vector<String>(newComments);
 		}
 		newComments2.add(0,"");
 		if ( comp == StateMod_DataSet.COMP_DELAY_TABLES_DAILY ) {

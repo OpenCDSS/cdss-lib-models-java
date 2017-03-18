@@ -3082,7 +3082,7 @@ public String getStateModFileProperty ( int component_type )
 Return a summary of the data set.
 @return a summary of the data set as a Vector of String.
 */
-public List getSummary()
+public List<String> getSummary()
 {	List data_Vector = null; // Reuse as needed below.
 	List rights_Vector = null; // Reuse as needed below.
 	List infoVector = new Vector (100);

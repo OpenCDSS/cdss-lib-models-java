@@ -404,7 +404,7 @@ protected String	_dtype;	// data type associated with _type
 protected String	_scenario;	// scenario, optional
 protected int		_switch;	// off=0, on=1, used for output control
 					// also used for big picture: run type
-protected List	_IDVec;	// location(s), used for big picture
+protected List<String>	_IDVec;	// location(s), used for big picture
 protected String	_YrAve;	// year or average, used for big picture
 protected String	_fileName; // file name or entire path, big picture
 
@@ -426,9 +426,9 @@ public void addID ( String s )
 }
 
 //FIXME SAM 2008-03-24 Why is this here?  Does anything use it outside of this class?
-public static List arrayToVector(String[] array) {
+public static List<String> arrayToVector(String[] array) {
 	int size = array.length;
-	List v = new Vector();
+	List<String> v = new Vector<String>();
 	for (int i = 0; i < size; i++) {
 		v.add(array[i]);
 	}
@@ -604,7 +604,7 @@ Locate the index of the string matching dtype.
 public static int getDataOutputIndex(int type, String dtype, double statemod_version) {
 	// first, set Options to correct string list of options depending on the type
 
-	List Options = getGraphDataType ( type, statemod_version, true );
+	List<String> Options = getGraphDataType ( type, statemod_version, true );
 	if ( Options == null ) {
 		Message.printWarning(1, "StateMod_GraphNode.getDataOutputIndex",
 			"Unable to determine the StateMod output column "
@@ -612,7 +612,7 @@ public static int getDataOutputIndex(int type, String dtype, double statemod_ver
 	}
 
 	for (int i = 0; i < Options.size(); i++) {
-		String s = (String)Options.get(i);
+		String s = Options.get(i);
 		if (s.equalsIgnoreCase(dtype)) {
 			return i;
 		}
@@ -639,7 +639,7 @@ Get data type associated with type.  It is assumed that StateMod is the newest v
 Input (historical) and output data types are returned.
 @param type Structure/station data type (see StateMod_GraphNode.*_TYPE).
 */
-public static List getGraphDataType ( int type )
+public static List<String> getGraphDataType ( int type )
 {	return getGraphDataType ( type, 1000.0, true );
 }
 
@@ -650,7 +650,7 @@ It is assumed that StateMod is the newest version.
 @param include_all If true, input (historical) and output data types are returned.
 If false, only output data types are returned.
 */
-public static List getGraphDataType (int type, boolean include_all) {
+public static List<String> getGraphDataType (int type, boolean include_all) {
 	return getGraphDataType(type, 1000.0, include_all);
 }
 
@@ -663,7 +663,7 @@ It is assumed that the structure/station is NOT a baseflow node.
 list (suitable for StateMod GUI graphing tool).  If false, only model output
 parameters are returned (suitable for delplt usage with the big picture plot).
 */
-public static List getGraphDataType ( int type, double statemod_version, boolean include_all )
+public static List<String> getGraphDataType ( int type, double statemod_version, boolean include_all )
 {	return getGraphDataType ( type, statemod_version, include_all, false );
 }
 
@@ -679,9 +679,9 @@ a data type of "StreamflowBase" will be appended to the list.
 @return a new-line delimited list of appropriate graph parameter types or null
 if the requested station type or version does not match a known combination.
 */
-public static List getGraphDataType ( int type, double statemod_version, boolean include_all, boolean is_baseflow )
+public static List<String> getGraphDataType ( int type, double statemod_version, boolean include_all, boolean is_baseflow )
 {
-	List options = null;
+	List<String> options = null;
 	if ( statemod_version >= 9.69 ) {
 		if ( type == STREAM_TYPE ) {
 			options = arrayToVector(streamOptions_0969);
@@ -775,7 +775,7 @@ public static List getGraphDataType ( int type, double statemod_version, boolean
 	}
 
 	if ( options == null ) {
-		options = new Vector();
+		options = new Vector<String>();
 	}
 	
 	if ( is_baseflow ) {
@@ -882,7 +882,7 @@ public String getID ( int pos )
 /**
 Retrieve the ID Vector.
 */
-public List getIDVec() {
+public List<String> getIDVec() {
 	return _IDVec;
 }
 
@@ -981,7 +981,7 @@ private void initialize ()
 	_switch = 1;
 	_YrAve = "";
 	_fileName = "";
-	_IDVec = new Vector(1,10);
+	_IDVec = new Vector<String>();
 }
 
 /**
@@ -1075,13 +1075,13 @@ public void setYrAve ( String s )
 	}
 }
 
-public static int SMDumpDelpltFile ( List theTemplate, String filename, PrintWriter out )
+public static int SMDumpDelpltFile ( List<StateMod_GraphNode> theTemplate, String filename, PrintWriter out )
 throws IOException
 {	String rtn = "StateMod_GraphNode.SMDumpDelpltFile";
 	String temp_cmnt = "#>";
 	String cmnt = "#";
 	StateMod_GraphNode node = null;
-	List v = null;
+	List<String> v = null;
 
 	int num = 0;
 	if ( theTemplate != null ) {
@@ -1093,7 +1093,7 @@ throws IOException
 		out.println ( temp_cmnt );
 
 		for ( int i=0; i<num; i++ ) {
-			node = (StateMod_GraphNode)theTemplate.get(i);
+			node = theTemplate.get(i);
 			if ( i==0 ) {
 				out.println ( cmnt );
 				out.println ( cmnt + " Run type (Single, Multiple, Difference, " + "Diffx, Merge):" );
@@ -1133,7 +1133,7 @@ throws IOException
 			v = node.getIDVec();
 			int numIDs = v.size();
 			for ( int j=0; j<numIDs; j++ ) {
-				out.println ((String)v.get(j));
+				out.println(v.get(j));
 			}
 			out.println ( "-999" );
 			out.println ( cmnt );
@@ -1146,23 +1146,13 @@ throws IOException
 		out.println ( cmnt + "     End of file indicator" );
 		out.println ( "-999" );
 	} catch (Exception e) {
-		rtn = null;
-		temp_cmnt = null;
-		cmnt = null;
-		node = null;
-		v = null;
 		Message.printWarning ( 2, rtn, e );
 		throw new IOException ( e.getMessage());
 	}
-	rtn = null;
-	temp_cmnt = null;
-	cmnt = null;
-	node = null;
-	v = null;
 	return 0;
 }
 
-public static int SMDumpGraphFile ( List theGraphOpts, PrintWriter out )
+public static int SMDumpGraphFile ( List<StateMod_GraphNode> theGraphOpts, PrintWriter out )
 throws IOException
 {	StateMod_GraphNode node = null;
 	String ident = null;
@@ -1179,7 +1169,7 @@ throws IOException
 	}
 	try {
 		for ( i=0; i<num; i++ ) {
-			node = (StateMod_GraphNode)theGraphOpts.get(i);
+			node = theGraphOpts.get(i);
 			// Identifier is ID..StructType_DataType.MONTH.Scenario
 			ident = node.getID() + ".." + node.getType() + "_" + node.getDtype() + ".MONTH." + node.getScenario();
 			out.println ( ident );
@@ -1190,20 +1180,17 @@ throws IOException
 		Message.printWarning ( 2, "StateMod_GraphNode.SMDumpGraphFile", e );
 		throw new IOException ( e.getMessage());
 	}
-	
-	node = null;
-	ident = null;
 	return 0;
 }
 
-public static int SMDumpOutputControlFile ( List theOC, PrintWriter out )
+public static int SMDumpOutputControlFile ( List<StateMod_GraphNode> theOC, PrintWriter out )
 throws IOException
 {	String iline = null;
 	String rtn = "StateMod_GraphNode.SMDumpOutputControlFile";
 	String format = "%-12.12s %-24.24s %-3.3s %5d";
 	String cmnt = "#>";
 	StateMod_GraphNode node = null;
-	List v = new Vector ( 4 );
+	List<Object> v = new Vector<Object> ( 4 );
 
 	int i;
 	int num = 0;
@@ -1229,9 +1216,9 @@ throws IOException
 
 		int istart=0;
 		if ( num > 0 ) {
-			node = (StateMod_GraphNode)theOC.get(0);
+			node = theOC.get(0);
 
-			if ((node.getID()).equalsIgnoreCase("All")) {
+			if (node.getID().equalsIgnoreCase("All")) {
 				out.println ( "All" );
 				istart=1;
 			}
@@ -1239,7 +1226,7 @@ throws IOException
 
 		for ( i=istart; i<num; i++ )
 		{
-			node = (StateMod_GraphNode)theOC.get(i);
+			node = theOC.get(i);
 			if ( node == null ) {
 				continue;
 			}
@@ -1282,14 +1269,14 @@ throws IOException
 /**
 Parse a SmDelta input file.  Each StateMod_GraphNode contains a
 station type/file/parameter combination.  The identifiers associated with the
-graph node are stored in a Vector with each node (e.g., can be a single zero
-string in the Vector or a Vector of identifiers).  The run mode is stored with
+graph node are stored in a list with each node (e.g., can be a single zero
+string in the list or a list of identifiers).  The run mode is stored with
 each item returned.
-@param theTemplate An existing Vector to have graph nodes added to it.
+@param theTemplate An existing list to have graph nodes added to it.
 @param filename Name of the file name to read.
 @return 1 if an error or 0 if successful.
 */
-public static int readStateModDelPltFile ( List theTemplate, String filename )
+public static int readStateModDelPltFile ( List<StateMod_GraphNode> theTemplate, String filename )
 throws IOException
 {	String rtn = "StateMod_GraphNode.readStateModDelPltFile";
 	String iline = null;
@@ -1381,24 +1368,15 @@ throws IOException
 			}
 		}
 	} catch (Exception e) {
-		rtn = null;
-		iline = null;
 		if ( in != null ) {
 			in.close();
 		}
-		in = null;
-		aNode=null;
 		Message.printWarning ( 2, rtn, e );
 		throw new IOException ( e.getMessage());
 	}
-
-	rtn = null;
-	iline = null;
 	if ( in != null ) {
 		in.close();
 	}
-	in = null;
-	aNode=null;
 	return 0;
 }
 
@@ -1406,14 +1384,14 @@ throws IOException
 Read graph information in and store in a java vector.  The new graph types are
 added to the end of the previously stored diversions.
 */
-public static int readStateModGraphFile ( List theGraphOpts, String filename )
+public static int readStateModGraphFile ( List<StateMod_GraphNode> theGraphOpts, String filename )
 throws IOException
 {	String rtn = "StateMod_GraphNode.readStateModGraphFile";
 	String iline = null;
 	BufferedReader in = null;
 	StateMod_GraphNode aNode = null;
 	TSIdent ident = null;
-	List list = null;
+	List<String> list = null;
 	int dtype_pos = 0;
 
 	Message.printStatus ( 1, rtn, "Reading graph template: " + filename );
@@ -1444,7 +1422,7 @@ throws IOException
 			if ( list.size() < 2 ) {
 				continue;
 			}
-			aNode.setType ( (String)list.get(0));
+			aNode.setType ( list.get(0));
 			if ( aNode.getType().equalsIgnoreCase( "instream flow") ) {
 				// New convention is shorter as of 2002-08-06
 				aNode.setType("instream");
@@ -1466,27 +1444,15 @@ throws IOException
 			theGraphOpts.add ( aNode );
 		}
 	} catch (Exception e) {
-		rtn = null;
-		iline = null;
 		if ( in != null ) {
 			in.close();
 		}
-		in = null;
-		aNode = null;
-		ident = null;
-		list = null;
 		Message.printWarning ( 2, rtn, e );
 		throw new IOException ( e.getMessage());
 	}
-	rtn = null;
-	iline = null;
 	if ( in != null ) {
 		in.close();
 	}
-	in = null;
-	aNode = null;
-	ident = null;
-	list = null;
 	return 0;
 }
 
@@ -1494,12 +1460,12 @@ throws IOException
 Read output control information in and store in a java vector.  The new control
 information is added to the end of the previously stored information.
 */
-public static int readStateModOutputControlFile ( List theOC, String filename )
+public static int readStateModOutputControlFile ( List<StateMod_GraphNode> theOC, String filename )
 throws IOException
 {	String rtn = "StateMod_GraphNode.readStateModOutputControlFile";
 	String format = "s12x1s24x1s3x1i5";
 	String iline = null;
-	List v = null;
+	List<Object> v = null;
 	BufferedReader in = null;
 	StateMod_GraphNode aNode = null;
 
@@ -1556,42 +1522,32 @@ throws IOException
 			theOC.add ( aNode );
 		}
 	} catch (Exception e) {
-		rtn = null;
-		format = null;
-		iline = null;
-		v = null;
 		if ( in != null ) {
 			in.close();
 		}
-		in = null;
-		aNode = null;
 		Message.printWarning ( 2, rtn, e );
 		throw new IOException ( e.getMessage());
 	}
-	rtn = null;
-	format = null;
-	iline = null;
-	v = null;
-	if ( in != null ) {
-		in.close();
+	finally {
+		if ( in != null ) {
+			in.close();
+		}
 	}
-	in = null;
-	aNode = null;
 	return 0;
 }
 
-private static List removeLastNElements(List v, int count) {
-	List r = new Vector();
+private static List<String> removeLastNElements(List<String> v, int count) {
+	List<String> r = new Vector<String>();
 	int itransfer = v.size() - count;
 	for (int i = 0; i < itransfer; i++) {
-		r.add ( new String((String)v.get(i)) );
+		r.add ( v.get(i) );
 	}
 	
 	return r;
 }
 
 public static void writeStateModDelPltFile ( String instrfile, 
-	String outstrfile, List theTemplate, String[] new_comments )
+	String outstrfile, List<StateMod_GraphNode> theTemplate, String[] new_comments )
 throws IOException
 {	String rtn = "StateMod_GraphNode.writeStateModDelPltFile";
 	String [] comment_str = { "#" };
@@ -1605,26 +1561,18 @@ throws IOException
 		SMDumpDelpltFile ( theTemplate, outstrfile, out );
 		out.flush();
 		out.close();
-		out = null;
-		rtn = null;
-		comment_str = null;
-		ignore_comment_str = null;
 	} catch ( Exception e ) {
 		if ( out != null ) {
 			out.flush();
 			out.close();
 		}
-		out = null;
-		rtn = null;
-		comment_str = null;
-		ignore_comment_str = null;
 		Message.printWarning ( 2, rtn, e );
 		throw new IOException ( e.getMessage());
 	}
 }
 
 public static void writeStateModGraphFile ( String instrfile, String outstrfile,
-		List theGraphOpts, String[] new_comments )
+		List<StateMod_GraphNode> theGraphOpts, String[] new_comments )
 throws IOException
 {	String rtn = "StateMod_GraphNode.writeStateModGraphFile";
 	String [] comment_str = { "#" };
@@ -1639,24 +1587,16 @@ throws IOException
 		SMDumpGraphFile ( theGraphOpts, out );
 		out.flush();
 		out.close();
-		out = null;
-		rtn = null;
-		comment_str = null;
-		ignore_comment_str = null;
 	} catch ( Exception e ) {
 		if ( out != null ) {
 			out.flush();
 			out.close();
 		}
-		out = null;
-		rtn = null;
-		comment_str = null;
-		ignore_comment_str = null;
 		throw new IOException ( e.getMessage());
 	}
 }
 
-public static void writeStateModOutputControlFile ( String instrfile, String outstrfile, List theOC, String[] new_comments )
+public static void writeStateModOutputControlFile ( String instrfile, String outstrfile, List<StateMod_GraphNode> theOC, String[] new_comments )
 throws IOException
 {	String rtn = "StateMod_GraphNode.writeStateModOutputControlFile";
 	String [] comment_str = { "#" };
@@ -1670,19 +1610,11 @@ throws IOException
 		SMDumpOutputControlFile ( theOC, out );
 		out.flush();
 		out.close();
-		out = null;
-		rtn = null;
-		comment_str = null;
-		ignore_comment_str = null;
 	} catch ( Exception e ) {
 		if ( out != null ) {
 			out.flush();
 			out.close();
 		}
-		out = null;
-		rtn = null;
-		comment_str = null;
-		ignore_comment_str = null;
 		Message.printWarning ( 2, rtn, e );
 		throw new IOException ( e.getMessage());
 	}
@@ -1704,4 +1636,4 @@ public String toString()
 		+ ", Filename: " + _fileName;
 }
 
-} // end StateMod_GraphNode
+}

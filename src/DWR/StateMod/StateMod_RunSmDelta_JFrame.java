@@ -117,6 +117,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -146,6 +147,7 @@ import RTi.Util.Message.Message;
 /**
 This GUI is a class for controlling the run of delta plots.
 */
+@SuppressWarnings("serial")
 public class StateMod_RunSmDelta_JFrame extends JFrame
 implements ActionListener, ItemListener, KeyListener, MouseListener, 
 WindowListener {
@@ -362,7 +364,7 @@ public void actionPerformed(ActionEvent event) {
 		setMessages(__SmDelta + " input has changed.", "Ready");
 	}
 	else if (action.equals(__BUTTON_HELP)) {
-		List helpVector = fillBPPrelimHelpGUIVector();
+		List<String> helpVector = fillBPPrelimHelpGUIVector();
 		PropList proplist = new PropList("HelpProps");
 		proplist.setValue("HelpKey", "SMGUI.BigPicture");
 		new HelpJDialog(this, helpVector, proplist);
@@ -411,14 +413,14 @@ public void actionPerformed(ActionEvent event) {
 
 		JGUIUtil.setWaitCursor(this, true);
 
-		List theGraphNodes = new Vector();
+		List<StateMod_GraphNode> theGraphNodes = new Vector<StateMod_GraphNode>();
 		try {
 			StateMod_GraphNode.readStateModDelPltFile(theGraphNodes, currDir + File.separator + filename);
-			List nodes = __tableModel.formLoadData(theGraphNodes);
+			List<StateMod_GraphNode> nodes = __tableModel.formLoadData(theGraphNodes);
 			StateMod_GraphNode gn = null;
 			__worksheet.clear();
 			for (int i = 0; i < nodes.size(); i++) {
-				gn = (StateMod_GraphNode)nodes.get(i);
+				gn = nodes.get(i);
 				__worksheet.addRow(new StateMod_GraphNode());
 				__worksheet.setValueAt(gn.getFileName(), i, 0);
 				__worksheet.setValueAt(gn.getType(), i, 1);
@@ -511,8 +513,8 @@ protected void closeWindow() {
 /**
 Create help information for the help dialog.
 */
-private List fillBPPrelimHelpGUIVector() {
-	List helpVector = new Vector(2);
+private List<String> fillBPPrelimHelpGUIVector() {
+	List<String> helpVector = new Vector<String>(2);
 	helpVector.add( "This tool helps you create an input file for the " + __SmDelta);
 	helpVector.add( "program, which allows comparisons of different scenarios, years, ");
 	helpVector.add( "data types, etc.  Each section in the input file (file, data type, ");
@@ -943,12 +945,13 @@ private boolean saveSmDeltaFile() {
 
 	JGUIUtil.setWaitCursor(this, true);
 
-	List theGraphNodes = __tableModel.formSaveData(__worksheet.getAllData());
+	@SuppressWarnings("unchecked")
+	List<StateMod_GraphNode>theGraphNodes = (List<StateMod_GraphNode>)__tableModel.formSaveData(__worksheet.getAllData());
 
 	StateMod_GraphNode gn = null;
 	int runtype = getRunType();
 	for (int i = 0; i < theGraphNodes.size(); i++) {
-		gn = (StateMod_GraphNode)theGraphNodes.get(i);
+		gn = theGraphNodes.get(i);
 		gn.setSwitch(runtype);
 	}
 	try {	
@@ -1130,7 +1133,7 @@ private void setupGUI() {
 	File file = new File(__dataset.getDataSetDirectory());
 	__smdeltaFolder = __dataset.getDataSetDirectory();
 	JGUIUtil.setLastFileDialogDirectory(__dataset.getDataSetDirectory());
-	List filters = new Vector();
+	List<String> filters = new Vector<String>();
 	filters.add("xre");
 	filters.add("b44");
 	filters.add("xdd");
@@ -1138,7 +1141,7 @@ private void setupGUI() {
 	SimpleFileFilter sff = new SimpleFileFilter(filters, "etc");
 	File[] files = file.listFiles(sff);
 
-	List filenames = new Vector();
+	List<String> filenames = new Vector<String>();
 	filenames.add("");
 	filenames.add(OPTION_BROWSE);
 	for (int i = 0; i < files.length; i++) {
@@ -1150,12 +1153,13 @@ private void setupGUI() {
 	JScrollWorksheet jsw = null;
 	try {
 		__tableModel = new
-			StateMod_RunSmDelta_TableModel(this, new Vector(),
-			(List)__reservoirComp.getData(), 
-			(List)__diversionComp.getData(),
-			(List)__instreamFlowComp.getData(),
-			(List)__wellComp.getData(),
-			(List)__streamGageComp.getData());
+			StateMod_RunSmDelta_TableModel(this, new ArrayList(),
+			(List<StateMod_Reservoir>)__reservoirComp.getData(), 
+			(List<StateMod_Diversion>)__diversionComp.getData(),
+			(List<StateMod_InstreamFlow>)__instreamFlowComp.getData(),
+			(List<StateMod_StreamGage>)__streamGageComp.getData(),
+			(List<StateMod_Well>)__wellComp.getData());
+
 			
 		StateMod_RunSmDelta_CellRenderer crg = new StateMod_RunSmDelta_CellRenderer(__tableModel);
 	
@@ -1164,7 +1168,7 @@ private void setupGUI() {
 
 		__worksheet.setColumnJComboBoxValues(0, filenames, true);
 
-		List vn = StateMod_Util.arrayToList( StateMod_GraphNode.node_types);
+		List<String> vn = StateMod_Util.arrayToList( StateMod_GraphNode.node_types);
 		
 		int index = vn.indexOf("Streamflow");
 		vn.add(index + 1, "Stream ID (0* Gages)");

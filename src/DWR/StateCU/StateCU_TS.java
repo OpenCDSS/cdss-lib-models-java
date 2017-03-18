@@ -30,6 +30,7 @@ package DWR.StateCU;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.List;
@@ -95,7 +96,7 @@ public static boolean isFrostDatesFile ( String filename )
 			else if ( header_read ) {
 				// See if line has 6 tokens and 4 instances of
 				// "/" - this assumes no missing...
-				List v = StringUtil.breakStringList ( iline," ",StringUtil.DELIM_SKIP_BLANKS);
+				List<String> v = StringUtil.breakStringList ( iline," ",StringUtil.DELIM_SKIP_BLANKS);
 				if (	(v != null) && (v.size() == 6) &&
 					((StringUtil.patternCount(iline,"/") +
 					StringUtil.patternCount(iline,"-"))
@@ -107,14 +108,15 @@ public static boolean isFrostDatesFile ( String filename )
 			}
 		}
 	}
-	catch ( Exception e ) {
+	catch (Exception IOException ) {
+		// TODO sam 2017-03-17 need to handle
+	}
+	finally {
 		try {	ifp.close();
 		}
 		catch ( Exception e2 ) {
 			// Ignore.
-		}
-		ifp = null;
-		return is_frost_dates;
+		}	
 	}
 	return is_frost_dates;
 }
@@ -162,14 +164,15 @@ public static boolean isReportFile ( String filename )
 			}
 		}
 	}
-	catch ( Exception e ) {
+	catch ( IOException e ) {
+		// TODO sam 2017-03-16 need to handle
+	}
+	finally {
 		try {	ifp.close();
 		}
 		catch ( Exception e2 ) {
 			// Ignore.
 		}
-		ifp = null;
-		return false;
 	}
 	return false;
 }
@@ -220,7 +223,7 @@ throws Exception
 		"Unable to open file \"" + full_fname + "\"" );
 		return ts;
 	}
-	List v = readTimeSeriesList ( tsident_string, in, full_fname, date1, date2, units, read_data );
+	List<TS> v = readTimeSeriesList ( tsident_string, in, full_fname, date1, date2, units, read_data );
 	in.close();
 	if ( (v == null) || (v.size() == 0) ) {
 		// Did not find the time series...
@@ -255,7 +258,7 @@ series).
 @param units Units to convert to.
 @param read_data Indicates whether data should be read (false=no, true=yes).
 */
-public static List readTimeSeriesList ( String tsident_string, String filename,
+public static List<TS> readTimeSeriesList ( String tsident_string, String filename,
 					DateTime date1, DateTime date2, String units, boolean read_data )
 throws Exception
 {	String routine = "StateCU_TS.readTimeSeriesList";
@@ -276,7 +279,7 @@ throws Exception
 		"Unable to open file \"" + full_fname + "\"" );
 		return null;
 	}
-	List tslist = readTimeSeriesList ( tsident_string, in, full_fname, date1, date2, units, read_data);
+	List<TS> tslist = readTimeSeriesList ( tsident_string, in, full_fname, date1, date2, units, read_data);
 	in.close();
 	TS ts;
 	int nts = 0;
@@ -304,7 +307,7 @@ a NULL pointer if not.
 @param units Units to convert to.
 @param read_data Indicates whether data should be read.
 */
-public static List readTimeSeriesList (	String fname, DateTime date1, DateTime date2,
+public static List<TS> readTimeSeriesList (	String fname, DateTime date1, DateTime date2,
 						String units, boolean read_data)
 throws Exception
 {	return readTimeSeriesList ( null, fname, date1, date2, units,read_data);
@@ -326,7 +329,7 @@ the entire time series).
 @param read_data Indicates whether data should be read.
 @exception Exception if there is an error reading the time series.
 */
-private static List readTimeSeriesList ( String req_tsident_string,
+private static List<TS> readTimeSeriesList ( String req_tsident_string,
 						BufferedReader in,
 						String full_filename,
 						DateTime req_date1,
@@ -376,7 +379,7 @@ the entire time series).
 @param read_data Indicates whether data should be read.
 @exception Exception if there is an error reading the time series.
 */
-private static List readTimeSeriesListFromFrostDatesFile (
+private static List<TS> readTimeSeriesListFromFrostDatesFile (
 						String req_tsident_string,
 						BufferedReader ifp,
 						String full_filename,
@@ -391,8 +394,8 @@ throws Exception
 		line_count = 0;			// Count of lines that are read
 	String	chval, iline, message,
 		rtn="StateCU_TS.readTimeSeriesListFromFrostDatesFile";
-	List	v;
-	List tslist = new Vector();		// Time series data to return.
+	List<Object> v;
+	List<TS> tslist = new Vector<TS>();		// Time series data to return.
 	DateTime date = new DateTime(DateTime.PRECISION_YEAR);
 	TSIdent tsident = null;			// Time series identifier used
 						// when creating time series -
@@ -944,7 +947,7 @@ the entire time series).
 @param read_data Indicates whether data should be read.
 @exception Exception if there is an error reading the time series.
 */
-private static List readTimeSeriesListFromReportFile (
+private static List<TS> readTimeSeriesListFromReportFile (
 						String req_tsident_string,
 						BufferedReader in,
 						String full_filename,
@@ -958,7 +961,7 @@ throws Exception
 	String req_data_type = null;
 	String req_interval = null;
 	String req_id_pattern = null;	// Need for wildcarding
-	List tslist = new Vector();
+	List<TS> tslist = new Vector<TS>();
 	int dl = 1;
 	int line_count = 0;
 	TSIdent req_tsident = null;
@@ -1023,12 +1026,12 @@ throws Exception
 	DateTime date2 = new DateTime( DateTime.PRECISION_MONTH);
 					// Period to allocate time series.
 	DateTime date = new DateTime();	// Used for data iteration.
-	List ilines = new Vector();	// Buffer to hold lines for a single
+	List<String> ilines = new Vector<String>();	// Buffer to hold lines for a single
 					// time series.
 	TSIdent tsident = null;		// Used to create new time series.
 	YearTS area_ts = null, yts = null, depth_ts = null;
 	MonthTS mts = null;		// The time series to return.
-	List v = null;		// Used to parse
+	List<Object> v = null;		// Used to parse
 	String iline;			// Line read from file.
 	boolean include_area_ts = true;	// Indicate which time series to include
 	boolean include_mts = true;
@@ -1425,7 +1428,7 @@ will be grouped and output together.
 @param req_date2 Requested output end of period (only year is used).
 @exception Exception if an error occurs writing the file.
 */
-public static void writeFrostDatesFile ( List tslist, String outfile,
+public static void writeFrostDatesFile ( List<TS> tslist, String outfile,
 					String [] newcomments, DateTime req_date1, DateTime req_date2 )
 throws Exception
 {	PrintWriter out;
@@ -1446,7 +1449,7 @@ throws Exception
 
 	// Get the contents of the file...
 
-	List strings = formatFrostDatesOutput ( tslist, req_date1, req_date2);
+	List<String> strings = formatFrostDatesOutput ( tslist, req_date1, req_date2);
 	// Now write the new data...
 
 	int size = 0;
@@ -1470,13 +1473,13 @@ location (see the writeFrostDatesFile() method for more information).
 @param req_date2 Requested end year, or null to write all data.
 @return Vector of String suitable for a report or file.
 */
-private static List formatFrostDatesOutput ( List tslist, DateTime req_date1, DateTime req_date2 )
+private static List<String> formatFrostDatesOutput ( List<TS> tslist, DateTime req_date1, DateTime req_date2 )
 throws Exception
 {	String	cmnt = "#>";	// Non-permanent comment for header.
 	String	message = null;
 	String	rtn="StateCU_TS.formatFrostDatesOutput";
-	List	strings = new Vector ( 50, 50 );
-	List	v = new Vector ( 50 );
+	List<String>	strings = new Vector<String> ( 50, 50 );
+	List<Object>v = new Vector<Object> ( 50 );
 
 	if ( Message.isDebugOn ) {
 		Message.printStatus ( 1, rtn, "Creating frost dates output " +
@@ -1492,14 +1495,14 @@ throws Exception
 	// This defines the locations.
 
 	int size = tslist.size();
-	List ids = new Vector(size/4 + 4);
+	List<String> ids = new Vector<String>(size/4 + 4);
 	TS ts;
 	int ids_size = 0;
 	boolean found = false;
 	String id;
 	int j = 0;		// Reused in loop below
 	for ( int i = 0; i < size; i++ ) {
-		ts = (TS)tslist.get(i);
+		ts = tslist.get(i);
 		if ( ts == null ) {
 			continue;
 		}
@@ -1507,7 +1510,7 @@ throws Exception
 		id = ts.getLocation();
 		ids_size = ids.size();
 		for ( j = 0; j < ids_size; j++ ) {
-			if ( id.equalsIgnoreCase((String)ids.get(j)) ) {
+			if ( id.equalsIgnoreCase(ids.get(j)) ) {
 				found = true;
 				break;
 			}
@@ -1722,7 +1725,7 @@ throws Exception
 	double	missing = -999.0;
 	Double	missing_Double = new Double ( missing );
 	
-	List iline_v = new Vector(30);
+	List<Object> iline_v = new Vector<Object>(30);
 	DateTime date = new DateTime ( DateTime.PRECISION_YEAR );
 	date.setYear ( earliest_year );
 	int [] date_array;	// Returned from TimeUtil below - reused.

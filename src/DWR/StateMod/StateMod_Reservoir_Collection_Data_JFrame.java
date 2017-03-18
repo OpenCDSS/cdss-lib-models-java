@@ -18,9 +18,10 @@ import java.util.List;
 import RTi.Util.GUI.JScrollWorksheet;
 
 /**
-This class is a JFrame for displaying a Vector of StateMod_Reservoir 
+This class is a JFrame for displaying a list of StateMod_Reservoir 
 collection data in a worksheet.  The worksheet data can be exported to a file or printed.
 */
+@SuppressWarnings("serial")
 public class StateMod_Reservoir_Collection_Data_JFrame 
 extends StateMod_Data_JFrame {
 
@@ -32,7 +33,7 @@ Constructor.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_Reservoir_Collection_Data_JFrame(List data, String titleString, boolean editable)
+public StateMod_Reservoir_Collection_Data_JFrame(List<StateMod_Reservoir> data, String titleString, boolean editable)
 throws Exception {
 	super(data, titleString, editable);
 	setSize(423, getHeight());

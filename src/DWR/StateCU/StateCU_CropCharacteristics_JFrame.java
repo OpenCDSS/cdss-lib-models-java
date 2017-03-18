@@ -53,6 +53,7 @@ import RTi.Util.Message.Message;
 /**
 This class is a GUI for displaying crop char data.
 */
+@SuppressWarnings("serial")
 public class StateCU_CropCharacteristics_JFrame extends JFrame
 implements ActionListener, KeyListener, MouseListener, WindowListener {
 
@@ -169,11 +170,11 @@ private DataSetComponent __cropComponent;
 private DataSetComponent __blaneyComponent;
 
 /**
-Vector of crops data in the DataSetComponent.
+List of crops data in the DataSetComponent.
 */
-private List __cropsVector;
+private List<StateCU_CropCharacteristics> __cropsVector;
 
-private List __blaneyVector;
+private List<StateCU_BlaneyCriddle> __blaneyVector;
 
 private StateCU_CropCharacteristics_TableModel __blaneyModel;
 
@@ -196,11 +197,15 @@ boolean editable) {
 	__dataset = dataset;
 	__cropComponent = __dataset.getComponentForComponentType(
 		StateCU_DataSet.COMP_CROP_CHARACTERISTICS);
-	__cropsVector = (List)__cropComponent.getData();
+	@SuppressWarnings("unchecked")
+	List<StateCU_CropCharacteristics> cropsVector0 = (List<StateCU_CropCharacteristics>)__cropComponent.getData();
+	__cropsVector = cropsVector0;
 
 	__blaneyComponent = __dataset.getComponentForComponentType(
 		StateCU_DataSet.COMP_BLANEY_CRIDDLE);
-	__blaneyVector = (List)__blaneyComponent.getData();
+	@SuppressWarnings("unchecked")
+	List<StateCU_BlaneyCriddle> blaneyVector0 = (List<StateCU_BlaneyCriddle>)__blaneyComponent.getData();
+	__blaneyVector = blaneyVector0;
 
 	setupGUI(0);
 }
@@ -219,11 +224,15 @@ StateCU_CropCharacteristics crop, boolean editable) {
 	__dataset = dataset;
 	__cropComponent = __dataset.getComponentForComponentType(
 		StateCU_DataSet.COMP_CROP_CHARACTERISTICS);
-	__cropsVector = (List)__cropComponent.getData();
+	@SuppressWarnings("unchecked")
+	List<StateCU_CropCharacteristics> cropsVector0 = (List<StateCU_CropCharacteristics>)__cropComponent.getData();
+	__cropsVector = cropsVector0;
 
 	__blaneyComponent = __dataset.getComponentForComponentType(
 		StateCU_DataSet.COMP_BLANEY_CRIDDLE);
-	__blaneyVector = (List)__blaneyComponent.getData();
+	@SuppressWarnings("unchecked")
+	List<StateCU_BlaneyCriddle> blaneyVector0 = (List<StateCU_BlaneyCriddle>)__blaneyComponent.getData();
+	__blaneyVector = blaneyVector0;
 
 	String id = crop.getID();
 	int index = StateCU_Util.indexOf(__cropsVector, id);
@@ -281,7 +290,7 @@ data object.
 @return true if the text fields are okay, false if not.
 */
 private boolean checkInput() {
-	List errors = new Vector();
+	List<String> errors = new Vector<String>();
 	int errorCount = 0;
 
 	// for each field, check if it contains valid input.  If not,
@@ -555,7 +564,7 @@ private void setupGUI(int index) {
 	__firstDaysBetweenJTextField = new JTextField(6);
 	__secondDaysBetweenJTextField = new JTextField(6);
 
-	List v = new Vector();
+	List<String> v = new Vector<String>();
 	v.add(__0_MEAN_TEMP);
 	v.add(__1_28_DEG_FROST);
 	v.add(__2_32_DEG_FROST);

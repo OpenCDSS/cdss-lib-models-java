@@ -28,6 +28,7 @@ import RTi.Util.GUI.JScrollWorksheet;
 This class is a JFrame for displaying well delay table assignment data 
 in a worksheet.  The worksheet data can be exported to a file or printed.
 */
+@SuppressWarnings("serial")
 public class StateMod_Well_DelayTableAssignment_Data_JFrame 
 extends StateMod_Data_JFrame {
 
@@ -55,7 +56,7 @@ the data can be edited, if false they can not.
 @param isDepletion whether the data are depletions or not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_Well_DelayTableAssignment_Data_JFrame(List data, 
+public StateMod_Well_DelayTableAssignment_Data_JFrame(List<StateMod_Well> data, 
 String titleString, boolean editable, boolean isDepletion)
 throws Exception {
 	super();

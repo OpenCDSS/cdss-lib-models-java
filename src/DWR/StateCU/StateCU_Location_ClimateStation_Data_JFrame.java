@@ -19,9 +19,10 @@ import DWR.StateMod.StateMod_Data_JFrame;
 import RTi.Util.GUI.JScrollWorksheet;
 
 /**
-This class is a JFrame for displaying a Vector of StateCU_Location 
+This class is a JFrame for displaying a list of StateCU_Location 
 climate station data in a worksheet.  The worksheet data can be exported to a file or printed.
 */
+@SuppressWarnings("serial")
 public class StateCU_Location_ClimateStation_Data_JFrame 
 extends StateMod_Data_JFrame {
 
@@ -33,7 +34,7 @@ Constructor.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateCU_Location_ClimateStation_Data_JFrame(List data, String titleString, boolean editable)
+public StateCU_Location_ClimateStation_Data_JFrame(List<StateCU_Location> data, String titleString, boolean editable)
 throws Exception {
 	super(data, titleString, editable);
 	setSize(610, getHeight());

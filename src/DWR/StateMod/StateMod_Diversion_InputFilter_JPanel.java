@@ -10,6 +10,7 @@ import RTi.Util.String.StringUtil;
 /**
 Input filter panel for StateMod diversion data.
 */
+@SuppressWarnings("serial")
 public class StateMod_Diversion_InputFilter_JPanel extends InputFilter_JPanel
 {
 
@@ -23,7 +24,7 @@ for StateMod diversion station queries.  This is used by the StateMod GUI.
 public StateMod_Diversion_InputFilter_JPanel ( StateMod_DataSet dataset )
 throws Exception
 {	super();
-    List input_filters = new Vector(15);
+    List<InputFilter> input_filters = new Vector<InputFilter>(15);
 	InputFilter filter = null;
 	input_filters.add ( new InputFilter (
 		"", "",

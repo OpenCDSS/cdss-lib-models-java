@@ -69,7 +69,7 @@ The actual time series data are stored as separate components and are shared amo
 Any calls to "set" routines sets the StateMod_DataSet.COMP_RESERVOIR_STATIONS dirty.
 */
 public class StateMod_ReservoirClimate extends StateMod_Data
-implements Cloneable, Comparable {
+implements Cloneable, Comparable<StateMod_Data> {
 
 /**
 Precipitation station type.
@@ -112,16 +112,16 @@ public Object clone() {
 /**
 Compares this object to another StateMod_Data object based on the sorted
 order from the StateMod_Data variables, and then by _type and _weight, in that order.
-@param o the object to compare against.
+@param data the object to compare against.
 @return 0 if they are the same, 1 if this object is greater than the other object, or -1 if it is less.
 */
-public int compareTo(Object o) {
-	int res = super.compareTo(o);
+public int compareTo(StateMod_Data data) {
+	int res = super.compareTo(data);
 	if (res != 0) {
 		return res;
 	}
 
-	StateMod_ReservoirClimate rc = (StateMod_ReservoirClimate)o;
+	StateMod_ReservoirClimate rc = (StateMod_ReservoirClimate)data;
 	if (_type < rc._type) {
 		return -1;
 	}
@@ -144,7 +144,7 @@ Creates a backup of the current data object and stores it in _original,
 for use in determining if an object was changed inside of a GUI.
 */
 public void createBackup() {
-	_original = clone();
+	_original = (StateMod_ReservoirClimate)clone();
 	((StateMod_ReservoirClimate)_original)._isClone = false;
 	_isClone = true;
 }
@@ -155,26 +155,26 @@ Compare two rights Vectors and see if they are the same.
 @param v2 the second Vector of StateMod_ReservoirClimate s to check.  Cannot be null.
 @return true if they are the same, false if not.
 */
-public static boolean equals(List v1, List v2) {
+public static boolean equals(List<StateMod_ReservoirClimate> v1, List<StateMod_ReservoirClimate> v2) {
 	String routine = "StateMod_ReservoirClimate.equals(Vector, Vector)";
 	StateMod_ReservoirClimate r1;	
 	StateMod_ReservoirClimate r2;	
 	if (v1.size() != v2.size()) {
-		Message.printStatus(1, routine, "Vectors are different sizes");
+		Message.printStatus(1, routine, "Lists are different sizes");
 		return false;
 	}
 	else {
 		// sort the Vectors and compare item-by-item.  Any differences
 		// and data will need to be saved back into the dataset.
 		int size = v1.size();
-		Message.printStatus(1, routine, "Vectors are of size: " + size);
-		List v1Sort = StateMod_Util.sortStateMod_DataVector(v1);
-		List v2Sort = StateMod_Util.sortStateMod_DataVector(v2);
-		Message.printStatus(1, routine, "Vectors have been sorted");
+		Message.printStatus(1, routine, "Lists are of size: " + size);
+		List<StateMod_ReservoirClimate> v1Sort = StateMod_Util.sortStateMod_DataVector(v1);
+		List<StateMod_ReservoirClimate> v2Sort = StateMod_Util.sortStateMod_DataVector(v2);
+		Message.printStatus(1, routine, "Lists have been sorted");
 	
 		for (int i = 0; i < size; i++) {			
-			r1 = (StateMod_ReservoirClimate)v1Sort.get(i);	
-			r2 = (StateMod_ReservoirClimate)v2Sort.get(i);	
+			r1 = v1Sort.get(i);	
+			r2 = v2Sort.get(i);	
 			Message.printStatus(1, routine, r1.toString());
 			Message.printStatus(1, routine, r2.toString());
 			Message.printStatus(1, routine, "Element " + i + " comparison: " + r1.compareTo(r2));
@@ -296,7 +296,7 @@ public void setWeight(String str) {
 Calculates the number of StateMod_ReservoirClimate objects that are evaporation stations.
 @return the number of StateMod_ReservoirClimate objects that are evaporation stations.
 */
-public static int getNumEvap(List climates)
+public static int getNumEvap(List<StateMod_ReservoirClimate> climates)
 {	if (climates == null) {
 		return 0;
 	}
@@ -305,7 +305,7 @@ public static int getNumEvap(List climates)
 	int num = climates.size();
 	
 	for (int i=0; i<num; i++) {
-		if (((StateMod_ReservoirClimate)climates.get(i)).getType() == CLIMATE_EVAP) {
+		if (climates.get(i).getType() == CLIMATE_EVAP) {
 			nevap++;
 		}
 	} 
@@ -316,7 +316,7 @@ public static int getNumEvap(List climates)
 Calculates the number of StateMod_ReservoirClimate objects that are precipitation stations.
 @return the number of StateMod_ReservoirClimate objects that are precipitation stations.
 */
-public static int getNumPrecip(List climates)
+public static int getNumPrecip(List<StateMod_ReservoirClimate> climates)
 {	if (climates == null) {
 		return 0;
 	}
@@ -325,7 +325,7 @@ public static int getNumPrecip(List climates)
 	int num = climates.size();
 	
 	for (int i=0; i<num; i++) {
-		if (((StateMod_ReservoirClimate)climates.get(i)).getType() == CLIMATE_PTPX) {
+		if (climates.get(i).getType() == CLIMATE_PTPX) {
 			nptpx++;
 		}
 	}
@@ -354,7 +354,7 @@ StateMod_DataSet.COMP_RESERVOIR_EVAP_STATIONS.
 @throws Exception if an error occurs.
 */
 public static void writeListFile(String filename, String delimiter,
-boolean update, List data, List newComments, int componentType) 
+boolean update, List<StateMod_ReservoirClimate> data, List<String> newComments, int componentType) 
 throws Exception
 {	String routine = "StateMod_ReservoirClimate.writeListFile";
 	int size = 0;
@@ -362,7 +362,7 @@ throws Exception
 		size = data.size();
 	}
 	
-	List fields = new Vector();
+	List<String> fields = new Vector<String>();
 	fields.add("ReservoirID");
 	fields.add("StationID");
 	fields.add("PercentWeight");
@@ -373,7 +373,7 @@ throws Exception
 	int comp = componentType;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.get(i);
+		s = fields.get(i);
 		names[i] = StateMod_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateMod_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -386,9 +386,9 @@ throws Exception
 	int j = 0;
 	PrintWriter out = null;
 	StateMod_ReservoirClimate cli = null;
-	List commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	String[] line = new String[fieldCount];
 	StringBuffer buffer = new StringBuffer();
@@ -396,12 +396,12 @@ throws Exception
 	try {
 		// Add some basic comments at the top of the file.  Do this to a copy of the
 		// incoming comments so that they are not modified in the calling code.
-		List newComments2 = null;
+		List<String> newComments2 = null;
 		if ( newComments == null ) {
-			newComments2 = new Vector();
+			newComments2 = new Vector<String>();
 		}
 		else {
-			newComments2 = new Vector(newComments);
+			newComments2 = new Vector<String>(newComments);
 		}
 		newComments2.add(0,"");
 		if ( componentType == StateMod_DataSet.COMP_RESERVOIR_STATION_EVAP_STATIONS ) {

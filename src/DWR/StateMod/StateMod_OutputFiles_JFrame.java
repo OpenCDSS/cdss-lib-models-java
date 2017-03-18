@@ -73,6 +73,7 @@ import RTi.Util.String.StringUtil;
 This class is a GUI for displaying the output files that have been created
 and also viewing/editing them.
 */
+@SuppressWarnings("serial")
 public class StateMod_OutputFiles_JFrame extends JFrame
 implements ActionListener, ListSelectionListener, MouseListener, WindowListener{
 
@@ -292,15 +293,15 @@ public void fillFileJListContents(){
 	int i = 0;
 	int length = filelist.length;
 
-	List overall = new Vector();
+	List<String> overall = new Vector<String>();
 
-	List v1 = new Vector(3);
+	List<Object> v1 = new Vector<Object>(3);
 	v1.add("File");
 	v1.add("Contents");
 	v1.add("Description");
 	iline = StringUtil.formatString(v1, format);
 	overall.add(iline);
-	List v2 = new Vector(3);
+	List<Object> v2 = new Vector<Object>(3);
 	v2.add("----");
 	v2.add("--------");
 	v2.add("-----------");
@@ -314,7 +315,7 @@ public void fillFileJListContents(){
 		filename = __path + filelist[i];
 		if (IOUtil.fileReadable(filename)) {
 			Message.printStatus(10, rtn, "Adding " + filename);
-			List v = new Vector(3);
+			List<Object> v = new Vector<Object>(3);
 			v.add(filelist[i++]);
 			v.add(filelist[i++]);
 			v.add(filelist[i++]);

@@ -5,6 +5,7 @@ import RTi.Util.GUI.JWorksheet_AbstractExcelCellRenderer;
 /**
 This class is used for rendering cells for well augmentation plan data.
 */
+@SuppressWarnings("serial")
 public class StateMod_Plan_WellAugmentation_Data_CellRenderer
 extends JWorksheet_AbstractExcelCellRenderer {
 

@@ -83,6 +83,7 @@ import RTi.Util.String.StringUtil;
 /**
 This class is a gui for displaying and editing well right data.
 */
+@SuppressWarnings("serial")
 public class StateMod_Well_Right_JFrame extends JFrame
 implements ActionListener, KeyListener, MouseListener, WindowListener {
 
@@ -228,7 +229,8 @@ exist.
 */
 private int checkInput() {
 	String routine = "StateMod_Well_Right_JFrame.checkInput";
-	List v = __worksheet.getAllData();
+	@SuppressWarnings("unchecked")
+	List<StateMod_WellRight> v = (List<StateMod_WellRight>)__worksheet.getAllData();
 
 	int size = v.size();
 	StateMod_WellRight right = null;
@@ -323,8 +325,9 @@ private boolean saveData() {
 	boolean needToSave = false;
 
 	// if the Vectors are differently-sized, they're different
-	List wv = __worksheet.getAllData();		// w for worksheet
-	List lv = __currentWell.getRights();		// l for welL
+	@SuppressWarnings("unchecked")
+	List<StateMod_WellRight> wv = (List<StateMod_WellRight>)__worksheet.getAllData();		// w for worksheet
+	List<StateMod_WellRight> lv = (List<StateMod_WellRight>)__currentWell.getRights();		// l for welL
 
 	needToSave = !(StateMod_WellRight.equals(wv, lv));
 
@@ -338,12 +341,13 @@ private boolean saveData() {
 
 	// at this point, remove the old diversion rights from the original
 	// component Vector
-	List wellRights = (List)(__dataset.getComponentForComponentType(
+	@SuppressWarnings("unchecked")
+	List<StateMod_WellRight> wellRights = (List<StateMod_WellRight>)(__dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_WELL_RIGHTS)).getData();
 	int size = lv.size();
 	StateMod_WellRight wr;
 	for (int i = 0; i < size; i++) {
-		wr = (StateMod_WellRight)lv.get(i);
+		wr = lv.get(i);
 		StateMod_Util.removeFromVector(wellRights, wr);
 	}
 
@@ -362,7 +366,7 @@ private boolean saveData() {
 	// REVISIT (JTS - 2003-10-10)
 	// here we are sorting the full data array -- may be a performance
 	// issue
-	List sorted = StateMod_Util.sortStateMod_DataVector(wellRights);
+	List<StateMod_WellRight> sorted = StateMod_Util.sortStateMod_DataVector(wellRights);
 	__dataset.getComponentForComponentType(StateMod_DataSet.COMP_WELL_RIGHTS)
 		.setData(sorted);
 	__currentWell.disconnectRights();
@@ -507,11 +511,10 @@ private void setupGUI() {
 	int widths[] = null;
 	JScrollWorksheet jsw = null;
 	try {	
-		List v = new Vector();
-		List v2 = __currentWell.getRights();
+		List<StateMod_WellRight> v = new Vector<StateMod_WellRight>();
+		List<StateMod_WellRight> v2 = __currentWell.getRights();
 		for (int i = 0; i < v2.size(); i++) {
-			v.add(((StateMod_WellRight)
-				(v2.get(i))).clone());
+			v.add((StateMod_WellRight)v2.get(i).clone());
 		}			
 		StateMod_WellRight_TableModel tmw = new
 			StateMod_WellRight_TableModel( v, __editable, true);
@@ -534,7 +537,7 @@ private void setupGUI() {
 	__worksheet.addMouseListener(this);	
 	__worksheet.addKeyListener(this);
 
-	List v = new Vector();
+	List<String> v = new Vector<String>();
 	v.add("0 - Off");
 	v.add("1 - On");
 	__worksheet.setColumnJComboBoxValues(

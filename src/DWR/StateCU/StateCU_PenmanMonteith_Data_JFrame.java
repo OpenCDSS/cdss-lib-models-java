@@ -9,6 +9,7 @@ import RTi.Util.GUI.JScrollWorksheet;
 This class is a JFrame for displaying a list of StateCU_PenmanMonteith data in
 a worksheet.  The worksheet data can be exported to a file or printed.
 */
+@SuppressWarnings("serial")
 public class StateCU_PenmanMonteith_Data_JFrame 
 extends StateMod_Data_JFrame {
 
@@ -20,7 +21,7 @@ Constructor.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateCU_PenmanMonteith_Data_JFrame(List data, String titleString,
+public StateCU_PenmanMonteith_Data_JFrame(List<StateCU_PenmanMonteith> data, String titleString,
 boolean editable)
 throws Exception {
 	super(data, titleString, editable);

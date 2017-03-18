@@ -17,9 +17,9 @@
 
 package DWR.StateCU;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Vector;
 
 import javax.swing.JTextField;
 
@@ -75,28 +75,28 @@ public static Validator[] getIDValidators()
 Determine the CU Location given a part identifier.  If the part identifier
 matches a full location, then the full location identifier is returned.  Only ditch
 identifiers can be matched (collections of parcels cannot).
-@param CULocation_Vector a Vector of StateCU_Location to be searched.  The
+@param CULocation_List a Vector of StateCU_Location to be searched.  The
 collection information is assumed to have been defined for the locations.
 @param part_id The identifier to be found in the list of locations.
 @return the matching StateCU_Location, or null if a match cannot be found.
 */
-public static StateCU_Location getLocationForPartID ( List CULocation_Vector, String part_id )
+public static StateCU_Location getLocationForPartID ( List<StateCU_Location> CULocation_List, String part_id )
 {
 	// First try to match the main location.
 	
-	int pos = indexOf ( CULocation_Vector, part_id );
+	int pos = indexOf ( CULocation_List, part_id );
 	if ( pos >= 0 ) {
-		return ( (StateCU_Location)CULocation_Vector.get(pos) );
+		return CULocation_List.get(pos);
 	}
 	// If here, search the location collections...
 	int size = 0;
-	if ( CULocation_Vector != null ) {
-		size = CULocation_Vector.size();
+	if ( CULocation_List != null ) {
+		size = CULocation_List.size();
 	}
 	StateCU_Location culoc;
-	List part_ids;
+	List<String> part_ids;
 	for ( int i = 0; i < size; i++ ) {
-		culoc = (StateCU_Location)CULocation_Vector.get(i);
+		culoc = CULocation_List.get(i);
 		// Only check aggregates/collections that are composed of ditches.
 		if ( !culoc.getCollectionPartType().equalsIgnoreCase(StateCU_Location.COLLECTION_PART_TYPE_DITCH) ) {
 			continue;
@@ -174,12 +174,12 @@ useful when retrieving time series.
 @return a non-null list of data types.  The list will have zero size if no
 data types are requested or are valid.
 */
-public static List getTimeSeriesDataTypes ( String binary_filename, int comp_type, String id,
+public static List<String> getTimeSeriesDataTypes ( String binary_filename, int comp_type, String id,
     StateCU_DataSet dataset, double statecu_version, int interval, boolean include_input,
     boolean include_input_estimated, boolean include_output, boolean check_availability,
     boolean add_group, boolean add_note )
 {   String routine = "StateCU_Util.getTimeSeriesDataTypes";
-	List data_types = new Vector();
+	List<String> data_types = new ArrayList<String>();
 
     StateCU_BTS bts = null;
     if ( binary_filename != null ) {
@@ -219,7 +219,7 @@ public static List getTimeSeriesDataTypes ( String binary_filename, int comp_typ
         }
     //}
 
-    data_types = new Vector(parameters.length);
+    data_types = new ArrayList<String>(parameters.length);
     for ( int i = 0; i < parameters.length; i++ ) {
         data_types.add ( parameters[i] );
     }
@@ -228,19 +228,20 @@ public static List getTimeSeriesDataTypes ( String binary_filename, int comp_typ
 }
 
 /**
-Find the position of a StateCU_Data object in the data Vector, using the
+Find the position of a StateCU_Data object in the data list, using the
 identifier.  The position for the first match is returned.
 @return the position, or -1 if not found.
+@param data an object extended from StateCU_Data
 @param id StateCU_Data identifier.
 */
-public static int indexOf ( List data, String id )
+public static int indexOf ( List<? extends StateCU_Data> data, String id )
 {	int size = 0;
 	if ( data != null ) {
 		size = data.size();
 	}
 	StateCU_Data d = null;
 	for (int i = 0; i < size; i++) {
-		d = (StateCU_Data)data.get(i);
+		d = data.get(i);
 		if ( id.equalsIgnoreCase ( d._id ) ) {
 			return i;
 		}
@@ -249,19 +250,19 @@ public static int indexOf ( List data, String id )
 }
 
 /**
-Find the position of a StateCU_Data object in the data Vector, using the name.
+Find the position of a StateCU_Data object in the data list, using the name.
 The position for the first match is returned.
 @return the position, or -1 if not found.
 @param name StateCU_Data name.
 */
-public static int indexOfName ( List data, String name )
+public static int indexOfName ( List<? extends StateCU_Data> data, String name )
 {	int size = 0;
 	if ( data != null ) {
 		size = data.size();
 	}
 	StateCU_Data d = null;
 	for (int i = 0; i < size; i++) {
-		d = (StateCU_Data)data.get(i);
+		d = data.get(i);
 		if ( name.equalsIgnoreCase ( d._name ) ) {
 			return i;
 		}
@@ -331,33 +332,33 @@ public static String lookupTimeSeriesGraphTitle ( int comp_type )
 }
 
 /**
-Find a list of StateCU_Data in a Vector, using a regular expression to match identifiers.
-@param data_Vector a Vector of StateCU_Data to search.
+Find a list of StateCU_Data in a list, using a regular expression to match identifiers.
+@param data_List a list of StateCU_Data to search.
 @param pattern Regular expression pattern to use when finding 
-@return a Vector containing StateCU_Data from data_Vector that have an
-identifier that matches the requested pattern.  A non-null Vector will be
-returned but it may have zero elements.
+@return a list containing StateCU_Data from data_List that have an
+identifier that matches the requested pattern.  A non-null list will be
+returned but it may have zero elements.  Cast the result to the proper list of objects.
 */
-public static List match ( List data_Vector, String pattern )
+public static List<StateCU_Data> match ( List<? extends StateCU_Data> data_List, String pattern )
 {	int size = 0;
-	if ( data_Vector != null ) {
-		size = data_Vector.size();
+	if ( data_List != null ) {
+		size = data_List.size();
 	}
 	StateCU_Data data = null;
-	List matches_Vector = new Vector ( size/10 + 1 );	// Guess size
+	List<StateCU_Data> matches_List = new ArrayList<StateCU_Data>();
 	// Apparently if the pattern is "*", Java complains so do a specific check...
 	boolean return_all = false;
 	if ( pattern.equals("*") ) {
 		return_all = true;
 	}
-	// Loop regardless (always return a new Vector).
+	// Loop regardless (always return a new list).
 	for ( int i = 0; i < size; i++ ) {
-		data = (StateCU_Data)data_Vector.get(i);
+		data = data_List.get(i);
 		if ( return_all || data.getID().matches(pattern) ) {
-			matches_Vector.add ( data );
+			matches_List.add ( data );
 		}
 	}
-	return matches_Vector;
+	return matches_List;
 }
 
 /**
@@ -365,30 +366,32 @@ Sorts a list of StateCU_Data objects, depending on the compareTo() method for th
 @param data a list of StateCU_Data objects.  Can be null.
 @return a new sorted list with references to the same data objects in the
 passed-in list.  If a null list is passed in, an empty list will be returned.
+Cast the result to the list type being sorted
 */
-public static List sortStateCUDataList ( List data )
+public static List<StateCU_Data> sortStateCUDataList ( List<? extends StateCU_Data> data )
 {	return sortStateCUDataList ( data, true );
 }
 
 /**
 Sorts a list of StateCU_Data objects, depending on the compareTo() method for the specific object.
-@param data a list of StateMod_Data objects.  Can be null.
+@param data a list of StateMod_Data objects.  Cannot be null.
 @param return_new If true, return a new list with references to the data.
 If false, return the original list, with sorted contents.
 @return a sorted list with references to the same data objects in the
 passed-in list.  If a null list is passed in, an empty list will be returned.
 */
-public static List sortStateCUDataList ( List data, boolean return_new )
+public static List<StateCU_Data> sortStateCUDataList ( List<? extends StateCU_Data> data, boolean return_new )
 {	if (data == null) {
-		return new Vector();
+		return new ArrayList<StateCU_Data>();
 	}
-	List v = data;
+	@SuppressWarnings("unchecked")
+	List<StateCU_Data> v = (List<StateCU_Data>)data;
 	int size = data.size();
 	if ( return_new ) {
 		if (size == 0) {
-			return new Vector();
+			return new ArrayList<StateCU_Data>();
 		}
-		v = new Vector();
+		v = new ArrayList<StateCU_Data>();
 		for (int i = 0; i < size; i++) {
 			v.add(data.get(i));
 		}

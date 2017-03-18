@@ -81,6 +81,7 @@ import RTi.Util.Message.Message;
 This class displays reservoir owner account information and allows 
 owner accounts to be added or deleted from the current reservoir.
 */
+@SuppressWarnings("serial")
 public class StateMod_Reservoir_Owner_JFrame extends JFrame
 implements ActionListener, KeyListener, MouseListener, WindowListener {
 
@@ -218,7 +219,8 @@ exist.
 */
 private int checkInput() {
 	String routine = "StateMod_Reservoir_Owner_JFrame.checkInput";
-	List v = __worksheet.getAllData();
+	@SuppressWarnings("unchecked")
+	List<StateMod_ReservoirAccount> v = (List<StateMod_ReservoirAccount>)__worksheet.getAllData();
 
 	int size = v.size();
 	StateMod_ReservoirAccount acct = null;
@@ -230,7 +232,7 @@ private int checkInput() {
 	int currID = 0;
 
 	if (size > 0) {
-		acct = (StateMod_ReservoirAccount)(v.get(0));
+		acct = v.get(0);
 
 		id = acct.getID();
 		if (!id.trim().equals("1")) {
@@ -241,7 +243,7 @@ private int checkInput() {
 	}
 	
 	for (int i = 0; i < size; i++) {
-		acct = (StateMod_ReservoirAccount)(v.get(i));
+		acct = v.get(i);
 
 		id = acct.getID();
 
@@ -337,8 +339,9 @@ private boolean saveData() {
 	boolean needToSave = false;
 
 	// if the Vectors are differently-sized, they're different
-	List wv = __worksheet.getAllData();		// w for worksheet
-	List rv = __currentRes.getAccounts();	// i for instream flow
+	@SuppressWarnings("unchecked")
+	List<StateMod_ReservoirAccount> wv = (List<StateMod_ReservoirAccount>)__worksheet.getAllData();		// w for worksheet
+	List<StateMod_ReservoirAccount> rv = __currentRes.getAccounts();	// i for instream flow
 
 	needToSave = !(StateMod_ReservoirAccount.equals(wv, rv));
 
@@ -353,11 +356,10 @@ private boolean saveData() {
 	// now add the elements from the new Vector to the reservoirRights 
 	// Vector.
 	int size = wv.size();
-	List clone = new Vector();
+	List<StateMod_ReservoirAccount> clone = new Vector<StateMod_ReservoirAccount>();
 	StateMod_ReservoirAccount ra;
 	for (int i = 0; i < size; i++) {
-		ra = (StateMod_ReservoirAccount)
-			((StateMod_ReservoirAccount)(wv.get(i))).clone();
+		ra = (StateMod_ReservoirAccount)wv.get(i).clone();
 		clone.add(ra);	
 	}
 
@@ -518,13 +520,11 @@ private void setupGUI() {
 	int widths[] = null;
 	JScrollWorksheet jsw = null;
 	try {	
-		List v = new Vector();
-		List v2 = __currentRes.getAccounts();
+		List<StateMod_ReservoirAccount> v = new Vector<StateMod_ReservoirAccount>();
+		List<StateMod_ReservoirAccount> v2 = __currentRes.getAccounts();
 		StateMod_ReservoirAccount ra;
 		for (int i = 0; i < v2.size(); i++) {
-			ra = (StateMod_ReservoirAccount)
-				((StateMod_ReservoirAccount)v2.get(i))
-				.clone();
+			ra = (StateMod_ReservoirAccount)v2.get(i).clone();
 			v.add(ra);
 		}			
 		StateMod_ReservoirAccount_TableModel tmr = new
@@ -536,7 +536,7 @@ private void setupGUI() {
 		jsw = new JScrollWorksheet(crr, tmr, p);
 		__worksheet = jsw.getJWorksheet();
 
-		List owner = StateMod_ReservoirAccount.getN2ownChoices (true);
+		List<String> owner = StateMod_ReservoirAccount.getN2ownChoices (true);
 		__worksheet.setColumnJComboBoxValues(
 			StateMod_ReservoirAccount_TableModel.COL_OWNERSHIP_TIE,
 			owner, false);

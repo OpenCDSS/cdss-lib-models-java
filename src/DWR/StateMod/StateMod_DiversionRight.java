@@ -86,7 +86,7 @@ import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 
 public class StateMod_DiversionRight extends StateMod_Data 
-implements Cloneable, Comparable, StateMod_ComponentValidator, StateMod_Right {
+implements Cloneable, Comparable<StateMod_Data>, StateMod_ComponentValidator, StateMod_Right {
 
 /**
 Administration number.
@@ -124,16 +124,16 @@ public Object clone() {
 /**
 Compares this object to another StateMod_Data object based on the sorted
 order from the StateMod_Data variables, and then by irtem and dcrdiv, in that order.
-@param o the object to compare against.
+@param data the object to compare against.
 @return 0 if they are the same, 1 if this object is greater than the other object, or -1 if it is less.
 */
-public int compareTo(Object o) {
-	int res = super.compareTo(o);
+public int compareTo(StateMod_Data data) {
+	int res = super.compareTo(data);
 	if (res != 0) {
 		return res;
 	}
 
-	StateMod_DiversionRight right = (StateMod_DiversionRight)o;
+	StateMod_DiversionRight right = (StateMod_DiversionRight)data;
 
 	res = _irtem.compareTo(right.getIrtem());
 	if (res == 0) {
@@ -157,23 +157,23 @@ public int compareTo(Object o) {
 Creates a copy of the object for later use in checking to see if it was changed in a GUI.
 */
 public void createBackup() {
-	_original = clone();
+	_original = (StateMod_DiversionRight)clone();
 	((StateMod_DiversionRight)_original)._isClone = false;
 	_isClone = true;
 }
 
 /**
-Compare two rights Vectors and see if they are the same.
-@param v1 the first Vector of StateMod_DiversionRights to check.  Cannot be null.
-@param v2 the second Vector of StateMod_DiversionRights to check.  Cannot be null.
+Compare two rights list and see if they are the same.
+@param v1 the first list of StateMod_DiversionRight to check.  Cannot be null.
+@param v2 the second list of StateMod_DiversionRight to check.  Cannot be null.
 @return true if they are the same, false if not.
 */
-public static boolean equals(List v1, List v2) {
+public static boolean equals(List<StateMod_DiversionRight> v1, List<StateMod_DiversionRight> v2) {
 	String routine = "StateMod_DiversionRight.equals(Vector, Vector)";
 	StateMod_DiversionRight r1;	
 	StateMod_DiversionRight r2;	
 	if (v1.size() != v2.size()) {
-		Message.printStatus(1, routine, "Vectors are different sizes");
+		Message.printStatus(1, routine, "Lists are different sizes");
 		return false;
 	}
 	else {
@@ -181,13 +181,13 @@ public static boolean equals(List v1, List v2) {
 		// and data will need to be saved back into the dataset.
 		int size = v1.size();
 		//Message.printStatus(2, routine, "Lists are of size: " + size);
-		List v1Sort = StateMod_Util.sortStateMod_DataVector(v1);
-		List v2Sort = StateMod_Util.sortStateMod_DataVector(v2);
+		List<StateMod_DiversionRight> v1Sort = StateMod_Util.sortStateMod_DataVector(v1);
+		List<StateMod_DiversionRight> v2Sort = StateMod_Util.sortStateMod_DataVector(v2);
 		//Message.printStatus(2, routine, "Lists have been sorted");
 	
 		for (int i = 0; i < size; i++) {			
-			r1 = (StateMod_DiversionRight)v1Sort.get(i);	
-			r2 = (StateMod_DiversionRight)v2Sort.get(i);	
+			r1 = v1Sort.get(i);	
+			r2 = v2Sort.get(i);	
 			//Message.printStatus(2, routine, r1.toString());
 			//Message.printStatus(2, routine, r2.toString());
 			//Message.printStatus(2, routine, "Element " + i + " comparison: " + r1.compareTo(r2));
@@ -281,15 +281,15 @@ The options are of the form "0" if include_notes is false and "0 - Off", if incl
 @return a list of on/off switch option strings, for use in GUIs.
 @param include_notes Indicate whether notes should be added after the parameter values.
 */
-public static List getIdvrswChoices ( boolean include_notes )
-{	List v = new Vector(2);
+public static List<String> getIdvrswChoices ( boolean include_notes )
+{	List<String> v = new Vector<String>(2);
 	v.add ( "0 - Off" );	// Possible options are listed here.
 	v.add ( "1 - On" );
 	if ( !include_notes ) {
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.set(i, StringUtil.getToken((String)v.get(i), " ", 0, 0) );
+			v.set(i, StringUtil.getToken(v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
@@ -357,7 +357,7 @@ Parses the diversion rights file and returns a Vector of StateMod_DiversionRight
 public static List<StateMod_DiversionRight> readStateModFile(String filename)
 throws Exception {
 	String routine = "StateMod_DiversionRight.readStateModFile";
-	List<StateMod_DiversionRight> theDivRights = new Vector();
+	List<StateMod_DiversionRight> theDivRights = new Vector<StateMod_DiversionRight> ();
 
 	int format_0[] = {
 		StringUtil.TYPE_STRING,
@@ -374,7 +374,7 @@ throws Exception {
 		8,
 		8 };
 	String iline = null;
-	List v = new Vector(6);
+	List<Object> v = new Vector<Object>(6);
 	BufferedReader in = null;
 	StateMod_DiversionRight aRight = null;
 
@@ -558,12 +558,12 @@ public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset 
 Writes a diversion rights file.
 @param infile the original file
 @param outfile the new file to write
-@param theRights a Vector of StateMod_DiversionRight objects to right
+@param theRights a list of StateMod_DiversionRight objects to right
 @param newComments new comments to add to the header
 @throws Exception if an error occurs.
 */
 public static void writeStateModFile(String infile, String outfile,
-		List theRights, List newComments)
+		List<StateMod_DiversionRight> theRights, List<String> newComments)
 throws Exception {
 	writeStateModFile(infile, outfile, theRights, newComments, false);
 }
@@ -578,11 +578,11 @@ Writes a diversion rights file.
 @throws Exception if an error occurs.
 */
 public static void writeStateModFile(String infile, String outfile,
-		List theRights, List newComments, boolean useOldAdminNumFormat)
+		List<StateMod_DiversionRight> theRights, List<String> newComments, boolean useOldAdminNumFormat)
 throws Exception {
-	List commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	PrintWriter out = null;
 	String routine = "StateMod_DiversionRight.writeStateModFile";
@@ -603,7 +603,7 @@ throws Exception {
 			format_0 = "%-12.12s%-24.24s%-12.12s%16.16s%8.2F%8d";
 		}
 		StateMod_DiversionRight right = null;
-		List v = new Vector(6);
+		List<Object> v = new Vector<Object>(6);
 
 		// print out the non-permanent header
 		out.println(cmnt);
@@ -670,8 +670,8 @@ header (true) or to create a new file with a new header.
 @param newComments comments to add at the top of the file (e.g., command file, HydroBase version).
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter, boolean update, List data,
-	List newComments ) 
+public static void writeListFile(String filename, String delimiter, boolean update,
+	List<StateMod_DiversionRight> data, List<String> newComments ) 
 throws Exception
 {	String routine = "StateMod_DiversionRight.writeListFile";
 	int size = 0;
@@ -679,7 +679,7 @@ throws Exception
 		size = data.size();
 	}
 	
-	List fields = new Vector();
+	List<String> fields = new Vector<String>();
 	fields.add("ID");
 	fields.add("Name");
 	fields.add("StationID");
@@ -693,7 +693,7 @@ throws Exception
 	int comp = StateMod_DataSet.COMP_DIVERSION_RIGHTS;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.get(i);
+		s = fields.get(i);
 		names[i] = StateMod_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateMod_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -705,9 +705,9 @@ throws Exception
 
 	int j = 0;
 	StateMod_DiversionRight right = null;
-	List commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	String[] line = new String[fieldCount];
 	StringBuffer buffer = new StringBuffer();
@@ -716,12 +716,12 @@ throws Exception
 	try {
 		// Add some basic comments at the top of the file.  Do this to a copy of the
 		// incoming comments so that they are not modified in the calling code.
-		List newComments2 = null;
+		List<String> newComments2 = null;
 		if ( newComments == null ) {
-			newComments2 = new Vector();
+			newComments2 = new Vector<String>();
 		}
 		else {
-			newComments2 = new Vector(newComments);
+			newComments2 = new Vector<String>(newComments);
 		}
 		newComments2.add(0,"");
 		newComments2.add(1,"StateMod diversion rights as a delimited list file.");
@@ -739,7 +739,7 @@ throws Exception
 		out.println(buffer.toString());
 		
 		for (int i = 0; i < size; i++) {
-			right = (StateMod_DiversionRight)data.get(i);
+			right = data.get(i);
 			
 			line[0] = StringUtil.formatString(right.getID(),formats[0]).trim();
 			line[1] = StringUtil.formatString(right.getName(),formats[1]).trim();

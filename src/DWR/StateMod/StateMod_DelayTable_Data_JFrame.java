@@ -43,6 +43,7 @@ import RTi.Util.GUI.JScrollWorksheet;
 This class is a JFrame for displaying a Vector of StateMod_DelayTable data in
 a worksheet.  The worksheet data can be exported to a file or printed.
 */
+@SuppressWarnings("serial")
 public class StateMod_DelayTable_Data_JFrame 
 extends StateMod_Data_JFrame {
 
@@ -75,7 +76,7 @@ the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 @deprecated use the other one without returnIsPercent.
 */
-public StateMod_DelayTable_Data_JFrame(List data, String titleString,
+public StateMod_DelayTable_Data_JFrame(List<StateMod_DelayTable_Data_TableModel> data, String titleString,
 boolean monthlyData, boolean returnIsPercent, boolean editable)
 throws Exception {
 	this(data, titleString, monthlyData, editable);
@@ -92,7 +93,7 @@ false, they are showing daily data.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_DelayTable_Data_JFrame(List data, String titleString, boolean monthlyData, boolean editable)
+public StateMod_DelayTable_Data_JFrame(List<StateMod_DelayTable_Data_TableModel> data, String titleString, boolean monthlyData, boolean editable)
 throws Exception {
 	super();
 	__monthlyData = monthlyData;

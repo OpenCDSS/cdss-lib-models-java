@@ -52,7 +52,7 @@ Object used to store reservoir area capacity information in.
 Any calls to "set" routines sets the _dataset.COMP_RESERVOIR_STATIONS flag dirty.
 */
 public class StateMod_ReservoirAreaCap extends StateMod_Data 
-implements Cloneable, Comparable {
+implements Cloneable, Comparable<StateMod_Data> {
 
 /**
 Content in area cap table.
@@ -88,17 +88,17 @@ public Object clone() {
 /**
 Compares this object to another StateMod_Data object based on the sorted
 order from the StateMod_Data variables, and then by conten, surarea and seepage, in that order.
-@param o the object to compare against.
+@param data the object to compare against.
 @return 0 if they are the same, 1 if this object is greater than the other
 object, or -1 if it is less.
 */
-public int compareTo(Object o) {
-	int res = super.compareTo(o);
+public int compareTo(StateMod_Data data) {
+	int res = super.compareTo(data);
 	if (res != 0) {
 		return res;
 	}
 
-	StateMod_ReservoirAreaCap ac = (StateMod_ReservoirAreaCap)o;
+	StateMod_ReservoirAreaCap ac = (StateMod_ReservoirAreaCap)data;
 
 	if (_conten < ac._conten) {
 		return -1;
@@ -129,18 +129,18 @@ Creates a backup of the current data object and stores it in _original,
 for use in determining if an object was changed inside of a GUI.
 */
 public void createBackup() {
-	_original = clone();
+	_original = (StateMod_ReservoirAreaCap)clone();
 	((StateMod_ReservoirAreaCap)_original)._isClone = false;
 	_isClone = true;
 }
 
 /**
-Compare two rights Vectors and see if they are the same.
-@param v1 the first Vector of StateMod_ReservoirAreaCap s to check.  Cannot be null.
-@param v2 the second Vector of StateMod_ReservoirAreaCap s to check.  Cannot be null.
+Compare two lists and see if they are the same.
+@param v1 the first list of StateMod_ReservoirAreaCap to check.  Cannot be null.
+@param v2 the second list of StateMod_ReservoirAreaCap to check.  Cannot be null.
 @return true if they are the same, false if not.
 */
-public static boolean equals(List v1, List v2) {
+public static boolean equals(List<StateMod_ReservoirAreaCap> v1, List<StateMod_ReservoirAreaCap> v2) {
 	String routine = "StateMod_ReservoirAreaCap.equals";
 	StateMod_ReservoirAreaCap r1;	
 	StateMod_ReservoirAreaCap r2;	
@@ -149,17 +149,17 @@ public static boolean equals(List v1, List v2) {
 		return false;
 	}
 	else {
-		// sort the Vectors and compare item-by-item.  Any differences
+		// sort the lists and compare item-by-item.  Any differences
 		// and data will need to be saved back into the dataset.
 		int size = v1.size();
 		Message.printStatus(1, routine, "Lists are of size: " + size);
-		List v1Sort = StateMod_Util.sortStateMod_DataVector(v1);
-		List v2Sort = StateMod_Util.sortStateMod_DataVector(v2);
+		List<StateMod_ReservoirAreaCap> v1Sort = StateMod_Util.sortStateMod_DataVector(v1);
+		List<StateMod_ReservoirAreaCap> v2Sort = StateMod_Util.sortStateMod_DataVector(v2);
 		Message.printStatus(2, routine, "Vectors have been sorted");
 	
 		for (int i = 0; i < size; i++) {			
-			r1 = (StateMod_ReservoirAreaCap)v1Sort.get(i);	
-			r2 = (StateMod_ReservoirAreaCap)v2Sort.get(i);	
+			r1 = v1Sort.get(i);	
+			r2 = v2Sort.get(i);	
 			Message.printStatus(1, routine, r1.toString());
 			Message.printStatus(1, routine, r2.toString());
 			Message.printStatus(1, routine, "Element " + i + " comparison: " + r1.compareTo(r2));
@@ -359,8 +359,8 @@ header (true) or to create a new file with a new header.
 @param newComments new comments to add at the top of the file.
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter, boolean update, List data,
-	List newComments ) 
+public static void writeListFile(String filename, String delimiter, boolean update, List<StateMod_ReservoirAreaCap> data,
+	List<String> newComments ) 
 throws Exception
 {	String routine = "StateMod_ReservoirAreaCap.writeListFile";
 	int size = 0;
@@ -368,7 +368,7 @@ throws Exception
 		size = data.size();
 	}
 	
-	List fields = new Vector();
+	List<String> fields = new Vector<String>();
 	fields.add("ReservoirID");
 	fields.add("Content");
 	fields.add("Area");
@@ -394,21 +394,21 @@ throws Exception
 	PrintWriter out = null;
 	StateMod_ReservoirAreaCap area = null;
 	String[] line = new String[fieldCount];
-	List commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	StringBuffer buffer = new StringBuffer();
 	
 	try {
 		// Add some basic comments at the top of the file.  Do this to a copy of the
 		// incoming comments so that they are not modified in the calling code.
-		List newComments2 = null;
+		List<String> newComments2 = null;
 		if ( newComments == null ) {
-			newComments2 = new Vector();
+			newComments2 = new Vector<String>();
 		}
 		else {
-			newComments2 = new Vector(newComments);
+			newComments2 = new Vector<String>(newComments);
 		}
 		newComments2.add(0,"");
 		newComments2.add(1,"StateMod reservoir content/area/seepage data as a delimited list file.");

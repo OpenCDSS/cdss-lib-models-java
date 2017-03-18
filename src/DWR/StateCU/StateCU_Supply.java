@@ -20,7 +20,7 @@ groundwater only lands, the supply consists of well right/permit identifiers
 and decree/yield for amount.
 */
 public class StateCU_Supply extends StateCU_Data 
-implements Cloneable, Comparable {
+implements Cloneable, Comparable<StateCU_Data> {
 
 // Base class has ID and name
 
@@ -54,17 +54,17 @@ public Object clone() {
 /**
 Compares this object to another StateCU_Supply object based on the sorted
 order from the StateCU_Data variables, and then by amount.
-@param o the object to compare against.
+@param data the object to compare against.
 @return 0 if they are the same, 1 if this object is greater than the other
 object, or -1 if it is less.
 */
-public int compareTo(Object o) {
-	int res = super.compareTo(o);
+public int compareTo(StateCU_Data data) {
+	int res = super.compareTo(data);
 	if (res != 0) {
 		return res;
 	}
 
-	StateCU_Supply supply = (StateCU_Supply)o;
+	StateCU_Supply supply = (StateCU_Supply)data;
 
 	if (__amount < supply.__amount) {
 		return -1;

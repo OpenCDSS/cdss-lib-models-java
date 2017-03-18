@@ -146,7 +146,7 @@ This class stores all relevant data for a StateMod well.
 
 public class StateMod_Well 
 extends StateMod_Data
-implements Cloneable, Comparable, HasGeoRecord, StateMod_ComponentValidator {
+implements Cloneable, Comparable<StateMod_Data>, HasGeoRecord, StateMod_ComponentValidator {
 /**
 Well id to use for daily data.
 */
@@ -186,11 +186,11 @@ private double _diveff[];
 /**
 Return flow data.
 */
-private List _rivret;
+private List<StateMod_ReturnFlow> _rivret;
 /**
 Depletion data.
 */
-private List _depl;
+private List<StateMod_ReturnFlow> _depl;
 /**
 Historical time series (monthly).
 */
@@ -230,7 +230,7 @@ private DayTS _cwr_DayTS;
 /**
 Well rights.
 */
-private List _rights;
+private List<StateMod_WellRight> _rights;
 /**
 Priority switch.
 */
@@ -243,7 +243,7 @@ private GeoRecord _georecord;
 /**
 List of parcel data, in particular to allow StateDMI to detect when a well had no data.
 */
-protected List _parcel_Vector = new Vector();
+protected List<StateMod_Parcel> _parcel_Vector = new Vector<StateMod_Parcel>();
 
 // Collections are set up to be specified by year for wells, using parcels as the parts.
 
@@ -434,7 +434,7 @@ Performs data checks for the capacity portion of this component.
 @param wer_Vector List of water rights.
 @return String[] array of data that has been checked.  Returns null if there were no problems found.
  */
-public String[] checkComponentData_Capacity( List wer_Vector, int count )
+public String[] checkComponentData_Capacity( List<StateMod_WellRight> wer_Vector, int count )
 {
 	double decree;
 	double decree_sum;
@@ -517,16 +517,16 @@ public Object clone() {
 
 /**
 Compares this object to another StateMod_Well object.
-@param o the object to compare against.
+@param data the object to compare against.
 @return 0 if they are the same, 1 if this object is greater than the other object, or -1 if it is less.
 */
-public int compareTo(Object o) {
-	int res = super.compareTo(o);
+public int compareTo(StateMod_Data data) {
+	int res = super.compareTo(data);
 	if (res != 0) {
 		return res;
 	}
 
-	StateMod_Well w = (StateMod_Well)o;
+	StateMod_Well w = (StateMod_Well)data;
 
 	res = _cdividyw.compareTo(w._cdividyw);
 	if (res != 0) {
@@ -623,7 +623,7 @@ public int compareTo(Object o) {
 Creates a copy of the object for later use in checking to see if it was changed in a GUI.
 */
 public void createBackup() {
-	_original = clone();
+	_original = (StateMod_Well)clone();
 	((StateMod_Well)_original)._isClone = false;
 	_isClone = true;
 }
@@ -635,7 +635,7 @@ already exists. This method just connects next and previous pointers.
 @param wells all wells
 @param rights all rights
 */
-public static void connectAllRights ( List wells, List rights ) {
+public static void connectAllRights ( List<StateMod_Well> wells, List<StateMod_WellRight> rights ) {
 	if ( (wells == null) || (rights == null) ) {
 		return;
 	}
@@ -643,7 +643,7 @@ public static void connectAllRights ( List wells, List rights ) {
 	
 	StateMod_Well well = null;
 	for (int i = 0; i < num_wells; i++) {
-		well = (StateMod_Well)wells.get(i);
+		well = wells.get(i);
 		if (well == null) {
 			continue;
 		}
@@ -657,8 +657,9 @@ Connect the wells time series to this instance.
 @param cwr_MonthTS list of monthly consumptive water requirement time series, or null.
 @param cwr_DayTS list of daily consumptive water requirement time series, or null.
 */
-public static void connectAllTS ( List wells, List pumping_MonthTS, List pumping_DayTS,
-	List demand_MonthTS, List demand_DayTS, List ipy_YearTS, List cwr_MonthTS, List cwr_DayTS )
+public static void connectAllTS ( List<StateMod_Well> wells, List<MonthTS> pumping_MonthTS, List<DayTS> pumping_DayTS,
+	List<MonthTS> demand_MonthTS, List<DayTS> demand_DayTS, List<StateCU_IrrigationPracticeTS> ipy_YearTS,
+	List<MonthTS> cwr_MonthTS, List<DayTS> cwr_DayTS )
 {	if (wells == null) {
 		return;
 	}
@@ -667,7 +668,7 @@ public static void connectAllTS ( List wells, List pumping_MonthTS, List pumping
 	
 	StateMod_Well well = null;
 	for (int i = 0; i < num_wells; i++) {
-		well = (StateMod_Well)wells.get(i);
+		well = wells.get(i);
 		if (well == null) {
 			continue;
 		}
@@ -699,7 +700,7 @@ public static void connectAllTS ( List wells, List pumping_MonthTS, List pumping
 Connect daily CWR series pointer.  The connection is made using the value of "cdividyw" for the well.
 @param tslist demand time series
 */
-public void connectCWRDayTS ( List tslist )
+public void connectCWRDayTS ( List<DayTS> tslist )
 {	if ( tslist == null) {
 		return;
 	}
@@ -708,7 +709,7 @@ public void connectCWRDayTS ( List tslist )
 
 	DayTS ts;
 	for (int i = 0; i < num_TS; i++) {
-		ts = (DayTS)tslist.get(i);
+		ts = tslist.get(i);
 		if ( ts == null ) {
 			return;
 		}
@@ -724,7 +725,7 @@ public void connectCWRDayTS ( List tslist )
 Connect monthly CWR time series pointer.  The time series name is set to that of the well.
 @param tslist Time series list.
 */
-public void connectCWRMonthTS ( List tslist )
+public void connectCWRMonthTS ( List<MonthTS> tslist )
 {	if ( tslist == null ) {
 		return;
 	}
@@ -733,7 +734,7 @@ public void connectCWRMonthTS ( List tslist )
 	MonthTS ts;
 	_cwr_MonthTS = null;
 	for ( int i = 0; i < num_TS; i++ ) {
-		ts = (MonthTS)tslist.get(i);
+		ts = tslist.get(i);
 		if ( ts == null ) {
 			continue;
 		}
@@ -749,7 +750,7 @@ public void connectCWRMonthTS ( List tslist )
 Connect daily demand time series pointer to this object.
 @param tslist Daily demand time series.
 */
-public void connectDemandDayTS ( List tslist )
+public void connectDemandDayTS ( List<DayTS> tslist )
 {	if ( tslist == null ) {
 		return;
 	}
@@ -759,7 +760,7 @@ public void connectDemandDayTS ( List tslist )
 
 	DayTS ts = null;
 	for (int i = 0; i < num_TS; i++) {
-		ts = (DayTS)tslist.get(i);
+		ts = tslist.get(i);
 		if (ts == null) {
 			continue;
 		}
@@ -775,7 +776,7 @@ public void connectDemandDayTS ( List tslist )
 Connect monthly demand time series pointer to this object.
 @param tslist demand time series
 */
-public void connectDemandMonthTS ( List tslist )
+public void connectDemandMonthTS ( List<MonthTS> tslist )
 {	if ( tslist == null) {
 		return;
 	}
@@ -784,7 +785,7 @@ public void connectDemandMonthTS ( List tslist )
 
 	MonthTS ts = null;
 	for (int i = 0; i < num_TS; i++) {
-		ts = (MonthTS)tslist.get(i);
+		ts = tslist.get(i);
 		if (ts == null) {
 			continue;
 		}
@@ -800,7 +801,7 @@ public void connectDemandMonthTS ( List tslist )
 Connect the irrigation practice TS object.
 @param tslist Time series list.
 */
-public void connectIrrigationPracticeYearTS ( List tslist )
+public void connectIrrigationPracticeYearTS ( List<StateCU_IrrigationPracticeTS> tslist )
 {	if ( tslist == null ) {
 		return;
 	}
@@ -809,7 +810,7 @@ public void connectIrrigationPracticeYearTS ( List tslist )
 	_ipy_YearTS = null;
 	StateCU_IrrigationPracticeTS ipy_YearTS;
 	for ( int i = 0; i < num_TS; i++ ) {
-		ipy_YearTS = (StateCU_IrrigationPracticeTS)tslist.get(i);
+		ipy_YearTS = tslist.get(i);
 		if ( ipy_YearTS == null ) {
 			continue;
 		}
@@ -824,7 +825,7 @@ public void connectIrrigationPracticeYearTS ( List tslist )
 Connect daily pumping time series pointer to this object.
 @param tslist Daily pumping time series.
 */
-public void connectPumpingDayTS ( List tslist )
+public void connectPumpingDayTS ( List<DayTS> tslist )
 {	if ( tslist == null ) {
 		return;
 	}
@@ -834,7 +835,7 @@ public void connectPumpingDayTS ( List tslist )
 
 	DayTS ts = null;
 	for (int i = 0; i < num_TS; i++) {
-		ts = (DayTS)tslist.get(i);
+		ts = tslist.get(i);
 		if (ts == null) {
 			continue;
 		}
@@ -850,7 +851,7 @@ public void connectPumpingDayTS ( List tslist )
 Connect monthly pumping time series pointer to this object.
 @param tslist monthly pumping time series
 */
-public void connectPumpingMonthTS ( List tslist )
+public void connectPumpingMonthTS ( List<MonthTS> tslist )
 {	if ( tslist == null) {
 		return;
 	}
@@ -859,7 +860,7 @@ public void connectPumpingMonthTS ( List tslist )
 
 	MonthTS ts = null;
 	for (int i = 0; i < num_TS; i++) {
-		ts = (MonthTS)tslist.get(i);
+		ts = tslist.get(i);
 		if (ts == null) {
 			continue;
 		}
@@ -875,7 +876,7 @@ public void connectPumpingMonthTS ( List tslist )
 Create a list of references to rights for this well.
 @param rights all rights
 */
-public void connectRights(List rights) {
+public void connectRights(List<StateMod_WellRight> rights) {
 	if (rights == null) {
 		return;
 	}
@@ -884,7 +885,7 @@ public void connectRights(List rights) {
 
 	StateMod_WellRight right = null;
 	for (int i = 0; i < num_rights; i++) {
-		right = (StateMod_WellRight)rights.get(i);
+		right = rights.get(i);
 		if (right == null) {
 			continue;
 		} 
@@ -1112,7 +1113,7 @@ The options are of the form "1" if include_notes is false and
 @return a list of demand source option strings, for use in GUIs.
 @param includeNotes Indicate whether notes should be included.
 */
-public static List getDemsrcwChoices ( boolean includeNotes )
+public static List<String> getDemsrcwChoices ( boolean includeNotes )
 {
 	return StateMod_Diversion.getDemsrcChoices(includeNotes);
 }
@@ -1127,9 +1128,9 @@ public StateMod_ReturnFlow getDepletion(int index) {
 }
 
 /**
-@return the depletion vector
+@return the depletion list
 */
-public List getDepletions() {
+public List<StateMod_ReturnFlow> getDepletions() {
 	return _depl;
 }
 
@@ -1236,8 +1237,8 @@ The options are of the form "1" if include_notes is false and
 @return a list of monthly demand type option strings, for use in GUIs.
 @param include_notes Indicate whether notes should be included.
 */
-public static List getIdvcomwChoices ( boolean include_notes )
-{	List v = new Vector(6);
+public static List<String> getIdvcomwChoices ( boolean include_notes )
+{	List<String> v = new Vector<String>(6);
 	v.add ( "1 - Monthly total demand" );
 	v.add ( "2 - Annual total demand" );
 	v.add ( "3 - Monthly irrigation water requirement" );
@@ -1296,7 +1297,7 @@ The options are of the form "1" if include_notes is false and
 @return a list of use type option strings, for use in GUIs.
 @param includeNotes Indicate whether notes should be included.
 */
-public static List getIrturnwChoices ( boolean includeNotes )
+public static List<String> getIrturnwChoices ( boolean includeNotes )
 {
 	return StateMod_Diversion.getIrturnChoices(includeNotes);
 }
@@ -1330,10 +1331,10 @@ public int getNrtnw2() {
 }
 
 /**
-Return the Vector of parcels.
-@return the Vector of parcels.
+Return the list of parcels.
+@return the list of parcels.
 */
-public List getParcels()
+public List<StateMod_Parcel> getParcels()
 {	return _parcel_Vector;
 }
 
@@ -1351,8 +1352,8 @@ The options are of the form "0" if include_notes is false and
 @return a list primary switch option strings, for use in GUIs.
 @param include_notes Indicate whether notes should be added after the parameter values.
 */
-public static List getPrimaryChoices ( boolean include_notes )
-{	List v = new Vector(52);
+public static List<String> getPrimaryChoices ( boolean include_notes )
+{	List<String> v = new Vector<String>(52);
 	v.add ( "0 - Use water right priorities" );
 	for ( int i = 1000; i < 50000; i += 1000 ) {
 		v.add ( "" + i + " - Well water rights will be adjusted by " + i );
@@ -1361,7 +1362,7 @@ public static List getPrimaryChoices ( boolean include_notes )
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.set(i,StringUtil.getToken( (String)v.get(i), " ", 0, 0) );
+			v.set(i,StringUtil.getToken( v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
@@ -1387,13 +1388,13 @@ public static String getPrimaryDefault ( boolean include_notes )
 @exception ArrayIndexOutOfBounds throws exception if unable to retrieve the specified return flow node
 */
 public StateMod_ReturnFlow getReturnFlow(int index) {
-	return (StateMod_ReturnFlow)_rivret.get(index);
+	return _rivret.get(index);
 }
 
 /**
-@return the return flow vector
+@return the return flow list
 */
-public List getReturnFlows() {
+public List<StateMod_ReturnFlow> getReturnFlows() {
 	return _rivret;
 }
 
@@ -1412,9 +1413,9 @@ public StateMod_WellRight getRight(int index)
 }
 
 /** 
-@return rights Vector
+@return rights list
 */
-public List getRights() {
+public List<StateMod_WellRight> getRights() {
 	return _rights;
 }
 
@@ -1462,8 +1463,8 @@ false, initialize to missing values.
 */
 private void initialize ( boolean initialize_defaults )
 {	_smdata_type = StateMod_DataSet.COMP_WELL_STATIONS;
-	_rivret = new Vector(10);
-	_depl = new Vector(10);
+	_rivret = new Vector<StateMod_ReturnFlow>(10);
+	_depl = new Vector<StateMod_ReturnFlow>(10);
 	_pumping_MonthTS = null;
 	_pumping_DayTS = null;
 	_demand_MonthTS = null;
@@ -1471,7 +1472,7 @@ private void initialize ( boolean initialize_defaults )
 	_ipy_YearTS = null;
 	_cwr_MonthTS = null;
 	_cwr_DayTS = null;
-	_rights = new Vector();
+	_rights = new Vector<StateMod_WellRight>();
 	_georecord = null;
 
 	if ( initialize_defaults ) {
@@ -1537,10 +1538,10 @@ Read a well input file.
 @param filename name of file containing well information
 @return status(always 0 since exception handling is now used)
 */
-public static List readStateModFile(String filename)
+public static List<StateMod_Well> readStateModFile(String filename)
 throws Exception {
 	String routine = "StateMod_Well.readStateModFile";
-	List theWellStations = new Vector();
+	List<StateMod_Well> theWellStations = new Vector<StateMod_Well>();
 	int [] format_1 = {
 				StringUtil.TYPE_STRING,
 				StringUtil.TYPE_STRING,
@@ -1592,20 +1593,18 @@ throws Exception {
 				8,
 				8 };
 	String iline = null;
-	int linecount = 0;
 	String s = null;
-	List v = new Vector(9);
+	List<Object> v = new Vector<Object>(9);
 	BufferedReader in = null;
 	StateMod_Well aWell = null;
 	StateMod_ReturnFlow aReturnNode = null;
-	List effv = null;
+	List<String> effv = null;
 	int nrtn, ndepl;
 
 	Message.printStatus(1, routine, "Reading well file: " + filename);
 	
 	try {
 		in = new BufferedReader(new FileReader(	IOUtil.getPathUsingWorkingDir(filename)));
-		++linecount;
 		while ((iline = in.readLine()) != null) {
 			if (iline.startsWith("#") || iline.trim().length()==0) {
 				continue;
@@ -1877,9 +1876,9 @@ Set the collection list for an aggregate/system for the entire period, used when
 @param partIdList The identifiers indicating the locations in the collection.
 */
 public void setCollectionPartIDs ( List<String> partIdList, List<String> partIdTypeList )
-{		__collectionIDList = new ArrayList ( 1 );
+{		__collectionIDList = new ArrayList<List<String>> ( 1 );
 		__collectionIDList.add ( partIdList );
-		__collectionIDTypeList = new ArrayList ( 1 );
+		__collectionIDTypeList = new ArrayList<List<String>> ( 1 );
 		__collectionIDTypeList.add ( partIdTypeList );
 		__collectionYear = new int[1];
 		__collectionYear[0] = 0;
@@ -1894,7 +1893,7 @@ public void setCollectionPartIDsForYear ( int year, List<String> partIdList )
 {	int pos = -1;	// Position of year in data lists.
 	if ( __collectionIDList == null ) {
 		// No previous data so create memory...
-		__collectionIDList = new Vector ( 1 );
+		__collectionIDList = new Vector<List<String>> ( 1 );
 		__collectionIDList.add ( partIdList );
 		__collectionYear = new int[1];
 		__collectionYear[0] = year;
@@ -1932,7 +1931,7 @@ Return the collection part ID type list.  This is used with well locations when 
 by well identifiers (WDIDs and permit receipt numbers).
 @return the list of collection part ID types, or null if not defined.
 */
-public List getCollectionPartIDTypes () {
+public List<String> getCollectionPartIDTypes () {
 	if (__collectionIDTypeList == null ) {
 		return null;
 	}
@@ -2024,7 +2023,7 @@ public void setDemsrcw(String demsrcw) {
 }
 
 // TODO - need to handle dirty flag
-public void setDepletions(List depl) {
+public void setDepletions(List<StateMod_ReturnFlow> depl) {
 	_depl = depl;
 }
 
@@ -2297,10 +2296,10 @@ public void setModelEfficiencies ( double [] model_efficiencies )
 }
 
 /**
-Set the parcel Vector.
-@param parcel_Vector the Vector of StateMod_Parcel to set for parcel data.
+Set the parcel list.
+@param parcel_Vector the list of StateMod_Parcel to set for parcel data.
 */
-void setParcels ( List parcel_Vector )
+void setParcels ( List<StateMod_Parcel> parcel_Vector )
 {	_parcel_Vector = parcel_Vector;
 }
 
@@ -2341,12 +2340,12 @@ public void setPrimary(String primary) {
 }
 
 // TODO - need to handle dirty flag
-public void setReturnFlows(List rivret) {
+public void setReturnFlows(List<StateMod_ReturnFlow> rivret) {
 	_rivret = rivret;
 }
 
 // TODO - need to handle dirty flag
-public void setRights(List rights) {
+public void setRights(List<StateMod_WellRight> rights) {
 	_rights = rights;
 }
 
@@ -2384,10 +2383,12 @@ public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset 
 	}
 	// Get the network list if available for checks below
 	DataSetComponent comp = null;
-	List rinList = null;
+	List<StateMod_RiverNetworkNode> rinList = null;
 	if ( dataset != null ) {
 		comp = dataset.getComponentForComponentType(StateMod_DataSet.COMP_RIVER_NETWORK);
-		rinList = (List)comp.getData();
+		@SuppressWarnings("unchecked")
+		List<StateMod_RiverNetworkNode> rinList0 = (List<StateMod_RiverNetworkNode>)comp.getData();
+		rinList = rinList0;
 		if ( (rinList != null) && (rinList.size() == 0) ) {
 			// Set to null to simplify checks below
 			rinList = null;
@@ -2415,7 +2416,8 @@ public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset 
 	// Verify that the daily ID is in the data set (daily ID is allowed to be missing)
 	if ( (dataset != null) && !StateMod_Util.isMissing(dailyID) ) {
 		DataSetComponent comp2 = dataset.getComponentForComponentType(StateMod_DataSet.COMP_WELL_STATIONS);
-		List wesList = (List)comp2.getData();
+		@SuppressWarnings("unchecked")
+		List<StateMod_Well> wesList = (List<StateMod_Well>)comp2.getData();
 		if ( dailyID.equals("0") || dailyID.equals("3") || dailyID.equals("4") ) {
 			// OK
 		}
@@ -2437,7 +2439,8 @@ public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset 
 	// Verify that the diversion ID is in the data set (diversion ID is allowed to be missing)
 	if ( (dataset != null) && !StateMod_Util.isMissing(idvcow2) ) {
 		DataSetComponent comp2 = dataset.getComponentForComponentType(StateMod_DataSet.COMP_DIVERSION_STATIONS);
-		List ddsList = (List)comp2.getData();
+		@SuppressWarnings("unchecked")
+		List<StateMod_Diversion> ddsList = (List<StateMod_Diversion>)comp2.getData();
 		if ( !dailyID.equals("NA") && !dailyID.equals("N/A") ) {
 			// OK
 		}
@@ -2548,10 +2551,12 @@ public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset 
 	// TODO SAM 2009-06-01) evaluate how to check rights (with getRights() or checking the rights data
 	// set component).
 	boolean checkRights = false;
-	List wer_Vector = null;
+	List<StateMod_WellRight> wer_Vector = null;
 	if ( dataset != null ) {
 		DataSetComponent wer_comp = dataset.getComponentForComponentType ( StateMod_DataSet.COMP_WELL_RIGHTS );
-		wer_Vector = (List)wer_comp.getData();
+		@SuppressWarnings("unchecked")
+		List<StateMod_WellRight> wer_Vector0 = (List<StateMod_WellRight>)wer_comp.getData();
+		wer_Vector = wer_Vector0;
 	}
 	
 	// Check to see if any parcels were associated with wells
@@ -2562,7 +2567,7 @@ public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset 
 	double wes_parcel_area = 0.0;	// Area of parcels for well station
 	int wes_well_parcel_count = 0;	// Parcel (with wells) count for well station.
 	double wes_well_parcel_area = 0.0; // Area of parcels with wells for well station.
-	List parcel_Vector;		// List of parcels for well station.
+	List<StateMod_Parcel> parcel_Vector;		// List of parcels for well station.
 
 	id_i = getID();
 	if ( getAreaw() <= 0.0 ) {
@@ -2581,7 +2586,7 @@ public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset 
 		if ( parcel_Vector != null ) {
 			wes_parcel_count = parcel_Vector.size();
 			for ( int j = 0; j < wes_parcel_count; j++ ) {
-				parcel = (StateMod_Parcel)parcel_Vector.get(j);
+				parcel = parcel_Vector.get(j);
 				if ( parcel.getArea() > 0.0 ) {
 					wes_parcel_area += parcel.getArea();
 				}
@@ -2615,10 +2620,10 @@ public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset 
 FIXME SAM 2009-06-03 Evaluate how to call from above to add more specific checks.
 Check the well stations.
 */
-private void validateComponent2 ( List werList, List wesList, String idpattern_Java,
+private void validateComponent2 ( List<StateMod_WellRight> werList, List<StateMod_Well> wesList, String idpattern_Java,
 	int warningCount, int warningLevel, String commandTag, CommandStatus status )
-{	String routine = getClass().getName() + ".checkWellRights";
-	String message;
+{	//String routine = getClass().getSimpleName() + ".checkWellRights";
+	//String message;
 	int matchCount = 0;
 	/*
 	StateMod_Well wes_i = null;
@@ -2735,7 +2740,7 @@ by formatting the capacity and decree sum to .NN precision.
 @param message_list Vector of string to be printed to the check file, which will
 be added to in this method.
 */
-private int validateComponent_checkWellRights_SumToCapacity ( List wesList, List werList,
+private int validateComponent_checkWellRights_SumToCapacity ( List<StateMod_Well> wesList, List<StateMod_WellRight> werList,
 	int warningCount, int warningLevel, String commandTag, CommandStatus status  )
 {	String routine = getClass().getName() + "checkWellRights_SumToCapacity";
 	String message;
@@ -2815,7 +2820,7 @@ is also maintained by calling this routine.
 @see RTi.Util.IOUtil#processFileHeaders
 */
 public static void writeStateModFile(String instrfile, String outstrfile,
-		List theWellStations, List newComments)
+		List<StateMod_Well> theWellStations, List<String> newComments)
 throws Exception {
 	List<String> commentIndicators = new ArrayList<String>(1);
 	commentIndicators.add ( "#" );
@@ -2836,9 +2841,9 @@ throws Exception {
 		String format_4 = "                                    %-12.12s%8.2F%8d";
 		StateMod_Well well = null;
 		StateMod_ReturnFlow ret = null;
-		List v = new Vector(8);
-		List wellDepletion = null;
-		List wellReturnFlow = null;
+		List<Object> v = new Vector<Object>(8);
+		List<StateMod_ReturnFlow> wellDepletion = null;
+		List<StateMod_ReturnFlow> wellReturnFlow = null;
 	
 		out.println(cmnt);
 		out.println(cmnt + " *******************************************************");
@@ -2900,7 +2905,7 @@ throws Exception {
 		}
 	
 		for (i = 0; i < num; i++) {
-			well = (StateMod_Well)theWellStations.get(i);
+			well = theWellStations.get(i);
 			if (well == null) {
 				continue;
 			}
@@ -2947,7 +2952,7 @@ throws Exception {
 			wellReturnFlow = well.getReturnFlows();
 			for (j = 0; j < nrtn; j++) {
 				v.clear();
-				ret = (StateMod_ReturnFlow)wellReturnFlow.get(j);
+				ret = wellReturnFlow.get(j);
 				v.add(ret.getCrtnid());
 				v.add(new Double(ret.getPcttot()));
 				v.add(new Integer(ret.getIrtndl()));
@@ -2962,7 +2967,7 @@ throws Exception {
 			wellDepletion = well.getDepletions();
 			for (j = 0; j < nrtn; j++) {
 				v.clear();
-				ret = (StateMod_ReturnFlow)wellDepletion.get(j);
+				ret = wellDepletion.get(j);
 				v.add(ret.getCrtnid());
 				v.add(new Double(ret.getPcttot()));
 				v.add(new Integer(ret.getIrtndl()));
@@ -3010,15 +3015,15 @@ header (true) or to create a new file with a new header.
 filenames.
 @throws Exception if an error occurs.
 */
-public static List writeListFile(String filename, String delimiter, boolean update,
-		List data, List newComments ) 
+public static List<File> writeListFile(String filename, String delimiter, boolean update,
+		List<StateMod_Well> data, List<String> newComments ) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
 		size = data.size();
 	}
 	
-	List fields = new Vector();
+	List<String> fields = new Vector<String>();
 	fields.add("ID");
 	fields.add("Name");
 	fields.add("RiverNodeID");
@@ -3051,7 +3056,7 @@ throws Exception {
 	int comp = StateMod_DataSet.COMP_WELL_STATIONS;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.get(i);
+		s = fields.get(i);
 		names[i] = StateMod_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateMod_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -3066,27 +3071,28 @@ throws Exception {
 	PrintWriter out = null;
 	StateMod_ReturnFlow rf = null;
 	StateMod_Well well = null;
-	List commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	String[] line = new String[fieldCount];
 	String id = null;
 	StringBuffer buffer = new StringBuffer();
-	List depletions = new Vector();
-	List returnFlows = new Vector();
-	List temp = null;
+	List<StateMod_ReturnFlow> depletions = new Vector<StateMod_ReturnFlow>();
+	List<StateMod_ReturnFlow> returnFlows = new Vector<StateMod_ReturnFlow>();
+	List<StateMod_ReturnFlow> temprf = null;
+	List<StateMod_ReturnFlow> tempdep = null;
 	
 	String filenameFull = IOUtil.getPathUsingWorkingDir(filename);
 	try {
 		// Add some basic comments at the top of the file.  Do this to a copy of the
 		// incoming comments so that they are not modified in the calling code.
-		List newComments2 = null;
+		List<String> newComments2 = null;
 		if ( newComments == null ) {
-			newComments2 = new Vector();
+			newComments2 = new Vector<String>();
 		}
 		else {
-			newComments2 = new Vector(newComments);
+			newComments2 = new Vector<String>(newComments);
 		}
 		newComments2.add(0,"");
 		newComments2.add(1,"StateMod well stations as a delimited list file.");
@@ -3146,19 +3152,19 @@ throws Exception {
 
 			out.println(buffer.toString());
 
-			temp = well.getReturnFlows();
-			size2 = temp.size();
+			temprf = well.getReturnFlows();
+			size2 = temprf.size();
 			id = well.getID();
 			for (j = 0; j < size2; j++) {
-				rf = (StateMod_ReturnFlow)temp.get(j);
+				rf = temprf.get(j);
 				rf.setID(id);
 				returnFlows.add(rf);
 			}
 
-			temp = well.getDepletions();
-			size2 = temp.size();
+			tempdep = well.getDepletions();
+			size2 = tempdep.size();
 			for (j = 0; j < size2; j++) {
-				rf = (StateMod_ReturnFlow)temp.get(j);
+				rf = tempdep.get(j);
 				rf.setID(id);
 				depletions.add(rf);
 			}
@@ -3187,7 +3193,7 @@ throws Exception {
 	String collectionFilename = front + "_Collections." + end;
 	writeCollectionListFile(collectionFilename, delimiter, update, data, newComments );
 	
-	List filesWritten = new Vector();
+	List<File> filesWritten = new Vector<File>();
 	filesWritten.add ( new File(filenameFull) );
 	filesWritten.add ( new File(returnFlowFilename) );
 	filesWritten.add ( new File(depletionFilename) );
@@ -3196,7 +3202,7 @@ throws Exception {
 }
 
 /**
-Writes the collection data from a Vector of StateMod_Well objects to a 
+Writes the collection data from a list of StateMod_Well objects to a 
 list file.  A header is printed to the top of the file, containing the commands 
 used to generate the file.  Any strings in the body of the file that contain 
 the field delimiter will be wrapped in "...". 
@@ -3208,14 +3214,14 @@ header (true) or to create a new file with a new header.
 @throws Exception if an error occurs.
 */
 public static void writeCollectionListFile(String filename, String delimiter, boolean update,
-	List data, List newComments )
+	List<StateMod_Well> data, List<String> newComments )
 throws Exception {
 	int size = 0;
 	if (data != null) {
 		size = data.size();
 	}
 	
-	List fields = new Vector();
+	List<String> fields = new Vector<String>();
 	fields.add("LocationID");
 	fields.add("Year");
 	fields.add("CollectionType");
@@ -3244,27 +3250,27 @@ throws Exception {
 	int numYears = 0;
 	PrintWriter out = null;
 	StateMod_Well well = null;
-	List commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	String[] field = new String[fieldCount];
 	String colType = null;
 	String id = null;
 	String partType = null;
 	StringBuffer buffer = new StringBuffer();
-	List ids = null;
-	List idTypes = null;
+	List<String> ids = null;
+	List<String> idTypes = null;
 
 	try {
 		// Add some basic comments at the top of the file.  However, do this to a copy of the
 		// incoming comments so that they are not modified in the calling code.
-		List newComments2 = null;
+		List<String> newComments2 = null;
 		if ( newComments == null ) {
-			newComments2 = new Vector();
+			newComments2 = new Vector<String>();
 		}
 		else {
-			newComments2 = new Vector(newComments);
+			newComments2 = new Vector<String>(newComments);
 		}
 		newComments2.add(0,"");
 		newComments2.add(1,"StateMod well station collection information as delimited list file.");

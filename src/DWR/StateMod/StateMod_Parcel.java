@@ -19,7 +19,7 @@ StateDMI to track whether a well or diversion station have parcels.  This
 approach will be evaluated.
 */
 public class StateMod_Parcel extends StateMod_Data 
-implements Cloneable, Comparable {
+implements Cloneable, Comparable<StateMod_Data> {
 
 // Base class has ID import and name (not important)
 
@@ -65,17 +65,17 @@ public Object clone() {
 Compares this object to another StateMod_Data object based on the sorted
 order from the StateMod_Data variables, and then by crop, area, and year,
 in that order.
-@param o the object to compare against.
+@param data the object to compare against.
 @return 0 if they are the same, 1 if this object is greater than the other
 object, or -1 if it is less.
 */
-public int compareTo(Object o) {
-	int res = super.compareTo(o);
+public int compareTo(StateMod_Data data) {
+	int res = super.compareTo(data);
 	if (res != 0) {
 		return res;
 	}
 
-	StateMod_Parcel parcel = (StateMod_Parcel)o;
+	StateMod_Parcel parcel = (StateMod_Parcel)data;
 
 	res = _crop.compareTo(parcel.getCrop());
 	if ( res != 0) {
@@ -104,7 +104,7 @@ Creates a backup of the current data object and stores it in _original,
 for use in determining if an object was changed inside of a GUI.
 */
 public void createBackup() {
-	_original = clone();
+	_original = (StateMod_Parcel)clone();
 	((StateMod_Parcel)_original)._isClone = false;
 	_isClone = true;
 }

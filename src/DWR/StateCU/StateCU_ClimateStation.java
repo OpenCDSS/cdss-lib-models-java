@@ -148,8 +148,8 @@ public static List<StateCU_ClimateStation> readStateCUFile ( String filename )
 throws IOException
 {	String rtn = "StateCU_ClimateStation.readStateCUFile";
 	String iline = null;
-	List v = new Vector ( 10 );
-	List<StateCU_ClimateStation> sta_Vector = new Vector ( 100 ); // Data to return.
+	List<Object> v = new Vector<Object> ( 10 );
+	List<StateCU_ClimateStation> sta_Vector = new Vector<StateCU_ClimateStation> ( 100 ); // Data to return.
 	int format_0[] = {
 		StringUtil.TYPE_STRING, // station id
 		StringUtil.TYPE_STRING, // latitude
@@ -347,9 +347,9 @@ Specify as null if no previous file is available.
 public static void writeStateCUFile ( String filenamePrev, String filename, List<StateCU_ClimateStation> dataList,
 		List<String> newComments )
 throws IOException
-{	List<String> comment_str = new Vector(1);
+{	List<String> comment_str = new Vector<String>(1);
 	comment_str.add ( "#" );
-	List<String> ignore_comment_str = new Vector(1);
+	List<String> ignore_comment_str = new Vector<String>(1);
 	ignore_comment_str.add ( "#>" );
 	PrintWriter out = null;
 	try {
@@ -383,7 +383,7 @@ throws IOException
 	String cmnt = "#>";
 	// Missing data handled by formatting all as strings...
 	String format =	"%-12.12s%6.6s%9.9s  %-20.20s%-8.8s  %-24.24s%8.8s%8.8s";
-	List v = new Vector(8);	// Reuse for all output lines.
+	List<Object> v = new Vector<Object>(8);	// Reuse for all output lines.
 
 	out.println ( cmnt );
 	out.println ( cmnt + "  StateCU Climate Stations File" );
@@ -472,7 +472,7 @@ throws Exception {
 		size = data.size();
 	}
 	
-	List<String> fields = new Vector();
+	List<String> fields = new Vector<String>();
 	fields.add("ID");
 	fields.add("Name");
 	fields.add("Latitude");
@@ -501,9 +501,9 @@ throws Exception {
 	int j = 0;
 	PrintWriter out = null;
 	StateCU_ClimateStation cli = null;
-	List<String> commentString = new Vector(1);
+	List<String> commentString = new Vector<String>(1);
 	commentString.add ( "#" );
-	List<String> ignoreCommentString = new Vector(1);
+	List<String> ignoreCommentString = new Vector<String>(1);
 	ignoreCommentString.add ( "#>" );
 	String[] line = new String[fieldCount];
 	StringBuffer buffer = new StringBuffer();
@@ -511,12 +511,12 @@ throws Exception {
 	try {
 		// Add some basic comments at the top of the file.  However, do this to a copy of the
 		// incoming comments so that they are not modified in the calling code.
-		List newComments2 = null;
+		List<String> newComments2 = null;
 		if ( outputComments == null ) {
-			newComments2 = new Vector();
+			newComments2 = new Vector<String>();
 		}
 		else {
-			newComments2 = new Vector(outputComments);
+			newComments2 = new Vector<String>(outputComments);
 		}
 		newComments2.add(0,"");
 		newComments2.add(1,"StateCU climate stations as a delimited list file.");

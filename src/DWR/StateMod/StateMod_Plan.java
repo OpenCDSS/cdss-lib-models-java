@@ -19,7 +19,7 @@ the COMP_PLANS flag dirty.  A new object will have empty non-null
 lists, null time series, and defaults for all other data.
 */
 public class StateMod_Plan extends StateMod_Data
-implements Cloneable, Comparable, HasGeoRecord
+implements Cloneable, Comparable<StateMod_Data>, HasGeoRecord
 {
 
 // ID, name, river node (cgoto), and switch are in the base class.
@@ -75,7 +75,7 @@ protected GeoRecord _georecord;
 Comments provided by user - # comments before each plan.  An empty (non-null) list is guaranteed.
 TODO SAM 2010-12-14 Evaluate whether this can be in StateMod_Data or will it bloat memory.
 */
-protected List<String> __commentsBeforeData = new Vector();
+protected List<String> __commentsBeforeData = new Vector<String>();
 
 /**
 Construct a new plan and assign data to reasonable defaults.
@@ -150,12 +150,12 @@ public Object clone() {
 
 /**
 Compares this object to another StateMod_Plan object.
-@param o the object to compare against.
+@param data the object to compare against.
 @return 0 if they are the same, 1 if this object is greater than the other
 object, or -1 if it is less.
 */
-public int compareTo(Object o) {
-	int res = super.compareTo(o);
+public int compareTo(StateMod_Data data) {
+	int res = super.compareTo(data);
 	if (res != 0) {
 		return res;
 	}
@@ -262,7 +262,7 @@ public int compareTo(Object o) {
 Creates a copy of the object for later use in checking to see if it was changed in a GUI.
 */
 public void createBackup() {
-	_original = clone();
+	_original = (StateMod_Plan)clone();
 	((StateMod_Plan)_original)._isClone = false;
 	_isClone = true;
 }
@@ -315,7 +315,7 @@ The options are of the form "0" if include_notes is false and
 @param include_notes Indicate whether notes should be added after the parameter values.
 */
 public static List<String> getIPfailChoices ( boolean include_notes )
-{	List<String> v = new Vector(2);
+{	List<String> v = new Vector<String>(2);
 	v.add ( "0 - Do not turn plan off if it fails" );
 	v.add ( "1 - Turn plan off if it fails" );
 	if ( !include_notes ) {
@@ -358,7 +358,7 @@ The options are of the form "1" if include_notes is false and
 @param include_notes Indicate whether notes should be added after the parameter values.
 */
 public static List<String> getIPlnTypChoices ( boolean include_notes )
-{	List<String> v = new Vector(9);
+{	List<String> v = new Vector<String>(9);
 	v.add ( "1 - Terms and Conditions (T&C)" );
 	v.add ( "2 - Well Augmentation" );
 	v.add ( "3 - Reuse to a Reservoir" );
@@ -421,7 +421,7 @@ The options are of the form "0" if include_notes is false and
 @param includeNotes Indicate whether notes should be added after the parameter values.
 */
 public static List<String> getPeffFlagChoices ( boolean includeNotes )
-{	List<String> v = new Vector(2);
+{	List<String> v = new Vector<String>(2);
 	v.add ( "0 - Not used" );
 	v.add ( "1 - Specify 12 plan efficiency values" );
 	v.add ( "999 - Use source structure's efficiency values" );
@@ -457,7 +457,7 @@ The options are of the form "0" if include_notes is false and
 @param include_notes Indicate whether notes should be added after the parameter values.
 */
 public static List<String> getPonChoices ( boolean include_notes )
-{	List<String> v = new Vector(2);
+{	List<String> v = new Vector<String>(2);
 	v.add ( "0 - Off" );	// Possible options are listed here.
 	v.add ( "1 - On" );
 	if ( !include_notes ) {
@@ -500,7 +500,7 @@ The options are of the form "0" if includeNotes is false and
 @param includeNotes Indicate whether notes should be added after the parameter values.
 */
 public static List<String> getIPrfChoices ( boolean includeNotes )
-{	List<String> v = new Vector(2);
+{	List<String> v = new Vector<String>(2);
 	v.add ( "0 - no return flows calculated" );
 	v.add ( "1 - T&C plan with return data in plan return file" );
 	v.add ( "8 - Recharge plan with return data in plan return file" );
@@ -596,8 +596,8 @@ public static List<StateMod_Plan> readStateModFile(String filename)
 throws Exception
 {	String routine = "StateMod_Plan.readStateModFile";
 	String iline = null;
-	List<String> v = new Vector(9);
-	List<StateMod_Plan> thePlans = new Vector();
+	List<String> v = new Vector<String>(9);
+	List<StateMod_Plan> thePlans = new Vector<StateMod_Plan>();
 	int linecount = 0;
 	
 	StateMod_Plan aPlan = null;
@@ -608,7 +608,7 @@ throws Exception
 	int errorCount = 0;
 	try {	
 		in = new BufferedReader(new FileReader(IOUtil.getPathUsingWorkingDir(filename)));
-		List<String> commentsBeforeData = new Vector();
+		List<String> commentsBeforeData = new Vector<String>();
 		while ((iline = in.readLine()) != null) {
 			++linecount;
 			// check for comments
@@ -717,7 +717,7 @@ throws Exception
 				aPlan.setCommentsBeforeData(commentsBeforeData);
 			}
 			// Always clear out for next right...
-			commentsBeforeData = new Vector(1);
+			commentsBeforeData = new Vector<String>(1);
 
 			// Set the plan to not dirty because it was just initialized...
 
@@ -1038,9 +1038,9 @@ public static void writeStateModFile(String instrfile, String outstrfile,
 		List<StateMod_Plan> thePlans, List<String> newComments )
 throws Exception
 {	String routine = "StateMod_Plan.writeStateModFile";
-	List<String> commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List<String> ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	PrintWriter out = null;
 	try {
@@ -1055,7 +1055,7 @@ throws Exception
 		// This format follows historical conventions
 		String formatLine1 = "%-12.12s \"%-24.24s\" %-12.12s%8d%8d%8d%8d%8d%8d \"%-12.12s\" %8.8s";
 		StateMod_Plan plan = null;
-		List<Object> v = new Vector(11); // Reuse for all output lines.
+		List<Object> v = new Vector<Object>(11); // Reuse for all output lines.
 
 		out.println(cmnt);
 		out.println(cmnt + "*************************************************");

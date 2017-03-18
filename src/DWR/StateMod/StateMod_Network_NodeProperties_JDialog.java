@@ -69,6 +69,7 @@ import RTi.Util.String.StringUtil;
 /**
 This class draws the network that can be printed, viewed and altered.
 */
+@SuppressWarnings("serial")
 public class StateMod_Network_NodeProperties_JDialog extends JDialog
 implements ActionListener, KeyListener, WindowListener {
 
@@ -298,7 +299,7 @@ Adds the IDs of the upstream nodes to the main JPanel.
 @param y the y coordinate at which to start adding them.
 */
 private int addUpstreamNodesToPanel(JPanel panel, int y) {
-	List upstreams = __nodes[__nodeNum].getUpstreamNodes();
+	List<HydrologyNode> upstreams = __nodes[__nodeNum].getUpstreamNodes();
 	if (upstreams == null || upstreams.size() == 0) {
 		return y;
 	}

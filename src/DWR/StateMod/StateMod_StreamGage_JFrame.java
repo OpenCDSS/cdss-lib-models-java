@@ -132,6 +132,7 @@ import RTi.Util.Message.Message;
 /**
 Class to display data about stream gage stations.
 */
+@SuppressWarnings("serial")
 public class StateMod_StreamGage_JFrame extends JFrame
 implements ActionListener, ItemListener, KeyListener, MouseListener, 
 WindowListener, JWorksheet_SortListener {
@@ -272,7 +273,7 @@ public StateMod_StreamGage_JFrame (	StateMod_DataSet dataset, StateMod_DataSet_W
 	__dataset_wm = dataset_wm;
 	__streamGageStationComponent = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_STREAMGAGE_STATIONS);
-	__streamGageStationsVector = (List)__streamGageStationComponent.getData();
+	__streamGageStationsVector = (List<StateMod_StreamGage>)__streamGageStationComponent.getData();
 	int size = __streamGageStationsVector.size();
 	StateMod_StreamGage s = null;
 	for (int i = 0; i < size; i++) {
@@ -298,11 +299,11 @@ StateMod_StreamGage station, boolean editable) {
 	__dataset = dataset;
 	__streamGageStationComponent = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_STREAMGAGE_STATIONS);
-	__streamGageStationsVector = (List)__streamGageStationComponent.getData();
+	__streamGageStationsVector = (List<StateMod_StreamGage>)__streamGageStationComponent.getData();
 	int size = __streamGageStationsVector.size();
 	StateMod_StreamGage s = null;
 	for (int i = 0; i < size; i++) {
-		s =(StateMod_StreamGage)__streamGageStationsVector.get(i);
+		s = __streamGageStationsVector.get(i);
 		s.createBackup();
 	}
 
@@ -426,7 +427,7 @@ Checks the text fields for validity before they are saved back into the data obj
 @return true if the text fields are okay, false if not.
 */
 private boolean checkInput() {
-	List errors = new Vector();
+	List<String> errors = new Vector<String>();
 	int errorCount = 0;
 
 	// for each field, check if it contains valid input.  If not,
@@ -521,7 +522,7 @@ private void displayTSViewJFrame(Object o)
 	props.set("Product.TotalWidth", "600");
 	props.set("Product.TotalHeight", "400");
 
-	List tslist = new Vector();
+	List<TS> tslist = new Vector<TS>();
 
 	int sub = 0;
 	int its = 0;
@@ -714,7 +715,7 @@ private void populateCrunidyComboBox() {
 	__crunidyComboBox.add("3 - Daily time series are supplied");
 	__crunidyComboBox.add("4 - Daily time series interpolated from midpoints of monthly data");
 
-	List idNameVector = StateMod_Util.createIdentifierList(__streamGageStationsVector, true);
+	List<String> idNameVector = StateMod_Util.createIdentifierListFromStateModData(__streamGageStationsVector, true,null);
 	int size = idNameVector.size();
 
 	String s = null;

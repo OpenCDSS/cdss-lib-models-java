@@ -84,6 +84,7 @@ import RTi.Util.String.StringUtil;
 /**
 This class is a GUI for displaying and editing return flows.
 */
+@SuppressWarnings("serial")
 public class StateMod_Diversion_ReturnFlow_JFrame extends JFrame
 implements ActionListener, KeyListener, MouseListener, WindowListener {
 
@@ -226,8 +227,9 @@ private boolean saveData() {
 	// now only save data if any are different.
 	boolean needToSave = false;
 
-	// if the Vectors are differently-sized, they're different
-	List wv = __worksheet.getAllData();		// w for worksheet
+	// if the lists are differently-sized, they're different
+	@SuppressWarnings("unchecked")
+	List<StateMod_ReturnFlow> wv = (List<StateMod_ReturnFlow>)__worksheet.getAllData();		// w for worksheet
 	List dv = __currentDiv.getReturnFlows();	// d for diversion
 
 	needToSave = !(StateMod_ReturnFlow.equals(wv, dv));
@@ -243,14 +245,13 @@ private boolean saveData() {
 	// clone the objects from the worksheet vector and assign them
 	// to the diversion object as its new return flows.
 	int size = wv.size();
-	List clone = new Vector();
+	List<StateMod_ReturnFlow> clone = new Vector<StateMod_ReturnFlow>();
 	StateMod_ReturnFlow rf = null;
 	StateMod_ReturnFlow crf = null;
 	for (int i = 0; i < size; i++) {
-		rf = (StateMod_ReturnFlow)wv.get(i);
+		rf = wv.get(i);
 		crf = (StateMod_ReturnFlow)rf.clone();
-		rf.setCrtnid(StringUtil.getToken(rf.getCrtnid(), " ",
-			StringUtil.DELIM_SKIP_BLANKS, 0));
+		rf.setCrtnid(StringUtil.getToken(rf.getCrtnid(), " ",StringUtil.DELIM_SKIP_BLANKS, 0));
 		crf._isClone = false;
 		clone.add(crf);
 	}
@@ -268,7 +269,8 @@ exist.
 */
 private int checkInput() {
 	String routine = "StateMod_Diversion_ReturnFlow_JFrame.checkInput";
-	List v = __worksheet.getAllData();
+	@SuppressWarnings("unchecked")
+	List<StateMod_ReturnFlow> v = (List<StateMod_ReturnFlow>)__worksheet.getAllData();
 
 	int size = 0;
 	if ( v != null ) {
@@ -279,7 +281,7 @@ private int checkInput() {
 	String riverNode;
 	int fatalCount = 0;
 	for (int i = 0; i < size; i++) {
-		rf = (StateMod_ReturnFlow)(v.get(i));
+		rf = v.get(i);
 		riverNode = rf.getCrtnid();
 		riverNode = StringUtil.getToken(riverNode, " ", 
 			StringUtil.DELIM_SKIP_BLANKS, 0);
@@ -456,19 +458,18 @@ public void setupGUI() {
 	int widths[] = null;
 	JScrollWorksheet jsw = null;
 	try {	
-		List nodes = (List)(__dataset.getComponentForComponentType(
+		@SuppressWarnings("unchecked")
+		List<StateMod_RiverNetworkNode> nodes = (List <StateMod_RiverNetworkNode>)(__dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_RIVER_NETWORK).getData());
 
-		List v = new Vector();
-		List v2 = __currentDiv.getReturnFlows();
+		List<StateMod_ReturnFlow> v = new Vector<StateMod_ReturnFlow>();
+		List<StateMod_ReturnFlow> v2 = __currentDiv.getReturnFlows();
 		int size = v2.size();
 		StateMod_ReturnFlow rf;		
 		for (int i = 0; i < size; i++) {
-			rf = (StateMod_ReturnFlow)
-				((StateMod_ReturnFlow)v2.get(i)).clone();
+			rf = (StateMod_ReturnFlow)v2.get(i).clone();
 			rf.setCrtnid(rf.getCrtnid()
-				+ StateMod_Util.findNameInVector(rf.getCrtnid(),
-				nodes, true));
+				+ StateMod_Util.findNameInVector(rf.getCrtnid(),nodes, true));
 			v.add(rf);			
 		}
 
@@ -481,7 +482,8 @@ public void setupGUI() {
 		jsw = new JScrollWorksheet(crd, tmd, p);
 		__worksheet = jsw.getJWorksheet();
 
-		v = StateMod_Util.createIdentifierList(nodes, true);
+		// TODO SAM 2017-03-15 something not right here - looks like original list variable was wrong
+		//v = StateMod_Util.createIdentifierListFromStateModData(nodes, true, null);
 		__worksheet.setColumnJComboBoxValues(
 			StateMod_ReturnFlow_TableModel.COL_RIVER_NODE, v,false);
 
@@ -497,7 +499,7 @@ public void setupGUI() {
 				.getComponentForComponentType(
 				StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY).getData());
 		}
-		v = StateMod_Util.createIdentifierList(delayIDs, true);
+		v = StateMod_Util.createIdentifierListFromStateModData(delayIDs, true, null);
 		__worksheet.setColumnJComboBoxValues(
 			StateMod_ReturnFlow_TableModel.COL_RETURN_ID, v, false);
 		widths = crd.getColumnWidths();		

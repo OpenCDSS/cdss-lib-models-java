@@ -129,7 +129,7 @@ Checks whether the node is a gage that is to supply proration data.
 @param prfGageData vector of prf gage data 
 @return true if the node is gage that supplies proration data, false if not.
 */
-public static boolean isSetprfSource ( String id, List prfGageData)
+public static boolean isSetprfSource ( String id, List<StateMod_PrfGageData> prfGageData)
 {	String routine = "StateMod_PrfGageData.isSetprfSource";
 	int dl = 10;
 
@@ -145,7 +145,7 @@ public static boolean isSetprfSource ( String id, List prfGageData)
 
 	StateMod_PrfGageData prfGageData_j;
 	for (int j = 0; j < numPrfGageData; j++) {
-		prfGageData_j = (StateMod_PrfGageData)prfGageData.get(j);
+		prfGageData_j = prfGageData.get(j);
 		if (prfGageData_j.getGageID().equalsIgnoreCase( id ) ) {
 			if (Message.isDebugOn) {
 				Message.printDebug(dl, routine,

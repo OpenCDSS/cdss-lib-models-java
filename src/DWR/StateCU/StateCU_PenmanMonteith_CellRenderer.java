@@ -5,6 +5,7 @@ import RTi.Util.GUI.JWorksheet_AbstractExcelCellRenderer;
 /**
 This class is used to render Penman-Monteith cells.
 */
+@SuppressWarnings("serial")
 public class StateCU_PenmanMonteith_CellRenderer extends JWorksheet_AbstractExcelCellRenderer
 {
 

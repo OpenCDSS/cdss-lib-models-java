@@ -133,6 +133,7 @@ import RTi.GR.GRLimits;
 import RTi.GR.GRShape;
 import RTi.GRTS.TSProduct;
 import RTi.GRTS.TSViewJFrame;
+import RTi.TS.MonthTS;
 import RTi.TS.TS;
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.JScrollWorksheet;
@@ -148,6 +149,7 @@ import RTi.Util.Message.Message;
 /**
 This class displays data for StateMod_Reservoir objects.
 */
+@SuppressWarnings("serial")
 public class StateMod_Reservoir_JFrame extends JFrame
 implements ActionListener, ItemListener, KeyListener, MouseListener, 
 WindowListener, JWorksheet_SortListener {
@@ -310,7 +312,7 @@ public StateMod_Reservoir_JFrame ( StateMod_DataSet dataset, StateMod_DataSet_Wi
 	__dataset_wm = dataset_wm;
 	__reservoirComponent = __dataset.getComponentForComponentType( StateMod_DataSet.COMP_RESERVOIR_STATIONS);
 
-	__reservoirsVector = (List)__reservoirComponent.getData();
+	__reservoirsVector = (List<StateMod_Reservoir>)__reservoirComponent.getData();
 
 	int size = __reservoirsVector.size();
 	for (int i = 0; i < size; i++) {
@@ -339,7 +341,7 @@ public StateMod_Reservoir_JFrame ( StateMod_DataSet dataset, StateMod_DataSet_Wi
 	__dataset_wm = dataset_wm;
 	__reservoirComponent = __dataset.getComponentForComponentType(StateMod_DataSet.COMP_RESERVOIR_STATIONS);
 
-	__reservoirsVector = (List)__reservoirComponent.getData();
+	__reservoirsVector = (List<StateMod_Reservoir>)__reservoirComponent.getData();
 
 	int size = __reservoirsVector.size();
 	for (int i = 0; i < size; i++) {
@@ -492,7 +494,7 @@ Checks the text fields for validity before they are saved back into the data obj
 @return true if the text fields are okay, false if not.
 */
 private boolean checkInput() {
-	List errors = new Vector();
+	List<String> errors = new Vector<String>();
 	int errorCount = 0;
 
 	// for each field, check if it contains valid input.  If not,
@@ -589,7 +591,7 @@ private void displayTSViewJFrame(Object o)
 
 	PropList props = new PropList("Reservoir");
 
-	List tslist = new Vector();
+	List<TS> tslist = new Vector<TS>();
 
 	// Get the time series to display and set plot properties if graphing.
 
@@ -597,9 +599,11 @@ private void displayTSViewJFrame(Object o)
 	int its = 0;
 	TS ts = null;
 	StateMod_Reservoir res =((StateMod_Reservoir)__reservoirsVector.get(__currentReservoirIndex));
-	List precip_tslist = (List)(__dataset.getComponentForComponentType(
+	@SuppressWarnings("unchecked")
+	List<MonthTS> precip_tslist = (List<MonthTS>)(__dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_PRECIPITATION_TS_MONTHLY)).getData();
-	List evap_tslist = (List)(__dataset.getComponentForComponentType(
+	@SuppressWarnings("unchecked")
+	List<MonthTS> evap_tslist = (List<MonthTS>)(__dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_EVAPORATION_TS_MONTHLY)).getData();
 	StateMod_ReservoirClimate clim = null;
 	if ( Message.isDebugOn ) {
@@ -1020,7 +1024,7 @@ private void rebuildResDailyID() {
 
 	// then add the IDs of all the other reservoirs in the dataset,
 	// making sure not to re-add the above ID again.
-	List ids = StateMod_Util.createIdentifierList(__reservoirsVector, false);
+	List<String> ids = StateMod_Util.createIdentifierListFromStateModData(__reservoirsVector, false, null);
 	
 	for (int i = 0; i < ids.size(); i++) {
 		String currID = (String)ids.get(i);

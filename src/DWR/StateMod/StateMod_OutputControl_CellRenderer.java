@@ -15,6 +15,7 @@ import RTi.Util.GUI.JWorksheet_AbstractExcelCellRenderer;
 /**
 This class renders cells for output control tables.
 */
+@SuppressWarnings("serial")
 public class StateMod_OutputControl_CellRenderer
 extends JWorksheet_AbstractExcelCellRenderer {
 

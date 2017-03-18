@@ -50,8 +50,8 @@ import RTi.Util.String.StringUtil;
 public class StateMod_DeltaPlot extends StateMod_Data {
 
 protected String	_type;	// "Difference", "Single", etc.
-protected List	_columnTitles;	// String vector, column titles
-protected List	_nodes;	// StateMod_DeltaPlotNode vector
+protected List<String>	_columnTitles;	// String vector, column titles
+protected List<StateMod_DeltaPlotNode>	_nodes;	// StateMod_DeltaPlotNode vector
 
 /**
 Constructor.
@@ -111,8 +111,8 @@ public String getType() {
 
 private void initialize ()
 {	_type = "";
-	_columnTitles = new Vector(10,10);
-	_nodes = new Vector(10,10);
+	_columnTitles = new Vector<String>();
+	_nodes = new Vector<StateMod_DeltaPlotNode>();
 }
 
 public int nodesSize () {
@@ -135,7 +135,7 @@ throws IOException
 	String type = null;
 	String yrOrAve = null;
 	String colTitle = null;
-	List list = null;
+	List<String> list = null;
 	StateMod_DeltaPlotNode node = null;
 	String id = null;
 	String name = null;
@@ -158,10 +158,10 @@ throws IOException
 		int size = _columnTitles.size();
 		for ( int i=0; i<size; i++ ) {
 			list = StringUtil.breakStringList (
-				(String)_columnTitles.get(i), " ", 
+				_columnTitles.get(i), " ", 
 				StringUtil.DELIM_SKIP_BLANKS );
-			yrOrAve = (String)list.get(0);
-			colTitle = ((String)list.get(1)).replace(',','_');
+			yrOrAve = list.get(0);
+			colTitle = list.get(1).replace(',','_');
 			if ( !include_type ) {
 				iline += ",";
 			}
@@ -227,13 +227,13 @@ throws IOException
 {	String rtn = "StateMod_DeltaPlot.readStateModDeltaOutputFile";
 	String iline = null;
 	BufferedReader in = null;
-	List list1 = null;
+	List<String> list1 = null;
 	String a = null;
 	Integer b = null;
 	String format ="s12s1s24s1d10s1d10s1d10s1d10s1d10s1d10s1d10" +
 			"s1d10s1d10s1d10s1d10s1d10s1d10s1d10s1d10s1d10s1d10" +
 			"s1d10s1d10s1d10";
-	List v = null;
+	List<Object> v = null;
 
 	Message.printStatus ( 1, rtn, "Reading delplt output file: " 
 		+ filename );
@@ -246,6 +246,7 @@ throws IOException
 			Message.printWarning ( 1, rtn, 
 			"Unknown format for first line in delplt output file: "
 			+ iline );
+			in.close();
 			return 1;
 		}
 		
@@ -254,7 +255,7 @@ throws IOException
 			Message.printDebug ( 50, rtn, iline );
 		}
 
-		a = (String)list1.get(0);
+		a = list1.get(0);
 		//Message.printDebug ( 10, rtn, a );
 		b = new Integer ( a );
 		int nz = b.intValue();

@@ -15,6 +15,7 @@ import RTi.Util.GUI.JWorksheet_AbstractExcelCellRenderer;
 /**
 This class renders cells for well tables.
 */
+@SuppressWarnings("serial")
 public class StateMod_Well_Data_CellRenderer
 extends JWorksheet_AbstractExcelCellRenderer {
 

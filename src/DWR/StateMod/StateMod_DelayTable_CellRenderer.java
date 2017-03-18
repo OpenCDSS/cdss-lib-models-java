@@ -18,6 +18,7 @@ import RTi.Util.GUI.JWorksheet_AbstractExcelCellRenderer;
 /**
 This class is used for rendering cells for delay table tables.
 */
+@SuppressWarnings("serial")
 public class StateMod_DelayTable_CellRenderer
 extends JWorksheet_AbstractExcelCellRenderer {
 

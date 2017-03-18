@@ -46,13 +46,13 @@ delay entries are added to the end of the previously stored delays.  Returns the
 values in each delay pattern.  -1 indicates variable number of values with
 values as percent (0-100).  -100 indicates variable number of values with values as fraction (0-1).
 */
-public static List readStateCUFile ( String filename, int interv )
+public static List<StateMod_DelayTable> readStateCUFile ( String filename, int interv )
 throws Exception
 {
 	boolean is_monthly = true;
 	String routine = "StateCU_DelayTable.readStateCUFile";
 	String iline;
-	List theDelays = new Vector(1);
+	List<StateMod_DelayTable> theDelays = new Vector<StateMod_DelayTable>(1);
 	StateMod_DelayTable aDelay = new StateMod_DelayTable ( is_monthly );
 	int num_read=0, total_num_to_read=0;
 	boolean reading=false; 
@@ -129,12 +129,12 @@ routine which now does not mess with headers.
 @param newcomments new comments to save with the header of the file
 @throws Exception if an error occurs
 */
-public static void writeStateCUFile(String inputFile, String outputFile, List dly, List newcomments )
+public static void writeStateCUFile(String inputFile, String outputFile, List<StateMod_DelayTable> dly, List<String> newcomments )
 throws Exception
 {	PrintWriter	out = null;
-	List commentStr = new Vector(1);
+	List<String> commentStr = new Vector<String>(1);
 	commentStr.add ( "#" );
-	List ignoreCommentStr = new Vector(1);
+	List<String> ignoreCommentStr = new Vector<String>(1);
 	ignoreCommentStr.add ( "#>" );
 	String routine = "StateMod_DelayTable.writeStateCUFile";
 
@@ -183,7 +183,7 @@ throws Exception
 		int nvals = 0; // Number of returns in a table
 		boolean printed; // Indicates if a line of output was printed, to help handle 12 values or less per line
 		for (int i = 0; i < ndly; i++) {
-			delay = (StateMod_DelayTable)dly.get(i);
+			delay = dly.get(i);
 			b.setLength(0);
 			b.append ( StringUtil.formatString(delay.getTableID(), "%8d"));
 			b.append ( StringUtil.formatString(delay.getNdly(), "%4d") );

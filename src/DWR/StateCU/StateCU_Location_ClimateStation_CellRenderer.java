@@ -15,6 +15,7 @@ import RTi.Util.GUI.JWorksheet_AbstractExcelCellRenderer;
 /**
 This class is used to render location cells.
 */
+@SuppressWarnings("serial")
 public class StateCU_Location_ClimateStation_CellRenderer
 extends JWorksheet_AbstractExcelCellRenderer {
 

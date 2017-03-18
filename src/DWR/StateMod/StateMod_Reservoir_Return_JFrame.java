@@ -33,6 +33,7 @@ import RTi.Util.Message.Message;
 /**
 GUI for displaying/editing the return flow assignments for a reservoir.
 */
+@SuppressWarnings("serial")
 public class StateMod_Reservoir_Return_JFrame extends JFrame
 implements ActionListener, KeyListener, MouseListener, WindowListener {
 
@@ -76,7 +77,7 @@ private JWorksheet __worksheet;
 /**
 Dataset that contains the data.
 */
-private StateMod_DataSet __dataset;
+//private StateMod_DataSet __dataset;
 
 /**
 The current reservoir for which returns are being shown.
@@ -88,7 +89,7 @@ The list of return data to view.  These returns are maintained as a separate dat
 currently linked to the reservoir.  This is a different approach than diversion/well returns, mainly
 because effort has not been put into the full editing features and "dirty" data need to be separate.
 */
-private List<StateMod_ReturnFlow> __currentResReturnList = new Vector();
+private List<StateMod_ReturnFlow> __currentResReturnList = new Vector<StateMod_ReturnFlow>();
 
 /**
 Constructor.
@@ -101,12 +102,13 @@ public StateMod_Reservoir_Return_JFrame(StateMod_DataSet dataset, StateMod_Reser
 		+ " - Reservoir Return Flow Table Assignment", null);
 	JGUIUtil.setIcon(this, JGUIUtil.getIconImage());
 	__currentRes = res;
+	@SuppressWarnings("unchecked")
 	List<StateMod_ReturnFlow> allReturns = (List<StateMod_ReturnFlow>)dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_RESERVOIR_RETURN).getData();
 	__currentResReturnList = (List<StateMod_ReturnFlow>)StateMod_Util.getDataList (allReturns,res.getID());
 	Message.printStatus(2,"","Have " + __currentResReturnList.size() + " return records for reservoir \"" +
 		__currentRes.getID() + "\" (selected from full list of size " + allReturns.size() + ")." );
-	__dataset = dataset;
+	//__dataset = dataset;
 	// TODO SAM 2011-01-02 For now editing is disabled...
 	editable = false;
 	__editable = editable;
@@ -181,25 +183,26 @@ Checks the data to make sure that all the data are valid.
 */
 private int checkInput() {
 	String routine = "StateMod_Reservoir_Return_JFrame.checkInput";
-	List v = __worksheet.getAllData();
+	@SuppressWarnings("unchecked")
+	List<StateMod_ReturnFlow> v = (List<StateMod_ReturnFlow>)__worksheet.getAllData();
 
 	int size = v.size();
 	StateMod_ReturnFlow aReturn = null;
 	String warning = "";
 	String id;
 	String riverNodeID;
-	double percent;
-	String tableID;
+	//double percent;
+	//String tableID;
 	int fatalCount = 0;
-	String comment;
+	//String comment;
 	for (int i = 0; i < size; i++) {
-		aReturn = (StateMod_ReturnFlow)(v.get(i));
+		aReturn = v.get(i);
 
 		id = aReturn.getID();
 		riverNodeID = aReturn.getCrtnid();
-		percent = aReturn.getPcttot();
-		tableID = "" + aReturn.getIrtndl();
-		comment = aReturn.getComment();
+		//percent = aReturn.getPcttot();
+		//tableID = "" + aReturn.getIrtndl();
+		//comment = aReturn.getComment();
 	
 		// TODO SAM 2011-01-02 Need to implement validators
 		if (id.length() > 12) {
@@ -243,7 +246,7 @@ Saves the input back into the dataset.
 @return true if the data was saved successfully.  False if not.
 */
 private boolean saveData() {
-	String routine = "StateMod_Reservoir_Return_JFrame.saveData";
+	//String routine = "StateMod_Reservoir_Return_JFrame.saveData";
 	/* TODO SAM 2011-01-02 Enable - for now no editing is allowed
 	if (!__worksheet.stopEditing()) {
 		// don't save if there are errors.

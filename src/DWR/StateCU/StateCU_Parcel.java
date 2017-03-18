@@ -1,7 +1,7 @@
 package DWR.StateCU;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 /**
 This class is not part of the core StateCU classes.  Instead, it is used with
@@ -9,7 +9,7 @@ StateDMI to track whether a CU Location has parcels.  The data may ultimately be
 useful in StateCU and is definitely useful for data checks in StateDMI.
 */
 public class StateCU_Parcel extends StateCU_Data 
-implements Cloneable, Comparable {
+implements Cloneable, Comparable<StateCU_Data> {
 
 // Base class has ID and name (not useful and same as ID)
 
@@ -41,7 +41,7 @@ private String __irrigation_method;
 /**
 Water supply sources - initialize so non-null.
 */
-private List __supply_Vector = new Vector();
+private List<StateCU_Supply> __supply_List = new ArrayList<StateCU_Supply>();
 
 /**
 Constructor.
@@ -55,7 +55,7 @@ public StateCU_Parcel() {
 Add a supply object.
 */
 public void addSupply ( StateCU_Supply supply )
-{	__supply_Vector.add ( supply );
+{	__supply_List.add ( supply );
 }
 
 /**
@@ -71,17 +71,16 @@ public Object clone() {
 /**
 Compares this object to another StateCU_Data object based on the sorted order from the StateCU_Data
 variables, and then by crop, irrigation method, area, and year,in that order.
-@param o the object to compare against.
+@param data the object to compare against (should be a StateCU_Parcel).
 @return 0 if they are the same, 1 if this object is greater than the other object, or -1 if it is less.
 */
-public int compareTo(Object o) {
-	int res = super.compareTo(o);
+public int compareTo(StateCU_Data data) {
+	int res = super.compareTo(data);
 	if (res != 0) {
 		return res;
 	}
-
-	StateCU_Parcel parcel = (StateCU_Parcel)o;
-
+	
+	StateCU_Parcel parcel = (StateCU_Parcel)data;
 	res = __crop.compareTo(parcel.getCrop());
 	if ( res != 0) {
 		return res;
@@ -226,8 +225,8 @@ public String getIrrigationMethod() {
 Return the list of StateCU_Supply for the parcel.
 @return the list of StateCU_Supply for the parcel.
 */
-public List getSupplyList() {
-	return __supply_Vector;
+public List<StateCU_Supply> getSupplyList() {
+	return __supply_List;
 }
 
 /**
@@ -253,10 +252,10 @@ Indicate whether the parcel has groundwater supply.  This will be true if
 any of the StateCU_Supply associated with the parcel return isGroundWater as true.
 */
 public boolean hasGroundWaterSupply ()
-{	int size = __supply_Vector.size();
+{	int size = __supply_List.size();
 	StateCU_Supply supply = null;
 	for ( int i = 0; i < size; i++ ) {
-		supply = (StateCU_Supply)__supply_Vector.get(i);
+		supply = (StateCU_Supply)__supply_List.get(i);
 		if ( supply.isGroundWater() ) {
 			return true;
 		}

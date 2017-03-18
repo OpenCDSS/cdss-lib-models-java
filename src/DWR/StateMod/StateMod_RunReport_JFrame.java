@@ -92,6 +92,7 @@ import RTi.Util.String.StringUtil;
 This class is a gui for choosing the options for statemod for running certain 
 reports.
 */
+@SuppressWarnings("serial")
 public class StateMod_RunReport_JFrame extends JFrame
 implements ActionListener, MouseListener, WindowListener {
 
@@ -570,51 +571,56 @@ Sets up the GUI.
 private void setupGUI() {
 	__xdgSimpleJComboBox = new SimpleJComboBox();
 
-	List diversionsVector = (List)
+	@SuppressWarnings("unchecked")
+	List<StateMod_Diversion> diversionsVector = (List<StateMod_Diversion>)
 		__dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_DIVERSION_STATIONS).getData();
-	List list_names = StateMod_Util.createIdentifierList (
-		diversionsVector, true );
+	List<String> list_names = StateMod_Util.createIdentifierListFromStateModData (
+		diversionsVector, true, null );
 	int size = list_names.size();
 	for (int i = 0; i < size; i++) {
 		__xdgSimpleJComboBox.add ( list_names.get(i) +
 		" - Diversion");
 	}
 
-	List instreamFlowsVector = (List)
+	@SuppressWarnings("unchecked")
+	List<StateMod_InstreamFlow> instreamFlowsVector = (List<StateMod_InstreamFlow>)
 		__dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_INSTREAM_STATIONS).getData();
-	list_names = StateMod_Util.createIdentifierList ( instreamFlowsVector, true );
+	list_names = StateMod_Util.createIdentifierListFromStateModData ( instreamFlowsVector, true, null );
 	size = list_names.size();
 	for (int i = 0; i < size; i++) {
 		__xdgSimpleJComboBox.add ( list_names.get(i) +
 		" - Instream Flow");
 	}
 
-	List gageVector = (List)
+	@SuppressWarnings("unchecked")
+	List<StateMod_StreamGage> gageVector = (List<StateMod_StreamGage>)
 		__dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_STREAMGAGE_STATIONS).getData();
-	list_names = StateMod_Util.createIdentifierList ( gageVector, true );
+	list_names = StateMod_Util.createIdentifierListFromStateModData ( gageVector, true, null );
 	size = list_names.size();
 	for (int i = 0; i < size; i++) {
 		__xdgSimpleJComboBox.add ( list_names.get(i) +
 		" - Stream Gage");
 	}
 
-	List estimateVector = (List)
+	@SuppressWarnings("unchecked")
+	List<StateMod_StreamEstimate> estimateVector = (List<StateMod_StreamEstimate>)
 		__dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS).getData();
-	list_names = StateMod_Util.createIdentifierList ( estimateVector, true );
+	list_names = StateMod_Util.createIdentifierListFromStateModData ( estimateVector, true, null );
 	size = list_names.size();
 	for (int i = 0; i < size; i++) {
 		__xdgSimpleJComboBox.add ( list_names.get(i) +
 		" - Stream Estimate");
 	}
 
-	List reservoirsVector = (List)
+	@SuppressWarnings("unchecked")
+	List<StateMod_Reservoir> reservoirsVector = (List<StateMod_Reservoir>)
 		__dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_RESERVOIR_STATIONS).getData();
-	list_names = StateMod_Util.createIdentifierList ( reservoirsVector, true );
+	list_names = StateMod_Util.createIdentifierListFromStateModData ( reservoirsVector, true, null );
 	size = list_names.size();
 	__xrgSimpleJComboBox = new SimpleJComboBox();
 	for (int i = 0; i < size; i++) {
@@ -622,10 +628,11 @@ private void setupGUI() {
 		" - Reservoir");
 	}
 
-	List wellsVector = (List)
+	@SuppressWarnings("unchecked")
+	List<StateMod_Well> wellsVector = (List<StateMod_Well>)
 		__dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_WELL_STATIONS).getData();
-	list_names = StateMod_Util.createIdentifierList ( wellsVector, true );
+	list_names = StateMod_Util.createIdentifierListFromStateModData ( wellsVector, true, null );
 	size = list_names.size();
 	__xwgSimpleJComboBox = new SimpleJComboBox();
 	for (int i = 0; i < size; i++) {

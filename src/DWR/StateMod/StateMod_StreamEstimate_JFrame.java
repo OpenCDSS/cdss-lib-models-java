@@ -117,6 +117,7 @@ import RTi.Util.Message.Message;
 This class is a GUI for displaying stream estimate station data and the
 associated coefficient data.
 */
+@SuppressWarnings("serial")
 public class StateMod_StreamEstimate_JFrame extends JFrame
 implements ActionListener, ItemListener, KeyListener, MouseListener, 
 WindowListener, JWorksheet_SortListener {
@@ -263,7 +264,7 @@ public StateMod_StreamEstimate_JFrame (	StateMod_DataSet dataset,
 	__dataset = dataset;
 	__dataset_wm = dataset_wm;
 	__stationsComp = __dataset.getComponentForComponentType( StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS);
-	__stationsVector = (List)__stationsComp.getData();
+	__stationsVector = (List<StateMod_StreamEstimate>)__stationsComp.getData();
 	int size = __stationsVector.size();
 	StateMod_StreamEstimate s = null;
 	for (int i = 0; i < size; i++) {
@@ -273,7 +274,7 @@ public StateMod_StreamEstimate_JFrame (	StateMod_DataSet dataset,
 
 	__coefficientsComp = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS);
-	__coefficientsVector = (List)__coefficientsComp.getData();	
+	__coefficientsVector = (List<StateMod_StreamEstimate_Coefficients>)__coefficientsComp.getData();	
 	size = __coefficientsVector.size();
 	StateMod_StreamEstimate_Coefficients c = null;
 	for (int i = 0; i < size; i++) {
@@ -307,7 +308,7 @@ public StateMod_StreamEstimate_JFrame (	StateMod_DataSet dataset,
 	__dataset_wm = dataset_wm;
 	__stationsComp = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS);
-	__stationsVector = (List)__stationsComp.getData();
+	__stationsVector = (List<StateMod_StreamEstimate>)__stationsComp.getData();
 	int size = __stationsVector.size();
 	StateMod_StreamEstimate s = null;
 	for (int i = 0; i < size; i++) {
@@ -317,7 +318,7 @@ public StateMod_StreamEstimate_JFrame (	StateMod_DataSet dataset,
 
 	__coefficientsComp = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS);
-	__coefficientsVector = (List)__coefficientsComp.getData();
+	__coefficientsVector = (List<StateMod_StreamEstimate_Coefficients>)__coefficientsComp.getData();
 	size = __coefficientsVector.size();
 	StateMod_StreamEstimate_Coefficients c = null;
 	for (int i = 0; i < size; i++) {
@@ -474,7 +475,7 @@ data object.
 @return true if the text fields are okay, false if not.
 */
 private boolean checkInput() {
-	List errors = new Vector();
+	List<String> errors = new Vector<String>();
 	int errorCount = 0;
 
 	// for each field, check if it contains valid input.  If not,
@@ -569,7 +570,7 @@ private void displayTSViewJFrame(Object o)
 	props.set("Product.TotalWidth", "600");
 	props.set("Product.TotalHeight", "400");
 
-	List tslist = new Vector();
+	List<TS> tslist = new Vector<TS>();
 
 	int sub = 0;
 	int its = 0;
@@ -1050,7 +1051,7 @@ private void setupGUI(int index) {
 	int[] widthsR = null;
 	JScrollWorksheet jswR = null;
 	try {
-		List v = new Vector();
+		List<StateMod_StreamEstimate_Coefficients> v = new Vector<StateMod_StreamEstimate_Coefficients>();
 		/*
 		for (int i = 0; i < StateMod_RiverBaseFlow.MAX_BASEFLOWS;
 			i++) {
