@@ -15,6 +15,7 @@ import RTi.Util.GUI.JWorksheet_AbstractExcelCellRenderer;
 /**
 This class is used to render climate station cells.
 */
+@SuppressWarnings("serial")
 public class StateCU_BlaneyCriddle_CellRenderer
 extends JWorksheet_AbstractExcelCellRenderer {
 

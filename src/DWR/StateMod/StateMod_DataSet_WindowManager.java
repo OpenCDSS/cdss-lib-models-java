@@ -62,6 +62,7 @@ import RTi.GR.GRPoint;
 import RTi.GR.GRSymbol;
 import RTi.GR.GRText;
 import RTi.GRTS.TSViewJFrame;
+import RTi.TS.TS;
 import RTi.Util.GUI.ReportJFrame;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
@@ -365,8 +366,10 @@ public JFrame displayWindow ( int window_type, boolean editable )
 		props.set ( "PrintSize", "7" );
 		props.set ( "PageLength", "100" );
 		try {
-			win = new TSViewJFrame ( (List)(__dataset.getComponentForComponentType(
-			StateMod_DataSet.COMP_PRECIPITATION_TS_MONTHLY)).getData(), props );
+			@SuppressWarnings("unchecked")
+			List<TS> tslist = (List<TS>)(__dataset.getComponentForComponentType(
+					StateMod_DataSet.COMP_PRECIPITATION_TS_MONTHLY)).getData();
+			win = new TSViewJFrame ( tslist, props );
 			setWindowOpen ( WINDOW_PRECIPITATION, win );
 			// Use a window listener to know when the window closes
 			// so that it can be managed like all the other data windows.
@@ -395,8 +398,10 @@ public JFrame displayWindow ( int window_type, boolean editable )
 		props.set ( "PrintSize", "7" );
 		props.set ( "PageLength", "100" );
 		try {
-			win = new TSViewJFrame ( (List)(__dataset.getComponentForComponentType(
-				StateMod_DataSet.COMP_EVAPORATION_TS_MONTHLY)).getData(), props );
+			@SuppressWarnings("unchecked")
+			List<TS> tslist = (List<TS>)(__dataset.getComponentForComponentType(
+				StateMod_DataSet.COMP_EVAPORATION_TS_MONTHLY)).getData();
+			win = new TSViewJFrame ( tslist, props );
 			setWindowOpen ( WINDOW_EVAPORATION, win );
 			// Use a window listener to know when the window closes
 			// so that it can be managed like all the other data windows.
@@ -905,10 +910,6 @@ public void renderStateModNetworkAnnotation ( StateMod_Network_JComponent networ
 			nodeUpstream = network.findNode ( smdataUpstream.getID(),
 				false, // Do not change the selection
 				false ); // Do not zoom to the node
-		}
-		else {
-			Message.printStatus(2,"","Unable to find StateMod upstream data object for IFS \"" +
-				ifs.getID() + "\"" );
 		}
 		StateMod_Data smdataDownstream = ifs.lookupDownstreamDataObject(dataset);
 		if ( smdataDownstream != null ) {

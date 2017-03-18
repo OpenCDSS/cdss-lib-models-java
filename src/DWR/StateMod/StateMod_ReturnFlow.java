@@ -63,7 +63,7 @@ The StateMod_Data ID is the station for which the return flow applies.
 </p>
 */
 public class StateMod_ReturnFlow extends StateMod_Data 
-implements Cloneable, Comparable {
+implements Cloneable, Comparable<StateMod_Data> {
 
 /**
 River node receiving the return flow.
@@ -110,16 +110,16 @@ public Object clone() {
 /**
 Compares this object to another StateMod_ReturnFlow object based on the sorted
 order from the StateMod_ReturnFlow variables, and then by crtnid, pcttot, and irtndl, in that order.
-@param o the object to compare against.
+@param data the object to compare against.
 @return 0 if they are the same, 1 if this object is greater than the other object, or -1 if it is less.
 */
-public int compareTo(Object o) {
-	int res = super.compareTo(o);
+public int compareTo(StateMod_Data data) {
+	int res = super.compareTo(data);
 	if (res != 0) {
 		return res;
 	}
 
-	StateMod_ReturnFlow rf = (StateMod_ReturnFlow)o;
+	StateMod_ReturnFlow rf = (StateMod_ReturnFlow)data;
 
 	int index = -1;
 	String crtnid1 = __crtnid;
@@ -173,7 +173,7 @@ Creates a backup of the current data object and stores it in _original,
 for use in determining if an object was changed inside of a GUI.
 */
 public void createBackup() {
-	_original = clone();
+	_original = (StateMod_ReturnFlow)clone();
 	((StateMod_ReturnFlow)_original)._isClone = false;
 	_isClone = true;
 }
@@ -197,13 +197,13 @@ public static boolean equals(List<StateMod_ReturnFlow> v1, List<StateMod_ReturnF
 		// and data will need to be saved back into the data set.
 		int size = v1.size();
 		//Message.printStatus(2, routine, "Return flow lists are of size: " + size);
-		List v1Sort = StateMod_Util.sortStateMod_DataVector(v1);
-		List v2Sort = StateMod_Util.sortStateMod_DataVector(v2);
+		List<StateMod_ReturnFlow> v1Sort = StateMod_Util.sortStateMod_DataVector(v1);
+		List<StateMod_ReturnFlow> v2Sort = StateMod_Util.sortStateMod_DataVector(v2);
 		//Message.printStatus(2, routine, "Return flow lists have been sorted");
 	
 		for (int i = 0; i < size; i++) {			
-			rf1 = (StateMod_ReturnFlow)v1Sort.get(i);	
-			rf2 = (StateMod_ReturnFlow)v2Sort.get(i);	
+			rf1 = v1Sort.get(i);	
+			rf2 = v2Sort.get(i);	
 			Message.printStatus(2, routine, rf1.toString());
 			Message.printStatus(2, routine, rf2.toString());
 			//Message.printStatus(2, routine, "Element " + i + " comparison: " + rf1.compareTo(rf2));
@@ -283,7 +283,7 @@ throws Exception
 {	String routine = "StateMod_ReturnFlow.readStateModFile";
 	String iline = null;
 	List<String> v;
-	List<StateMod_ReturnFlow> theReturns = new Vector();
+	List<StateMod_ReturnFlow> theReturns = new Vector<StateMod_ReturnFlow>();
 	int linecount = 0;
 	
 	StateMod_ReturnFlow aReturn = null;
@@ -460,7 +460,7 @@ throws Exception {
 		size = data.size();
 	}
 	
-	List<String> fields = new Vector();
+	List<String> fields = new Vector<String>();
 	fields.add("ID");
 	fields.add("RiverNodeID");
 	if (componentType == StateMod_DataSet.COMP_WELL_STATION_DEPLETION_TABLES) {
@@ -491,9 +491,9 @@ throws Exception {
 	int j = 0;
 	PrintWriter out = null;
 	StateMod_ReturnFlow rf = null;
-	List<String> commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List<String> ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	String[] line = new String[fieldCount];
 	StringBuffer buffer = new StringBuffer();
@@ -503,10 +503,10 @@ throws Exception {
 		// incoming comments so that they are not modified in the calling code.
 		List<String> newComments2 = null;
 		if ( newComments == null ) {
-			newComments2 = new Vector();
+			newComments2 = new Vector<String>();
 		}
 		else {
-			newComments2 = new Vector(newComments);
+			newComments2 = new Vector<String>(newComments);
 		}
 		newComments2.add(0,"");
 		if (componentType == StateMod_DataSet.COMP_DIVERSION_STATION_DELAY_TABLES) {
@@ -579,9 +579,9 @@ public static void writeStateModFile(String instrfile, String outstrfile,
 		String stationType, List<StateMod_ReturnFlow> theReturns, List<String> newComments )
 throws Exception
 {	String routine = "StateMod_ReturnFlow.writeStateModFile";
-	List<String> commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List<String> ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	PrintWriter out = null;
 	String comment;
@@ -597,7 +597,7 @@ throws Exception
 		// This format follows historical conventions found in example files, limited by StateMod ID lengths
 		String formatLine1 = "%-12.12s %-12.12s %8.2f %-12.12s"; // Comment only written if not blank
 		StateMod_ReturnFlow rf = null;
-		List<Object> v = new Vector(11); // Reuse for all output lines.
+		List<Object> v = new Vector<Object>(11); // Reuse for all output lines.
 
 		out.println(cmnt);
 		out.println(cmnt + "*************************************************");

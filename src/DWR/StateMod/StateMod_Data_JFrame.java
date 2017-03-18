@@ -110,6 +110,7 @@ Currently there is no window management being done for this class and its
 derived classes.  This will be added in the future but for now multiple windows
 will be able to be opened, etc.
 */
+@SuppressWarnings("serial")
 public abstract class StateMod_Data_JFrame 
 extends JFrame
 implements ActionListener, WindowListener {
@@ -218,7 +219,7 @@ public void actionPerformed(ActionEvent event) {
 			return;
 		}
 
-		List v = formatOutput(s[1], true, true);
+		List<String> v = formatOutput(s[1], true, true);
 		try {
 			export(s[0], v);
 		}
@@ -301,12 +302,12 @@ protected void createDataBackup() {
 protected abstract void createDataBackup();
 
 /**
-Exports a Vector of strings to a file.
+Exports a list of strings to a file.
 @param filename the name of the file to write.
 @param strings a non-null Vector of Strings, each element of which will be
 another line in the file.
 */
-protected void export(String filename, List strings)
+protected void export(String filename, List<String> strings)
 throws Exception {
 	String routine = "StateMod_Data_JFrame.export";
 	// First see if we can write the file given the security
@@ -367,19 +368,19 @@ throws Throwable {
 }
 
 /**
-Formats the data in the worksheet into a Vector of Strings.  Each field in the
+Formats the data in the worksheet into a list of Strings.  Each field in the
 worksheet will be separated from the next by the specified delimiter, with
 no trailing delimiter.
 @param delimiter the character String to use to separate worksheet fields.
 @param quotes if true, then the column names will be surrounded by 
 quotes.  In addition, if the column data has the delimiter in it, it will be
 surrounded by quotes.  If false, nothing will be surrounded by quotes.
-@return a Vector of delimited strings.  Each element in the Vector is one
+@return a list of delimited strings.  Each element in the list is one
 row in the worksheet.
 */
-protected List formatOutput(String delimiter, boolean trimFieldValue,
+protected List<String> formatOutput(String delimiter, boolean trimFieldValue,
 boolean quotes) {
-	List v = new Vector();
+	List<String> v = new Vector<String>();
 
 	int rows = _worksheet.getRowCount();
 	int cols = _worksheet.getColumnCount();
@@ -476,9 +477,9 @@ protected String[] getFilenameAndFormat() {
 		SimpleFileFilter sff = (SimpleFileFilter)fc.getFileFilter();
 
 		// this will always return a one-element vector
-		List extensionV = sff.getFilters();
+		List<String> extensionV = sff.getFilters();
 
-		String extension = (String)extensionV.get(0);
+		String extension = extensionV.get(0);
 		
 		String desc = sff.getShortDescription();
 		String delimiter = "\t";
@@ -550,7 +551,7 @@ public void print() {
 	if (index > -1) {
 		titleString = (titleString.substring(index + 1)).trim();
 	}
-	List v = formatOutput(" ", false, false);
+	List<String> v = formatOutput(" ", false, false);
 	if (v.size() > 40) {
 		for (int i = v.size() - 1; i > 40; i--) {
 			v.remove(i);

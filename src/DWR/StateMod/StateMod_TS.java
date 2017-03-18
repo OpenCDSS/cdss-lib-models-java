@@ -245,7 +245,7 @@ for daily)
 @param sum the sum of the values to be considered for the total
 @param count the count of the values to be considered for the average (includes only non-missing values)
 */
-private static Double getLineTotal ( TS ts, boolean standardTS, int nvals, List lineObjects,
+private static Double getLineTotal ( TS ts, boolean standardTS, int nvals, List<Object> lineObjects,
 	List<String> formatObjects,	int reqIntervalBase, boolean do_total, double sum, int count,
 	boolean doSumToPrinted )
 {
@@ -418,11 +418,11 @@ stations a pattern name is used, and instead of monthly data values, string
 values are used (e.g., "WET", "DRY", "AVE").  This data can then be used
 to fill missing data using TSUtil.fillUsingPattern().
 The IOUtil.getPathUsingWorkingDir() method is applied to the filename.
-@return A Vector of StringMonthTS containing pattern data.
+@return A list of StringMonthTS containing pattern data.
 @param filename Name of pattern file to read.
 @param read_data true if all the data should be read, false if only the header should be read.
 */
-public static List readPatternTimeSeriesList ( String filename, boolean read_data )
+public static List<StringMonthTS> readPatternTimeSeriesList ( String filename, boolean read_data )
 {	int	dl = 1, i, m1, m2, y1, y2, num_years, year = 0, len,
 		currentTSindex, current_year=0, init_year, numts = 0;
 	String	chval, iline, message, rtn="StateMod_TS.readPatternTimeSeriesList", value;
@@ -430,8 +430,8 @@ public static List readPatternTimeSeriesList ( String filename, boolean read_dat
 	DateTime date1 = new DateTime (DateTime.PRECISION_MONTH);
 	DateTime date2 = new DateTime (DateTime.PRECISION_MONTH);
 
-	List v;
-	List tslist = new Vector ( 10, 5 );
+	List<Object> v;
+	List<StringMonthTS> tslist = new Vector<StringMonthTS>();
 
 	String full_filename = IOUtil.getPathUsingWorkingDir(filename);
 	BufferedReader ifp = null;
@@ -1307,7 +1307,7 @@ throws Exception
 					// Attach new time series to list.  This is only done if we have not passed
 					// in a requested time series to fill.
 					if ( tslist == null ) {
-						tslist = new Vector(100);
+						tslist = new Vector<TS>();
 					}
 					tslist.add ( ts );
 					numts++;
@@ -1679,7 +1679,7 @@ or "Calendar" (Jan through Dec), consistent with the YearType enumeration.
 </table>
 @exception Exception if there is an error writing the file.
 */
-public static void writePatternTimeSeriesList ( String filename, List<String> comments, List tslist,
+public static void writePatternTimeSeriesList ( String filename, List<String> comments, List<StringMonthTS> tslist,
 	DateTime date1, DateTime date2, PropList props )
 throws Exception
 {	String rtn = "StateMod_TS.writePatternTimeSeriesList";
@@ -1687,7 +1687,7 @@ throws Exception
 	String iline; // string for use with StringUtil.formatString
 	int year = 0;
 	String value; // Used when printing each data item
-	List v = new Vector(20,10);	// Used while formatting
+	List<Object> v = new Vector<Object>();	// Used while formatting
 	StringMonthTS tsptr = null;	// Reference to current time series
 
 	// Verify that the ts vector is not null.  Then count the number of series in list.
@@ -1791,9 +1791,9 @@ throws Exception
 	// Open the file...
 
 	String full_filename = IOUtil.getPathUsingWorkingDir ( filename );
-	List commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	PrintWriter out = IOUtil.processFileHeaders (
 		null, // No need to update the old file headers
@@ -1832,7 +1832,7 @@ throws Exception
 
 	String	empty_string = "-", tmpdesc, tmpid, tmplocation, tmpsource, tmptype, tmpunits;
 	String	format= "%s %3d %-24.24s %-6.6s %-8.8s %-6.6s %3.3s/%d - %3.3s/%d %-12.12s%-24.24s";
-	List genesis = null;
+	List<String> genesis = null;
 
 	for ( int i=0; i < nseries; i++ ) {
 		tsptr = (StringMonthTS)tslist.get(i);
@@ -2068,11 +2068,11 @@ throws Exception
 	DateTime cdate = new DateTime ( DateTime.PRECISION_MONTH );
 	date.setMonth ( req_date1.getMonth());
 	date.setYear ( req_date1.getYear());
-	List iline_v = null; // List for output lines.
+	List<Object> iline_v = null; // List for output lines.
 	int	mon, j;	// counters
 
 	if ( req_interval_base == TimeInterval.MONTH ) {
-		iline_v = new Vector(15,1);
+		iline_v = new Vector<Object>(15,1);
 	}
 	/* TODO SAM 2005-05-06 maybe enable daily later
 	else {
@@ -2103,7 +2103,7 @@ throws Exception
 				if ( !include_ts[j] ) {
 					continue;
 				}
-				tsptr = (StringMonthTS)tslist.get(j);
+				tsptr = tslist.get(j);
 				if ( tsptr.getDataIntervalBase() != req_interval_base ) {
 					// We've already warned user above.
 					continue;
@@ -2161,7 +2161,7 @@ for time series values is 8 characters and 10 for the total.
 in the file header, or false to omit from the header.
 @exception Exception if there is an error writing the file.
 */
-private static void writeTimeSeriesList ( PrintWriter out, List tslist, 
+private static void writeTimeSeriesList ( PrintWriter out, List<TS> tslist, 
 	DateTime date1, DateTime date2, YearType outputYearType, double MissingDV,
 	int req_precision, boolean print_genesis )
 throws Exception
@@ -2172,7 +2172,7 @@ throws Exception
 	String iline; // string for use with StringUtil.formatString
 	double value=0, annual_sum;	// Used when printing each data item
 	int annual_count = 0, year = 0; // A "counter" for the year
-	List v = new Vector(20,10);	// Used while formatting
+	List<Object> v = new Vector<Object>(20,10);	// Used while formatting
 	TS tsptr = null; // Reference to current time series
 	boolean standard_ts = true;	// Non-standard indicates 12 monthly average values
 
@@ -2294,7 +2294,7 @@ throws Exception
 
 	String	empty_string = "-", tmpdesc, tmpid, tmplocation, tmpsource, tmptype, tmpunits;
 	String	format= "%s %3d %-24.24s %-6.6s %-8.8s %-6.6s %3.3s/%d - %3.3s/%d %-12.12s%-24.24s";
-	List genesis = null;
+	List<String> genesis = null;
 
 	for ( int i=0; i < nseries; i++ ) {
 		tsptr = (TS)tslist.get(i);
@@ -2568,20 +2568,20 @@ throws Exception
 	date.setMonth ( req_date1.getMonth());
 	date.setYear ( req_date1.getYear());
 	int precision = PRECISION_DEFAULT;
-	List iline_v = null; // Vector for output lines (objects to be formatted).
-	List iline_format_v = null; // Vector for formats for objects.
+	List<Object> iline_v = null; // Vector for output lines (objects to be formatted).
+	List<String> iline_format_v = null; // Vector for formats for objects.
 	int	ndays; // Number of days in a month.
 	int	mon, day, j; // counters
 	Double DoubleMissingDV = new Double ( MissingDV );
 
 	if ( req_interval_base == TimeInterval.MONTH ) {
-		iline_v = new Vector(15,1);
-		iline_format_v = new Vector(15,1);
+		iline_v = new Vector<Object>(15,1);
+		iline_format_v = new Vector<String>(15,1);
 	}
 	else {
 		// Daily...
-		iline_v = new Vector(36,1);
-		iline_format_v = new Vector(36,1);
+		iline_v = new Vector<Object>(36,1);
+		iline_format_v = new Vector<String>(36,1);
 	}
 
 	// Buffer that is used to format each line...
@@ -2823,9 +2823,9 @@ in calling routines and is not automatically set here.  The full width for time 
 public static void writeTimeSeriesList ( String infile, String outfile, List<String> newcomments, List<TS> tslist, 
 	DateTime date1, DateTime date2, YearType outputYearType, double MissingDV, int precision )
 throws Exception
-{	List<String> commentIndicators = new Vector(1);
+{	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List<String> ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	String rtn = "StateMod_TS.writeTimeSeriesList";
 
@@ -3028,7 +3028,9 @@ throws Exception
 	Object prop_contents = props.getContents ( "NewComments" );
 	if ( prop_contents != null ) {
 	    if ( prop_contents instanceof List ) {
-	        newComments = (List<String>)prop_contents;
+	    	@SuppressWarnings("unchecked")
+			List<String> newComments0 = (List<String>)prop_contents;
+	        newComments = newComments0;
 	    }
 	    else if ( prop_contents instanceof String[] ) {
 	        newComments = StringUtil.toList((String [])prop_contents);
@@ -3073,9 +3075,9 @@ throws Exception
 
 	PrintWriter out = null;
 	try {
-		List<String> commentIndicators = new Vector(1);
+		List<String> commentIndicators = new Vector<String>(1);
 		commentIndicators.add ( "#" );
-		List<String> ignoredCommentIndicators = new Vector(1);
+		List<String> ignoredCommentIndicators = new Vector<String>(1);
 		ignoredCommentIndicators.add ( "#>");
 		out = IOUtil.processFileHeaders (
 			IOUtil.getPathUsingWorkingDir(infile),

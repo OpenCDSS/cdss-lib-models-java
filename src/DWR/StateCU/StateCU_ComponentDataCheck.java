@@ -62,7 +62,7 @@ public CheckFile checkComponentType( PropList props )
 	// reset general data problem count
 	__gen_problems = 0;
 	// check for component data.  If none exists then do no checks.
-	List data_vector = getComponentData( __type );
+	List<Object> data_vector = getComponentData( __type );
 	if ( data_vector == null || data_vector.size() == 0 ) {
 		return __check_file;
 	}
@@ -100,9 +100,9 @@ public CheckFile checkComponentType( PropList props )
 }
 
 /**
-Performs general and specific data checks on blaney criddle data. 
+Performs general and specific data checks on Blaney-Criddle data. 
 @param props A property list for specific properties.
-@param data_vector Vector of data to check.
+@param data_vector list of data to check.
 */
 private void checkBlaneyCriddleData(PropList props, List data_vector) 
 {
@@ -452,16 +452,16 @@ private String[] getColumnHeader( StateCU_Data_TableModel tm )
 }
 
 /**
-Helper method to return the data vector for the component
-type.  This is maintained by the StateMod dataset.
+Helper method to return the data list for the component
+type.  This is maintained by the StateCU dataset.
 @param type Component type to get data for. 
-@return Vector of data for a specific component.
+@return list of data for a specific component.
  */
-private List getComponentData( int type )
+private List<Object> getComponentData( int type )
 {
-	DataSetComponent comp = 
-		__dataset.getComponentForComponentType( type );
-	List data_vector = ( List )comp.getData();
+	DataSetComponent comp = __dataset.getComponentForComponentType( type );
+	@SuppressWarnings("unchecked")
+	List<Object> data_vector = (List<Object>)comp.getData();
 	
 	return data_vector; 
 }
@@ -492,10 +492,10 @@ the table model for the current component.
 If any element fails any one of its validators the content
 of that element is formatted to tag it as an error.
  */
-private List performDataValidation( StateCU_Data_TableModel tm, 
+private List<String []> performDataValidation( StateCU_Data_TableModel tm, 
 String title )
 {
-	List data = new Vector();
+	List<String []> data = new Vector<String []>();
 	if ( tm == null ) {
 		return data;
 	}

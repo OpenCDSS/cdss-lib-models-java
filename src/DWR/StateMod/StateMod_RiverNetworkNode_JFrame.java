@@ -92,6 +92,7 @@ import RTi.Util.Message.Message;
 /**
 Class to display data about river stations.
 */
+@SuppressWarnings("serial")
 public class StateMod_RiverNetworkNode_JFrame extends JFrame
 implements ActionListener, KeyListener, MouseListener, WindowListener,
 JWorksheet_SortListener {
@@ -201,7 +202,11 @@ public StateMod_RiverNetworkNode_JFrame (
 	__dataset_wm = dataset_wm;
 	__riverNetworkNodeComponent = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_RIVER_NETWORK);
-	__riverNetworkNodesVector=(List)__riverNetworkNodeComponent.getData();
+	@SuppressWarnings("unchecked")
+	List<StateMod_RiverNetworkNode> riverNetworkNodesList = 
+		(List<StateMod_RiverNetworkNode>)__riverNetworkNodeComponent.getData();
+	__riverNetworkNodesVector = riverNetworkNodesList;
+
 
 	int size = __riverNetworkNodesVector.size();
 	StateMod_RiverNetworkNode r = null;
@@ -230,7 +235,10 @@ StateMod_RiverNetworkNode node, boolean editable) {
 	__dataset = dataset;
 	__riverNetworkNodeComponent = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_RIVER_NETWORK);
-	__riverNetworkNodesVector=(List)__riverNetworkNodeComponent.getData();
+	@SuppressWarnings("unchecked")
+	List<StateMod_RiverNetworkNode> riverNetworkNodesList = 
+			(List<StateMod_RiverNetworkNode>)__riverNetworkNodeComponent.getData();
+	__riverNetworkNodesVector = riverNetworkNodesList;
 
 	int size = __riverNetworkNodesVector.size();
 	StateMod_RiverNetworkNode r = null;
@@ -357,7 +365,7 @@ data object.
 @return true if the text fields are okay, false if not.
 */
 private boolean checkInput() {
-	List errors = new Vector();
+	List<String> errors = new Vector<String>();
 	int errorCount = 0;
 
 	// for each field, check if it contains valid input.  If not,

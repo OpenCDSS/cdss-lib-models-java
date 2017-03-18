@@ -90,7 +90,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
 
@@ -119,6 +118,7 @@ import RTi.Util.Time.TimeInterval;
 /**
 This class is a gui for displaying and editing DelayTable information.
 */
+@SuppressWarnings("serial")
 public class StateMod_DelayTable_JFrame 
 extends JFrame
 implements ActionListener, KeyListener, MouseListener, WindowListener {
@@ -208,9 +208,9 @@ The DataSetComponent that contains the delay data.
 private DataSetComponent __delayComponent;
 
 /**
-The Vector of delay data in the DataSetComponent.
+The list of delay data in the DataSetComponent.
 */
-private List __delaysVector;
+private List<StateMod_DelayTable> __delaysVector;
 
 /**
 Constructor.
@@ -246,13 +246,14 @@ public StateMod_DelayTable_JFrame (	StateMod_DataSet dataset,
 	}
 	StateMod_GUIUtil.setTitle(this, dataset, "Delay Tables" + interval, 
 		null);	
-
-	__delaysVector = (List)__delayComponent.getData();
+	@SuppressWarnings("unchecked")
+	List<StateMod_DelayTable> delaysList = (List<StateMod_DelayTable>)__delayComponent.getData();
+	__delaysVector = delaysList;
 
 	int size = __delaysVector.size();
 	StateMod_DelayTable dt = null;
 	for (int i = 0; i < size; i++) {
-		dt = (StateMod_DelayTable)__delaysVector.get(i);
+		dt = __delaysVector.get(i);
 		dt.createBackup();
 	}
 
@@ -297,12 +298,14 @@ public StateMod_DelayTable_JFrame (	StateMod_DataSet dataset,
 	StateMod_GUIUtil.setTitle(this, dataset, "Delay Tables" + interval, 
 		null);		
 
-	__delaysVector = (List)__delayComponent.getData();
+	@SuppressWarnings("unchecked")
+	List<StateMod_DelayTable> delaysList = (List<StateMod_DelayTable>)__delayComponent.getData();
+	__delaysVector = delaysList;
 
 	int size = __delaysVector.size();
 	StateMod_DelayTable dt = null;
 	for (int i = 0; i < size; i++) {
-		dt = (StateMod_DelayTable)__delaysVector.get(i);
+		dt = __delaysVector.get(i);
 		dt.createBackup();
 	}
 
@@ -315,13 +318,13 @@ public StateMod_DelayTable_JFrame (	StateMod_DataSet dataset,
 
 /**
 Constructor.
-@param delaysVector the Vector of delays to show
+@param delaysVector the list of delays to show
 @param delayTable the delay table to display.
 @param monthly_data If true, display the monthly delay tables.  If false,
 display the daily delay tables.
 @param editable whether the data is editable or not
 */
-public StateMod_DelayTable_JFrame (	List delaysVector,
+public StateMod_DelayTable_JFrame (	List<StateMod_DelayTable> delaysVector,
 					StateMod_DelayTable delayTable,
 					boolean monthly_data, boolean editable )
 {	__monthly_data = monthly_data;
@@ -337,15 +340,14 @@ public StateMod_DelayTable_JFrame (	List delaysVector,
 		__componentType = StateMod_DataSet.COMP_DELAY_TABLES_DAILY;
 		interval = " (Daily)";
 	}
-	StateMod_GUIUtil.setTitle(this, null, "Delay Tables" + interval, 
-		null);			
+	StateMod_GUIUtil.setTitle(this, null, "Delay Tables" + interval, null);			
 
 	__delaysVector = delaysVector;
 
 	int size = __delaysVector.size();
 	StateMod_DelayTable dt = null;
 	for (int i = 0; i < size; i++) {
-		dt = (StateMod_DelayTable)__delaysVector.get(i);
+		dt = __delaysVector.get(i);
 		dt.createBackup();
 	}
 
@@ -364,7 +366,7 @@ StateDMI when used with a StateCU_DataSet.
 display the daily delay tables.
 @param editable whether the data is editable or not
 */
-public StateMod_DelayTable_JFrame (	List delaysVector,
+public StateMod_DelayTable_JFrame (	List<StateMod_DelayTable> delaysVector,
 					boolean monthly_data, boolean editable)
 {	__monthly_data = monthly_data;
 	String interval = " (Monthly)";
@@ -387,7 +389,7 @@ public StateMod_DelayTable_JFrame (	List delaysVector,
 	int size = __delaysVector.size();
 	StateMod_DelayTable dt = null;
 	for (int i = 0; i < size; i++) {
-		dt = (StateMod_DelayTable)__delaysVector.get(i);
+		dt = __delaysVector.get(i);
 		dt.createBackup();
 	}
 
@@ -421,13 +423,13 @@ public StateMod_DelayTable_JFrame (	StateMod_DelayTable delay,
 	}
 	StateMod_GUIUtil.setTitle(this, null, "Delay Table" + interval, 
 		null);				
-	__delaysVector = new Vector();
+	__delaysVector = new Vector<StateMod_DelayTable>();
 	__delaysVector.add(delay);
 
 	int size = __delaysVector.size();
 	StateMod_DelayTable dt = null;
 	for (int i = 0; i < size; i++) {
-		dt = (StateMod_DelayTable)__delaysVector.get(i);
+		dt = __delaysVector.get(i);
 		dt.createBackup();
 	}
 
@@ -644,7 +646,7 @@ public void actionPerformed(ActionEvent e) {
 						currentDelay.getRet_val(j);
 					}
 				}
-				List tslist = new Vector();
+				List<TS> tslist = new Vector<TS>();
 				tslist.add(ts);
 
 				PropList graphProps = new PropList("TSView");
@@ -873,7 +875,8 @@ private void saveDelayTable() {
 		return;
 	}
 
-	List v = __worksheetR.getAllData();
+	@SuppressWarnings("unchecked")
+	List<Double> v = (List<Double>)__worksheetR.getAllData();
 	/*
 	StateMod_DelayTable dt = (StateMod_DelayTable)__worksheetL.getRowData(index);
 
@@ -910,7 +913,7 @@ private void saveDelayTable() {
 	}
 	dt.setRet_val(clone);
 	*/
-	((StateMod_DelayTable)__delaysVector.get(index)).setRet_val(v);	
+	__delaysVector.get(index).setRet_val(v);	
 }
 
 /**
@@ -1014,10 +1017,9 @@ private void setupGUI( int index ) {
 	int[] widthsR = null;
 	JScrollWorksheet jswR = null;
 	try {
-		StateMod_DelayTable_TableModel tmd = new
-			StateMod_DelayTable_TableModel(new Vector(),
+		StateMod_DelayTable_TableModel tmd = new StateMod_DelayTable_TableModel(new Vector<Double>(),
 			__monthly_data, __editable, percent);
-		tmd.setSubDelays(new Vector());
+		tmd.setSubDelays(new Vector<Double>());
 		StateMod_DelayTable_CellRenderer crd = new
 			StateMod_DelayTable_CellRenderer(tmd);
 		
@@ -1066,8 +1068,7 @@ private void setupGUI( int index ) {
 	int[] widthsL = null;
 	JScrollWorksheet jswL = null;
 	try {
-		StateMod_DelayTable_TableModel tmd = new
-			StateMod_DelayTable_TableModel(__delaysVector,
+		StateMod_DelayTable_TableModel tmd = new StateMod_DelayTable_TableModel(__delaysVector,
 			__monthly_data, __editable, percent);
 		StateMod_DelayTable_CellRenderer crd = new
 			StateMod_DelayTable_CellRenderer(tmd);
@@ -1187,51 +1188,20 @@ private void setupGUI( int index ) {
 }
 
 /**
-Sorts a Vector of objects.
-@param data the Vector to be a sorted.
-@return a new Vector of the objects in the other Vector, sorted.
-*/
-public static List sortVector(List data) {
-	if (data == null) {
-		return new Vector();
-	}
-	int size = data.size();
-	if (size == 0) {
-		return new Vector();
-	}
-	if (size == 1) {
-		List v = new Vector();
-		v.add(data.get(0));
-		return v;
-	}
-
-	List v = new Vector();
-	for (int i = 0; i < size; i++) {
-		v.add(data.get(i));
-	}
-
-	Collections.sort(v);
-	return v;
-}
-
-/**
 Updates the right table based on a new selection from the left table, 
 or if rows were added or deleted to the right table.
 @param dt the StateMod_DelayTable object selected in the left table.
 */
 private void updateRightTable(StateMod_DelayTable dt) {
-	List v = dt.getRet_val();
-	List v2 = new Vector();
+	List<Double> v = dt.getRet_val();
+	List<Double> v2 = new Vector<Double>();
 	for (int i = 0; i < v.size(); i++) {
-		v2.add(new Double(((Double)v.get(i)).doubleValue()));
+		v2.add(new Double(v.get(i).doubleValue()));
 	}
 
-	((StateMod_DelayTable_TableModel)__worksheetR.getModel())
-		.setSubDelays(v2);
-	((StateMod_DelayTable_TableModel)__worksheetR.getModel())
-		.fireTableDataChanged();		
-	((StateMod_DelayTable_TableModel)__worksheetR.getModel())
-		.fireTableDataChanged();
+	((StateMod_DelayTable_TableModel)__worksheetR.getModel()).setSubDelays(v2);
+	((StateMod_DelayTable_TableModel)__worksheetR.getModel()).fireTableDataChanged();		
+	((StateMod_DelayTable_TableModel)__worksheetR.getModel()).fireTableDataChanged();
 	__deleteReturn.setEnabled(false);
 }
 

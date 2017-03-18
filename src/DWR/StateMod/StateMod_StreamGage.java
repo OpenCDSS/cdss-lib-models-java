@@ -157,7 +157,7 @@ import RTi.Util.String.StringUtil;
 
 public class StateMod_StreamGage 
 extends StateMod_Data
-implements Cloneable, Comparable, HasGeoRecord, StateMod_ComponentValidator
+implements Cloneable, Comparable<StateMod_Data>, HasGeoRecord, StateMod_ComponentValidator
 {
 
 //protected String 	_cgoto;		// River node for stream station.
@@ -265,17 +265,17 @@ public Object clone() {
 
 /**
 Compares this object to another StateMod_StreamGage object.
-@param o the object to compare against.
+@param data the object to compare against.
 @return 0 if they are the same, 1 if this object is greater than the other
 object, or -1 if it is less.
 */
-public int compareTo(Object o) {
-	int res = super.compareTo(o);
+public int compareTo(StateMod_Data data) {
+	int res = super.compareTo(data);
 	if (res != 0) {
 		return res;
 	}
 
-	StateMod_StreamGage s = (StateMod_StreamGage)o;
+	StateMod_StreamGage s = (StateMod_StreamGage)data;
 
 	res = _cgoto.compareTo(s._cgoto);
 	if (res != 0) {
@@ -309,15 +309,15 @@ Connect the historical monthly and daily TS pointers to the appropriate TS
 for all the elements in the list of StateMod_StreamGage objects.
 @param rivs list of StateMod_StreamGage (e.g., as read from StateMod .ris file).
 */
-public static void connectAllTS ( List rivs, List historical_MonthTS, List historical_DayTS,
-		List baseflow_MonthTS, List baseflow_DayTS )
+public static void connectAllTS ( List<StateMod_StreamGage> rivs, List<MonthTS> historical_MonthTS, List<DayTS> historical_DayTS,
+		List<MonthTS> baseflow_MonthTS, List<DayTS> baseflow_DayTS )
 {	if ( rivs == null ) {
 		return;
 	}
 	StateMod_StreamGage riv;
 	int size = rivs.size();
 	for ( int i=0; i < size; i++ ) {
-		riv = (StateMod_StreamGage)rivs.get(i);
+		riv = rivs.get(i);
 		if ( historical_MonthTS != null ) {
 			riv.connectHistoricalMonthTS ( historical_MonthTS );
 		}
@@ -338,7 +338,7 @@ Connect the daily base streamflow TS pointer to the appropriate TS in the list.
 A connection is made if the node identifier matches the time series location.
 @param tslist list of DayTS.
 */
-private void connectBaseflowDayTS ( List tslist )
+private void connectBaseflowDayTS ( List<DayTS> tslist )
 {	if ( tslist == null ) {
 		return;
 	}
@@ -346,7 +346,7 @@ private void connectBaseflowDayTS ( List tslist )
 	int size = tslist.size();
 	_baseflow_DayTS = null;
 	for ( int i=0; i < size; i++ ) {
-		ts = (DayTS)tslist.get(i);
+		ts = tslist.get(i);
 		if ( ts == null ) {
 			continue;
 		}
@@ -363,7 +363,7 @@ private void connectBaseflowDayTS ( List tslist )
 Connect monthly baseflow time series.  
 @param tslist baseflow time series. 
 */
-public void connectBaseflowMonthTS ( List tslist )
+public void connectBaseflowMonthTS ( List<MonthTS> tslist )
 {	if ( tslist == null ) {
 		return;
 	}
@@ -372,7 +372,7 @@ public void connectBaseflowMonthTS ( List tslist )
 	_baseflow_MonthTS = null;
 	MonthTS ts = null;
 	for (int i=0; i<num_TS; i++) {
-		ts = (MonthTS)tslist.get(i);
+		ts = tslist.get(i);
 		if ( ts == null ) {
 			continue;
 		}
@@ -390,7 +390,7 @@ Connect the historical daily TS pointer to the appropriate TS in the Vector.
 A connection is made if the node identifier matches the time series location.
 @param tslist Vector of DayTS.
 */
-private void connectHistoricalDayTS ( List tslist )
+private void connectHistoricalDayTS ( List<DayTS> tslist )
 {	if ( tslist == null ) {
 		return;
 	}
@@ -398,7 +398,7 @@ private void connectHistoricalDayTS ( List tslist )
 	_historical_DayTS = null;
 	int size = tslist.size();
 	for ( int i=0; i < size; i++ ) {
-		ts = (DayTS)tslist.get(i);
+		ts = tslist.get(i);
 		if ( ts == null ) {
 			continue;
 		}
@@ -416,7 +416,7 @@ Connect the historical monthly TS pointer to the appropriate TS.
 A connection is made if the node identifier matches the time series location.
 @param tslist Vector of MonthTS.
 */
-public void connectHistoricalMonthTS ( List tslist )
+public void connectHistoricalMonthTS ( List<MonthTS> tslist )
 {	if ( tslist == null ) {
 		return;
 	}
@@ -424,7 +424,7 @@ public void connectHistoricalMonthTS ( List tslist )
 	_historical_MonthTS = null;
 	int size = tslist.size();
 	for ( int i=0; i < size; i++ ) {
-		ts = (MonthTS)tslist.get(i);
+		ts = tslist.get(i);
 		if ( ts == null ) {
 			continue;
 		}
@@ -441,7 +441,7 @@ public void connectHistoricalMonthTS ( List tslist )
 Creates a copy of the object for later use in checking to see if it was changed in a GUI.
 */
 public void createBackup() {
-	_original = clone();
+	_original = (StateMod_StreamGage)clone();
 	((StateMod_StreamGage)_original)._isClone = false;
 	_isClone = true;
 }
@@ -577,16 +577,16 @@ private void initialize ( boolean initialize_defaults )
 
 /**
 Read the stream gage station file and store return a Vector of StateMod_StreamGage.
-@return a Vector of StateMod_StreamGage.
+@return a list of StateMod_StreamGage.
 @param filename Name of file to read.
 @exception Exception if there is an error reading the file.
 */
-public static List readStateModFile ( String filename )
+public static List<StateMod_StreamGage> readStateModFile ( String filename )
 throws Exception
 {	String rtn = "StateMod_StreamGage.readStateModFile";
-	List theRivs = new Vector();
+	List<StateMod_StreamGage> theRivs = new Vector<StateMod_StreamGage>();
 	String iline;
-	List v = new Vector ( 5 );
+	List<Object> v = new Vector<Object>( 5 );
 	int [] format_0;
 	int [] format_0w;
 	format_0 = new int[5];
@@ -811,17 +811,17 @@ Write the new (updated) stream gage stations file.  If an original file is
 specified, then the original header is carried into the new file.
 @param infile Name of old file or null if no old file to update.
 @param outfile Name of new file to create (can be the same as the old file).
-@param theRivs Vector of StateMod_StreamGage to write.
+@param theRivs list of StateMod_StreamGage to write.
 @param newcomments New comments to write in the file header.
 @param do_daily Indicates whether daily modeling fields should be written.
 */
 public static void writeStateModFile( String infile, String outfile,
-		List theRivs, List newcomments, boolean do_daily )
+		List<StateMod_StreamGage> theRivs, List<String> newcomments, boolean do_daily )
 throws Exception
 {	PrintWriter	out = null;
-	List commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	String routine = "StateMod_StreamGage.writeStateModFile";
 
@@ -867,9 +867,9 @@ throws Exception
 		if ( theRivs != null ) {
 			num = theRivs.size();
 		}
-		List v = new Vector ( 5 );
+		List<Object> v = new Vector<Object>( 5 );
 		for ( int i=0; i< num; i++ ) {
-			riv = (StateMod_StreamGage) theRivs.get(i);
+			riv = theRivs.get(i);
 			v.clear ();
 			v.add ( riv.getID() );
 			v.add ( riv.getName() );
@@ -880,11 +880,6 @@ throws Exception
 			iline = StringUtil.formatString ( v, format );
 			out.println ( iline );
 		}
-		riv = null;
-		routine = null;
-		cmnt = null;
-		iline = null;
-		format = null;
 	}
 	catch ( Exception e ) {
 		Message.printWarning ( 3, routine, e );
@@ -910,15 +905,15 @@ header (true) or to create a new file with a new header.
 @param newComments list of comments to add at the top of the file.
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter, boolean update, List data,
-		List newComments ) 
+public static void writeListFile(String filename, String delimiter, boolean update, List<StateMod_StreamGage> data,
+		List<String> newComments ) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
 		size = data.size();
 	}
 	
-	List fields = new Vector();
+	List<String> fields = new Vector<String>();
 	fields.add("ID");
 	fields.add("Name");
 	fields.add("NodeID");
@@ -930,7 +925,7 @@ throws Exception {
 	int comp = StateMod_DataSet.COMP_STREAMGAGE_STATIONS;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.get(i);
+		s = fields.get(i);
 		names[i] = StateMod_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateMod_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -943,9 +938,9 @@ throws Exception {
 	int j = 0;
 	PrintWriter out = null;
 	StateMod_StreamGage gage = null;
-	List commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	String[] line = new String[fieldCount];
 	StringBuffer buffer = new StringBuffer();
@@ -953,12 +948,12 @@ throws Exception {
 	try {
 		// Add some basic comments at the top of the file.  Do this to a copy of the
 		// incoming comments so that they are not modified in the calling code.
-		List newComments2 = null;
+		List<String> newComments2 = null;
 		if ( newComments == null ) {
-			newComments2 = new Vector();
+			newComments2 = new Vector<String>();
 		}
 		else {
-			newComments2 = new Vector(newComments);
+			newComments2 = new Vector<String>(newComments);
 		}
 		newComments2.add(0,"");
 		newComments2.add(1,"StateMod stream gage stations as a delimited list file.");

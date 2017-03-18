@@ -84,6 +84,7 @@ import RTi.Util.Message.Message;
 This class is a gui for displaying area cap information associated with a 
 reservoir, and deleting and adding area cap information to the reservoir.
 */
+@SuppressWarnings("serial")
 public class StateMod_Reservoir_AreaCap_JFrame extends JFrame
 implements ActionListener, KeyListener, MouseListener, WindowListener {
 
@@ -219,7 +220,7 @@ Check the GUI state.  In particular, indicate whether the graph buttons should
 be enabled.
 */
 private void checkGUIState ()
-{	List rv = __currentRes.getAreaCaps();	
+{	List<StateMod_ReservoirAreaCap> rv = __currentRes.getAreaCaps();	
 	if ( (rv != null) && (rv.size() > 0) ) {
 		boolean area_ok = true, seepage_ok = true;
 		// Check for data all one value...
@@ -321,8 +322,9 @@ private boolean saveData() {
 	boolean needToSave = false;
 
 	// if the Vectors are differently-sized, they're different
-	List wv = __worksheet.getAllData();		// w for worksheet
-	List rv = __currentRes.getAreaCaps();	
+	@SuppressWarnings("unchecked")
+	List<StateMod_ReservoirAreaCap> wv = (List<StateMod_ReservoirAreaCap>)__worksheet.getAllData();		// w for worksheet
+	List<StateMod_ReservoirAreaCap> rv = __currentRes.getAreaCaps();	
 
 	needToSave = !(StateMod_ReservoirAreaCap.equals(wv, rv));
 
@@ -337,10 +339,9 @@ private boolean saveData() {
 	// now add the elements from the new Vector to the reservoirRights 
 	// Vector.
 	int size = wv.size();
-	List clone = new Vector();
+	List<StateMod_ReservoirAreaCap> clone = new Vector<StateMod_ReservoirAreaCap>();
 	for (int i = 0; i < size; i++) {
-		clone.add(((StateMod_ReservoirAreaCap)
-			(wv.get(i))).clone());
+		clone.add((StateMod_ReservoirAreaCap)wv.get(i).clone());
 	}
 
 	__currentRes.setAreaCaps(clone);
@@ -522,11 +523,10 @@ private void setupGUI() {
 	int widths[] = null;
 	JScrollWorksheet jsw = null;
 	try {	
-		List v = new Vector();
-		List v2 = __currentRes.getAreaCaps();
+		List<StateMod_ReservoirAreaCap> v = new Vector<StateMod_ReservoirAreaCap>();
+		List<StateMod_ReservoirAreaCap> v2 = __currentRes.getAreaCaps();
 		for (int i = 0; i < v2.size(); i++) {
-			v.add(((StateMod_ReservoirAreaCap)
-				(v2.get(i))).clone());
+			v.add((StateMod_ReservoirAreaCap)v2.get(i).clone());
 		}				
 		StateMod_ReservoirAreaCap_TableModel tmr = new
 			StateMod_ReservoirAreaCap_TableModel(

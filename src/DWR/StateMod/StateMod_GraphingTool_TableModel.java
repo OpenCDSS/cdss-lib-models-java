@@ -687,7 +687,7 @@ public boolean isCellEditable(int rowIndex, int columnIndex) {
 	if (size > 0) {
 		int[] temp;
 		for (int i = 0; i < size; i++) {
-			temp = (int[])_cellEditOverride.elementAt(i);
+			temp = (int[])_cellEditOverride.get(i);
 			if (temp[0] == rowIndex && temp[1] == columnIndex) {
 				if (temp[2] == 1) {
 					return true;

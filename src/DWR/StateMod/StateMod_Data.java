@@ -71,7 +71,7 @@ Abstract object from which all other StateMod objects are derived.
 Each object can be identified by setting the smdata_type member.
 Possible values for this member come from the SMFileData class (RES_FILE, DIV_FILE, etc.)
 */
-public class StateMod_Data implements Cloneable, Comparable {
+public class StateMod_Data implements Cloneable, Comparable<StateMod_Data> {
 
 // TODO SAM 2010-12-20 Consider moving to NaN for missing floats, but what about integers?
 public static DateTime MISSING_DATE = null;
@@ -155,7 +155,7 @@ protected boolean _mapLabelDisplayName;
 /**
 For screens that can cancel changes, this stores the original values.
 */
-protected Object _original;
+protected StateMod_Data _original;
 
 /**
 Each GRShape has a pointer to the StateMod_Data which is its associated object.
@@ -202,10 +202,8 @@ _cgoto, _switch, _utm_x, _utm_y, in that order.  The comment is not compared.
 @param o the object to compare against.
 @return 0 if they are the same, 1 if this object is greater than the other object, or -1 if it is less.
 */
-public int compareTo(Object o)
+public int compareTo(StateMod_Data data)
 {
-	StateMod_Data data = (StateMod_Data)o;
-	
 	String name = data.getName();
 	String id = data.getID();
 	String cgoto = data.getCgoto();

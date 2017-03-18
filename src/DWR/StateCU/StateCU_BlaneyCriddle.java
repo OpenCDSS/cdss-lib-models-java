@@ -309,7 +309,7 @@ private static boolean isVersion_10( String filename ) throws IOException
 		
 		// Version 10 has 3 columns in the third row - the newest version has 4 columns
 		if( count == 2) {
-			List tmp = StringUtil.breakStringList(line, " \t", StringUtil.DELIM_SKIP_BLANKS);
+			List<String> tmp = StringUtil.breakStringList(line, " \t", StringUtil.DELIM_SKIP_BLANKS);
 			if(tmp.size() == 3) {
 				rVal = true;
 			}
@@ -326,12 +326,12 @@ private static boolean isVersion_10( String filename ) throws IOException
 Read the StateCU KBC file and return as a Vector of StateCU_BlaneyCriddle.
 @param filename filename containing KBC records.
 */
-public static List readStateCUFile ( String filename )
+public static List<StateCU_BlaneyCriddle> readStateCUFile ( String filename )
 throws IOException
 {	String rtn = "StateCU_BlaneyCriddle.readKBCFile";
 	String iline = null;
 	StateCU_BlaneyCriddle kbc = null;
-	List kbc_Vector = new Vector(25);
+	List<StateCU_BlaneyCriddle> kbc_Vector = new Vector<StateCU_BlaneyCriddle>(25);
 	BufferedReader in = null;
 	boolean version10 = isVersion_10( filename );	// Is version 10 (old) format?
 	
@@ -365,7 +365,7 @@ throws IOException
 	int [] nckcp = null;
 	double [] ckc = null;
 	String ktsw = null;
-	List tokens;
+	List<String> tokens;
 	int j = 0;
 	for ( int i = 0; i < nc; i++ ) {
 		nckca = null;	// use to check whether annual or perennial below.
@@ -598,8 +598,8 @@ processing headers).  Specify as null if no previous file is available.
 if no comments are available.
 @exception IOException if there is an error writing the file.
 */
-public static void writeStateCUFile ( String filename_prev, String filename, List data_Vector,
-	List new_comments )
+public static void writeStateCUFile ( String filename_prev, String filename, List<StateCU_BlaneyCriddle> data_Vector,
+	List<String> new_comments )
 throws IOException
 {	writeStateCUFile ( filename_prev, filename, data_Vector, new_comments, null );
 }
@@ -618,12 +618,12 @@ optional Precision property can be set, indicating how many digits after the
 decimal should be printed (default is 3).
 @exception IOException if there is an error writing the file.
 */
-public static void writeStateCUFile ( String filename_prev, String filename, List data_Vector,
-	List new_comments, PropList props )
+public static void writeStateCUFile ( String filename_prev, String filename, List<StateCU_BlaneyCriddle> data_Vector,
+	List<String> new_comments, PropList props )
 throws IOException
-{	List comment_str = new Vector(1);
+{	List<String> comment_str = new Vector<String>(1);
 	comment_str.add ( "#" );
-	List ignore_comment_str = new Vector(1);
+	List<String> ignore_comment_str = new Vector<String>(1);
 	ignore_comment_str.add ( "#>" );
 	PrintWriter out = null;
 	String full_filename_prev = IOUtil.getPathUsingWorkingDir ( filename_prev );
@@ -648,7 +648,7 @@ optional Precision property can be set, indicating how many digits after the
 decimal should be printed (default is 3).
 @exception IOException if an error occurs.
 */
-private static void writeVector ( List data_Vector, PrintWriter out, PropList props )
+private static void writeVector ( List<StateCU_BlaneyCriddle> data_Vector, PrintWriter out, PropList props )
 throws IOException
 {	int i,j;
 	String cmnt = "#>";
@@ -805,8 +805,8 @@ header (true) or to create a new file with a new header.
 @param data the Vector of objects to write.  
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter, boolean update, List data,
-	List outputComments ) 
+public static void writeListFile(String filename, String delimiter, boolean update, List<StateCU_BlaneyCriddle> data,
+	List<String> outputComments ) 
 throws Exception
 {	String routine = "StateCU_BlaneyCriddle.writeListFile";
 	int size = 0;
@@ -814,7 +814,7 @@ throws Exception
 		size = data.size();
 	}
 	
-	List fields = new Vector();
+	List<String> fields = new Vector<String>();
 	fields.add("Name");
 	fields.add("CurveType");
 	fields.add("DayPercent");
@@ -840,9 +840,9 @@ throws Exception
 	int k = 0;
 	PrintWriter out = null;
 	StateCU_BlaneyCriddle bc = null;
-	List commentString = new Vector(1);
+	List<String> commentString = new Vector<String>(1);
 	commentString.add ( "#" );
-	List ignoreCommentString = new Vector(1);
+	List<String> ignoreCommentString = new Vector<String>(1);
 	ignoreCommentString.add ( "#>" );
 	String[] line = new String[fieldCount];
 	String flag = null;
@@ -851,12 +851,12 @@ throws Exception
 	try {
 		// Add some basic comments at the top of the file.  However, do this to a copy of the
 		// incoming comments so that they are not modified in the calling code.
-		List newComments2 = null;
+		List<String> newComments2 = null;
 		if ( outputComments == null ) {
-			newComments2 = new Vector();
+			newComments2 = new Vector<String>();
 		}
 		else {
-			newComments2 = new Vector(outputComments);
+			newComments2 = new Vector<String>(outputComments);
 		}
 		newComments2.add(0,"");
 		newComments2.add(1,"StateCU Blaney-Criddle crop coefficients as a delimited list file.");

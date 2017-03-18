@@ -130,6 +130,7 @@ import RTi.GR.GRLimits;
 import RTi.GR.GRShape;
 import RTi.GRTS.TSProduct;
 import RTi.GRTS.TSViewJFrame;
+import RTi.TS.DayTS;
 import RTi.TS.TS;
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.JScrollWorksheet;
@@ -145,6 +146,7 @@ import RTi.Util.Time.StopWatch;
 /**
 This class is a GUI for displaying and editing well data.
 */
+@SuppressWarnings("serial")
 public class StateMod_Well_JFrame extends JFrame
 implements ActionListener, ItemListener, KeyListener, MouseListener, 
 WindowListener {
@@ -374,7 +376,9 @@ public StateMod_Well_JFrame ( StateMod_DataSet dataset, StateMod_DataSet_WindowM
 	__dataset = dataset;
 	__dataset_wm = dataset_wm;
 	__wellComponent = __dataset.getComponentForComponentType(StateMod_DataSet.COMP_WELL_STATIONS);
-	__wellsVector = (List)__wellComponent.getData();
+	@SuppressWarnings("unchecked")
+	List<StateMod_Well> wellsVector0 = (List<StateMod_Well>)__wellComponent.getData();
+	__wellsVector = wellsVector0;
 
 	int size = __wellsVector.size();
 	StateMod_Well well = null;
@@ -404,7 +408,9 @@ public StateMod_Well_JFrame ( StateMod_DataSet dataset, StateMod_DataSet_WindowM
 	__dataset = dataset;
 	__dataset_wm = dataset_wm;
 	__wellComponent = __dataset.getComponentForComponentType(StateMod_DataSet.COMP_WELL_STATIONS);
-	__wellsVector = (List)__wellComponent.getData();
+	@SuppressWarnings("unchecked")
+	List<StateMod_Well> wellsVector0 = (List<StateMod_Well>)__wellComponent.getData();
+	__wellsVector = wellsVector0;
 
 	int size = __wellsVector.size();
 	StateMod_Well w = null;
@@ -569,7 +575,7 @@ Checks the text fields for validity before they are saved back into the data obj
 @return true if the text fields are okay, false if not.
 */
 private boolean checkInput() {
-	List errors = new Vector();
+	List<String> errors = new Vector<String>();
 	int errorCount = 0;
 
 	// for each field, check if it contains valid input.  If not,
@@ -664,7 +670,7 @@ private void displayTSViewJFrame(Object o)
 	props.set("Product.TotalWidth", "600");
 	props.set("Product.TotalHeight", "400");
 
-	List tslist = new Vector();
+	List<TS> tslist = new Vector<TS>();
 
 	int sub = 0;
 	int its = 0;
@@ -886,12 +892,12 @@ Populates the well daily id combo box.
 private void populateWellDailyID() {
 	__dailyIDComboBox.removeAllItems();
 
-	List idNameVector = StateMod_Util.createIdentifierList(__wellsVector,true);
+	List<String> idNameVector = StateMod_Util.createIdentifierListFromStateModData(__wellsVector,true,null);
 	idNameVector.add( 0, "0 - Use average daily value from monthly time series");
 	idNameVector.add( 1, "3 - Daily time series are supplied");
 	idNameVector.add( 2, "4 - Daily time series interpolated from midpoints of monthly data");
 
-	DefaultComboBoxModel dcbm = new DefaultComboBoxModel(new Vector(idNameVector));
+	DefaultComboBoxModel<String> dcbm = new DefaultComboBoxModel<String>(new Vector<String>(idNameVector));
 	__dailyIDComboBox.setModel(dcbm);
 }
 
@@ -1189,7 +1195,8 @@ private void saveInformation(int record) {
 		well.setCdividyw(cdividyw);
 	}
 
-	List dailyWellDemandTSVector = (List)(__dataset.getComponentForComponentType(
+	@SuppressWarnings("unchecked")
+	List<DayTS> dailyWellDemandTSVector = (List<DayTS>)(__dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_WELL_DEMAND_TS_DAILY).getData());
 	well.connectDemandDayTS(dailyWellDemandTSVector);
 
@@ -1354,7 +1361,7 @@ private void setupGUI(int index) {
 
 	addWindowListener(this);
 
-	JPanel p1 = new JPanel();	// first 6 months' effeciency
+	JPanel p1 = new JPanel();	// first 6 months' efficiency
 	JPanel p3 = new JPanel();	// div sta id -> switch for diversion
 
 	JPanel left_panel = new JPanel();	// multilist and search area
@@ -1370,10 +1377,11 @@ private void setupGUI(int index) {
 	__associatedDiversionsComboBox = new SimpleJComboBox();
 	__associatedDiversionsComboBox.add("N/A - Not associated with diversion");
 	
-	List diversions = (List)(__dataset.getComponentForComponentType(
+	@SuppressWarnings("unchecked")
+	List<StateMod_Diversion> diversions = (List<StateMod_Diversion>)(__dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_DIVERSION_STATIONS).getData());
-	diversions = StateMod_Util.createIdentifierList(diversions, true);
-	DefaultComboBoxModel dcbm = new DefaultComboBoxModel(new Vector(diversions));
+	List<String> diversionIds = StateMod_Util.createIdentifierListFromStateModData(diversions, true, null);
+	DefaultComboBoxModel<String> dcbm = new DefaultComboBoxModel<String>(new Vector<String>(diversionIds));
 	__associatedDiversionsComboBox.setModel(dcbm);
 	/*
 	for (int i = 0; i < size; i++) {

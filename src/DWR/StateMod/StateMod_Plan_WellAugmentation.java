@@ -14,7 +14,7 @@ import RTi.Util.String.StringUtil;
 This class stores Plan (Well Augmentation) data.  The plan ID is stored in the StateMod_Data ID.
 */
 public class StateMod_Plan_WellAugmentation extends StateMod_Data 
-implements Cloneable, Comparable {
+implements Cloneable, Comparable<StateMod_Data> {
 
 /**
 Well right ID.
@@ -47,16 +47,16 @@ public Object clone() {
 
 /**
 Compares this object to another object based on the well structure ID and well right ID.
-@param o the object to compare against.
+@param data the object to compare against.
 @return 0 if they are the same, 1 if this object is greater than the other object, or -1 if it is less.
 */
-public int compareTo(Object o) {
-	int res = super.compareTo(o);
+public int compareTo(StateMod_Data data) {
+	int res = super.compareTo(data);
 	if (res != 0) {
 		return res;
 	}
 
-	StateMod_Plan_WellAugmentation rf = (StateMod_Plan_WellAugmentation)o;
+	StateMod_Plan_WellAugmentation rf = (StateMod_Plan_WellAugmentation)data;
 	
 	// Strip off trailing "- name" - may be present if comparing in UI
 
@@ -97,7 +97,7 @@ Creates a backup of the current data object and stores it in _original,
 for use in determining if an object was changed inside of a GUI.
 */
 public void createBackup() {
-	_original = clone();
+	_original = (StateMod_Plan_WellAugmentation)clone();
 	((StateMod_Plan_WellAugmentation)_original)._isClone = false;
 	_isClone = true;
 }
@@ -121,13 +121,13 @@ public static boolean equals(List<StateMod_Plan_WellAugmentation> v1, List<State
 		// and data will need to be saved back into the data set.
 		int size = v1.size();
 		//Message.printStatus(2, routine, "Well augmentation lists are of size: " + size);
-		List v1Sort = StateMod_Util.sortStateMod_DataVector(v1);
-		List v2Sort = StateMod_Util.sortStateMod_DataVector(v2);
+		List<StateMod_Plan_WellAugmentation> v1Sort = StateMod_Util.sortStateMod_DataVector(v1);
+		List<StateMod_Plan_WellAugmentation> v2Sort = StateMod_Util.sortStateMod_DataVector(v2);
 		//Message.printStatus(2, routine, "Well augmentation lists have been sorted");
 	
 		for (int i = 0; i < size; i++) {			
-			rf1 = (StateMod_Plan_WellAugmentation)v1Sort.get(i);	
-			rf2 = (StateMod_Plan_WellAugmentation)v2Sort.get(i);	
+			rf1 = v1Sort.get(i);	
+			rf2 = v2Sort.get(i);	
 			Message.printStatus(2, routine, rf1.toString());
 			Message.printStatus(2, routine, rf2.toString());
 			//Message.printStatus(2, routine, "Element " + i + " comparison: " + rf1.compareTo(rf2));
@@ -192,8 +192,8 @@ public static List<StateMod_Plan_WellAugmentation> readStateModFile(String filen
 throws Exception
 {	String routine = "StateMod_Plan_WellAugmentation.readStateModFile";
 	String iline = null;
-	List<String> v = new Vector(9);
-	List<StateMod_Plan_WellAugmentation> theWellAugs = new Vector();
+	List<String> v = new Vector<String>(9);
+	List<StateMod_Plan_WellAugmentation> theWellAugs = new Vector<StateMod_Plan_WellAugmentation>();
 	int linecount = 0;
 	
 	StateMod_Plan_WellAugmentation aWellAug = null;
@@ -336,7 +336,7 @@ throws Exception {
 		size = data.size();
 	}
 	
-	List<String> fields = new Vector();
+	List<String> fields = new Vector<String>();
 	fields.add("PlanID");
 	fields.add("WellRightID");
 	fields.add("WellStructureID");
@@ -360,9 +360,9 @@ throws Exception {
 	int j = 0;
 	PrintWriter out = null;
 	StateMod_Plan_WellAugmentation wellAug = null;
-	List<String> commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List<String> ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	String[] line = new String[fieldCount];
 	StringBuffer buffer = new StringBuffer();
@@ -372,10 +372,10 @@ throws Exception {
 		// incoming comments so that they are not modified in the calling code.
 		List<String> newComments2 = null;
 		if ( newComments == null ) {
-			newComments2 = new Vector();
+			newComments2 = new Vector<String>();
 		}
 		else {
-			newComments2 = new Vector(newComments);
+			newComments2 = new Vector<String>(newComments);
 		}
 		newComments2.add(0,"");
 		newComments2.add(1,"StateMod well augmentation plan data file.");
@@ -437,9 +437,9 @@ public static void writeStateModFile(String instrfile, String outstrfile,
 		List<StateMod_Plan_WellAugmentation> wellAugList, List<String> newComments )
 throws Exception
 {	String routine = "StateMod_Plan_WellAugmentation.writeStateModFile";
-	List<String> commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List<String> ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	PrintWriter out = null;
 	String comment;
@@ -455,7 +455,7 @@ throws Exception
 		// This format follows historical conventions found in example files, limited by StateMod ID lengths
 		String formatLine1 = "%-12.12s %-12.12s %-12.12s"; // Comment only written if not blank
 		StateMod_Plan_WellAugmentation wellAug = null;
-		List<Object> v = new Vector(11); // Reuse for all output lines.
+		List<Object> v = new Vector<Object>(11); // Reuse for all output lines.
 
 		out.println(cmnt);
 		out.println(cmnt + "*************************************************");

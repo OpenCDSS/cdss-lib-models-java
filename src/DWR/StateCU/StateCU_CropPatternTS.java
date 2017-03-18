@@ -151,13 +151,13 @@ private String __filename = "";
 /**
 The list of crop time series.  The data type for each time series is the crop type.
 */
-private List __tslist = new Vector();
+private List<TS> __tslist = new Vector<TS>();
 
 /**
 The list of StateCU_Parcel observations, as an archive of observations to use with data filling.
 These are read from HydroBase.
 */
-private List __parcel_Vector = new Vector();
+private List<StateCU_Parcel> __parcel_Vector = new Vector<StateCU_Parcel>();
 
 /**
 Total acres (total of all crops) for each year in the period.  This is computed
@@ -211,8 +211,8 @@ identifier.  This is typically only called by readStateCUFile().
 public StateCU_CropPatternTS ( String id, DateTime date1, DateTime date2, String units, String filename )
 {	super();
 	_id = id;
-	__tslist = new Vector();
-	__crop_name_Vector = new Vector();
+	__tslist = new Vector<TS>();
+	__crop_name_Vector = new Vector<String>();
 	__units = units;
 	__filename = filename;
 	if ( (date1 == null) || (date2 == null) ) {
@@ -353,21 +353,21 @@ The list will be sorted alphabetically.
 @return a list of distinct crop names, determined from data_Vector.  A
 non-null list is guaranteed, but may be empty.
 */
-public static List<String> getCropNames ( List dataList )
-{	List v = new Vector ( 10 );
+public static List<String> getCropNames ( List<StateCU_CropPatternTS> dataList )
+{	List<String> v = new Vector<String> ( 10 );
 	int size = 0;
 	StateCU_CropPatternTS cds = null;
 	if ( dataList != null ) {
 		size = dataList.size();
 	}
-	List crop_names = null;
+	List<String> crop_names = null;
 	String crop_name;
 	int vsize = 0;
 	int ncrops, j, k;
 	boolean found;
 	// Loop through StateCU_CropPatternTS instances...
 	for ( int i = 0; i < size; i++ ) {
-		cds = (StateCU_CropPatternTS)dataList.get(i);
+		cds = dataList.get(i);
 		if ( cds == null ) {
 			continue;
 		}
@@ -379,11 +379,11 @@ public static List<String> getCropNames ( List dataList )
 		}
 		// Loop through each crop and add to the main Vector if it is not already in that list...
 		for ( j = 0; j < ncrops; j++ ) {
-			crop_name = (String)crop_names.get(j);
+			crop_name = crop_names.get(j);
 			vsize = v.size();
 			found = false;
 			for ( k = 0; k < vsize; k++ ) {
-				if ( crop_name.equalsIgnoreCase((String)v.get(k)) ) {
+				if ( crop_name.equalsIgnoreCase(v.get(k)) ) {
 					found = true;
 					break;
 				}
@@ -398,7 +398,7 @@ public static List<String> getCropNames ( List dataList )
 	// Alphabetize...
 
 	if ( v.size() == 0 ) {
-		return new Vector();
+		return new Vector<String>();
 	}
 	else {
 		return ( StringUtil.sortStringList ( v ) );
@@ -442,12 +442,12 @@ Return the parcels for a requested year and crop type.  These values can be used
 @param crop Crop type of interest or null if all crops should be returned.
 @return the list of StateCU_Parcel for a year
 */
-public List getParcelListForYearAndCropName ( int year, String crop )
-{	List parcels = new Vector();
+public List<StateCU_Parcel> getParcelListForYearAndCropName ( int year, String crop )
+{	List<StateCU_Parcel> parcels = new Vector<StateCU_Parcel>();
 	int size = __parcel_Vector.size();
 	StateCU_Parcel parcel;
 	for ( int i = 0; i < size; i++ ) {
-		parcel = (StateCU_Parcel)__parcel_Vector.get(i);
+		parcel = __parcel_Vector.get(i);
 		if ( (year > 0) && (parcel.getYear() != year) ) {
 			// Requested year does not match.
 			continue;
@@ -614,7 +614,7 @@ Read the StateCU CDS file and return as a Vector of StateCU_CropPattern.
 @param date1_req Requested start of period.
 @param date2_req Requested end of period.
 */
-public static List readStateCUFile ( String filename, DateTime date1_req, DateTime date2_req )
+public static List<StateCU_CropPatternTS> readStateCUFile ( String filename, DateTime date1_req, DateTime date2_req )
 throws Exception
 {	return readStateCUFile ( filename, date1_req, date2_req, null );
 }
@@ -657,12 +657,12 @@ should only be used when processing older files.</td>
 </tr>
 </table>
 */
-public static List readStateCUFile ( String filename, DateTime date1_req, DateTime date2_req, PropList props )
+public static List<StateCU_CropPatternTS> readStateCUFile ( String filename, DateTime date1_req, DateTime date2_req, PropList props )
 throws Exception
 {	String routine = "StateCU_CropPatternTS.readStateCUFile";
 	String iline = null;
-	List v = new Vector ( 5 );
-	List cupat_Vector = new Vector ( 100 );	// Data to return.
+	List<Object> v = new Vector<Object> ( 5 );
+	List<StateCU_CropPatternTS> cupat_Vector = new Vector<StateCU_CropPatternTS> ( 100 );
 	
 	String full_filename = IOUtil.getPathUsingWorkingDir ( filename );
 	Message.printStatus(2,routine, "Reading StateCU CDS file: " + full_filename );
@@ -839,18 +839,18 @@ throws Exception
 		ra.read ( b );
 		String string = null;
 		String bs = new String ( b );
-		List v2 = StringUtil.breakStringList ( bs, "\n\r", StringUtil.DELIM_SKIP_BLANKS );
+		List<String> v2 = StringUtil.breakStringList ( bs, "\n\r", StringUtil.DELIM_SKIP_BLANKS );
 		// Loop through and figure out the first date.
 		int size = v2.size();
 		String date1_string = null;
-		List tokens = null;
+		List<String> tokens = null;
 		for ( int i = 0; i < size; i++ ) {
-			string = ((String)v2.get(i)).trim();
+			string = v2.get(i).trim();
 			if ( (string.length() == 0) || (string.charAt(0) == '#') || (string.charAt(0) == ' ') ) {
 				continue;
 			}
 			tokens = StringUtil.breakStringList( string, " \t", StringUtil.DELIM_SKIP_BLANKS );
-			date1_string = (String)tokens.get(0);
+			date1_string = tokens.get(0);
 			// Check for reasonable dates...
 			if ( StringUtil.isInteger(date1_string) && (StringUtil.atoi(date1_string) < 2050) ) {
 				break;
@@ -876,12 +876,12 @@ throws Exception
 		size = v2.size();
 		String date2_string = null;
 		for ( int i = 1; i < size; i++ ) {
-			string = ((String)v2.get(i)).trim();
+			string = v2.get(i).trim();
 			if ( (string.length() == 0) || (string.charAt(0) == '#') || (string.charAt(0) == ' ') ) {
 				continue;
 			}
 			tokens = StringUtil.breakStringList( string, " \t", StringUtil.DELIM_SKIP_BLANKS );
-			string = (String)tokens.get(0);
+			string = tokens.get(0);
 			// Check for reasonable dates...
 			if ( StringUtil.isInteger(string) && (StringUtil.atoi(string) < 2050) ) {
 				date2_string = string;
@@ -926,7 +926,7 @@ throws Exception
 	String culoc = "";
 	int pos = 0;
 	int linecount = 0;
-	List tokens;
+	List<Object> tokens;
 	try {
 	while ( (iline = in.readLine()) != null ) {
 		++linecount;
@@ -954,8 +954,8 @@ throws Exception
 			
 			if(iline.startsWith("      ")) {
 				// this is the newest format - have startYear, endYear, units
-				List toks = StringUtil.breakStringList( iline, " ", StringUtil.DELIM_SKIP_BLANKS );
-				units_file = ((String)toks.get(2));
+				List<String> toks = StringUtil.breakStringList( iline, " ", StringUtil.DELIM_SKIP_BLANKS );
+				units_file = toks.get(2);
 			}
 			else {
 				units_file = ((String)tokens.get(2)).trim();
@@ -1085,8 +1085,10 @@ throws Exception
 		// Now rethrow to calling code...
 		throw ( e );
 	}
-	if ( in != null ) {
-		in.close();
+	finally {
+		if ( in != null ) {
+			in.close();
+		}
 	}
 	return cupat_Vector;
 }
@@ -1114,9 +1116,9 @@ public static TS readTimeSeries ( String tsident_string, String filename, DateTi
 	String units, boolean read_data )
 throws Exception
 {	TS ts = null;
-	List v = readTimeSeriesList ( tsident_string, filename, date1, date2, units, read_data );
+	List<TS> v = readTimeSeriesList ( tsident_string, filename, date1, date2, units, read_data );
 	if ( (v != null) && (v.size() > 0) ) {
-		ts = (TS)v.get(0);
+		ts = v.get(0);
 	}
 	return ts;
 }
@@ -1124,17 +1126,17 @@ throws Exception
 /**
 Read all the time series from a StateCU format file.
 The IOUtil.getPathUsingWorkingDir() method is applied to the filename.
-@return a pointer to a newly-allocated Vector of time series if successful, a NULL pointer if not.
+@return a pointer to a newly-allocated list of time series if successful, a NULL pointer if not.
 @param fname Name of file to read.
 @param date1 Starting date to initialize period (NULL to read the entire time series).
 @param date2 Ending date to initialize period (NULL to read the entire time series).
 @param units Units to convert to.
 @param read_data Indicates whether data should be read.
 */
-public static List readTimeSeriesList (	String fname, DateTime date1, DateTime date2,
+public static List<TS> readTimeSeriesList (	String fname, DateTime date1, DateTime date2,
 	String units, boolean read_data)
 throws Exception
-{	List tslist = null;
+{	List<TS> tslist = null;
 
 	String full_fname = IOUtil.getPathUsingWorkingDir(fname);
 	tslist = readTimeSeriesList ( null, full_fname, date1, date2, units, read_data );
@@ -1144,7 +1146,7 @@ throws Exception
 
 /**
 Read one or more time series from a StateCU crop pattern time series format file.
-@return a Vector of time series if successful, null if not.  The calling code
+@return a list of time series if successful, null if not.  The calling code
 is responsible for freeing the memory for the time series.
 @param req_tsident Identifier for requested item series.  If null,
 return all new time series in the vector.  If not null, return the matching time series.
@@ -1155,20 +1157,20 @@ return all new time series in the vector.  If not null, return the matching time
 @param read_data Indicates whether data should be read.
 @exception Exception if there is an error reading the time series.
 */
-private static List readTimeSeriesList ( String req_tsident, String full_filename, DateTime req_date1,
+private static List<TS> readTimeSeriesList ( String req_tsident, String full_filename, DateTime req_date1,
 	DateTime req_date2, String req_units, boolean read_data )
 throws Exception
 {	// TODO - can optimize this later to only read one time series...
 	// First read the whole file...
 
-	List data_Vector = readStateCUFile ( full_filename, req_date1, req_date2 );
+	List<StateCU_CropPatternTS> data_Vector = readStateCUFile ( full_filename, req_date1, req_date2 );
 	// If all the time series are required, return all...
 	int size = 0;
 	if ( data_Vector != null ) {
 		size = data_Vector.size();
 	}
 	// Guess at non-zero size (assume 1.5 crops per structure)...
-	List tslist = new Vector((size + 1)*3/2);
+	List<TS> tslist = new Vector<TS>((size + 1)*3/2);
 	StateCU_CropPatternTS cds;
 	int nts = 0, j;
 	TSIdent tsident = null;
@@ -1179,7 +1181,7 @@ throws Exception
 	boolean include_ts = true;
 	for ( int i = 0; i < size; i++ ) {
 		include_ts = true;
-		cds = (StateCU_CropPatternTS)data_Vector.get(i);
+		cds = data_Vector.get(i);
 		if ( req_tsident != null ) {
 			// Check to see if the location match...
 			if ( !cds.getID().equalsIgnoreCase(	tsident.getLocation() ) ) {
@@ -1192,7 +1194,7 @@ throws Exception
 		nts = cds.__tslist.size();
 		for ( j = 0; j < nts; j++ ) {
 			// TODO - optimize this by evaluating when reading the file...
-			ts = (TS)cds.__tslist.get(j);
+			ts = cds.__tslist.get(j);
 			if ( req_tsident != null ) {
 				// Check to see if the location and data type match...
 				if ( !tsident.getType().equalsIgnoreCase( ts.getDataType() ) ) {
@@ -1523,7 +1525,7 @@ time series are returned.  Use the overloaded version to also return total time 
 @return a list containing all the time series in the data list.
 @param dataList A list of StateCU_CropPatternTS.
 */
-public static List toTSList ( List dataList )
+public static List<TS> toTSList ( List<StateCU_CropPatternTS> dataList )
 {	return toTSList ( dataList, false, false, null, null );
 }
 
@@ -1547,16 +1549,16 @@ in particular, if the totals for different data sets will be graphed or manipula
 @param dataset_datasource Data source to be used for the total time series.
 If not specified, "StateCU" will be used.
 */
-public static List toTSList ( List dataList, boolean include_location_totals,
+public static List<TS> toTSList ( List<StateCU_CropPatternTS> dataList, boolean include_location_totals,
 	boolean include_dataset_totals, String dataset_location, String dataset_datasource )
-{	String routine = "StateCU_CropPatternTS.toTSVector";
-	List tslist = new Vector();
+{	String routine = "StateCU_CropPatternTS.toTSList";
+	List<TS> tslist = new Vector<TS>();
 	int size = 0;
 	if ( dataList != null ) {
 		size = dataList.size();
 	}
 	StateCU_CropPatternTS cds = null;
-	List distinct_crop_names = null;	// For data set totals.
+	List<String> distinct_crop_names = null;	// For data set totals.
 	String crop_name, crop_name2;		// Single crop name.
 	int ndistinct_crops = 0;		// For data set totals.
 	DateTime start_DateTime = null,
@@ -1564,7 +1566,7 @@ public static List toTSList ( List dataList, boolean include_location_totals,
 	int end_year = 0, start_year = 0, year;	// For data set totals.
 	YearTS yts = null, yts2;		// For data set totals.
 	String units = "";			// Units for new time series.
-	List dataset_ts_Vector = null;	// List of data set total time series.
+	List<TS> dataset_ts_Vector = null;	// List of data set total time series.
 	int j, k, nts;
 	if ( include_dataset_totals ) {
 		// Get a list of unique crops in the time series list...
@@ -1581,7 +1583,7 @@ public static List toTSList ( List dataList, boolean include_location_totals,
 		}
 		// Determine the period to use for new time series...
 		for ( int i = 0; i < size; i++ ) {
-			cds = (StateCU_CropPatternTS)dataList.get(i);
+			cds = dataList.get(i);
 			date = cds.getDate1();
 			if ( (start_DateTime == null) || date.lessThan(start_DateTime) ) {
 				start_DateTime = new DateTime ( date );
@@ -1597,7 +1599,7 @@ public static List toTSList ( List dataList, boolean include_location_totals,
 			}
 		}
 		// Add a time series for each distinct crop and for the data set total...
-		dataset_ts_Vector = new Vector ( ndistinct_crops );
+		dataset_ts_Vector = new Vector<TS>( ndistinct_crops );
 		for ( j = 0; j < ndistinct_crops; j++ ) {
 			// Add a new time series for all the distinct crops...
 			crop_name = (String)distinct_crop_names.get(j);
@@ -1854,11 +1856,11 @@ processing headers).  Specify as null if no previous file is available.
 @exception IOException if there is an error writing the file.
 */
 public static void writeDateValueFile (	String filename_prev, String filename,
-					List dataList, List new_comments )
+					List<StateCU_CropPatternTS> dataList, List<String> new_comments )
 throws Exception
 {	// For now ignore the previous file and new comments.
-	// Create a new Vector with the time series data...
-	List tslist = toTSList ( dataList );
+	// Create a new list with the time series data...
+	List<TS> tslist = toTSList ( dataList );
 	// Now write using a standard DateValueTS call...
 	String full_filename = IOUtil.getPathUsingWorkingDir ( filename );
 	DateValueTS.writeTimeSeriesList ( tslist, full_filename );	
@@ -1877,7 +1879,7 @@ if no comments are available.
 @exception IOException if there is an error writing the file.
 */
 public static void writeStateCUFile ( String filename_prev, String filename,
-		List dataList, List new_comments, boolean write_crop_area )
+		List<StateCU_CropPatternTS> dataList, List<String> new_comments, boolean write_crop_area )
 throws IOException
 {	PropList props = new PropList ( "writeStateCUFile" );
 	if ( !write_crop_area ) {
@@ -1903,11 +1905,11 @@ if no comments are available.
 @exception IOException if there is an error writing the file.
 */
 public static void writeStateCUFile ( String filename_prev, String filename,
-		List dataList, List new_comments, DateTime req_date1, DateTime req_date2, PropList props )
+		List<StateCU_CropPatternTS> dataList, List<String> new_comments, DateTime req_date1, DateTime req_date2, PropList props )
 throws IOException
-{	List commentStr = new Vector(1);
+{	List<String> commentStr = new Vector<String>(1);
 	commentStr.add ( "#" );
-	List ignoreCommentStr = new Vector(1);
+	List<String> ignoreCommentStr = new Vector<String>(1);
 	ignoreCommentStr.add ( "#>" );
 	PrintWriter out = null;
 	String full_filename_prev = IOUtil.getPathUsingWorkingDir ( filename_prev );
@@ -1954,7 +1956,7 @@ This is useful when verifying output and only the total is being checked.
 </table>
 @exception IOException if an error occurs.
 */
-private static void writeStateCUFile ( List dataList, PrintWriter out,
+private static void writeStateCUFile ( List<StateCU_CropPatternTS> dataList, PrintWriter out,
 					DateTime req_date1, DateTime req_date2, PropList props )
 throws IOException
 {	int i;
@@ -2006,7 +2008,7 @@ throws IOException
 		}
 	}
 
-	List v = new Vector(3);	// Reuse for all output lines.
+	List<Object> v = new Vector<Object>(3);	// Reuse for all output lines.
 
 	out.println ( cmnt );
 	out.println ( cmnt + "  StateCU Crop Patterns (CDS) File" );
@@ -2093,7 +2095,7 @@ throws IOException
 	}
 	StateCU_CropPatternTS cds = null;
 	// The dates are taken from the first object and are assumed to be consistent between objects...
-	cds = (StateCU_CropPatternTS)dataList.get(0);
+	cds = dataList.get(0);
 	DateTime date1 = cds.getDate1();
 	if ( req_date1 != null ) {
 		date1 = req_date1;
@@ -2107,7 +2109,7 @@ throws IOException
 	int icrop = 0;
 	int ncrops = 0;
 	int year = 0;
-	List crop_names = null;
+	List<String> crop_names = null;
 	String crop_name = null;
 	// Default is for current version...
 	String row1_header = "      " + StringUtil.formatString(date1.getYear(),"%4d") +
@@ -2127,7 +2129,7 @@ throws IOException
 	// Make sure that the time series are refreshed before writing.  The
 	// totals are needed to calculate percentages.
 	for ( i=0; i<num; i++ ) {
-		cds = (StateCU_CropPatternTS)dataList.get(i);
+		cds = dataList.get(i);
 		cds.refresh();
 	}
 	// Outer loop is for the time series period...
@@ -2135,7 +2137,7 @@ throws IOException
 		year = date.getYear();
 		// Inner loop is for each StateCU_Location
 		for ( i=0; i<num; i++ ) {
-			cds = (StateCU_CropPatternTS)dataList.get(i);
+			cds = dataList.get(i);
 			if ( cds == null ) {
 				continue;
 			}
@@ -2158,7 +2160,7 @@ throws IOException
 			//long fraction_sum_int = 0;
 			for ( icrop = 0; icrop < ncrops; icrop++ ) {
 				v.clear();
-				crop_name = (String)crop_names.get(icrop);
+				crop_name = crop_names.get(icrop);
 				v.add ( crop_name );
 				// Write the fraction...
 				fraction=cds.getCropArea(crop_name, year, true);

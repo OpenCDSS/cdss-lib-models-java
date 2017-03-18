@@ -273,6 +273,7 @@ import RTi.Util.Time.YearType;
 This class is a gui that displays a list of all the Diversions and the 
 data for each diversion, once it is selected.
 */
+@SuppressWarnings("serial")
 public class StateMod_Diversion_JFrame extends JFrame
 implements ActionListener, ItemListener, KeyListener, MouseListener, 
 WindowListener, JWorksheet_SortListener {
@@ -483,7 +484,7 @@ public StateMod_Diversion_JFrame ( StateMod_DataSet dataset, StateMod_DataSet_Wi
 	__dataset_wm = dataset_wm;
 	__diversionsComponent = __dataset.getComponentForComponentType(StateMod_DataSet.COMP_DIVERSION_STATIONS);
 
-	__diversionsVector = (List)__diversionsComponent.getData();	
+	__diversionsVector = (List<StateMod_Diversion>)__diversionsComponent.getData();	
 	int size = __diversionsVector.size();
 	StateMod_Diversion div = null;
 	for (int i = 0; i < size; i++) {
@@ -673,7 +674,8 @@ private int checkInput()
 	// Non-fatal errors (need to be corrected somehow)...
 	if ( __dataset != null ) {
 		DataSetComponent comp = __dataset.getComponentForComponentType (StateMod_DataSet.COMP_RIVER_NETWORK );
-		List data = (List)comp.getData();
+		@SuppressWarnings("unchecked")
+		List<StateMod_RiverNetworkNode> data = (List<StateMod_RiverNetworkNode>)comp.getData();
 		if ( !rivernode.equals("") && (StateMod_Util.indexOf(data,rivernode) < 0) ) {
 			warning += "\nRiver node ID (" + rivernode + ") is not in the network.";
 			++nonfatal_count;
@@ -841,7 +843,7 @@ public void displayTSViewJFrame(String type)
 	props.set("Product.TotalWidth", "600");
 	props.set("Product.TotalHeight", "400");
 
-	List tslist = new Vector();
+	List<TS> tslist = new Vector<TS>();
 
 	int sub = 0;
 	int its = 0;
@@ -1321,7 +1323,7 @@ private void populateDiversionDailyID()
 {	__diversionDailyID_JComboBox.removeAllItems();
 
 	// Get a list of all the diversions with "ID - Name"...
-	List<String> idNameVector = StateMod_Util.createIdentifierList(__diversionsVector, true);
+	List<String> idNameVector = StateMod_Util.createIdentifierListFromStateModData(__diversionsVector, true, null);
 	List<String> static_choices = StateMod_Diversion.getCdividyChoices ( true );
 	// Take special care if no diversions are in the list...
 	if ( idNameVector.size() == 0 ) {

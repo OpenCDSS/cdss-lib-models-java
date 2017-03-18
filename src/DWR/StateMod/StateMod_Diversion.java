@@ -186,7 +186,7 @@ the COMP_DIVERSION_STATIONS flag dirty.  A new object will have empty non-null
 lists, null time series, and defaults for all other data.
 */
 public class StateMod_Diversion extends StateMod_Data
-implements Cloneable, Comparable, StateMod_ComponentValidator, HasGeoRecord
+implements Cloneable, Comparable<StateMod_Data>, StateMod_ComponentValidator, HasGeoRecord
 {
 
 /**
@@ -252,12 +252,12 @@ protected int _irturn;
 /**
 river nodes receiving return flow
 */
-protected List _rivret;
+protected List<StateMod_ReturnFlow> _rivret;
 
 /**
 Direct diversions rights
 */
-protected List _rights;
+protected List<StateMod_DiversionRight> _rights;
 
 /**
 Acreage source
@@ -340,7 +340,7 @@ protected GeoRecord _georecord = null;
 /**
 List of parcel data, in particular to allow StateDMI to detect when a diversion had no data.
 */
-protected List<StateMod_Parcel> _parcel_Vector = new Vector();
+protected List<StateMod_Parcel> _parcel_Vector = new Vector<StateMod_Parcel>();
 
 // Collections are set up to be specified by year, although currently for
 // diversions collections are always the same for the full period.
@@ -534,13 +534,13 @@ Compares this object to another StateMod_Diversion object.
 @return 0 if they are the same, 1 if this object is greater than the other
 object, or -1 if it is less.
 */
-public int compareTo(Object o) {
-	int res = super.compareTo(o);
+public int compareTo(StateMod_Data data) {
+	int res = super.compareTo(data);
 	if (res != 0) {
 		return res;
 	}
 
-	StateMod_Diversion d = (StateMod_Diversion)o;
+	StateMod_Diversion d = (StateMod_Diversion)data;
 	boolean emptyCdividy = false;
 	boolean emptyDCdividy = false;
 	if (_cdividy.equals("")) {
@@ -664,14 +664,14 @@ public int compareTo(Object o) {
 }
 
 /**
-Given a vector containing all the diversions and another vector containing
+Given a list containing all the diversions and another list containing
 all the rights, creates a system of pointers to link the diversions to their associated rights.
 This routines doesn't add an element to an array.  The array
 already exists, we are just connecting next and previous pointers.
 @param diversions all diversions
 @param rights all rights
 */
-public static void connectAllRights ( List diversions, List rights )
+public static void connectAllRights ( List<StateMod_Diversion> diversions, List<StateMod_DiversionRight> rights )
 {	if ((diversions == null)||(rights == null)) {
 		return;
 	}
@@ -679,40 +679,39 @@ public static void connectAllRights ( List diversions, List rights )
 	
 	StateMod_Diversion div;
 	for (int i = 0; i < num_divs; i++) {
-		div = (StateMod_Diversion)diversions.get(i);
+		div = diversions.get(i);
 		if (div == null) {
 			continue;
 		}
 		div.connectRights(rights);
 	}
-	div = null;
 }
 
 /**
 Given a vector containing all the diversion objects and lists of time series
 objects, sets pointers from the diversions to the associated time series.
 @param diversions All diversions.
-@param diversion_MonthTS Vector of monthly historical diversion time series, or null.
-@param diversion_DayTS Vector of daily historical diversion time series, or null.
-@param demand_MonthTS Vector of monthly demand time series, or null.
-@param demand_override_MonthTS Vector of monthly override demand time series, or null.
-@param demand_average_MonthTS Vector of average monthly override
+@param diversion_MonthTS list of monthly historical diversion time series, or null.
+@param diversion_DayTS list of daily historical diversion time series, or null.
+@param demand_MonthTS list of monthly demand time series, or null.
+@param demand_override_MonthTS list of monthly override demand time series, or null.
+@param demand_average_MonthTS list of average monthly override
 demand time series, or null.
-@param ipy_YearTS Vector of yearly irrigation practice objects, containing 
+@param ipy_YearTS list of yearly irrigation practice objects, containing 
 time series of efficiencies, etc. (StateCU_IrrigationPracticeTS), or null
-@param cwr_MonthTS Vector of monthly consumptive water requirement time series, or null.
-@param cwr_DayTS Vector of daily consumptive water requirement time series, or null.
+@param cwr_MonthTS list of monthly consumptive water requirement time series, or null.
+@param cwr_DayTS list of daily consumptive water requirement time series, or null.
 */
-public static void connectAllTS (	List diversions,
-		List diversion_MonthTS,
-		List diversion_DayTS,
-		List demand_MonthTS, 
-		List demand_override_MonthTS, 
-		List demand_average_MonthTS, 
-		List demand_DayTS,
-		List ipy_YearTS,
-		List cwr_MonthTS,
-		List cwr_DayTS )
+public static void connectAllTS ( List<StateMod_Diversion> diversions,
+		List<MonthTS> diversion_MonthTS,
+		List<DayTS> diversion_DayTS,
+		List<MonthTS> demand_MonthTS, 
+		List<MonthTS> demand_override_MonthTS, 
+		List<MonthTS> demand_average_MonthTS, 
+		List<DayTS> demand_DayTS,
+		List<StateCU_IrrigationPracticeTS> ipy_YearTS,
+		List<MonthTS> cwr_MonthTS,
+		List<DayTS> cwr_DayTS )
 {	if (diversions == null) {
 		return;
 	}
@@ -721,7 +720,7 @@ public static void connectAllTS (	List diversions,
 	
 	StateMod_Diversion div;
 	for (i = 0; i < num_divs; i++) {
-		div = (StateMod_Diversion)diversions.get(i);
+		div = diversions.get(i);
 		if (div == null) {
 			continue;
 		}
@@ -754,14 +753,13 @@ public static void connectAllTS (	List diversions,
 			div.connectCWRDayTS ( cwr_DayTS );
 		}
 	}
-	div = null;
 }
 
 /**
 Connect daily CWR series pointer.  The connection is made using the value of "cdividy" for the diversion.
 @param tslist demand time series
 */
-public void connectCWRDayTS ( List tslist )
+public void connectCWRDayTS ( List<DayTS> tslist )
 {	if ( tslist == null) {
 		return;
 	}
@@ -770,7 +768,7 @@ public void connectCWRDayTS ( List tslist )
 
 	DayTS ts;
 	for (int i = 0; i < num_TS; i++) {
-		ts = (DayTS)tslist.get(i);
+		ts = tslist.get(i);
 		if ( ts == null ) {
 			return;
 		}
@@ -786,7 +784,7 @@ public void connectCWRDayTS ( List tslist )
 Connect monthly CWR time series pointer.  The time series name is set to that of the diversion.
 @param tslist Time series list.
 */
-public void connectCWRMonthTS ( List tslist )
+public void connectCWRMonthTS ( List<MonthTS> tslist )
 {	if ( tslist == null ) {
 		return;
 	}
@@ -795,7 +793,7 @@ public void connectCWRMonthTS ( List tslist )
 	MonthTS ts;
 	_cwr_MonthTS = null;
 	for ( int i = 0; i < num_TS; i++ ) {
-		ts = (MonthTS)tslist.get(i);
+		ts = tslist.get(i);
 		if ( ts == null ) {
 			continue;
 		}
@@ -812,7 +810,7 @@ Connect average monthly demand time series pointer.  The time series
 name is set to that of the diversion.
 @param tslist Time series list.
 */
-public void connectDemandAverageMonthTS ( List tslist )
+public void connectDemandAverageMonthTS ( List<MonthTS> tslist )
 {	if ( tslist == null ) {
 		return;
 	}
@@ -821,7 +819,7 @@ public void connectDemandAverageMonthTS ( List tslist )
 	MonthTS ts;
 	_demand_average_MonthTS = null;
 	for ( int i = 0; i < num_TS; i++ ) {
-		ts = (MonthTS)tslist.get(i);
+		ts = tslist.get(i);
 		if ( ts == null ) {
 			continue;
 		}
@@ -838,7 +836,7 @@ Connect daily demand time series pointer.  The connection is made using the
 value of "cdividy" for the diversion.
 @param tslist demand time series
 */
-public void connectDemandDayTS ( List tslist )
+public void connectDemandDayTS ( List<DayTS> tslist )
 {	if ( tslist == null) {
 		return;
 	}
@@ -847,7 +845,7 @@ public void connectDemandDayTS ( List tslist )
 
 	DayTS ts;
 	for (int i = 0; i < num_TS; i++) {
-		ts = (DayTS)tslist.get(i);
+		ts = tslist.get(i);
 		if ( ts == null ) {
 			return;
 		}
@@ -863,7 +861,7 @@ public void connectDemandDayTS ( List tslist )
 Connect monthly demand time series pointer.  The time series name is set to that of the diversion.
 @param tslist Time series list.
 */
-public void connectDemandMonthTS ( List tslist )
+public void connectDemandMonthTS ( List<MonthTS> tslist )
 {	if ( tslist == null ) {
 		return;
 	}
@@ -872,7 +870,7 @@ public void connectDemandMonthTS ( List tslist )
 	MonthTS ts;
 	_demand_MonthTS = null;
 	for ( int i = 0; i < num_TS; i++ ) {
-		ts = (MonthTS)tslist.get(i);
+		ts = tslist.get(i);
 		if ( ts == null ) {
 			continue;
 		}
@@ -889,7 +887,7 @@ Connect monthly demand override time series pointer.  The time series name is
 set to that of the diversion.
 @param tslist Time series list.
 */
-public void connectDemandOverrideMonthTS ( List tslist )
+public void connectDemandOverrideMonthTS ( List<MonthTS> tslist )
 {	if ( tslist == null ) {
 		return;
 	}
@@ -898,7 +896,7 @@ public void connectDemandOverrideMonthTS ( List tslist )
 	MonthTS ts;
 	_demand_override_MonthTS = null;
 	for ( int i = 0; i < num_TS; i++ ) {
-		ts = (MonthTS)tslist.get(i);
+		ts = tslist.get(i);
 		if ( ts == null ) {
 			continue;
 		}
@@ -914,7 +912,7 @@ public void connectDemandOverrideMonthTS ( List tslist )
 Connect historical daily diversion time series pointer.  
 @param tslist Vector of historical daily diversion time series.
 */
-public void connectDiversionDayTS ( List tslist )
+public void connectDiversionDayTS ( List<DayTS> tslist )
 {	if ( tslist == null ) {
 		return;
 	}
@@ -923,7 +921,7 @@ public void connectDiversionDayTS ( List tslist )
 	DayTS ts;
 	_diversion_DayTS = null;
 	for ( int i = 0; i < num_TS; i++ ) {
-		ts = (DayTS)tslist.get(i);
+		ts = tslist.get(i);
 		if ( ts == null ) {
 			continue;
 		}
@@ -937,9 +935,9 @@ public void connectDiversionDayTS ( List tslist )
 
 /**
 Connect historical monthly time series pointer.  
-@param tslist Vector of historical monthly time series.
+@param tslist list of historical monthly time series.
 */
-public void connectDiversionMonthTS ( List tslist )
+public void connectDiversionMonthTS ( List<MonthTS> tslist )
 {	if ( tslist == null ) {
 		return;
 	}
@@ -948,7 +946,7 @@ public void connectDiversionMonthTS ( List tslist )
 	MonthTS ts;
 	_diversion_MonthTS = null;
 	for ( int i = 0; i < num_TS; i++ ) {
-		ts = (MonthTS)tslist.get(i);
+		ts = tslist.get(i);
 		if ( ts == null ) {
 			continue;
 		}
@@ -964,7 +962,7 @@ public void connectDiversionMonthTS ( List tslist )
 Connect the irrigation practice TS object.
 @param tslist Time series list.
 */
-public void connectIrrigationPracticeYearTS ( List tslist )
+public void connectIrrigationPracticeYearTS ( List<StateCU_IrrigationPracticeTS> tslist )
 {	if ( tslist == null ) {
 		return;
 	}
@@ -973,7 +971,7 @@ public void connectIrrigationPracticeYearTS ( List tslist )
 	_ipy_YearTS = null;
 	StateCU_IrrigationPracticeTS ipy_YearTS;
 	for ( int i = 0; i < num_TS; i++ ) {
-		ipy_YearTS = (StateCU_IrrigationPracticeTS)tslist.get(i);
+		ipy_YearTS = tslist.get(i);
 		if ( ipy_YearTS == null ) {
 			continue;
 		}
@@ -989,7 +987,7 @@ Connect the diversion rights with this diversion, comparing the "cgoto" for the
 right to the diversion identifier.  Multiple rights may be associated with a diversion.
 @param rights all rights.
 */
-public void connectRights ( List rights )
+public void connectRights ( List<StateMod_DiversionRight> rights )
 {	if (rights == null) {
 		return;
 	}
@@ -997,7 +995,7 @@ public void connectRights ( List rights )
 
 	StateMod_DiversionRight right;
 	for ( int i = 0; i < num_rights; i++) {
-		right = (StateMod_DiversionRight)rights.get(i);
+		right = rights.get(i);
 		if (right == null) {
 			continue;
 		}
@@ -1005,14 +1003,13 @@ public void connectRights ( List rights )
 			_rights.add ( right );
 		}
 	}
-	right = null;
 }
 
 /**
 Creates a copy of the object for later use in checking to see if it was changed in a GUI.
 */
 public void createBackup() {
-	_original = clone();
+	_original = (StateMod_Diversion)clone();
 	((StateMod_Diversion)_original)._isClone = false;
 	_isClone = true;
 }
@@ -1251,8 +1248,8 @@ The options are of the form "1" if include_notes is false and
 @return a list of demand source option strings, for use in GUIs.
 @param include_notes Indicate whether notes should be included.
 */
-public static List getDemsrcChoices ( boolean include_notes )
-{	List v = new Vector(8);
+public static List<String> getDemsrcChoices ( boolean include_notes )
+{	List<String> v = new Vector<String>(8);
 	v.add ( "0 - Irrigated acres source unknown" );
 	v.add ( "1 - Irrigated acres from GIS" );
 	v.add ( "2 - Irrigated acres from structure file (tia)" );
@@ -1362,7 +1359,7 @@ The options are of the form "0" if include_notes is false and
 @param include_notes Indicate whether notes should be added after the parameter values.
 */
 public static List<String> getIdivswChoices ( boolean include_notes )
-{	List<String> v = new Vector(2);
+{	List<String> v = new Vector<String>(2);
 	v.add ( "0 - Off" );	// Possible options are listed here.
 	v.add ( "1 - On" );
 	if ( !include_notes ) {
@@ -1405,7 +1402,7 @@ The options are of the form "1" if include_notes is false and
 @param include_notes Indicate whether notes should be included.
 */
 public static List<String> getIdvcomChoices ( boolean include_notes )
-{	List v = new Vector(5);
+{	List<String> v = new Vector<String>(5);
 	v.add ( "1 - Monthly total demand" );
 	v.add ( "2 - Annual total demand" );
 	v.add ( "3 - Monthly irrigation water requirement" );
@@ -1450,7 +1447,7 @@ The options are of the form "0" if include_notes is false and
 @param include_notes Indicate whether notes should be included.
 */
 public static List<String> getIreptypeChoices ( boolean include_notes )
-{	List<String> v = new Vector(3);
+{	List<String> v = new Vector<String>(3);
 	v.add ( "0 - Do not provide replacement res. benefits" );
 	v.add ( "1 - Provide 100% replacement" );
 	v.add ( "-1 - Provide depletion replacement" );
@@ -1499,8 +1496,8 @@ The options are of the form "1" if include_notes is false and
 @return a list of use type option strings, for use in GUIs.
 @param include_notes Indicate whether notes should be included.
 */
-public static List getIrturnChoices ( boolean include_notes )
-{	List v = new Vector(6);
+public static List<String> getIrturnChoices ( boolean include_notes )
+{	List<String> v = new Vector<String>(6);
 	v.add ( "0 - Storage" );
 	v.add ( "1 - Irrigation" );
 	v.add ( "2 - Municipal" );
@@ -1562,7 +1559,7 @@ public int getNrtn() {
 Return the list of parcels.
 @return the list of parcels.
 */
-public List getParcels()
+public List<StateMod_Parcel> getParcels()
 {	return _parcel_Vector;
 }
 
@@ -1571,13 +1568,13 @@ Return the return flow at a particular index.
 @param index index desired to retrieve.
 */
 public StateMod_ReturnFlow getReturnFlow(int index)
-{	return ((StateMod_ReturnFlow)_rivret.get(index));
+{	return _rivret.get(index);
 }
 
 /**
 Retrieve the return flow vector.
 */
-public List getReturnFlows()
+public List<StateMod_ReturnFlow> getReturnFlows()
 {	return _rivret;
 }
 
@@ -1599,7 +1596,7 @@ public StateMod_DiversionRight getRight(int index)
 Return the rights list.
 @return the rights list.
 */
-public List getRights()
+public List<StateMod_DiversionRight> getRights()
 {	return _rights;
 }
 
@@ -1647,8 +1644,8 @@ private void initialize ( boolean initialize_defaults )
 		_demsrc	= StateMod_Util.MISSING_INT;
 		_ireptype = StateMod_Util.MISSING_INT;
 	}
-	_rivret = new Vector();
-	_rights = new Vector();
+	_rivret = new Vector<StateMod_ReturnFlow>();
+	_rights = new Vector<StateMod_DiversionRight>();
 	_diversion_MonthTS = null;
 	_diversion_DayTS = null;
 	_demand_MonthTS = null;
@@ -1693,12 +1690,12 @@ The new diversions are added to the end of the previously stored diversions.
 @param filename filename containing diversion information
 @throws Exception if an error occurs
 */
-public static List readStateModFile(String filename)
+public static List<StateMod_Diversion> readStateModFile(String filename)
 throws Exception
 {	String routine = "StateMod_Diversion.readStateModFile";
 	String iline = null;
-	List v = new Vector(9);
-	List theDiversions = new Vector();
+	List<Object> v = new Vector<Object>(9);
+	List<StateMod_Diversion> theDiversions = new Vector<StateMod_Diversion>();
 	int i;
 	int linecount = 0;
 	String s = null;
@@ -1998,8 +1995,8 @@ The options are of the form "3" if include_notes is false and
 @return a list of daily ID option strings, for use in GUIs.
 @param include_notes Indicate whether notes should be included.
 */
-public static List getCdividyChoices ( boolean include_notes )
-{	List v = new Vector(8);
+public static List<String> getCdividyChoices ( boolean include_notes )
+{	List<String> v = new Vector<String>(8);
 	v.add ( "0 - Use monthly time series to get average daily values" );
 	v.add (	"3 - Daily time series are supplied" );
 	v.add (	"4 - Daily time series interpolated from midpoints of monthly data" );
@@ -2056,9 +2053,9 @@ Set the collection list for an aggregate/system.  It is assumed that the
 collection applies to all years of data.
 @param ids The identifiers indicating the locations to collection.
 */
-public void setCollectionPartIDs ( List ids )
+public void setCollectionPartIDs ( List<String> ids )
 {	if ( __collection_Vector == null ) {
-		__collection_Vector = new Vector ( 1 );
+		__collection_Vector = new Vector<List<String>> ( 1 );
 		__collection_year = new int[1];
 	}
 	else {
@@ -2427,22 +2424,22 @@ public void setModelEfficiencies ( double [] model_efficiencies )
 Set the parcel list.
 @param parcel_Vector the list of StateMod_Parcel to set for parcel data.
 */
-void setParcels ( List parcel_Vector )
+void setParcels ( List<StateMod_Parcel> parcel_Vector )
 {	_parcel_Vector = parcel_Vector;
 }
 
 /**
 Sets the Return flow vector.
 */
-public void setReturnFlow(List rivret) {
+public void setReturnFlow(List<StateMod_ReturnFlow> rivret) {
 	_rivret = rivret;
 }
 
 /**
-set the rights from a vector of rights.  The linked list will be set up, too, 
-according to the order in the vector.
+Set the rights from a list of rights.  The linked list will be set up, too, 
+according to the order in the list.
 */
-public void setRightsVector(List rights)
+public void setRightsVector(List<StateMod_DiversionRight> rights)
 {	_rights = rights;
 }
 
@@ -2490,10 +2487,12 @@ public StateMod_ComponentValidation validateComponent ( StateMod_DataSet dataset
 	}
 	// Get the network list if available for checks below
 	DataSetComponent comp = null;
-	List rinList = null;
+	List<StateMod_RiverNetworkNode> rinList = null;
 	if ( dataset != null ) {
 		comp = dataset.getComponentForComponentType(StateMod_DataSet.COMP_RIVER_NETWORK);
-		rinList = (List)comp.getData();
+		@SuppressWarnings("unchecked")
+		List<StateMod_RiverNetworkNode> rinList0 = (List<StateMod_RiverNetworkNode>)comp.getData();
+		rinList = rinList0;
 		if ( (rinList != null) && (rinList.size() == 0) ) {
 			// Set to null to simplify checks below
 			rinList = null;
@@ -2527,7 +2526,8 @@ public StateMod_ComponentValidation validateComponent ( StateMod_DataSet dataset
 	// Verify that the daily ID is in the data set (daily ID is allowed to be missing)
 	if ( (dataset != null) && !StateMod_Util.isMissing(dailyID) ) {
 		DataSetComponent comp2 = dataset.getComponentForComponentType(StateMod_DataSet.COMP_DIVERSION_STATIONS);
-		List ddsList = (List)comp2.getData();
+		@SuppressWarnings("unchecked")
+		List<StateMod_Diversion> ddsList = (List<StateMod_Diversion>)comp2.getData();
 		if ( dailyID.equals("0") || dailyID.equals("3") || dailyID.equals("4") ) {
 			// OK
 		}
@@ -2625,12 +2625,12 @@ Write diversion information to output.  History header information
 is also maintained by calling this routine.  Daily data fields are written.
 @param instrfile input file from which previous history should be taken
 @param outstrfile output file to which to write
-@param theDiversions vector of diversions to write.
+@param theDiversions list of diversions to write.
 @param newComments addition comments which should be included in history
 @exception Exception if an error occurs.
 */
 public static void writeStateModFile(String instrfile, String outstrfile,
-		List theDiversions, List newComments)
+		List<StateMod_Diversion> theDiversions, List<String> newComments)
 throws Exception {
 	writeStateModFile(instrfile, outstrfile, theDiversions, newComments, true);
 }
@@ -2640,19 +2640,19 @@ Write diversion information to output.  History header information
 is also maintained by calling this routine.
 @param instrfile input file from which previous history should be taken
 @param outstrfile output file to which to write
-@param theDiversions vector of diversions to write.
+@param theDiversions list of diversions to write.
 @param newComments addition comments which should be included in history
 @param use_daily_data Indicates whether daily data should be written.  The data
 are only used if the control file indicates that a daily run is occurring.
 @exception Exception if an error occurs.
 */
 public static void writeStateModFile(String instrfile, String outstrfile,
-		List theDiversions, List newComments, boolean use_daily_data)
+		List<StateMod_Diversion> theDiversions, List<String> newComments, boolean use_daily_data)
 throws Exception
 {	String routine = "StateMod_Diversin.writeStateModFile";
-	List commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	PrintWriter out = null;
 	try {
@@ -2674,8 +2674,8 @@ throws Exception
 		String format_4 = "                                    %-12.12s%8.2F%8d";
 		StateMod_Diversion div = null;
 		StateMod_ReturnFlow ret = null;
-		List v = new Vector(9);	// Reuse for all output lines.
-		List v5 = null;		// For return flows.
+		List<Object> v = new Vector<Object>(9);	// Reuse for all output lines.
+		List<StateMod_ReturnFlow> v5 = null;		// For return flows.
 
 		out.println(cmnt);
 		out.println(cmnt + "*************************************************");
@@ -2728,7 +2728,7 @@ throws Exception
 			num = theDiversions.size();
 		}
 		for (i = 0; i < num; i++) {
-			div = (StateMod_Diversion)theDiversions.get(i);
+			div = theDiversions.get(i);
 			if (div == null) {
 				continue;
 			}
@@ -2781,7 +2781,7 @@ throws Exception
 			v5 = div.getReturnFlows();
 			for (j = 0; j < nrtn; j++) {
 				v.clear();
-				ret =(StateMod_ReturnFlow)v5.get(j);
+				ret = v5.get(j);
 				v.add(ret.getCrtnid());
 				v.add(new Double(ret.getPcttot()));
 				v.add(new Integer(ret.getIrtndl()));
@@ -2832,7 +2832,7 @@ throws Exception
 		size = data.size();
 	}
 	
-	List<String> fields = new Vector();
+	List<String> fields = new Vector<String>();
 	fields.add("ID");
 	fields.add("Name");
 	fields.add("RiverNodeID");
@@ -2878,16 +2878,16 @@ throws Exception
 	int j = 0;
 	int size2 = 0;
 	PrintWriter out = null;
-	List<String> commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List<String> ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	String[] line = new String[fieldCount];
 	String id = null;
 	StringBuffer buffer = new StringBuffer();
 	StateMod_Diversion div = null;
 	StateMod_ReturnFlow rf = null;
-	List<StateMod_ReturnFlow> returnFlows = new Vector();
+	List<StateMod_ReturnFlow> returnFlows = new Vector<StateMod_ReturnFlow>();
 	List<StateMod_ReturnFlow> temp = null;
 	
 	try {
@@ -2895,10 +2895,10 @@ throws Exception
 		// incoming comments so that they are not modified in the calling code.
 		List<String> newComments2 = null;
 		if ( newComments == null ) {
-			newComments2 = new Vector();
+			newComments2 = new Vector<String>();
 		}
 		else {
-			newComments2 = new Vector(newComments);
+			newComments2 = new Vector<String>(newComments);
 		}
 		newComments2.add(0,"");
 		newComments2.add(1,"StateMod diversion stations as a delimited list file.");
@@ -2990,7 +2990,7 @@ throws Exception
 	String collectionFilename = front + "_Collections." + end;
 	writeCollectionListFile(collectionFilename, delimiter, update, data, newComments);
 	
-	List<File> filesWritten = new Vector();
+	List<File> filesWritten = new Vector<File>();
 	filesWritten.add ( new File(filename) );
 	filesWritten.add ( new File(returnFlowFilename) );
 	filesWritten.add ( new File(collectionFilename) );
@@ -3011,7 +3011,7 @@ header (true) or to create a new file with a new header.
 @throws Exception if an error occurs.
 */
 public static void writeCollectionListFile(String filename, String delimiter, boolean update,
-	List data, List newComments ) 
+	List<StateMod_Diversion> data, List<String> newComments ) 
 throws Exception
 {	String routine = "StateMod_Diversion.writeCollectionListFile";
 	int size = 0;
@@ -3019,7 +3019,7 @@ throws Exception
 		size = data.size();
 	}
 	
-	List fields = new Vector();
+	List<String> fields = new Vector<String>();
 	fields.add("LocationID");
 	fields.add("Year");
 	fields.add("CollectionType");
@@ -3032,7 +3032,7 @@ throws Exception
 	int comp = StateMod_DataSet.COMP_DIVERSION_STATION_COLLECTIONS;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.get(i);
+		s = fields.get(i);
 		names[i] = StateMod_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateMod_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -3047,26 +3047,26 @@ throws Exception
 	int num = 0;
 	PrintWriter out = null;
 	StateMod_Diversion div = null;
-	List commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	String[] line = new String[fieldCount];
 	String colType = null;
 	String id = null;
 	String partType = null;	
 	StringBuffer buffer = new StringBuffer();
-	List ids = null;
+	List<String> ids = null;
 
 	try {
 		// Add some basic comments at the top of the file.  However, do this to a copy of the
 		// incoming comments so that they are not modified in the calling code.
-		List newComments2 = null;
+		List<String> newComments2 = null;
 		if ( newComments == null ) {
-			newComments2 = new Vector();
+			newComments2 = new Vector<String>();
 		}
 		else {
-			newComments2 = new Vector(newComments);
+			newComments2 = new Vector<String>(newComments);
 		}
 		newComments2.add(0,"");
 		newComments2.add(1,"StateMod diversion station collection information as delimited list file.");
@@ -3085,7 +3085,7 @@ throws Exception
 		out.println(buffer.toString());
 		
 		for (int i = 0; i < size; i++) {
-			div = (StateMod_Diversion)data.get(i);
+			div = data.get(i);
 			id = div.getID();
 			years = div.getCollectionYears();
 			if (years == null) {

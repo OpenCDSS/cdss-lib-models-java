@@ -132,12 +132,12 @@ public int getNumDelayTables ()
 Read the StateCU delay table assignment file and return as a list of StateCU_DelayTableAssignment.
 @param filename filename containing delay table assignment records.
 */
-public static List readStateCUFile ( String filename )
+public static List<StateCU_DelayTableAssignment> readStateCUFile ( String filename )
 throws IOException
 {	String rtn = "StateCU_DelayTableAssignment.readStateCUFile";
 	String iline = null;
-	List v = new Vector ( 8 );
-	List data_Vector = new Vector ( 100 );	// Data to return.
+	List<Object> v = new Vector<Object> ( 8 );
+	List<StateCU_DelayTableAssignment> data_Vector = new Vector<StateCU_DelayTableAssignment> ( 100 );	// Data to return.
 	int i;
 	int format_0[] = {
 		StringUtil.TYPE_STRING,	// CU Location
@@ -258,11 +258,11 @@ processing headers).  Specify as null if no previous file is available.
 @exception IOException if there is an error writing the file.
 */
 public static void writeStateCUFile ( String filename_prev, String filename,
-	List data_Vector, List newComments )
+	List<StateCU_DelayTableAssignment> data_Vector, List<String> newComments )
 throws IOException
-{	List commentStr = new Vector(1);
+{	List<String> commentStr = new Vector<String>(1);
 	commentStr.add ( "#" );
-	List ignoreCommentStr = new Vector(1);
+	List<String> ignoreCommentStr = new Vector<String>(1);
 	ignoreCommentStr.add ( "#>" );
 	PrintWriter out = null;
 	String full_filename_prev = IOUtil.getPathUsingWorkingDir ( filename_prev );
@@ -284,7 +284,7 @@ Write a list of StateCU_DelayTableAssignment to an opened file.
 @param out output PrintWriter.
 @exception IOException if an error occurs.
 */
-private static void writeVector ( List data_Vector, PrintWriter out )
+private static void writeVector ( List<StateCU_DelayTableAssignment> data_Vector, PrintWriter out )
 throws IOException
 {	int i,j;
 	String cmnt = "#>";
@@ -312,7 +312,7 @@ throws IOException
 	int ndt = 0;
 	StringBuffer b = new StringBuffer();
 	for ( i=0; i<num; i++ ) {
-		data = (StateCU_DelayTableAssignment)data_Vector.get(i);
+		data = data_Vector.get(i);
 		if ( data == null ) {
 			continue;
 		}
@@ -342,7 +342,7 @@ header (true) or to create a new file with a new header.
 @param newComments comments to add to the top of the file (e.g., command file and HydroBase version).
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter, boolean update, List data, List newComments) 
+public static void writeListFile(String filename, String delimiter, boolean update, List<StateCU_DelayTableAssignment> data, List<String> newComments) 
 throws Exception {
 	String routine = "StateCU_DelayTableAssignment.writeListFile";
 	int size = 0;
@@ -350,7 +350,7 @@ throws Exception {
 		size = data.size();
 	}
 	
-	List fields = new Vector();
+	List<String> fields = new Vector<String>();
 	fields.add("ID");
 	fields.add("DelayTableID");
 	fields.add("Percent");
@@ -376,9 +376,9 @@ throws Exception {
 	int num = 0;
 	PrintWriter out = null;
 	StateCU_DelayTableAssignment dly = null;
-	List commentString = new Vector(1);
+	List<String> commentString = new Vector<String>(1);
 	commentString.add ( "#" );
-	List ignoreCommentString = new Vector(1);
+	List<String> ignoreCommentString = new Vector<String>(1);
 	ignoreCommentString.add ("#>");
 	String[] line = new String[fieldCount];
 	String id = null;
@@ -387,12 +387,12 @@ throws Exception {
 	try {
 		// Add some basic comments at the top of the file.  However, do this to a copy of the
 		// incoming comments so that they are not modified in the calling code.
-		List newComments2 = null;
+		List<String> newComments2 = null;
 		if ( newComments == null ) {
-			newComments2 = new Vector();
+			newComments2 = new Vector<String>();
 		}
 		else {
-			newComments2 = new Vector(newComments);
+			newComments2 = new Vector<String>(newComments);
 		}
 		newComments2.add(0,"");
 		newComments2.add(1,"StateCU location delay table assignment information as a delimited list file.");

@@ -205,7 +205,7 @@ private EndianRandomAccessFile __fp;
 /**
 A hashtable for the file pointers (instances of StateMod_BTS).  This is used to increase performance.
 */
-private static Hashtable __file_Hashtable = new Hashtable();
+private static Hashtable<String,StateMod_BTS> __file_Hashtable = new Hashtable<String,StateMod_BTS>();
 /**
 Direct access file record length, bytes.  140 is the B43 for 9.62, but this is reset below.
 */
@@ -562,14 +562,14 @@ throws IOException
 	// Loop through the Hashtable and remove all entries...
 	// Remove from the Hashtable...
 
-	Enumeration keysEnumeration = __file_Hashtable.keys();
+	Enumeration<String> keysEnumeration = __file_Hashtable.keys();
 
 	StateMod_BTS bts = null;
 	String filename = null;
 
 	while (keysEnumeration.hasMoreElements()) {
-		filename = (String)keysEnumeration.nextElement();	
-		bts = (StateMod_BTS)__file_Hashtable.get(filename);
+		filename = keysEnumeration.nextElement();	
+		bts = __file_Hashtable.get(filename);
 		bts.close();
 		__file_Hashtable.remove ( filename );
 	}	
@@ -1509,7 +1509,7 @@ throws IOException
 	    Message.printDebug( dl, routine, "Getting parameters from hard-coded lists for older file version." );
 		__parameters = StringUtil.toArray (
 			StateMod_Util.getTimeSeriesDataTypes (
-			__comp_type,	// Componnent
+			__comp_type,	// Component
 			null,	// ID - we want all in the file
 			null,	// DataSet - for now assume none
 			__version,	// Really need to get this from the file!
@@ -1732,7 +1732,7 @@ throws Exception
 	// Call the fully-loaded method...
 	// Pass the file pointer and an empty time series, which
 	// will be used to locate the time series in the file.
-	List tslist = in.readTimeSeriesList ( tsident_string, date1, date2, units, read_data );
+	List<TS> tslist = in.readTimeSeriesList ( tsident_string, date1, date2, units, read_data );
 
 	if (closeFile) {
 		in.close();
@@ -1763,11 +1763,11 @@ main location part is first matched and the the reservoir account is checked if 
 @exception IOException if the interval for the time series does not match that
 for the file or if a write error occurs.
 */
-public List readTimeSeriesList (	String tsident_pattern, DateTime date1,
+public List<TS> readTimeSeriesList (	String tsident_pattern, DateTime date1,
 					DateTime date2, String req_units, boolean read_data )
 throws Exception
 {	String routine = "StateMod_BTS.readTimeSeriesList";
-	// Using previously read informtion, loop through each time series
+	// Using previously read information, loop through each time series
 	// identifier and see if it matches what we are searching for...
 
 	// TODO (JTS - 2004-08-04)
@@ -1776,7 +1776,7 @@ throws Exception
 	// reading the header.  This needs to be considered.
 
 	int iparam = 0;
-	List tslist = new Vector();
+	List<TS> tslist = new Vector<TS>();
 	if ( (tsident_pattern == null) || (tsident_pattern.length() == 0) ) {
 		tsident_pattern = "*.*.*.*.*";
 	}

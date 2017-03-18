@@ -95,7 +95,7 @@ import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 
 public class StateMod_ReservoirRight extends StateMod_Data 
-implements Cloneable, Comparable, StateMod_ComponentValidator, StateMod_Right {
+implements Cloneable, Comparable<StateMod_Data>, StateMod_ComponentValidator, StateMod_Right {
 /**
 Administration number
 */
@@ -143,17 +143,17 @@ public Object clone() {
 Compares this object to another StateMod_Data object based on the sorted
 order from the StateMod_Data variables, and then by rtem, dcrres, iresco,
 ityrstr, n2fill and copid, in that order.
-@param o the object to compare against.
+@param data the object to compare against.
 @return 0 if they are the same, 1 if this object is greater than the other
 object, or -1 if it is less.
 */
-public int compareTo(Object o) {
-	int res = super.compareTo(o);
+public int compareTo(StateMod_Data data) {
+	int res = super.compareTo(data);
 	if (res != 0) {
 		return res;
 	}
 
-	StateMod_ReservoirRight right = (StateMod_ReservoirRight)o;
+	StateMod_ReservoirRight right = (StateMod_ReservoirRight)data;
 
 	res = _rtem.compareTo(right.getRtem());
 	if (res != 0) {
@@ -197,7 +197,7 @@ Creates a backup of the current data object and stores it in _original,
 for use in determining if an object was changed inside of a GUI.
 */
 public void createBackup() {
-	_original = clone();
+	_original = (StateMod_ReservoirRight)clone();
 	((StateMod_ReservoirRight)_original)._isClone = false;
 	_isClone = true;
 }
@@ -208,7 +208,7 @@ Compare two rights lists and see if they are the same.
 @param v2 the second list of StateMod_ReservoirRight s to check.  Cannot be null.
 @return true if they are the same, false if not.
 */
-public static boolean equals(List v1, List v2)
+public static boolean equals(List<StateMod_ReservoirRight> v1, List<StateMod_ReservoirRight> v2)
 {
 	StateMod_ReservoirRight r1;	
 	StateMod_ReservoirRight r2;	
@@ -221,13 +221,13 @@ public static boolean equals(List v1, List v2)
 		// and data will need to be saved back into the dataset.
 		int size = v1.size();
 		//Message.printStatus(2, routine, "Lists are of size: " + size);
-		List v1Sort = StateMod_Util.sortStateMod_DataVector(v1);
-		List v2Sort = StateMod_Util.sortStateMod_DataVector(v2);
+		List<StateMod_ReservoirRight> v1Sort = StateMod_Util.sortStateMod_DataVector(v1);
+		List<StateMod_ReservoirRight> v2Sort = StateMod_Util.sortStateMod_DataVector(v2);
 		//Message.printStatus(2, routine, "Lists have been sorted");
 	
 		for (int i = 0; i < size; i++) {			
-			r1 = (StateMod_ReservoirRight)v1Sort.get(i);	
-			r2 = (StateMod_ReservoirRight)v2Sort.get(i);	
+			r1 = v1Sort.get(i);	
+			r2 = v2Sort.get(i);	
 			//Message.printStatus(2, routine, r1.toString());
 			//Message.printStatus(2, routine, r2.toString());
 			//Message.printStatus(2, routine, "Element " + i + " comparison: " + r1.compareTo(r2));
@@ -338,8 +338,8 @@ The options are of the form "1" if include_notes is false and
 @return a list of on/off switch option strings, for use in GUIs.
 @param include_notes Indicate whether notes should be added after the parameter values.
 */
-public static List getIrescoChoices ( boolean include_notes )
-{	List v = new Vector(102);	// Allow for one blank in StateDMI
+public static List<String> getIrescoChoices ( boolean include_notes )
+{	List<String> v = new Vector<String>(102);	// Allow for one blank in StateDMI
 	for ( int i = 1; i <= 50; i++ ) {
 		v.add ( "" + i + " - Account served by right" );
 	}
@@ -350,7 +350,7 @@ public static List getIrescoChoices ( boolean include_notes )
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.set(i,StringUtil.getToken((String)v.get(i), " ", 0, 0));
+			v.set(i,StringUtil.getToken(v.get(i), " ", 0, 0));
 		}
 	}
 	return v;
@@ -377,7 +377,7 @@ The options are of the form "0" if include_notes is false and "0 - Off", if incl
 @return a list of on/off switch option strings, for use in GUIs.
 @param include_notes Indicate whether notes should be added after the parameter values.
 */
-public static List getIrsrswChoices ( boolean include_notes )
+public static List<String> getIrsrswChoices ( boolean include_notes )
 {	return StateMod_DiversionRight.getIdvrswChoices ( include_notes );
 }
 
@@ -404,15 +404,15 @@ The options are of the form "1" if include_notes is false and
 @return a list of fill switch option strings, for use in GUIs.
 @param include_notes Indicate whether notes should be added after the parameter values.
 */
-public static List getItyrsrChoices ( boolean include_notes )
-{	List v = new Vector(2);
+public static List<String> getItyrsrChoices ( boolean include_notes )
+{	List<String> v = new Vector<String>(2);
 	v.add ( "1 - Standard" ); // Possible options are listed here.
 	v.add ( "-1 - Out of priority water right" );
 	if ( !include_notes ) {
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.set(i,StringUtil.getToken( (String)v.get(i), " ", 0, 0) );
+			v.set(i,StringUtil.getToken(v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
@@ -455,15 +455,15 @@ The options are of the form "1" if include_notes is false and
 @return a list of fill switch option strings, for use in GUIs.
 @param include_notes Indicate whether notes should be added after the parameter values.
 */
-public static List getN2fillChoices ( boolean include_notes )
-{	List v = new Vector(2);
+public static List<String> getN2fillChoices ( boolean include_notes )
+{	List<String> v = new Vector<String>(2);
 	v.add ( "1 - First fill" ); // Possible options are listed here.
 	v.add ( "2 - Second fill" );
 	if ( !include_notes ) {
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.set(i,StringUtil.getToken((String)v.get(i), " ", 0, 0) );
+			v.set(i,StringUtil.getToken(v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
@@ -550,7 +550,7 @@ throws Exception {
 		8,
 		12 };
 	String iline = null;
-	List v = new Vector(10);
+	List<Object> v = new Vector<Object>(10);
 	BufferedReader in = null;
 	StateMod_ReservoirRight aRight = null;
 
@@ -863,7 +863,7 @@ is also maintained by calling this routine.
 @param newComments addition comments which should be included in history
 @exception Exception if an error occurs.
 */
-public static void writeStateModFile(String infile, String outfile, List theRights, List newComments)
+public static void writeStateModFile(String infile, String outfile, List<StateMod_ReservoirRight> theRights, List<String> newComments)
 throws Exception {
 	writeStateModFile(infile, outfile, theRights, newComments, false);
 }
@@ -879,12 +879,12 @@ is also maintained by calling this routine.
 @exception Exception if an error occurs.
 */
 public static void writeStateModFile(String infile, String outfile,
-		List theRights, List newComments, boolean oldAdminNumFormat)
+		List<StateMod_ReservoirRight> theRights, List<String> newComments, boolean oldAdminNumFormat)
 throws Exception
 {
-	List commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");	
 	String routine = "StateMod_ReservoirRight.writeStateModFile";
 	PrintWriter out = null;
@@ -901,7 +901,7 @@ throws Exception
 		String iline = null;
 		String cmnt = "#>";
 		StateMod_ReservoirRight right = null;
-		List v = new Vector(10);
+		List<Object> v = new Vector<Object>(10);
 		String format_0 = null;
 		String format_1 = null;
 		if (oldAdminNumFormat) {
@@ -1001,8 +1001,8 @@ header (true) or to create a new file with a new header.
 @param newComments comments to write to the top of the file.
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter, boolean update, List data,
-	List newComments ) 
+public static void writeListFile(String filename, String delimiter, boolean update,
+	List<StateMod_ReservoirRight> data, List<String> newComments ) 
 throws Exception
 {	String routine = "StateMod_ReservoirRight.writeListFile";
 	int size = 0;
@@ -1010,7 +1010,7 @@ throws Exception
 		size = data.size();
 	}
 	
-	List fields = new Vector();
+	List<String> fields = new Vector<String>();
 	fields.add("ID");
 	fields.add("Name");
 	fields.add("StructureID");
@@ -1028,7 +1028,7 @@ throws Exception
 	int comp = StateMod_DataSet.COMP_RESERVOIR_RIGHTS;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.get(i);
+		s = fields.get(i);
 		names[i] = StateMod_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateMod_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -1040,9 +1040,9 @@ throws Exception
 	
 	int j = 0;
 	StateMod_ReservoirRight right = null;
-	List commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	String[] line = new String[fieldCount];
 	StringBuffer buffer = new StringBuffer();
@@ -1051,12 +1051,12 @@ throws Exception
 	try {
 		// Add some basic comments at the top of the file.  Do this to a copy of the
 		// incoming comments so that they are not modified in the calling code.
-		List newComments2 = null;
+		List<String> newComments2 = null;
 		if ( newComments == null ) {
-			newComments2 = new Vector();
+			newComments2 = new Vector<String>();
 		}
 		else {
-			newComments2 = new Vector(newComments);
+			newComments2 = new Vector<String>(newComments);
 		}
 		newComments2.add(0,"");
 		newComments2.add(1,"StateMod reservoir rights as a delimited list file.");

@@ -16,6 +16,7 @@ import RTi.Util.GUI.JWorksheet_AbstractExcelCellRenderer;
 /**
 This class is used to render delay table assignment cells.
 */
+@SuppressWarnings("serial")
 public class StateMod_Well_DelayTableAssignment_Data_CellRenderer
 extends JWorksheet_AbstractExcelCellRenderer {
 

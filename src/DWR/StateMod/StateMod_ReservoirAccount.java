@@ -48,7 +48,7 @@ import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 
 public class StateMod_ReservoirAccount extends StateMod_Data 
-implements Cloneable, Comparable
+implements Cloneable, Comparable<StateMod_Data>
 {
 
 /**
@@ -94,17 +94,17 @@ public Object clone() {
 Compares this object to another StateMod_Data object based on the sorted
 order from the StateMod_Data variables, and then by _ownmax, _curown, 
 _pcteva, and _n2own, in that order.
-@param o the object to compare against.
+@param data the object to compare against.
 @return 0 if they are the same, 1 if this object is greater than the other
 object, or -1 if it is less.
 */
-public int compareTo(Object o) {
-	int res = super.compareTo(o);
+public int compareTo(StateMod_Data data) {
+	int res = super.compareTo(data);
 	if (res != 0) {
 		return res;
 	}
 
-	StateMod_ReservoirAccount acct = (StateMod_ReservoirAccount)o;
+	StateMod_ReservoirAccount acct = (StateMod_ReservoirAccount)data;
 	if (_ownmax < acct._ownmax) {
 		return -1;
 	}
@@ -141,7 +141,7 @@ Creates a backup of the current data object and stores it in _original,
 for use in determining if an object was changed inside of a GUI.
 */
 public void createBackup() {
-	_original = clone();
+	_original = (StateMod_ReservoirAccount)clone();
 	((StateMod_ReservoirAccount)_original)._isClone = false;
 	_isClone = true;
 }
@@ -152,22 +152,22 @@ Compare two rights Vectors and see if they are the same.
 @param v2 the second Vector of StateMod_ReservoirAccounts to check.  Cannot be null.
 @return true if they are the same, false if not.
 */
-public static boolean equals(List v1, List v2) {
-	String routine = "StateMod_ReservoirAccount.equals(Vector, Vector)";
+public static boolean equals(List<StateMod_ReservoirAccount> v1, List<StateMod_ReservoirAccount> v2) {
+	String routine = "StateMod_ReservoirAccount.equals(List,List)";
 	StateMod_ReservoirAccount r1;	
 	StateMod_ReservoirAccount r2;	
 	if (v1.size() != v2.size()) {
-		Message.printStatus(1, routine, "Vectors are different sizes");
+		Message.printStatus(1, routine, "Lists are different sizes");
 		return false;
 	}
 	else {
 		// sort the Vectors and compare item-by-item.  Any differences
 		// and data will need to be saved back into the dataset.
 		int size = v1.size();
-		Message.printStatus(1, routine, "Vectors are of size: " + size);
-		List v1Sort = StateMod_Util.sortStateMod_DataVector(v1);
-		List v2Sort = StateMod_Util.sortStateMod_DataVector(v2);
-		Message.printStatus(1, routine, "Vectors have been sorted");
+		Message.printStatus(1, routine, "Lists are of size: " + size);
+		List<StateMod_ReservoirAccount> v1Sort = StateMod_Util.sortStateMod_DataVector(v1);
+		List<StateMod_ReservoirAccount> v2Sort = StateMod_Util.sortStateMod_DataVector(v2);
+		Message.printStatus(1, routine, "Lists have been sorted");
 	
 		for (int i = 0; i < size; i++) {			
 			r1 = (StateMod_ReservoirAccount)v1Sort.get(i);	
@@ -237,7 +237,7 @@ The options are of the form "1" if include_notes is false and
 @param include_notes Indicate whether notes should be added after the parameter values.
 */
 public static List<String> getN2ownChoices ( boolean include_notes )
-{	List<String> v = new Vector(2);
+{	List<String> v = new Vector<String>(2);
 	v.add ( "1 - Ownership is tied to first fill right(s)" );
 	v.add ( "2 - Ownership is tied to second fill right(s)" );
 	if ( !include_notes ) {
@@ -279,7 +279,7 @@ The options are of the form "0" if include_notes is false and
 @param include_notes Indicate whether notes should be added after the parameter values.
 */
 public static List<String> getPctevaChoices ( boolean include_notes )
-{	List<String> v = new Vector(2);
+{	List<String> v = new Vector<String>(2);
 	v.add ( "0 - Prorate evaporation based on current storage" );
 	for ( int i = 100; i >= 1; i-- ) {
 		v.add ( "" + i + " - Apply " + i + " % of evaporation to account" );

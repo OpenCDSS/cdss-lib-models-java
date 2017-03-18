@@ -54,6 +54,7 @@ import DWR.StateMod.StateMod_DataSet_WindowManager;
 import DWR.StateMod.StateMod_DiversionRight;
 import DWR.StateMod.StateMod_GUIUtil;
 import RTi.GRTS.TSViewJFrame;
+import RTi.TS.TS;
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.JWorksheet;
 import RTi.Util.GUI.ResponseJDialog;
@@ -64,6 +65,7 @@ import RTi.Util.Message.Message;
 /**
 This class is a GUI for displaying location data.
 */
+@SuppressWarnings("serial")
 public class StateCU_Location_JFrame extends JFrame
 implements ActionListener, KeyListener, MouseListener, WindowListener {
 
@@ -183,12 +185,12 @@ private List<StateCU_Location> __locationsList;
 private JWorksheet __delayWorksheet;
 private StateCU_Location_TableModel __delayModel;
 private DataSetComponent __delaysComponent;
-private List __delaysVector;
+private List<StateCU_DelayTableAssignment> __delaysVector;
 
 private JWorksheet __stationWorksheet;
 private StateCU_Location_TableModel __stationModel;
 private DataSetComponent __stationsComponent;
-private List __stationsVector;
+private List<StateCU_ClimateStation> __stationsVector;
 
 private JWorksheet __rightsWorksheet;
 private StateCU_Location_TableModel __rightsModel;
@@ -223,14 +225,20 @@ public StateCU_Location_JFrame(boolean isStateCU, StateCU_DataSet dataset,
 	__dataset = dataset;
 	__dataset_wm = dataset_wm;
 	__locationComponent = __dataset.getComponentForComponentType( StateCU_DataSet.COMP_CU_LOCATIONS);
-	__locationsList = (List<StateCU_Location>)__locationComponent.getData();
+	@SuppressWarnings("unchecked")
+	List<StateCU_Location> locationsList0 = (List<StateCU_Location>)__locationComponent.getData();
+	__locationsList = locationsList0;
 	Message.printStatus(2, "", "Have " + __locationsList.size() + " locations");
 
 	__delaysComponent = __dataset.getComponentForComponentType( StateCU_DataSet.COMP_DELAY_TABLE_ASSIGNMENT_MONTHLY);
-	__delaysVector = (List)__delaysComponent.getData();
+	@SuppressWarnings("unchecked")
+	List <StateCU_DelayTableAssignment> delaysVector0 = (List <StateCU_DelayTableAssignment>)__delaysComponent.getData();
+	__delaysVector = delaysVector0;
 
 	__stationsComponent = __dataset.getComponentForComponentType( StateCU_DataSet.COMP_CLIMATE_STATIONS);
-	__stationsVector = (List)__stationsComponent.getData();
+	@SuppressWarnings("unchecked")
+	List<StateCU_ClimateStation> stationsVector0 = (List<StateCU_ClimateStation>)__stationsComponent.getData();
+	__stationsVector = stationsVector0;
 
 	__rightsComponent = __dataset.getComponentForComponentType( StateCU_DataSet.COMP_DIVERSION_RIGHTS);
 
@@ -254,21 +262,27 @@ public StateCU_Location_JFrame(boolean isStateCU, StateCU_DataSet dataset,
 	__dataset = dataset;
 	__dataset_wm = dataset_wm;
 	__currentLocationIndex = -1;	
-	__locationsList = new Vector();
+	__locationsList = new Vector<StateCU_Location>();
 
 	__locationComponent = __dataset.getComponentForComponentType(StateCU_DataSet.COMP_CU_LOCATIONS);
-	__locationsList = (List)__locationComponent.getData();	
+	@SuppressWarnings("unchecked")
+	List<StateCU_Location> locationsList0 = (List<StateCU_Location>)__locationComponent.getData();
+	__locationsList = locationsList0;
 
 	String id = location.getID();
 	int index = StateCU_Util.indexOf(__locationsList, id);
 
 	__delaysComponent = __dataset.getComponentForComponentType(
 		StateCU_DataSet.COMP_DELAY_TABLE_ASSIGNMENT_MONTHLY);
-	__delaysVector = (List)__delaysComponent.getData();
+	@SuppressWarnings("unchecked")
+	List<StateCU_DelayTableAssignment> delaysVector0 = (List<StateCU_DelayTableAssignment>)__delaysComponent.getData();
+	__delaysVector = delaysVector0;
 
 	__stationsComponent = __dataset.getComponentForComponentType(
 		StateCU_DataSet.COMP_CLIMATE_STATIONS);
-	__stationsVector = (List)__stationsComponent.getData();
+	@SuppressWarnings("unchecked")
+	List<StateCU_ClimateStation> stationsVector0 = (List<StateCU_ClimateStation>)__stationsComponent.getData();
+	__stationsVector = stationsVector0;
 
 	__rightsComponent = __dataset.getComponentForComponentType(
 		StateCU_DataSet.COMP_DIVERSION_RIGHTS);
@@ -342,7 +356,7 @@ Checks the text fields for validity before they are saved back into the data obj
 @return true if the text fields are okay, false if not.
 */
 private boolean checkInput() {
-	List errors = new Vector();
+	List<String> errors = new Vector<String>();
 	int errorCount = 0;
 
 	// for each field, check if it contains valid input.  If not,
@@ -372,7 +386,7 @@ private boolean checkInput() {
 private void displayTSViewJFrame(String action) {
 	String routine = "displayTSViewJFrame";
 
-	List tslist = new Vector();
+	List<TS> tslist = new Vector<TS>();
 
 	boolean graphAll = false;
 	if (action.equals(__BUTTON_GRAPH_ALL)) {
@@ -552,15 +566,17 @@ private void processTableSelection(int index) {
 
 	__stationModel.setStations(location, __stationsVector);
 
-	List<StateMod_DiversionRight> v = new Vector();
+	List<StateMod_DiversionRight> v = new Vector<StateMod_DiversionRight>();
 	if ( (__rightsComponent != null) && (__rightsComponent.getData() != null) ) {
-		v = (List)__rightsComponent.getData();
+		@SuppressWarnings("unchecked")
+		List<StateMod_DiversionRight> v0 = (List<StateMod_DiversionRight>)__rightsComponent.getData();
+		v = v0;
 	}
 	String did = null;
 	String sdid = null;
 	String id = location.getID();
 	int j = 0;
-	List<StateMod_DiversionRight> rights = new Vector();
+	List<StateMod_DiversionRight> rights = new Vector<StateMod_DiversionRight>();
 	StateMod_DiversionRight right = null;
 	for (int i = 0; i < v.size(); i++) {
 		right = v.get(i);
@@ -854,7 +870,7 @@ private void setupGUI(int index) {
 
 	int[] widths2 = null;
 	try {
-		__stationModel = new StateCU_Location_TableModel(new Vector());
+		__stationModel = new StateCU_Location_TableModel(new Vector<StateCU_Location>());
 		StateCU_Location_CellRenderer crw = new StateCU_Location_CellRenderer(__stationModel);
 	
 		__stationWorksheet = new JWorksheet(crw, __stationModel, p);
@@ -890,7 +906,7 @@ private void setupGUI(int index) {
 	int[] widths3 = null;
 	if (__dataset.getDataSetType() >= StateCU_DataSet.TYPE_WATER_SUPPLY_LIMITED_BY_WATER_RIGHTS) {
 		try {
-			__rightsModel = new StateCU_Location_TableModel(new Vector());
+			__rightsModel = new StateCU_Location_TableModel(new Vector<StateCU_Location>());
 			StateCU_Location_CellRenderer crw = new StateCU_Location_CellRenderer(__rightsModel);
 		
 			__rightsWorksheet = new JWorksheet(crw, __rightsModel, p);
@@ -995,7 +1011,7 @@ private void setupGUI(int index) {
 	int[] widths4 = null;
 	if (__dataset.getDataSetType() >= StateCU_DataSet.TYPE_RIVER_DEPLETION) {	
 		try {
-			__delayModel = new StateCU_Location_TableModel(new Vector());
+			__delayModel = new StateCU_Location_TableModel(new Vector<StateCU_Location>());
 			StateCU_Location_CellRenderer crw = new StateCU_Location_CellRenderer(__delayModel);
 		
 			__delayWorksheet = new JWorksheet(crw, __delayModel, p);

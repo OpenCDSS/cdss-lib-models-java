@@ -85,7 +85,7 @@ import RTi.Util.String.StringUtil;
 
 public class StateMod_StreamEstimate 
 extends StateMod_Data
-implements Cloneable, Comparable, HasGeoRecord, StateMod_ComponentValidator
+implements Cloneable, Comparable<StateMod_Data>, HasGeoRecord, StateMod_ComponentValidator
 {
 
 /**
@@ -176,16 +176,16 @@ public Object clone() {
 
 /**
 Compares this object to another StateMod_StreamEstimate object.
-@param o the object to compare against.
+@param data the object to compare against.
 @return 0 if they are the same, 1 if this object is greater than the other object, or -1 if it is less.
 */
-public int compareTo(Object o) {
-	int res = super.compareTo(o);
+public int compareTo(StateMod_Data data) {
+	int res = super.compareTo(data);
 	if (res != 0) {
 		return res;
 	}
 
-	StateMod_StreamEstimate s = (StateMod_StreamEstimate)o;
+	StateMod_StreamEstimate s = (StateMod_StreamEstimate)data;
 	res = _crunidy.compareTo(s._crunidy);
 	if (res != 0) {
 		return res;
@@ -217,14 +217,14 @@ for all the elements in the Vector of StateMod_StreamEstimate objects.
 @param baseflow_DayTS list of baseflow MonthTS (e.g., as read from StateMod
 .xbd? or .rid file).  Pass as null to not connect.
 */
-public static void connectAllTS ( List rivs, List baseflow_MonthTS, List baseflow_DayTS )
+public static void connectAllTS ( List<StateMod_StreamEstimate> rivs, List<MonthTS> baseflow_MonthTS, List<DayTS> baseflow_DayTS )
 {	if ( rivs == null ) {
 		return;
 	}
 	StateMod_StreamEstimate riv;
 	int size = rivs.size();
 	for ( int i=0; i < size; i++ ) {
-		riv = (StateMod_StreamEstimate)rivs.get(i);
+		riv = rivs.get(i);
 		if ( baseflow_MonthTS != null ) {
 			riv.connectBaseflowMonthTS ( baseflow_MonthTS );
 		}
@@ -239,7 +239,7 @@ Connect the daily base streamflow TS pointer to the appropriate TS in the list.
 A connection is made if the node identifier matches the time series location.
 @param tslist list of DayTS.
 */
-private void connectBaseflowDayTS ( List tslist )
+private void connectBaseflowDayTS ( List<DayTS> tslist )
 {	if ( tslist == null ) {
 		return;
 	}
@@ -247,7 +247,7 @@ private void connectBaseflowDayTS ( List tslist )
 	int size = tslist.size();
 	_baseflow_DayTS = null;
 	for ( int i=0; i < size; i++ ) {
-		ts = (DayTS)tslist.get(i);
+		ts = tslist.get(i);
 		if ( ts == null ) {
 			continue;
 		}
@@ -264,7 +264,7 @@ private void connectBaseflowDayTS ( List tslist )
 Connect monthly baseflow time series.  
 @param tslist monthly baseflow time series. 
 */
-public void connectBaseflowMonthTS ( List tslist )
+public void connectBaseflowMonthTS ( List<MonthTS> tslist )
 {	if ( tslist == null ) {
 		return;
 	}
@@ -273,7 +273,7 @@ public void connectBaseflowMonthTS ( List tslist )
 	MonthTS ts = null;
 	_baseflow_MonthTS = null;
 	for (int i=0; i<num_TS; i++) {
-		ts = (MonthTS)tslist.get(i);
+		ts = tslist.get(i);
 		if ( ts == null ) {
 			continue;
 		}
@@ -290,7 +290,7 @@ public void connectBaseflowMonthTS ( List tslist )
 Creates a copy of the object for later use in checking to see if it was changed in a GUI.
 */
 public void createBackup() {
-	_original = clone();
+	_original = (StateMod_StreamEstimate)clone();
 	((StateMod_StreamEstimate)_original)._isClone = false;
 	_isClone = true;
 }
@@ -409,7 +409,8 @@ gage station and stream estimate stations is read.  The following adjustments to
 @param rib_Vector list of StateMod_StreamEstimte_Coefficients, after initial
 read.
 */
-public static void processStreamData ( List ris_Vector, List rih_Vector, List rbs_Vector, List rib_Vector )
+public static void processStreamData ( List<StateMod_StreamGage> ris_Vector, List<TS> rih_Vector,
+	List<StateMod_StreamEstimate> rbs_Vector, List<StateMod_StreamEstimate_Coefficients> rib_Vector )
 {	int nris = 0;
 	if ( ris_Vector != null ) {
 		nris = ris_Vector.size();
@@ -433,11 +434,11 @@ public static void processStreamData ( List ris_Vector, List rih_Vector, List rb
 	String id;
 	boolean found = false;
 	for ( i=0; i < nris; i++) {
-		ris = (StateMod_StreamGage)ris_Vector.get(i);
+		ris = ris_Vector.get(i);
 		id = ris.getID();
 		found = false;
 		for ( j = 0; j < nrih; j++ ) {
-			ts = (TS)rih_Vector.get(j);
+			ts = rih_Vector.get(j);
 			if ( id.equalsIgnoreCase(ts.getLocation())) {
 				found = true;
 				break;
@@ -452,11 +453,11 @@ public static void processStreamData ( List ris_Vector, List rih_Vector, List rb
 	StateMod_StreamEstimate rbs;
 	StateMod_StreamEstimate_Coefficients rib;
 	for ( i=0; i < nrbs; i++) {
-		rbs = (StateMod_StreamEstimate)rbs_Vector.get(i);
+		rbs = rbs_Vector.get(i);
 		id = rbs.getID();
 		found = false;
 		for ( j = 0; j < nrib; j++ ) {
-			rib = (StateMod_StreamEstimate_Coefficients)rib_Vector.get(j);
+			rib = rib_Vector.get(j);
 			if ( id.equalsIgnoreCase(rib.getID())) {
 				found = true;
 				break;
@@ -478,12 +479,12 @@ remove instances that are not actually base flow nodes.
 @param filename Name of file to read.
 @exception Exception if there is an error reading the file.
 */
-public static List readStateModFile ( String filename )
+public static List<StateMod_StreamEstimate> readStateModFile ( String filename )
 throws Exception
 {	String rtn = "StateMod_StreamEstimate.readStateModFile";
-	List theRivs = new Vector();
+	List<StateMod_StreamEstimate> theRivs = new Vector<StateMod_StreamEstimate>();
 	String iline;
-	List v = new Vector ( 5 );
+	List<Object> v = new Vector<Object>( 5 );
 	int [] format_0;
 	int [] format_0w;
 	format_0 = new int[5];
@@ -643,7 +644,8 @@ public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset 
 		// Verify that the river node is in the data set, if the network is available
 		if ( dataset != null ) {
 			DataSetComponent comp = dataset.getComponentForComponentType(StateMod_DataSet.COMP_RIVER_NETWORK);
-			List rinList = (List)comp.getData();
+			@SuppressWarnings("unchecked")
+			List<StateMod_RiverNetworkNode> rinList = (List<StateMod_RiverNetworkNode>)comp.getData();
 			if ( (rinList != null) && (rinList.size() > 0) ) {
 				if ( StateMod_Util.indexOf(rinList, riverID) < 0 ) {
 					validation.add(new StateMod_ComponentValidationProblem(this,"Stream estimate \"" + id +
@@ -657,7 +659,8 @@ public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset 
 	if ( !StateMod_Util.isMissing(dailyID) ) {
 		if ( dataset != null ) {
 			DataSetComponent comp = dataset.getComponentForComponentType(StateMod_DataSet.COMP_STREAMGAGE_STATIONS);
-			List risList = (List)comp.getData();
+			@SuppressWarnings("unchecked")
+			List<StateMod_StreamGage> risList = (List<StateMod_StreamGage>)comp.getData();
 			if ( (risList != null) && (risList.size() > 0) ) {
 				if ( !dailyID.equals("0") && !dailyID.equals("3") && !dailyID.equals("4") &&
 					(StateMod_Util.indexOf(risList, dailyID) < 0) ) {
@@ -681,12 +684,12 @@ specified, then the original header is carried into the new file.
 @param do_daily Indicates whether daily modeling fields should be written.
 */
 public static void writeStateModFile( String infile, String outfile,
-		List theRivs, List newcomments, boolean do_daily )
+		List<StateMod_StreamEstimate> theRivs, List<String> newcomments, boolean do_daily )
 throws Exception
 {	PrintWriter	out = null;
-	List commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	String routine = "StateMod_StreamEstimate.writeStateModFile";
 
@@ -743,9 +746,9 @@ throws Exception
 		if ( theRivs != null ) {
 			num = theRivs.size();
 		}
-		List v = new Vector ( 5 );
+		List<Object> v = new Vector<Object> ( 5 );
 		for ( int i=0; i< num; i++ ) {
-			riv = (StateMod_StreamEstimate)theRivs.get(i);
+			riv = theRivs.get(i);
 			v.clear ();
 			v.add ( riv.getID() );
 			v.add ( riv.getName() );
@@ -756,13 +759,6 @@ throws Exception
 			iline = StringUtil.formatString ( v, format );
 			out.println ( iline );
 		}
-		riv = null;
-		routine = null;
-		cmnt = null;
-		iline = null;
-		format = null;
-
-
 	}
 	catch ( Exception e ) {
 		Message.printWarning ( 2, routine, e );
@@ -788,15 +784,15 @@ header (true) or to create a new file with a new header.
 @param newComments list of new comments to add in the file header.
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter, boolean update, List data,
-	List newComments ) 
+public static void writeListFile(String filename, String delimiter, boolean update, List<StateMod_StreamEstimate> data,
+	List<String> newComments ) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
 		size = data.size();
 	}
 	
-	List fields = new Vector();
+	List<String> fields = new Vector<String>();
 	fields.add("ID");
 	fields.add("Name");
 	fields.add("RiverNodeID");
@@ -809,7 +805,7 @@ throws Exception {
 	
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.get(i);
+		s = fields.get(i);
 		names[i] = StateMod_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateMod_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -822,9 +818,9 @@ throws Exception {
 	int j = 0;
 	PrintWriter out = null;
 	StateMod_StreamEstimate se = null;
-	List commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	String[] line = new String[fieldCount];
 	StringBuffer buffer = new StringBuffer();
@@ -832,12 +828,12 @@ throws Exception {
 	try {
 		// Add some basic comments at the top of the file.  Do this to a copy of the
 		// incoming comments so that they are not modified in the calling code.
-		List newComments2 = null;
+		List<String> newComments2 = null;
 		if ( newComments == null ) {
-			newComments2 = new Vector();
+			newComments2 = new Vector<String>();
 		}
 		else {
-			newComments2 = new Vector(newComments);
+			newComments2 = new Vector<String>(newComments);
 		}
 		newComments2.add(0,"");
 		newComments2.add(1,"StateMod stream estimate stations as a delimited list file.");

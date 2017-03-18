@@ -358,15 +358,15 @@ private static boolean isVersion_10( String filename ) throws IOException
 
 
 /**
-Read the StateCU CCH file and return as a Vector of StateCU_CropCharacteristics.
+Read the StateCU CCH file and return as a list of StateCU_CropCharacteristics.
 @param filename filename containing CCH records.
 */
-public static List readStateCUFile ( String filename )
+public static List<StateCU_CropCharacteristics> readStateCUFile ( String filename )
 throws IOException
 {	String rtn = "StateCU_CropCharacteristics.readStateCUFile";
 	String iline = null;
-	List v = new Vector ( 18 );
-	List cch_Vector = new Vector ( 100 );	// Data to return.
+	List<Object> v = new Vector<Object>( 18 );
+	List<StateCU_CropCharacteristics> cch_Vector = new Vector<StateCU_CropCharacteristics>( 100 );
 	// Don't read the crop number...
 	int v10_format_0[] = {
 				StringUtil.TYPE_STRING,		// cname
@@ -864,7 +864,7 @@ adjusted to the working directory if necessary using IOUtil.getPathUsingWorkingD
 @throws IOException
  */
 public static void writeStateCUFile ( String filename_prev, String filename,
-	List data_Vector, List new_comments )
+	List<StateCU_CropCharacteristics> data_Vector, List<String> new_comments )
 throws IOException
 {	writeStateCUFile ( filename_prev, filename, data_Vector, new_comments, null );
 }
@@ -900,11 +900,11 @@ b></td>
 @exception IOException if there is an error writing the file.
 */
 public static void writeStateCUFile ( String filename_prev, String filename,
-		List data_Vector, List new_comments, PropList props )
+		List<StateCU_CropCharacteristics> data_Vector, List<String> new_comments, PropList props )
 throws IOException
-{	List comment_str = new Vector(1);
+{	List<String> comment_str = new Vector<String>(1);
 	comment_str.add ( "#" );
-	List ignore_comment_str = new Vector(1);
+	List<String> ignore_comment_str = new Vector<String>(1);
 	ignore_comment_str.add ( "#>" );
 	PrintWriter out = null;
 	String full_filename_prev = IOUtil.getPathUsingWorkingDir (filename_prev );
@@ -927,7 +927,7 @@ Write a list of StateCU_CropCharacteristics to an opened file.
 @param props Properties to control output (see writeStateCUFile).
 @exception IOException if an error occurs.
 */
-private static void writeVector ( List data_Vector, PrintWriter out, PropList props )
+private static void writeVector ( List<StateCU_CropCharacteristics> data_Vector, PrintWriter out, PropList props )
 throws IOException
 {	int i;
 	String iline;
@@ -979,7 +979,7 @@ throws IOException
 		Message.printStatus(2, rtn, "Writing file in Version 10 format.");
 	}
 	
-	List v = new Vector(19);	// Reuse for all output lines.
+	List<Object> v = new Vector<Object>(19);	// Reuse for all output lines.
 	out.println ( cmnt );
 	out.println ( cmnt + "  StateCU Crop Characteristics (CCH) File" );
 	out.println ( cmnt );
@@ -1030,7 +1030,7 @@ throws IOException
 	StateCU_CropCharacteristics cch = null;
 	String name = null;	// Crop name
 	for ( i=0; i<num; i++ ) {
-		cch = (StateCU_CropCharacteristics)data_Vector.get(i);
+		cch = data_Vector.get(i);
 		if ( cch == null ) {
 			continue;
 		}
@@ -1177,8 +1177,9 @@ header (true) or to create a new file with a new header.
 @param data the list of objects to write.  
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter, boolean update, List data,
-	List outputComments ) 
+public static void writeListFile(String filename, String delimiter, boolean update,
+	List<StateCU_CropCharacteristics> data,
+	List<String> outputComments ) 
 throws Exception {
 	String routine = "StateCU_CropCharacteristics.writeListFile";
 	int size = 0;
@@ -1186,7 +1187,7 @@ throws Exception {
 		size = data.size();
 	}
 	
-	List fields = new Vector();
+	List<String> fields = new Vector<String>();
 	fields.add("Name");
 	fields.add("PlantingMonth");
 	fields.add("PlantingDay");
@@ -1212,7 +1213,7 @@ throws Exception {
 	int comp = StateCU_DataSet.COMP_CROP_CHARACTERISTICS;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.get(i);
+		s = fields.get(i);
 		names[i] = StateCU_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateCU_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -1225,9 +1226,9 @@ throws Exception {
 	int j = 0;
 	PrintWriter out = null;
 	StateCU_CropCharacteristics cc = null;
-	List commentString = new Vector(1);
+	List<String> commentString = new Vector<String>(1);
 	commentString.add ( "#" );
-	List ignoreCommentString = new Vector(1);
+	List<String> ignoreCommentString = new Vector<String>(1);
 	ignoreCommentString.add ( "#>" );
 	String[] line = new String[fieldCount];
 	StringBuffer buffer = new StringBuffer();
@@ -1235,12 +1236,12 @@ throws Exception {
 	try {
 		// Add some basic comments at the top of the file.  However, do this to a copy of the
 		// incoming comments so that they are not modified in the calling code.
-		List newComments2 = null;
+		List<String> newComments2 = null;
 		if ( outputComments == null ) {
-			newComments2 = new Vector();
+			newComments2 = new Vector<String>();
 		}
 		else {
-			newComments2 = new Vector(outputComments);
+			newComments2 = new Vector<String>(outputComments);
 		}
 		newComments2.add(0,"");
 		newComments2.add(1,"StateCU crop characteristics as a delimited list file.");
@@ -1258,7 +1259,7 @@ throws Exception {
 		out.println(buffer.toString());
 		
 		for (int i = 0; i < size; i++) {
-			cc = (StateCU_CropCharacteristics)data.get(i);
+			cc = data.get(i);
 			
 			line[0] = StringUtil.formatString(cc.getName(),formats[0]).trim();
 			line[1] = StringUtil.formatString(cc.getGdate1(),formats[1]).trim();
@@ -1292,9 +1293,6 @@ throws Exception {
 
 			out.println(buffer.toString());
 		}
-		out.flush();
-		out.close();
-		out = null;
 	}
 	catch (Exception e) {
 		Message.printWarning ( 3, routine, e );
@@ -1305,7 +1303,6 @@ throws Exception {
 			out.flush();
 			out.close();
 		}
-		out = null;
 	}
 }
 

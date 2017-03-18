@@ -68,6 +68,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -188,7 +189,7 @@ private String __filename = "";
 /**
 The list of StateCU_Parcel observations, as an archive of observations to use with data filling.
 */
-private List __parcel_Vector = new Vector();
+private List<StateCU_Parcel> __parcel_List = new Vector<StateCU_Parcel>();
 
 /**
 Construct a new StateCU_IrrigationPracticeTS object for the specified CU
@@ -541,7 +542,7 @@ Add a parcel containing observations.
 @param parcel StateCU_Parcel to add.
 */
 public void addParcel ( StateCU_Parcel parcel )
-{	__parcel_Vector.add ( parcel );
+{	__parcel_List.add ( parcel );
 }
 
 /**
@@ -1125,12 +1126,12 @@ Return the parcels for a requested year.  These values can be used in data filli
 @param year Parcel year of interest or <= number if all years should be returned.
 @return the list of StateCU_Parcel for a year
 */
-public List getParcelListForYear ( int year )
-{	List parcels = new Vector();
-	int size = __parcel_Vector.size();
+public List<StateCU_Parcel> getParcelListForYear ( int year )
+{	List<StateCU_Parcel> parcels = new Vector<StateCU_Parcel>();
+	int size = __parcel_List.size();
 	StateCU_Parcel parcel;
 	for ( int i = 0; i < size; i++ ) {
-		parcel = (StateCU_Parcel)__parcel_Vector.get(i);
+		parcel = __parcel_List.get(i);
 		if ( (year > 0) && (parcel.getYear() != year) ) {
 			// Requested year does not match.
 			continue;
@@ -1264,7 +1265,7 @@ file format.  Call the overloaded method to get types based on an older format.
 is a flag that is not suitable for numerical filling.
 @param include_notes If true, include " - Note" notes after the data type. This is currently disabled.
 */
-public static List getTimeSeriesDataTypes (	boolean include_gwmode, boolean include_notes )
+public static List<String> getTimeSeriesDataTypes (	boolean include_gwmode, boolean include_notes )
 {	return getTimeSeriesDataTypes ( include_gwmode, include_notes, null );
 }
 
@@ -1278,8 +1279,8 @@ is flag that is not suitable for numerical filling.
 @param version File version.  Use null or blank for the most recent version or
 use "10" for version 10 data types.
 */
-public static List getTimeSeriesDataTypes (	boolean include_gwmode, boolean include_notes, String version )
-{	List datatypes = new Vector (12);
+public static List<String> getTimeSeriesDataTypes (	boolean include_gwmode, boolean include_notes, String version )
+{	List<String> datatypes = new ArrayList<String> (12);
 	
 	datatypes.add ( TSTYPE_Eff_SurfaceMax );
 	datatypes.add ( TSTYPE_Eff_FloodMax );
@@ -1325,10 +1326,10 @@ any of the StateCU_Supply associated with the parcel return isGroundWater as
 true.
 */
 public boolean hasGroundWaterSupply ()
-{	int size = __parcel_Vector.size();
+{	int size = __parcel_List.size();
 	StateCU_Parcel parcel = null;
 	for ( int i = 0; i < size; i++ ) {
-		parcel = (StateCU_Parcel)__parcel_Vector.get(i);
+		parcel = (StateCU_Parcel)__parcel_List.get(i);
 		if ( parcel.hasGroundWaterSupply() ) {
 			return true;
 		}
@@ -1421,7 +1422,7 @@ private static boolean isVersion_10( String filename ) throws IOException
 	}
 	// Check the line of data...
 	// Old IPY format has only 10 elements on lines after the header
-	List tmp = StringUtil.breakStringList( line," ",StringUtil.DELIM_SKIP_BLANKS);
+	List<String> tmp = StringUtil.breakStringList( line," ",StringUtil.DELIM_SKIP_BLANKS);
 	if(tmp.size() < 12 ) {
 		Message.printStatus(2, routine, 
 			"IPY file found to be in version 10 format: " + tmp.size() +
@@ -1436,12 +1437,12 @@ private static boolean isVersion_10( String filename ) throws IOException
 }
 
 /**
-Read the StateCU TSP file and return as a Vector of StateCU_IrrigationPracticeTS.
+Read the StateCU TSP file and return as a list of StateCU_IrrigationPracticeTS.
 @param filename filename containing irrigation practice time series records.
 @param date1_req Requested start of period.
 @param date2_req Requested end of period.
 */
-public static List readStateCUFile ( String filename, DateTime date1_req, DateTime date2_req )
+public static List<StateCU_IrrigationPracticeTS> readStateCUFile ( String filename, DateTime date1_req, DateTime date2_req )
 throws Exception
 {	return readStateCUFile ( filename, date1_req, date2_req, null );
 }
@@ -1466,12 +1467,12 @@ most current format will be read.</td>
 
 </table>
 */
-public static List readStateCUFile ( String filename, DateTime date1_req, DateTime date2_req, PropList props )
+public static List<StateCU_IrrigationPracticeTS> readStateCUFile ( String filename, DateTime date1_req, DateTime date2_req, PropList props )
 throws Exception
 {	String routine = "StateCU_IrrigationPracticeTS.readStateCUFile";
 	String iline = null;
-	List v = new Vector ( 5 );
-	List ipyts_Vector = new Vector ( 100 );	// Data to return.
+	List<Object> v = new ArrayList<Object>();
+	List<StateCU_IrrigationPracticeTS> ipyts_Vector = new ArrayList<StateCU_IrrigationPracticeTS>();
 	if ( props == null ) {
 		props = new PropList ( "IPY" );
 	}
@@ -1600,18 +1601,18 @@ throws Exception
 		ra.read ( b );
 		String string = null;
 		String bs = new String ( b );
-		List v2 = StringUtil.breakStringList ( bs, "\n\r", StringUtil.DELIM_SKIP_BLANKS );
+		List<String> v2 = StringUtil.breakStringList ( bs, "\n\r", StringUtil.DELIM_SKIP_BLANKS );
 		// Loop through and figure out the first date.
 		int size = v2.size();
 		String date1_string = null;
-		List tokens = null;
+		List<String> tokens = null;
 		for ( int i = 0; i < size; i++ ) {
-			string = ((String)v2.get(i)).trim();
+			string = v2.get(i).trim();
 			if ( (string.length() == 0) || (string.charAt(0) == '#') || (string.charAt(0) == ' ') ) {
 				continue;
 			}
 			tokens = StringUtil.breakStringList( string, " \t", StringUtil.DELIM_SKIP_BLANKS );
-			date1_string = (String)tokens.get(0);
+			date1_string = tokens.get(0);
 			// Check for reasonable dates...
 			if ( StringUtil.isInteger(date1_string) && (StringUtil.atoi(date1_string) < 2050) ) {
 				break;
@@ -1637,12 +1638,12 @@ throws Exception
 		size = v2.size();
 		String date2_string = null;
 		for ( int i = 1; i < size; i++ ) {
-			string = ((String)v2.get(i)).trim();
+			string = v2.get(i).trim();
 			if ( (string.length() == 0) || (string.charAt(0) == '#') || (string.charAt(0) == ' ') ) {
 				continue;
 			}
 			tokens = StringUtil.breakStringList( string, " \t", StringUtil.DELIM_SKIP_BLANKS );
-			string = (String)tokens.get(0);
+			string = tokens.get(0);
 			// Check for reasonable dates...
 			if ( StringUtil.isInteger(string) && (StringUtil.atoi(string) < 2050) ) {
 				date2_string = string;
@@ -1677,12 +1678,11 @@ throws Exception
 	String culoc = "";
 	int pos = 0;
 	int linecount = 0;
-	int count = 0;	// counts the lines that are not comments
-	List tokens = null;
+	List<Object> tokens = null;
 	String year_type = "CYR";
 	int pos_error_count = 0;	// Counter for error when the first year
 					// of data does not contain the IDs.
-					// Often this is beause the year type
+					// Often this is because the year type
 					// has not been considered when
 					// formatting the data file.
 	double acswfl = 0.0;	// Acres for various time series.
@@ -1699,7 +1699,6 @@ throws Exception
 				continue;
 			}
 	
-			count++;
 			// If the dates have not been determined, do so (assume that
 			// the first line is header with the period, etc.).  Only read the years.
 			if ( date1_file == null ) {
@@ -1776,7 +1775,7 @@ throws Exception
 					ipyts_Vector.add ( ipyts );
 				}
 				else {
-					ipyts = (StateCU_IrrigationPracticeTS)ipyts_Vector.get(pos);
+					ipyts = ipyts_Vector.get(pos);
 				}
 			}
 			// Now set the values...
@@ -1898,9 +1897,9 @@ public static TS readTimeSeries ( String tsident_string, String filename,
 	DateTime date1, DateTime date2, String units, boolean read_data )
 throws Exception
 {	TS ts = null;
-	List v = readTimeSeriesList ( tsident_string, filename, date1, date2, units, read_data );
+	List<TS> v = readTimeSeriesList ( tsident_string, filename, date1, date2, units, read_data );
 	if ( (v != null) && (v.size() > 0) ) {
-		ts = (TS)v.get(0);
+		ts = v.get(0);
 	}
 	return ts;
 }
@@ -1915,10 +1914,10 @@ The IOUtil.getPathUsingWorkingDir() method is applied to the filename.
 @param units Units to convert to.
 @param read_data Indicates whether data should be read.
 */
-public static List readTimeSeriesList (	String fname, DateTime date1, DateTime date2,
+public static List<TS> readTimeSeriesList (	String fname, DateTime date1, DateTime date2,
 	String units, boolean read_data)
 throws Exception
-{	List tslist = null;
+{	List<TS> tslist = null;
 
 	String full_fname = IOUtil.getPathUsingWorkingDir(fname);
 	tslist = readTimeSeriesList ( null, full_fname, date1, date2, units, read_data );
@@ -1928,7 +1927,7 @@ throws Exception
 
 /**
 Read one or more time series from a StateCU crop pattern time series format file.
-@return a Vector of time series if successful, null if not.  The calling code
+@return a list of time series if successful, null if not.  The calling code
 is responsible for freeing the memory for the time series.
 @param req_tsident Identifier for requested item series.  If null,
 return all new time series in the vector.  If not null, return the matching time series.
@@ -1939,19 +1938,19 @@ return all new time series in the vector.  If not null, return the matching time
 @param read_data Indicates whether data should be read.
 @exception Exception if there is an error reading the time series.
 */
-private static List readTimeSeriesList ( String req_tsident, String full_filename, DateTime req_date1,
+private static List<TS> readTimeSeriesList ( String req_tsident, String full_filename, DateTime req_date1,
 	DateTime req_date2, String req_units, boolean read_data )
 throws Exception
 {	// TODO - can optimize this later to only read one time series...
 	// First read the whole file...
 
-	List data_Vector = readStateCUFile ( full_filename, req_date1, req_date2 );
+	List<StateCU_IrrigationPracticeTS> data_Vector = readStateCUFile ( full_filename, req_date1, req_date2 );
 	// If all the time series are required, return all...
 	int size = 0;
 	if ( data_Vector != null ) {
 		size = data_Vector.size();
 	}
-	List tslist = new Vector(size*8);
+	List<TS> tslist = new Vector<TS>(size*8);
 	StateCU_IrrigationPracticeTS ipy;
 	TSIdent tsident = null;
 	String req_data_type = null;
@@ -1962,7 +1961,7 @@ throws Exception
 	boolean include_ts = true;
 	for ( int i = 0; i < size; i++ ) {
 		include_ts = true;
-		ipy = (StateCU_IrrigationPracticeTS)data_Vector.get(i);
+		ipy = data_Vector.get(i);
 		if ( req_tsident != null ) {
 			// Check to see if the location match...
 			if ( !ipy.getID().equalsIgnoreCase(tsident.getLocation() ) ) {
@@ -2368,10 +2367,10 @@ public String toString()
 /**
 Return a List containing all the time series in the data list.  Only the raw
 time series are returned.  Use the overloaded version to also return total time series.
-@return a Vector containing all the time series in the data list.
+@return a list containing all the time series in the data list.
 @param dataList A list of StateCU_IrrigationPracticeTS.
 */
-public static List toTSList ( List dataList )
+public static List<TS> toTSList ( List<StateCU_IrrigationPracticeTS> dataList )
 {	return toTSList ( dataList, false, null, null );
 }
 
@@ -2381,22 +2380,22 @@ Optionally, process the time series in the instance and add total time series fo
 This is a performance hit but is useful for summarizing the data.  Any non-zero
 value in the individual time series will result in a value in the total.
 Missing for all time series will result in missing in the total.  The period for
-the totals is the overal period from all StateCU_IrrigationPracticeTS being processed.
-@return a Vector containing all the time series in the data list.
-@param data_Vector A list of StateCU_IrrigationPracticeTS.
+the totals is the overall period from all StateCU_IrrigationPracticeTS being processed.
+@return a list containing all the time series in the data list.
+@param dataList A list of StateCU_IrrigationPracticeTS.
 @param include_dataset_totals If true, include totals for the entire data set,
 including the groundwater, sprinkler, and total acreage, and the total of maximum monthly pumping.
 @param dataset_location A string used as the location for the data set totals.
 If not specified, "DataSet" will be used.  A non-null value should be supplied,
 in particular, if the totals for different data sets will be graphed or manipulated.
 */
-public static List toTSList ( List data_Vector, boolean include_dataset_totals,
+public static List<TS> toTSList ( List<StateCU_IrrigationPracticeTS> dataList, boolean include_dataset_totals,
 	String dataset_location, String dataset_datasource )
 {	String routine = "StateCU_IrrigationPracticeTS.toTSVector";
-	List tslist = new Vector();
+	List<TS> tslist = new Vector<TS>();
 	int size = 0;
-	if ( data_Vector != null ) {
-		size = data_Vector.size();
+	if ( dataList != null ) {
+		size = dataList.size();
 	}
 	StateCU_IrrigationPracticeTS ipy = null;
 	DateTime start_DateTime = null,
@@ -2419,7 +2418,7 @@ public static List toTSList ( List data_Vector, boolean include_dataset_totals,
 		}
 		// Determine the period to use for new time series...
 		for ( int i = 0; i < size; i++ ) {
-			ipy = (StateCU_IrrigationPracticeTS)data_Vector.get(i);
+			ipy = (StateCU_IrrigationPracticeTS)dataList.get(i);
 			date = ipy.getDate1();
 			if ( (start_DateTime == null) || date.lessThan(start_DateTime) ) {
 				start_DateTime = new DateTime ( date );
@@ -2637,7 +2636,7 @@ public static List toTSList ( List data_Vector, boolean include_dataset_totals,
 		yts_pump.allocateDataSpace();
 	}
 	for ( int i = 0; i < size; i++ ) {
-		ipy = (StateCU_IrrigationPracticeTS)data_Vector.get(i);
+		ipy = (StateCU_IrrigationPracticeTS)dataList.get(i);
 		tslist.add ( ipy.__ceff_ts );
 		tslist.add ( ipy.__feff_ts );
 		tslist.add ( ipy.__seff_ts );
@@ -2770,17 +2769,22 @@ Performs specific data checks and returns a list of data that failed the data ch
 */
 public StateCU_ComponentValidation validateComponent ( StateCU_DataSet dataset ) {
 	StateCU_ComponentValidation validation = new StateCU_ComponentValidation();
-	// Get the CDS component if available.
-	List cdsList = null;
-	YearTS cds_yts = null;
+	// Get the CDS component if available that matches this IPY.
+	// TODO SAM 2017-03-14 the following to get YearTS did not seem correct
+	//YearTS cds_yts = null;
+	StateCU_CropPatternTS cdsForId = null;
 	if ( dataset != null ) {
 		DataSetComponent comp = dataset.getComponentForComponentType(StateCU_DataSet.COMP_CROP_PATTERN_TS_YEARLY);
 		if ( comp != null ) {
-			cdsList = (List)comp.getData();
+			@SuppressWarnings("unchecked")
+			List<StateCU_CropPatternTS> cdsList = (List<StateCU_CropPatternTS>)comp.getData();
 			if ( cdsList != null ) {
 				int pos = StateCU_Util.indexOf ( cdsList, getID() );
 				if ( pos >= 0 ) {
-					cds_yts = (YearTS)cdsList.get(pos);
+					// Get the CDS total acreage time series
+					// TODO SAM 2017-03-14 the following to get YearTS did not seem correct
+					//cds_yts = cdsList.get(pos).getTotal()???;
+					cdsForId = cdsList.get(pos);
 				}
 			}
 		}
@@ -2882,7 +2886,8 @@ public StateCU_ComponentValidation validateComponent ( StateCU_DataSet dataset )
 					StringUtil.formatString(tacre,"%.1f") + ") is invalid.",
 					"Verify that the total acres value is >= 0.") );
 			}
-			if ( !problemFound || (cds_yts != null) ) {
+			//if ( !problemFound || (cds_yts != null) ) {
+			if ( !problemFound || (cdsForId != null) ) {
 				// Need the following...
 				tacreFormatted = StringUtil.formatString(tacre,"%.1f");
 			}
@@ -2899,8 +2904,10 @@ public StateCU_ComponentValidation validateComponent ( StateCU_DataSet dataset )
 			}
 			// Verify that the totals agree to .1 with the CDS total since .1 precision is what the
 			// IPY file acreage is written to
-			if ( cds_yts != null ) {
-				cds = cds_yts.getDataValue(temp_DateTime);
+			if ( cdsForId != null ) {
+				// TODO SAM 2017-03-14 the following does not seem correct
+				//cds = cds_yts.getDataValue(temp_DateTime);
+				cds = cdsForId.getTotalArea(year);
 				cdsFormatted = StringUtil.formatString(cds,"%.1f");
 				if ( !cdsFormatted.equals(tacreFormatted) ) {
 					validation.add(new StateCU_ComponentValidationProblem(this,
@@ -2923,23 +2930,23 @@ is adjusted to the working directory if necessary using IOUtil.getPathUsingWorki
 @param filename_prev The name of the previous version of the file (for
 processing headers).  Specify as null if no previous file is available.
 @param filename The name of the file to write.
-@param data_Vector A list of StateCU_IrrigationPracticeTS to write.
+@param data_List A list of StateCU_IrrigationPracticeTS to write.
 @param new_comments Comments to add to the top of the file.  Specify as null if no comments are available.
 @exception IOException if there is an error writing the file.
 */
 public static void writeStateCUFile ( String filename_prev, String filename,
-		List data_Vector, List new_comments )
+		List<StateCU_IrrigationPracticeTS> data_List, List<String> new_comments )
 throws IOException
-{	writeStateCUFile ( filename_prev, filename, data_Vector, new_comments, null );
+{	writeStateCUFile ( filename_prev, filename, data_List, new_comments, null );
 }
 
 /**
-Write a Vector of StateCU_IrrigationPracticeTS to a StateCU file.  The filename
+Write a list of StateCU_IrrigationPracticeTS to a StateCU file.  The filename
 is adjusted to the working directory if necessary using IOUtil.getPathUsingWorkingDir().
 @param filename_prev The name of the previous version of the file (for
 processing headers).  Specify as null if no previous file is available.
 @param filename The name of the file to write.
-@param data_Vector A Vector of StateCU_IrrigationPracticeTS to write.
+@param data_List A list of StateCU_IrrigationPracticeTS to write.
 @param new_comments Comments to add to the top of the file.  Specify as null 
 if no comments are available.
 @param start DateTime to start output.
@@ -2947,11 +2954,11 @@ if no comments are available.
 @exception IOException if there is an error writing the file.
 */
 public static void writeStateCUFile ( String filename_prev, String filename,
-	List data_Vector, List new_comments, DateTime start, DateTime end, PropList props )
+	List<StateCU_IrrigationPracticeTS> data_List, List<String> new_comments, DateTime start, DateTime end, PropList props )
 throws IOException
-{	List commentStr = new Vector(1);
+{	List<String> commentStr = new Vector<String>(1);
 	commentStr.add ( "#" );
-	List ignoreCommentStr = new Vector(1);
+	List<String> ignoreCommentStr = new Vector<String>(1);
 	ignoreCommentStr.add ( "#>" );
 	PrintWriter out = null;
 	String full_filename_prev = IOUtil.getPathUsingWorkingDir ( filename_prev );
@@ -2962,10 +2969,9 @@ throws IOException
 		throw new IOException ( "Error writing to \"" +
 		full_filename + "\"" );
 	}
-	writeVector ( data_Vector, out, start, end, props );
+	writeList ( data_List, out, start, end, props );
 	out.flush();
 	out.close();
-	out = null;
 }
 
 /**
@@ -2974,14 +2980,14 @@ is adjusted to the working directory if necessary using IOUtil.getPathUsingWorki
 @param filename_prev The name of the previous version of the file (for
 processing headers).  Specify as null if no previous file is available.
 @param filename The name of the file to write.
-@param data_Vector A list of StateCU_IrrigationPracticeTS to write.
+@param data_List A list of StateCU_IrrigationPracticeTS to write.
 @param new_comments Comments to add to the top of the file.  Specify as null if no comments are available.
 @exception IOException if there is an error writing the file.
 */
 public static void writeStateCUFile ( String filename_prev, String filename,
-	List data_Vector, List new_comments, PropList props )
+	List<StateCU_IrrigationPracticeTS> data_List, List<String> new_comments, PropList props )
 throws IOException
-{	writeStateCUFile ( filename_prev, filename, data_Vector, new_comments, null, null, props );
+{	writeStateCUFile ( filename_prev, filename, data_List, new_comments, null, null, props );
 }
 
 /**
@@ -2995,11 +3001,11 @@ processing headers).  Specify as null if no previous file is available.
 @exception IOException if there is an error writing the file.
 */
 public static void writeDateValueFile (	String filename_prev, String filename,
-					List dataList, List new_comments )
+					List<StateCU_IrrigationPracticeTS> dataList, List<String> new_comments )
 throws Exception
 {	// For now ignore the previous file and new comments.
 	// Create a new Vector with the time series data...
-	List tslist = toTSList ( dataList );
+	List<TS> tslist = toTSList ( dataList );
 	// Now write using a standard DateValueTS call...
 	String full_filename = IOUtil.getPathUsingWorkingDir ( filename );
 	DateValueTS.writeTimeSeriesList ( tslist, full_filename );	
@@ -3007,7 +3013,7 @@ throws Exception
 
 /**
 Write a list of StateCU_IrrigationPracticeTS to an opened file.
-@param data_Vector A list of StateCU_IrrigationPracticeTS to write.
+@param data_List A list of StateCU_IrrigationPracticeTS to write.
 @param out output PrintWriter.
 @param start the DateTime for the start of output.
 @param end the DateTime for the end of output.
@@ -3017,7 +3023,7 @@ should be recomputed from the parts (default=true).  PrecisionArea indicates the
 precision for area formatting.
 @exception IOException if an error occurs.
 */
-private static void writeVector ( List data_Vector, PrintWriter out, 
+private static void writeList ( List<StateCU_IrrigationPracticeTS> data_List, PrintWriter out, 
 DateTime start, DateTime end, PropList props ) throws IOException 
 {
 	int i;
@@ -3073,7 +3079,7 @@ DateTime start, DateTime end, PropList props ) throws IOException
 		header1 = "Yr  CULocation   Surf  Flood Spr  AcGW   AcSprnk PumpingMax GMode  AcTot";
 	}
 	
-	List v = new Vector(11);	// Reuse for all output lines.
+	List<Object> v = new Vector<Object>(11);	// Reuse for all output lines.
 
 	out.println ( cmnt );
 	out.println ( cmnt + "  StateCU Irrigation Practice Time Series (IPY) File" );
@@ -3145,7 +3151,7 @@ DateTime start, DateTime end, PropList props ) throws IOException
 	// Write the header...
 	// The dates by default are taken from the first object and are assumed to be
 	// consistent between objects...
-	StateCU_IrrigationPracticeTS tsp = (StateCU_IrrigationPracticeTS)data_Vector.get(0);
+	StateCU_IrrigationPracticeTS tsp = (StateCU_IrrigationPracticeTS)data_List.get(0);
 	DateTime date1 = tsp.getDate1();
 	DateTime date2 = tsp.getDate2();
 	if ( start != null ) {
@@ -3169,8 +3175,8 @@ DateTime start, DateTime end, PropList props ) throws IOException
 	// Write the data...
 
 	int num = 0;
-	if ( data_Vector != null ) {
-		num = data_Vector.size();
+	if ( data_List != null ) {
+		num = data_List.size();
 	}
 	if ( num == 0 ) {
 		return;
@@ -3190,7 +3196,7 @@ DateTime start, DateTime end, PropList props ) throws IOException
 		temp_DateTime.setYear ( year );
 		// Inner loop is for each CULocation
 		for ( i=0; i<num; i++ ) {
-			tsp = (StateCU_IrrigationPracticeTS)data_Vector.get(i);
+			tsp = data_List.get(i);
 			if ( tsp == null ) {
 				continue;
 			}

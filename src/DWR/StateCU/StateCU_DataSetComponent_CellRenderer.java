@@ -17,6 +17,7 @@ import RTi.Util.GUI.JWorksheet_DefaultTableCellRenderer;
 /**
 This class is used to render cells for StateCU_DataSetComponent_TableModel data.
 */
+@SuppressWarnings("serial")
 public class StateCU_DataSetComponent_CellRenderer extends
 JWorksheet_DefaultTableCellRenderer{
 

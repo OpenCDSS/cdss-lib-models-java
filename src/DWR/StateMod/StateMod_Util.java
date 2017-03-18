@@ -590,10 +590,10 @@ See the system/StateModGUI.cfg file for configuration properties.
 private static String __smdeltaExecutable = "SmDelta";
 
 /**
-Turns an array of Strings into a Vector of Strings.
+Turns an array of Strings into a list of Strings.
 */
-public static List arrayToList(String[] array) {
-	List v = new Vector();
+public static List<String> arrayToList(String[] array) {
+	List<String> v = new Vector<String>();
 	
 	if (array == null) {
 		return v;
@@ -742,10 +742,9 @@ Compare similar StateMod files and generate a summary of the files, with differe
 @param comp_type Component type.
 @exception Exception if an error is generated.
 */
-public static List compareFiles ( String path1, String path2, int comp_type )
+public static List<String> compareFiles ( String path1, String path2, int comp_type )
 throws Exception
-{	List v = new Vector(50);
-	List data1_Vector, data2_Vector;	// Data to compare
+{	List<String> v = new Vector<String>(50);
 	String full_path1 = IOUtil.getPathUsingWorkingDir ( path1 );
 	String full_path2 = IOUtil.getPathUsingWorkingDir ( path2 );
 	int n1, n2;				// Size of data vectors
@@ -753,27 +752,27 @@ throws Exception
 	StringBuffer b = new StringBuffer();
 	if ( comp_type == StateMod_DataSet.COMP_WELL_RIGHTS ) {
 		StateMod_WellRight wer1, wer2;
-		data1_Vector = StateMod_WellRight.readStateModFile(full_path1 );
+		List<StateMod_WellRight> data1_Vector = StateMod_WellRight.readStateModFile(full_path1 );
 		n1 = data1_Vector.size();
-		data2_Vector = StateMod_WellRight.readStateModFile(full_path2 );
+		List<StateMod_WellRight> data2_Vector = StateMod_WellRight.readStateModFile(full_path2 );
 		n2 = data2_Vector.size();
-		List allids_Vector = new Vector(n1*3/2); // guess at size
+		List<String> allids_Vector = new Vector<String>(n1*3/2); // guess at size
 		double decree;
 		double decree1_alltotal = 0.0; // All decrees in file
 		double decree2_alltotal = 0.0;
 		int missing_n1 = 0;
 		int missing_n2 = 0;
-		List onlyin1_Vector = new Vector();
-		List onlyin2_Vector = new Vector();
+		List<StateMod_WellRight> onlyin1_Vector = new Vector<StateMod_WellRight>();
+		List<StateMod_WellRight> onlyin2_Vector = new Vector<StateMod_WellRight>();
 		// Get a list of all identifiers.  This is used to summarize results by location...
 		for ( i = 0; i < n1; i++ ) {
 			// Add to list of all identifiers...
-			wer1 = (StateMod_WellRight)data1_Vector.get(i);
+			wer1 = data1_Vector.get(i);
 			allids_Vector.add ( wer1.getCgoto() );
 		}
 		for ( i = 0; i < n2; i++ ) {
 			// Add to list of all identifiers...
-			wer2 = (StateMod_WellRight)data2_Vector.get(i);
+			wer2 = data2_Vector.get(i);
 			allids_Vector.add ( wer2.getCgoto() );
 		}
 		// Sort all the identifiers...
@@ -794,7 +793,7 @@ throws Exception
 		// Now process each list...
 
 		for ( i = 0; i < n1; i++ ) {
-			wer1 = (StateMod_WellRight)data1_Vector.get(i);
+			wer1 = data1_Vector.get(i);
 			decree = wer1.getDcrdivw();
 			if ( StateMod_Util.isMissing( decree ) ) {
 				++missing_n1;
@@ -820,7 +819,7 @@ throws Exception
 			}
 		}
 		for ( i = 0; i < n2; i++ ) {
-			wer2 = (StateMod_WellRight)data2_Vector.get(i);
+			wer2 = data2_Vector.get(i);
 			decree = wer2.getDcrdivw();
 			if ( StateMod_Util.isMissing( decree ) ) {
 				++missing_n2;
@@ -954,21 +953,21 @@ public static String createDataLabel ( StateMod_Data smdata, boolean include_nam
 /**
 Create a list of data objects, for use in choices, etc -- this method differs
 from createDataList in that it contains the Cgoto instead of the ID.
-@return a Vector of String containing formatted identifiers and names.  A
+@return a list of String containing formatted identifiers and names.  A
 non-null list is guaranteed; however, the list may have zero items.
 @param include_name If false, each string will consist of only the value
 returned from StateMod_Data.getID().  If true the string will contain the ID,
 followed by " - xxxx", where xxxx is the value returned from StateMod_Data.getName().
 */
-public static List<String> createCgotoDataList ( List smdata_Vector, boolean include_name )
+public static List<String> createCgotoDataList ( List<StateMod_Data> smdata_Vector, boolean include_name )
 {	List<String> v = null;
 	if ( smdata_Vector == null ) {
-		v = new Vector();
+		v = new Vector<String>();
 		return v;
 	}
 	else {
 	    // This optimizes memory management...
-		v = new Vector ( smdata_Vector.size() );
+		v = new Vector<String> ( smdata_Vector.size() );
 	}
 	int size = smdata_Vector.size();
 	StateMod_Data smdata;
@@ -1164,7 +1163,7 @@ for example "ID - (T&C Plan) Name".
 public static List<String> createIdentifierList ( StateMod_DataSet dataset,
 	StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType [] associatedPlanAllowedTypes,
 	boolean includeName )
-{	List<String> idList = new Vector();
+{	List<String> idList = new Vector<String>();
 	// Return a list of plans identifiers that match the requested types
 	// Loop through the source/destination types...
 	StateMod_OperationalRight_Metadata_SourceOrDestinationType sourceOrDestType;
@@ -1174,9 +1173,13 @@ public static List<String> createIdentifierList ( StateMod_DataSet dataset,
 		List dataList = getDataList(sourceOrDestType, dataset, null, false);
 		// Format the identifiers...
 		String type = "" + associatedPlanAllowedTypes[i];
-		List<String> idList2 = createIdentifierList(dataList, includeName, type);
-		// Add to the list (probably no need to sort, especially since type is included
-		idList.addAll(idList2);
+		if ( (dataList != null) && (dataList.size() > 0) ) {
+			// Format the identifiers...
+			@SuppressWarnings("unchecked")
+			List<String> idList2 = createIdentifierListFromStateModData((List<StateMod_Data>)dataList, includeName, type);
+			// Add to the list (probably no need to sort, especially since type is included
+			idList.addAll(idList2);
+		}
 	}
 	return idList;
 }
@@ -1195,18 +1198,30 @@ for example "ID - (Reservoir) Name".
 public static List<String> createIdentifierList ( StateMod_DataSet dataset,
 	StateMod_OperationalRight_Metadata_SourceOrDestinationType [] sourceOrDestTypes,
 	boolean includeName )
-{	List<String> idList = new Vector();
+{	List<String> idList = new Vector<String>();
 	// Loop through the source/destination types...
 	for ( int i = 0; i < sourceOrDestTypes.length; i++ ) {
 		// Get the data objects
 		// TODO SAM 2011-02-02 Why was true added below?
 		//List dataList = getDataList(sourceOrDestTypes[i], dataset, null, true);
 		List dataList = getDataList(sourceOrDestTypes[i], dataset, null, false);
-		// Format the identifiers...
-		String type = "" + sourceOrDestTypes[i];
-		List<String> idList2 = createIdentifierList(dataList, includeName, type);
-		// Add to the list (probably no need to sort, especially since type is included
-		idList.addAll(idList2);
+		if ( (dataList != null) && (dataList.size() > 0) ) {
+			// Format the identifiers...
+			String type = "" + sourceOrDestTypes[i];
+			Object object0 = dataList.get(0);
+			if ( object0 instanceof StateMod_Data ) {
+				@SuppressWarnings("unchecked")
+				List<String> idList2 = createIdentifierListFromStateModData((List<StateMod_Data>)dataList, includeName, type);
+				// Add to the list (probably no need to sort, especially since type is included
+				idList.addAll(idList2);
+			}
+			else if ( object0 instanceof TS ) {
+				@SuppressWarnings("unchecked")
+				List<String> idList2 = createIdentifierListFromTS((List<TS>)dataList, includeName, type);
+				// Add to the list (probably no need to sort, especially since type is included
+				idList.addAll(idList2);
+			}
+		}
 	}
 	return idList;
 }
@@ -1219,56 +1234,90 @@ non-null list is guaranteed; however, the list may have zero items.
 returned from StateMod_Data.getID().  If true the string will contain the ID,
 followed by " - xxxx", where xxxx is the value returned from StateMod_Data.getName().
 */
-public static List<String> createIdentifierList ( List smdataList, boolean includeName )
+/*
+public static List<String> createIdentifierList ( List<Object> smdataList, boolean includeName )
 {
 	return createIdentifierList(smdataList, includeName, null );
 }
+*/
 
 /**
 Create a list of strings for use in choices, etc.
 @return a list of String containing formatted identifiers and names.  A
 non-null list is guaranteed; however, the list may have zero items.
-@param smdataList a list of StateMod_Data or TS objects
+@param smdataList a list of StateMod_Data objects
 @param includeName If false, each string will consist of only the value
 returned from StateMod_Data.getID().  If true the string will contain the ID,
 followed by " - xxxx", where xxxx is the value returned from StateMod_Data.getName().
 @param type if non-null and non-blank, include as "(type)" before the name, to indicate a location type,
 for example "ID - (Reservoir) Name".
 */
-public static List<String> createIdentifierList ( List smdataList, boolean includeName, String type )
+public static List<String> createIdentifierListFromStateModData ( List<? extends StateMod_Data> smdataList, boolean includeName, String type )
 {	List<String> v = null;
 	if ( smdataList == null ) {
-		v = new Vector();
+		v = new Vector<String>();
 		return v;
 	}
 	else {
 	    // This optimizes memory management...
-		v = new Vector ( smdataList.size() );
+		v = new Vector<String> ( smdataList.size() );
 	}
 	int size = smdataList.size();
 	StateMod_Data smdata;
 	String id = "", name = "";
-	TS ts;
-	Object o;
 	String typeString = "";
 	for ( int i = 0; i < size; i++ ) {
-		o = smdataList.get(i);
-		if ( o == null ) {
+		smdata = smdataList.get(i);
+		if ( smdata == null ) {
 			continue;
 		}
-		if ( o instanceof StateMod_Data ) {
-			smdata = (StateMod_Data)o;
-			id = smdata.getID();
-			name = smdata.getName();
+		id = smdata.getID();
+		name = smdata.getName();
+		if ( (type != null) && (type.length() > 0) ) {
+			typeString = "(" + type + ") ";
 		}
-		else if ( o instanceof TS ) {
-			ts = (TS)o;
-			id = ts.getLocation();
-			name = ts.getDescription();
+		if ( includeName ) {
+			v.add ( id + " - " + typeString + name );
 		}
 		else {
-		    Message.printWarning ( 2,"StateMod_Util.createDataList", "Unrecognized StateMod data." );
+		    v.add ( id );
 		}
+	}
+	return v;
+}
+
+/**
+Create a list of strings for use in choices, etc.
+@return a list of String containing formatted identifiers and names.  A
+non-null list is guaranteed; however, the list may have zero items.
+@param tslist a list of TS objects
+@param includeName If false, each string will consist of only the value
+returned from StateMod_Data.getID().  If true the string will contain the ID,
+followed by " - xxxx", where xxxx is the value returned from StateMod_Data.getName().
+@param type if non-null and non-blank, include as "(type)" before the name, to indicate a location type,
+for example "ID - (Reservoir) Name".
+*/
+public static List<String> createIdentifierListFromTS ( List<TS> tslist, boolean includeName, String type )
+{	List<String> v = null;
+	if ( tslist == null ) {
+		v = new Vector<String>();
+		return v;
+	}
+	else {
+	    // This optimizes memory management...
+		v = new Vector<String> ( tslist.size() );
+	}
+	int size = tslist.size();
+	String id = "", name = "";
+	TS ts;
+	String typeString = "";
+	for ( int i = 0; i < size; i++ ) {
+		ts = tslist.get(i);
+		if ( ts == null ) {
+			continue;
+		}
+		id = ts.getLocation();
+		name = ts.getDescription();
 		if ( (type != null) && (type.length() > 0) ) {
 			typeString = "(" + type + ") ";
 		}
@@ -1297,7 +1346,7 @@ no value is available, the total will be missing.
 information for the new time series.
 @exception Exception if there is an error creating the time series.
 */
-public static TS createTotalTS ( List<? extends TS> tslist, String dataset_location,
+public static TS createTotalTS ( List<TS> tslist, String dataset_location,
 					String dataset_datasource, String dataset_description, int comp_type )
 throws Exception
 {	String routine = "StateMod_Util.createTotalTS";
@@ -1536,7 +1585,7 @@ create the time series header information.
 @return a list of time series created from a list of water rights.
 @exception Exception if there is an error
 */
-public static List createWaterRightTimeSeriesList ( List smrights,
+public static List<TS> createWaterRightTimeSeriesList ( List<? extends StateMod_Right> smrights,
 		int interval_base, int spatial_aggregation, int parcel_year,
 		boolean include_dataset_totals,
 		DateTime OutputStart_DateTime, DateTime OutputEnd_DateTime,
@@ -1568,7 +1617,7 @@ throws Exception
 		FreeWaterMethod_int = UseSeniorRightAppropriationDate_int;
 	}
 
-	List tslist = new Vector();
+	List<TS> tslist = new Vector<TS>();
 	TS ts = null;	// Time series to add.
 	StateMod_Right smright;
 	StateMod_WellRight smwellright; // Only for parcel processing.
@@ -1582,9 +1631,9 @@ throws Exception
 						// Administration number corresponding to date for right.
 	DateTime decree_DateTime = null; // Right appropriation date, to day.
 	// Get the locations that have water rights.
-	List loc_Vector = null;
+	List<String> loc_Vector = null;
 	if ( spatial_aggregation == BYPARCEL ) {
-		loc_Vector = getWaterRightParcelList ( smrights, parcel_year );
+		loc_Vector = getWaterRightParcelList ( (List<StateMod_Right>)smrights, parcel_year );
 	}
 	else {
 	    // Process by location or individual rights...
@@ -1608,7 +1657,7 @@ throws Exception
 	    Message.printStatus ( 2, routine, "Found " + loc_size + " rights from " + smrights_size + " rights.");
 	}
 	String loc_id = null;	// Identifier for a location or parcel
-	List loc_rights = null; // Vector of StateMod_Right
+	List<StateMod_Right> loc_rights = null;
 	DateTime min_DateTime = null;
 	DateTime max_DateTime = null;
 	double decree = 0;	// Decree for water right
@@ -1619,7 +1668,7 @@ throws Exception
 	int free_right_count; // count of free water rights at location
 	// Process the list of locations.
 	for ( int iloc = 0; iloc < loc_size; iloc++ ) {
-		loc_id = (String)loc_Vector.get(iloc);
+		loc_id = loc_Vector.get(iloc);
 		Message.printStatus ( 2, routine, "Processing location \"" + loc_id + "\"");
 		if ( spatial_aggregation == BYPARCEL ) {
 			loc_rights = getWaterRightsForParcel ( smrights, loc_id, parcel_year );
@@ -2010,7 +2059,7 @@ dataset.  Note that this is always a calendar date.  The time series that are ch
 */
 public static DateTime findEarliestDateInPOR(StateMod_DataSet dataset)
 {	DateTime newDate = null;
-	List tsVector = null;
+	List<TS> tsVector = null;
 	DateTime tempDate = null;
 
 	int numFiles = 8;
@@ -2050,15 +2099,15 @@ A private helper method for <b>findEarliestDateInPOR()</b> for finding the
 earliest date in the period.  Because the vector of time series is assumed to
 have been read from a single file, just check the first time series with a
 non-zero date (no need to check all time series after that).
-@param tsVector a vector of time series.
+@param tsVector a list of time series.
 @param newDate the data against which to check the first date in the time series
 @return first date of the time series or null if the first date of the time
 series is not earlier than newDate
 */
-private static DateTime findEarliestDateInPORHelper(List tsVector, DateTime newDate) {
+private static DateTime findEarliestDateInPORHelper(List<TS> tsVector, DateTime newDate) {
 	DateTime date = null;
 	if (tsVector.size() > 0) {
-		date = ((TS)tsVector.get(0)).getDate1();
+		date = (tsVector.get(0)).getDate1();
 		if (date.getYear() > 0 && date.lessThan(newDate)) {
 			return date;
 		}
@@ -2084,7 +2133,6 @@ dataset.  Note that this is always a calendar date.  The time series that are ch
 */
 public static DateTime findLatestDateInPOR(StateMod_DataSet dataset)
 {	DateTime newDate = null;
-	List tsVector = null;
 	DateTime tempDate = null;
 
 	int numFiles = 8;
@@ -2103,12 +2151,13 @@ public static DateTime findLatestDateInPOR(StateMod_DataSet dataset)
 	
 	for (int i = 0; i < numFiles; i++) {
 		if (dataset.getComponentForComponentType(files[i]).hasData()) {
-			tsVector = (List)((dataset.getComponentForComponentType(files[i])).getData());
+			@SuppressWarnings("unchecked")
+			List<TS> tslist = (List<TS>)((dataset.getComponentForComponentType(files[i])).getData());
 			if ( newDate == null ) {
-				tempDate = findLatestDateInPORHelper(tsVector,seedDate);
+				tempDate = findLatestDateInPORHelper(tslist,seedDate);
 			}
 			else {
-			    tempDate = findLatestDateInPORHelper(tsVector,newDate);
+			    tempDate = findLatestDateInPORHelper(tslist,newDate);
 			}
 			if (tempDate != null) {
 				newDate = tempDate;
@@ -2121,20 +2170,20 @@ public static DateTime findLatestDateInPOR(StateMod_DataSet dataset)
 
 /**
 A private helper method for <b>findLatestDateInPOR()</b> for finding the latest
-POR.  Because the vector of time series is assumed to have been read from a
+POR.  Because the list of time series is assumed to have been read from a
 single file, just check the first time series with a non-zero date (no need
 to check all time series after that).
-@param tsVector a vector of time series.
+@param tslist a list of time series.
 @param newDate the data against which to check the last date in the time series
 @return last date of the time series or null if the last date of the time series is not later than newDate
 */
-private static DateTime findLatestDateInPORHelper (	List tsVector, DateTime newDate )
+private static DateTime findLatestDateInPORHelper (	List<TS> tslist, DateTime newDate )
 {	DateTime date = null;
-	if (tsVector == null) {
+	if (tslist == null) {
 		return null;
 	}
-	if (tsVector.size() > 0) {
-		date = ((TS)tsVector.get(0)).getDate2();
+	if (tslist.size() > 0) {
+		date = tslist.get(0).getDate2();
 		if (date.getYear() > 0 && date.greaterThan(newDate) ) {
 			return date;
 		}
@@ -2143,12 +2192,12 @@ private static DateTime findLatestDateInPORHelper (	List tsVector, DateTime newD
 }
 
 // TODO SAM 2004-09-07 JTS needs to javadoc?
-public static String findNameInVector(String id, List v, boolean includeDash)
+public static String findNameInVector(String id, List<? extends StateMod_Data> v, boolean includeDash)
 {	int size = v.size();
 
 	StateMod_Data data;
 	for (int i = 0; i < size; i++) {
-		data = (StateMod_Data)v.get(i);
+		data = v.get(i);
 		if (data.getID().equals(id)) {
 			if (includeDash) {
 				return " - " + data.getName();
@@ -2163,7 +2212,7 @@ public static String findNameInVector(String id, List v, boolean includeDash)
 
 /**
 Find the insert position for a new water right, in the full list of rights.
-The position that is returned can be used with Vector.insertElementAt(), for the
+The position that is returned can be used with list.insertElementAt(), for the
 full data array.  The position is determined by finding the an item in the
 data vector with the same "cgoto" value.  The insert then considers the value of
 "irtem" so that the result after the insert is water rights sorted by "irtem". 
@@ -2172,10 +2221,10 @@ and are sorted by "irtem".  If no matching "cgoto" is found, the insert position
 will be according to cgoto order.
 @return the insert position for a new water right, in the full list of rights,
 or -1 if the right should be inserted at the end (no other option).
-@param data_Vector a Vector of StateMod_*Right, with data members populated.
+@param data_Vector a list of StateMod_*Right, with data members populated.
 @param item A single StateMod_*Right to insert.
 */
-public static int findWaterRightInsertPosition ( List data_Vector, StateMod_Data item )
+public static int findWaterRightInsertPosition ( List<? extends StateMod_Data> data_Vector, StateMod_Data item )
 {	if ( (data_Vector == null) || (data_Vector.size() == 0) ) {
 		// Add at the end...
 		return -1;
@@ -2186,7 +2235,7 @@ public static int findWaterRightInsertPosition ( List data_Vector, StateMod_Data
 	}
 	StateMod_Data data = null;	// StateMod data object to evaluate
 	for ( int i = 0; i < size; i++ ) {
-		data = (StateMod_Data)data_Vector.get(i);
+		data = data_Vector.get(i);
 		if (data.getID().compareTo(item.getID()) > 0 ) {
 			// Vector item is greater than the new item
 			// to insert so insert at this position...
@@ -2495,18 +2544,21 @@ Get a list of data objects, as a subset of a full data component list.
 @return a list of objects matching the idToMatch.  A
 non-null list is guaranteed; however, the list may have zero items.
 */
-public static List getDataList ( List<? extends StateMod_Data> smdataList, String idToMatch )
-{	List<StateMod_Data> v = new Vector();
+public static <T> List<T> getDataList ( List<T> smdataList, String idToMatch )
+{	List<T> v = new Vector<T>();
 	if ( smdataList == null ) {
 		return v;
 	}
 
-	for ( StateMod_Data smdata: smdataList ) {
+	for ( T smdata: smdataList ) {
 		if ( smdata == null ) {
 			continue;
 		}
-		else if ( smdata.getID().equalsIgnoreCase(idToMatch) ) {
-			v.add(smdata);
+		else {
+			StateMod_Data smdata2 = (StateMod_Data)smdata;
+			if ( smdata2.getID().equalsIgnoreCase(idToMatch) ) {
+				v.add(smdata);
+			}
 		}
 	}
 	return v;
@@ -2894,7 +2946,7 @@ Return a list of identifiers given a list of StateMod data.
 */
 public static List<String> getIDList ( List<? extends StateMod_Data> smdataList, boolean sort )
 {
-	List<String> idList = new Vector();
+	List<String> idList = new Vector<String>();
 	if ( smdataList == null ) {
 		return idList;
 	}
@@ -2946,8 +2998,8 @@ rights is compared with the supplied station identifier.
 @return the list of water rights that match the station identifier.  A non-null
 list is guaranteed (but may have zero length).
 */
-public static List getRightsForStation ( String station_id, List rights_Vector )
-{	List matches = new Vector();
+public static List<? extends StateMod_Right> getRightsForStation ( String station_id, List<? extends StateMod_Right> rights_Vector )
+{	List<StateMod_Right> matches = new Vector<StateMod_Right>();
 	int size = 0;
 	if ( rights_Vector != null ) {
 		size = rights_Vector.size();
@@ -3154,7 +3206,7 @@ useful when retrieving time series.
 @return a non-null list of data types.  The list will have zero size if no
 data types are requested or are valid.
 */
-public static List getTimeSeriesDataTypes ( int comp_type, String id,
+public static List<String> getTimeSeriesDataTypes ( int comp_type, String id,
 						StateMod_DataSet dataset,
 						String statemodVersion,
 						int interval,
@@ -3222,7 +3274,7 @@ useful when retrieving time series.
 @return a non-null list of data types.  The list will have zero size if no
 data types are requested or are valid.
 */
-public static List getTimeSeriesDataTypes ( String binary_filename,
+public static List<String> getTimeSeriesDataTypes ( String binary_filename,
 						int comp_type, String id,
 						StateMod_DataSet dataset,
 						String statemodVersion,
@@ -3234,7 +3286,7 @@ public static List getTimeSeriesDataTypes ( String binary_filename,
 						boolean add_group,
 						boolean add_note )
 {	String routine = "StateMod_Util.getTimeSeriesDataTypes";
-	List data_types = new Vector();
+	List<String> data_types = new Vector<String>();
 	String [] diversion_types0 = null;
 	String [] instream_types0 = null;
 	String [] reservoir_types0 = null;
@@ -3630,11 +3682,11 @@ Determine the output precision for a list of time series (e.g., for use with the
 time series write methods or to display data in a table).  The default is to get
 the precision from the units of the first time series.
 */
-public static int getTimeSeriesOutputPrecision ( List tslist )
+public static int getTimeSeriesOutputPrecision ( List<TS> tslist )
 {	int	list_size = 0, precision = -2;	// Default
 	TS tspt = null;
 	if ( (tslist != null) && (tslist.size() > 0) ) {
-		tspt = (TS)tslist.get(0);
+		tspt = tslist.get(0);
 		list_size = tslist.size();
 	}
 	if ( tspt != null ) {
@@ -3655,7 +3707,7 @@ public static int getTimeSeriesOutputPrecision ( List tslist )
 	// In year of CRDSS 2, we changed the precision to 0 for RSTO.
 	// See if any of the TS in the list are RSTO...
 	for ( int ilist = 0; ilist < list_size; ilist++ ) {
-		tspt = (TS)tslist.get(ilist);
+		tspt = tslist.get(ilist);
 		if ( tspt == null ) {
 			continue;
 		}
@@ -3670,24 +3722,24 @@ public static int getTimeSeriesOutputPrecision ( List tslist )
 // TODO - might move this to a different class once the network builder falls into place.
 /**
 Determine the nodes that are immediately upstream of a given downstream node.
-@return Vector of StateMod_RiverNetworkNode that are upstream of the node for
+@return list of StateMod_RiverNetworkNode that are upstream of the node for
 the given identifier.  If none are found, an empty non-null Vector is returned.
-@param node_Vector Vector of StateMod_RiverNetworkNode.
+@param node_Vector list of StateMod_RiverNetworkNode.
 @param downstream_id Downstream identifier of interest.
 */
-public static List getUpstreamNetworkNodes ( List node_Vector, String downstream_id )
+public static List<StateMod_RiverNetworkNode> getUpstreamNetworkNodes ( List<StateMod_RiverNetworkNode> node_Vector, String downstream_id )
 {	String rtn = "StateMod_Util.getUpstreamNetworkNodes";
 	if ( Message.isDebugOn ) {
 		Message.printDebug ( 1, rtn, "Trying to find upstream nodes for " + downstream_id );
 	}
-	List v = new Vector ();
+	List<StateMod_RiverNetworkNode> v = new Vector<StateMod_RiverNetworkNode>();
 	if ( node_Vector == null ) {
 		return v;
 	}
 	int num = node_Vector.size();
 	StateMod_RiverNetworkNode riv;
 	for ( int i=0; i<num; i++ ) {
-		riv = (StateMod_RiverNetworkNode)node_Vector.get(i);	
+		riv = node_Vector.get(i);	
 		if ( riv.getCstadn().equalsIgnoreCase ( downstream_id )) {
 			if ( Message.isDebugOn ) {
 				Message.printDebug ( 1, rtn, "Adding upstream node " + riv.getID() );
@@ -3706,8 +3758,8 @@ nodes at which the rights apply.  One or more water right can exist with the sam
 @param req_parcel_year Parcel year for data or -1 to use all (only used with well rights).
 @return a list of locations for water rights, in the order found in the original list.
 */
-public static List getWaterRightIdentifiersForLocation ( List smrights, String loc_id, int req_parcel_year )
-{	List matchlist = new Vector();	// Returned data, identifiers (not full right)
+public static List<String> getWaterRightIdentifiersForLocation ( List<? extends StateMod_Right> smrights, String loc_id, int req_parcel_year )
+{	List<String> matchlist = new Vector<String>();	// Returned data, identifiers (not full right)
 	int size = 0;
 	if ( smrights != null ) {
 		size = smrights.size();
@@ -3718,7 +3770,7 @@ public static List getWaterRightIdentifiersForLocation ( List smrights, String l
 	int matchlist_size = 0;
 	boolean found = false; // used to indicate matching ID found
 	for ( int i = 0; i < size; i++ ) {
-		right = (StateMod_Right)smrights.get(i);
+		right = smrights.get(i);
 		if ( (req_parcel_year != -1) && right instanceof StateMod_WellRight ) {
 			// Allow the year to filter.
 			parcel_year = ((StateMod_WellRight)right).getParcelYear();
@@ -3757,8 +3809,8 @@ requested parcel year.
 @param req_parcel_year Parcel year for data or -1 to use all (only used with well rights).
 @return a list of locations for water rights, in the order found in the original list.
 */
-public static List<StateMod_Right> getWaterRightsForLocation ( List<StateMod_Right> smrights, String loc_id, int req_parcel_year )
-{	List<StateMod_Right> matchlist = new Vector();	// Returned data
+public static List<StateMod_Right> getWaterRightsForLocation ( List<? extends StateMod_Right> smrights, String loc_id, int req_parcel_year )
+{	List<StateMod_Right> matchlist = new Vector<StateMod_Right>();	// Returned data
 	int size = 0;
 	if ( smrights != null ) {
 		size = smrights.size();
@@ -3791,9 +3843,9 @@ nodes at which the rights apply.
 @param req_parcel_year Parcel year for data or -1 to use all (only used with well rights).
 @return a list of locations for water rights, in the order found in the original list.
 */
-public static List getWaterRightsForLocationAndRightIdentifier (
-		List smrights, String loc_id, String right_id, int req_parcel_year )
-{	List matchlist = new Vector();	// Returned data
+public static List<StateMod_Right> getWaterRightsForLocationAndRightIdentifier (
+		List<? extends StateMod_Right> smrights, String loc_id, String right_id, int req_parcel_year )
+{	List<StateMod_Right> matchlist = new Vector<StateMod_Right>();	// Returned data
 	int size = 0;
 	if ( smrights != null ) {
 		size = smrights.size();
@@ -3801,7 +3853,7 @@ public static List getWaterRightsForLocationAndRightIdentifier (
 	StateMod_Right right = null;
 	int parcel_year;
 	for ( int i = 0; i < size; i++ ) {
-		right = (StateMod_Right)smrights.get(i);
+		right = smrights.get(i);
 		if ( (req_parcel_year != -1) && right instanceof StateMod_WellRight ) {
 			// Allow the year to filter.
 			parcel_year = ((StateMod_WellRight)right).getParcelYear();
@@ -3829,21 +3881,25 @@ Get a list of water rights for a parcel.
 @param req_parcel_year Parcel year for data or -1 to use all.
 @return a list of water rights for the parcel, in the order found in the original list.
 */
-public static List getWaterRightsForParcel ( List smrights, String parcel_id, int req_parcel_year )
-{	List matchlist = new Vector();	// Returned data
+public static List<StateMod_Right> getWaterRightsForParcel ( List<? extends StateMod_Right> smrights, String parcel_id, int req_parcel_year )
+{	List<StateMod_Right> matchlist = new Vector<StateMod_Right>();	// Returned data
 	int size = 0;
 	if ( smrights != null ) {
 		size = smrights.size();
 	}
-	StateMod_WellRight right = null;
+	StateMod_Right right = null;
+	StateMod_WellRight wellright = null;
 	for ( int i = 0; i < size; i++ ) {
-		right = (StateMod_WellRight)smrights.get(i);
-		if ( (req_parcel_year != -1) && (right.getParcelYear() != req_parcel_year) ) {
-			// No need to process right.
-			continue;
-		}
-		if ( parcel_id.equalsIgnoreCase(right.getParcelID()) ) {
-			matchlist.add ( right );
+		right = smrights.get(i);
+		if ( right instanceof StateMod_WellRight ) {
+			wellright = (StateMod_WellRight)right;
+			if ( (req_parcel_year != -1) && (wellright.getParcelYear() != req_parcel_year) ) {
+				// No need to process right.
+				continue;
+			}
+			if ( parcel_id.equalsIgnoreCase(wellright.getParcelID()) ) {
+				matchlist.add ( wellright );
+			}
 		}
 	}
 	return matchlist;
@@ -3852,13 +3908,13 @@ public static List getWaterRightsForParcel ( List smrights, String parcel_id, in
 /**
 Get a list of locations from a list of water rights.  The locations are the
 nodes at which the rights apply.
-@param smrights Vector of StateMod_Right to search.
+@param smrights list of StateMod_Right to search.
 @param req_parcel_year Specific parcel year to match, or -1 to match all, if input is a
 list of StateMod_WellRight.
 @return a list of locations for water rights, in the order found in the original list.
 */
-public static List<String> getWaterRightLocationList ( List smrights, int req_parcel_year )
-{	List loclist = new Vector();	// Returned data
+public static List<String> getWaterRightLocationList ( List<? extends StateMod_Right> smrights, int req_parcel_year )
+{	List<String> loclist = new Vector<String>();	// Returned data
 	int size = 0;
 	if ( smrights != null ) {
 		size = smrights.size();
@@ -3870,7 +3926,7 @@ public static List<String> getWaterRightLocationList ( List smrights, int req_pa
 	int parcel_year = 0;	// Parcel year to process.
 	int j = 0; // Loop index for found locations.
 	for ( int i = 0; i < size; i++ ) {
-		right = (StateMod_Right)smrights.get(i);
+		right = smrights.get(i);
 		if ( req_parcel_year != -1 ) {
 			// Check the parcel year and skip if necessary.
 			if ( right instanceof StateMod_WellRight ) {
@@ -3885,7 +3941,7 @@ public static List<String> getWaterRightLocationList ( List smrights, int req_pa
 		// Search the list to see if it is a new item...
 		found = false;
 		for ( j = 0; j < size_loc; j++ ) {
-			if ( right_loc_id.equalsIgnoreCase((String)loclist.get(j)) ) {
+			if ( right_loc_id.equalsIgnoreCase(loclist.get(j)) ) {
 				found = true;
 				break;
 			}
@@ -3906,38 +3962,42 @@ locations at which well rights have been matched.
 @param req_parcel_year a requested year to constrain the parcel list (or -1 to return all).
 @return a list of parcels for water rights, in the order found in the original list.
 */
-public static List getWaterRightParcelList ( List smrights, int req_parcel_year )
-{	List loclist = new Vector();	// Returned data
+public static List<String> getWaterRightParcelList ( List<StateMod_Right> smrights, int req_parcel_year )
+{	List<String> loclist = new Vector<String>();	// Returned data
 	int size = 0;
 	if ( smrights != null ) {
 		size = smrights.size();
 	}
-	StateMod_WellRight right = null;
+	StateMod_Right right = null;
+	StateMod_WellRight wellright = null;
 	int size_loc = 0;	// size of location list
 	boolean found = false;	// Indicate whether the location has been found.
 	String parcel_id = null; // ID for location
 	int parcel_year = 0;	// Year for parcels.
 	int j = 0; // Loop index for found locations.
 	for ( int i = 0; i < size; i++ ) {
-		right = (StateMod_WellRight)smrights.get(i);
-		parcel_id = right.getParcelID();
-		parcel_year = right.getParcelYear();
-		if ( (req_parcel_year != -1) && (parcel_year != req_parcel_year) ) {
-			// No need to process right
-			continue;
-		}
-		// Search the list to see if it is a new item...
-		found = false;
-		for ( j = 0; j < size_loc; j++ ) {
-			if ( parcel_id.equalsIgnoreCase((String)loclist.get(j)) ) {
-				found = true;
-				break;
+		right = smrights.get(i);
+		if ( right instanceof StateMod_WellRight ) {
+			wellright = (StateMod_WellRight)right;
+			parcel_id = wellright.getParcelID();
+			parcel_year = wellright.getParcelYear();
+			if ( (req_parcel_year != -1) && (parcel_year != req_parcel_year) ) {
+				// No need to process right
+				continue;
 			}
-		}
-		if ( !found ) {
-			// Add to the list
-			loclist.add ( parcel_id );
-			size_loc = loclist.size();
+			// Search the list to see if it is a new item...
+			found = false;
+			for ( j = 0; j < size_loc; j++ ) {
+				if ( parcel_id.equalsIgnoreCase(loclist.get(j)) ) {
+					found = true;
+					break;
+				}
+			}
+			if ( !found ) {
+				// Add to the list
+				loclist.add ( parcel_id );
+				size_loc = loclist.size();
+			}
 		}
 	}
 	return loclist;
@@ -7161,10 +7221,10 @@ private static void setStateModVersion ( String statemodVersion )
 /**
 Sorts a list of StateMod_Data objects, depending on the compareTo() method for the specific object.
 @param data a list of StateMod_Data objects.  Can be null.
-@return a new sorted Vector with references to the same data objects in the
-passed-in Vector.  If a null Vector is passed in, an empty Vector will be returned.
+@return a new sorted list with references to the same data objects in the
+passed-in list.  If a null Vector is passed in, an empty list will be returned.
 */
-public static List sortStateMod_DataVector ( List data )
+public static <T> List<T> sortStateMod_DataVector ( List<T> data )
 {	return sortStateMod_DataVector ( data, true );
 }
 
@@ -7176,17 +7236,17 @@ If false, return the original list, with sorted contents.
 @return a sorted list with references to the same data objects in the
 passed-in list.  If null is passed in, an empty list will be returned.
 */
-public static List sortStateMod_DataVector ( List data, boolean returnNew )
+public static <T> List<T> sortStateMod_DataVector ( List<T> data, boolean returnNew )
 {	if (data == null) {
-		return new Vector();
+		return new Vector<T>();
 	}
 	List dataSorted = data;
 	int size = data.size();
 	if ( returnNew ) {
 		if (size == 0) {
-			return new Vector();
+			return new Vector<T>();
 		}
-		dataSorted = new Vector(data);
+		dataSorted = new Vector<T>(data);
 	}
 
 	Collections.sort(dataSorted);
@@ -7205,7 +7265,7 @@ to fill in the description field in the time series
 example, the reservoir min/max vector has two time series for each node in
 theData (min and max) whereas most have a one-to-one correlation.
 */
-public static void setTSDescriptions (List theData, List theTS, int mult) {
+public static void setTSDescriptions (List<StateMod_Data> theData, List<TS> theTS, int mult) {
 	if ((theData == null) || (theTS == null)) {
 		return;
 	}
@@ -7218,10 +7278,10 @@ public static void setTSDescriptions (List theData, List theTS, int mult) {
 	StateMod_Data smdata = null;
 	TS ts = null;
 	for (int i=0; i<size; i++) {
-		smdata = (StateMod_Data)theData.get(i);
+		smdata = theData.get(i);
 		for (int j=0; j<mult; j++) {
 			try {
-				ts = (TS)theTS.get(i*mult + j);
+				ts = theTS.get(i*mult + j);
 
 				if (smdata.getID().equalsIgnoreCase	(ts.getIdentifier().getLocation())) {
 					ts.setDescription(smdata.getName());
@@ -7232,8 +7292,6 @@ public static void setTSDescriptions (List theData, List theTS, int mult) {
 		}
 				
 	}
-	smdata = null;
-	ts = null;
 }
 
 /**

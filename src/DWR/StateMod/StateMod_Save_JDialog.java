@@ -62,6 +62,7 @@ import RTi.Util.Time.YearType;
 This dialog displays a list of all the data set components that have been changed
 and prompts the user to select the ones that should be saved.
 */
+@SuppressWarnings("serial")
 public class StateMod_Save_JDialog extends JDialog
 implements ActionListener, WindowListener {
 
@@ -232,7 +233,7 @@ private boolean saveData()
 	String newFilename0 = null;	// Used within path
 	String newFilename = null;
 	String oldFilename = null;
-	List<String> comments = new Vector();
+	List<String> comments = new Vector<String>();
 	// TODO - add a checkbox to the display.
 	//if ( __add_revision_comments_JCheckBox.isSelected() ) {
 	comments.add("Modification to data made interactively by user with " + IOUtil.getProgramName() + " " 
@@ -478,43 +479,67 @@ throws Exception {
 			name = "Control";
 			break;
 		case StateMod_DataSet.COMP_DELAY_TABLES_DAILY:
+			@SuppressWarnings("unchecked")
+			List<StateMod_DelayTable> delayTablesDaily = (List<StateMod_DelayTable>)data;
 			StateMod_DelayTable.writeStateModFile(oldFilename,
-				newFilename, (List)data, comments, __dataset.getInterv(), -1);
+				newFilename, delayTablesDaily, comments, __dataset.getInterv(), -1);
 			name = "Delay Tables Daily";
 			break;
 		case StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY:
+			@SuppressWarnings("unchecked")
+			List<StateMod_DelayTable> delayTablesMonthly = (List<StateMod_DelayTable>)data;
 			StateMod_DelayTable.writeStateModFile(oldFilename,
-				newFilename, (List)data, comments, __dataset.getInterv(), -1);
+				newFilename, delayTablesMonthly, comments, __dataset.getInterv(), -1);
 			name = "Delay Tables Monthly";
 			break;
 		case StateMod_DataSet.COMP_DIVERSION_STATIONS:
-			StateMod_Diversion.writeStateModFile(oldFilename, newFilename, (List)data, comments, daily );
+			@SuppressWarnings("unchecked")
+			List<StateMod_Diversion> diversionStations = (List<StateMod_Diversion>)data;
+			StateMod_Diversion.writeStateModFile(oldFilename, newFilename, diversionStations, comments, daily );
 			name = "Diversion";
 			break;
 		case StateMod_DataSet.COMP_DIVERSION_RIGHTS:
-			StateMod_DiversionRight.writeStateModFile(oldFilename, newFilename, (List)data, comments, daily);
+			@SuppressWarnings("unchecked")
+			List<StateMod_DiversionRight> diversionRights = (List<StateMod_DiversionRight>)data;
+			StateMod_DiversionRight.writeStateModFile(oldFilename, newFilename, diversionRights, comments, daily);
 			name = "Diversion Rights";
 			break;
 		case StateMod_DataSet.COMP_INSTREAM_STATIONS:
-			StateMod_InstreamFlow.writeStateModFile(oldFilename, newFilename, (List)data, comments, daily);
+			@SuppressWarnings("unchecked")
+			List<StateMod_InstreamFlow> instreamFlow = (List<StateMod_InstreamFlow>)data;
+			StateMod_InstreamFlow.writeStateModFile(oldFilename, newFilename, instreamFlow, comments, daily);
 			name = "Instream";
 			break;
 		case StateMod_DataSet.COMP_INSTREAM_RIGHTS:
-			StateMod_InstreamFlowRight.writeStateModFile( oldFilename, newFilename, (List)data, comments );
+			@SuppressWarnings("unchecked")
+			List<StateMod_InstreamFlowRight> instreamFlowRights = (List<StateMod_InstreamFlowRight>)data;
+			StateMod_InstreamFlowRight.writeStateModFile( oldFilename, newFilename, instreamFlowRights, comments );
 			name = "Instream Rights";
 			break;
 		case StateMod_DataSet.COMP_OPERATION_RIGHTS:
+			@SuppressWarnings("unchecked")
+			List<StateMod_OperationalRight> operationalRights = (List<StateMod_OperationalRight>)data;
 			// 2 is the file version (introduced for StateMod version 12 change)
-			StateMod_OperationalRight.writeStateModFile( oldFilename, newFilename, 2, (List)data, comments,
+			StateMod_OperationalRight.writeStateModFile( oldFilename, newFilename, 2, operationalRights, comments,
 				__dataset );
 			name = "Operational Rights";
 			break;
+		case StateMod_DataSet.COMP_PLANS:
+			@SuppressWarnings("unchecked")
+			List<StateMod_Plan> planStations = (List<StateMod_Plan>)data;
+			StateMod_Plan.writeStateModFile(oldFilename, newFilename, planStations, comments);
+			name = "Plan";
+			break;
 		case StateMod_DataSet.COMP_RESERVOIR_STATIONS:
-			StateMod_Reservoir.writeStateModFile(oldFilename, newFilename, (List)data, comments, daily);
+			@SuppressWarnings("unchecked")
+			List<StateMod_Reservoir> reservoirStations = (List<StateMod_Reservoir>)data;
+			StateMod_Reservoir.writeStateModFile(oldFilename, newFilename, reservoirStations, comments, daily);
 			name = "Reservoir";
 			break;
 		case StateMod_DataSet.COMP_RESERVOIR_RIGHTS:
-			StateMod_ReservoirRight.writeStateModFile(oldFilename, newFilename, (List)data, comments);
+			@SuppressWarnings("unchecked")
+			List<StateMod_ReservoirRight> reservoirRights = (List<StateMod_ReservoirRight>)data;
+			StateMod_ReservoirRight.writeStateModFile(oldFilename, newFilename, reservoirRights, comments);
 			name = "Reservoir Rights";
 			break;
 		case StateMod_DataSet.COMP_RESPONSE:
@@ -522,31 +547,39 @@ throws Exception {
 			name = "Response";
 			break;
 		case StateMod_DataSet.COMP_RIVER_NETWORK:
-			StateMod_RiverNetworkNode.writeStateModFile(oldFilename, newFilename, (List)data, comments, true);
+			@SuppressWarnings("unchecked")
+			List<StateMod_RiverNetworkNode> riverNodes = (List<StateMod_RiverNetworkNode>)data;
+			StateMod_RiverNetworkNode.writeStateModFile(oldFilename, newFilename, riverNodes, comments, true);
 			name = "River Network";
 			break;
 		case StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS:
-			StateMod_StreamEstimate.writeStateModFile(oldFilename, newFilename, (List)data, comments, daily);
+			@SuppressWarnings("unchecked")
+			List<StateMod_StreamEstimate> streamEstimateStations = (List<StateMod_StreamEstimate>)data;
+			StateMod_StreamEstimate.writeStateModFile(oldFilename, newFilename, streamEstimateStations, comments, daily);
 			name = "Stream Estimate";
 			break;
 		case StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS:
-			StateMod_StreamEstimate_Coefficients.writeStateModFile( oldFilename, newFilename, (List)data, comments );
+			@SuppressWarnings("unchecked")
+			List<StateMod_StreamEstimate_Coefficients> streamEstimateCoefficients = (List<StateMod_StreamEstimate_Coefficients>)data;
+			StateMod_StreamEstimate_Coefficients.writeStateModFile( oldFilename, newFilename, streamEstimateCoefficients, comments );
 			name = "Stream Estimate Coefficients";
 			break;
 		case StateMod_DataSet.COMP_STREAMGAGE_STATIONS:
-			StateMod_StreamGage.writeStateModFile(oldFilename, newFilename, (List)data, comments, daily);
+			@SuppressWarnings("unchecked")
+			List<StateMod_StreamGage> streamGageStations = (List<StateMod_StreamGage>)data;
+			StateMod_StreamGage.writeStateModFile(oldFilename, newFilename, streamGageStations, comments, daily);
 			name = "Streamgage Stations";
 			break;
 		case StateMod_DataSet.COMP_WELL_STATIONS:
-			StateMod_Well.writeStateModFile(oldFilename, newFilename, (List)data, comments);
+			@SuppressWarnings("unchecked")
+			List<StateMod_Well> wellStations = (List<StateMod_Well>)data;
+			StateMod_Well.writeStateModFile(oldFilename, newFilename, wellStations, comments);
 			name = "Well";
 			break;
-		case StateMod_DataSet.COMP_PLANS:
-			StateMod_Plan.writeStateModFile(oldFilename, newFilename, (List)data, comments);
-			name = "Plan";
-			break;
 		case StateMod_DataSet.COMP_WELL_RIGHTS:
-			StateMod_WellRight.writeStateModFile(oldFilename, newFilename, (List)data, comments, (PropList)null);
+			@SuppressWarnings("unchecked")
+			List<StateMod_WellRight> wellRights = (List<StateMod_WellRight>)data;
+			StateMod_WellRight.writeStateModFile(oldFilename, newFilename, wellRights, comments, (PropList)null);
 			name = "Well Rights";
 			break;
 
@@ -592,13 +625,20 @@ throws Exception {
 			}
 			int precision = 2;
 
-			if (data != null && ((List)data).size() > 0) {
-				TS ts = (TS)((List)data).get(0);
-				missing = ts.getMissing();
+			// Do the following to avoid warnings
+			List<TS> tslist = null;
+			if ( data != null ) {
+				@SuppressWarnings("unchecked")
+				List<TS> tslist0 = (List<TS>)data;
+				if ( tslist0.size() > 0) {
+					TS ts = tslist0.get(0);
+					missing = ts.getMissing();
+				}
+				tslist = tslist0;
 			}
 			
 			StateMod_TS.writeTimeSeriesList(oldFilename,
-				newFilename, comments, (List)data, null, null, yearType, missing, precision);
+				newFilename, comments, tslist, null, null, yearType, missing, precision);
 			name = "TS (" + type + ")";
 			break;
 

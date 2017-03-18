@@ -42,6 +42,7 @@ import RTi.Util.GUI.SimpleFileFilter;
 /**
 This table model display delta plot data.
 */
+@SuppressWarnings({ "serial", "rawtypes" })
 public class StateMod_RunSmDelta_TableModel 
 extends JWorksheet_AbstractRowTableModel {
 
@@ -61,25 +62,23 @@ The worksheet in which this table model is working.
 private JWorksheet __worksheet;
 
 /**
-Vectors of data for filling ID lists.
+List of data for filling ID lists.
 */
-private List 
-	__reservoirs,
-	__diversions,
-	__instreamFlows,
-	__wells,
-	__streamGages;
+private List<StateMod_Reservoir> __reservoirs;
+private List<StateMod_Diversion> __diversions;
+private List<StateMod_InstreamFlow> __instreamFlows;
+private List<StateMod_Well> __wells;
+private List<StateMod_StreamGage> __streamGages;
 
 /**
 ID lists to be displayed in the combo boxes.
 */
-private List
-	__reservoirIDs = null,
-	__diversionIDs = null,
-	__instreamFlowIDs = null,
-	__streamflowIDs = null,
-	__streamflow0IDs = null,
-	__wellIDs = null;
+private List<String> __reservoirIDs = null;
+private List<String> __diversionIDs = null;
+private List<String> __instreamFlowIDs = null;
+private List<String> __streamflowIDs = null;
+private List<String> __streamflow0IDs = null;
+private List<String> __wellIDs = null;
 
 protected String _ABOVE_STRING = "";
 
@@ -96,16 +95,16 @@ public final static int
 Constructor.  
 @param parent the StateMod_RunDeltaPlot_JFrame in which the table is displayed
 @param data the data that will be displayed in the table.
-@param reservoirs Vector of StateMod_Reservoir objects
-@param diversions Vector of StateMod_Diversion objects
-@param instreamFlows Vector of StateMod_InstreamFlow objects.
-@param streamGages Vector of StateMod_??? objects
-@param wells Vector of StateMod_Well objects
+@param reservoirs list of StateMod_Reservoir objects
+@param diversions list of StateMod_Diversion objects
+@param instreamFlows list of StateMod_InstreamFlow objects.
+@param streamGages list of StateMod_??? objects
+@param wells list of StateMod_Well objects
 @throws Exception if an invalid data or dmi was passed in.
 */
 public StateMod_RunSmDelta_TableModel(StateMod_RunSmDelta_JFrame parent,
-List data, List reservoirs, List diversions, List instreamFlows,
-List streamGages, List wells)
+List data, List<StateMod_Reservoir> reservoirs, List<StateMod_Diversion> diversions, List<StateMod_InstreamFlow> instreamFlows,
+List<StateMod_StreamGage> streamGages, List<StateMod_Well> wells)
 throws Exception {
 	__parent = parent;
 
@@ -235,11 +234,11 @@ public void copyDownComboBoxes() {
 /**
 Creates a list of the available IDs for a Vector of StateMod_Data-extending objects.
 @param nodes the nodes for which to create a list of IDs.
-@return a Vector of Strings, each of which contains an ID followed by the 
+@return a list of Strings, each of which contains an ID followed by the 
 name of Structure in parentheses
 */
-private List createAvailableIDsList(List nodes) {
-	List v = new Vector();
+private List<String> createAvailableIDsList(List<? extends StateMod_Data> nodes) {
+	List<String> v = new Vector<String>();
 
 	int num = 0;
 	if (nodes != null) {
@@ -249,8 +248,8 @@ private List createAvailableIDsList(List nodes) {
 	v.add("0 (All)");
 
 	for (int i = 0; i < num; i++) {
-		v.add(((StateMod_Data)nodes.get(i)).getID() + " (" 
-			+ ((StateMod_Data)nodes.get(i)).getName() + ")");
+		v.add(nodes.get(i).getID() + " (" 
+			+ nodes.get(i).getName() + ")");
 	}
 	return v;
 }
@@ -287,7 +286,7 @@ Fills the parameter column in the given row based on the station type selected f
 @param type the type of the station in the given row.
 */
 public void fillParameterColumn(int row, String type) {
-	List datatypes = new Vector();
+	List<String> datatypes = new Vector<String>();
 
 	// Get the model output data types (no input since SmDelta deals with output).
 	if (type.equalsIgnoreCase("Diversion")) {
@@ -309,7 +308,7 @@ public void fillParameterColumn(int row, String type) {
 		datatypes = StateMod_GraphNode.getGraphDataType(StateMod_GraphNode.STREAM_TYPE, false);
 	}
 
-	List finalTypes = new Vector();
+	List<String> finalTypes = new Vector<String>();
 	finalTypes.add("");
 
 	for (int i = 0; i < datatypes.size(); i++) {
@@ -331,7 +330,7 @@ Fills the ID column based on the kind of structure selected.
 @param type the type of structure selected (column 1)
 */
 public void fillIDColumn(int row, String type) {
-	List ids = new Vector();
+	List<String> ids = new Vector<String>();
 	if (type.equalsIgnoreCase("Diversion")) {
 		if (__diversionIDs == null) {
 			__diversionIDs = createAvailableIDsList(__diversions);
@@ -364,11 +363,11 @@ public void fillIDColumn(int row, String type) {
 	}
 	else if (type.equalsIgnoreCase("Stream ID (0* Gages)")) {
 		if (__streamflow0IDs == null) {
-			List v = createAvailableIDsList(__streamGages);
+			List<String> v = createAvailableIDsList(__streamGages);
 			String s = null;
-			__streamflow0IDs = new Vector();
+			__streamflow0IDs = new Vector<String>();
 			for (int i = 0; i < v.size(); i++) {
-				s = (String)v.get(i);
+				s = v.get(i);
 				if (s.startsWith("0")) {
 					__streamflow0IDs.add(s);
 				}
@@ -383,20 +382,20 @@ public void fillIDColumn(int row, String type) {
 }
 
 /**
-Creates a Vector of objects suitable for use in the worksheet from the data
+Creates a list of objects suitable for use in the worksheet from the data
 read from a delta plot file.
 @param fileData the fileData to process.
-@return a Vector of objects suitable for use within a form.
+@return a list of objects suitable for use within a form.
 */
-public List formLoadData(List fileData) {
+public List<StateMod_GraphNode> formLoadData(List<StateMod_GraphNode> fileData) {
 	int rows = fileData.size();
 
 	if (rows == 0 ) {
-		return new Vector();
+		return new Vector<StateMod_GraphNode>();
 	}
 
 	// gnf will be a node used to read data FROM the _F_ile nodes
-	StateMod_GraphNode gnf = (StateMod_GraphNode)fileData.get(0);
+	StateMod_GraphNode gnf = fileData.get(0);
 
 	String pfile = "";
 	String ptype = "";
@@ -410,12 +409,12 @@ public List formLoadData(List fileData) {
 	// gnw will be a node used for creating the _W_orksheet nodes
 	StateMod_GraphNode gnw = null;
 
-	List v = new Vector();
+	List<StateMod_GraphNode> v = new Vector<StateMod_GraphNode>();
 
 	int ids = 0;
 
 	for (int i = 0; i < rows; i++) {
-		gnf = (StateMod_GraphNode)fileData.get(i);
+		gnf = fileData.get(i);
 		ids = gnf.getIDVectorSize();
 
 		file = gnf.getFileName().trim();
@@ -474,17 +473,17 @@ public List formLoadData(List fileData) {
 /**
 Saves form data to the data set.
 @param worksheetData the data in the worksheet to save.
-@return a Vector of data objects created from the data in the worksheet.
+@return a list of data objects created from the data in the worksheet.
 */
-public List formSaveData(List worksheetData) {
+public List<StateMod_GraphNode> formSaveData(List<StateMod_GraphNode> worksheetData) {
 	int rows = worksheetData.size();
 	
 	if (rows == 0) {
-		return new Vector();
+		return new Vector<StateMod_GraphNode>();
 	}
 
 	// gnw will be a node used to read data FROM the _W_orksheet nodes
-	StateMod_GraphNode gnw = (StateMod_GraphNode)worksheetData.get(0);
+	StateMod_GraphNode gnw = worksheetData.get(0);
 
 	String pfile = gnw.getFileName().trim();
 	String ptype = gnw.getType().trim();
@@ -512,10 +511,10 @@ public List formSaveData(List worksheetData) {
 		gno.addID(pid);
 	}
 
-	List v = new Vector();
+	List<StateMod_GraphNode> v = new Vector<StateMod_GraphNode>();
 
 	for (int i = 1; i < rows; i++) {
-		gnw = (StateMod_GraphNode)worksheetData.get(i);
+		gnw = worksheetData.get(i);
 
 		file = gnw.getFileName().trim();
 		if (file.equals("")) {
@@ -585,7 +584,7 @@ public List formSaveData(List worksheetData) {
 From AbstractTableModel.  Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 */
-public Class getColumnClass (int columnIndex) {
+public Class<?> getColumnClass (int columnIndex) {
 	switch (columnIndex) {
 		case COL_FILE:	return String.class;
 		case COL_TYPE:	return String.class;

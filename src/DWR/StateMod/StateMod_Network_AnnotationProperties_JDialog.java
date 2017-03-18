@@ -21,6 +21,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -39,6 +41,7 @@ import RTi.Util.String.StringUtil;
 /**
 GUI for displaying, editing, and validating node properties for normal nodes and annotations.
 */
+@SuppressWarnings("serial")
 public class StateMod_Network_AnnotationProperties_JDialog 
 extends JFrame 
 implements ActionListener, KeyListener, WindowListener {
@@ -291,9 +294,11 @@ private void setupGUI() {
 	__textPositionComboBox = new SimpleJComboBox(false);
 	String[] positions = GRText.getTextPositions();
 	__textPositionComboBox.setMaximumRowCount(positions.length);
+	List<String> positionsChoices = new ArrayList<String>();
 	for (int i = 0; i < positions.length; i++) {
-		__textPositionComboBox.addItem(positions[i]);
+		positionsChoices.add(positions[i]);
 	}
+	__textPositionComboBox.setData(positionsChoices);
 	
 	__fontNameComboBox = JGUIUtil.newFontNameJComboBox();
 	__fontSizeTextField = new JTextField(7);

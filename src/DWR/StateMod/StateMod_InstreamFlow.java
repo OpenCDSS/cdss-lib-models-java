@@ -103,7 +103,7 @@ import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 
 public class StateMod_InstreamFlow extends StateMod_Data
-implements HasGeoRecord, StateMod_ComponentValidator
+implements Comparable<StateMod_Data>, HasGeoRecord, StateMod_ComponentValidator
 {
 
 /**
@@ -216,16 +216,16 @@ public Object clone() {
 
 /**
 Compares this object to another StateMod_InstreamFlow object.
-@param o the object to compare against.
+@param data the object to compare against.
 @return 0 if they are the same, 1 if this object is greater than the other object, or -1 if it is less.
 */
-public int compareTo(Object o) {
-	int res = super.compareTo(o);
+public int compareTo(StateMod_Data data) {
+	int res = super.compareTo(data);
 	if (res != 0) {
 		return res;
 	}
 
-	StateMod_InstreamFlow i = (StateMod_InstreamFlow)o;
+	StateMod_InstreamFlow i = (StateMod_InstreamFlow)data;
 
 	res = _cifridy.compareTo(i._cifridy);
 	if (res != 0) {
@@ -249,10 +249,10 @@ public int compareTo(Object o) {
 
 /**
 Connect instream flow rights to stations.
-@param isfs Vector of instream flow stations
-@param rights Vector of instream flow rights
+@param isfs list of instream flow stations
+@param rights list of instream flow rights
 */
-public static void connectAllRights ( List isfs, List rights )
+public static void connectAllRights ( List<StateMod_InstreamFlow> isfs, List<StateMod_InstreamFlowRight> rights )
 {	if ((isfs == null) || (rights == null)) {
 		return;
 	}
@@ -260,7 +260,7 @@ public static void connectAllRights ( List isfs, List rights )
 
 	StateMod_InstreamFlow insf;
 	for (int i = 0; i < num_insf; i++) {
-		insf = (StateMod_InstreamFlow)isfs.get(i);
+		insf = isfs.get(i);
 		if (insf == null) {
 			continue;
 		}
@@ -272,7 +272,8 @@ public static void connectAllRights ( List isfs, List rights )
 /**
 Connect all instream flow time series to the instream flow objects.
 */
-public static void connectAllTS ( List theIns, List demandMonthTS, List demandAverageMonthTS, List demandDayTS )
+public static void connectAllTS ( List<StateMod_InstreamFlow> theIns, List<MonthTS> demandMonthTS,
+	List<MonthTS> demandAverageMonthTS, List<DayTS> demandDayTS )
 {	if ( theIns == null ) {
 		return;
 	}
@@ -280,7 +281,7 @@ public static void connectAllTS ( List theIns, List demandMonthTS, List demandAv
 	StateMod_InstreamFlow insflow;
 
 	for (int i = 0; i < numInsf; i++) {
-		insflow = (StateMod_InstreamFlow)theIns.get(i);
+		insflow = theIns.get(i);
 		if (insflow == null) {
 			continue;
 		}
@@ -288,8 +289,7 @@ public static void connectAllTS ( List theIns, List demandMonthTS, List demandAv
 			insflow.connectDemandMonthTS(demandMonthTS);
 		}
 		if ( demandAverageMonthTS != null ) {
-			insflow.connectDemandAverageMonthTS(
-			demandAverageMonthTS);
+			insflow.connectDemandAverageMonthTS(demandAverageMonthTS);
 		}
 		if ( demandDayTS != null ) {
 			insflow.connectDemandDayTS(demandDayTS);
@@ -302,7 +302,7 @@ Connect daily demand time series to the instream flow.
 The daily id "cifridy" must match the time series.
 The time series description is set to the station name.
 */
-public void connectDemandDayTS ( List tslist )
+public void connectDemandDayTS ( List<DayTS> tslist )
 {	if ( tslist == null) {
 		return;
 	}
@@ -311,7 +311,7 @@ public void connectDemandDayTS ( List tslist )
 	DayTS ts;
 
 	for (int i = 0; i < numTS; i++) {
-		ts = (DayTS)tslist.get(i);
+		ts = tslist.get(i);
 		if (ts == null) {
 			continue;
 		}
@@ -321,14 +321,13 @@ public void connectDemandDayTS ( List tslist )
 			break;
 		}
 	}
-	ts = null;
 }
 
 /**
 Connect average monthly demand time series to the instream flow.
 The time series description is set to the station name.
 */
-public void connectDemandAverageMonthTS(List tslist) {
+public void connectDemandAverageMonthTS(List<MonthTS> tslist) {
 	if (tslist == null) {
 		return;
 	}
@@ -337,7 +336,7 @@ public void connectDemandAverageMonthTS(List tslist) {
 
 	_demand_average_MonthTS = null;
 	for (int i = 0; i < numTS; i++) {
-		ts = (MonthTS)tslist.get(i);
+		ts = tslist.get(i);
 		if (ts == null) {
 			continue;
 		}
@@ -353,7 +352,7 @@ public void connectDemandAverageMonthTS(List tslist) {
 Connect monthly demand time series to the instream flow.
 The time series description is set to the station name.
 */
-public void connectDemandMonthTS(List tslist) {
+public void connectDemandMonthTS(List<MonthTS> tslist) {
 	if (tslist == null) {
 		return;
 	}
@@ -362,7 +361,7 @@ public void connectDemandMonthTS(List tslist) {
 
 	_demand_MonthTS = null;
 	for (int i = 0; i < numTS; i++) {
-		ts = (MonthTS)tslist.get(i);
+		ts = tslist.get(i);
 		if (ts == null) {
 			continue;
 		}
@@ -377,7 +376,7 @@ public void connectDemandMonthTS(List tslist) {
 /**
 Connect the rights in the main rights file to this instream flow, using the instream flow ID.
 */
-public void connectRights(List rights) {
+public void connectRights(List<StateMod_InstreamFlowRight> rights) {
 	if (rights == null) {
 		return;
 	}
@@ -385,7 +384,7 @@ public void connectRights(List rights) {
 
 	StateMod_InstreamFlowRight right;
 	for (int i = 0; i < num_rights; i++) {
-		right = (StateMod_InstreamFlowRight)rights.get(i);
+		right = rights.get(i);
 		if (right == null) {
 			continue;
 		}
@@ -399,7 +398,7 @@ public void connectRights(List rights) {
 Creates a copy of the object for later use in checking to see if it was changed in a GUI.
 */
 public void createBackup() {
-	_original = clone();
+	_original = (StateMod_InstreamFlow)clone();
 	((StateMod_InstreamFlow)_original)._isClone = false;
 	_isClone = true;
 }
@@ -418,7 +417,7 @@ public void disconnectRight ( StateMod_InstreamFlowRight right )
 	StateMod_InstreamFlowRight right2;
 	// Assume that more than on instance can exist, even though this is not allowed...
 	for ( int i = 0; i < size; i++ ) {
-		right2 = (StateMod_InstreamFlowRight)_rights.get(i);
+		right2 = _rights.get(i);
 		if ( right2.getID().equalsIgnoreCase(right.getID()) ) {
 			_rights.remove(i);
 		}
@@ -433,7 +432,7 @@ public void disconnectRights ()
 }
 
 /**
-Free memory for gargage collection.
+Free memory for garbage collection.
 */
 protected void finalize()
 throws Throwable {
@@ -508,15 +507,15 @@ The options are of the form "1" if include_notes is false and
 @return a list of demand type option strings, for use in GUIs.
 @param include_notes Indicate whether notes should be included.
 */
-public static List getIifcomChoices ( boolean include_notes )
-{	List v = new Vector(5);
+public static List<String> getIifcomChoices ( boolean include_notes )
+{	List<String> v = new Vector<String>(5);
 	v.add ( "1 - Monthly demand" );
 	v.add ( "2 - Average monthly demand" );
 	if ( !include_notes ) {
 		// Remove the trailing notes...
 		int size = v.size();
 		for ( int i = 0; i < size; i++ ) {
-			v.set(i, StringUtil.getToken((String)v.get(i), " ", 0, 0) );
+			v.set(i, StringUtil.getToken(v.get(i), " ", 0, 0) );
 		}
 	}
 	return v;
@@ -575,9 +574,9 @@ public StateMod_InstreamFlowRight getRight(int index)
 }
 
 /**
-Returns Vector of rights.
+Returns list of rights.
 */
-public List getRights() {
+public List<StateMod_InstreamFlowRight> getRights() {
 	return _rights;
 }
 
@@ -599,7 +598,7 @@ private void initialize ( boolean initializeDefaults )
 		_cifridy = "";
 		_iifcom = StateMod_Util.MISSING_INT;
 	}
-	_rights = new Vector();
+	_rights = new Vector<StateMod_InstreamFlowRight>();
 	_demand_DayTS = null;
 	_demand_MonthTS = null;
 	_demand_average_MonthTS = null;
@@ -615,7 +614,7 @@ public StateMod_Data lookupDownstreamDataObject ( StateMod_DataSet dataset )
 	String downstreamID = getIfrrdn();
 	StateMod_OperationalRight_Metadata_SourceOrDestinationType downstreamTypes[] =
 		{ StateMod_OperationalRight_Metadata_SourceOrDestinationType.RIVER_NODE };
-	List<StateMod_Data> smdataList = new Vector();
+	List<StateMod_Data> smdataList = new Vector<StateMod_Data>();
 	for ( int i = 0; i < downstreamTypes.length; i++ ) {
 		 smdataList.addAll ( StateMod_Util.getDataList ( downstreamTypes[i], dataset,
 			downstreamID, true ) );
@@ -646,8 +645,8 @@ public static List<StateMod_InstreamFlow> readStateModFile(String filename)
 throws Exception {
 	String routine = "StateMod_InstreamFlow.readStateModFile";
 	String iline, s;
-	List<StateMod_InstreamFlow> theIns = new Vector();
-	List v = new Vector(9);
+	List<StateMod_InstreamFlow> theIns = new Vector<StateMod_InstreamFlow>();
+	List<Object> v = new Vector<Object>(9);
 	int format_0[] = {
 		StringUtil.TYPE_STRING,
 		StringUtil.TYPE_STRING,
@@ -823,7 +822,7 @@ public void setIfrrdn(String ifrrdn) {
 Set the rights list.
 @param rights list of rights to set - this should not be null.
 */
-public void setRights ( List rights )
+public void setRights ( List<StateMod_InstreamFlowRight> rights )
 {	_rights = rights;
 }
 
@@ -929,7 +928,8 @@ is also maintained by calling this routine.
 @param newcomments addition comments which should be included in history
 @exception Exception if an error occurs.
 */
-public static void writeStateModFile(String infile, String outfile, List theInsf, List newcomments)
+public static void writeStateModFile(String infile, String outfile,
+	List<StateMod_InstreamFlow> theInsf, List<String> newcomments)
 throws Exception {
 	writeStateModFile(infile, outfile, theInsf, newcomments, true);
 }
@@ -944,12 +944,12 @@ Write the instream flow objects to the StateMod file.
 @throws Exception if an error occurs
 */
 public static void writeStateModFile(String infile, String outfile,
-		List theInsf, List newcomments, boolean useDailyData)
+	List<StateMod_InstreamFlow> theInsf, List<String> newcomments, boolean useDailyData)
 throws Exception {
 	String routine = "StateMod_InstreamFlow.writeStateModFile";
-	List commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	PrintWriter out = null;
 	Message.printStatus(2, routine, "Writing instream flows to file \""
@@ -966,7 +966,7 @@ throws Exception {
 		int i;
 		String iline;
 		String cmnt = "#>";
-		List v = new Vector(7);
+		List<Object> v = new Vector<Object>(7);
 		StateMod_InstreamFlow insf = null;
 		String format_0 = "%-12.12s%-24.24s%-12.12s%8d %-12.12s %-12.12s%8d";
 		String format_1 = "%-12.12s%-24.24s%-12.12s%8d %-12.12s";
@@ -996,7 +996,7 @@ throws Exception {
 			num = theInsf.size();
 		}
 		for (i = 0; i < num; i++) {
-			insf = (StateMod_InstreamFlow)theInsf.get(i);
+			insf = theInsf.get(i);
 			if (insf == null) {
 				continue;
 			}
@@ -1041,15 +1041,15 @@ header (true) or to create a new file with a new header.
 @param newComments additional comments to write to the header.
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter, boolean update, List data,
-		List newComments ) 
+public static void writeListFile(String filename, String delimiter, boolean update,
+	List<StateMod_InstreamFlow> data, List<String> newComments ) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
 		size = data.size();
 	}
 	
-	List fields = new Vector();
+	List<String> fields = new Vector<String>();
 	fields.add("ID");
 	fields.add("Name");
 	fields.add("UpstreamRiverNodeID");
@@ -1064,7 +1064,7 @@ throws Exception {
 	int comp = StateMod_DataSet.COMP_INSTREAM_STATIONS;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.get(i);
+		s = fields.get(i);
 		names[i] = StateMod_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateMod_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -1077,9 +1077,9 @@ throws Exception {
 	int j = 0;
 	PrintWriter out = null;
 	StateMod_InstreamFlow flo = null;
-	List commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	String[] line = new String[fieldCount];
 	StringBuffer buffer = new StringBuffer();
@@ -1087,12 +1087,12 @@ throws Exception {
 	try {	
 		// Add some basic comments at the top of the file.  Do this to a copy of the
 		// incoming comments so that they are not modified in the calling code.
-		List newComments2 = null;
+		List<String> newComments2 = null;
 		if ( newComments == null ) {
-			newComments2 = new Vector();
+			newComments2 = new Vector<String>();
 		}
 		else {
-			newComments2 = new Vector(newComments);
+			newComments2 = new Vector<String>(newComments);
 		}
 		newComments2.add(0,"");
 		newComments2.add(1,"StateMod instream flow stations as a delimited list file.");
@@ -1134,17 +1134,12 @@ throws Exception {
 
 			out.println(buffer.toString());
 		}
-		out.flush();
-		out.close();
-		out = null;
 	}
-	catch (Exception e) {
+	finally {
 		if (out != null) {
 			out.flush();
 			out.close();
-		}
-		out = null;
-		throw e;
+		}	
 	}
 }
 

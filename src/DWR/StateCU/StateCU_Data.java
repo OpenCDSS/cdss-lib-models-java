@@ -5,14 +5,14 @@ This StateCU_Data class can be used as a base class for StateCU data objects.
 Common data like identifier and name is maintained here to simplify access and remove redundant code.
 */
 public abstract class StateCU_Data 
-implements Cloneable, Comparable {
+implements Cloneable, Comparable<StateCU_Data> {
 
 protected String _id = StateCU_Util.MISSING_STRING;
 protected String _name = StateCU_Util.MISSING_STRING;
 protected boolean _is_dirty = false;
 
 /**
-Whether this object is a clone (ie, data that can be cancelled out of).
+Whether this object is a clone (i.e., data that can be cancelled out of).
 */
 protected boolean _isClone = false;
 
@@ -48,13 +48,11 @@ public Object clone() {
 }
 
 /**
-Compares this object to another StateMod_Data object based on _id and _name, in that order.
+Compares this object to another StateCU_Data object based on _id and _name, in that order.
 @param o the object to compare against.
 @return 0 if they are the same, 1 if this object is greater than the other object, or -1 if it is less.
 */
-public int compareTo(Object o) {
-	StateCU_Data data = (StateCU_Data)o;
-	
+public int compareTo (StateCU_Data data) {
 	String name = data.getName();
 	String id = data.getID();
 

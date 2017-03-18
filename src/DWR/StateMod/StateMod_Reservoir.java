@@ -167,7 +167,7 @@ The Reservoir class holds data for entries in the StateMod reservoir station
 file.  Secondary data classes are used in cases where lists of data are used.
 */
 public class StateMod_Reservoir extends StateMod_Data
-implements Cloneable, Comparable, HasGeoRecord, StateMod_ComponentValidator
+implements Cloneable, Comparable<StateMod_Data>, HasGeoRecord, StateMod_ComponentValidator
 {
 
 /**
@@ -277,7 +277,7 @@ The identifiers for data that are collected - null if not a collection location.
 This is a list of List where the __collection_year is the first dimension.
 This is ugly but need to use the code to see if it can be made cleaner.
  */
-private List __collection_Vector = null;
+private List<List<String>> __collection_Vector = null;
 
 /**
 An array of years that correspond to the aggregate/system.  Reservoirs currently only have one year.
@@ -396,17 +396,17 @@ public Object clone() {
 
 /**
 Compares this object to another StateMod_Reservoir object.
-@param o the object to compare against.
+@param data the object to compare against.
 @return 0 if they are the same, 1 if this object is greater than the other
 object, or -1 if it is less.
 */
-public int compareTo(Object o) {
-	int res = super.compareTo(o);
+public int compareTo(StateMod_Data data) {
+	int res = super.compareTo(data);
 	if (res != 0) {
 		return res;
 	}
 
-	StateMod_Reservoir r = (StateMod_Reservoir)o;
+	StateMod_Reservoir r = (StateMod_Reservoir)data;
 
 	if (_rdate < r._rdate) {
 		return -1;
@@ -673,7 +673,7 @@ Creates a backup of the current data object and stores it in _original,
 for use in determining if an object was changed inside of a GUI.
 */
 public void createBackup() {
-	_original = clone();
+	_original = (StateMod_Reservoir)clone();
 	((StateMod_Reservoir)_original)._isClone = false;
 	_isClone = true;
 }
@@ -786,7 +786,7 @@ public StateMod_ReservoirAreaCap getAreaCap(int index)
 /**
 Return all the area capacity data.
 */
-public List getAreaCaps ()
+public List<StateMod_ReservoirAreaCap> getAreaCaps ()
 {	return _areacapvals;
 }
 
@@ -808,18 +808,18 @@ public List<StateMod_ReservoirClimate> getClimates() {
 }
 
 /**
-Return the collection part ID list for the specific year.  For wells, only one
+Return the collection part ID list for the specific year.  For reservoirs, only one
 aggregate/system list is currently supported so the same information is returned
 regardless of the year value.
 @return the list of collection part IDS, or null if not defined.
 */
-public List getCollectionPartIDs ( int year )
+public List<String> getCollectionPartIDs ( int year )
 {	if ( __collection_Vector.size() == 0 ) {
 		return null;
 	}
 	//if ( __collection_part_type.equalsIgnoreCase("Reservoir") ) {
 		// The list of part IDs will be the first and only list...
-		return (List)__collection_Vector.get(0);
+		return __collection_Vector.get(0);
 	//}
 	/* Not supported
 	else if ( __collection_part_type.equalsIgnoreCase("Parcel") ) {
@@ -921,7 +921,7 @@ The options are of the form "0" if include_notes is false and "0 - Off", if incl
 @param include_notes Indicate whether notes should be added after the parameter values.
 */
 public static List<String> getIresswChoices ( boolean include_notes )
-{	List<String> v = new Vector();
+{	List<String> v = new Vector<String>();
 	v.add ( "0 - Off" );	// Possible options are listed here.
 	v.add ( "1 - On, do not store above reservoir targets" );
 	v.add ( "2 - 1 and adjust volume, etc. by dead storage" );
@@ -1053,7 +1053,7 @@ public int getNumEvaporationMonthTS ( List<MonthTS> tslist, boolean check_ts )
 
 /**
 Return the number of precipitation time series for the reservoir.
-@param tslist The Vector of monthly precipitation data to check.
+@param tslist The list of monthly precipitation data to check.
 @param check_ts If true, get the count of non-null time series (the reservoir
 may reference precipitation station identifiers but the identifiers may not actually exist).
 @return the number of precipitation time series for the reservoir.
@@ -1111,7 +1111,7 @@ The options are of the form "-1" if include_notes is false and
 @param include_notes Indicate whether notes should be added after the parameter values.
 */
 public static List<String> getRdateChoices ( boolean include_notes )
-{	List<String> v = new Vector(2);
+{	List<String> v = new Vector<String>(2);
 	v.add ( "-1 - Do not administer the one fill rule" );
 	v.add ( "1 - January" );	// Possible options are listed here.
 	v.add ( "2 - February" );
@@ -1192,10 +1192,10 @@ If false, don't initialize data - this is suitable for filling in StateDMI.
 */
 private void initialize ( boolean initialize_defaults )
 {	_smdata_type = StateMod_DataSet.COMP_RESERVOIR_STATIONS;
-	_owners = new Vector();
-	_climate_Vector = new Vector();
-	_areacapvals = new Vector();
-	_rights = new Vector();
+	_owners = new Vector<StateMod_ReservoirAccount>();
+	_climate_Vector = new Vector<StateMod_ReservoirClimate>();
+	_areacapvals = new Vector<StateMod_ReservoirAreaCap>();
+	_rights = new Vector<StateMod_ReservoirRight>();
 	_content_MonthTS = null;
 	_content_DayTS = null;
 	_mintarget_MonthTS = null;
@@ -1256,9 +1256,9 @@ Read reservoir information in and store in a Vector.
 public static List<StateMod_Reservoir> readStateModFile(String filename)
 throws Exception
 {	String routine = "StateMod_Reservoir.readStateModFile";
-	List<StateMod_Reservoir> theReservoirs = new Vector();
+	List<StateMod_Reservoir> theReservoirs = new Vector<StateMod_Reservoir>();
 	String iline = null;
-	List v = new Vector(9);
+	List<Object> v = new Vector<Object>(9);
 	int [] format_0 = {
 		StringUtil.TYPE_STRING,
 		StringUtil.TYPE_STRING,
@@ -1526,9 +1526,9 @@ Set the collection list for an aggregate/system.  It is assumed that the
 collection applies to all years of data.
 @param ids The identifiers indicating the locations to collection.
 */
-public void setCollectionPartIDs ( List ids )
+public void setCollectionPartIDs ( List<String> ids )
 {	if ( __collection_Vector == null ) {
-		__collection_Vector = new Vector ( 1 );
+		__collection_Vector = new Vector<List<String>> ( 1 );
 		__collection_year = new int[1];
 	}
 	else {
@@ -1713,7 +1713,7 @@ public void setRdate(String rdate) {
 /**
 Set the rights
 */
-public void setRights ( List rights )
+public void setRights ( List<StateMod_ReservoirRight> rights )
 {	_rights = rights;
 }
 
@@ -1842,7 +1842,8 @@ public StateMod_ComponentValidation validateComponent ( StateMod_DataSet dataset
 	// Verify that the daily ID is in the data set (daily ID is allowed to be missing)
 	if ( (dataset != null) && !StateMod_Util.isMissing(dailyID) ) {
 		DataSetComponent comp2 = dataset.getComponentForComponentType(StateMod_DataSet.COMP_RESERVOIR_STATIONS);
-		List resList = (List)comp2.getData();
+		@SuppressWarnings("unchecked")
+		List<StateMod_Reservoir> resList = (List<StateMod_Reservoir>)comp2.getData();
 		if ( dailyID.equals("0") || dailyID.equals("3") || dailyID.equals("4") || dailyID.equals("5") ) {
 			// OK
 		}
@@ -2074,9 +2075,9 @@ public static void writeStateModFile(String infile, String outfile,
 		List<StateMod_Reservoir> theReservoirs, List<String> newComments, boolean useDailyData)
 throws Exception {
 	String routine = "StateMod_Reservoirs.writeStateModFile";
-	List<String> commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List<String> ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	PrintWriter out = null;
 
@@ -2111,7 +2112,7 @@ throws Exception {
 		StateMod_ReservoirAccount own = null;
 		StateMod_ReservoirClimate clmt = null;
 		String ch1 = null;
-		List v = new Vector(6);	
+		List<Object> v = new Vector<Object>(6);	
 		List<StateMod_ReservoirAccount> ownv = null;
 		List<StateMod_ReservoirClimate> climatev = null;
 		List<StateMod_ReservoirAreaCap> areacapv = null;
@@ -2371,7 +2372,7 @@ throws Exception
 		size = data.size();
 	}
 	
-	List<String> fields = new Vector();
+	List<String> fields = new Vector<String>();
 	fields.add("ID");
 	fields.add("Name");
 	fields.add("RiverNodeID");
@@ -2411,27 +2412,29 @@ throws Exception
 	StateMod_ReservoirAccount account = null;
 	StateMod_ReservoirAreaCap areaCap = null;
 	StateMod_ReservoirClimate climate = null;	
-	List<String> commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List<String> ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	String[] line = new String[fieldCount];
 	StringBuffer buffer = new StringBuffer();
-	List<StateMod_ReservoirAccount> accounts = new Vector();
-	List<StateMod_ReservoirAreaCap> areaCaps = new Vector();
-	List<StateMod_ReservoirClimate> evapClimates = new Vector();
-	List<StateMod_ReservoirClimate> precipClimates = new Vector();
-	List tempV = null;
+	List<StateMod_ReservoirAccount> accounts = new Vector<StateMod_ReservoirAccount>();
+	List<StateMod_ReservoirAreaCap> areaCaps = new Vector<StateMod_ReservoirAreaCap>();
+	List<StateMod_ReservoirClimate> evapClimates = new Vector<StateMod_ReservoirClimate>();
+	List<StateMod_ReservoirClimate> precipClimates = new Vector<StateMod_ReservoirClimate>();
+	List<StateMod_ReservoirAccount> tempVAccounts = null;
+	List<StateMod_ReservoirAreaCap> tempVAreaCap = null;
+	List<StateMod_ReservoirClimate> tempClimates = null;
 	
 	try {
 		// Add some basic comments at the top of the file.  Do this to a copy of the
 		// incoming comments so that they are not modified in the calling code.
 		List<String> newComments2 = null;
 		if ( newComments == null ) {
-			newComments2 = new Vector();
+			newComments2 = new Vector<String>();
 		}
 		else {
-			newComments2 = new Vector(newComments);
+			newComments2 = new Vector<String>(newComments);
 		}
 		newComments2.add(0,"");
 		newComments2.add(1,"StateMod reservoir stations as a delimited list file.");
@@ -2471,12 +2474,12 @@ throws Exception
 			line[12] = StringUtil.formatString(
 				StateMod_ReservoirClimate.getNumPrecip(res.getClimates()),formats[12]).trim();
 			
-			tempV = res.getAreaCaps();
-		 	if (tempV == null) {
+			tempVAreaCap = res.getAreaCaps();
+		 	if (tempVAreaCap == null) {
 				nAreaCaps = 0;
 			}
 			else {
-				nAreaCaps = tempV.size();
+				nAreaCaps = tempVAreaCap.size();
 			}
 			line[13] = StringUtil.formatString(nAreaCaps,formats[13]).trim();
 				
@@ -2491,26 +2494,26 @@ throws Exception
 				buffer.append(line[j]);
 			}
 
-			tempV = res.getAccounts();
-			size2 = tempV.size();
+			tempVAccounts = res.getAccounts();
+			size2 = tempVAccounts.size();
 			for (j = 0; j < size2; j++) {
-				account = (StateMod_ReservoirAccount)tempV.get(j);
+				account = tempVAccounts.get(j);
 				account.setCgoto(res.getID());
 				accounts.add(account);
 			}
 
-			tempV = res.getAreaCaps();
-			size2 = tempV.size();
+			tempVAreaCap = res.getAreaCaps();
+			size2 = tempVAreaCap.size();
 			for (j = 0; j < size2; j++) {
-				areaCap = (StateMod_ReservoirAreaCap)tempV.get(j);
+				areaCap = tempVAreaCap.get(j);
 				areaCap.setCgoto(res.getID());
 				areaCaps.add(areaCap);
 			}
 			
-			tempV = res.getClimates();
-			size2 = tempV.size();
+			tempClimates = res.getClimates();
+			size2 = tempClimates.size();
 			for (j = 0; j < size2; j++) {
-				climate = (StateMod_ReservoirClimate)tempV.get(j);
+				climate = tempClimates.get(j);
 				climate.setCgoto(res.getID());
 				if (climate.getType() == StateMod_ReservoirClimate.CLIMATE_PTPX) {
 				    precipClimates.add(climate);
@@ -2557,7 +2560,7 @@ throws Exception
 	String collectionFilename = front + "_Collections." + end;
 	writeCollectionListFile(collectionFilename, delimiter, update, data, newComments );
 	
-	List<File> filesWritten = new Vector();
+	List<File> filesWritten = new Vector<File>();
 	filesWritten.add ( new File(filename) );
 	filesWritten.add ( new File(accountFilename) );
 	filesWritten.add ( new File(areaCapFilename) );
@@ -2589,7 +2592,7 @@ throws Exception
 		size = data.size();
 	}
 	
-	List<String> fields = new Vector();
+	List<String> fields = new Vector<String>();
 	fields.add("LocationID");
 	fields.add("Year");
 	fields.add("CollectionType");
@@ -2615,9 +2618,9 @@ throws Exception
 	int[] years = null;
 	int numYears = 0;
 	StateMod_Reservoir res = null;
-	List<String> commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List<String> ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	String[] line = new String[fieldCount];	
 	String colType = null;
@@ -2632,10 +2635,10 @@ throws Exception
 		// incoming comments so that they are not modified in the calling code.
 		List<String> newComments2 = null;
 		if ( newComments == null ) {
-			newComments2 = new Vector();
+			newComments2 = new Vector<String>();
 		}
 		else {
-			newComments2 = new Vector(newComments);
+			newComments2 = new Vector<String>(newComments);
 		}
 		newComments2.add(0,"");
 		newComments2.add(1,"StateMod reservoir station collection information as delimited list file.");

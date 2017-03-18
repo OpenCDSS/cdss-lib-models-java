@@ -31,8 +31,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -62,6 +62,7 @@ import RTi.Util.Message.Message;
 /**
 This class is a GUI for displaying climate station data.
 */
+@SuppressWarnings("serial")
 public class StateCU_ClimateStation_JFrame extends JFrame
 implements ActionListener, KeyListener, MouseListener, WindowListener {
 
@@ -193,7 +194,9 @@ public StateCU_ClimateStation_JFrame ( String title, StateCU_DataSet dataset, bo
 
 	__dataset = dataset;
 	__stationComponent = __dataset.getComponentForComponentType(StateCU_DataSet.COMP_CLIMATE_STATIONS);
-	__stationsVector = (List<StateCU_ClimateStation>)__stationComponent.getData();
+	@SuppressWarnings("unchecked")
+	List<StateCU_ClimateStation> stationsVector0 = (List<StateCU_ClimateStation>)__stationComponent.getData();
+	__stationsVector = stationsVector0;
 
 	setupGUI(0);
 }
@@ -214,11 +217,12 @@ public StateCU_ClimateStation_JFrame ( String title, StateCU_DataSet dataset,
 		setTitle ( title );
 	}
 	__dataset = dataset;
-	__currentStationIndex = -1;	
-	__stationsVector = new Vector();
+	__currentStationIndex = -1;
 
 	__stationComponent = __dataset.getComponentForComponentType(StateCU_DataSet.COMP_CLIMATE_STATIONS);
-	__stationsVector = (List<StateCU_ClimateStation>)__stationComponent.getData();	
+	@SuppressWarnings("unchecked")
+	List<StateCU_ClimateStation> stationsVector0 = (List<StateCU_ClimateStation>)__stationComponent.getData();
+	__stationsVector = stationsVector0;
 
 	String id = station.getID();
 	int index = StateCU_Util.indexOf(__stationsVector, id);
@@ -280,7 +284,7 @@ Checks the text fields for validity before they are saved back into the data obj
 @return true if the text fields are okay, false if not.
 */
 private boolean checkInput() {
-	List errors = new Vector();
+	List<String> errors = new ArrayList<String>();
 	int errorCount = 0;
 	// validate __nameJTextField == string
 	// validate __stationIDJTextField == string
@@ -337,20 +341,22 @@ private void displayTSViewJFrame(String action)
 
 	PropList props = new PropList("ClimateStation");
 
-	List<TS> tslist = new Vector();
+	List<TS> tslist = new ArrayList<TS>();
 
 	// Get the time series to display and set plot properties if graphing.
 	// For now need to find in the lists because references to time series
 	// are not implemented...
 
-	List v = null;
+	List<TS> v = null;
 	TS ts = null;
 	int sub = 0;
 	int pos;
 	StateCU_ClimateStation station = __stationsVector.get(__currentStationIndex);
 	if (__precipitationCheckBox.isSelected()) {
-		v = (List)__dataset.getComponentForComponentType(
+		@SuppressWarnings("unchecked")
+		List<TS> v0 = (List<TS>)__dataset.getComponentForComponentType(
 			StateCU_DataSet.COMP_PRECIPITATION_TS_MONTHLY).getData();
+		v = v0;
 		pos = TSUtil.indexOf ( v, station.getID(), "Location", 1 );
 		if ( pos >= 0 ) {
 			ts = (TS)v.get(pos);
@@ -366,8 +372,10 @@ private void displayTSViewJFrame(String action)
 		}
 	}
 	if (__temperatureCheckBox.isSelected()) {
-		v = (List)__dataset.getComponentForComponentType(
+		@SuppressWarnings("unchecked")
+		List<TS> v0 = (List<TS>)__dataset.getComponentForComponentType(
 				StateCU_DataSet.COMP_TEMPERATURE_TS_MONTHLY_AVERAGE).getData();
+		v = v0;
 		pos = TSUtil.indexOf ( v, station.getID(), "Location", 1 );
 		if ( pos >= 0 ) {
 			ts = (TS)v.get(pos);

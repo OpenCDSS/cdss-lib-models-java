@@ -137,7 +137,6 @@ import cdss.domain.hydrology.network.HydrologyNode;
 import RTi.GR.GRArrowStyleType;
 import RTi.GR.GRAspect;
 import RTi.GR.GRColor;
-import RTi.GR.GRDrawingArea;
 import RTi.GR.GRDrawingAreaUtil;
 import RTi.GR.GRJComponentDevice;
 import RTi.GR.GRJComponentDrawingArea;
@@ -169,6 +168,7 @@ There are 3 main ways of drawing the network:
 <li>	Saving an image file - specify the image size and area will be scaled to fit.</li>
 </ol>
 */
+@SuppressWarnings("serial")
 public class StateMod_Network_JComponent extends GRJComponentDevice
 implements ActionListener, KeyListener, MouseListener, MouseMotionListener, Printable {
 
@@ -752,24 +752,24 @@ private String
 List of all the annotations displayed on the network.  Note that internally
 annotations are managed as a list of HydrologyNode.
 */
-private List<HydrologyNode> __annotations = new Vector();
+private List<HydrologyNode> __annotations = new Vector<HydrologyNode>();
 
 /**
 StateMod_Network_AnnotationRenderers to display extra information as annotations on the map.
 Note that these are complex annotations whereas the __annotations list contains simple lines and shapes.
 */
-private List<StateMod_Network_AnnotationData> __annotationDataList = new Vector();
+private List<StateMod_Network_AnnotationData> __annotationDataList = new Vector<StateMod_Network_AnnotationData>();
 
 /**
 List of all the links drawn on the network.  Each link is managed as a PropList with link properties.
 See the HydrologyNodeNetwork.writeXML() method for supported properties.
 */
-private List<PropList> __links = new Vector();
+private List<PropList> __links = new Vector<PropList>();
 
 /**
 List to hold change operations.
 */
-private List<StateMod_Network_UndoData> __undoOperations = new Vector();
+private List<StateMod_Network_UndoData> __undoOperations = new Vector<StateMod_Network_UndoData>();
 
 /**
 Constructor used for headless operations, in particular printing.
@@ -832,7 +832,7 @@ public StateMod_Network_JComponent(StateMod_Network_JFrame parent, double scale)
 	// TODO (JTS - 2004-07-13) remove this call?
 	setPrintFontSize(10);
 
-	__undoOperations = new Vector();
+	__undoOperations = new Vector<StateMod_Network_UndoData>();
 }
 
 /**
@@ -887,7 +887,7 @@ public void actionPerformed(ActionEvent event)
 			__network.deleteNode(id);
 			buildNodeArray();
 			findMaxReachLevel();		
-			__undoOperations = new Vector();
+			__undoOperations = new Vector<StateMod_Network_UndoData>();
 			__parent.setUndo(false);
 			__parent.setRedo(false);			
 		}
@@ -1257,7 +1257,7 @@ private void buildNodeArray() {
 	boolean done = false;
 	HydrologyNode node = __network.getMostUpstreamNode();
 	HydrologyNode holdNode = null;
-	List<HydrologyNode> nodes = new Vector();
+	List<HydrologyNode> nodes = new Vector<HydrologyNode>();
 
 	while (!done) {
 		if (node == null) {
@@ -1422,7 +1422,7 @@ Builds limits and sets up the starting position for a drag for multiple nodes.
 This is done prior to dragging starting.
 */
 private void buildSelectedNodesLimits() {
-	List<Integer> v = new Vector();
+	List<Integer> v = new Vector<Integer>();
 
 	// First get a list comprising the indices of the nodes in the
 	// __nodes array that are being dragged.  This method is only called
@@ -1921,8 +1921,8 @@ private void deleteLink() {
 	String from = null;
 	String id = __nodes[__popupNodeNum].getCommonID();
 	String to = null;
-	List<String> links = new Vector();
-	List<Integer> nums = new Vector();	
+	List<String> links = new Vector<String>();
+	List<Integer> nums = new Vector<Integer>();	
 
 	// Gather all the links in the network that reference the node
 	// that the popup menu was opened in
@@ -1981,7 +1981,7 @@ public void deleteNode(String id) {
 	buildNodeArray();
 	findMaxReachLevel();
 	forceRepaint();	
-	__undoOperations = new Vector();
+	__undoOperations = new Vector<StateMod_Network_UndoData>();
 	__parent.setUndo(false);
 	__parent.setRedo(false);
 }
@@ -2698,17 +2698,6 @@ private void drawNodesOutlines(Graphics g) {
 }
 
 /**
-Draw a test page using the current drawing limits and data limits.
-*/
-private void drawTestPage ( Graphics g )
-{
-	Graphics2D g2d = (Graphics2D)g;
-	g2d.setColor(Color.black);
-	g2d.fillRect(100, 100, 600, 600);
-	//this.__drawingArea
-}
-
-/**
 Called when a user presses OK on an Add Node dialog.
 */
 protected void endAddNode() {
@@ -2905,7 +2894,7 @@ select one and the annotation will be highlighted and zoomed to.
 public HydrologyNode findAnnotation()
 {
 	// Compile a list of all the annotations in the network
-	List<String> annotationListTextSorted = new Vector();
+	List<String> annotationListTextSorted = new Vector<String>();
 	PropList props = null;
 	String propValue;
 	for ( HydrologyNode annotation: getNetwork().getAnnotationList() ) {
@@ -2999,7 +2988,7 @@ public HydrologyNode findNode()
 {
 	// compile a list of all the node IDs in the network
 	int size = __nodes.length;
-	List<String> v = new Vector(size);
+	List<String> v = new Vector<String>(size);
 	for (int i = 0; i < size; i++) {
 		v.add(__nodes[i].getCommonID());
 	}
@@ -3262,7 +3251,7 @@ Returns a list of all the nodes in the node array that are a given type.
 @return a list of all the nodes that are the specified type.  The list is guaranteed to be non-null.
 */
 public List<HydrologyNode> getNodesForType(int type) {
-	List<HydrologyNode> v = new Vector();
+	List<HydrologyNode> v = new Vector<HydrologyNode>();
 
 	for (int i = 0; i < __nodes.length; i++) {
 		if (__nodes[i].getType() == type) {
@@ -3289,7 +3278,7 @@ buildNodeArray() and possibly refreshing the network display.
 */
 protected List<HydrologyNode> getSelectedNodes ()
 {	HydrologyNode [] nodeArray = getNodesArray();
-	List<HydrologyNode> nodeList = new Vector();
+	List<HydrologyNode> nodeList = new Vector<HydrologyNode>();
 	for ( int i = 0; i < nodeArray.length; i++ ) {
 		if ( nodeArray[i].isSelected() ) {
 			nodeList.add(nodeArray[i]);
@@ -3318,7 +3307,7 @@ A value of .5 means that the rendered graphics are 1/2 as big as the full-size r
 @return the scale, relative to a full 1:1 rendering for the page layout
 */
 public double getScale ()
-{	String routine = getClass().getName() + ".getScale";
+{	//String routine = getClass().getName() + ".getScale";
 	double scale = Double.NaN;
 	// The scale is determined by mapping the current drawing area to the full scale drawing area
 	// The resulting data range is then compared to the full scale data range.
@@ -4096,7 +4085,7 @@ public void paint(Graphics g) {
 	// Multiple calls to print can result in some weirdly-drawing things,
 	// plus they slow it down.  The following check makes sure that when
 	// the network is being printed, it is only drawn one time.
-    int dl=5;
+    //int dl=5;
     String routine = "StateMod_Network_JComponenet.paint";
 	if ( this.__printingNetwork && !this.__useOldPrinting ) {
 		// Printing the network using new code.  Just print without all the interactive checks
@@ -4664,7 +4653,7 @@ public int print(Graphics g, PageFormat pageFormat, int pageIndex)
     
     // Set the font size for the scale...
     // TODO SAM 2011-07-08 Only full scale printing currently is supported
-	int fontSize = this.__drawingArea.calculateFontSize(g2d, this.__fontSizePixels);
+	//int fontSize = this.__drawingArea.calculateFontSize(g2d, this.__fontSizePixels);
 	
 	// TODO SAM 2011-07-05 Adjust the drawing limits accordingly to center on the imageable area when
 	// the selected page size does not match the layout size
@@ -4938,7 +4927,7 @@ protected void readMakenetFile(	StateMod_NodeDataProvider nodeDataProvider, Stri
 	__annotations = __network.getAnnotationList();
 	__processAnnotations = true;
 	if (__annotations == null) {
-		__annotations = new Vector();
+		__annotations = new Vector<HydrologyNode>();
 	}	
 	__links = __network.getLinkList();
 	printNetworkInfo();
@@ -5230,7 +5219,7 @@ protected void setNetwork ( StateMod_NodeNetwork network, boolean dirty, boolean
 	__network = network;
 	__processAnnotations = true;
 	if (__annotations == null) {
-		__annotations = new Vector();
+		__annotations = new Vector<HydrologyNode>();
 	}	
 	printNetworkInfo();
 	setNetworkChanged ( dirty );

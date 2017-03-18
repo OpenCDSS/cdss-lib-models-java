@@ -187,12 +187,12 @@ public static int getNGrowthStagesFromCropName ( String cropName )
 Read the StateCU KPM file and return as a list of StateCU_PenmanMonteith.
 @param filename filename containing KPM records.
 */
-public static List readStateCUFile ( String filename )
+public static List<StateCU_PenmanMonteith> readStateCUFile ( String filename )
 throws IOException
 {	String rtn = "StateCU_PenmanMonteith.readStateCUFile";
 	String iline = null;
 	StateCU_PenmanMonteith kpm = null;
-	List kpmList = new Vector(25);
+	List<StateCU_PenmanMonteith> kpmList = new Vector<StateCU_PenmanMonteith>(25);
 	BufferedReader in = null;
 	int lineNum = 0;
 	
@@ -388,9 +388,9 @@ decimal should be printed (default is 3).
 public static void writeStateCUFile ( String filename_prev, String filename,
 	List<StateCU_PenmanMonteith> data_Vector, List<String> new_comments, Integer precision )
 throws IOException
-{	List<String> comment_str = new Vector(1);
+{	List<String> comment_str = new Vector<String>(1);
 	comment_str.add ( "#" );
-	List<String> ignore_comment_str = new Vector(1);
+	List<String> ignore_comment_str = new Vector<String>(1);
 	ignore_comment_str.add ( "#>" );
 	PrintWriter out = null;
 	String full_filename_prev = IOUtil.getPathUsingWorkingDir ( filename_prev );
@@ -512,7 +512,7 @@ throws Exception
 		size = data.size();
 	}
 	
-	List<String> fields = new Vector();
+	List<String> fields = new Vector<String>();
 	fields.add("Name");
 	fields.add("GrowthStage");
 	fields.add("Percent");
@@ -537,9 +537,9 @@ throws Exception
 	int j = 0;
 	int k = 0;
 	PrintWriter out = null;
-	List<String> commentString = new Vector(1);
+	List<String> commentString = new Vector<String>(1);
 	commentString.add ( "#" );
-	List<String> ignoreCommentString = new Vector(1);
+	List<String> ignoreCommentString = new Vector<String>(1);
 	ignoreCommentString.add ( "#>" );
 	String[] line = new String[fieldCount];
 	StringBuffer buffer = new StringBuffer();
@@ -549,10 +549,10 @@ throws Exception
 		// incoming comments so that they are not modified in the calling code.
 		List<String> newComments2 = null;
 		if ( outputComments == null ) {
-			newComments2 = new Vector();
+			newComments2 = new Vector<String>();
 		}
 		else {
-			newComments2 = new Vector(outputComments);
+			newComments2 = new Vector<String>(outputComments);
 		}
 		newComments2.add(0,"");
 		newComments2.add(1,"StateCU Penman-Monteith crop coefficients as a delimited list file.");

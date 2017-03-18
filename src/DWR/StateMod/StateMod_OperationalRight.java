@@ -110,7 +110,7 @@ Not all operational right types may be handled by the software.  See the the
 StateMod_OperationalRight_Metadata.getFullEditingSupported() for information.
 */
 public class StateMod_OperationalRight extends StateMod_Data
-implements Cloneable, Comparable
+implements Cloneable, Comparable<StateMod_Data>
 {
 	
 /**
@@ -194,7 +194,7 @@ private int _imonsw[] = null;
 Comments provided by user - # comments before each right.  An empty (non-null) list is guaranteed.
 TODO SAM 2010-12-14 Evaluate whether this can be in StateMod_Data or will it bloat memory.
 */
-private List<String> __commentsBeforeData = new Vector();
+private List<String> __commentsBeforeData = new Vector<String>();
 /**
 Used with operational right 17, 18.
 */
@@ -253,13 +253,13 @@ TODO SAM 2011-01-29 Phase out when operational rights as documented have been fu
 A list of strings indicating errors at read.  This is checked to determine if the right should be edited
 as text (yes if any errors) or detailed (no if any errors).
 */
-private List<String> __readErrorList = new Vector();
+private List<String> __readErrorList = new Vector<String>();
 
 /**
 The operational right as a list of strings (lines after right comments and prior to the comments for
 the next right.
 */
-private List<String> __rightStringsList = new Vector();
+private List<String> __rightStringsList = new Vector<String>();
 
 /**
 Used with monthly and annual limitation.
@@ -356,11 +356,11 @@ public Object clone() {
 		__oprEff = null;
 	}
 	
-	op.__commentsBeforeData = new Vector();
+	op.__commentsBeforeData = new Vector<String>();
 	for ( String comment: __commentsBeforeData ) {
 		op.__commentsBeforeData.add(comment);
 	}
-	op.__rightStringsList = new Vector();
+	op.__rightStringsList = new Vector<String>();
 	for ( String string: __rightStringsList ) {
 		op.__rightStringsList.add(string);
 	}
@@ -372,12 +372,12 @@ public Object clone() {
 Compares this object to another StateMod_OperationalRight object.  Because there is so much variability
 in the operational rights data, two instances that are of the same type should have the same non-used
 extra data.  Therefore, only significant information should be compared if the types are the same.
-@param o the object to compare against.
+@param data the object to compare against.
 @return 0 if they are the same, 1 if this object is greater than the other object, or -1 if it is less.
 */
-public int compareTo(Object o)
+public int compareTo(StateMod_Data data)
 {	int res; // result of compareTo calls
-	StateMod_OperationalRight op = (StateMod_OperationalRight)o;
+	StateMod_OperationalRight op = (StateMod_OperationalRight)data;
 	if ( !__metadata.getFullEditingSupported(_dataset) ) {
 		// Only text is used so compare the text.
 		if ( __rightStringsList.size() < op.__rightStringsList.size() ) {
@@ -404,7 +404,7 @@ public int compareTo(Object o)
 		}
 	}
 	// Else, compare the data members...
-	res = super.compareTo(o);
+	res = super.compareTo(data);
 	if (res != 0) {
 		if ( Message.isDebugOn ) {
 			Message.printDebug(1,"compareTo","op rights parent data are different");
@@ -790,7 +790,7 @@ public int compareTo(Object o)
 Creates a copy of the object for later use in checking to see if it was changed in a GUI.
 */
 public void createBackup() {
-	_original = clone();
+	_original = (StateMod_OperationalRight)clone();
 	((StateMod_OperationalRight)_original)._isClone = false;
 	_isClone = true;
 }
@@ -994,7 +994,7 @@ public String getInternT(int index) {
 Return the intervening structure identifiers, guaranteed to be non-null but may be empty.
 */
 public List<String> getInterveningStructureIDs()
-{	List<String> structureIDList = new Vector();
+{	List<String> structureIDList = new Vector<String>();
 	if ( __metadata == null ) {
 		return structureIDList;
 	}
@@ -1031,7 +1031,7 @@ Get the interns as a list.
 @return the intervening structure identifiers or an empty list.
 */
 public List<String> getInternsVector() {
-	List<String> v = new Vector();
+	List<String> v = new Vector<String>();
 	if ( _intern != null ) {
 		for ( int i = 0; i < _intern.length; i++) {
 			v.add(getIntern(i));
@@ -1240,7 +1240,7 @@ private void initialize()
 	for ( int i = 0; i < 10; i++ ) {
 		_intern[i] = "";
 	}
-	__commentsBeforeData = new Vector();
+	__commentsBeforeData = new Vector<String>();
 	_qdebt = StateMod_Util.MISSING_DOUBLE;
 	_qdebtx = StateMod_Util.MISSING_DOUBLE;
 	_sjmina = StateMod_Util.MISSING_DOUBLE;
@@ -1308,7 +1308,7 @@ public StateMod_Data lookupDestinationDataObject ( StateMod_DataSet dataset )
 	if ( destinationTypes == null ) {
 		return null;
 	}
-	List<StateMod_Data> smdataList = new Vector();
+	List<StateMod_Data> smdataList = new Vector<StateMod_Data>();
 	for ( int i = 0; i < destinationTypes.length; i++ ) {
 		 smdataList.addAll ( StateMod_Util.getDataList ( destinationTypes[i], dataset,
 			destinationID, true ) );
@@ -1351,7 +1351,7 @@ public StateMod_Data lookupSource1DataObject ( StateMod_DataSet dataset )
 		(sourceTypes[0] == StateMod_OperationalRight_Metadata_SourceOrDestinationType.NA) ) {
 		return null;
 	}
-	List<StateMod_Data> smdataList = new Vector();
+	List<StateMod_Data> smdataList = new Vector<StateMod_Data>();
 	for ( int i = 0; i < sourceTypes.length; i++ ) {
 		smdataList.addAll ( StateMod_Util.getDataList ( sourceTypes[i], dataset, sourceID, true ) );
 		if ( smdataList.size() > 0 ) {
@@ -1393,7 +1393,7 @@ public StateMod_Data lookupSource2DataObject ( StateMod_DataSet dataset )
 		(sourceTypes[0] == StateMod_OperationalRight_Metadata_SourceOrDestinationType.NA) ) {
 		return null;
 	}
-	List<StateMod_Data> smdataList = new Vector();
+	List<StateMod_Data> smdataList = new Vector<StateMod_Data>();
 	for ( int i = 0; i < sourceTypes.length; i++ ) {
 		smdataList.addAll( StateMod_Util.getDataList ( sourceTypes[i], dataset, sourceID, true ));
 		if ( smdataList.size() > 0 ) {
@@ -1540,7 +1540,7 @@ throws IOException
 	try {
 		Message.printStatus ( 2, routine, "Processing operating rule " + anOprit.getItyopr() +
 			" intervening structures without loss line " + (linecount + 1) + ": " + iline );
-		List v = StringUtil.fixedRead(iline, format);
+		List<Object> v = StringUtil.fixedRead(iline, format);
 		for ( int i=0; i<ninterv; i++) {
 			anOprit.setIntern(i, ((String)v.get(i)).trim(), false);
 		}
@@ -1739,7 +1739,7 @@ throws IOException
 	// StateMod doc treats last part as numbers but treat as strings here consistent with source ID/account
 	//String formatRioGrande = "x64f8f8x1a12i8x1a12i8x1a12i8";
 	String formatRioGrande = "x64f8f8x1a12a8x1a12a8x1a12a8";
-	List v = null;
+	List<Object> v = null;
 	String iline = in.readLine();
 	++linecount;
 	try {
@@ -1779,7 +1779,7 @@ throws IOException
 	int errorCount = 0;
 	// San Juan additional data...
 	String formatSanJuan = "x64f8f8";
-	List v = null;
+	List<Object> v = null;
 	String iline = in.readLine();
 	++linecount;
 	try {
@@ -2084,9 +2084,9 @@ private static List<StateMod_OperationalRight> readStateModFileVersion2(String f
 throws Exception {
 	String routine = "StateMod_OperationalRight.readStateModFileVersion2";
 	String iline = null;
-	List v = null;
-	List<StateMod_OperationalRight> theOprits = new Vector();
-	List<String> commentsBeforeData = new Vector(); // Will be used prior to finding an operational right
+	List<Object> v = null;
+	List<StateMod_OperationalRight> theOprits = new Vector<StateMod_OperationalRight>();
+	List<String> commentsBeforeData = new Vector<String>(); // Will be used prior to finding an operational right
 	// Formats use strings for many variables because files may have extra
 	// whitespace or be used for numeric and character data...
 	// Consistent among all operational rights...
@@ -2185,7 +2185,7 @@ throws Exception {
 				anOprit.setCommentsBeforeData(commentsBeforeData);
 			}
 			// Always clear out for next right...
-			commentsBeforeData = new Vector(1);
+			commentsBeforeData = new Vector<String>(1);
 
 			// line 1
 			if (Message.isDebugOn) {
@@ -2256,7 +2256,7 @@ throws Exception {
 				// The type is not known so read in as strings and set the type to negative.
 				// Most of the reading will occur at the top of the loop.
 				readingUnknownRight = true;
-				rightStringsList = new Vector();
+				rightStringsList = new Vector<String>();
 				rightStringsList.add ( iline );
 				// Add list and continue to add if more lines are read.  Since using a reference
 				// this will ensure that all lines are set for the right.
@@ -3427,9 +3427,9 @@ public static void writeStateModFileVersion1(String infile, String outfile,
 	List<StateMod_OperationalRight> theOpr, List<String> newComments)
 throws Exception {
 	PrintWriter	out = null;
-	List commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	String routine = "StateMod_OperationalRight.writeStateModFileVersion1";
 
@@ -3445,11 +3445,11 @@ throws Exception {
 		String formatsp = "%36.36s";
 		String formatI = "%-12.12s";
 		StateMod_OperationalRight opr = null;
-		List v = new Vector(12);
-		List vS = new Vector(12);
-		List vsp = new Vector(1);
-		List vI = new Vector(1);
-		List comments_vector = null;
+		List<Object> v = new Vector<Object>(12);
+		List<Object> vS = new Vector<Object>(12);
+		List<Object> vsp = new Vector<Object>(1);
+		List<Object> vI = new Vector<Object>(1);
+		List<String> comments_vector = null;
 	
 		out.println(cmnt);
 		out.println(cmnt + " *******************************************************");
@@ -3526,7 +3526,7 @@ throws Exception {
 			}
 			// If the operational right was not understood at read, print the original contents
 			// and go to the next right.
-			List rightStringsList = opr.getRightStrings();
+			List<String> rightStringsList = opr.getRightStrings();
 			if ( rightStringsList != null ) {
 				for ( int j = 0; j < rightStringsList.size(); j++ ) {
 					out.println ( rightStringsList.get(j) );
@@ -3621,9 +3621,9 @@ public static void writeStateModFileVersion2(String infile, String outfile,
 	List<StateMod_OperationalRight> theOpr, List<String> newComments, StateMod_DataSet dataSet )
 throws Exception {
 	PrintWriter	out = null;
-	List commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	String routine = "StateMod_OperationalRight.writeStateModFileVersion2";
 
@@ -3642,10 +3642,10 @@ throws Exception {
 		String formatsp = "%36.36s";
 		String formatI = "%-12.12s";
 		StateMod_OperationalRight opr = null;
-		List v = new Vector(18);
-		List vMonthlySwitches = new Vector(12);
-		List vsp = new Vector(1);
-		List vI = new Vector(1);
+		List<Object> v = new Vector<Object>(18);
+		List<Object> vMonthlySwitches = new Vector<Object>(12);
+		List<Object> vsp = new Vector<Object>(1);
+		List<Object> vI = new Vector<Object>(1);
 		List<String> commentsBeforeData = null;
 	
 		out.println(cmnt);

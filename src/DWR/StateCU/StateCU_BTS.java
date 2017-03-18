@@ -64,10 +64,10 @@ private final String TS_VAR_STRUCTURE_INDEX = "Structure Index";
 private final String TS_VAR_YEAR = "Year";
 private final String TS_VAR_MONTH_INDEX = "Month Index";
 
-private String __version = "Unknown"; // File format version as a String (e.g., "9.62") or "Unknown".
+//private String __version = "Unknown"; // File format version as a String (e.g., "9.62") or "Unknown".
 private double __versionDouble = -999.0; // File format version as a double
-private String __headerProgram = "StateCU";		// Program that created the file.
-private String __headerDateString = "Unknown";		// Date for the software version.
+//private String __headerProgram = "StateCU";		// Program that created the file.
+//private String __headerDateString = "Unknown";		// Date for the software version.
 
 // Data members...
 
@@ -79,7 +79,7 @@ private EndianRandomAccessFile 	__fp; // Pointer to random access file (StateCU 
 						// are assumed to be little endian since they are written
 						// by Lahey FORTRAN code on a PC).  If necessary, the year
 						// value can be examined to determine the file endianness.
-private static Hashtable __fileHashtable = new Hashtable();
+private static Hashtable<String,StateCU_BTS> __fileHashtable = new Hashtable<String,StateCU_BTS>();
 						// A hashtable for the file pointers (instances of
 						// StateCU_BTS).  This is used to increase performance.
 private int	__headerLengthBytes = 0;		// Length of the header in
@@ -252,14 +252,14 @@ throws IOException
 	// Loop through the Hashtable and remove all entries...
 	// Remove from the Hashtable...
 
-	Enumeration keysEnumeration = __fileHashtable.keys();
+	Enumeration<String> keysEnumeration = __fileHashtable.keys();
 
 	StateCU_BTS bts = null;
 	String filename = null;
 
 	while (keysEnumeration.hasMoreElements()) {
-		filename = (String)keysEnumeration.nextElement();	
-		bts = (StateCU_BTS)__fileHashtable.get(filename);
+		filename = keysEnumeration.nextElement();	
+		bts = __fileHashtable.get(filename);
 		bts.close();
 		__fileHashtable.remove ( filename );
 	}	
@@ -763,10 +763,10 @@ empty file).
 private void readHeaderVersion()
 throws IOException
 {	// The initial StateCU binary file specification does not have a header with version.
-    __version = "Unknown";
+    //__version = "Unknown";
 	__versionDouble = -999.0;
-	__headerProgram = "StateCU";
-	__headerDateString = null;
+	//__headerProgram = "StateCU";
+	//__headerDateString = null;
 }
 
 /**
@@ -869,7 +869,7 @@ throws Exception
 	// Call the fully-loaded method...
 	// Pass the file pointer and an empty time series, which
 	// will be used to locate the time series in the file.
-	List tslist = in.readTimeSeriesList ( tsident_string, date1, date2, units, read_data );
+	List<TS> tslist = in.readTimeSeriesList ( tsident_string, date1, date2, units, read_data );
 
 	if (closeFile) {
 		in.close();
@@ -946,7 +946,7 @@ implemented).
 @exception IOException if the interval for the time series does not match that
 for the file or if a write error occurs.
 */
-public List readTimeSeriesList ( String tsidentPattern, DateTime reqDate1,
+public List<TS> readTimeSeriesList ( String tsidentPattern, DateTime reqDate1,
 					DateTime reqDate2, String reqUnits, boolean readData )
 throws Exception
 {	String routine = "StateCUd_BTS.readTimeSeriesList";
@@ -959,7 +959,7 @@ throws Exception
 	// SAM 2006-01-04 - non-static is used because there is a penalty
 	// reading the header.  This needs to be considered.
 
-	List tslist = new Vector();
+	List<TS> tslist = new Vector<TS>();
 	if ( (tsidentPattern == null) || (tsidentPattern.length() == 0) ) {
 	    // Match all parts when searching the data.
 		tsidentPattern = "*.*.*.*.*";

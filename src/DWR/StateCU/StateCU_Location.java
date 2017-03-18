@@ -73,7 +73,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.PropList;
@@ -233,23 +232,23 @@ regardless of the year value.  For wells, the collection is done for a specific 
 @param year The year of interest, only used for well identifiers when collection is specified with parcels.
 @return the list of collection part IDS, or null if not defined.
 */
-public List getCollectionPartIDsForYear ( int year )
+public List<String> getCollectionPartIDsForYear ( int year )
 {	if ( (__collectionIDList == null) || (__collectionIDList.size() == 0) ) {
 		return null;
 	}
 	if ( __collection_part_type.equalsIgnoreCase(COLLECTION_PART_TYPE_DITCH) ) {
 		// The list of part IDs will be the first and only list (same for all years)...
-		return (List)__collectionIDList.get(0);
+		return __collectionIDList.get(0);
 	}
 	else if ( __collection_part_type.equalsIgnoreCase(COLLECTION_PART_TYPE_WELL) ) {
 		// The list of part IDs will be the first and only list (same for all years)...
-		return (List)__collectionIDList.get(0);
+		return __collectionIDList.get(0);
 	}
 	else if ( __collection_part_type.equalsIgnoreCase(COLLECTION_PART_TYPE_PARCEL) ) {
 		// The list of part IDs needs to match the year.
 		for ( int i = 0; i < __collectionYear.length; i++ ) {
 			if ( year == __collectionYear[i] ) {
-				return (List)__collectionIDList.get(i);
+				return __collectionIDList.get(i);
 			}
 		}
 	}
@@ -261,7 +260,7 @@ Return the collection part ID type list.  This is used with well locations when 
 by well identifiers (WDIDs and permit receipt numbers).
 @return the list of collection part ID types, or null if not defined.
 */
-public List getCollectionPartIDTypes () {
+public List<String> getCollectionPartIDTypes () {
 	if (__collectionIDTypeList == null ) {
 		return null;
 	}
@@ -423,7 +422,7 @@ public String getRegion2()
 {	return __region2;
 }
 
-public List getTemp() {
+public List<List<String>> getTemp() {
 	return __collectionIDList;
 }
 
@@ -474,8 +473,8 @@ public static List<StateCU_Location> readStateCUFile ( String filename )
 throws IOException
 {	String rtn = "StateCU_Location.readStateCUFile";
 	String iline = null;
-	List<String> v = new Vector ( 8 );
-	List<StateCU_Location> culoc_Vector = new Vector ( 100 );	// Data to return.
+	List<Object> v = new ArrayList<Object>(8);
+	List<StateCU_Location> culoc_List = new ArrayList<StateCU_Location>();
 	int i;
 	int format_0[] = {
 				StringUtil.TYPE_STRING,	// CU Location
@@ -531,23 +530,23 @@ throws IOException
 		culoc = new StateCU_Location();
 
 		StringUtil.fixedRead ( iline, format_0, format_0w, v );
-		culoc.setID ( v.get(0).trim() ); 
-		latitude = ( v.get(1).trim() );
+		culoc.setID ( ((String)v.get(0)).trim() ); 
+		latitude = ( ((String)v.get(1)).trim() );
 		if ((latitude.length() != 0) && StringUtil.isDouble(latitude)) {
 			culoc.setLatitude ( StringUtil.atod(latitude) );
 		}
-		elevation = v.get(2).trim();
+		elevation = ((String)v.get(2)).trim();
 		if ( (elevation.length() != 0) && StringUtil.isDouble(elevation)) {
 			culoc.setElevation ( StringUtil.atod(elevation) );
 		}
-		culoc.setRegion1 ( v.get(3).trim() ); 
-		culoc.setRegion2 ( v.get(4).trim() ); 
-		culoc.setName ( v.get(5).trim() ); 
-		num_climate_stations = ( v.get(6).trim() );
+		culoc.setRegion1 ( ((String)v.get(3)).trim() ); 
+		culoc.setRegion2 ( ((String)v.get(4)).trim() ); 
+		culoc.setName ( ((String)v.get(5)).trim() ); 
+		num_climate_stations = ( ((String)v.get(6)).trim() );
 		if ( (num_climate_stations.length() != 0) && StringUtil.isInteger(num_climate_stations)) {
 			culoc.setNumClimateStations ( StringUtil.atoi(num_climate_stations) );
 		}
-		awc = v.get(7).trim();
+		awc = ((String)v.get(7)).trim();
 		if ( (awc.length() != 0) && StringUtil.isDouble(awc)) {
 			culoc.setAwc ( StringUtil.atod(awc) );
 		}
@@ -559,23 +558,23 @@ throws IOException
 			}
 			StringUtil.fixedRead ( iline, format_1, format_1w, v );
 			vsize = v.size();
-			culoc.setClimateStationID ( v.get(0).trim(), i ); 
-			weight = v.get(1).trim();
+			culoc.setClimateStationID ( ((String)v.get(0)).trim(), i ); 
+			weight = ((String)v.get(1)).trim();
 			if ( (weight.length() != 0) && StringUtil.isDouble(weight)) {
 				culoc.setTemperatureStationWeight ( StringUtil.atod(weight), i );
 			}
-			weight = v.get(2).trim();
+			weight = ((String)v.get(2)).trim();
 			if ( (weight.length() != 0) && StringUtil.isDouble(weight)) {
 				culoc.setPrecipitationStationWeight ( StringUtil.atod(weight), i );
 			}
 			if ( vsize > 3 ) {
-				ota = v.get(3).trim();
+				ota = ((String)v.get(3)).trim();
 				if ( (ota.length() != 0) && StringUtil.isDouble(ota)) {
 					culoc.setOrographicTemperatureAdjustment ( StringUtil.atod(ota), i );
 				}
 			}
 			if ( vsize > 4 ) {
-				opa = v.get(4).trim();
+				opa = ((String)v.get(4)).trim();
 				if ( (opa.length() != 0) &&	StringUtil.isDouble(opa)) {
 					culoc.setOrographicPrecipitationAdjustment ( StringUtil.atod(opa), i );
 				}
@@ -583,12 +582,12 @@ throws IOException
 		}
 
 		// Add the StateCU_Location to the vector...
-		culoc_Vector.add ( culoc );
+		culoc_List.add ( culoc );
 	}
 	if ( in != null ) {
 		in.close();
 	}
-	return culoc_Vector;
+	return culoc_List;
 }
 
 /**
@@ -654,9 +653,9 @@ Set the collection list for an aggregate/system.  It is assumed that the
 collection applies to all years of data.
 @param ids The identifiers indicating the locations to collection.
 */
-public void setCollectionPartIDs ( List ids )
+public void setCollectionPartIDs ( List<String> ids )
 {	if ( __collectionIDList == null ) {
-		__collectionIDList = new Vector ( 1 );
+		__collectionIDList = new ArrayList<List<String>>();
 		__collectionYear = new int[1];
 	}
 	else {
@@ -675,8 +674,8 @@ collection applies to all years of data.
 */
 public void setCollectionPartIDs ( List<String> ids, List<String> idTypes )
 {	
-	__collectionIDList = new ArrayList( 1 );
-	__collectionIDTypeList = new ArrayList( 1 );
+	__collectionIDList = new ArrayList<List<String>>();
+	__collectionIDTypeList = new ArrayList<List<String>>();
 	__collectionYear = new int[1];
 
 	// Now assign...
@@ -691,11 +690,11 @@ assumed that the collection applies to all years of data.
 @param year The year to which the collection applies.
 @param ids The identifiers indicating the locations in the collection.
 */
-public void setCollectionPartIDsForYear ( int year, List ids )
+public void setCollectionPartIDsForYear ( int year, List<String> ids )
 {	int pos = -1;	// Position of year in data lists.
 	if ( __collectionIDList == null ) {
 		// No previous data so create memory...
-		__collectionIDList = new Vector ( 1 );
+		__collectionIDList = new ArrayList<List<String>>();
 		__collectionIDList.add ( ids );
 		__collectionYear = new int[1];
 		__collectionYear[0] = year;
@@ -993,7 +992,7 @@ processing headers).  Specify as null if no previous file is available.
 @exception IOException if there is an error writing the file.
 */
 public static void writeStateCUFile ( String filenamePrev, String filename,
-					List dataList, List newComments )
+					List<StateCU_Location> dataList, List<String> newComments )
 throws IOException
 {	writeStateCUFile ( filenamePrev, filename, dataList, newComments, null );
 }
@@ -1013,11 +1012,11 @@ used.  This is useful for comparing with or regenerating old data sets.
 @exception IOException if there is an error writing the file.
 */
 public static void writeStateCUFile ( String filenamePrev, String filename,
-					List dataList, List newComments, PropList props )
+					List<StateCU_Location> dataList, List<String> newComments, PropList props )
 throws IOException
-{	List commentStr = new Vector(1);
+{	List<String> commentStr = new ArrayList<String>(1);
 	commentStr.add ( "#" );
-	List ignoreCommentStr = new Vector(1);
+	List<String> ignoreCommentStr = new ArrayList<String>(1);
 	ignoreCommentStr.add ( "#>" );
 	PrintWriter out = null;
 	String fullFilenamePrev = IOUtil.getPathUsingWorkingDir ( filenamePrev );
@@ -1030,17 +1029,16 @@ throws IOException
 	writeStateCUFile ( dataList, out, props );
 	out.flush();
 	out.close();
-	out = null;
 }
 
 /**
 Write a Vector of StateCU_Location to an opened file.
-@param data_Vector A Vector of StateCU_Location to write.
+@param dataList A Vector of StateCU_Location to write.
 @param out output PrintWriter.
 @param props Properties to control the write.  See the writeStateCUFile() method for a description.
 @exception IOException if an error occurs.
 */
-private static void writeStateCUFile ( List data_Vector, PrintWriter out, PropList props )
+private static void writeStateCUFile ( List<StateCU_Location> dataList, PrintWriter out, PropList props )
 throws IOException
 {	int i,j;
 	String cmnt = "#>";
@@ -1052,7 +1050,7 @@ throws IOException
 	// Not used but indicates format before orographic adjustments were added
 	//String format2_version10 = "%-12.12s%6.6s%9.9s";
 	StateCU_Location cu_loc = null;
-	List v = new Vector(8);	// Reuse for all output lines.
+	List<Object> v = new ArrayList<Object>(8);	// Reuse for all output lines.
 
 	if ( props == null ) {
 		props = new PropList ( "StateCU_Location" );
@@ -1104,13 +1102,13 @@ throws IOException
 	out.println ( cmnt + "EndHeader" );
 
 	int num = 0;
-	if ( data_Vector != null ) {
-		num = data_Vector.size();
+	if ( dataList != null ) {
+		num = dataList.size();
 	}
 	int numclimate = 0;
 	double val;	// Generic value
 	for ( i=0; i<num; i++ ) {
-		cu_loc = (StateCU_Location)data_Vector.get(i);
+		cu_loc = dataList.get(i);
 		if ( cu_loc == null ) {
 			continue;
 		}
@@ -1202,15 +1200,15 @@ filenames.
 @param newComments comments to add to the top of the file (e.g., command file and HydroBase version). 
 @throws Exception if an error occurs.
 */
-public static List writeListFile(String filename, String delimiter, boolean update, List data,
-		List newComments) 
+public static List<File> writeListFile(String filename, String delimiter, boolean update, List<StateCU_Location> data,
+		List<String> newComments) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
 		size = data.size();
 	}
 	
-	List fields = new Vector();
+	List<String> fields = new ArrayList<String>();
 	fields.add("ID");
 	fields.add("Name");
 	fields.add("Latitude");
@@ -1221,12 +1219,12 @@ throws Exception {
 	fields.add("AWC");
 	int fieldCount = fields.size();
 
-	List names = new Vector(fieldCount);
-	List formats = new Vector(fieldCount); 
+	List<String> names = new ArrayList<String>(fieldCount);
+	List<String> formats = new ArrayList<String>(fieldCount); 
 	int comp = StateCU_DataSet.COMP_CU_LOCATIONS;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.get(i);
+		s = fields.get(i);
 		names.add(StateCU_Util.lookupPropValue(comp, "FieldName", s));
 		formats.add(StateCU_Util.lookupPropValue(comp, "Format", s));
 	}
@@ -1239,9 +1237,9 @@ throws Exception {
 	int j = 0;
 	PrintWriter out = null;
 	StateCU_Location loc = null;
-	List commentString = new Vector(1);
+	List<String> commentString = new ArrayList<String>(1);
 	commentString.add ( "#" );
-	List ignoreCommentString = new Vector(1);
+	List<String> ignoreCommentString = new ArrayList<String>(1);
 	ignoreCommentString.add ("#>");
 	String[] line = new String[fieldCount];
 	StringBuffer buffer = new StringBuffer();
@@ -1250,12 +1248,12 @@ throws Exception {
 	try {
 		// Add some basic comments at the top of the file.  However, do this to a copy of the
 		// incoming comments so that they are not modified in the calling code.
-		List newComments2 = null;
+		List<String> newComments2 = null;
 		if ( newComments == null ) {
-			newComments2 = new Vector();
+			newComments2 = new ArrayList<String>();
 		}
 		else {
-			newComments2 = new Vector(newComments);
+			newComments2 = new ArrayList<String>(newComments);
 		}
 		newComments2.add(0,"");
 		newComments2.add(1,"StateCU location information as delimited list file.");
@@ -1274,7 +1272,7 @@ throws Exception {
 		out.println(buffer.toString());
 		
 		for (int i = 0; i < size; i++) {
-			loc = (StateCU_Location)data.get(i);
+			loc = data.get(i);
 			
 			line[0] = StringUtil.formatString(loc.getID(), ((String)formats.get(0))).trim();
 			line[1] = StringUtil.formatString(loc.getName(), ((String)formats.get(1))).trim();
@@ -1298,17 +1296,13 @@ throws Exception {
 
 			out.println(buffer.toString());
 		}
-		out.flush();
-		out.close();
-		out = null;
 	}
-	catch (Exception e) {
+	finally {
 		if (out != null) {
 			out.flush();
 			out.close();
 		}
 		out = null;
-		throw e;
 	}
 
 	int lastIndex = filename.lastIndexOf(".");
@@ -1321,7 +1315,7 @@ throws Exception {
 	String collectionFilename = front + "_Collections." + end;
 	writeCollectionListFile(collectionFilename, delimiter, update, data, newComments );
 	
-	List filesWritten = new Vector();
+	List<File> filesWritten = new ArrayList<File>();
 	filesWritten.add ( new File(filenameFull) );
 	filesWritten.add ( new File(climateFilename) );
 	filesWritten.add ( new File(collectionFilename) );
@@ -1343,14 +1337,14 @@ be extracted).
 @throws Exception if an error occurs.
 */
 public static void writeClimateStationListFile(String filename, String delimiter, boolean update,
-	List data, List newComments ) 
+	List<StateCU_Location> data, List<String> newComments ) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
 		size = data.size();
 	}
 	
-	List fields = new Vector();
+	List<String> fields = new ArrayList<String>();
 	fields.add("LocationID");
 	fields.add("StationID");
 	fields.add("TempWeight");
@@ -1359,12 +1353,12 @@ throws Exception {
 	fields.add("OrographicPrecipAdj");
 	int fieldCount = fields.size();
 
-	List names = new Vector(fieldCount);
-	List formats = new Vector(fieldCount); 
+	List<String> names = new ArrayList<String>(fieldCount);
+	List<String> formats = new ArrayList<String>(fieldCount); 
 	int comp = StateCU_DataSet.COMP_CU_LOCATION_CLIMATE_STATIONS;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.get(i);
+		s = fields.get(i);
 		names.add( StateCU_Util.lookupPropValue(comp, "FieldName", s));
 		formats.add(StateCU_Util.lookupPropValue(comp, "Format", s));
 	}
@@ -1379,9 +1373,9 @@ throws Exception {
 	int num = 0;
 	PrintWriter out = null;
 	StateCU_Location loc = null;
-	List commentString = new Vector(1);
+	List<String> commentString = new ArrayList<String>(1);
 	commentString.add ( "#" );
-	List ignoreCommentString = new Vector(1);
+	List<String> ignoreCommentString = new ArrayList<String>(1);
 	ignoreCommentString.add ( "#>" );
 	String[] line = new String[fieldCount];
 	String id = null;
@@ -1390,12 +1384,12 @@ throws Exception {
 	try {
 		// Add some basic comments at the top of the file.  However, do this to a copy of the
 		// incoming comments so that they are not modified in the calling code.
-		List newComments2 = null;
+		List<String> newComments2 = null;
 		if ( newComments == null ) {
-			newComments2 = new Vector();
+			newComments2 = new ArrayList<String>();
 		}
 		else {
-			newComments2 = new Vector(newComments);
+			newComments2 = new ArrayList<String>(newComments);
 		}
 		newComments2.add(0,"");
 		newComments2.add(1,"StateCU location climate station assignment information as delimited list file.");
@@ -1441,17 +1435,12 @@ throws Exception {
 				out.println(buffer.toString());
 			}
 		}
-		out.flush();
-		out.close();
-		out = null;
 	}
-	catch (Exception e) {
+	finally {
 		if (out != null) {
 			out.flush();
 			out.close();
 		}
-		out = null;
-		throw e;
 	}
 }
 
@@ -1470,14 +1459,14 @@ be extracted.
 @throws Exception if an error occurs.
 */
 public static void writeCollectionListFile(String filename, String delimiter, boolean update,
-	List data, List newComments ) 
+	List<StateCU_Location> data, List<String> newComments ) 
 throws Exception {
 	int size = 0;
 	if (data != null) {
 		size = data.size();
 	}
 	
-	List fields = new Vector();
+	List<String> fields = new ArrayList<String>();
 	fields.add("LocationID");
 	fields.add("Division");
 	fields.add("Year");
@@ -1493,7 +1482,7 @@ throws Exception {
 	
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.get(i);
+		s = fields.get(i);
 		names[i] = StateCU_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateCU_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -1510,27 +1499,27 @@ throws Exception {
 	int numYears = 0;
 	PrintWriter out = null;
 	StateCU_Location loc = null;
-	List commentString = new Vector(1);
+	List<String> commentString = new ArrayList<String>(1);
 	commentString.add ( "#" );
-	List ignoreCommentString = new Vector(1);
+	List<String> ignoreCommentString = new ArrayList<String>(1);
 	ignoreCommentString.add ( "#>" );
 	String[] field = new String[fieldCount];
 	String colType = null;
 	String id = null;
 	String partType = null;	
 	StringBuffer buffer = new StringBuffer();
-	List ids = null;
-	List idTypes = null;
+	List<String> ids = null;
+	List<String> idTypes = null;
 
 	try {
 		// Add some basic comments at the top of the file.  However, do this to a copy of the
 		// incoming comments so that they are not modified in the calling code.
-		List newComments2 = null;
+		List<String> newComments2 = null;
 		if ( newComments == null ) {
-			newComments2 = new Vector();
+			newComments2 = new ArrayList<String>();
 		}
 		else {
-			newComments2 = new Vector(newComments);
+			newComments2 = new ArrayList<String>(newComments);
 		}
 		newComments2.add(0,"");
 		newComments2.add(1,"StateCU location collection information as delimited list file.");
@@ -1551,7 +1540,7 @@ throws Exception {
 		out.println(buffer.toString());
 		
 		for (int i = 0; i < size; i++) {
-			loc = (StateCU_Location)data.get(i);
+			loc = data.get(i);
 			id = loc.getID();
 			div = loc.getCollectionDiv();
 			years = loc.getCollectionYears();
@@ -1578,11 +1567,11 @@ throws Exception {
 					field[2] = StringUtil.formatString(years[j],formats[2]).trim();
 					field[3] = StringUtil.formatString(colType,formats[3]).trim();
 					field[4] = StringUtil.formatString(partType,formats[4]).trim();
-					field[5] = StringUtil.formatString(((String)(ids.get(k))),formats[5]).trim();
+					field[5] = StringUtil.formatString(ids.get(k),formats[5]).trim();
 					field[6] = "";
 					if ( numIdTypes > k ) {
 						// Have data to output
-						field[6] = StringUtil.formatString(((String)(idTypes.get(k))),formats[6]).trim();
+						field[6] = StringUtil.formatString(idTypes.get(k),formats[6]).trim();
 					}
 	
 					buffer = new StringBuffer();	
@@ -1601,17 +1590,12 @@ throws Exception {
 				}
 			}
 		}
-		out.flush();
-		out.close();
-		out = null;
 	}
-	catch (Exception e) {
+	finally {
 		if (out != null) {
 			out.flush();
 			out.close();
 		}
-		out = null;
-		throw e;
 	}
 }
 

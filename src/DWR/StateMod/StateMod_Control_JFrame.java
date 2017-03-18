@@ -125,6 +125,7 @@ import RTi.Util.Time.YearType;
 /**
 This class is a GUI for displaying and editing control file data.
 */
+@SuppressWarnings("serial")
 public class StateMod_Control_JFrame extends JFrame
 implements ActionListener, ItemListener, WindowListener {
 
@@ -282,7 +283,7 @@ data object.
 @return true if the text fields are okay, false if not.
 */
 private boolean checkInput() {
-	List errors = new Vector();
+	List<String> errors = new Vector<String>();
 	int errorCount = 0;
 
 	// for each field, check if it contains valid input.  If not,

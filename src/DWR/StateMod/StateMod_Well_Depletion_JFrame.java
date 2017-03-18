@@ -80,6 +80,7 @@ import RTi.Util.String.StringUtil;
 /**
 This class is a gui for displaying and editing well depletion data.
 */
+@SuppressWarnings("serial")
 public class StateMod_Well_Depletion_JFrame extends JFrame
 implements ActionListener, KeyListener, MouseListener, WindowListener {
 
@@ -223,8 +224,9 @@ private boolean saveData() {
 	boolean needToSave = false;
 
 	// if the Vectors are differently-sized, they're different
-	List wv = __worksheet.getAllData();		// w for worksheet
-	List lv = __currentWell.getDepletions();	// l for welL
+	@SuppressWarnings("unchecked")
+	List<StateMod_ReturnFlow> wv = (List<StateMod_ReturnFlow>)__worksheet.getAllData();		// w for worksheet
+	List<StateMod_ReturnFlow> lv = (List<StateMod_ReturnFlow>)__currentWell.getDepletions();	// l for welL
 
 	needToSave = !(StateMod_ReturnFlow.equals(wv, lv));
 
@@ -239,12 +241,11 @@ private boolean saveData() {
 	// clone the objects from the worksheet vector and assign them
 	// to the diversion object as its new return flows.
 	int size = wv.size();
-	List clone = new Vector();
+	List<StateMod_ReturnFlow> clone = new Vector<StateMod_ReturnFlow>();
 	StateMod_ReturnFlow rf;
 	StateMod_ReturnFlow crf;
 	for (int i = 0; i < size; i++) {
-		rf = (StateMod_ReturnFlow)
-			((StateMod_ReturnFlow)(wv.get(i))).clone();
+		rf = (StateMod_ReturnFlow)wv.get(i).clone();
 		crf = (StateMod_ReturnFlow)rf.clone();
 		crf.setCrtnid(StringUtil.getToken(rf.getCrtnid(), " ",
 			StringUtil.DELIM_SKIP_BLANKS, 0));
@@ -265,7 +266,8 @@ exist.
 */
 private int checkInput() {
 	String routine = "StateMod_Well_ReturnFlow_JFrame.checkInput";
-	List v = __worksheet.getAllData();
+	@SuppressWarnings("unchecked")
+	List<StateMod_ReturnFlow> v = (List<StateMod_ReturnFlow>)__worksheet.getAllData();
 
 	int size = v.size();
 	StateMod_ReturnFlow rf = null;
@@ -273,7 +275,7 @@ private int checkInput() {
 	String riverNode;
 	int fatalCount = 0;
 	for (int i = 0; i < size; i++) {
-		rf = (StateMod_ReturnFlow)(v.get(i));
+		rf = v.get(i);
 		riverNode = rf.getCrtnid();
 		riverNode = StringUtil.getToken(riverNode, " ", 
 			StringUtil.DELIM_SKIP_BLANKS, 0);
@@ -454,14 +456,14 @@ public void setupGUI() {
 	int widths[] = null;
 	JScrollWorksheet jsw = null;
 	try {	
-		List nodes = (List)(__dataset.getComponentForComponentType(
+		@SuppressWarnings("unchecked")
+		List<StateMod_RiverNetworkNode> nodes = (List<StateMod_RiverNetworkNode>)(__dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_RIVER_NETWORK).getData());	
-		List v = new Vector();
-		List v2 = __currentWell.getDepletions();
+		List<StateMod_ReturnFlow> v = new Vector<StateMod_ReturnFlow>();
+		List<StateMod_ReturnFlow> v2 = __currentWell.getDepletions();
 		StateMod_ReturnFlow rf;
 		for (int i = 0; i < v2.size(); i++) {
-			rf = (StateMod_ReturnFlow)
-				((StateMod_ReturnFlow)v2.get(i)).clone();
+			rf = (StateMod_ReturnFlow)v2.get(i).clone();
 			rf.setCrtnid(rf.getCrtnid()
 				+ StateMod_Util.findNameInVector(rf.getCrtnid(),
 				nodes, true));
@@ -477,24 +479,28 @@ public void setupGUI() {
 		jsw = new JScrollWorksheet(crw, tmw, p);
 		__worksheet = jsw.getJWorksheet();
 
-		v = StateMod_Util.createIdentifierList(nodes, true);
+		List<String> ids = StateMod_Util.createIdentifierListFromStateModData(nodes, true, null);
 		__worksheet.setColumnJComboBoxValues(
-		StateMod_ReturnFlow_TableModel.COL_RIVER_NODE, v, false);
+		StateMod_ReturnFlow_TableModel.COL_RIVER_NODE, ids, false);
 
-		List delayIDs = null;
+		List<StateMod_DelayTable> delayIDs = null;
 		if (__dataset.getIday() == 1) {
-			delayIDs = (List)(__dataset
+			@SuppressWarnings("unchecked")
+			List<StateMod_DelayTable> delayIDs0 = (List<StateMod_DelayTable>)(__dataset
 				.getComponentForComponentType(
 				StateMod_DataSet.COMP_DELAY_TABLES_DAILY).getData());
+			delayIDs = delayIDs0;
 		}
 		else {
-			delayIDs = (List)(__dataset
+			@SuppressWarnings("unchecked")
+			List<StateMod_DelayTable> delayIDs0 = (List<StateMod_DelayTable>)(__dataset
 				.getComponentForComponentType(
 				StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY).getData());
+			delayIDs = delayIDs0;
 		}
-		v = StateMod_Util.createIdentifierList(delayIDs, true);
+		ids = StateMod_Util.createIdentifierListFromStateModData(delayIDs, true, null);
 		__worksheet.setColumnJComboBoxValues(
-		StateMod_ReturnFlow_TableModel.COL_RETURN_ID, v, false);
+		StateMod_ReturnFlow_TableModel.COL_RETURN_ID, ids, false);
 		widths = crw.getColumnWidths();		
 	}
 	catch (Exception e) {

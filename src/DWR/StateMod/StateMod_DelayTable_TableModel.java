@@ -31,6 +31,7 @@ import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 /**
 This class displays delay table related data.
 */
+@SuppressWarnings("serial")
 public class StateMod_DelayTable_TableModel 
 extends JWorksheet_AbstractRowTableModel {
 
@@ -94,7 +95,7 @@ throws Exception {
 Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 */
-public Class getColumnClass (int columnIndex) {
+public Class<?> getColumnClass (int columnIndex) {
 	switch (columnIndex) {
 		case COL_ID:		return String.class;
 		case COL_DATE:		return Integer.class;
@@ -211,9 +212,9 @@ public int[] getColumnWidths() {
 
 /**
 Sets the delay table data that will be displayed for a particular delay.
-@param subDelays Vector of subDelay information (month/day, pct)
+@param subDelays list of subDelay information (month/day, pct)
 */
-public void setSubDelays(List subDelays) {
+public void setSubDelays(List<Double> subDelays) {
 	__subDelays = subDelays;
 	_data = subDelays;
 	if (__subDelays == null) {

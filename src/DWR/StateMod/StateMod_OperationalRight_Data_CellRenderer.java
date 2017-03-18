@@ -16,6 +16,7 @@ import RTi.Util.GUI.JWorksheet_AbstractExcelCellRenderer;
 /**
 This class renders cells for operational right tables.
 */
+@SuppressWarnings("serial")
 public class StateMod_OperationalRight_Data_CellRenderer
 extends JWorksheet_AbstractExcelCellRenderer {
 

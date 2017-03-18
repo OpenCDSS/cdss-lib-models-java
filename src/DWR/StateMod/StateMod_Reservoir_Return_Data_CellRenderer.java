@@ -5,6 +5,7 @@ import RTi.Util.GUI.JWorksheet_AbstractExcelCellRenderer;
 /**
 This class is used for rendering cells for reservoir station return assignment.
 */
+@SuppressWarnings("serial")
 public class StateMod_Reservoir_Return_Data_CellRenderer
 extends JWorksheet_AbstractExcelCellRenderer {
 

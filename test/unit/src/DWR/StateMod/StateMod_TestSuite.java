@@ -2,6 +2,7 @@ package DWR.StateMod;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -10,7 +11,7 @@ import RTi.Util.Test.TestCollector;
 
 public class StateMod_TestSuite extends TestCase {
 
-    private static ArrayList testList;
+    private static List<String> testList;
     
     public StateMod_TestSuite(String testname)
     {
@@ -23,7 +24,6 @@ public class StateMod_TestSuite extends TestCase {
     
     public static Test suite() throws ClassNotFoundException
     {
-        testList = new ArrayList();
         TestSuite suite = new TestSuite();
         TestCollector tests = new TestCollector();
         File path = new File("test\\unit\\src");

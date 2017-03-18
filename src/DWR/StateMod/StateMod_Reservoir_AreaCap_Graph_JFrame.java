@@ -35,6 +35,7 @@ import org.jfree.data.xy.XYSeries;
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.Message.Message;
 
+@SuppressWarnings("serial")
 public class StateMod_Reservoir_AreaCap_Graph_JFrame extends JFrame
 {
 
@@ -77,7 +78,7 @@ private DefaultTableXYDataset createDataset()
 {	String routine ="StateMod_Reservoir_AreaCap_Graph_JFrame.createDataSet";
 	DefaultTableXYDataset dataset = new DefaultTableXYDataset();
 
-	List v = __res.getAreaCaps();
+	List<StateMod_ReservoirAreaCap> v = __res.getAreaCaps();
 	int size = 0;
 	if ( v != null ) {
 		size = v.size();
