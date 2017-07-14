@@ -8,7 +8,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/cdss-lib-cdss-java"/>
 	<classpathentry kind="lib" path="lib/JCommon/jcommon.jar"/>
 	<classpathentry kind="lib" path="lib/JFreeChart/jfreechart.jar"/>
-	<classpathentry kind="lib" path="lib/Xerces/xerces.jar"/>
 	<classpathentry kind="lib" path="/cdss-util-buildtools/lib/junit-3.8.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
