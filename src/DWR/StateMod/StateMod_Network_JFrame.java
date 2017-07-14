@@ -81,11 +81,14 @@ import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 
-import org.apache.xerces.parsers.DOMParser;
+// Before 2017-07-01 Xerces was used - as of this date rely on built-in XML support in Java
+//import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import com.sun.org.apache.xerces.internal.parsers.DOMParser;
 
 import cdss.domain.hydrology.network.HydrologyNode;
 

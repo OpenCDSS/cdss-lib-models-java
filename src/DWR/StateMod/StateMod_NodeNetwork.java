@@ -9,11 +9,14 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Vector;
 
-import org.apache.xerces.parsers.DOMParser;
+// Before 2017-07-01 used Xerces but Java is now distributed with embedded Xerces
+//import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import com.sun.org.apache.xerces.internal.parsers.DOMParser;
 
 import RTi.DMI.DMIUtil;
 import RTi.GR.GRLimits;
