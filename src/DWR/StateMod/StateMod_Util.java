@@ -1234,12 +1234,10 @@ non-null list is guaranteed; however, the list may have zero items.
 returned from StateMod_Data.getID().  If true the string will contain the ID,
 followed by " - xxxx", where xxxx is the value returned from StateMod_Data.getName().
 */
-/*
-public static List<String> createIdentifierList ( List<Object> smdataList, boolean includeName )
+public static List<String> createIdentifierList ( List<? extends StateMod_Data> smdataList, boolean includeName )
 {
-	return createIdentifierList(smdataList, includeName, null );
+	return createIdentifierListFromStateModData(smdataList, includeName, null );
 }
-*/
 
 /**
 Create a list of strings for use in choices, etc.

@@ -21,7 +21,7 @@ which case an empty worksheet is shown.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_Plan_Return_Data_JFrame(List<StateMod_Plan> data, String titleString, boolean editable)
+public StateMod_Plan_Return_Data_JFrame(List<StateMod_ReturnFlow> data, String titleString, boolean editable)
 throws Exception {
 	super();
 	initialize(data, titleString, editable);
