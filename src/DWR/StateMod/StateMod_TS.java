@@ -1449,8 +1449,8 @@ throws Exception
         List<Object> v = new ArrayList<Object>(14);
         int format[] = null;
         int format_w[] = null;
-        int dataRowCount = 0; // Initialize for first iteration
-        int maxYears = 500; // Maximum years of data in a time series handled
+        int dataRowCount = 0; // Initialize for first iteration, value is 0+
+        int maxYears = 1500; // Maximum years of data in a time series handled
         int [] yearArray = new int[maxYears];
         double [][] dataArray = new double[maxYears][13]; // handles months and year total
         int year;
@@ -1645,7 +1645,12 @@ throws Exception
                     else {
                         // Always read the year so it can be used to set the period in time series metadata
                         ++dataRowCount;
-                        if ( dataRowCount <= maxYears ) {
+                        if ( dataRowCount >= maxYears ) {
+                        	// The array used to process the block of data is undersized
+                        	Message.printWarning(3,routine,"Maximum number of years (" + maxYears +
+                        		") cannot handle data file.  Need to update software code." );
+                        }
+                        if ( dataRowCount < maxYears ) {
                             StringUtil.fixedRead ( iline, format, format_w, v );
                             year = (Integer)v.get(0);
                             yearArray[dataRowCount - 1] = year;
