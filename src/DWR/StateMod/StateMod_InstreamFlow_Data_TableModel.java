@@ -47,8 +47,9 @@ import RTi.Util.IO.Validators;
 /**
 This table model displays instream flow data.
 */
+@SuppressWarnings("serial")
 public class StateMod_InstreamFlow_Data_TableModel 
-extends JWorksheet_AbstractRowTableModel implements StateMod_Data_TableModel {
+extends JWorksheet_AbstractRowTableModel<StateMod_InstreamFlow> implements StateMod_Data_TableModel {
 
 /**
 Number of columns in the table model.
@@ -77,9 +78,9 @@ Constructor.
 @param data the data that will be displayed in the table.
 @param editable whether the table data is editable or not
 */
-public StateMod_InstreamFlow_Data_TableModel(List data, boolean editable) {
+public StateMod_InstreamFlow_Data_TableModel(List<StateMod_InstreamFlow>data, boolean editable) {
 	if (data == null) {
-		_data = new Vector();	
+		_data = new Vector<StateMod_InstreamFlow>();	
 	}
 	else {
 		_data = data;
@@ -94,7 +95,7 @@ public StateMod_InstreamFlow_Data_TableModel(List data, boolean editable) {
 returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 */
-public Class getColumnClass (int columnIndex) {
+public Class<?> getColumnClass (int columnIndex) {
 	switch (columnIndex) {
 		case COL_ID:		return String.class;
 		case COL_NAME:		return String.class;

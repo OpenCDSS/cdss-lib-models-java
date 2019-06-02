@@ -87,8 +87,9 @@ This table model displays reservoir account data.  The model can display
 account data for a single reservoir or for 1+ reservoirs.  The difference is
 specified in the constructor and affects how many columns of data are shown.
 */
+@SuppressWarnings("serial")
 public class StateMod_ReservoirAccount_TableModel 
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel<StateMod_ReservoirAccount> {
 
 /**
 Number of columns in the table model.  For table models that display accounts
@@ -131,7 +132,7 @@ a single reservoir's right data.  This means that the reservoir ID field will
 not be shown.  If false then the reservoir right field will be included.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_ReservoirAccount_TableModel(List data, boolean editable,
+public StateMod_ReservoirAccount_TableModel(List<StateMod_ReservoirAccount> data, boolean editable,
 boolean singleReservoir)
 throws Exception {
 	if (data == null) {
@@ -158,7 +159,7 @@ Returns the class of the data stored in a given column.
 @param col the column for which to return the data class.
 @return the class of the data stored in a given column.
 */
-public Class getColumnClass (int col) {
+public Class<?> getColumnClass (int col) {
 	// necessary for table models that display accounts for 1+ reservoirs,
 	// so that the -1st column (ID) can also be displayed.  By doing it
 	// this way, code can be shared between the two kinds of table models
@@ -379,7 +380,7 @@ public void setValueAt(Object value, int row, int col)
 	}
 	double dval;
 	int ival;
-	StateMod_ReservoirAccount rac = (StateMod_ReservoirAccount)_data.get(row);
+	StateMod_ReservoirAccount rac = _data.get(row);
 
 	// necessary for table models that display accounts for 1+ reservoirs,
 	// so that the -1st column (ID) can also be displayed.  By doing it

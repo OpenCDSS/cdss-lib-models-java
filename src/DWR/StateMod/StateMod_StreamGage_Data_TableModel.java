@@ -45,8 +45,9 @@ import RTi.Util.IO.Validator;
 /**
 This table model displays reservoir data.
 */
+@SuppressWarnings("serial")
 public class StateMod_StreamGage_Data_TableModel 
-extends JWorksheet_AbstractRowTableModel implements StateMod_Data_TableModel {
+extends JWorksheet_AbstractRowTableModel<StateMod_StreamGage> implements StateMod_Data_TableModel {
 
 /**
 Number of columns in the table model.
@@ -72,7 +73,7 @@ Constructor.
 @param data the data that will be displayed in the table.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_StreamGage_Data_TableModel(List data)
+public StateMod_StreamGage_Data_TableModel(List<StateMod_StreamGage> data)
 throws Exception {
 	this(data, true);
 }
@@ -81,9 +82,9 @@ throws Exception {
 Constructor.  
 @param data the data that will be displayed in the table.
 */
-public StateMod_StreamGage_Data_TableModel(List data, boolean editable) {
+public StateMod_StreamGage_Data_TableModel(List<StateMod_StreamGage> data, boolean editable) {
 	if (data == null) {
-		_data = new Vector();
+		_data = new Vector<StateMod_StreamGage>();
 	}
 	else {
 		_data = data;
@@ -96,7 +97,7 @@ public StateMod_StreamGage_Data_TableModel(List data, boolean editable) {
 Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 */
-public Class getColumnClass (int columnIndex) {
+public Class<?> getColumnClass (int columnIndex) {
 	switch (columnIndex) {
 		case COL_ID:		return String.class;
 		case COL_NAME:		return String.class;
@@ -239,7 +240,7 @@ public void setValueAt(Object value, int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	StateMod_StreamGage sg = (StateMod_StreamGage)_data.get(row);
+	StateMod_StreamGage sg = _data.get(row);
 
 	switch (col) {
 		case COL_ID:	

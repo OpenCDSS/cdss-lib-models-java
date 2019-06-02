@@ -108,6 +108,7 @@ import RTi.Util.String.StringUtil;
 /**
 This class is a GUI for displaying and editing instream flow rights.
 */
+@SuppressWarnings("serial")
 public class StateMod_InstreamFlow_Right_JFrame extends JFrame
 implements ActionListener, KeyListener, MouseListener, WindowListener {
 
@@ -254,7 +255,8 @@ exist.
 */
 private int checkInput() {
 	String routine = "StateMod_InstreamFlow_Right_JFrame.checkInput";
-	List v = __worksheet.getAllData();
+	@SuppressWarnings("unchecked")
+	List<StateMod_InstreamFlowRight> v = (List<StateMod_InstreamFlowRight>)__worksheet.getAllData();
 
 	int size = v.size();
 	StateMod_InstreamFlowRight right = null;
@@ -265,7 +267,7 @@ private int checkInput() {
 	String adminNum;
 	int fatalCount = 0;
 	for (int i = 0; i < size; i++) {
-		right = (StateMod_InstreamFlowRight)(v.get(i));
+		right = v.get(i);
 
 		id = right.getID();
 		name = right.getName();
@@ -355,8 +357,9 @@ private boolean saveData() {
 	boolean needToSave = false;
 
 	// if the Vectors are differently-sized, they're different
-	List wv = __worksheet.getAllData();		// w for worksheet
-	List iv = __currentInstreamFlow.getRights();	// i for instream flow
+	@SuppressWarnings("unchecked")
+	List<StateMod_InstreamFlowRight> wv = __worksheet.getAllData();		// w for worksheet
+	List<StateMod_InstreamFlowRight> iv = __currentInstreamFlow.getRights();	// i for instream flow
 
 	needToSave = !(StateMod_InstreamFlowRight.equals(wv, iv));
 
@@ -368,15 +371,14 @@ private boolean saveData() {
 		return true;
 	}
 
-	// at this point, remove the old diversion rights from the original
-	// component Vector
-	List instreamFlowRights =
-		(List)(__dataset.getComponentForComponentType(
-		StateMod_DataSet.COMP_INSTREAM_RIGHTS)).getData();
+	// at this point, remove the old diversion rights from the original component list
+	@SuppressWarnings("unchecked")
+	List<StateMod_InstreamFlowRight> instreamFlowRights =
+		(List<StateMod_InstreamFlowRight>)(__dataset.getComponentForComponentType(StateMod_DataSet.COMP_INSTREAM_RIGHTS)).getData();
 	int size = iv.size();
 	StateMod_InstreamFlowRight ir;
 	for (int i = 0; i < size; i++) {
-		ir = (StateMod_InstreamFlowRight)iv.get(i);
+		ir = iv.get(i);
 		StateMod_Util.removeFromVector(instreamFlowRights, ir);
 	}
 
@@ -395,7 +397,7 @@ private boolean saveData() {
 	// REVISIT (JTS - 2003-10-10)
 	// here we are sorting the full data array -- may be a performance
 	// issue
-	List sorted=StateMod_Util.sortStateMod_DataVector(instreamFlowRights);
+	List<StateMod_InstreamFlowRight> sorted = StateMod_Util.sortStateMod_DataVector(instreamFlowRights);
 	__dataset.getComponentForComponentType(StateMod_DataSet.COMP_INSTREAM_RIGHTS)
 		.setData(sorted);
 	__currentInstreamFlow.disconnectRights();
@@ -540,11 +542,10 @@ private void setupGUI() {
 	int[] widths = null;
 	JScrollWorksheet jsw = null;
 	try {
-		List v = new Vector();
-		List v2 = __currentInstreamFlow.getRights();
+		List<StateMod_InstreamFlowRight> v = new Vector<StateMod_InstreamFlowRight>();
+		List<StateMod_InstreamFlowRight> v2 = __currentInstreamFlow.getRights();
 		for (int i = 0; i < v2.size(); i++) {
-			v.add(((StateMod_InstreamFlowRight)
-				(v2.get(i))).clone());
+			v.add((StateMod_InstreamFlowRight)v2.get(i).clone());
 		}	
 		StateMod_InstreamFlowRight_TableModel tmi = new
 			StateMod_InstreamFlowRight_TableModel(
@@ -566,7 +567,7 @@ private void setupGUI() {
 	__worksheet.addMouseListener(this);	
 	__worksheet.addKeyListener(this);
 
-	List v = new Vector();
+	List<String> v = new Vector<String>(2);
 	v.add("0 - Off");
 	v.add("1 - On");
 	__worksheet.setColumnJComboBoxValues(

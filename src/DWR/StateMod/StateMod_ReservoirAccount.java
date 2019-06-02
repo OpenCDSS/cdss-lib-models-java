@@ -495,8 +495,8 @@ header (true) or to create a new file with a new header.
 @param newComments new comments to add to the top of the file.
 @throws Exception if an error occurs.
 */
-public static void writeListFile(String filename, String delimiter, boolean update, List data,
-	List newComments ) 
+public static void writeListFile(String filename, String delimiter, boolean update, List<StateMod_ReservoirAccount> data,
+	List<String> newComments ) 
 throws Exception
 {	String routine = "StateMod_ReservoirAccount.writeListFile";
 	int size = 0;
@@ -504,7 +504,7 @@ throws Exception
 		size = data.size();
 	}
 	
-	List fields = new Vector();
+	List<String> fields = new Vector<String>();
 	fields.add("ReservoirID");
 	fields.add("OwnerID");
 	fields.add("OwnerAccount");
@@ -519,7 +519,7 @@ throws Exception
 	int comp = StateMod_DataSet.COMP_RESERVOIR_STATION_ACCOUNTS;
 	String s = null;
 	for (int i = 0; i < fieldCount; i++) {
-		s = (String)fields.get(i);
+		s = fields.get(i);
 		names[i] = StateMod_Util.lookupPropValue(comp, "FieldName", s);
 		formats[i] = StateMod_Util.lookupPropValue(comp, "Format", s);
 	}
@@ -531,9 +531,9 @@ throws Exception
 	
 	int j = 0;
 	StateMod_ReservoirAccount acct = null;
-	List commentIndicators = new Vector(1);
+	List<String> commentIndicators = new Vector<String>(1);
 	commentIndicators.add ( "#" );
-	List ignoredCommentIndicators = new Vector(1);
+	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	String[] line = new String[fieldCount];
 	StringBuffer buffer = new StringBuffer();
@@ -542,12 +542,12 @@ throws Exception
 	try {	
 		// Add some basic comments at the top of the file.  Do this to a copy of the
 		// incoming comments so that they are not modified in the calling code.
-		List newComments2 = null;
+		List<String> newComments2 = null;
 		if ( newComments == null ) {
-			newComments2 = new Vector();
+			newComments2 = new Vector<String>();
 		}
 		else {
-			newComments2 = new Vector(newComments);
+			newComments2 = new Vector<String>(newComments);
 		}
 		newComments2.add(0,"");
 		newComments2.add(1,"StateMod reservoir station accounts as a delimited list file.");
@@ -569,7 +569,7 @@ throws Exception
 		out.println(buffer.toString());
 		
 		for (int i = 0; i < size; i++) {
-			acct = (StateMod_ReservoirAccount)data.get(i);
+			acct = data.get(i);
 			
 			line[0] = StringUtil.formatString(acct.getCgoto(),formats[0]).trim();
 			line[1] = StringUtil.formatString(acct.getID(),formats[1]).trim();

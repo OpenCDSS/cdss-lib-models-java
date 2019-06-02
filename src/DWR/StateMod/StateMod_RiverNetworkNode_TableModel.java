@@ -44,8 +44,9 @@ import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 /**
 This table model displays reservoir data.
 */
+@SuppressWarnings("serial")
 public class StateMod_RiverNetworkNode_TableModel 
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel<StateMod_RiverNetworkNode> {
 
 /**
 Number of columns in the table model.
@@ -65,7 +66,7 @@ Constructor.
 @param data the data that will be displayed in the table.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_RiverNetworkNode_TableModel(List data)
+public StateMod_RiverNetworkNode_TableModel(List<StateMod_RiverNetworkNode> data)
 throws Exception {
 	if (data == null) {
 		throw new Exception ("Invalid data Vector passed to " 
@@ -79,7 +80,7 @@ throws Exception {
 Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 */
-public Class getColumnClass (int columnIndex) {
+public Class<?> getColumnClass (int columnIndex) {
 	switch (columnIndex) {
 		case COL_ID:		return String.class;
 		case COL_NAME:		return String.class;
@@ -146,7 +147,7 @@ public Object getValueAt(int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	StateMod_RiverNetworkNode r = (StateMod_RiverNetworkNode)_data.get(row);
+	StateMod_RiverNetworkNode r = _data.get(row);
 
 	switch (col) {
 		case COL_ID:	return r.getID();

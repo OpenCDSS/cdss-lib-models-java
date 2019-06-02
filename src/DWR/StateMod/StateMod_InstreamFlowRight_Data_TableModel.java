@@ -47,8 +47,9 @@ import RTi.Util.IO.Validator;
 /**
 This table model displays instream flow right data.
 */
+@SuppressWarnings("serial")
 public class StateMod_InstreamFlowRight_Data_TableModel 
-extends JWorksheet_AbstractRowTableModel implements StateMod_Data_TableModel {
+extends JWorksheet_AbstractRowTableModel<StateMod_InstreamFlowRight> implements StateMod_Data_TableModel {
 
 /**
 Number of columns in the table model.
@@ -76,9 +77,9 @@ Constructor.
 @param data the data that will be displayed in the table.
 @param editable whether the table data is editable or not
 */
-public StateMod_InstreamFlowRight_Data_TableModel(List data, boolean editable) {
+public StateMod_InstreamFlowRight_Data_TableModel(List<StateMod_InstreamFlowRight> data, boolean editable) {
 	if (data == null) {
-		_data = new Vector();
+		_data = new Vector<StateMod_InstreamFlowRight>();
 	}
 	else {
 		_data = data;
@@ -93,7 +94,7 @@ public StateMod_InstreamFlowRight_Data_TableModel(List data, boolean editable) {
 Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 */
-public Class getColumnClass (int columnIndex) {
+public Class<?> getColumnClass (int columnIndex) {
 	switch (columnIndex) {
 		case COL_RIGHT_ID:	return String.class;
 		case COL_RIGHT_NAME:	return String.class;
@@ -188,8 +189,7 @@ public Object getValueAt( int row, int col ) {
 		row = _sortOrder[row];
 	}
 
-	StateMod_InstreamFlowRight infr = 
-		       (StateMod_InstreamFlowRight)_data.get(row);
+	StateMod_InstreamFlowRight infr = _data.get(row);
 	switch (col) {
 		case COL_RIGHT_ID:	return infr.getID();
 		case COL_RIGHT_NAME:	return infr.getName();

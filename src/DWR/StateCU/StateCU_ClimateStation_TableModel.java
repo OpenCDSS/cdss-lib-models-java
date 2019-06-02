@@ -31,8 +31,9 @@ import RTi.Util.IO.Validator;
 /**
 This class is a table model for displaying StateCU climate station data.
 */
+@SuppressWarnings("serial")
 public class StateCU_ClimateStation_TableModel 
-extends JWorksheet_AbstractRowTableModel implements StateCU_Data_TableModel {
+extends JWorksheet_AbstractRowTableModel<StateCU_ClimateStation> implements StateCU_Data_TableModel {
 
 /**
 Number of columns in the table model.
@@ -68,7 +69,7 @@ Constructor.  This builds the Model for displaying climate station data
 @param data the data that will be displayed in the table.
 @throws Exception if invalid data or dmi was passed in.
 */
-public StateCU_ClimateStation_TableModel(List data)
+public StateCU_ClimateStation_TableModel(List<StateCU_ClimateStation> data)
 throws Exception {
 	this(data, true);
 }
@@ -79,7 +80,7 @@ Constructor.  This builds the Model for displaying climate station data
 @param editable whether the data are editable or not.
 @throws Exception if invalid data or dmi was passed in.
 */
-public StateCU_ClimateStation_TableModel(List data, boolean editable)
+public StateCU_ClimateStation_TableModel(List<StateCU_ClimateStation> data, boolean editable)
 throws Exception {
 	if (data == null) {
 		throw new Exception ("Invalid data list passed to " 
@@ -95,7 +96,7 @@ throws Exception {
 Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 */
-public Class getColumnClass (int columnIndex) {
+public Class<?> getColumnClass (int columnIndex) {
 	switch (columnIndex) {
 		case __COL_ID: return String.class;
 		case __COL_NAME: return String.class;

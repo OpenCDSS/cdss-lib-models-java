@@ -1,7 +1,7 @@
 package DWR.StateMod;
 
 import java.io.File;
-import java.util.ArrayList;
+//import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.Test;
@@ -35,7 +35,7 @@ public class StateMod_TestSuite extends TestCase {
         {
             String testName = (testList.get(i).toString());
             System.out.println(testName);
-            String test = tests.formatFileName(testName);
+            //String test = tests.formatFileName(testName);
             // FIXME SAM 2014-12-03 unit test code not working in new environment?
             //suite.addTestSuite(Class.forName(test));
         }

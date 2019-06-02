@@ -283,7 +283,7 @@ public static void displayGraphForTS (TS ts, String title,
 StateMod_DataSet dataset)
 throws Exception
 {
-	List v = new Vector();
+	List<TS> v = new Vector<TS>();
 	v.add(ts);
 
 	// add title to proplist
@@ -303,7 +303,7 @@ public static void displayGraphForTS ( TS ts, PropList props,
 StateMod_DataSet dataset)
 throws Exception
 {
-	List v = new Vector();
+	List<TS> v = new Vector<TS>();
 	v.add(ts);
 	displayGraphForTS(v, props, dataset);
 }
@@ -314,8 +314,7 @@ Displays a graph for a time series.
 @param title the title of the graph
 @param dataset the dataset in which the ts data exists
 */
-public static void displayGraphForTS ( List tslist, String title,
-StateMod_DataSet dataset)
+public static void displayGraphForTS ( List<TS> tslist, String title, StateMod_DataSet dataset)
 throws Exception
 {
 	// add title to proplist
@@ -333,7 +332,7 @@ The properties may contain valid TSViewGraphGUI properies or
 may not, in which case defaults will be used.
 If some important properties are not set, they are set using the same PropList.
 */
-public static void displayGraphForTS(List tslist, PropList props, StateMod_DataSet dataset)
+public static void displayGraphForTS(List<TS> tslist, PropList props, StateMod_DataSet dataset)
 {
 	PropList proplist = null;
 	if (props == null) {

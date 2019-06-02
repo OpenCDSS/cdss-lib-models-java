@@ -55,8 +55,9 @@ This class is a JFrame for displaying a Vector of StateMod_ReservoirAreaCap
 data in a worksheet.  Area capacities for 1+ reservoirs can be displayed in the
 same worksheet.  The worksheet data can be exported to a file or printed.
 */
+@SuppressWarnings("serial")
 public class StateMod_ReservoirAreaCap_Data_JFrame 
-extends StateMod_Data_JFrame {
+extends StateMod_Data_JFrame<StateMod_ReservoirAreaCap> {
 
 /**
 Constructor. 
@@ -67,7 +68,7 @@ which case an empty worksheet is shown.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_ReservoirAreaCap_Data_JFrame(List data, String titleString, boolean editable)
+public StateMod_ReservoirAreaCap_Data_JFrame(List<StateMod_Reservoir> data, String titleString, boolean editable)
 throws Exception {
 	super();
 	
@@ -76,15 +77,15 @@ throws Exception {
 	int size2 = 0;
 	StateMod_Reservoir r = null;
 	StateMod_ReservoirAreaCap a = null;
-	List areacaps = null;
-	List v = new Vector();
+	List<StateMod_ReservoirAreaCap> areacaps = null;
+	List<StateMod_ReservoirAreaCap> v = new Vector<StateMod_ReservoirAreaCap>();
 	
 	if (data != null) {
 		size = data.size();
 	}
 	
 	for (int i = 0; i < size; i++) {
-		r = (StateMod_Reservoir)data.get(i);
+		r = data.get(i);
 		areacaps = r.getAreaCaps();
 		if (areacaps == null) {
 			continue;
@@ -93,7 +94,7 @@ throws Exception {
 		size2 = areacaps.size();
 
 		for (j = 0; j < size2; j++) {
-			a = (StateMod_ReservoirAreaCap)areacaps.get(j);
+			a = areacaps.get(j);
 			a.setCgoto(r.getID());
 		    v.add(a);
 		}

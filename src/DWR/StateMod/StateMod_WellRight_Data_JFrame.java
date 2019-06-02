@@ -55,7 +55,7 @@ The worksheet data can be exported to a file or printed.
 */
 @SuppressWarnings("serial")
 public class StateMod_WellRight_Data_JFrame 
-extends StateMod_Data_JFrame {
+extends StateMod_Data_JFrame<StateMod_WellRight> {
 
 /**
 Constructor. 
@@ -79,7 +79,7 @@ protected void apply() {
 	StateMod_WellRight right = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		right = (StateMod_WellRight)_data.get(i);
+		right = _data.get(i);
 		right.createBackup();
 	}
 }
@@ -108,7 +108,7 @@ protected void cancel() {
 	StateMod_WellRight right = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		right = (StateMod_WellRight)_data.get(i);
+		right = _data.get(i);
 		right.restoreOriginal();
 	}
 }
@@ -121,7 +121,7 @@ protected void createDataBackup() {
 	StateMod_WellRight right = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		right = (StateMod_WellRight)_data.get(i);
+		right = _data.get(i);
 		right.createBackup();
 	}
 }

@@ -33,7 +33,7 @@ a worksheet.  The worksheet data can be exported to a file or printed.
 */
 @SuppressWarnings("serial")
 public class StateMod_Plan_WellAugmentation_Data_JFrame 
-extends StateMod_Data_JFrame {
+extends StateMod_Data_JFrame<StateMod_Plan_WellAugmentation> {
 
 /**
 Constructor. 
@@ -58,7 +58,7 @@ protected void apply() {
 	StateMod_Plan_WellAugmentation wellAug = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		wellAug = (StateMod_Plan_WellAugmentation)_data.get(i);
+		wellAug = _data.get(i);
 		wellAug.createBackup();
 	}
 }
@@ -93,7 +93,7 @@ protected void cancel() {
 	StateMod_Plan_WellAugmentation wellAug = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		wellAug = (StateMod_Plan_WellAugmentation)_data.get(i);
+		wellAug = _data.get(i);
 		wellAug.restoreOriginal();
 	}
 }
@@ -105,7 +105,7 @@ protected void createDataBackup() {
 	StateMod_Plan_WellAugmentation wellAug = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		wellAug = (StateMod_Plan_WellAugmentation)_data.get(i);
+		wellAug = _data.get(i);
 		wellAug.createBackup();
 	}
 }

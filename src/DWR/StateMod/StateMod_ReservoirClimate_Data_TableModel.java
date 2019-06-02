@@ -88,8 +88,9 @@ This table model displays reservoir climate station assignment data.  The model
 can display climate data for a single reservoir or for 1+ reservoirs.  The
 difference is specified in the constructor and affects how many columns of data are shown.
 */
+@SuppressWarnings("serial")
 public class StateMod_ReservoirClimate_Data_TableModel 
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel<StateMod_ReservoirClimate> {
 
 /**
 Number of columns in the table model.  For table models that display climate
@@ -125,9 +126,9 @@ Constructor.
 @param data the StateMod_ReservoirClimate data that will be displayed in the table.
 @param editable whether the table data can be modified.
 */
-public StateMod_ReservoirClimate_Data_TableModel(List data, boolean editable){
+public StateMod_ReservoirClimate_Data_TableModel(List<StateMod_ReservoirClimate> data, boolean editable){
 	if (data == null) {
-		_data = new Vector();
+		_data = new Vector<StateMod_ReservoirClimate>();
 	}
 	else {
 		_data = data;
@@ -142,7 +143,7 @@ Returns the class of the data stored in a given column.
 @param col the column for which to return the data class.
 @return the class of the data stored in a given column.
 */
-public Class getColumnClass (int col) {
+public Class<?> getColumnClass (int col) {
 	switch (col) {
 		case COL_RESERVOIR_ID:	return String.class;
 		case COL_STATION:	return String.class;
@@ -275,7 +276,7 @@ public void setValueAt(Object value, int row, int col) {
 		row = _sortOrder[row];
 	}
 	double dval;
-	StateMod_ReservoirClimate cl = (StateMod_ReservoirClimate)_data.get(row);
+	StateMod_ReservoirClimate cl = _data.get(row);
 
 	switch (col) {
 		case COL_RESERVOIR_ID:

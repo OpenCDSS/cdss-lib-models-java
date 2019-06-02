@@ -31,8 +31,9 @@ import RTi.Util.IO.Validator;
 /**
 This class is a table model for displaying Penman-Monteith crop coefficients data.
 */
+@SuppressWarnings("serial")
 public class StateCU_PenmanMonteith_TableModel 
-extends JWorksheet_AbstractRowTableModel implements StateCU_Data_TableModel {
+extends JWorksheet_AbstractRowTableModel<StateCU_PenmanMonteith> implements StateCU_Data_TableModel {
 
 /**
 Number of columns in the table model.
@@ -65,7 +66,7 @@ Constructor.  This builds the model for displaying crop char data
 @param data the data that will be displayed in the table.
 @throws Exception if an invalid data.
 */
-public StateCU_PenmanMonteith_TableModel(List data) {
+public StateCU_PenmanMonteith_TableModel(List<StateCU_PenmanMonteith> data) {
 	this(data, true);
 }
 
@@ -75,7 +76,7 @@ Constructor.  This builds the Model for displaying crop char data
 @param editable whether the data are editable or not.
 @throws Exception if an invalid data.
 */
-public StateCU_PenmanMonteith_TableModel(List data, boolean editable) {
+public StateCU_PenmanMonteith_TableModel(List<StateCU_PenmanMonteith> data, boolean editable) {
 	if (data == null) {
 		_rows = 0;
 	}
@@ -92,7 +93,7 @@ Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 @return the class of the data stored in a given column.
 */
-public Class getColumnClass (int columnIndex) {
+public Class<?> getColumnClass (int columnIndex) {
 	switch (columnIndex) {
 		case __COL_CROP_NAME: return String.class;
 		case __COL_GROWTH_STAGE: return Integer.class;
@@ -245,7 +246,7 @@ public int[] getColumnWidths() {
 Sets up internal arrays.
 @param data the list of data (non-null) that will be displayed in the table model.
 */
-private void initialize(List data)
+private void initialize(List<StateCU_PenmanMonteith> data)
 {
 	int size = data.size();
 	__cropFirstRows = new int[size];
@@ -253,7 +254,7 @@ private void initialize(List data)
 	int row = 0;
 	StateCU_PenmanMonteith kpm;
 	for (int i = 0; i < size; i++) {
-		kpm = (StateCU_PenmanMonteith)data.get(i);
+		kpm = data.get(i);
 		__cropFirstRows[i] = row;
 		// The number of rows per crop is the number of growth stages times the number of values per stage
 		row += kpm.getNGrowthStages()*StateCU_PenmanMonteith.getNCoefficientsPerGrowthStage();
@@ -303,7 +304,7 @@ public void setValueAt(Object value, int row, int col) {
 
 	int dataPos = lookupVectorPositionForRow(row);
 
-	StateCU_PenmanMonteith pm = (StateCU_PenmanMonteith)_data.get(dataPos);
+	StateCU_PenmanMonteith pm = _data.get(dataPos);
 	
 	// Row position in the data object...
 	int num = row - __cropFirstRows[dataPos];

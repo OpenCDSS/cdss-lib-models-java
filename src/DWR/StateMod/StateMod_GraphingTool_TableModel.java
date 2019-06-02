@@ -90,8 +90,9 @@ import RTi.Util.Time.TimeInterval;
 /**
 This table model display graphing tool data.
 */
+@SuppressWarnings("serial")
 public class StateMod_GraphingTool_TableModel 
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel<TSIdent> {
 
 private final int __COLUMNS = 6;		// The number of columns.
 protected final int _COL_STATION_TYPE = 0;
@@ -122,18 +123,17 @@ private StateMod_DataSet __dataset = null;
 /**
 Lists of data for filling ID lists.
 */
-private List 
-	__diversions,
-	__instreamFlows,
-	__reservoirs,
-	__streamEstimateStations,
-	__streamGageStations,
-	__wells;
+private List<StateMod_Diversion> __diversions;
+private List<StateMod_InstreamFlow> __instreamFlows;
+private List<StateMod_Reservoir> __reservoirs;
+private List<StateMod_StreamEstimate> __streamEstimateStations;
+private List<StateMod_StreamGage> __streamGageStations;
+private List<StateMod_Well> __wells;
 
 /**
 ID lists to be displayed in the combo boxes.
 */
-private List
+private List<String>
 	__diversionIDs = null,
 	__instreamFlowIDs = null,
 	__reservoirIDs = null,
@@ -148,26 +148,38 @@ Constructor.
 @param data the data to display in the worksheet.
 @throws Exception if an invalid data was passed in.
 */
-public StateMod_GraphingTool_TableModel ( StateMod_GraphingTool_JFrame parent, StateMod_DataSet dataset, List data )
+public StateMod_GraphingTool_TableModel ( StateMod_GraphingTool_JFrame parent, StateMod_DataSet dataset, List<TSIdent> data )
 throws Exception {
 	__parent = parent;
 
 	__dataset = dataset;
-	__reservoirs = (List)__dataset.getComponentForComponentType(
-			StateMod_DataSet.COMP_RESERVOIR_STATIONS).getData();
-	__diversions = (List)__dataset.getComponentForComponentType(
-			StateMod_DataSet.COMP_DIVERSION_STATIONS).getData();
-	__instreamFlows = (List)__dataset.getComponentForComponentType(
-			StateMod_DataSet.COMP_INSTREAM_STATIONS).getData();
-	__wells = (List)__dataset.getComponentForComponentType(
-			StateMod_DataSet.COMP_WELL_STATIONS).getData();
-	__streamGageStations = (List)__dataset.getComponentForComponentType(
-			StateMod_DataSet.COMP_STREAMGAGE_STATIONS).getData();
-	__streamEstimateStations=(List)__dataset.getComponentForComponentType(
-		StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS).getData();
+	@SuppressWarnings("unchecked")
+	List<StateMod_Reservoir> resList =
+		(List<StateMod_Reservoir>)__dataset.getComponentForComponentType(StateMod_DataSet.COMP_RESERVOIR_STATIONS).getData();
+	__reservoirs = resList;
+	@SuppressWarnings("unchecked")
+	List<StateMod_Diversion> ddsList =
+		(List<StateMod_Diversion>)__dataset.getComponentForComponentType(StateMod_DataSet.COMP_DIVERSION_STATIONS).getData();
+	__diversions = ddsList;
+	@SuppressWarnings("unchecked")
+	List<StateMod_InstreamFlow> ifsList =
+		(List<StateMod_InstreamFlow>)__dataset.getComponentForComponentType(StateMod_DataSet.COMP_INSTREAM_STATIONS).getData();
+	__instreamFlows = ifsList;
+	@SuppressWarnings("unchecked")
+	List<StateMod_Well> wesList =
+		(List<StateMod_Well>)__dataset.getComponentForComponentType(StateMod_DataSet.COMP_WELL_STATIONS).getData();
+	__wells = wesList;
+	@SuppressWarnings("unchecked")
+	List<StateMod_StreamGage> risList =
+		(List<StateMod_StreamGage>)__dataset.getComponentForComponentType(StateMod_DataSet.COMP_STREAMGAGE_STATIONS).getData();
+	__streamGageStations = risList;
+	@SuppressWarnings("unchecked")
+	List<StateMod_StreamEstimate> sesList =
+		(List<StateMod_StreamEstimate>)__dataset.getComponentForComponentType(StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS).getData();
+	__streamEstimateStations = sesList;
 	
 	if (data == null) {
-		throw new Exception ("Invalid data Vector passed to StateMod_GraphingTool_TableModel constructor.");
+		throw new Exception ("Invalid data list passed to StateMod_GraphingTool_TableModel constructor.");
 	}
 	_rows = data.size();
 	_data = data;
@@ -200,14 +212,14 @@ public boolean canAddNewRow() {
 }
 
 /**
-Creates a list of the available IDs for a Vector of StateMod_Data-extending
+Creates a list of the available IDs for a list of StateMod_Data-extending
 objects.  Reservoirs will include an identifier for each reservoir total and each account for the reservoir.
 @param nodes the nodes for which to create a list of IDs.
 @param include_accounts If true, the 
-@return a Vector of Strings, each of which contains an ID followed by the name of Structure in parentheses
+@return a list of Strings, each of which contains an ID followed by the name of Structure in parentheses
 */
-private List createAvailableIDsList ( List nodes ) {
-	List v = new Vector();
+private List<String> createAvailableIDsList ( List<? extends StateMod_Data> nodes ) {
+	List<String> v = new Vector<String>();
 
 	int num = 0;
 	boolean is_reservoir = false;	// To allow check below
@@ -252,7 +264,7 @@ the ID of that structure, and the interval that is selected.
 */
 public void fillDataTypeColumn ( int row, boolean outputOnly,
 					String station_type, String id, String interval_string )
-{	List dataTypes = new Vector();
+{	List<String> dataTypes = new Vector<String>();
 	int interval = TimeInterval.MONTH;
 	if ( interval_string.equalsIgnoreCase("Day") ) {
 		interval = TimeInterval.DAY;
@@ -326,13 +338,14 @@ public void fillDataTypeColumn ( int row, boolean outputOnly,
 
 	if (__worksheet != null) {
 		__worksheet.setCellSpecificJComboBoxValues(	row, _COL_DATA_TYPE, dataTypes);
-		List v = __worksheet.getCellSpecificJComboBoxValues(row, _COL_DATA_TYPE);
+		@SuppressWarnings("unchecked")
+		List<String> v = (List<String>)__worksheet.getCellSpecificJComboBoxValues(row, _COL_DATA_TYPE);
 		String s = null;
 		if (v == null || v.size() == 0) {
 			s = "";
 		}
 		else {
-			s = (String)v.get(0);
+			s = v.get(0);
 		}
 		setInternalValueAt(s, row,_COL_DATA_TYPE);
 	}	
@@ -344,7 +357,7 @@ Fills the ID column based on the kind of station selected.
 @param type the type of structure selected (column 1)
 */
 public void fillIDColumn(int row, String type)
-{	List ids = new Vector();
+{	List<String> ids = new Vector<String>();
 	if (type.equalsIgnoreCase(StateMod_Util.STATION_TYPE_DIVERSION)) {
 		if (__diversionIDs == null) {
 			__diversionIDs = createAvailableIDsList(__diversions);
@@ -389,7 +402,8 @@ public void fillIDColumn(int row, String type)
 
 	if (__worksheet != null) {
 		__worksheet.setCellSpecificJComboBoxValues(row, _COL_ID, ids);
-		List v = __worksheet.getCellSpecificJComboBoxValues( row, _COL_ID);
+		@SuppressWarnings("unchecked")
+		List<String> v = __worksheet.getCellSpecificJComboBoxValues( row, _COL_ID);
 		String s = null;
 		if (v == null || v.size() == 0) {
 			s = "";
@@ -413,7 +427,7 @@ interval, data type, and input type that is selected.
 */
 public void fillInputNameColumn ( int row, String station_type, String id,
 					String interval_string, String data_type, String input_type )
-{	List input_names = new Vector();
+{	List<String> input_names = new Vector<String>();
 	int interval = TimeInterval.MONTH;
 	if ( interval_string.equalsIgnoreCase("Day") ) {
 		interval = TimeInterval.DAY;
@@ -487,7 +501,8 @@ public void fillInputNameColumn ( int row, String station_type, String id,
 
 	if (__worksheet != null) {
 		__worksheet.setCellSpecificJComboBoxValues( row, _COL_INPUT_NAME, input_names);
-		List v = __worksheet.getCellSpecificJComboBoxValues( row,_COL_INPUT_NAME);
+		@SuppressWarnings("unchecked")
+		List<String> v = __worksheet.getCellSpecificJComboBoxValues( row,_COL_INPUT_NAME);
 		String s = null;
 		if (v == null || v.size() == 0) {
 			s = "";
@@ -510,7 +525,7 @@ interval, and data type that is selected.
 */
 public void fillInputTypeColumn ( int row, String station_type, String id,
 					String interval_string, String data_type )
-{	List input_types = new Vector();
+{	List<String> input_types = new Vector<String>();
 
 	if ( StringUtil.indexOfIgnoreCase(data_type, "Output", 0) > 0 ) {
 		// Have an output time series...
@@ -522,7 +537,8 @@ public void fillInputTypeColumn ( int row, String station_type, String id,
 
 	if (__worksheet != null) {
 		__worksheet.setCellSpecificJComboBoxValues( row, _COL_INPUT_TYPE, input_types);
-		List v = __worksheet.getCellSpecificJComboBoxValues( row,_COL_INPUT_TYPE);
+		@SuppressWarnings("unchecked")
+		List<String> v = __worksheet.getCellSpecificJComboBoxValues( row,_COL_INPUT_TYPE);
 		String s = null;
 		if (v == null || v.size() == 0) {
 			s = "";
@@ -544,19 +560,20 @@ Fills the interval column combo box according to the type of station selected an
 @param id the ID of the structure (column _COL_ID)
 */
 public void fillIntervalColumn ( int row, String station_type, String id )
-{	List intervals = new Vector();
+{	List<String> intervals = new Vector<String>(2);
 	intervals.add ( "Month" );
 	intervals.add ( "Day" );
 
 	if (__worksheet != null) {
 		__worksheet.setCellSpecificJComboBoxValues( row, _COL_INTERVAL, intervals);
-		List v = __worksheet.getCellSpecificJComboBoxValues( row, _COL_INTERVAL);
+		@SuppressWarnings("unchecked")
+		List<String> v = (List<String>)__worksheet.getCellSpecificJComboBoxValues( row, _COL_INTERVAL);
 		String s = null;
 		if (v == null || v.size() == 0) {
 			s = "";
 		}
 		else {
-			s = (String)v.get(0);
+			s = v.get(0);
 		}
 		setInternalValueAt(s, row, _COL_INTERVAL);
 	}
@@ -566,7 +583,7 @@ public void fillIntervalColumn ( int row, String station_type, String id )
 From AbstractTableModel.  Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 */
-public Class getColumnClass (int columnIndex) {
+public Class<?> getColumnClass (int columnIndex) {
 	switch (columnIndex) {
 		case _COL_STATION_TYPE:		return String.class;
 		case _COL_ID:			return String.class;
@@ -760,7 +777,8 @@ public void setValueAt(Object value, int row, int col)
 			// Since the ID is filled, select the first item by
 			// default to force something to be displayed...
 			if ( __worksheet != null ) {
-				List ids = __worksheet.getCellSpecificJComboBoxValues(row, _COL_ID);
+				@SuppressWarnings("unchecked")
+				List<String> ids = __worksheet.getCellSpecificJComboBoxValues(row, _COL_ID);
 				if ( ids.size() > 0 ) {
 					setValueAt(ids.get(0), row, _COL_ID);
 				}

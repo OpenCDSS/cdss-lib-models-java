@@ -135,6 +135,7 @@ import RTi.Util.String.StringUtil;
 /**
 This class is a class for displaying the network editor.
 */
+@SuppressWarnings("serial")
 public class StateMod_Network_JFrame extends JFrame
 implements ActionListener, ItemListener, WindowListener {
 
@@ -904,7 +905,7 @@ no layouts defined in it.
 */
 private void createFirstLayout() {
 	if (__layouts == null) {
-		__layouts = new Vector();
+		__layouts = new Vector<PropList>();
 	}
 	PropList main = new PropList("Layout");
 	__id = "Page Layout #" + (__layouts.size() + 1);
@@ -1364,7 +1365,7 @@ throws Exception {
 		if (elementName.equalsIgnoreCase("StateMod_Network")) {
 			children = docNode.getChildNodes();
 			processStateMod_NetworkNode(docNode);
-			__layouts = new Vector();
+			__layouts = new Vector<PropList>();
 			if (children != null) {
 				elementName = null;
 				int len = children.getLength();
@@ -1492,7 +1493,7 @@ throws Exception {
 
 	// Loop through and process the document nodes, starting with the root node...
 
-	__layouts = new Vector();
+	__layouts = new Vector<PropList>();
 	processDocumentNodeForRead(doc);
 
 	StateMod_NodeNetwork network = StateMod_NodeNetwork.readXMLNetworkFile(filename);
@@ -1536,7 +1537,7 @@ throws Exception {
 	
 	PropList p = null;
 	String s = null;
-	List ids = new Vector();
+	List<String> ids = new Vector<String>();
 	for (int i = 0; i < size; i++) {
 		p = __layouts.get(i);
 		s = p.getValue("IsDefault");
@@ -1732,10 +1733,6 @@ private void setupGUI() {
 		}
 		for (node = nodeTop; node != null;
 		    node = StateMod_NodeNetwork.getDownstreamNode(node, StateMod_NodeNetwork.POSITION_COMPUTATIONAL)) {
-			// Break if we are at the end of the list...
-			if (node == null) {
-				break;
-			}
 			try {	
 				xmin = MathUtil.min(xmin, node.getX());
 				xmax = MathUtil.max(xmax, node.getX());
@@ -2205,7 +2202,7 @@ private void setupPaper() {
 	PropList main = null;
 	PropList p = null;
 	String s = null;
-	List ids = new Vector();
+	List<String> ids = new Vector<String>();
 	for (int i = 0; i < size; i++) {
 		p = __layouts.get(i);
 		s = p.getValue("IsDefault");

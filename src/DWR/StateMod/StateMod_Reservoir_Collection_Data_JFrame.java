@@ -46,7 +46,7 @@ collection data in a worksheet.  The worksheet data can be exported to a file or
 */
 @SuppressWarnings("serial")
 public class StateMod_Reservoir_Collection_Data_JFrame 
-extends StateMod_Data_JFrame {
+extends StateMod_Data_JFrame<StateMod_Reservoir> {
 
 /**
 Constructor. 
@@ -69,15 +69,14 @@ protected void apply() {
 	StateMod_Reservoir res = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		res = (StateMod_Reservoir)_data.get(i);
+		res = _data.get(i);
 		res.createBackup();
 	}
 }
 
 /**
 Creates a JScrollWorksheet for the current data and returns it.
-@return a JScrollWorksheet containing the data Vector passed in to the 
-constructor.
+@return a JScrollWorksheet containing the data Vector passed in to the constructor.
 */
 protected JScrollWorksheet buildJScrollWorksheet() 
 throws Exception {
@@ -98,7 +97,7 @@ protected void cancel() {
 	StateMod_Reservoir res = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		res = (StateMod_Reservoir)_data.get(i);
+		res = _data.get(i);
 		res.restoreOriginal();
 	}
 }
@@ -111,7 +110,7 @@ protected void createDataBackup() {
 	StateMod_Reservoir res = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		res = (StateMod_Reservoir)_data.get(i);
+		res = _data.get(i);
 		res.createBackup();
 	}
 }

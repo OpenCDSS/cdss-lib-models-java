@@ -93,6 +93,7 @@ import RTi.Util.Time.YearType;
 This class is a gui that displays a list of all the plans and the 
 data for each plan, once it is selected.
 */
+@SuppressWarnings("serial")
 public class StateMod_Plan_JFrame extends JFrame
 implements ActionListener, ItemListener, KeyListener, MouseListener, 
 WindowListener, JWorksheet_SortListener {
@@ -236,7 +237,9 @@ public StateMod_Plan_JFrame ( StateMod_DataSet dataset, StateMod_DataSet_WindowM
 	__dataset_wm = dataset_wm;
 	__plansComponent = __dataset.getComponentForComponentType(StateMod_DataSet.COMP_PLANS);
 
-	__plansVector = (List)__plansComponent.getData();	
+	@SuppressWarnings("unchecked")
+	List<StateMod_Plan> dataList = (List<StateMod_Plan>)__plansComponent.getData();	
+	__plansVector = dataList;
 	int size = __plansVector.size();
 	StateMod_Plan plan = null;
 	for (int i = 0; i < size; i++) {
@@ -265,7 +268,9 @@ public StateMod_Plan_JFrame ( StateMod_DataSet dataset, StateMod_DataSet_WindowM
 	__dataset_wm = dataset_wm;
 	__plansComponent = __dataset.getComponentForComponentType( StateMod_DataSet.COMP_PLANS);
 
-	__plansVector = (List)__plansComponent.getData();	
+	@SuppressWarnings("unchecked")
+	List<StateMod_Plan> dataList = (List<StateMod_Plan>)__plansComponent.getData();	
+	__plansVector = dataList;
 	int size = __plansVector.size();
 	StateMod_Plan plan = null;
 	for (int i = 0; i < size; i++) {
@@ -428,14 +433,18 @@ private int checkInput()
 	// Non-fatal errors (need to be corrected somehow)...
 	if ( __dataset != null ) {
 		DataSetComponent comp = __dataset.getComponentForComponentType ( StateMod_DataSet.COMP_RIVER_NETWORK );
-		List data = (List)comp.getData();
+		@SuppressWarnings("unchecked")
+		List<StateMod_Plan> data = (List<StateMod_Plan>)comp.getData();
 		if ( !rivernode.equals("") && (StateMod_Util.indexOf(data,rivernode) < 0) ) {
 			warning += "\nRiver node ID (" + rivernode + ") is not in the network.";
 			++nonfatal_count;
 		}
 	}
+	if ( nonfatal_count > 0 ) {
+		// TODO need to do more?
+	}
 	if ( warning.length() > 0 ) {
-		StateMod_Plan plan = (StateMod_Plan)__plansVector.get(__currentPlanIndex);
+		StateMod_Plan plan = __plansVector.get(__currentPlanIndex);
 		warning = "\nPlan:  " +
 		StateMod_Util.formatDataLabel ( plan.getID(), plan.getName() ) + warning + "\nCorrect or Cancel.";
 		Message.printWarning ( 1, routine, warning, this );

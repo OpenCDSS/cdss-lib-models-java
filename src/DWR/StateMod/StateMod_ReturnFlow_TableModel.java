@@ -56,8 +56,9 @@ import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 This table model display data in return flow tables for use with return flows
 and depletions.
 */
+@SuppressWarnings("serial")
 public class StateMod_ReturnFlow_TableModel 
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel<StateMod_ReturnFlow> {
 
 /**
 Number of columns in the table model.
@@ -95,7 +96,7 @@ Constructor.  This builds the Model for displaying the return flow data.
 @param is_return Specify true for return flows and false for depletions.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_ReturnFlow_TableModel (	List data, boolean editable, boolean is_return )
+public StateMod_ReturnFlow_TableModel (	List<StateMod_ReturnFlow> data, boolean editable, boolean is_return )
 throws Exception {
 	this(null, data, editable, is_return );
 }
@@ -109,7 +110,7 @@ information is used to determine whether return flows for daily or monthly.
 @param is_return Specify true for return flows and false for depletions.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_ReturnFlow_TableModel(StateMod_DataSet dataset, List data, boolean editable, boolean is_return )
+public StateMod_ReturnFlow_TableModel(StateMod_DataSet dataset, List<StateMod_ReturnFlow> data, boolean editable, boolean is_return )
 throws Exception {
 	__dataset = dataset;
 	if (data == null) {
@@ -127,7 +128,7 @@ throws Exception {
 Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 */
-public Class getColumnClass (int columnIndex) {
+public Class<?> getColumnClass (int columnIndex) {
 	switch (columnIndex) {
 		case COL_RIVER_NODE:	return String.class;
 		case COL_RETURN_PCT:	return Double.class;
@@ -289,7 +290,7 @@ public void setValueAt(Object value, int row, int col)
 	int index;
 	String s;
 
-	StateMod_ReturnFlow rf = (StateMod_ReturnFlow)_data.get(row);
+	StateMod_ReturnFlow rf = _data.get(row);
 	switch (col) {
 		case COL_RIVER_NODE:	
 			/*

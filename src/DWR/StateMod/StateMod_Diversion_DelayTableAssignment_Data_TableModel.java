@@ -43,8 +43,9 @@ import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 /**
 This class is a table model for displaying delay table data.
 */
+@SuppressWarnings("serial")
 public class StateMod_Diversion_DelayTableAssignment_Data_TableModel 
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel<StateMod_Diversion> {
 
 /**
 Number of columns in the table model.
@@ -80,20 +81,20 @@ A Vector that maps rows in the display when totals are NOT being shown to rows
 in the overall data Vectors.  Used to make switching between displays with and
 without totals relatively efficient.  See getValueAt() and setupData().
 */
-private List __rowMap = null;
+private List<Integer> __rowMap = null;
 
 /**
 Array of Vectors, each of which holds the data for one of the columns in the
 table.  Since the data cannot be pulled out from the data objects directly, 
 this is done to make display efficient.
 */
-private List[] __data = null;
+private List<Object>[] __data = null;
 
 /**
 Constructor.  This builds the Model for displaying delay table data
 @param data the data that will be displayed in the table.
 */
-public StateMod_Diversion_DelayTableAssignment_Data_TableModel(List data) {
+public StateMod_Diversion_DelayTableAssignment_Data_TableModel(List<StateMod_Diversion> data) {
 	this(data, true);
 }
 
@@ -102,9 +103,9 @@ Constructor.  This builds the Model for displaying delay table data
 @param data the data that will be displayed in the table.
 @param editable whether the data are editable or not.
 */
-public StateMod_Diversion_DelayTableAssignment_Data_TableModel(List data, boolean editable) {
+public StateMod_Diversion_DelayTableAssignment_Data_TableModel(List<StateMod_Diversion> data, boolean editable) {
 	if (data == null) {
-		data = new Vector();
+		data = new Vector<StateMod_Diversion>();
 		_rows = 0;
 	}
 
@@ -118,7 +119,7 @@ Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 @return the class of the data stored in a given column.
 */
-public Class getColumnClass (int columnIndex) {
+public Class<?> getColumnClass (int columnIndex) {
 	switch (columnIndex) {
 		case __COL_ID: 		return String.class;
 		case __COL_NODE_ID:	return String.class;
@@ -235,6 +236,7 @@ public boolean isCellEditable(int rowIndex, int columnIndex) {
 /**
 Sets up the data to be displayed in the table.
 */
+@SuppressWarnings("unchecked")
 private void setupData() {
 	int num = 0;
 	int size = _data.size();
@@ -242,24 +244,24 @@ private void setupData() {
 	String id = null;
 	__data = new List[__COLUMNS];
 	for (int i = 0; i < __COLUMNS; i++) {
-		__data[i] = new Vector();
+		__data[i] = new Vector<Object>();
 	}
 
-	__rowMap = new Vector();
+	__rowMap = new Vector<Integer>();
 
 	double total = 0;
 	int rowCount = 0;
 	StateMod_ReturnFlow rf = null;
-	List returnFlows = null;
+	List<StateMod_ReturnFlow> returnFlows = null;
 	for (int i = 0; i < size; i++) {
 		total = 0;
-		dt = (StateMod_Diversion)_data.get(i);
+		dt = _data.get(i);
 		id = dt.getID();
 
 		num = dt.getNrtn();		
 		returnFlows = dt.getReturnFlows();
 		for (int j = 0; j < num; j++) {
-			rf = (StateMod_ReturnFlow)returnFlows.get(j);
+			rf = returnFlows.get(j);
 			__data[__COL_ID].add(id);
 			__data[__COL_NODE_ID].add(rf.getCrtnid());
 			__data[__COL_PERCENT].add(new Double(rf.getPcttot()));

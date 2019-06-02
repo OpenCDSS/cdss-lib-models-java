@@ -56,6 +56,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -1455,16 +1456,24 @@ public static void writeFrostDatesFile ( List<TS> tslist, String outfile,
 					String [] newcomments, DateTime req_date1, DateTime req_date2 )
 throws Exception
 {	PrintWriter out;
-	String [] comment_str = { "#" }; 
-	String [] ignore_str = { "#>" };
+	List<String> comment_str = new ArrayList<String>();
+	comment_str.add("#"); 
+	List<String> ignore_str = new ArrayList<String>();
+	ignore_str.add("#>");
 	String rtn = "StateCU_TS.writeFrostDatesFile";
+	List<String> newCommentsList = new ArrayList<String>();
+	if ( newcomments != null ) {
+		for ( int i = 0; i < newcomments.length; i++ ) {
+			newCommentsList.add(newcomments[i]);
+		}
+	}
 
 	Message.printStatus ( 1, rtn, "Writing new time series to file \"" + outfile + "\"" );
 
 	// Process the header from the old file...
 
 	out = IOUtil.processFileHeaders ( (String)null,
-		IOUtil.getPathUsingWorkingDir(outfile), newcomments, comment_str, ignore_str, 0 );
+		IOUtil.getPathUsingWorkingDir(outfile), newCommentsList, comment_str, ignore_str, 0 );
 	if ( out == null ) {
 		Message.printWarning ( 2, rtn, "Error writing time series to \"" + outfile + "\"" );
 		throw new Exception ( "Error writing time series to \"" + outfile + "\"" );

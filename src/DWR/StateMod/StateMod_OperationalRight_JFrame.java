@@ -91,10 +91,10 @@ private final String
 	__BUTTON_SHOW_ON_MAP = "Show on Map",	
 	__BUTTON_SHOW_ON_NETWORK = "Show on Network",
 	__BUTTON_APPLY = "Apply",
-	__BUTTON_ADD = "Add",
+	//__BUTTON_ADD = "Add",
 	__BUTTON_CANCEL = "Cancel",
 	__BUTTON_CLOSE = "Close",
-	__BUTTON_DELETE = "Delete",
+	//__BUTTON_DELETE = "Delete",
 	__BUTTON_HELP =  "Help";
 
 /**
@@ -308,7 +308,7 @@ List of operational rights data.
 */
 private List<StateMod_OperationalRight> __operationalRights;
 
-private int __currentItyopr = -1;
+//private int __currentItyopr = -1;
 
 /**
 Constructor.
@@ -326,7 +326,9 @@ public StateMod_OperationalRight_JFrame ( StateMod_DataSet dataset,
 	__dataset_wm = dataset_wm;
 	__operationalRightsComponent = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_OPERATION_RIGHTS);
-	__operationalRights = (List<StateMod_OperationalRight>)__operationalRightsComponent.getData();
+	@SuppressWarnings("unchecked")
+	List<StateMod_OperationalRight> dataList = (List<StateMod_OperationalRight>)__operationalRightsComponent.getData();
+	__operationalRights = dataList;
 	int size = __operationalRights.size();
 	StateMod_OperationalRight o = null;
 	for (int i = 0; i < size; i++) {
@@ -357,7 +359,9 @@ public StateMod_OperationalRight_JFrame ( StateMod_DataSet dataset,
 	__dataset_wm = dataset_wm;
 	__operationalRightsComponent = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_OPERATION_RIGHTS);
-	__operationalRights = (List)__operationalRightsComponent.getData();
+	@SuppressWarnings("unchecked")
+	List<StateMod_OperationalRight> dataList = (List<StateMod_OperationalRight>)__operationalRightsComponent.getData();
+	__operationalRights = dataList;
 	int size = __operationalRights.size();
 	StateMod_OperationalRight o = null;
 	for (int i = 0; i < size; i++) {
@@ -607,7 +611,7 @@ Checks the text fields for validity before they are saved back into the data obj
 @return true if the text fields are okay, false if not.
 */
 private boolean checkInput() {
-	List<String> errors = new Vector();
+	List<String> errors = new Vector<String>();
 	int errorCount = 0;
 
 	// For each field, check if it contains valid input.  If not,
@@ -926,7 +930,7 @@ private void populateOperationalRight(StateMod_OperationalRight opr)
 	// Populate the various panels/controls depending on right metadata
 	
 	int ityopr = opr.getItyopr();
-	__currentItyopr = ityopr;
+	//__currentItyopr = ityopr;
 	populateOperationalRightAttributes ( opr, metadata, useTextEditor, __editable );
 	populateOperationalRightDestination ( opr, metadata, useTextEditor, __editable );
 	populateOperationalRightSource ( opr, metadata, useTextEditor, __editable );
@@ -1882,7 +1886,7 @@ private void populateOperationalRightAssociatedOperatingRule ( StateMod_Operatio
 			StateMod_OperationalRight_Metadata_SourceOrDestinationType [] operatingRuleType =
 				{ StateMod_OperationalRight_Metadata_SourceOrDestinationType.OPERATIONAL_RIGHT };
 			StateMod_DataSet dataset = getDataSet();
-			List<String> operatinalRightIDStrings = new Vector();
+			List<String> operatinalRightIDStrings = new Vector<String>();
 			// Always allow blank...
 			operatinalRightIDStrings.add("");
 			operatinalRightIDStrings.addAll ( StateMod_Util.createIdentifierList(
@@ -1967,7 +1971,7 @@ private void populateOperationalRightAttributes ( StateMod_OperationalRight opr,
 	__oprAdminNumber_JTextField.setEnabled(true);
 	
 	// On/off switch - repopulate with normal choices and also add if an integer is not in the list
-	List<String> oprSwitchChoices = new Vector();
+	List<String> oprSwitchChoices = new Vector<String>(2);
 	oprSwitchChoices.add ( "1 - On" );
 	oprSwitchChoices.add ( "0 - Off" );
 	__oprSwitch_JComboBox.setData(oprSwitchChoices);
@@ -2003,7 +2007,7 @@ private void populateOperationalRightAttributes ( StateMod_OperationalRight opr,
 		StateMod_OperationalRight_Metadata_AssociatedPlanAllowedType []
 		    allowedPlanTypes = metadata.getAssociatedPlanAllowedTypes();
 		StateMod_DataSet dataset = getDataSet();
-		List<String> planIDStrings = new Vector();
+		List<String> planIDStrings = new Vector<String>();
 		// Always allow blank...
 		planIDStrings.add("");
 		// Also add NA if specified...
@@ -2035,7 +2039,7 @@ private void populateOperationalRightAttributes ( StateMod_OperationalRight opr,
 		__associatedPlan_JComboBox.setEnabled(true);
 	}
 	else {
-		List<String> planIDStrings = new Vector();
+		List<String> planIDStrings = new Vector<String>();
 		// Only NA allowed but older rights may have blank
 		String creuse = opr.getCreuse();
 		if ( creuse.equals("") ) {
@@ -2053,7 +2057,7 @@ private void populateOperationalRightAttributes ( StateMod_OperationalRight opr,
 	if ( metadata.getRightTypeUsesDiversionType() ) {
 		String cdivtyp = opr.getCdivtyp();
 		StateMod_OperationalRight_Metadata_DiversionType [] diversionTypes = metadata.getDiversionTypes();
-		List<String> diversionTypeStrings = new Vector();
+		List<String> diversionTypeStrings = new Vector<String>();
 		// Only display the specific choices...
 		for ( int i = 0; i < diversionTypes.length; i++ ) {
 			diversionTypeStrings.add("" + diversionTypes[i]);
@@ -2076,7 +2080,7 @@ private void populateOperationalRightAttributes ( StateMod_OperationalRight opr,
 		__diversionType_JComboBox.setEnabled(true);
 	}
 	else {
-		List<String> diversionTypeStrings = new Vector();
+		List<String> diversionTypeStrings = new Vector<String>();
 		// Only NA is used, but allow blank if that is what is in the data
 		String cdivtyp = opr.getCdivtyp();
 		if ( cdivtyp.equals("") ) {
@@ -2183,7 +2187,7 @@ private void populateOperationalRightDestination ( StateMod_OperationalRight opr
 			StateMod_OperationalRight_Metadata_SourceOrDestinationType []
 			    allowedDestinationTypes = metadata.getDestinationTypes();
 			StateMod_DataSet dataset = getDataSet();
-			List<String> destIDStrings = new Vector();
+			List<String> destIDStrings = new Vector<String>();
 			// Always allow blank...
 			destIDStrings.add("");
 			destIDStrings.addAll ( StateMod_Util.createIdentifierList(
@@ -3078,7 +3082,7 @@ private void populateOperationalRightSourceAccount2 ( StateMod_OperationalRight 
 			(List<StateMod_Reservoir>)dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_RESERVOIR_STATIONS).getData();
 		int pos = StateMod_Util.indexOf(reservoirList,source2ID);
-		List<String> accountChoices = new Vector();
+		List<String> accountChoices = new Vector<String>();
 		if ( pos >= 0 ) {
 			StateMod_Reservoir res = reservoirList.get(pos);
 			accountChoices.addAll(StateMod_Util.createIdentifierListFromStateModData(res.getAccounts(), true, null));
@@ -4557,9 +4561,11 @@ private JPanel setupGUI_OperationalRightTextEditor (String routine)
 	return __textEditor_JPanel;
 }
 
+// TODO smalers 2019-06-01 evaluate not using deprecated code
 /**
 Show help about the operational rights - this is the documentation from the StateMod documentation.
 */
+@SuppressWarnings("deprecation")
 private void showHelpDocument ()
 {
     // The location of the documentation is relative to the application home

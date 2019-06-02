@@ -1576,6 +1576,7 @@ throws IOException
 	return errorCount;
 }
 
+// TODO smalers 2019-05-28 figure out whether to use
 /**
 Read the StateMod operational rights file intervening structures.
 @param routine to use for logging.
@@ -1585,6 +1586,7 @@ Read the StateMod operational rights file intervening structures.
 @return the number of errors.
 @exception IOException if there is an error reading the file
 */
+@SuppressWarnings("unused")
 private static int readStateModFile_MonthlyAndAnnualLimitationData ( String routine, int linecount,
 		BufferedReader in, StateMod_OperationalRight anOprit )
 throws IOException
@@ -3766,7 +3768,7 @@ throws Exception {
 		if (theOpr != null) {
 			num = theOpr.size();
 		}
-		int num_intern;
+		//int num_intern;
 		int numComments;
 		int dumx;
 		int rightType;
@@ -3966,6 +3968,7 @@ throws Exception {
 	}
 }
 
+// TODO smalers 2019-06-01 evaluate whether needed
 /**
 WRite the StateMod operational rights file monthly and annual limitation data.
 @param routine to use for logging.
@@ -3975,6 +3978,7 @@ WRite the StateMod operational rights file monthly and annual limitation data.
 @return the number of errors.
 @exception IOException if there is an error writing the file
 */
+@SuppressWarnings("unused")
 private static int writeStateModFile_MonthlyAndAnnualLimitationData ( String routine,
 		PrintWriter out, StateMod_OperationalRight anOprit )
 throws IOException

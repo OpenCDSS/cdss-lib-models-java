@@ -258,7 +258,7 @@ public String getAdministrationNumber ()
 Returns the column headers for the specific data checked.
 @return List of column headers.
  */
-public static String[] getDataHeader()
+public static String[] getDataCheckTableHeader()
 {
 	return new String[] {
 		"Num",
@@ -542,7 +542,8 @@ public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset 
 	else {
 		// Verify that the diversion station is in the data set, if the network is available
 		DataSetComponent comp2 = dataset.getComponentForComponentType(StateMod_DataSet.COMP_DIVERSION_STATIONS);
-		List ddsList = (List)comp2.getData();
+		@SuppressWarnings("unchecked")
+		List<StateMod_Diversion> ddsList = (List<StateMod_Diversion>)comp2.getData();
 		if ( (ddsList != null) && (ddsList.size() > 0) ) {
 			if ( StateMod_Util.indexOf(ddsList, cgoto) < 0 ) {
 				validation.add(new StateMod_ComponentValidationProblem(this,"Diversion right \"" + id +

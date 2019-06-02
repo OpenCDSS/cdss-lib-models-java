@@ -48,8 +48,9 @@ This table model displays diversion right data.  The model can display rights
 data for a single diversion or for 1+ diversion.  The difference is specified
 in the constructor and affects how many columns of data are shown.
 */
+@SuppressWarnings("serial")
 public class StateMod_DiversionRight_Data_TableModel 
-extends JWorksheet_AbstractRowTableModel implements StateMod_Data_TableModel {
+extends JWorksheet_AbstractRowTableModel<StateMod_DiversionRight> implements StateMod_Data_TableModel {
 
 /**
 Number of columns in the table model.  For table models that display rights
@@ -80,9 +81,9 @@ Constructor.  This builds the table model for displaying the diversion right dat
 @param data the diversion right data that will be displayed in the table.
 @param editable whether the data can be edited
 */
-public StateMod_DiversionRight_Data_TableModel(StateMod_DataSet dataset, List data, boolean editable) {
+public StateMod_DiversionRight_Data_TableModel(StateMod_DataSet dataset, List<StateMod_DiversionRight> data, boolean editable) {
 	if (data == null) {
-		_data = new Vector();
+		_data = new Vector<StateMod_DiversionRight>();
 	}
 	else {
 		_data = data;
@@ -98,7 +99,7 @@ Constructor.  This builds the table model for displaying the diversion right dat
 @param data the diversion right data that will be displayed in the table.
 @param editable whether the data can be edited
 */
-public StateMod_DiversionRight_Data_TableModel(List data, boolean editable) {
+public StateMod_DiversionRight_Data_TableModel(List<StateMod_DiversionRight> data, boolean editable) {
 	this(null, data, editable);
 }
 
@@ -107,7 +108,7 @@ Returns the class of the data stored in a given column.
 @param col the column for which to return the data class.  This is base 0.
 @return the class of the data stored in a given column.
 */
-public Class getColumnClass (int col) {
+public Class<?> getColumnClass (int col) {
 	switch (col) {
 		case COL_RIGHT_ID:	return String.class;
 		case COL_RIGHT_NAME:	return String.class;

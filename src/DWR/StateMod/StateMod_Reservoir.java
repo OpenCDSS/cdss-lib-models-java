@@ -648,15 +648,12 @@ public void connectTargetMonthTS(List<MonthTS> targetTS) {
 				}
 			}
 			// Now link the time series...
-			if ( (ts1 == null) && (ts2 == null) ) {
-				// Nothing to do...
-			}
-			else if ( (ts2 == null) && (ts1 != null) ) {
+			if ( (ts2 == null) && (ts1 != null) ) {
 				// Only one time series is specified so it is the maximum...
 				setMaxTargetMonthTS(ts1);
 				ts1.setDescription(getName());
 			}
-			else {
+			else if ( (ts1 != null) && (ts2 != null) ) {
 				// Have both time series...
 				setMinTargetMonthTS(ts1);
 				ts1.setDescription(getName());
@@ -1827,10 +1824,12 @@ public StateMod_ComponentValidation validateComponent ( StateMod_DataSet dataset
 	}
 	// Get the network list if available for checks below
 	DataSetComponent comp = null;
-	List rinList = null;
+	List<StateMod_RiverNetworkNode> rinList = null;
 	if ( dataset != null ) {
 		comp = dataset.getComponentForComponentType(StateMod_DataSet.COMP_RIVER_NETWORK);
-		rinList = (List)comp.getData();
+		@SuppressWarnings("unchecked")
+		List<StateMod_RiverNetworkNode> dataList = (List<StateMod_RiverNetworkNode>)comp.getData();
+		rinList = dataList;
 		if ( (rinList != null) && (rinList.size() == 0) ) {
 			// Set to null to simplify checks below
 			rinList = null;

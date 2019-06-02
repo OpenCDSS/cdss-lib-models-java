@@ -62,8 +62,9 @@ import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 /**
 This table model displays instream flow right data.
 */
+@SuppressWarnings("serial")
 public class StateMod_InstreamFlowRight_TableModel 
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel<StateMod_InstreamFlowRight> {
 
 /**
 Number of columns in the table model.
@@ -101,7 +102,7 @@ Constructor.
 shown in the table (true) or if multiple instream flows' rights are being shown.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_InstreamFlowRight_TableModel(List data, boolean editable, boolean singleInstreamFlow)
+public StateMod_InstreamFlowRight_TableModel(List<StateMod_InstreamFlowRight> data, boolean editable, boolean singleInstreamFlow)
 throws Exception {
 	if (data == null) {
 		throw new Exception ("Invalid data Vector passed to " 
@@ -122,7 +123,7 @@ throws Exception {
 Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 */
-public Class getColumnClass (int columnIndex) {
+public Class<?> getColumnClass (int columnIndex) {
 	if (!__singleInstreamFlow) {
 		columnIndex--;
 	}
@@ -289,7 +290,7 @@ public void setValueAt(Object value, int row, int col)
 	}
 	double dval;
 	int ival;
-	StateMod_InstreamFlowRight ifr = (StateMod_InstreamFlowRight)_data.get(row);
+	StateMod_InstreamFlowRight ifr = _data.get(row);
 
 	if (!__singleInstreamFlow) {
 		col--;

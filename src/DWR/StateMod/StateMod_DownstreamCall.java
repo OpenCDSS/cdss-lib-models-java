@@ -55,7 +55,7 @@ public static DayTS readStateModFile(String filename )
 throws Exception
 {	String routine = "StateMod_DownstreamCall.readStateModFile";
 	String iline = null;
-	List<String> vData = new Vector(4);
+	List<String> vData = new Vector<String>(4);
 	int linecount = 0;
 	
 	BufferedReader in = null;

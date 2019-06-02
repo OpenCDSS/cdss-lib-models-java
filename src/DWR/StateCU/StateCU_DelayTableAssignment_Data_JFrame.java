@@ -56,7 +56,7 @@ data in a worksheet.  The worksheet data can be exported to a file or printed.
 */
 @SuppressWarnings("serial")
 public class StateCU_DelayTableAssignment_Data_JFrame 
-extends StateMod_Data_JFrame {
+extends StateMod_Data_JFrame<StateCU_DelayTableAssignment> {
 
 /**
 The checkbox for selecting whether to show rows with totals or not.
@@ -76,7 +76,7 @@ Constructor.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateCU_DelayTableAssignment_Data_JFrame(List<StateCU_DelayTableAssignment_Data_TableModel> data, String titleString,
+public StateCU_DelayTableAssignment_Data_JFrame(List<StateCU_DelayTableAssignment> data, String titleString,
 boolean editable)
 throws Exception {
 	super(data, titleString, editable);
@@ -96,8 +96,7 @@ throws Exception {
 	pack();
 	
 	setSize(370, getHeight());
-	__tableModel = (StateCU_DelayTableAssignment_Data_TableModel)
-		_worksheet.getTableModel();
+	__tableModel = (StateCU_DelayTableAssignment_Data_TableModel)_worksheet.getTableModel();
 	__tableModel.setJWorksheet(_worksheet);
 }
 
@@ -122,7 +121,7 @@ protected void apply() {
 	StateCU_DelayTableAssignment station = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		station = (StateCU_DelayTableAssignment)_data.get(i);
+		station = _data.get(i);
 		station.createBackup();
 	}
 }
@@ -150,7 +149,7 @@ protected void cancel() {
 	StateCU_DelayTableAssignment station = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		station = (StateCU_DelayTableAssignment)_data.get(i);
+		station = _data.get(i);
 		station.restoreOriginal();
 	}
 }
@@ -163,7 +162,7 @@ protected void createDataBackup() {
 	StateCU_DelayTableAssignment station = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		station = (StateCU_DelayTableAssignment)_data.get(i);
+		station = _data.get(i);
 		station.createBackup();
 	}
 }

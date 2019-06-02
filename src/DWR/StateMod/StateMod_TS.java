@@ -539,6 +539,10 @@ public static List<StringMonthTS> readPatternTimeSeriesList ( String filename, b
 	
 		if ( m2<m1 ) {
 			num_years = y2 - y1;
+			if ( num_years < 0 ) {
+				// TODO smalers 2019-05-28 figure out why this is used
+				// Put this in to prevent the compiler from complaining
+			}
 		}
 		else {
 		    num_years = y2 - y1 + 1;
@@ -2189,7 +2193,7 @@ for time series values is 8 characters and 10 for the total.
 in the file header, or false to omit from the header.
 @exception Exception if there is an error writing the file.
 */
-private static void writeTimeSeriesList ( PrintWriter out, List<TS> tslist, 
+private static void writeTimeSeriesList ( PrintWriter out, List<? extends TS> tslist, 
 	DateTime date1, DateTime date2, YearType outputYearType, double MissingDV,
 	int req_precision, boolean print_genesis )
 throws Exception
@@ -2848,7 +2852,7 @@ point).  The default is is 2.  This should be set according to the datatype
 in calling routines and is not automatically set here.  The full width for time series is 8 characters.
 @exception Exception if there is an error writing the file.
 */
-public static void writeTimeSeriesList ( String infile, String outfile, List<String> newcomments, List<TS> tslist, 
+public static void writeTimeSeriesList ( String infile, String outfile, List<String> newcomments, List<? extends TS> tslist, 
 	DateTime date1, DateTime date2, YearType outputYearType, double MissingDV, int precision )
 throws Exception
 {	List<String> commentIndicators = new Vector<String>(1);
@@ -2977,7 +2981,7 @@ then -1 would be used for the precision.
 </table>
 @throws Exception if there is an error writing the file.
 */
-public static void writeTimeSeriesList ( List<TS> tslist, PropList props )
+public static void writeTimeSeriesList ( List<? extends TS> tslist, PropList props )
 throws Exception
 {	String prop_value = null;
 	String routine = "StateMod_TS.writeTimeSeriesList";

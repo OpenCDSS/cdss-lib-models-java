@@ -53,8 +53,9 @@ import RTi.Util.IO.Validator;
 /**
 This class is a table model for displaying location data.
 */
+@SuppressWarnings("serial")
 public class StateCU_Location_TableModel 
-extends JWorksheet_AbstractRowTableModel implements StateCU_Data_TableModel {
+extends JWorksheet_AbstractRowTableModel<StateCU_Location> implements StateCU_Data_TableModel {
 
 /**
 Number of columns in the table model.
@@ -92,16 +93,16 @@ private StateCU_Location __parentLocation;
 
 private StateCU_DelayTableAssignment __delays;
 
-private List __stations;
+private List<StateCU_ClimateStation> __stations;
 
-private List __rights;
+private List<StateMod_DiversionRight> __rights;
 
 /**
 Constructor.  This builds the Model for displaying location data
 @param data the data that will be displayed in the table.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateCU_Location_TableModel(List data)
+public StateCU_Location_TableModel(List<StateCU_Location> data)
 throws Exception {
 	this(data, true, true);
 }
@@ -114,7 +115,7 @@ Constructor.  This builds the Model for displaying location data
 are being shown in the table model.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateCU_Location_TableModel(List data, boolean editable, boolean singleLocation)
+public StateCU_Location_TableModel(List<StateCU_Location> data, boolean editable, boolean singleLocation)
 throws Exception {
 	if (data == null) {
 		throw new Exception ("Invalid data list passed to StateCU_Location_TableModel constructor.");
@@ -136,7 +137,7 @@ throws Exception {
 From AbstractTableModel.  Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 */
-public Class getColumnClass (int columnIndex) {
+public Class<?> getColumnClass (int columnIndex) {
 	if (__singleLocation) {
 		switch (columnIndex) {
 			case  0: 	return Integer.class;	// row #
@@ -337,7 +338,7 @@ public Object getValueAt(int row, int col) {
 				if (index == -1) {
 					return "N/A";
 				}
-				return ((StateCU_ClimateStation)__stations.get(row)).getName();
+				return (__stations.get(row)).getName();
 			case 7:	
 				return new Double(__parentLocation.getPrecipitationStationWeight(	row));
 			case 8:	
@@ -347,7 +348,7 @@ public Object getValueAt(int row, int col) {
 			case 11:
 			case 12:
 			case 13:
-				StateMod_DiversionRight right = (StateMod_DiversionRight)__rights.get(row);
+				StateMod_DiversionRight right = __rights.get(row);
 				switch (col) {
 					case 9:	return right.getID();
 					case 10:return right.getName();
@@ -458,8 +459,7 @@ public void setValueAt(Object value, int row, int col) {
 	super.setValueAt(value, row, col);	
 }	
 
-public void setDelay(StateCU_Location location, 
-StateCU_DelayTableAssignment dta) {
+public void setDelay(StateCU_Location location, StateCU_DelayTableAssignment dta) {
 	__parentLocation = location;
 	__delays = dta;
 	if (dta == null) {
@@ -471,7 +471,7 @@ StateCU_DelayTableAssignment dta) {
 	fireTableDataChanged();
 }
 
-public void setStations(StateCU_Location location, List stations) {
+public void setStations(StateCU_Location location, List<StateCU_ClimateStation> stations) {
 	__parentLocation = location;
 	__stations = stations;
 
@@ -479,7 +479,7 @@ public void setStations(StateCU_Location location, List stations) {
 	fireTableDataChanged();
 }
 
-public void setRights(StateCU_Location location, List rights) {
+public void setRights(StateCU_Location location, List<StateMod_DiversionRight> rights) {
 	__parentLocation = location;
 	__rights = rights;
 

@@ -53,8 +53,9 @@ import RTi.Util.IO.Validators;
 /**
 This table model displays well data.
 */
+@SuppressWarnings("serial")
 public class StateMod_Well_Data_TableModel 
-extends JWorksheet_AbstractRowTableModel implements StateMod_Data_TableModel {
+extends JWorksheet_AbstractRowTableModel<StateMod_Well> implements StateMod_Data_TableModel {
 
 /**
 Whether the table data is editable or not.
@@ -101,9 +102,9 @@ Constructor.
 @param data the well station data that will be displayed in the table.
 @param editable whether the table data is editable or not
 */
-public StateMod_Well_Data_TableModel(List data, boolean editable) {
+public StateMod_Well_Data_TableModel(List<StateMod_Well> data, boolean editable) {
 	if (data == null) {
-		_data = new Vector();
+		_data = new Vector<StateMod_Well>();
 	}
 	else {
 		_data = data;
@@ -117,6 +118,7 @@ public StateMod_Well_Data_TableModel(List data, boolean editable) {
 Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 */
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public Class getColumnClass (int columnIndex) {
 	switch (columnIndex) {
 		case COL_ID:			return String.class;
@@ -354,7 +356,7 @@ public Validator[] getValidators( int col )
 {	
 	Validator[] no_checks = new Validator[] {};
 	// More specific validators ...
-	// Demand and Annual Efficieny must be less than 100 and
+	// Demand and Annual Efficiency must be less than 100 and
 	Validator [] generalAndLessThanHundred = new Validator [] { 
 			Validators.notBlankValidator(),
 			Validators.regexValidator( "^[0-9\\-]+$" ),
@@ -410,7 +412,7 @@ public Object getValueAt(int row, int col)
 		row = _sortOrder[row];
 	}
 
-	StateMod_Well well = (StateMod_Well)_data.get(row);
+	StateMod_Well well = _data.get(row);
 
 	switch (col) {
 		case COL_ID:	

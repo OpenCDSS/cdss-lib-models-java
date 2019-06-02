@@ -272,8 +272,7 @@ StateMod_RiverNetworkNode node, boolean editable) {
 	}
 
 	String id = node.getID();
-	int index = StateMod_Util.locateIndexFromID(id, 
-		__riverNetworkNodesVector);
+	int index = StateMod_Util.locateIndexFromID(id, __riverNetworkNodesVector);
 
 	__editable = editable;
 

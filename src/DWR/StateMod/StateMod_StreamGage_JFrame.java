@@ -296,7 +296,9 @@ public StateMod_StreamGage_JFrame (	StateMod_DataSet dataset, StateMod_DataSet_W
 	__dataset_wm = dataset_wm;
 	__streamGageStationComponent = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_STREAMGAGE_STATIONS);
-	__streamGageStationsVector = (List<StateMod_StreamGage>)__streamGageStationComponent.getData();
+	@SuppressWarnings("unchecked")
+	List<StateMod_StreamGage> dataList = (List<StateMod_StreamGage>)__streamGageStationComponent.getData();
+	__streamGageStationsVector = dataList;
 	int size = __streamGageStationsVector.size();
 	StateMod_StreamGage s = null;
 	for (int i = 0; i < size; i++) {
@@ -322,7 +324,9 @@ StateMod_StreamGage station, boolean editable) {
 	__dataset = dataset;
 	__streamGageStationComponent = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_STREAMGAGE_STATIONS);
-	__streamGageStationsVector = (List<StateMod_StreamGage>)__streamGageStationComponent.getData();
+	@SuppressWarnings("unchecked")
+	List<StateMod_StreamGage> dataList = (List<StateMod_StreamGage>)__streamGageStationComponent.getData();
+	__streamGageStationsVector = dataList;
 	int size = __streamGageStationsVector.size();
 	StateMod_StreamGage s = null;
 	for (int i = 0; i < size; i++) {

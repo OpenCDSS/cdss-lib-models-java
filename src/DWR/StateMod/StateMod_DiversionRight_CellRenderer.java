@@ -43,6 +43,7 @@ import RTi.Util.GUI.JWorksheet_AbstractExcelCellRenderer;
 /**
 This class renders cells for diversion right tables.
 */
+@SuppressWarnings("serial")
 public class StateMod_DiversionRight_CellRenderer
 extends JWorksheet_AbstractExcelCellRenderer {
 

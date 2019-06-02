@@ -87,8 +87,9 @@ This table model displays reservoir area capacity data.  The model can display
 area capacity data for a single reservoir or for 1+ reservoirs.  The difference
 is specified in the constructor and affects how many columns of data are shown.
 */
+@SuppressWarnings("serial")
 public class StateMod_ReservoirAreaCap_TableModel 
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel<StateMod_ReservoirAreaCap> {
 
 /**
 Number of columns in the table model.  For table models that display area
@@ -128,7 +129,7 @@ a single reservoir's right data.  This means that the reservoir ID field will
 not be shown.  If false then the reservoir right field will be included.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_ReservoirAreaCap_TableModel(List data, boolean editable,
+public StateMod_ReservoirAreaCap_TableModel(List<StateMod_ReservoirAreaCap> data, boolean editable,
 boolean singleReservoir)
 throws Exception {
 	if (data == null) {
@@ -155,7 +156,7 @@ Returns the class of the data stored in a given column.
 @param col the column for which to return the data class.
 @return the class of the data stored in a given column.
 */
-public Class getColumnClass (int col) {
+public Class<?> getColumnClass (int col) {
 	// necessary for worksheets that display area capacities for 1+ 
 	// reservoirs, so that the -1st column (ID) can also be displayed.  By
 	// doing it this way, code can be shared between the two kinds of 
@@ -354,7 +355,7 @@ public void setValueAt(Object value, int row, int col) {
 		row = _sortOrder[row];
 	}
 	double dval;
-	StateMod_ReservoirAreaCap ra = (StateMod_ReservoirAreaCap)_data.get(row);
+	StateMod_ReservoirAreaCap ra = _data.get(row);
 
 	// necessary for worksheets that display area capacities for 1+ 
 	// reservoirs, so that the -1st column (ID) can also be displayed.  By

@@ -55,6 +55,7 @@ This class is a JFrame for displaying a Vector of StateMod_ReservoirClimate
 data in a worksheet.  Climate data for 1+ reservoirs can be displayed in the 
 same worksheet.  The worksheet data can be exported to a file or printed.
 */
+@SuppressWarnings({ "serial", "rawtypes" })
 public class StateMod_ReservoirClimate_Data_JFrame 
 extends StateMod_Data_JFrame {
 
@@ -69,7 +70,7 @@ the data can be edited, if false they can not.
 If false, they are evap stations.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_ReservoirClimate_Data_JFrame(List data, String titleString,
+public StateMod_ReservoirClimate_Data_JFrame(List<StateMod_Reservoir> data, String titleString,
 boolean editable, boolean precip)
 throws Exception {
 	super();
@@ -79,15 +80,15 @@ throws Exception {
 	int size2 = 0;
 	StateMod_Reservoir r = null;
 	StateMod_ReservoirClimate c = null;
-	List climates = null;
-	List v = new Vector();
+	List<StateMod_ReservoirClimate> climates = null;
+	List<StateMod_ReservoirClimate> v = new Vector<StateMod_ReservoirClimate>();
 	
 	if (data != null) {
 		size = data.size();
 	}
 	
 	for (int i = 0; i < size; i++) {
-		r = (StateMod_Reservoir)data.get(i);
+		r = data.get(i);
 		climates = r.getClimates();
 		if (climates == null) {
 			continue;
@@ -96,7 +97,7 @@ throws Exception {
 		size2 = climates.size();
 
 		for (j = 0; j < size2; j++) {
-			c = (StateMod_ReservoirClimate)climates.get(j);
+			c = climates.get(j);
 			if (c == null) {
 				// skip
 			}

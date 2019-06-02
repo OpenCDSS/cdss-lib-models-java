@@ -1194,10 +1194,12 @@ public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset 
 	return validation;
 }
 
+// TODO smalers 2019-05-28 figure out how to enable
 /**
 FIXME SAM 2009-06-03 Evaluate how to call from main validate method
 Check the well rights.
 */
+@SuppressWarnings("unused")
 private void validateComponent2 ( List<StateMod_WellRight> werList, List<StateMod_Well> wesList, String idpattern_Java,
 	int warningCount, int warningLevel, String commandTag, CommandStatus status )
 {	String routine = getClass().getName() + ".checkWellRights";
@@ -1211,12 +1213,13 @@ private void validateComponent2 ( List<StateMod_WellRight> werList, List<StateMo
 	int wes_well_parcel_count = 0; // Parcel (with wells) count for well station.
 	double wes_well_parcel_area = 0.0; // Area of parcels with wells for well station.
 	List<StateMod_Parcel> parcel_Vector; // List of parcels for well station.
-	int count = 0; // Count of well stations with potential problems.
+	// TODO smalers 2019-05-29 figure out what to do with count
+	//int count = 0; // Count of well stations with potential problems.
 	String id_i = null;
-	List rightList = null;
+	List<StateMod_WellRight> rightList = null;
 	int welListSize = wesList.size();
 	for ( int i = 0; i < welListSize; i++ ) {
-		wes_i = (StateMod_Well)wesList.get(i);
+		wes_i = wesList.get(i);
 		if ( wes_i == null ) {
 			continue;
 		}
@@ -1231,7 +1234,7 @@ private void validateComponent2 ( List<StateMod_WellRight> werList, List<StateMo
 			// stations.  This will clobber any parcel data that
 			// may have been saved at the time that well stations
 			// were processed (if processed in the same commands file).
-			++count;
+			//++count;
 			// Check for parcels...
 			wes_parcel_count = 0;
 			wes_parcel_area = 0.0;

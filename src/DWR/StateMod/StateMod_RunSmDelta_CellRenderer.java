@@ -38,6 +38,7 @@ import RTi.Util.GUI.JWorksheet_AbstractExcelCellRenderer;
 /**
 This class renders cells for the delta plot table.
 */
+@SuppressWarnings("serial")
 public class StateMod_RunSmDelta_CellRenderer
 extends JWorksheet_AbstractExcelCellRenderer {
 

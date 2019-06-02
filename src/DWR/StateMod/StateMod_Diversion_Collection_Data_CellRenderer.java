@@ -39,6 +39,7 @@ import RTi.Util.GUI.JWorksheet_AbstractExcelCellRenderer;
 /**
 This class is used to render diversion collection cells.
 */
+@SuppressWarnings("serial")
 public class StateMod_Diversion_Collection_Data_CellRenderer
 extends JWorksheet_AbstractExcelCellRenderer {
 

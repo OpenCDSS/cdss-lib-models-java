@@ -130,7 +130,7 @@ throws Exception
 From AbstractTableModel.  Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 */
-public Class getColumnClass (int columnIndex)
+public Class<?> getColumnClass (int columnIndex)
 {	// TODO - expand this to handle data set component properties for the ID, name, etc. columns
 	switch (columnIndex) {
 		case __COL_ID:		return String.class;	// ID

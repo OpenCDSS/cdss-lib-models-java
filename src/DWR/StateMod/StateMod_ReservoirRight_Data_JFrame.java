@@ -49,12 +49,13 @@ import java.util.List;
 import RTi.Util.GUI.JScrollWorksheet;
 
 /**
-This class is a JFrame for displaying a Vector of StateMod_ReservoirRight data 
+This class is a JFrame for displaying a list of StateMod_ReservoirRight data 
 in a worksheet.  Reservoir rights for 1+ reservoirs can be displayed in the 
 same worksheet.  The worksheet data can be exported to a file or printed.
 */
+@SuppressWarnings("serial")
 public class StateMod_ReservoirRight_Data_JFrame 
-extends StateMod_Data_JFrame {
+extends StateMod_Data_JFrame<StateMod_ReservoirRight> {
 
 /**
 Constructor. 
@@ -65,7 +66,7 @@ which case an empty worksheet is shown.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_ReservoirRight_Data_JFrame(List data, String titleString,
+public StateMod_ReservoirRight_Data_JFrame(List<StateMod_ReservoirRight> data, String titleString,
 boolean editable)
 throws Exception {
 	super(data, titleString, editable);
@@ -75,22 +76,20 @@ throws Exception {
 }
 
 /**
-Called when the Apply button is pressed. This commits any changes to the data
-objects.
+Called when the Apply button is pressed. This commits any changes to the data objects.
 */
 protected void apply() {
 	StateMod_ReservoirRight right = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		right = (StateMod_ReservoirRight)_data.get(i);
+		right = _data.get(i);
 		right.createBackup();
 	}
 }
 
 /**
 Creates a JScrollWorksheet for the current data and returns it.
-@return a JScrollWorksheet containing the data Vector passed in to the 
-constructor.
+@return a JScrollWorksheet containing the data Vector passed in to the constructor.
 */
 protected JScrollWorksheet buildJScrollWorksheet() 
 throws Exception {
@@ -111,7 +110,7 @@ protected void cancel() {
 	StateMod_ReservoirRight right = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		right = (StateMod_ReservoirRight)_data.get(i);
+		right = _data.get(i);
 		right.restoreOriginal();
 	}
 }
@@ -124,7 +123,7 @@ protected void createDataBackup() {
 	StateMod_ReservoirRight right = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		right = (StateMod_ReservoirRight)_data.get(i);
+		right = _data.get(i);
 		right.createBackup();
 	}
 }

@@ -60,6 +60,7 @@ import RTi.Util.GUI.SimpleJComboBox;
 /**
 Dialog for adding nodes interactively to the network.
 */
+@SuppressWarnings("serial")
 public class StateMod_Network_AddNode_JDialog
 extends JDialog
 implements ActionListener, KeyListener {

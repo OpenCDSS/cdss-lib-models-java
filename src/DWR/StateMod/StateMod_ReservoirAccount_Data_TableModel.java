@@ -45,8 +45,9 @@ This table model displays reservoir account data.  The model can display
 account data for a single reservoir or for 1+ reservoirs.  The difference is
 specified in the constructor and affects how many columns of data are shown.
 */
+@SuppressWarnings("serial")
 public class StateMod_ReservoirAccount_Data_TableModel 
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel<StateMod_ReservoirAccount> {
 
 /**
 Number of columns in the table model.  
@@ -75,9 +76,9 @@ Constructor.
 @param data the data that will be displayed in the table.
 @param editable whether the table data can be modified.
 */
-public StateMod_ReservoirAccount_Data_TableModel(List data, boolean editable){
+public StateMod_ReservoirAccount_Data_TableModel(List<StateMod_ReservoirAccount> data, boolean editable){
 	if (data == null) {
-		_data = new Vector();
+		_data = new Vector<StateMod_ReservoirAccount>();
 	}
 	else {
 		_data = data;
@@ -92,7 +93,7 @@ Returns the class of the data stored in a given column.
 @param col the column for which to return the data class.
 @return the class of the data stored in a given column.
 */
-public Class getColumnClass (int col) {
+public Class<?> getColumnClass (int col) {
 	switch (col) {
 		case COL_RESERVOIR_ID:		return String.class;
 		case COL_OWNER_ID:		return String.class;
@@ -252,7 +253,7 @@ public void setValueAt(Object value, int row, int col)
 	}
 	double dval;
 	int ival;
-	StateMod_ReservoirAccount rac = (StateMod_ReservoirAccount)_data.get(row);
+	StateMod_ReservoirAccount rac = _data.get(row);
 
 	switch (col) {
 		case COL_RESERVOIR_ID:

@@ -36,7 +36,7 @@ public class StateMod_ComponentValidation
 /**
 List of component data validation items - specific problems.
 */
-private List<StateMod_ComponentValidationProblem> __validationProblems = new Vector();
+private List<StateMod_ComponentValidationProblem> __validationProblems = new Vector<StateMod_ComponentValidationProblem>();
 
 /**
 Add a validation result.

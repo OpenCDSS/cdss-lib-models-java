@@ -118,7 +118,7 @@ private JButton
 /**
 The list in which the output files are displayed.
 */
-private JList __fileJList;
+private JList<String> __fileJList;
 
 /**
 The data set from which the data is read.
@@ -318,13 +318,13 @@ public void fillFileJListContents(){
 
 	List<String> overall = new Vector<String>();
 
-	List<Object> v1 = new Vector<Object>(3);
+	List<String> v1 = new Vector<String>(3);
 	v1.add("File");
 	v1.add("Contents");
 	v1.add("Description");
 	iline = StringUtil.formatString(v1, format);
 	overall.add(iline);
-	List<Object> v2 = new Vector<Object>(3);
+	List<String> v2 = new Vector<String>(3);
 	v2.add("----");
 	v2.add("--------");
 	v2.add("-----------");
@@ -338,7 +338,7 @@ public void fillFileJListContents(){
 		filename = __path + filelist[i];
 		if (IOUtil.fileReadable(filename)) {
 			Message.printStatus(10, rtn, "Adding " + filename);
-			List<Object> v = new Vector<Object>(3);
+			List<String> v = new Vector<String>(3);
 			v.add(filelist[i++]);
 			v.add(filelist[i++]);
 			v.add(filelist[i++]);
@@ -347,27 +347,12 @@ public void fillFileJListContents(){
 		}
 		else {	
 			if (Message.isDebugOn) {
-				Message.printDebug(10, rtn, 
-					"NOT adding " + filename);
+				Message.printDebug(10, rtn, "NOT adding " + filename);
 			}
 			i += 3;
 		}
 	}
-	__fileJList.setListData(new Vector(overall));
-}
-
-/**
-Clean up before garbage collection.
-*/
-protected void finalize()
-throws Throwable {
-	__closeJButton = null;
-	__viewEditJButton = null;
-	__fileJList = null;
-	__dataset = null;
-	__basinName = null;
-	__path = null;
-	super.finalize();
+	__fileJList.setListData(new Vector<String>(overall));
 }
 
 /**
@@ -410,7 +395,7 @@ Sets up the GUI.
 */
 private void setupGUI() {
 
-	__fileJList = new JList();
+	__fileJList = new JList<String>();
 	__fileJList.setSelectionMode ( ListSelectionModel.SINGLE_SELECTION );
 	__fileJList.addListSelectionListener(this);
 	__fileJList.setToolTipText(

@@ -158,6 +158,7 @@ import RTi.Util.Message.Message;
 /**
 This class is a GUI for displaying and editing output control files.
 */
+@SuppressWarnings("serial")
 public class StateMod_OutputControl_JFrame extends JFrame
 implements ActionListener, WindowListener {
 
@@ -350,7 +351,8 @@ public void actionPerformed(ActionEvent ae) {
 		__dirty = false;
 		__tableModel.setDirty(false);
 		
-		List theGraphNodes = __worksheet.getAllData();	
+		@SuppressWarnings("unchecked")
+		List<StateMod_GraphNode> theGraphNodes = (List<StateMod_GraphNode>)__worksheet.getAllData();	
 
 		try {	
 			StateMod_GraphNode.writeStateModOutputControlFile(null, 
@@ -409,7 +411,7 @@ public void actionPerformed(ActionEvent ae) {
 
 		__dirty = false;
 
-		List theGraphNodes = new Vector(20, 1);
+		List<StateMod_GraphNode> theGraphNodes = new Vector<StateMod_GraphNode>(20, 1);
 		
 		try {	
 			__worksheet.clear();
@@ -474,11 +476,11 @@ public void actionPerformed(ActionEvent ae) {
 		else {
 			__addRowButton.setEnabled(true);
 			__deleteRowButton.setEnabled(true);
-			List v = StateMod_Util.arrayToList ( StateMod_GraphNode.node_types);
+			List<String> v = StateMod_Util.arrayToList ( StateMod_GraphNode.node_types);
 			v.add("Other");
 			__worksheet.setColumnJComboBoxValues(0, v);
 			__worksheet.clear();
-			List offOn = new Vector();
+			List<String> offOn = new Vector<String>(2);
 			offOn.add("Off");
 			offOn.add("On");
 			__worksheet.setCellEditable(0, 0, true);
@@ -614,8 +616,7 @@ private void setupGUI() {
 		0, 0, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
-	PropList p = 
-		new PropList("StateMod_OutputControl_JFrame.JWorksheet");
+	PropList p = new PropList("StateMod_OutputControl_JFrame.JWorksheet");
 	p.add("JWorksheet.ShowRowHeader=true");
 	p.add("JWorksheet.AllowCopy=true");	
 	p.add("JWorksheet.ShowPopupMenu=true");
@@ -623,9 +624,9 @@ private void setupGUI() {
 	int[] widths = null;
 	JScrollWorksheet jsw = null;
 	try {
-		__tableModel = new
-			StateMod_OutputControl_TableModel(this, new Vector(),
-			(List)__riverNetworkComp.getData());
+		@SuppressWarnings("unchecked")
+		List<StateMod_RiverNetworkNode> rinList = (List<StateMod_RiverNetworkNode>)__riverNetworkComp.getData();
+		__tableModel = new StateMod_OutputControl_TableModel(this, new Vector<StateMod_GraphNode>(), rinList);
 			
 		StateMod_OutputControl_CellRenderer cro = new
 			StateMod_OutputControl_CellRenderer(__tableModel);
@@ -633,13 +634,13 @@ private void setupGUI() {
 		jsw = new JScrollWorksheet(cro, __tableModel, p);		
 		__worksheet = jsw.getJWorksheet();
 
-		List v = StateMod_Util.arrayToList(StateMod_GraphNode.node_types);
+		List<String> v = StateMod_Util.arrayToList(StateMod_GraphNode.node_types);
 		v.add("Other");
 		__worksheet.setColumnJComboBoxValues(0, v);
 
 		__worksheet.setCellSpecificJComboBoxColumn(1, false);
 
-		List offOn = new Vector();
+		List<String> offOn = new Vector<String>(2);
 		offOn.add("Off");
 		offOn.add("On");
 		__worksheet.setColumnJComboBoxValues(2, offOn);

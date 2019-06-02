@@ -41,6 +41,7 @@ import RTi.Util.GUI.JWorksheet_AbstractExcelCellRenderer;
 /**
 This class is used to render cells for instream flow station tables.
 */
+@SuppressWarnings("serial")
 public class StateMod_InstreamFlow_CellRenderer
 extends JWorksheet_AbstractExcelCellRenderer {
 

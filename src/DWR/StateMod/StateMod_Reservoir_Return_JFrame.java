@@ -200,10 +200,12 @@ public void actionPerformed(ActionEvent e) {
 	}
 }
 
+// TODO smalers 2019-06-01 evaluate why not used
 /**
 Checks the data to make sure that all the data are valid. 
 @return 0 if the data are valid, 1 if errors exist and -1 if non-fatal errors exist.
 */
+@SuppressWarnings("unused")
 private int checkInput() {
 	String routine = "StateMod_Reservoir_Return_JFrame.checkInput";
 	@SuppressWarnings("unchecked")

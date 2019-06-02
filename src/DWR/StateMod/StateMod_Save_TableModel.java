@@ -44,8 +44,9 @@ import RTi.Util.IO.DataSetComponent;
 /**
 This table model displays response data.
 */
+@SuppressWarnings("serial")
 public class StateMod_Save_TableModel 
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel<Object> {
 
 /**
 Number of columns in the table model.
@@ -82,9 +83,9 @@ throws Exception {
 	// the data set.
 	int[] groups = __dataset.getComponentGroupNumbers();
 
-	List ints = new Vector();
+	List<Integer> ints = new Vector<Integer>();
 	DataSetComponent dsc = null;
-	List v = null;
+	List<DataSetComponent> v = null;
 
 	// Go through each of the groups and get their data out.  Group data
 	// consists of the DataSetComponents the group contains.  For each
@@ -93,9 +94,11 @@ throws Exception {
 	for (int i = 0; i < groups.length; i++) {
 	
 		dsc = __dataset.getComponentForComponentType(groups[i]);
-		v = (List)dsc.getData();
+		@SuppressWarnings("unchecked")
+		List<DataSetComponent> compList = (List<DataSetComponent>)dsc.getData();
+		v = compList;
 		if (v == null) {
-			v = new Vector();
+			v = new Vector<DataSetComponent>();
 		}
 		for (int j = 0; j < v.size(); j++) {
 			dsc = (DataSetComponent)v.get(j);
@@ -123,7 +126,7 @@ From AbstractTableModel; returns the class of the data stored in a given
 column.
 @param columnIndex the column for which to return the data class.
 */
-public Class getColumnClass (int columnIndex) {
+public Class<?> getColumnClass (int columnIndex) {
 	switch (columnIndex) {
 		case COL_DESC:	return String.class;
 		case COL_FILE:	return String.class;
@@ -169,8 +172,7 @@ public String getFormat(int column) {
 }
 
 /**
-Gets the number of the component for which table is displayed at the specified
-row.
+Gets the number of the component for which table is displayed at the specified row.
 @param row the row of the component for which to return the component number.
 */
 public int getRowComponentNum(int row) {

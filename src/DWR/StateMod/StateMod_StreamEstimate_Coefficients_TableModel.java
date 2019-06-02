@@ -51,8 +51,9 @@ import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 /**
 This table model displays stream estimate station coefficients data.
 */
+@SuppressWarnings("serial")
 public class StateMod_StreamEstimate_Coefficients_TableModel 
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel<StateMod_StreamEstimate_Coefficients> {
 
 /**
 Number of columns in the table model.
@@ -80,7 +81,7 @@ Constructor.
 @param data the data that will be displayed in the table.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_StreamEstimate_Coefficients_TableModel(List data)
+public StateMod_StreamEstimate_Coefficients_TableModel(List<StateMod_StreamEstimate_Coefficients> data)
 throws Exception {
 	this(data, true);
 }
@@ -91,7 +92,7 @@ Constructor.
 @param editable whether the data are editable or not.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_StreamEstimate_Coefficients_TableModel(List data,
+public StateMod_StreamEstimate_Coefficients_TableModel(List<StateMod_StreamEstimate_Coefficients> data,
 boolean editable) 
 throws Exception {
 	if (data == null) {
@@ -110,7 +111,7 @@ From AbstractTableModel; returns the class of the data stored in a given
 column.
 @param columnIndex the column for which to return the data class.
 */
-public Class getColumnClass (int columnIndex) {
+public Class<?> getColumnClass (int columnIndex) {
 	switch (columnIndex) {
 		case COL_STREAM_NAME:		return Double.class;
 		case COL_UPSTREAM_GAGE:		return String.class;

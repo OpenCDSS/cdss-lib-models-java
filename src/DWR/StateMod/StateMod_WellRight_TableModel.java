@@ -60,8 +60,9 @@ This table model displays well right data.  The model can display rights data
 for a single well or for 1+ wells.  The difference is specified in the
 constructor and affects how many columns of data are shown.
 */
+@SuppressWarnings("serial")
 public class StateMod_WellRight_TableModel 
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel<StateMod_WellRight> {
 
 /**
 Number of columns in the table model.  For table models that display rights for
@@ -123,7 +124,7 @@ a single well's right data.  This means that the well ID field will
 not be shown.  If false then the well right field will be included.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_WellRight_TableModel(List data, boolean editable, boolean singleWell)
+public StateMod_WellRight_TableModel(List<StateMod_WellRight> data, boolean editable, boolean singleWell)
 throws Exception {
 	if (data == null) {
 		throw new Exception ("Invalid data list passed to StateMod_WellRight_TableModel constructor.");
@@ -148,7 +149,7 @@ Returns the class of the data stored in a given column.
 @param col the column for which to return the data class.
 @return the class of the data stored in a given column.
 */
-public Class getColumnClass (int col) {
+public Class<?> getColumnClass (int col) {
 	// necessary for table models that display rights for 1+ wells so that
 	// the -1st column (ID) can also be displayed.  By doing it this way,
 	// code can be shared between the two kinds of table models and less
@@ -497,7 +498,7 @@ public void setValueAt(Object value, int row, int col) {
 	double dval;
 	int ival;
 
-	StateMod_WellRight wellr = (StateMod_WellRight)_data.get(row);
+	StateMod_WellRight wellr = _data.get(row);
 
 	// necessary for table models that display rights for 1+ wells so that
 	// the -1st column (ID) can also be displayed.  By doing it this way,

@@ -49,8 +49,9 @@ import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 /**
 This table model displays output control data.
 */
+@SuppressWarnings("serial")
 public class StateMod_OutputControl_TableModel 
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel<StateMod_GraphNode> {
 
 /**
 The kinds of station types that can appear in the table.
@@ -87,14 +88,14 @@ The worksheet in which this table model is working.
 private JWorksheet __worksheet;
 
 /**
-Vectors of data for filling ID lists.
+Liss of data for filling ID lists.
 */
-private List __riverNetwork;
+private List<StateMod_RiverNetworkNode> __riverNetworkList;
 
 /**
 ID lists to be displayed in the combo boxes.
 */
-private List
+private List<String>
 	__reservoirIDs = null,
 	__diversionIDs = null,
 	__instreamFlowIDs = null,
@@ -106,15 +107,15 @@ private List
 Constructor.  
 @param parent the StateMod_OutputControl_JFrame in which the table is displayed
 @param data the data that will be used to fill in the table.
-@param riverNetwork the data that will be used to fill in the table IDS.
+@param riverNetworkList the data that will be used to fill in the table IDS.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_OutputControl_TableModel(StateMod_OutputControl_JFrame parent, List data, List riverNetwork) 
+public StateMod_OutputControl_TableModel(StateMod_OutputControl_JFrame parent, List<StateMod_GraphNode> data, List<StateMod_RiverNetworkNode> riverNetworkList) 
 throws Exception {
-	__riverNetwork = riverNetwork;
+	__riverNetworkList = riverNetworkList;
 	
 	if (data == null) {
-		throw new Exception ("Invalid data Vector passed to " 
+		throw new Exception ("Invalid data list passed to " 
 			+ "StateMod_OutputControl_TableModel constructor.");
 	}
 	_rows = data.size();
@@ -159,13 +160,13 @@ public boolean canAddNewRow() {
 }
 
 /**
-Creates a list of the available IDs for a Vector of StateMod_Data-extending objects.
+Creates a list of the available IDs for a list of StateMod_Data-extending objects.
 @param nodes the nodes for which to create a list of IDs.
 @return a Vector of Strings, each of which contains an ID followed by the 
 name of Structure in parentheses
 */
-private List createAvailableIDsList(List nodes) {
-	List v = new Vector();
+private List<String> createAvailableIDsList(List<? extends StateMod_Data> nodes) {
+	List<String> v = new Vector<String>();
 
 	int num = 0;
 	if (nodes != null) {
@@ -174,11 +175,9 @@ private List createAvailableIDsList(List nodes) {
 
 	String name = null;
 	for (int i = 0; i < (num - 1); i++) {
-		name = ((StateMod_Data)nodes.get(i)).getName();
+		name = nodes.get(i).getName();
 		name = name.substring (0, name.length() - 4).trim();
-		v.add(
-			((StateMod_Data)nodes.get(i)).getID() + " (" 
-			+ name + ")");
+		v.add( nodes.get(i).getID() + " (" + name + ")");
 	}
 	return v;
 }
@@ -189,7 +188,7 @@ Fills the ID column based on the kind of structure selected.
 @param type the type of structure selected (column 1)
 */
 public void fillIDColumn(int row, String type) {
-	List ids = new Vector();
+	List<String> ids = new Vector<String>();
 	if (type.equalsIgnoreCase("Diversion")) {
 		ids = __diversionIDs;
 	}
@@ -227,7 +226,6 @@ public void fillIDColumn(int row, String type) {
 		ids = __otherIDs;
 	}
 	
-
 	if (__worksheet != null) {
 		__worksheet.setCellSpecificJComboBoxValues(row, 1, ids);
 	}
@@ -240,7 +238,7 @@ Finds the ID of the appropriate type that starts with the given ID.
 @return the matching ID.
 */
 private String findIDMatch(String type, String ID) {
-	List search = null;
+	List<String> search = null;
 	
 	if (type.equalsIgnoreCase("INS")) {
 		search = __instreamFlowIDs;
@@ -269,7 +267,7 @@ private String findIDMatch(String type, String ID) {
 	int size = search.size();
 	String val = null;
 	for (int i = 0; i < size; i++) {	
-		val = (String)search.get(i);
+		val = search.get(i);
 		if (val.startsWith(ID)) {
 			return val;
 		}
@@ -281,7 +279,7 @@ private String findIDMatch(String type, String ID) {
 Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 */
-public Class getColumnClass (int columnIndex) {
+public Class<?> getColumnClass (int columnIndex) {
 	switch (columnIndex) {
 		case COL_TYPE:		return String.class;
 		case COL_ID:		return String.class;
@@ -316,8 +314,7 @@ public String getColumnName(int columnIndex) {
 Returns the format that the specified column should be displayed in when
 the table is being displayed in the given table format. 
 @param column column for which to return the format.
-@return the format (as used by StringUtil.formatString() in which to display the
-column.
+@return the format (as used by StringUtil.formatString() in which to display the column.
 */
 public String getFormat(int column) {
 	switch (column) {
@@ -329,19 +326,19 @@ public String getFormat(int column) {
 }
 
 /**
-Returns the appropriate ID Vector for the given structure type.
+Returns the appropriate ID list for the given structure type.
 @param type the structure type for which to return the ID Vector.
 @return the ID Vector for the structure type.
 */
-private List getTypeIDVector(String type) {
-	int size = __riverNetwork.size();
+private List<StateMod_RiverNetworkNode> getTypeIDVector(String type) {
+	int size = __riverNetworkList.size();
 
-	StateMod_Data node = null;
+	StateMod_RiverNetworkNode node = null;
 	String name = null;
-	List v = new Vector();
+	List<StateMod_RiverNetworkNode> v = new Vector<StateMod_RiverNetworkNode>();
 	// loops through to (num - 1) because the last element of the network Vector is "END"
 	for (int i = 0; i < size; i++) {
-		node = (StateMod_Data)__riverNetwork.get(i);
+		node = __riverNetworkList.get(i);
 
 		name = node.getName();
 		if (type.equals(__OTHtype) || name.endsWith(type)) {
@@ -369,7 +366,7 @@ public Object getValueAt(int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	StateMod_GraphNode gn = (StateMod_GraphNode)_data.get(row);
+	StateMod_GraphNode gn = _data.get(row);
 
 	String ID = gn.getID();
 	switch (col) {
@@ -501,7 +498,7 @@ public void setValueAt(Object value, int row, int col)
 		row = _sortOrder[row];
 	}
 	setDirty(true);
-	StateMod_GraphNode gn = (StateMod_GraphNode)_data.get(row);
+	StateMod_GraphNode gn = _data.get(row);
 
 	switch (col) {
 		case COL_TYPE:	

@@ -36,6 +36,7 @@ NoticeEnd */
 
 package DWR.StateCU;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -85,38 +86,85 @@ public CheckFile checkComponentType( PropList props )
 	// reset general data problem count
 	__gen_problems = 0;
 	// check for component data.  If none exists then do no checks.
+	/*
 	List<Object> data_vector = getComponentData( __type );
 	if ( data_vector == null || data_vector.size() == 0 ) {
 		return __check_file;
 	}
+	*/
 	switch( __type) {
 		case StateCU_DataSet.COMP_BLANEY_CRIDDLE:
-			checkBlaneyCriddleData( props, data_vector );
-		break;
+			@SuppressWarnings("unchecked")
+			List<StateCU_BlaneyCriddle> kbcList = (List<StateCU_BlaneyCriddle>)getComponentData(__type);
+			if ( kbcList == null || kbcList.size() == 0 ) {
+				return __check_file;
+			}
+			checkBlaneyCriddleData( props, kbcList );
+			break;
 		case StateCU_DataSet.COMP_CLIMATE_STATIONS:
-			checkClimateStationData( props, data_vector );
-		break;
+			@SuppressWarnings("unchecked")
+			List<StateCU_ClimateStation> climstaList = (List<StateCU_ClimateStation>)getComponentData(__type);
+			if ( climstaList == null || climstaList.size() == 0 ) {
+				return __check_file;
+			}
+			checkClimateStationData( props, climstaList );
+			break;
 		case StateCU_DataSet.COMP_CROP_CHARACTERISTICS:
-			checkCropCharacteristicsData( props, data_vector );
-		break;
+			@SuppressWarnings("unchecked")
+			List<StateCU_CropCharacteristics> ccList = (List<StateCU_CropCharacteristics>)getComponentData(__type);
+			if ( ccList == null || ccList.size() == 0 ) {
+				return __check_file;
+			}
+			checkCropCharacteristicsData( props, ccList );
+			break;
 		case StateCU_DataSet.COMP_CROP_PATTERN_TS_YEARLY:  
-			checkCropPatternTSData( props, data_vector );
-		break;
+			@SuppressWarnings("unchecked")
+			List<StateCU_CropPatternTS> cdsList = (List<StateCU_CropPatternTS>)getComponentData(__type);
+			if ( cdsList == null || cdsList.size() == 0 ) {
+				return __check_file;
+			}
+			checkCropPatternTSData( props, cdsList );
+			break;
 		case StateCU_DataSet.COMP_CU_LOCATIONS:
-			checkLocationData( props, data_vector );
-		break;
+			@SuppressWarnings("unchecked")
+			List<StateCU_Location> culocList = (List<StateCU_Location>)getComponentData(__type);
+			if ( culocList == null || culocList.size() == 0 ) {
+				return __check_file;
+			}
+			checkLocationData( props, culocList );
+			break;
 		case StateCU_DataSet.COMP_CU_LOCATION_CLIMATE_STATIONS:
-			checkLocationClimateStationsData( props, data_vector );
-		break;
+			//@SuppressWarnings("unchecked")
+			//List<StateCU_Location_ClimateStation> locclimsta = (List<StateCU_Location_ClimateStation>)getComponentData(__type);
+			//if ( locclimsta == null || locclimsta.size() == 0 ) {
+			//	return __check_file;
+			//}
+			//checkLocationClimateStationsData( props, locclimsta );
+			break;
 		case StateCU_DataSet.COMP_CU_LOCATION_COLLECTIONS:
-			checkLocationCollectionData( props, data_vector );
-		break;
+			//@SuppressWarnings("unchecked")
+			//List<StateCU_Location_Collection> cucolList = (List<StateCU_Location_Collection>)getComponentData(__type);
+			//if ( cucolList == null || cucolList.size() == 0 ) {
+			//	return __check_file;
+			//}
+			//checkLocationCollectionData( props, cucolList );
+			break;
 		case StateCU_DataSet.COMP_DELAY_TABLE_ASSIGNMENT_MONTHLY:
-			checkDelayTableAssignmentData( props, data_vector );
-		break;
+			@SuppressWarnings("unchecked")
+			List<StateCU_DelayTableAssignment> dtaList = (List<StateCU_DelayTableAssignment>)getComponentData(__type);
+			if ( dtaList == null || dtaList.size() == 0 ) {
+				return __check_file;
+			}
+			checkDelayTableAssignmentData( props, dtaList );
+			break;
 		case StateCU_DataSet.COMP_IRRIGATION_PRACTICE_TS_YEARLY:
-			checkIrrigationPracticeTSData( props, data_vector );
-		break;
+			@SuppressWarnings("unchecked")
+			List<StateCU_IrrigationPracticeTS> ipyList = (List<StateCU_IrrigationPracticeTS>)getComponentData(__type);
+			if ( ipyList == null || ipyList.size() == 0 ) {
+				return __check_file;
+			}
+			checkIrrigationPracticeTSData( props, ipyList );
+			break;
 		default: ;	// do nothing
 	}
 	return __check_file;
@@ -125,28 +173,27 @@ public CheckFile checkComponentType( PropList props )
 /**
 Performs general and specific data checks on Blaney-Criddle data. 
 @param props A property list for specific properties.
-@param data_vector list of data to check.
+@param kbcList list of data to check.
 */
-private void checkBlaneyCriddleData(PropList props, List data_vector) 
+private void checkBlaneyCriddleData(PropList props, List<StateCU_BlaneyCriddle> kbcList) 
 {
 	// Create elements for the checks and check file
 	String[] header = StateCU_BlaneyCriddle.getDataHeader();
-	List data = new Vector();
+	List<StateCU_ComponentValidationProblem> data = new Vector<StateCU_ComponentValidationProblem>();
 	String title = "Blaney Criddle";
 	
 	// Perform the general validation using the Data Table Model
-	StateCU_Data_TableModel tm = new StateCU_BlaneyCriddle_TableModel(
-			data_vector, false );
-	List checked = performDataValidation( tm, title );
+	StateCU_Data_TableModel tm = new StateCU_BlaneyCriddle_TableModel( kbcList, false );
+	List<String[]> checked = performDataValidation( tm, title );
 	//String [] columnHeader = getDataTableModelColumnHeader( tm );
 	String [] columnHeader = getColumnHeader( tm );
 	
 	// Do specific checks
 	int size = 0;
-	if ( data_vector != null ) {
-		size = data_vector.size();
+	if ( kbcList != null ) {
+		size = kbcList.size();
 	}
-	data = doSpecificDataChecks( data_vector, props );
+	data = doSpecificDataChecks( kbcList, props );
 	// Add the data and checks to the check file.
 	// Provides basic header information for this data check table 
 	String info = "The following " + title +  " (" + data.size() + 
@@ -154,7 +201,7 @@ private void checkBlaneyCriddleData(PropList props, List data_vector)
 
 	// Create data models for Check file
 	CheckFile_DataModel dm = new CheckFile_DataModel(
-			data, header, title, info, data.size(), tm.getRowCount() );
+			toCheckDataModelArray(data), header, title, info, data.size(), tm.getRowCount() );
 	CheckFile_DataModel gen_dm = new CheckFile_DataModel(
 			checked, columnHeader, title + " Missing or Invalid Data",
 			"", __gen_problems, tm.getRowCount() );
@@ -164,35 +211,35 @@ private void checkBlaneyCriddleData(PropList props, List data_vector)
 /**
 Performs general and specific data checks on climate station data. 
 @param props A property list for specific properties.
-@param data_vector Vector of data to check.
+@param climstaList Vector of data to check.
 */
-private void checkClimateStationData( PropList props, List data_vector ) 
+private void checkClimateStationData( PropList props, List<StateCU_ClimateStation> climstaList ) 
 {
 	// Create elements for the checks and check file
 	String[] header = StateCU_ClimateStation.getDataHeader();
-	List data = new Vector();
+	List<StateCU_ComponentValidationProblem> data = new Vector<StateCU_ComponentValidationProblem>();
 	String title = "Climate Station";
 	
 	// Perform the general validation using the Data Table Model
 	StateCU_Data_TableModel tm;
 	try {
-		tm = new StateCU_ClimateStation_TableModel( data_vector, false );
+		tm = new StateCU_ClimateStation_TableModel( climstaList, false );
 	} 
 	catch (Exception e) {
 		Message.printWarning( 3, 
 			"StateCU_ComponentDataCheck.checkClimateStationData", e );
 		return;
 	}
-	List checked = performDataValidation( tm, title );
+	List<String[]> checked = performDataValidation( tm, title );
 	//String [] columnHeader = getDataTableModelColumnHeader( tm );
 	String [] columnHeader = getColumnHeader( tm );
 	
 	// Do specific checks
 	int size = 0;
-	if ( data_vector != null ) {
-		size = data_vector.size();
+	if ( climstaList != null ) {
+		size = climstaList.size();
 	}
-	data = doSpecificDataChecks( data_vector, props );
+	data = doSpecificDataChecks( climstaList, props );
 	// Add the data and checks to the check file.
 	// Provides basic header information for this data check table 
 	String info = "The following " + title +  " (" + data.size() + 
@@ -200,7 +247,7 @@ private void checkClimateStationData( PropList props, List data_vector )
 
 	// Create data models for Check file
 	CheckFile_DataModel dm = new CheckFile_DataModel(
-			data, header, title, info, data.size(), tm.getRowCount() );
+			toCheckDataModelArray(data), header, title, info, data.size(), tm.getRowCount() );
 	CheckFile_DataModel gen_dm = new CheckFile_DataModel(
 			checked, columnHeader, title + " Missing or Invalid Data",
 			"", __gen_problems, tm.getRowCount() );
@@ -210,35 +257,34 @@ private void checkClimateStationData( PropList props, List data_vector )
 /**
 Performs general and specific data checks on crop characteristics data. 
 @param props A property list for specific properties.
-@param data_vector Vector of data to check.
+@param cchList list of data to check.
 */
-private void checkCropCharacteristicsData(PropList props, List data_vector) 
+private void checkCropCharacteristicsData(PropList props, List<StateCU_CropCharacteristics> cchList) 
 {
 	// Create elements for the checks and check file
 	String[] header = StateCU_CropCharacteristics.getDataHeader();
-	List data = new Vector();
+	List<StateCU_ComponentValidationProblem> data = new Vector<StateCU_ComponentValidationProblem>();
 	String title = "Crop Characteristics";
 	
 	// Perform the general validation using the Data Table Model
 	StateCU_Data_TableModel tm;
 	try {
-		tm = new StateCU_CropCharacteristics_TableModel( data_vector, 
-			false, false );
+		tm = new StateCU_CropCharacteristics_TableModel( cchList, false, false );
 	} catch (Exception e) {
 		Message.printWarning( 3, 
 			"StateCU_ComponentDataCheck.checkCropCharacteristicsData", e );
 		return;
 	}
-	List checked = performDataValidation( tm, title );
+	List<String []> checked = performDataValidation( tm, title );
 	//String [] columnHeader = getDataTableModelColumnHeader( tm );
 	String [] columnHeader = getColumnHeader( tm );
 	
 	// Do specific checks
 	int size = 0;
-	if ( data_vector != null ) {
-		size = data_vector.size();
+	if ( cchList != null ) {
+		size = cchList.size();
 	}
-	data = doSpecificDataChecks( data_vector, props );
+	data = doSpecificDataChecks( cchList, props );
 	// Add the data and checks to the check file.
 	// Provides basic header information for this data check table 
 	String info = "The following " + title +  " (" + data.size() + 
@@ -246,7 +292,7 @@ private void checkCropCharacteristicsData(PropList props, List data_vector)
 
 	// Create data models for Check file
 	CheckFile_DataModel dm = new CheckFile_DataModel(
-			data, header, title, info, data.size(), size );
+			toCheckDataModelArray(data), header, title, info, data.size(), size );
 	CheckFile_DataModel gen_dm = new CheckFile_DataModel(
 			checked, columnHeader, title + " Missing or Invalid Data",
 			"", __gen_problems, size );
@@ -256,9 +302,9 @@ private void checkCropCharacteristicsData(PropList props, List data_vector)
 /**
 Performs general and specific data checks on crop pattern ts data. 
 @param props A property list for specific properties.
-@param data_vector Vector of data to check.
+@param dataList list of data to check.
 */
-private void checkCropPatternTSData(PropList props, List data_vector) 
+private void checkCropPatternTSData(PropList props, List<StateCU_CropPatternTS> dataList) 
 {
 	
 }
@@ -266,28 +312,27 @@ private void checkCropPatternTSData(PropList props, List data_vector)
 /**
 Performs general and specific data checks on delay table assignment data. 
 @param props A property list for specific properties.
-@param data_vector Vector of data to check.
+@param dtaList list of data to check.
 */
-private void checkDelayTableAssignmentData(PropList props, List data_vector) 
+private void checkDelayTableAssignmentData(PropList props, List<StateCU_DelayTableAssignment> dtaList) 
 {
 	// Create elements for the checks and check file
-	String[] header = StateCU_CropCharacteristics.getDataHeader();
-	List data = new Vector();
+	String[] header = StateCU_DelayTableAssignment.getDataHeader();
+	List<StateCU_ComponentValidationProblem> data = new Vector<StateCU_ComponentValidationProblem>();
 	String title = "Delay Table Assignment";
 	
 	// Perform the general validation using the Data Table Model
-	StateCU_Data_TableModel tm = 
-		new StateCU_DelayTableAssignment_Data_TableModel( data_vector );
-	List checked = performDataValidation( tm, title );
+	StateCU_Data_TableModel tm = new StateCU_DelayTableAssignment_Data_TableModel( dtaList );
+	List<String []> checked = performDataValidation( tm, title );
 	//String [] columnHeader = getDataTableModelColumnHeader( tm );
 	String [] columnHeader = getColumnHeader( tm );
 	
 	// Do specific checks
 	int size = 0;
-	if ( data_vector != null ) {
-		size = data_vector.size();
+	if ( dtaList != null ) {
+		size = dtaList.size();
 	}
-	data = doSpecificDataChecks( data_vector, props );
+	data = doSpecificDataChecks( dtaList, props );
 	// Add the data and checks to the check file.
 	// Provides basic header information for this data check table 
 	String info = "The following " + title +  " (" + data.size() + 
@@ -295,7 +340,7 @@ private void checkDelayTableAssignmentData(PropList props, List data_vector)
 
 	// Create data models for Check file
 	CheckFile_DataModel dm = new CheckFile_DataModel(
-			data, header, title, info, data.size(), size );
+			toCheckDataModelArray(data), header, title, info, data.size(), size );
 	CheckFile_DataModel gen_dm = new CheckFile_DataModel(
 			checked, columnHeader, title + " Missing or Invalid Data",
 			"", __gen_problems, size );
@@ -305,9 +350,9 @@ private void checkDelayTableAssignmentData(PropList props, List data_vector)
 /**
 Performs general and specific data checks on irrigation practice ts data.
 @param props A property list for specific properties.
-@param data_vector Vector of data to check.
+@param data_vector list of data to check.
  */
-private void checkIrrigationPracticeTSData(PropList props, List data_vector) 
+private void checkIrrigationPracticeTSData(PropList props, List<StateCU_IrrigationPracticeTS> data_vector) 
 {
 	
 }
@@ -315,28 +360,29 @@ private void checkIrrigationPracticeTSData(PropList props, List data_vector)
 /**
 Performs general and specific data checks on location climate station data. 
 @param props A property list for specific properties.
-@param data_vector Vector of data to check.
+@param locclimstaList list of data to check.
 */
-private void checkLocationClimateStationsData(PropList props, List data_vector) 
+@SuppressWarnings("unused")
+private void checkLocationClimateStationsData(PropList props, List<StateCU_Location> locclimstaList) 
 {
 	// Create elements for the checks and check file
+	// TODO need to update this class if actually implemented
 	String[] header = StateCU_CropCharacteristics.getDataHeader();
-	List data = new Vector();
+	List<StateCU_ComponentValidationProblem> data = new Vector<StateCU_ComponentValidationProblem>();
 	String title = "Location Climate Station";
 	
 	// Perform the general validation using the Data Table Model
-	StateCU_Data_TableModel tm = 
-		new StateCU_Location_ClimateStation_TableModel( data_vector );
-	List checked = performDataValidation( tm, title );
+	StateCU_Data_TableModel tm = new StateCU_Location_ClimateStation_TableModel( locclimstaList );
+	List<String []> checked = performDataValidation( tm, title );
 	//String [] columnHeader = getDataTableModelColumnHeader( tm );
 	String [] columnHeader = getColumnHeader( tm );
 	
 	// Do specific checks
 	int size = 0;
-	if ( data_vector != null ) {
-		size = data_vector.size();
+	if ( locclimstaList != null ) {
+		size = locclimstaList.size();
 	}
-	data = doSpecificDataChecks( data_vector, props );
+	data = doSpecificDataChecks( locclimstaList, props );
 	// Add the data and checks to the check file.
 	// Provides basic header information for this data check table 
 	String info = "The following " + title +  " (" + data.size() + 
@@ -344,7 +390,7 @@ private void checkLocationClimateStationsData(PropList props, List data_vector)
 
 	// Create data models for Check file
 	CheckFile_DataModel dm = new CheckFile_DataModel(
-			data, header, title, info, data.size(), size );
+			toCheckDataModelArray(data), header, title, info, data.size(), size );
 	CheckFile_DataModel gen_dm = new CheckFile_DataModel(
 			checked, columnHeader, title + " Missing or Invalid Data",
 			"", __gen_problems, size );
@@ -354,9 +400,10 @@ private void checkLocationClimateStationsData(PropList props, List data_vector)
 /**
 Performs general and specific data checks on location collection data. 
 @param props A property list for specific properties.
-@param data_vector Vector of data to check.
+@param loccolList list of data to check.
 */
-private void checkLocationCollectionData(PropList props, List data_vector) 
+@SuppressWarnings("unused")
+private void checkLocationCollectionData(PropList props, List<StateCU_Location> loccolList) 
 {
 
 }
@@ -364,34 +411,34 @@ private void checkLocationCollectionData(PropList props, List data_vector)
 /**
 Performs general and specific data checks on location data. 
 @param props A property list for specific properties.
-@param data_vector Vector of data to check.
+@param culocList list of data to check.
 */
-private void checkLocationData(PropList props, List data_vector) 
+private void checkLocationData(PropList props, List<StateCU_Location> culocList) 
 {
 	//	 Create elements for the checks and check file
 	String[] header = StateCU_Location.getDataHeader();
-	List data = new Vector();
+	List<StateCU_ComponentValidationProblem> data = new Vector<StateCU_ComponentValidationProblem>();
 	String title = "CU Location";
 	
 	// Perform the general validation using the Data Table Model
 	StateCU_Data_TableModel tm;
 	try {
-		tm = new StateCU_Location_TableModel( data_vector, false, false );
+		tm = new StateCU_Location_TableModel( culocList, false, false );
 	} catch (Exception e) {
 		Message.printWarning( 3, 
 			"StateCU_ComponentDataCheck.checkLocationData", e );
 		return;
 	}
-	List checked = performDataValidation( tm, title );
+	List<String []> checked = performDataValidation( tm, title );
 	//String [] columnHeader = getDataTableModelColumnHeader( tm );
 	String [] columnHeader = getColumnHeader( tm );
 	
 	// Do specific checks
 	int size = 0;
-	if ( data_vector != null ) {
-		size = data_vector.size();
+	if ( culocList != null ) {
+		size = culocList.size();
 	}
-	data = doSpecificDataChecks( data_vector, props );
+	data = doSpecificDataChecks( culocList, props );
 	// Add the data and checks to the check file.
 	// Provides basic header information for this data check table 
 	String info = "The following " + title +  " (" + data.size() + 
@@ -399,7 +446,7 @@ private void checkLocationData(PropList props, List data_vector)
 
 	// Create data models for Check file
 	CheckFile_DataModel dm = new CheckFile_DataModel(
-			data, header, title, info, data.size(), size );
+			toCheckDataModelArray(data), header, title, info, data.size(), size );
 	CheckFile_DataModel gen_dm = new CheckFile_DataModel(
 			checked, columnHeader, title + " Missing or Invalid Data",
 			"", __gen_problems, size );
@@ -427,9 +474,9 @@ intelligence and checks are stored in the component itself.
 @param data List of data objects to check.
 @return List of data that failed the data checks.
  */
-private List doSpecificDataChecks( List<StateCU_ComponentValidator> data, PropList props )
+private List<StateCU_ComponentValidationProblem> doSpecificDataChecks( List<? extends StateCU_ComponentValidator> data, PropList props )
 {
-	List checks = new Vector();
+	List<StateCU_ComponentValidationProblem> checks = new Vector<StateCU_ComponentValidationProblem>();
 	if ( data == null ) {
 		return checks;
 	}
@@ -442,7 +489,7 @@ private List doSpecificDataChecks( List<StateCU_ComponentValidator> data, PropLi
 		comp = data.get( i );
 		StateCU_ComponentValidation validation = comp.validateComponent(__dataset );
 		if ( validation.size() > 0 ) {
-			checks.add( validation.getAll() );
+			checks.addAll( validation.getAll() );
 		}
 	}
 	return checks;
@@ -480,18 +527,17 @@ type.  This is maintained by the StateCU dataset.
 @param type Component type to get data for. 
 @return list of data for a specific component.
  */
-private List<Object> getComponentData( int type )
+private List<? extends StateCU_Data> getComponentData( int type )
 {
 	DataSetComponent comp = __dataset.getComponentForComponentType( type );
 	@SuppressWarnings("unchecked")
-	List<Object> data_vector = (List<Object>)comp.getData();
+	List<? extends StateCU_Data> data_vector = (List<? extends StateCU_Data>)comp.getData();
 	
 	return data_vector; 
 }
 
 /**
-Uses the table model object to obtain the column
-headers.
+Uses the table model object to obtain the column headers.
 @param tm StateMod_Data_TableModel Object.
 @return List of column headers from the table model.
  */
@@ -560,6 +606,25 @@ String title )
 		}
 	}
 	return data;
+}
+
+//TODO smalers 2019-05-29 need to fix this to actually translate the data
+/**
+* Convert a ComponentValidationProblem to String[] needed for general data check report formatting.
+* Each ComponentValidationProblem has data for a specific column.
+*/
+private List<String []> toCheckDataModelArray( List<StateCU_ComponentValidationProblem> problems ) {
+	List<String []> checkDataModelDataList = new ArrayList<String []>();
+	for ( StateCU_ComponentValidationProblem problem : problems ) {
+		if ( problem == null ) {
+			// code to prevent compiler warning not being used - fix when fill out this logic
+		}
+		String [] checkData = new String[3];
+		checkData[0] = "";
+		checkData[1] = "";
+		checkData[2] = "";
+	}
+	return checkDataModelDataList;
 }
 
 }

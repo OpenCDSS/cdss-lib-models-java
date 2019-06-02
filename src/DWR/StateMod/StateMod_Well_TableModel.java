@@ -61,8 +61,9 @@ import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 /**
 This table model displays well data.
 */
+@SuppressWarnings("serial")
 public class StateMod_Well_TableModel 
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel<StateMod_Well> {
 
 /**
 Whether the table data is editable or not.
@@ -114,7 +115,7 @@ Constructor.
 @param editable whether the table data is editable or not
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_Well_TableModel(List data, boolean editable)
+public StateMod_Well_TableModel(List<StateMod_Well> data, boolean editable)
 throws Exception {	
 	this(data, editable, true);
 }
@@ -126,7 +127,7 @@ Constructor.
 @param compactForm whether to only show the ID and name columns (true) or all data columns.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_Well_TableModel(List data, boolean editable, 
+public StateMod_Well_TableModel(List<StateMod_Well> data, boolean editable, 
 boolean compactForm)
 throws Exception {	
 	if (data == null) {
@@ -151,7 +152,7 @@ throws Exception {
 Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 */
-public Class getColumnClass (int columnIndex) {
+public Class<?> getColumnClass (int columnIndex) {
 	switch (columnIndex) {
 		case COL_ID:			return String.class;
 		case COL_NAME:			return String.class;

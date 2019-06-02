@@ -49,8 +49,9 @@ import RTi.Util.IO.Validators;
 /**
 This class is a table model for displaying crop char data.
 */
+@SuppressWarnings("serial")
 public class StateCU_BlaneyCriddle_TableModel 
-extends JWorksheet_AbstractRowTableModel implements StateCU_Data_TableModel {
+extends JWorksheet_AbstractRowTableModel<StateCU_BlaneyCriddle> implements StateCU_Data_TableModel {
 
 /**
 Number of columns in the table model.
@@ -88,7 +89,7 @@ Constructor.  This builds the Model for displaying crop char data
 @param data the data that will be displayed in the table.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateCU_BlaneyCriddle_TableModel(List data) {
+public StateCU_BlaneyCriddle_TableModel(List<StateCU_BlaneyCriddle> data) {
 	this(data, true);
 }
 
@@ -98,7 +99,7 @@ Constructor.  This builds the Model for displaying crop char data
 @param editable whether the data are editable or not.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateCU_BlaneyCriddle_TableModel(List data, boolean editable) {
+public StateCU_BlaneyCriddle_TableModel(List<StateCU_BlaneyCriddle> data, boolean editable) {
 	if (data == null) {
 		_rows = 0;
 	}
@@ -115,7 +116,7 @@ Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 @return the class of the data stored in a given column.
 */
-public Class getColumnClass (int columnIndex) {
+public Class<?> getColumnClass (int columnIndex) {
 	switch (columnIndex) {
 		case __COL_CROP_NAME: return String.class;
 		case __COL_DAY_PCT: return Integer.class;
@@ -280,9 +281,9 @@ public int[] getColumnWidths() {
 
 /**
 Sets up internal arrays.
-@param data the Vector of data (non-null) that will be displayed in the table model.
+@param data the list of data (non-null) that will be displayed in the table model.
 */
-private void initialize(List data) {
+private void initialize(List<StateCU_BlaneyCriddle> data) {
 	int size = data.size();
 	__firstRows = new int[size];
 	__day = new boolean[size];
@@ -291,7 +292,7 @@ private void initialize(List data) {
 	StateCU_BlaneyCriddle bc = null;
 	
 	for (int i = 0; i < size; i++) {
-		bc = (StateCU_BlaneyCriddle)data.get(i);
+		bc = data.get(i);
 
 		__firstRows[i] = row;
 

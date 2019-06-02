@@ -38,6 +38,7 @@ import RTi.Util.GUI.JWorksheet_AbstractExcelCellRenderer;
 /**
 This class renders cells for the graphing tool table.
 */
+@SuppressWarnings("serial")
 public class StateMod_GraphingTool_CellRenderer
 extends JWorksheet_AbstractExcelCellRenderer {
 

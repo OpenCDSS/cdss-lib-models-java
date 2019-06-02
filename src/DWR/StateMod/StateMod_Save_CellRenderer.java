@@ -38,6 +38,7 @@ import RTi.Util.GUI.JWorksheet_AbstractExcelCellRenderer;
 /**
 This class renders cells for the save dialog table.
 */
+@SuppressWarnings("serial")
 public class StateMod_Save_CellRenderer
 extends JWorksheet_AbstractExcelCellRenderer {
 

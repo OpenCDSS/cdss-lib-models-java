@@ -195,7 +195,7 @@ Return the special destination account
 */
 public List<String> getDestinationAccountSpecialChoices ()
 {
-	List<String> specialChoices = new Vector();
+	List<String> specialChoices = new Vector<String>();
 	int rightTypeNumber = getRightTypeNumber();
 	if ( rightTypeNumber == 17 ) {
 		specialChoices.add("1.0 - Coefficient");
@@ -333,7 +333,7 @@ public static List<String> getRightTypeNameList()
 {
 	initialize();
 	List<StateMod_OperationalRight_Metadata> metadataList = getAllMetadata();
-	List<String>names = new Vector();
+	List<String>names = new Vector<String>();
 	for ( StateMod_OperationalRight_Metadata metadata: metadataList ) {
 		names.add ( metadata.getRightTypeName() );
 	}
@@ -521,8 +521,8 @@ public boolean getRightTypeUsesMonthlyOprEff ( StateMod_DataSet dataSet, String 
 			return false;
 		}
 	}
-	List<StateMod_Plan> planList =
-		(List<StateMod_Plan>)dataSet.getComponentForComponentType(StateMod_DataSet.COMP_PLANS).getData();
+	@SuppressWarnings("unchecked")
+	List<StateMod_Plan> planList = (List<StateMod_Plan>)dataSet.getComponentForComponentType(StateMod_DataSet.COMP_PLANS).getData();
 	int pos = StateMod_Util.indexOf(planList, source2);
 	if ( pos >= 0 ) {
 		StateMod_Plan plan = planList.get(pos);
@@ -732,7 +732,7 @@ Return the special source 1 choices
 */
 public List<String> getSourceAccount1SpecialChoices ()
 {
-	List<String> specialChoices = new Vector();
+	List<String> specialChoices = new Vector<String>();
 	int rightTypeNumber = getRightTypeNumber();
 	if ( rightTypeNumber == 9 ) {
 		specialChoices.add("0 - Meet target by releasing from each account");
@@ -793,7 +793,7 @@ Return the special source2 types for the right.
 */
 public List<String> getSourceAccount2SpecialChoices ()
 {
-	List<String> specialChoices = new Vector();
+	List<String> specialChoices = new Vector<String>();
 	int rightTypeNumber = getRightTypeNumber();
 	if ( rightTypeNumber == 2 ) {
 		specialChoices.add("0 - Reservoir demand is not adjusted");
@@ -897,7 +897,7 @@ Return the special source 1 choices
 */
 public List<String> getSource2SpecialChoices ()
 {
-	List<String> specialChoices = new Vector();
+	List<String> specialChoices = new Vector<String>();
 	int rightTypeNumber = getRightTypeNumber();
 	if ( rightTypeNumber == 6 ) {
 		specialChoices.add("0 - Not required");
@@ -934,7 +934,7 @@ private static void initialize ()
 		// No need to initialize.
 		return;
 	}
-	__opRightsMetadataList = new Vector();
+	__opRightsMetadataList = new Vector<StateMod_OperationalRight_Metadata>();
 	// Initialize the list of metadata
 	StateMod_OperationalRight_Metadata metaData = null;
 	// Loop through the number of known operational right types.  This should ideally be the
