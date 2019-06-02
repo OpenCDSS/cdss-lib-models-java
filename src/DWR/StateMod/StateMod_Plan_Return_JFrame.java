@@ -57,6 +57,7 @@ import RTi.Util.Message.Message;
 /**
 GUI for displaying/editing the return flow assignments for a plan.
 */
+@SuppressWarnings("serial")
 public class StateMod_Plan_Return_JFrame extends JFrame
 implements ActionListener, KeyListener, MouseListener, WindowListener {
 
@@ -100,7 +101,7 @@ private JWorksheet __worksheet;
 /**
 Dataset that contains the data.
 */
-private StateMod_DataSet __dataset;
+//private StateMod_DataSet __dataset;
 
 /**
 The current plan for which returns are being shown.
@@ -112,7 +113,7 @@ The list of return data to view.  These returns are maintained as a separate dat
 currently linked to the plan.  This is a different approach than diversion/well returns, mainly
 because effort has not been put into the full editing features and "dirty" data need to be separate.
 */
-private List<StateMod_ReturnFlow> __currentPlanReturnList = new Vector();
+private List<StateMod_ReturnFlow> __currentPlanReturnList = new Vector<StateMod_ReturnFlow>();
 
 /**
 Constructor.
@@ -125,12 +126,13 @@ public StateMod_Plan_Return_JFrame(StateMod_DataSet dataset, StateMod_Plan plan,
 		+ " - Plan Return Flow Table Assignment", null);
 	JGUIUtil.setIcon(this, JGUIUtil.getIconImage());
 	__currentPlan = plan;
+	@SuppressWarnings("unchecked")
 	List<StateMod_ReturnFlow> allReturns = (List<StateMod_ReturnFlow>)dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_PLAN_RETURN).getData();
 	__currentPlanReturnList = (List<StateMod_ReturnFlow>)StateMod_Util.getDataList (allReturns,plan.getID());
 	Message.printStatus(2,"","Have " + __currentPlanReturnList.size() + " return records for plan \"" +
 		__currentPlan.getID() + "\" (selected from full list of size " + allReturns.size() + ")." );
-	__dataset = dataset;
+	//__dataset = dataset;
 	// TODO SAM 2011-01-02 For now editing is disabled...
 	editable = false;
 	__editable = editable;
@@ -199,31 +201,34 @@ public void actionPerformed(ActionEvent e) {
 	}
 }
 
+// TODO smalers 2019-06-01 evaluate whether needed
 /**
 Checks the data to make sure that all the data are valid. 
 @return 0 if the data are valid, 1 if errors exist and -1 if non-fatal errors exist.
 */
+@SuppressWarnings("unused")
 private int checkInput() {
 	String routine = "StateMod_Plan_Return_JFrame.checkInput";
-	List v = __worksheet.getAllData();
+	@SuppressWarnings("unchecked")
+	List<StateMod_ReturnFlow> v = (List<StateMod_ReturnFlow>)__worksheet.getAllData();
 
 	int size = v.size();
 	StateMod_ReturnFlow aReturn = null;
 	String warning = "";
 	String id;
 	String riverNodeID;
-	double percent;
-	String tableID;
+	//double percent;
+	//String tableID;
 	int fatalCount = 0;
-	String comment;
+	//String comment;
 	for (int i = 0; i < size; i++) {
 		aReturn = (StateMod_ReturnFlow)(v.get(i));
 
 		id = aReturn.getID();
 		riverNodeID = aReturn.getCrtnid();
-		percent = aReturn.getPcttot();
-		tableID = "" + aReturn.getIrtndl();
-		comment = aReturn.getComment();
+		//percent = aReturn.getPcttot();
+		//tableID = "" + aReturn.getIrtndl();
+		//comment = aReturn.getComment();
 	
 		// TODO SAM 2011-01-02 Need to implement validators
 		if (id.length() > 12) {
@@ -267,7 +272,7 @@ Saves the input back into the dataset.
 @return true if the data was saved successfully.  False if not.
 */
 private boolean saveData() {
-	String routine = "StateMod_Plan_Return_JFrame.saveData";
+	//String routine = "StateMod_Plan_Return_JFrame.saveData";
 	/* TODO SAM 2011-01-02 Enable - for now no editing is allowed
 	if (!__worksheet.stopEditing()) {
 		// don't save if there are errors.

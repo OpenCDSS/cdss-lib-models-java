@@ -54,7 +54,7 @@ a worksheet.  The worksheet data can be exported to a file or printed.
 */
 @SuppressWarnings("serial")
 public class StateMod_Well_Data_JFrame 
-extends StateMod_Data_JFrame {
+extends StateMod_Data_JFrame<StateMod_Well> {
 
 /**
 Constructor. 
@@ -74,14 +74,13 @@ throws Exception {
 }
 
 /**
-Called when the Apply button is pressed. This commits any changes to the data
-objects.
+Called when the Apply button is pressed. This commits any changes to the data objects.
 */
 protected void apply() {
 	StateMod_Well well = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		well = (StateMod_Well)_data.get(i);
+		well = _data.get(i);
 		well.createBackup();
 	}
 }
@@ -108,7 +107,7 @@ protected void cancel() {
 	StateMod_Well well = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		well = (StateMod_Well)_data.get(i);
+		well = _data.get(i);
 		well.restoreOriginal();
 	}
 }
@@ -121,7 +120,7 @@ protected void createDataBackup() {
 	StateMod_Well well = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		well = (StateMod_Well)_data.get(i);
+		well = _data.get(i);
 		well.createBackup();
 	}
 }

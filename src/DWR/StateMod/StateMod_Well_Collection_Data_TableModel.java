@@ -43,8 +43,9 @@ import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 /**
 This class is a table model for displaying reservoir collection data.
 */
+@SuppressWarnings("serial")
 public class StateMod_Well_Collection_Data_TableModel 
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel<StateMod_Well> {
 
 /**
 Number of columns in the table model.
@@ -70,13 +71,13 @@ private boolean __editable = false;
 /**
 The data displayed in the table, which is created in this method based on the source StateMod_Well data.
 */
-private List[] __data = null;
+private List<Object>[] __data = null;
 
 /**
 Constructor.  This builds the Model for displaying reservoir data
 @param data the StateMod_Well data that will be displayed in the table.
 */
-public StateMod_Well_Collection_Data_TableModel(List data) {
+public StateMod_Well_Collection_Data_TableModel(List<StateMod_Well> data) {
 	this(data, false);
 }
 
@@ -85,9 +86,9 @@ Constructor.  This builds the Model for displaying reservoir data
 @param data the data that will be displayed in the table.
 @param editable whether the data are editable or not.
 */
-public StateMod_Well_Collection_Data_TableModel(List data, boolean editable) {
+public StateMod_Well_Collection_Data_TableModel(List<StateMod_Well> data, boolean editable) {
 	if (data == null) {
-		data = new Vector();
+		data = new Vector<StateMod_Well>();
 	}
 	_data = data;
 	__editable = editable;
@@ -99,6 +100,7 @@ public StateMod_Well_Collection_Data_TableModel(List data, boolean editable) {
 From AbstractTableModel.  Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 */
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public Class getColumnClass (int columnIndex) {
 	switch (columnIndex) {
 		case __COL_ID: return String.class;
@@ -228,6 +230,7 @@ public boolean isCellEditable(int rowIndex, int columnIndex) {
 /**
 Sets up the data lists to display the reservoir collection data in the GUI.
 */
+@SuppressWarnings("unchecked")
 private void setupData() {
 	int[] years = null;
 	int yearArrayLen = 0;
@@ -238,18 +241,18 @@ private void setupData() {
 	String colType = null;
 	String id = null;
 	String partType = null;
-	List ids = null;
-	List idTypes = null;
+	List<String> ids = null;
+	List<String> idTypes = null;
 	String idType = null;
 	__data = new List[__COLUMNS];
 	for (int i = 0; i < __COLUMNS; i++) {
-		__data[i] = new Vector();
+		__data[i] = new Vector<Object>();
 	}
 	
 	int rows = 0;
 	
 	for (int i = 0; i < nwell; i++) {
-		well = (StateMod_Well)_data.get(i);
+		well = _data.get(i);
 		id = well.getID();
 
 		years = well.getCollectionYears();
@@ -294,7 +297,7 @@ private void setupData() {
 				__data[__COL_PART_ID].add(ids.get(k));
 				idType = "";
 				if ( nIdTypes != 0 ) {
-					idType = (String)idTypes.get(k); // Should align with ids.get(k)
+					idType = idTypes.get(k); // Should align with ids.get(k)
 				}
 				__data[__COL_PART_ID_TYPE].add(idType);
 				rows++;

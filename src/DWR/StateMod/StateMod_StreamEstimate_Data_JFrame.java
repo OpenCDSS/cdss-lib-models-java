@@ -48,11 +48,12 @@ import java.util.List;
 import RTi.Util.GUI.JScrollWorksheet;
 
 /**
-This class is a JFrame for displaying a Vector of StateMod_StreamEstimate data 
+This class is a JFrame for displaying a list of StateMod_StreamEstimate data 
 in a worksheet.  The worksheet data can be exported to a file or printed.
 */
+@SuppressWarnings("serial")
 public class StateMod_StreamEstimate_Data_JFrame 
-extends StateMod_Data_JFrame {
+extends StateMod_Data_JFrame<StateMod_StreamEstimate> {
 
 /**
 Constructor. 
@@ -63,29 +64,27 @@ which case an empty worksheet is shown.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_StreamEstimate_Data_JFrame(List data, String titleString, boolean editable)
+public StateMod_StreamEstimate_Data_JFrame(List<StateMod_StreamEstimate> data, String titleString, boolean editable)
 throws Exception {
 	super(data, titleString, editable);
 	setSize(546, getHeight());
 }
 
 /**
-Called when the Apply button is pressed. This commits any changes to the data
-objects.
+Called when the Apply button is pressed. This commits any changes to the data objects.
 */
 protected void apply() {
 	StateMod_StreamEstimate est = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		est = (StateMod_StreamEstimate)_data.get(i);
+		est = _data.get(i);
 		est.createBackup();
 	}
 }
 
 /**
 Creates a JScrollWorksheet for the current data and returns it.
-@return a JScrollWorksheet containing the data Vector passed in to the 
-constructor.
+@return a JScrollWorksheet containing the data Vector passed in to the constructor.
 */
 protected JScrollWorksheet buildJScrollWorksheet() 
 throws Exception {
@@ -99,14 +98,13 @@ throws Exception {
 }
 
 /**
-Called when the cancel button is pressed.  This discards any changes made to 
-the data objects.
+Called when the cancel button is pressed.  This discards any changes made to the data objects.
 */
 protected void cancel() {
 	StateMod_StreamEstimate est = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		est = (StateMod_StreamEstimate)_data.get(i);
+		est = _data.get(i);
 		est.restoreOriginal();
 	}
 }
@@ -119,7 +117,7 @@ protected void createDataBackup() {
 	StateMod_StreamEstimate est = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		est = (StateMod_StreamEstimate)_data.get(i);
+		est = _data.get(i);
 		est.createBackup();
 	}
 }

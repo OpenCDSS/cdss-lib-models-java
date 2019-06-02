@@ -92,8 +92,9 @@ import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 /**
 This table model displays reservoir station data.
 */
+@SuppressWarnings("serial")
 public class StateMod_Reservoir_TableModel
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel<StateMod_Reservoir> {
 
 /**
 Number of columns in the table model.
@@ -136,7 +137,7 @@ Constructor.
 @param editable whether the table data can be modified or not.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_Reservoir_TableModel(List data, boolean editable)
+public StateMod_Reservoir_TableModel(List<StateMod_Reservoir> data, boolean editable)
 throws Exception {
 	this(data, editable, true);
 }
@@ -148,7 +149,7 @@ Constructor.
 @param compactForm whether to only show the ID and name columns (true) or all data columns.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_Reservoir_TableModel(List data, boolean editable,
+public StateMod_Reservoir_TableModel(List<StateMod_Reservoir> data, boolean editable,
 boolean compactForm)
 throws Exception {
 	if (data == null) {
@@ -174,7 +175,7 @@ throws Exception {
 Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 */
-public Class getColumnClass (int columnIndex) {
+public Class<?> getColumnClass (int columnIndex) {
 	switch (columnIndex) {
 		case COL_ID:		return String.class;
 		case COL_NAME:		return String.class;
@@ -344,7 +345,7 @@ public Object getValueAt(int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	StateMod_Reservoir r = (StateMod_Reservoir)_data.get(row);
+	StateMod_Reservoir r = _data.get(row);
 	switch (col) {
 		case COL_ID:		return r.getID();
 		case COL_NAME:		return r.getName();
@@ -366,7 +367,7 @@ public Object getValueAt(int row, int col) {
 				r.getClimates());
 			return new Integer(nevap);
 		case COL_NUM_CURVE_ROWS:
-			List v = r.getAreaCaps();
+			List<StateMod_ReservoirAreaCap> v = r.getAreaCaps();
 			if (v == null) {
 				return new Integer(0);
 			}

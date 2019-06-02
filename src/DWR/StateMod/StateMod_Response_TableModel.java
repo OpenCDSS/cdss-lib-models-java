@@ -66,9 +66,12 @@ import RTi.Util.Message.Message;
 
 /**
 This table model displays response data.
+No data list is set in the worksheet.
+Instead, a dataset's components are used.
 */
+@SuppressWarnings("serial")
 public class StateMod_Response_TableModel 
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel<Object> {
 
 /**
 Number of columns in the table model.
@@ -107,9 +110,9 @@ throws Exception {
 	// the data set.
 	int[] groups = __dataset.getComponentGroupNumbers();
 
-	List ints = new Vector();
+	List<Integer> ints = new Vector<Integer>();
 	DataSetComponent dsc = null;
-	List v = null;
+	List<DataSetComponent> v = null;
 
 	// Go through each of the groups and get their data out.  Group data
 	// consists of the DataSetComponents the group contains.  For each
@@ -117,12 +120,14 @@ throws Exception {
 	// component type to the accumulation vector.
 	for (int i = 0; i < groups.length; i++) {
 		dsc = __dataset.getComponentForComponentType(groups[i]);
-		v = (List)dsc.getData();
+		@SuppressWarnings("unchecked")
+		List<DataSetComponent> componentList = (List<DataSetComponent>)dsc.getData();
+		v = componentList;
 		if (v == null) {
-			v = new Vector();
+			v = new Vector<DataSetComponent>();
 		}
 		for (int j = 0; j < v.size(); j++) {
-			dsc = (DataSetComponent)v.get(j);
+			dsc = v.get(j);
 			// the following makes sure that the response file 
 			// is not added here ... the response file is added
 			// below because it must always be in the GUI.
@@ -138,7 +143,7 @@ throws Exception {
 	__data = new int[ints.size() + 1];
 	__data[0] = StateMod_DataSet.COMP_RESPONSE;
 	for (int i = 0; i < ints.size(); i++) {
-		__data[i + 1] = ((Integer)ints.get(i)).intValue();
+		__data[i + 1] = ints.get(i).intValue();
 	}
 	
 	_rows = __data.length;
@@ -148,7 +153,7 @@ throws Exception {
 Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 */
-public Class getColumnClass (int columnIndex) {
+public Class<?> getColumnClass (int columnIndex) {
 	return String.class;
 }
 
@@ -198,8 +203,7 @@ public String[] getColumnToolTips() {
 }
 
 public String getComponentName(int row) {
-	return __dataset.getComponentForComponentType(__data[row])
-		.getComponentName();
+	return __dataset.getComponentForComponentType(__data[row]).getComponentName();
 }
 
 public int getComponentTypeForRow(int row) {
@@ -334,10 +338,8 @@ public void setValueAt(Object value, int row, int col)
 				return;
 			}
 
-			__dataset.getComponentForComponentType(
-				__data[row]).setDataFileName(s);
-			__dataset.getComponentForComponentType(
-				__data[row]).setDirty(true);
+			__dataset.getComponentForComponentType(__data[row]).setDataFileName(s);
+			__dataset.getComponentForComponentType(__data[row]).setDirty(true);
 		default:	break;
 	}	
 	

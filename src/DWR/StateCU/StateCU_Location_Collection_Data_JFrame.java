@@ -42,12 +42,12 @@ import DWR.StateMod.StateMod_Data_JFrame;
 import RTi.Util.GUI.JScrollWorksheet;
 
 /**
-This class is a JFrame for displaying a Vector of StateCU_Location 
+This class is a JFrame for displaying a list of StateCU_Location 
 collection data in a worksheet.  The worksheet data can be exported to a file or printed.
 */
 @SuppressWarnings("serial")
 public class StateCU_Location_Collection_Data_JFrame 
-extends StateMod_Data_JFrame {
+extends StateMod_Data_JFrame<StateCU_Location> {
 
 /**
 Constructor. 
@@ -71,7 +71,7 @@ protected void apply() {
 	StateCU_Location station = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		station = (StateCU_Location)_data.get(i);
+		station = _data.get(i);
 		station.createBackup();
 	}
 }
@@ -98,7 +98,7 @@ protected void cancel() {
 	StateCU_Location station = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		station = (StateCU_Location)_data.get(i);
+		station = _data.get(i);
 		station.restoreOriginal();
 	}
 }
@@ -110,7 +110,7 @@ protected void createDataBackup() {
 	StateCU_Location station = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		station = (StateCU_Location)_data.get(i);
+		station = _data.get(i);
 		station.createBackup();
 	}
 }

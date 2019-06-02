@@ -801,7 +801,8 @@ public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset 
 		// Verify that the river node is in the data set, if the network is available
 		if ( dataset != null ) {
 			DataSetComponent comp = dataset.getComponentForComponentType(StateMod_DataSet.COMP_RIVER_NETWORK);
-			List rinList = (List)comp.getData();
+			@SuppressWarnings("unchecked")
+			List<StateMod_RiverNetworkNode> rinList = (List<StateMod_RiverNetworkNode>)comp.getData();
 			if ( (rinList != null) && (rinList.size() > 0) ) {
 				if ( StateMod_Util.indexOf(rinList, riverID) < 0 ) {
 					validation.add(new StateMod_ComponentValidationProblem(this,"Stream gage \"" + id +
@@ -815,7 +816,8 @@ public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset 
 	if ( !StateMod_Util.isMissing(dailyID) ) {
 		if ( dataset != null ) {
 			DataSetComponent comp = dataset.getComponentForComponentType(StateMod_DataSet.COMP_STREAMGAGE_STATIONS);
-			List risList = (List)comp.getData();
+			@SuppressWarnings("unchecked")
+			List<StateMod_StreamGage> risList = (List<StateMod_StreamGage>)comp.getData();
 			if ( (risList != null) && (risList.size() > 0) ) {
 				if ( !dailyID.equals("0") && !dailyID.equals("3") && !dailyID.equals("4") &&
 					(StateMod_Util.indexOf(risList, dailyID) < 0) ) {

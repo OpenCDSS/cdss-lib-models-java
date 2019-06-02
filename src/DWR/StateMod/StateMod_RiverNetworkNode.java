@@ -163,7 +163,7 @@ StateMod data objects.  It should not be confused with network node objects
 (e.g., StateMod_Diversion_Node).   See the readStateModFile() method to read
 the .rin file into a true network.
 */
-public class StateMod_RiverNetworkNode  extends StateMod_Data
+public class StateMod_RiverNetworkNode extends StateMod_Data
 implements Cloneable, Comparable<StateMod_Data>, HasGeoRecord, StateMod_ComponentValidator {
 
 /**
@@ -573,10 +573,12 @@ public StateMod_ComponentValidation validateComponent ( StateMod_DataSet dataset
 	}
 	// Get the network list if available for checks below
 	DataSetComponent comp = null;
-	List rinList = null;
+	List<StateMod_RiverNetworkNode> rinList = null;
 	if ( dataset != null ) {
 		comp = dataset.getComponentForComponentType(StateMod_DataSet.COMP_RIVER_NETWORK);
-		rinList = (List)comp.getData();
+		@SuppressWarnings("unchecked")
+		List<StateMod_RiverNetworkNode> dataList = (List<StateMod_RiverNetworkNode>)comp.getData();
+		rinList = dataList;
 		if ( (rinList != null) && (rinList.size() == 0) ) {
 			// Set to null to simplify checks below
 			rinList = null;

@@ -31,7 +31,8 @@ import RTi.Util.GUI.JScrollWorksheet;
 This class is a JFrame for displaying a list of StateMod_OperationalRight 
 data in a worksheet.  The worksheet data can be exported to a file or printed.
 */
-public class StateMod_OperationalRight_Data_JFrame extends StateMod_Data_JFrame
+@SuppressWarnings("serial")
+public class StateMod_OperationalRight_Data_JFrame extends StateMod_Data_JFrame<StateMod_OperationalRight>
 {
 
 /**
@@ -55,7 +56,7 @@ protected void apply() {
 	StateMod_OperationalRight op = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		op = (StateMod_OperationalRight)_data.get(i);
+		op = _data.get(i);
 		op.createBackup();
 	}
 }
@@ -82,7 +83,7 @@ protected void cancel() {
 	StateMod_OperationalRight op = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		op = (StateMod_OperationalRight)_data.get(i);
+		op = _data.get(i);
 		op.restoreOriginal();
 	}
 }
@@ -94,7 +95,7 @@ protected void createDataBackup() {
 	StateMod_OperationalRight op = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		op = (StateMod_OperationalRight)_data.get(i);
+		op = _data.get(i);
 		op.createBackup();
 	}
 }

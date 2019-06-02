@@ -2695,6 +2695,7 @@ private void drawNodes( GRJComponentDrawingArea drawingArea, HydrologyNode [] no
 Draws the outline of a dragged node on the screen while it is being dragged.
 @param g the Graphics context to use for dragging the node.
 */
+@SuppressWarnings("deprecation")
 private void drawNodesOutlines(Graphics g) {
 	// Force the graphics context to be the on-screen one, not the double-buffered one
 	forceGraphics(g);
@@ -4101,6 +4102,7 @@ private void nodeWasMoved() {
 Paints the screen.
 @param g the Graphics context to use for painting.
 */
+@SuppressWarnings("deprecation")
 public void paint(Graphics g) {
 	// When printing is called, the print(Graphics ...) routine ends up
 	// getting called three times.  Just a foible of Java, that routine

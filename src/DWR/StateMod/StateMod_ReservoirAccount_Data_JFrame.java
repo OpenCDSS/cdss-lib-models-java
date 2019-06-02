@@ -46,6 +46,7 @@ NoticeEnd */
 package DWR.StateMod;
 
 import java.util.List;
+//import java.util.Vector;
 import java.util.Vector;
 
 import RTi.Util.GUI.JScrollWorksheet;
@@ -55,8 +56,9 @@ This class is a JFrame for displaying a Vector of StateMod_ReservoirAccount
 data in a worksheet.  Accounts for 1+ reservoirs can be displayed in the same
 worksheet.  The worksheet data can be exported to a file or printed.
 */
+@SuppressWarnings("serial")
 public class StateMod_ReservoirAccount_Data_JFrame 
-extends StateMod_Data_JFrame {
+extends StateMod_Data_JFrame<StateMod_Reservoir> {
 
 /**
 Constructor. 
@@ -67,7 +69,7 @@ which case an empty worksheet is shown.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_ReservoirAccount_Data_JFrame(List data, String titleString, boolean editable)
+public StateMod_ReservoirAccount_Data_JFrame(List<StateMod_Reservoir> data, String titleString, boolean editable)
 throws Exception {
 	super();
 	
@@ -76,15 +78,15 @@ throws Exception {
 	int size2 = 0;
 	StateMod_Reservoir r = null;
 	StateMod_ReservoirAccount a = null;
-	List accounts = null;
-	List v = new Vector();
+	List<StateMod_ReservoirAccount> accounts = null;
+	List<StateMod_ReservoirAccount> v = new Vector<StateMod_ReservoirAccount>();
 	
 	if (data != null) {
 		size = data.size();
 	}
 	
 	for (int i = 0; i < size; i++) {
-		r = (StateMod_Reservoir)data.get(i);
+		r = data.get(i);
 		accounts = r.getAccounts();
 		if (accounts == null) {
 			continue;
@@ -93,26 +95,30 @@ throws Exception {
 		size2 = accounts.size();
 
 		for (j = 0; j < size2; j++) {
-			a = (StateMod_ReservoirAccount)accounts.get(j);
+			a = accounts.get(j);
 			a.setCgoto(r.getID());
 		   	v.add(a);
 		}
 	}
-		
-	initialize(v, titleString, editable);
+	// TODO need to fix 
+	//initialize(v, titleString, editable);
 	setSize(691, getHeight());
+	throw new RuntimeException("Code needs to be updated for reservoir accounts");
 }
 
 /**
 Called when the Apply button is pressed. This commits any changes to the data objects.
 */
 protected void apply() {
-	StateMod_ReservoirAccount acct = null;
+	// TODO smalers 2019-06-01 This should backup StateMod_ReservoirAcccount - original code had bug
+	StateMod_Reservoir acct = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		acct = (StateMod_ReservoirAccount)_data.get(i);
+		acct = _data.get(i);
 		acct.createBackup();
 	}
+	// Put this in to alert about bad code
+	throw new RuntimeException("Code needs to be updated for reservoir accounts");
 }
 
 /**
@@ -121,6 +127,7 @@ Creates a JScrollWorksheet for the current data and returns it.
 */
 protected JScrollWorksheet buildJScrollWorksheet() 
 throws Exception {
+	/*
 	StateMod_ReservoirAccount_Data_TableModel tableModel 
 		= new StateMod_ReservoirAccount_Data_TableModel(_data, _editable);
 	StateMod_ReservoirAccount_Data_CellRenderer cellRenderer 
@@ -128,30 +135,41 @@ throws Exception {
 
 	// _props is defined in the super class
 	return new JScrollWorksheet(cellRenderer, tableModel, _props);
+	*/
+	// TODO smalers 2019-06-01 This should backup StateMod_ReservoirAcccount - original code had bug
+	throw new RuntimeException("Code needs to be updated for reservoir accounts");
 }
 
 /**
 Called when the cancel button is pressed.  This discards any changes made to the data objects.
 */
 protected void cancel() {
+	// TODO smalers 2019-06-01 This should backup StateMod_ReservoirAcccount - original code had bug
+	/*
 	StateMod_ReservoirAccount acct = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		acct = (StateMod_ReservoirAccount)_data.get(i);
+		acct = _data.get(i);
 		acct.restoreOriginal();
 	}
+	*/
+	throw new RuntimeException("Code needs to be updated for reservoir accounts");
 }
 
 /**
-Creates backups of all the data objects in the Vector so that changes can later be cancelled if necessary.
+Creates backups of all the data objects in the list so that changes can later be cancelled if necessary.
 */
 protected void createDataBackup() {
+	// TODO smalers 2019-06-01 This should backup StateMod_ReservoirAcccount - original code had bug
+	/*
 	StateMod_ReservoirAccount acct = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		acct = (StateMod_ReservoirAccount)_data.get(i);
+		acct = _data.get(i);
 		acct.createBackup();
 	}
+	*/
+	throw new RuntimeException("Code needs to be updated for reservoir accounts");
 }
 
 }

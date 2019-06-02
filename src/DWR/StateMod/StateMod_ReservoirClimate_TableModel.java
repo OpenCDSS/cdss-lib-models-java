@@ -88,8 +88,9 @@ can display climate data for a single reservoir or for 1+ reservoirs.  The
 difference is specified in the constructor and affects how many columns of 
 data are shown.
 */
+@SuppressWarnings("serial")
 public class StateMod_ReservoirClimate_TableModel 
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel<StateMod_ReservoirClimate> {
 
 /**
 Number of columns in the table model.  For table models that display climate
@@ -138,7 +139,7 @@ a single reservoir's right data.  This means that the reservoir ID field will
 not be shown.  If false then the reservoir right field will be included.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_ReservoirClimate_TableModel(List data, boolean editable,
+public StateMod_ReservoirClimate_TableModel(List<StateMod_ReservoirClimate> data, boolean editable,
 boolean singleReservoir)
 throws Exception {
 	if (data == null) {
@@ -165,7 +166,7 @@ Returns the class of the data stored in a given column.
 @param col the column for which to return the data class.
 @return the class of the data stored in a given column.
 */
-public Class getColumnClass (int col) {
+public Class<?> getColumnClass (int col) {
 	// necessary for table models that display climate data for 1+
 	// reservoirs, so that the -1st column (ID) can also be displayed.  
 	// By doing it this way, code can be shared between the two kinds of
@@ -357,7 +358,7 @@ public void setValueAt(Object value, int row, int col) {
 		row = _sortOrder[row];
 	}
 	double dval;
-	StateMod_ReservoirClimate cl = (StateMod_ReservoirClimate)_data.get(row);
+	StateMod_ReservoirClimate cl = _data.get(row);
 
 	// necessary for table models that display climate data for 1+
 	// reservoirs, so that the -1st column (ID) can also be displayed.  

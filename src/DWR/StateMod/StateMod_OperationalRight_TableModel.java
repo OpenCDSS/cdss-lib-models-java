@@ -31,8 +31,9 @@ import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 This class displays operational right data, in particular the list of rights in the StateMod GUI
 editor, and also the list of intervening structures (in which case the first two columns are hidden).
 */
+@SuppressWarnings("serial")
 public class StateMod_OperationalRight_TableModel 
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel<StateMod_OperationalRight> {
 
 /**
 Number of columns in the table model.
@@ -68,7 +69,7 @@ Constructor.  This builds the Model for displaying the diversion data.
 @param data the data that will be displayed in the table.
 @param editable whether the gui data are editable or not.
 */
-public StateMod_OperationalRight_TableModel(List data, boolean editable)
+public StateMod_OperationalRight_TableModel(List<StateMod_OperationalRight> data, boolean editable)
 throws Exception {
 	if (data == null) {
 		throw new Exception ("Invalid data list passed to " 
@@ -84,7 +85,7 @@ throws Exception {
 Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 */
-public Class getColumnClass (int columnIndex) {
+public Class<?> getColumnClass (int columnIndex) {
 	switch (columnIndex) {
 		case COL_ID: return String.class;
 		case COL_NAME: return String.class;
@@ -149,7 +150,7 @@ public Object getValueAt(int row, int col) {
 	if (_sortOrder != null) {
 		row = _sortOrder[row];
 	}
-	StateMod_OperationalRight smo = (StateMod_OperationalRight)_data.get(row);
+	StateMod_OperationalRight smo = _data.get(row);
 	switch (col) {
 		case COL_ID: return smo.getID();
 		case COL_NAME: return smo.getName();

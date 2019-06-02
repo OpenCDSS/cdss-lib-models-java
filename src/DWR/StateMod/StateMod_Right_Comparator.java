@@ -28,7 +28,7 @@ import java.util.Comparator;
 /**
 This class compares StateMod_Right instances to allow for sorting.
 */
-public class StateMod_Right_Comparator implements Comparator
+public class StateMod_Right_Comparator <T extends StateMod_Right> implements Comparator<T>
 {
 	
 /**
@@ -48,9 +48,9 @@ private int __order2 = -1;
 Compare two StateMod_Right according to the orders that have been set.
 See setOrder() and setOrder2().
 */
-public int compare ( Object o1, Object o2 )
-{	StateMod_Right right1 = (StateMod_Right)o1;
-	StateMod_Right right2 = (StateMod_Right)o2;
+public int compare ( T right1, T right2 )
+{	//StateMod_Right right1 = o1;
+	//StateMod_Right right2 = o2;
 	String id1 = right1.getIdentifier();
 	String id2 = right2.getIdentifier();
 	String locid1 = right1.getLocationIdentifier();

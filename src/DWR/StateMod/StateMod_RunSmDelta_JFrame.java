@@ -1174,15 +1174,24 @@ private void setupGUI() {
 	
 	int[] widths = null;
 	JScrollWorksheet jsw = null;
+	@SuppressWarnings("unchecked")
+	List<StateMod_Diversion> ddsList = (List<StateMod_Diversion>)__diversionComp.getData(); 
+	@SuppressWarnings("unchecked")
+	List<StateMod_InstreamFlow> ifsList = (List<StateMod_InstreamFlow>)__instreamFlowComp.getData(); 
+	@SuppressWarnings("unchecked")
+	List<StateMod_Reservoir> resList = (List<StateMod_Reservoir>)__reservoirComp.getData(); 
+	@SuppressWarnings("unchecked")
+	List<StateMod_StreamGage> risList =	(List<StateMod_StreamGage>)__streamGageComp.getData();
+	@SuppressWarnings("unchecked")
+	List<StateMod_Well> wellList = (List<StateMod_Well>)__wellComp.getData();
 	try {
 		__tableModel = new
-			StateMod_RunSmDelta_TableModel(this, new ArrayList(),
-			(List<StateMod_Reservoir>)__reservoirComp.getData(), 
-			(List<StateMod_Diversion>)__diversionComp.getData(),
-			(List<StateMod_InstreamFlow>)__instreamFlowComp.getData(),
-			(List<StateMod_StreamGage>)__streamGageComp.getData(),
-			(List<StateMod_Well>)__wellComp.getData());
-
+			StateMod_RunSmDelta_TableModel(this, new ArrayList<StateMod_GraphNode>(),
+			resList,
+			ddsList,
+			ifsList,
+			risList,
+			wellList);
 			
 		StateMod_RunSmDelta_CellRenderer crg = new StateMod_RunSmDelta_CellRenderer(__tableModel);
 	

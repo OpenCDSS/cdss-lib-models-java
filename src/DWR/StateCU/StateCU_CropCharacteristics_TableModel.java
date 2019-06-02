@@ -53,8 +53,9 @@ import RTi.Util.IO.Validators;
 /**
 This class is a table model for displaying crop char data.
 */
+@SuppressWarnings("serial")
 public class StateCU_CropCharacteristics_TableModel 
-extends JWorksheet_AbstractRowTableModel implements StateCU_Data_TableModel {
+extends JWorksheet_AbstractRowTableModel<StateCU_CropCharacteristics> implements StateCU_Data_TableModel {
 
 /**
 Number of columns in the table model.
@@ -118,7 +119,7 @@ Constructor.  This builds the Model for displaying crop char data
 @param data the data that will be displayed in the table.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateCU_CropCharacteristics_TableModel( List data )
+public StateCU_CropCharacteristics_TableModel( List<StateCU_CropCharacteristics> data )
 throws Exception {
 	this(data, true, true);
 }
@@ -131,7 +132,7 @@ Constructor.  This builds the Model for displaying crop char data
 the characteristics for many crops are shown.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateCU_CropCharacteristics_TableModel(List data, boolean editable,
+public StateCU_CropCharacteristics_TableModel(List<StateCU_CropCharacteristics> data, boolean editable,
 boolean singleCrop)
 throws Exception {
 	if (data == null) {
@@ -156,7 +157,7 @@ throws Exception {
 Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 */
-public Class getColumnClass (int columnIndex) {
+public Class<?> getColumnClass (int columnIndex) {
 	if (__singleCrop) {
 		switch (columnIndex) {
 			case __COL_NAME:	return String.class;

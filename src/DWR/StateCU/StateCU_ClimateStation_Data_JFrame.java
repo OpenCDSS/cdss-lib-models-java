@@ -53,7 +53,7 @@ a worksheet.  The worksheet data can be exported to a file or printed.
 */
 @SuppressWarnings("serial")
 public class StateCU_ClimateStation_Data_JFrame 
-extends StateMod_Data_JFrame {
+extends StateMod_Data_JFrame<StateCU_ClimateStation> {
 
 /**
 Constructor. 
@@ -70,14 +70,13 @@ throws Exception {
 }
 
 /**
-Called when the Apply button is pressed. This commits any changes to the data
-objects.
+Called when the Apply button is pressed. This commits any changes to the data objects.
 */
 protected void apply() {
 	StateCU_ClimateStation station = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		station = (StateCU_ClimateStation)_data.get(i);
+		station = _data.get(i);
 		station.createBackup();
 	}
 }
@@ -96,14 +95,13 @@ throws Exception {
 }
 
 /**
-Called when the cancel button is pressed.  This discards any changes made to 
-the data objects.
+Called when the cancel button is pressed.  This discards any changes made to the data objects.
 */
 protected void cancel() {
 	StateCU_ClimateStation station = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		station = (StateCU_ClimateStation)_data.get(i);
+		station = _data.get(i);
 		station.restoreOriginal();
 	}
 }
@@ -116,7 +114,7 @@ protected void createDataBackup() {
 	StateCU_ClimateStation station = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		station = (StateCU_ClimateStation)_data.get(i);
+		station = _data.get(i);
 		station.createBackup();
 	}
 }

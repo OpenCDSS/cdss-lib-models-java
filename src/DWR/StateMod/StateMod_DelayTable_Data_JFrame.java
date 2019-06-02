@@ -63,12 +63,12 @@ import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.JScrollWorksheet;
 
 /**
-This class is a JFrame for displaying a Vector of StateMod_DelayTable data in
+This class is a JFrame for displaying a list of StateMod_DelayTable data in
 a worksheet.  The worksheet data can be exported to a file or printed.
 */
 @SuppressWarnings("serial")
 public class StateMod_DelayTable_Data_JFrame 
-extends StateMod_Data_JFrame {
+extends StateMod_Data_JFrame<StateMod_DelayTable> {
 
 /**
 Whether this JFrame is displaying monthly or daily delay table data.
@@ -92,18 +92,17 @@ which case an empty worksheet is shown.
 @param titleString the String to display as the GUI title.
 @param monthlyData if true, the delay tables are showing monthly data.  If
 false, they are showing daily data.
-@param returnIsPercent whether the return amounts are in percents (true) or
-fractions (false).
+@param returnIsPercent whether the return amounts are in percents (true) or fractions (false).
 @param editable whether the data in the JFrame can be edited or not.  If true
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 @deprecated use the other one without returnIsPercent.
 */
-public StateMod_DelayTable_Data_JFrame(List<StateMod_DelayTable_Data_TableModel> data, String titleString,
-boolean monthlyData, boolean returnIsPercent, boolean editable)
-throws Exception {
-	this(data, titleString, monthlyData, editable);
-}
+//public StateMod_DelayTable_Data_JFrame(List<StateMod_DelayTable> data, String titleString,
+//boolean monthlyData, boolean returnIsPercent, boolean editable)
+//throws Exception {
+//	this(data, titleString, monthlyData, editable);
+//}
 
 /**
 Constructor. 
@@ -116,7 +115,7 @@ false, they are showing daily data.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_DelayTable_Data_JFrame(List<StateMod_DelayTable_Data_TableModel> data, String titleString, boolean monthlyData, boolean editable)
+public StateMod_DelayTable_Data_JFrame(List<StateMod_DelayTable> data, String titleString, boolean monthlyData, boolean editable)
 throws Exception {
 	super();
 	__monthlyData = monthlyData;
@@ -162,7 +161,7 @@ protected void apply() {
 	StateMod_DelayTable delay = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		delay = (StateMod_DelayTable)_data.get(i);
+		delay = _data.get(i);
 		delay.createBackup();
 	}
 }
@@ -197,7 +196,7 @@ protected void cancel() {
 	StateMod_DelayTable delay = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		delay = (StateMod_DelayTable)_data.get(i);
+		delay = _data.get(i);
 		delay.restoreOriginal();
 	}
 }
@@ -209,7 +208,7 @@ protected void createDataBackup() {
 	StateMod_DelayTable delay = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		delay = (StateMod_DelayTable)_data.get(i);
+		delay = _data.get(i);
 		delay.createBackup();
 	}
 }

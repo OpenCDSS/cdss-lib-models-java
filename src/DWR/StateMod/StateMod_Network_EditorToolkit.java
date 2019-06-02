@@ -58,7 +58,7 @@ private StateMod_Network_JComponent __editorJComponent = null;
 /**
 Network being edited.
 */
-private StateMod_NodeNetwork __network = null;
+//private StateMod_NodeNetwork __network = null;
 
 /**
 Constructor.  The major objects used in editing are passed in, but may not be required for all actions.
@@ -73,7 +73,7 @@ public StateMod_Network_EditorToolkit ( StateMod_Network_JFrame editorJFrame,
 {
 	this.__editorJFrame = editorJFrame;
 	this.__editorJComponent = editorJComponent;
-	this.__network = network;
+	//this.__network = network;
 }
 
 /**
@@ -185,8 +185,8 @@ a sequence will have expected data.  A new list is returned, but original node o
 protected List<HydrologyNode> sortNodesSequential ( List<HydrologyNode> nodeListOrig )
 throws RuntimeException
 {
-	List<HydrologyNode> nodeList = new Vector(nodeListOrig);
-	List<HydrologyNode> nodeListSorted = new Vector();
+	List<HydrologyNode> nodeList = new Vector<HydrologyNode>(nodeListOrig);
+	List<HydrologyNode> nodeListSorted = new Vector<HydrologyNode>();
 	// First find a node that has only one of the other nodes downstream (no matching upstream).
 	// This will be the upstream node.
 	HydrologyNode upstreamNode = null;

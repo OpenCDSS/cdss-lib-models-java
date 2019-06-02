@@ -43,8 +43,9 @@ import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 /**
 This class is a table model for displaying location collection data.
 */
+@SuppressWarnings("serial")
 public class StateCU_Location_Collection_TableModel 
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel<StateCU_Location> {
 
 /**
 Number of columns in the table model.
@@ -71,13 +72,13 @@ private boolean __editable = false;
 /**
 The data displayed in the table.
 */
-private List[] __data = null;
+private List<Object>[] __data = null;
 
 /**
 Constructor.  This builds the Model for displaying location data
 @param data the data that will be displayed in the table.
 */
-public StateCU_Location_Collection_TableModel(List data) {
+public StateCU_Location_Collection_TableModel(List<StateCU_Location> data) {
 	this(data, false);
 }
 
@@ -86,9 +87,9 @@ Constructor.  This builds the Model for displaying location data
 @param data the data that will be displayed in the table.
 @param editable whether the data are editable or not.
 */
-public StateCU_Location_Collection_TableModel(List data, boolean editable) {
+public StateCU_Location_Collection_TableModel(List<StateCU_Location> data, boolean editable) {
 	if (data == null) {
-		data = new Vector();
+		data = new Vector<StateCU_Location>();
 	}
 	_data = data;
 	__editable = editable;
@@ -100,7 +101,7 @@ public StateCU_Location_Collection_TableModel(List data, boolean editable) {
 From AbstractTableModel.  Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 */
-public Class getColumnClass (int columnIndex) {
+public Class<?> getColumnClass (int columnIndex) {
 	switch (columnIndex) {
 		case __COL_ID: return String.class;
 		case __COL_DIV: return Integer.class;
@@ -236,6 +237,7 @@ public boolean isCellEditable(int rowIndex, int columnIndex) {
 /**
 Sets up the data Vectors to display the location collection data in the GUI.
 */
+@SuppressWarnings("unchecked")
 private void setupData() {
 	Integer div = null;
 	int[] years = null;
@@ -247,18 +249,18 @@ private void setupData() {
 	String colType = null;
 	String id = null;
 	String partType = null;
-	List ids = null;
-	List idTypes = null;
+	List<String> ids = null;
+	List<String> idTypes = null;
 	String idType = null;
 	__data = new List[__COLUMNS];
 	for (int i = 0; i < __COLUMNS; i++) {
-		__data[i] = new Vector();
+		__data[i] = new Vector<Object>();
 	}
 	
 	int rows = 0;
 	
 	for (int i = 0; i < nculoc; i++) {
-		culoc = (StateCU_Location)_data.get(i);
+		culoc = _data.get(i);
 		id = culoc.getID();
 		div = new Integer(culoc.getCollectionDiv());
 

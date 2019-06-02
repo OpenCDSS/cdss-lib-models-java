@@ -36,7 +36,7 @@ public class StateCU_ComponentValidation
 /**
 List of component data validation items - specific problems.
 */
-private List<StateCU_ComponentValidationProblem> __validationProblems = new Vector();
+private List<StateCU_ComponentValidationProblem> __validationProblems = new Vector<StateCU_ComponentValidationProblem>();
 
 /**
 Add a validation result.

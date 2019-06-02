@@ -321,8 +321,7 @@ public boolean equals(StateMod_Data data) {
 		&& data._smdata_type == _smdata_type
 		&& data._mapLabel.equals(_mapLabel)
 		&& data._mapLabelDisplayID == _mapLabelDisplayID
-		&& data._mapLabelDisplayName == _mapLabelDisplayName
-		&& StateMod_Data._dataset == _dataset) {
+		&& data._mapLabelDisplayName == _mapLabelDisplayName) {
 		return true;
 	}
 	return false;

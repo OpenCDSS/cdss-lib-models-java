@@ -171,10 +171,8 @@ private void initialize ( String title, boolean is_visible )
 			}
 			for ( int j = 0; j < data_size; j++ ) {
 				x = 0;
-				component = (DataSetComponent)data.get(j);
-				component_JTextField =
-					new JTextField( "    " +
-					component.getComponentName(), 20 );
+				component = data.get(j);
+				component_JTextField = new JTextField( "    " + component.getComponentName(), 20 );
 				component_JTextField.setEditable ( false );
 				JGUIUtil.addComponent ( components_JPanel,
 					component_JTextField,
@@ -182,8 +180,7 @@ private void initialize ( String title, boolean is_visible )
 					insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
 
 				// REVISIT - need to track create method
-				JTextField from_JTextField = new JTextField(
-					"?", 10 );
+				JTextField from_JTextField = new JTextField( "?", 10 );
 					//from.getName(), 10 );
 				from_JTextField.setEditable ( false );
 				JGUIUtil.addComponent ( components_JPanel,
@@ -204,7 +201,12 @@ private void initialize ( String title, boolean is_visible )
 
 				int count = 0;
 				try {
-					count = ((List)component.getData()).size();
+					Object oData = component.getData();
+					if ( oData instanceof List ) {
+						@SuppressWarnings("unchecked")
+						List<Object> dataList = (List<Object>)oData;
+						count = dataList.size();
+					}
 				}
 				catch ( Exception e ) {
 					// REVISIT

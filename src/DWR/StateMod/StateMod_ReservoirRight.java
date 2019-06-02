@@ -817,7 +817,8 @@ public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset 
 	else {
 		// Verify that the reservoir station is in the data set, if the network is available
 		DataSetComponent comp2 = dataset.getComponentForComponentType(StateMod_DataSet.COMP_RESERVOIR_STATIONS);
-		List resList = (List)comp2.getData();
+		@SuppressWarnings("unchecked")
+		List<StateMod_Reservoir> resList = (List<StateMod_Reservoir>)comp2.getData();
 		if ( (resList != null) && (resList.size() > 0) ) {
 			if ( StateMod_Util.indexOf(resList, cgoto) < 0 ) {
 				validation.add(new StateMod_ComponentValidationProblem(this,"Reservoir right \"" + id +

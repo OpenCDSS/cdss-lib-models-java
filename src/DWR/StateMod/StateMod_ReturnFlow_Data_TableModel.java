@@ -43,8 +43,9 @@ import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 /**
 This table model display data in return flow tables for use with return flows and depletions.
 */
+@SuppressWarnings("serial")
 public class StateMod_ReturnFlow_Data_TableModel 
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel<StateMod_ReturnFlow> {
 
 /**
 Number of columns in the table model.
@@ -76,9 +77,9 @@ Constructor.  This builds the Model for displaying the return flow data.
 @param editable whether the data can be edited or not.
 @param is_return Specify true for return flows and false for depletions.
 */
-public StateMod_ReturnFlow_Data_TableModel(List data, boolean editable, boolean is_return) {
+public StateMod_ReturnFlow_Data_TableModel(List<StateMod_ReturnFlow> data, boolean editable, boolean is_return) {
 	if (data == null) {
-		_data = new Vector();
+		_data = new Vector<StateMod_ReturnFlow>();
 	}
 	else {
 		_data = data;
@@ -93,7 +94,7 @@ public StateMod_ReturnFlow_Data_TableModel(List data, boolean editable, boolean 
 Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 */
-public Class getColumnClass (int columnIndex) {
+public Class<?> getColumnClass (int columnIndex) {
 	switch (columnIndex) {
 		case COL_RIVER_NODE:	return String.class;
 		case COL_RETURN_PCT:	return Double.class;
@@ -210,7 +211,7 @@ public Object getValueAt(int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	StateMod_ReturnFlow rf = (StateMod_ReturnFlow)_data.get(row);
+	StateMod_ReturnFlow rf = _data.get(row);
 	switch (col) {
 		case COL_RIVER_NODE:	return rf.getCrtnid();
 		case COL_RETURN_PCT:	return new Double(rf.getPcttot());

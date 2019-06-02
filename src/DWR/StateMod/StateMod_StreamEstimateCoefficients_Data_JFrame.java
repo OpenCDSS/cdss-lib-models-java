@@ -54,7 +54,7 @@ data can be exported to a file or printed.
 */
 @SuppressWarnings("serial")
 public class StateMod_StreamEstimateCoefficients_Data_JFrame 
-extends StateMod_Data_JFrame {
+extends StateMod_Data_JFrame<StateMod_StreamEstimate_Coefficients> {
 
 /**
 Constructor. 

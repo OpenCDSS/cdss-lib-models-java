@@ -1,5 +1,7 @@
 package DWR.StateMod;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 
@@ -22,19 +24,19 @@ public void testCheckForMissingData()
 	//StateMod_ComponentDataCheck testObj = new StateMod_ComponentDataCheck(
 	//	StateMod_DataSet.COMP_WELL_STATIONS, __check_file, __data_set );
 	
-	Vector orig = new Vector();
+	List<String> orig = new Vector<String>();
 	//int numMissing = 3;
-	orig.add( getStringList(  true ) );
-	orig.add( getStringList(  true ) );
-	orig.add( getStringList(  true ) );
-	orig.add( getStringList(  false ) );
-	orig.add( getStringList(  false ) );
+	orig.addAll( Arrays.asList(getStringList( true )) );
+	orig.addAll( Arrays.asList(getStringList( true )) );
+	orig.addAll( Arrays.asList(getStringList( true )) );
+	orig.addAll( Arrays.asList(getStringList( false )) );
+	orig.addAll( Arrays.asList(getStringList( false )) );
 	//Vector missing = testObj.checkForMissingData( orig );
 	//assertEquals( numMissing, missing.size() );
 	
 	orig.clear();
 	//numMissing = 0;
-	orig.add( getStringList(  false ) );
+	orig.addAll( Arrays.asList(getStringList( false )) );
 	//missing = testObj.checkForMissingData( orig );
 	//assertEquals( 0, missing.size() );
 	
@@ -65,6 +67,5 @@ private String[] getStringList( boolean missing )
 			new Double(generator.nextDouble()).toString()};
 	}
 }
-
 
 }

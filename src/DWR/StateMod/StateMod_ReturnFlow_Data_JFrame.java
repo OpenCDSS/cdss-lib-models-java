@@ -47,11 +47,12 @@ import java.util.List;
 import RTi.Util.GUI.JScrollWorksheet;
 
 /**
-This class is a JFrame for displaying a Vector of StateMod_ReturnFlow data in
+This class is a JFrame for displaying a list of StateMod_ReturnFlow data in
 a worksheet.  The worksheet data can be exported to a file or printed.
 */
+@SuppressWarnings("serial")
 public class StateMod_ReturnFlow_Data_JFrame 
-extends StateMod_Data_JFrame {
+extends StateMod_Data_JFrame<StateMod_ReturnFlow> {
 
 /**
 Whether the data being shown are return flows (true) or depletions (false).
@@ -68,7 +69,7 @@ which case an empty worksheet is shown.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_ReturnFlow_Data_JFrame(List data, String titleString, boolean isReturn, boolean editable)
+public StateMod_ReturnFlow_Data_JFrame(List<StateMod_ReturnFlow> data, String titleString, boolean isReturn, boolean editable)
 throws Exception {
 	super(data, titleString, editable);
 
@@ -82,7 +83,7 @@ protected void apply() {
 	StateMod_ReturnFlow rf = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		rf = (StateMod_ReturnFlow)_data.get(i);
+		rf = _data.get(i);
 		rf.createBackup();
 	}
 }
@@ -109,7 +110,7 @@ protected void cancel() {
 	StateMod_ReturnFlow rf = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		rf = (StateMod_ReturnFlow)_data.get(i);
+		rf = _data.get(i);
 		rf.restoreOriginal();
 	}
 }
@@ -121,7 +122,7 @@ protected void createDataBackup() {
 	StateMod_ReturnFlow rf = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		rf = (StateMod_ReturnFlow)_data.get(i);
+		rf = _data.get(i);
 		rf.createBackup();
 	}
 }

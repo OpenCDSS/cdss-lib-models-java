@@ -68,8 +68,9 @@ import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 /**
 This table model display data in diversion tables.
 */
+@SuppressWarnings("serial")
 public class StateMod_Diversion_TableModel 
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel<StateMod_Diversion> {
 
 /**
 Number of columns in the table model (this includes all data - other code
@@ -118,7 +119,7 @@ Constructor.  This builds the Model for displaying the diversion station data.
 @param editable whether the data can be edited or not
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_Diversion_TableModel(List data, boolean editable)
+public StateMod_Diversion_TableModel(List<StateMod_Diversion> data, boolean editable)
 throws Exception {
 	this(null, data, editable, false);
 }
@@ -131,7 +132,7 @@ Constructor.  This builds the Model for displaying the diversion station data.
 used.  In the compact form, only the name and ID are shown.  If false, all fields will be shown.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_Diversion_TableModel(List data, boolean editable, boolean compactForm)
+public StateMod_Diversion_TableModel(List<StateMod_Diversion> data, boolean editable, boolean compactForm)
 throws Exception {
 	this(null, data, editable, compactForm);
 }
@@ -145,7 +146,7 @@ Constructor.  This builds the Model for displaying the diversion data.
 used.  In the compact form, only the name and ID are shown.  If false, all fields will be shown.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_Diversion_TableModel(StateMod_DataSet dataset, List data, boolean editable, boolean compactForm)
+public StateMod_Diversion_TableModel(StateMod_DataSet dataset, List<StateMod_Diversion> data, boolean editable, boolean compactForm)
 throws Exception {
 	if (data == null) {
 		throw new Exception ("Invalid data Vector passed to " 
@@ -165,7 +166,7 @@ throws Exception {
 Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 */
-public Class getColumnClass (int columnIndex) {
+public Class<?> getColumnClass (int columnIndex) {
 	switch (columnIndex) {
 		case COL_ID:		return String.class;
 		case COL_NAME:		return String.class;
@@ -302,7 +303,7 @@ public Object getValueAt(int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	StateMod_Diversion smd = (StateMod_Diversion)_data.get(row);
+	StateMod_Diversion smd = _data.get(row);
 	switch (col) {
 		case COL_ID:		return smd.getID();
 		case COL_NAME:		return smd.getName();
@@ -405,7 +406,7 @@ public void setValueAt(Object value, int row, int col)
 	int ival;
 	int index;
 
-	StateMod_Diversion smd = (StateMod_Diversion)_data.get(row);
+	StateMod_Diversion smd = _data.get(row);
 
 	switch (col) {
 		case COL_ID:

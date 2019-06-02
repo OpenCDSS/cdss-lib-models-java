@@ -88,8 +88,9 @@ This table model displays reservoir area capacity data.  The model can display
 area capacity data for a single reservoir or for 1+ reservoirs.  The difference
 is specified in the constructor and affects how many columns of data are shown.
 */
+@SuppressWarnings("serial")
 public class StateMod_ReservoirAreaCap_Data_TableModel 
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel<StateMod_ReservoirAreaCap> {
 
 /**
 Number of columns in the table model.  For table models that display area
@@ -117,9 +118,9 @@ Constructor.
 @param data the reservoir area/cap/seepage data that will be displayed in the table.
 @param editable whether the table data can be modified.
 */
-public StateMod_ReservoirAreaCap_Data_TableModel(List data, boolean editable){
+public StateMod_ReservoirAreaCap_Data_TableModel(List<StateMod_ReservoirAreaCap> data, boolean editable){
 	if (data == null) {
-		_data = new Vector();
+		_data = new Vector<StateMod_ReservoirAreaCap>();
 	}
 	else {
 		_data = data;
@@ -134,7 +135,7 @@ Returns the class of the data stored in a given column.
 @param col the column for which to return the data class.
 @return the class of the data stored in a given column.
 */
-public Class getColumnClass (int col) {
+public Class<?> getColumnClass (int col) {
 	switch (col) {
 		case COL_RESERVOIR_ID:	return String.class;
 		case COL_CAPACITY:	return Double.class;
@@ -219,7 +220,7 @@ public Object getValueAt(int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	StateMod_ReservoirAreaCap ra = (StateMod_ReservoirAreaCap)_data.get(row);
+	StateMod_ReservoirAreaCap ra = _data.get(row);
 
 	switch (col) {
 		case COL_RESERVOIR_ID:	return ra.getCgoto();

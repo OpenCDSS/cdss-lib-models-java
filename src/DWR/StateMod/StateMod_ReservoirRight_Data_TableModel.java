@@ -51,8 +51,9 @@ This table model displays reservoir right data.  The model can display rights
 data for a single reservoir or for 1+ reservoirs.  The difference is specified
 in the constructor and affects how many columns of data are shown.
 */
+@SuppressWarnings("serial")
 public class StateMod_ReservoirRight_Data_TableModel 
-extends JWorksheet_AbstractRowTableModel implements StateMod_Data_TableModel {
+extends JWorksheet_AbstractRowTableModel<StateMod_ReservoirRight> implements StateMod_Data_TableModel {
 
 /**
 Number of columns in the table model.  For table models that display rights 
@@ -86,9 +87,9 @@ Constructor.
 @param data the data that will be displayed in the table.
 @param editable whether the table data can be modified or not.
 */
-public StateMod_ReservoirRight_Data_TableModel(List data, boolean editable) {
+public StateMod_ReservoirRight_Data_TableModel(List<StateMod_ReservoirRight> data, boolean editable) {
 	if (data == null) {
-		_data = new Vector();
+		_data = new Vector<StateMod_ReservoirRight>();
 	}
 	else {
 		_data = data;
@@ -103,7 +104,7 @@ Returns the class of the data stored in a given column.
 @param col the column for which to return the data class.
 @return the class of the data stored in a given column.
 */
-public Class getColumnClass (int col) {
+public Class<?> getColumnClass (int col) {
 	switch (col) {
 		case COL_RIGHT_ID:	return String.class;
 		case COL_RIGHT_NAME:	return String.class;
@@ -329,7 +330,7 @@ public void setValueAt(Object value, int row, int col) {
 	}
 	double dval;
 	int ival;
-	StateMod_ReservoirRight rr = (StateMod_ReservoirRight)_data.get(row);
+	StateMod_ReservoirRight rr = _data.get(row);
 
 	switch (col) {
 		case COL_RIGHT_ID:	

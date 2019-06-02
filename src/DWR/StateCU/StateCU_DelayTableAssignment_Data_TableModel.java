@@ -45,8 +45,9 @@ import RTi.Util.IO.Validator;
 /**
 This class is a table model for displaying delay table data.
 */
+@SuppressWarnings("serial")
 public class StateCU_DelayTableAssignment_Data_TableModel 
-extends JWorksheet_AbstractRowTableModel implements StateCU_Data_TableModel {
+extends JWorksheet_AbstractRowTableModel<StateCU_DelayTableAssignment> implements StateCU_Data_TableModel {
 
 /**
 Number of columns in the table model.
@@ -77,24 +78,24 @@ The worksheet that this model is displayed in.
 private JWorksheet __worksheet = null;
 
 /**
-A Vector that maps rows in the display when totals are NOT being shown to rows
-in the overall data Vectors.  Used to make switching between displays with and
+A list that maps rows in the display when totals are NOT being shown to rows
+in the overall data lists.  Used to make switching between displays with and
 without totals relatively efficient.  See getValueAt() and setupData().
 */
-private List __rowMap = null;
+private List<Object> __rowMap = null;
 
 /**
-Array of Vectors, each of which holds the data for one of the columns in the
+Array of lists, each of which holds the data for one of the columns in the
 table.  Since the data cannot be pulled out from the data objects directly, 
 this is done to make display efficient.
 */
-private List[] __data = null;
+private List<Object>[] __data = null;
 
 /**
 Constructor.  This builds the Model for displaying delay table data
 @param data the data that will be displayed in the table.
 */
-public StateCU_DelayTableAssignment_Data_TableModel(List data) {
+public StateCU_DelayTableAssignment_Data_TableModel(List<StateCU_DelayTableAssignment> data) {
 	this(data, true);
 }
 
@@ -103,9 +104,9 @@ Constructor.  This builds the Model for displaying delay table data
 @param data the data that will be displayed in the table.
 @param editable whether the data are editable or not.
 */
-public StateCU_DelayTableAssignment_Data_TableModel(List data, boolean editable) {
+public StateCU_DelayTableAssignment_Data_TableModel(List<StateCU_DelayTableAssignment> data, boolean editable) {
 	if (data == null) {
-		data = new Vector();
+		data = new Vector<StateCU_DelayTableAssignment>();
 		_rows = 0;
 	}
 
@@ -119,7 +120,7 @@ Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 @return the class of the data stored in a given column.
 */
-public Class getColumnClass (int columnIndex) {
+public Class<?> getColumnClass (int columnIndex) {
 	switch (columnIndex) {
 		case __COL_ID: 		return String.class;
 		case __COL_DELAY_ID:	return String.class;
@@ -240,6 +241,7 @@ public boolean isCellEditable(int rowIndex, int columnIndex) {
 /**
 Sets up the data to be displayed in the table.
 */
+@SuppressWarnings("unchecked")
 private void setupData() {
 	int num = 0;
 	int size = _data.size();
@@ -247,16 +249,16 @@ private void setupData() {
 	String id = null;
 	__data = new List[__COLUMNS];
 	for (int i = 0; i < __COLUMNS; i++) {
-		__data[i] = new Vector();
+		__data[i] = new Vector<Object>();
 	}
 
-	__rowMap = new Vector();
+	__rowMap = new Vector<Object>();
 
 	double total = 0;
 	int rowCount = 0;
 	for (int i = 0; i < size; i++) {
 		total = 0;
-		dt = (StateCU_DelayTableAssignment)_data.get(i);
+		dt = _data.get(i);
 		id = dt.getID();
 		num = dt.getNumDelayTables();
 		for (int j = 0; j < num; j++) {
@@ -279,8 +281,7 @@ private void setupData() {
 
 /**
 Sets whether to show lines with totals.  setJWorksheet() must have been called
-with a non-null worksheet prior to this method.  The worksheet will be updated
-instantly.
+with a non-null worksheet prior to this method.  The worksheet will be updated instantly.
 @param showTotals whether to show lines with totals in the worksheet.
 */
 public void setShowTotals(boolean showTotals) {

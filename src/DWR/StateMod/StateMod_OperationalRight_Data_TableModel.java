@@ -31,8 +31,9 @@ import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 /**
 Table model to display operational right data.
 */
+@SuppressWarnings("serial")
 public class StateMod_OperationalRight_Data_TableModel 
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel<StateMod_OperationalRight> {
 
 /**
 Number of columns in the table model.
@@ -75,9 +76,9 @@ Constructor.  This builds the Model for displaying the diversion data.
 @param data the data that will be displayed in the table.
 @param editable whether the gui data is editable or not.
 */
-public StateMod_OperationalRight_Data_TableModel(List data, boolean editable){
+public StateMod_OperationalRight_Data_TableModel(List<StateMod_OperationalRight> data, boolean editable){
 	if (data == null) {
-		_data = new Vector();
+		_data = new Vector<StateMod_OperationalRight>();
 	}
 	else {
 		_data = data;
@@ -91,7 +92,7 @@ public StateMod_OperationalRight_Data_TableModel(List data, boolean editable){
 Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 */
-public Class getColumnClass (int columnIndex) {
+public Class<?> getColumnClass (int columnIndex) {
 	switch (columnIndex) {
 		case COL_ID: return String.class;
 		case COL_NAME: return String.class;
@@ -205,7 +206,7 @@ public Object getValueAt(int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	StateMod_OperationalRight opr = (StateMod_OperationalRight)_data.get(row);
+	StateMod_OperationalRight opr = _data.get(row);
 	switch (col) {
 		case COL_ID: return opr.getID();
 		case COL_NAME: return opr.getName();

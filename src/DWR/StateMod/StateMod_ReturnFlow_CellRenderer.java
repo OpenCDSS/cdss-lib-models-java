@@ -43,6 +43,7 @@ import RTi.Util.GUI.JWorksheet_AbstractExcelCellRenderer;
 /**
 This class renders cells for return flow tables.
 */
+@SuppressWarnings("serial")
 public class StateMod_ReturnFlow_CellRenderer
 extends JWorksheet_AbstractExcelCellRenderer {
 

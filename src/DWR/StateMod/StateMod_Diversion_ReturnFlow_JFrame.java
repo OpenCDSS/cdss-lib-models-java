@@ -253,9 +253,9 @@ private boolean saveData() {
 	// if the lists are differently-sized, they're different
 	@SuppressWarnings("unchecked")
 	List<StateMod_ReturnFlow> wv = (List<StateMod_ReturnFlow>)__worksheet.getAllData();		// w for worksheet
-	List dv = __currentDiv.getReturnFlows();	// d for diversion
+	List<StateMod_ReturnFlow> dv = __currentDiv.getReturnFlows();	// d for diversion
 
-	needToSave = !(StateMod_ReturnFlow.equals(wv, dv));
+	needToSave = !StateMod_ReturnFlow.equals(wv, dv);
 
 	Message.printStatus(1, routine, "Saving? .........[" + needToSave +"]");
 
@@ -511,20 +511,19 @@ public void setupGUI() {
 			StateMod_ReturnFlow_TableModel.COL_RIVER_NODE, v,false);
 
 		// 10
-		List delayIDs = null;
+		List<StateMod_DelayTable> delayIDs = null;
 		if (__dataset.getIday() == 1) {
-			delayIDs = (List)(__dataset
-				.getComponentForComponentType(
-				StateMod_DataSet.COMP_DELAY_TABLES_DAILY).getData());
+			@SuppressWarnings("unchecked")
+			List<StateMod_DelayTable> dataList = (List<StateMod_DelayTable>)(__dataset.getComponentForComponentType(StateMod_DataSet.COMP_DELAY_TABLES_DAILY).getData());
+			delayIDs = dataList;
 		}
 		else {
-			delayIDs = (List)(__dataset
-				.getComponentForComponentType(
-				StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY).getData());
+			@SuppressWarnings("unchecked")
+			List<StateMod_DelayTable> dataList = (List<StateMod_DelayTable>)(__dataset.getComponentForComponentType(StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY).getData());
+			delayIDs = dataList;
 		}
-		v = StateMod_Util.createIdentifierListFromStateModData(delayIDs, true, null);
-		__worksheet.setColumnJComboBoxValues(
-			StateMod_ReturnFlow_TableModel.COL_RETURN_ID, v, false);
+		List<String> idList = StateMod_Util.createIdentifierListFromStateModData(delayIDs, true, null);
+		__worksheet.setColumnJComboBoxValues(StateMod_ReturnFlow_TableModel.COL_RETURN_ID, idList, false);
 		widths = crd.getColumnWidths();		
 	}
 	catch (Exception e) {

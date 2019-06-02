@@ -42,6 +42,7 @@ import RTi.Util.GUI.JWorksheet_AbstractExcelCellRenderer;
 /**
 This class renders cells for reservoir climate station tables.
 */
+@SuppressWarnings("serial")
 public class StateMod_ReservoirClimate_CellRenderer
 extends JWorksheet_AbstractExcelCellRenderer {
 

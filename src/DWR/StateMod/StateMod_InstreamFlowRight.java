@@ -496,7 +496,8 @@ public StateMod_ComponentValidation validateComponent ( StateMod_DataSet dataset
 	else {
 		// Verify that the instream flow station is in the data set, if the network is available
 		DataSetComponent comp2 = dataset.getComponentForComponentType(StateMod_DataSet.COMP_INSTREAM_STATIONS);
-		List ifsList = (List)comp2.getData();
+		@SuppressWarnings("unchecked")
+		List<StateMod_InstreamFlow> ifsList = (List<StateMod_InstreamFlow>)comp2.getData();
 		if ( (ifsList != null) && (ifsList.size() > 0) ) {
 			if ( StateMod_Util.indexOf(ifsList, cgoto) < 0 ) {
 				validation.add(new StateMod_ComponentValidationProblem(this,"Instream flow right \"" + id +

@@ -38,6 +38,7 @@ import RTi.Util.GUI.JWorksheet_AbstractExcelCellRenderer;
 /**
 This class renders cells for reservoir tables.
 */
+@SuppressWarnings("serial")
 public class StateMod_RiverNetworkNode_CellRenderer
 extends JWorksheet_AbstractExcelCellRenderer {
 

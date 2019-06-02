@@ -52,8 +52,9 @@ import RTi.Util.GUI.JScrollWorksheet;
 This class is a JFrame for displaying diversion delay table assignment data 
 in a worksheet.  The worksheet data can be exported to a file or printed.
 */
+@SuppressWarnings("serial")
 public class StateMod_Diversion_DelayTableAssignment_Data_JFrame 
-extends StateMod_Data_JFrame {
+extends StateMod_Data_JFrame<StateMod_Diversion> {
 
 /**
 The checkbox for selecting whether to show rows with totals or not.
@@ -73,7 +74,7 @@ Constructor.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_Diversion_DelayTableAssignment_Data_JFrame(List data, String titleString, boolean editable)
+public StateMod_Diversion_DelayTableAssignment_Data_JFrame(List<StateMod_Diversion> data, String titleString, boolean editable)
 throws Exception {
 	super(data, titleString, editable);
 
@@ -111,22 +112,20 @@ public void actionPerformed(ActionEvent event) {
 }
 
 /**
-Called when the Apply button is pressed. This commits any changes to the data
-objects.
+Called when the Apply button is pressed. This commits any changes to the data objects.
 */
 protected void apply() {
 	StateMod_Diversion diversion = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		diversion = (StateMod_Diversion)_data.get(i);
+		diversion = _data.get(i);
 		diversion.createBackup();
 	}
 }
 
 /**
 Creates a JScrollWorksheet for the current data and returns it.
-@return a JScrollWorksheet containing the data Vector passed in to the 
-constructor.
+@return a JScrollWorksheet containing the data list passed in to the constructor.
 */
 protected JScrollWorksheet buildJScrollWorksheet() 
 throws Exception {
@@ -154,7 +153,7 @@ protected void cancel() {
 	StateMod_Diversion diversion = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		diversion = (StateMod_Diversion)_data.get(i);
+		diversion = _data.get(i);
 		diversion.restoreOriginal();
 	}
 }
@@ -166,7 +165,7 @@ protected void createDataBackup() {
 	StateMod_Diversion diversion = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		diversion = (StateMod_Diversion)_data.get(i);
+		diversion = _data.get(i);
 		diversion.createBackup();
 	}
 }

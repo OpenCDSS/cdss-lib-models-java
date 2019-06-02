@@ -391,7 +391,7 @@ Sorts a list of StateCU_Data objects, depending on the compareTo() method for th
 passed-in list.  If a null list is passed in, an empty list will be returned.
 Cast the result to the list type being sorted
 */
-public static List<StateCU_Data> sortStateCUDataList ( List<? extends StateCU_Data> data )
+public static <T extends StateCU_Data> List<T> sortStateCUDataList ( List<T> data )
 {	return sortStateCUDataList ( data, true );
 }
 
@@ -403,18 +403,17 @@ If false, return the original list, with sorted contents.
 @return a sorted list with references to the same data objects in the
 passed-in list.  If a null list is passed in, an empty list will be returned.
 */
-public static List<StateCU_Data> sortStateCUDataList ( List<? extends StateCU_Data> data, boolean return_new )
+public static <T extends StateCU_Data> List<T> sortStateCUDataList ( List<T> data, boolean return_new )
 {	if (data == null) {
-		return new ArrayList<StateCU_Data>();
+		return new ArrayList<T>();
 	}
-	@SuppressWarnings("unchecked")
-	List<StateCU_Data> v = (List<StateCU_Data>)data;
+	List<T> v = (List<T>)data;
 	int size = data.size();
 	if ( return_new ) {
 		if (size == 0) {
-			return new ArrayList<StateCU_Data>();
+			return new ArrayList<T>();
 		}
-		v = new ArrayList<StateCU_Data>();
+		v = new ArrayList<T>();
 		for (int i = 0; i < size; i++) {
 			v.add(data.get(i));
 		}

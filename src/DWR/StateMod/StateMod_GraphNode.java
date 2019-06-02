@@ -84,6 +84,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -1573,14 +1574,17 @@ public static void writeStateModDelPltFile ( String instrfile,
 	String outstrfile, List<StateMod_GraphNode> theTemplate, String[] new_comments )
 throws IOException
 {	String rtn = "StateMod_GraphNode.writeStateModDelPltFile";
-	String [] comment_str = { "#" };
-	String [] ignore_comment_str = { "#>" };
+	List<String> comment_str = new ArrayList<String>();
+	comment_str.add("#");
+	List<String> ignore_comment_str = new ArrayList<String>();
+	ignore_comment_str.add("#>");
+	List<String> newComments = StringUtil.toList(new_comments);
 	PrintWriter out = null;
 	if ( Message.isDebugOn ) {
 		Message.printDebug ( 1, rtn, "in writeStateModDelPltFile printing file: " + outstrfile );
 	}
 	try {
-		out = IOUtil.processFileHeaders ( instrfile, outstrfile, new_comments, comment_str, ignore_comment_str, 0 );
+		out = IOUtil.processFileHeaders ( instrfile, outstrfile, newComments, comment_str, ignore_comment_str, 0 );
 		SMDumpDelpltFile ( theTemplate, outstrfile, out );
 		out.flush();
 		out.close();
@@ -1598,15 +1602,18 @@ public static void writeStateModGraphFile ( String instrfile, String outstrfile,
 		List<StateMod_GraphNode> theGraphOpts, String[] new_comments )
 throws IOException
 {	String rtn = "StateMod_GraphNode.writeStateModGraphFile";
-	String [] comment_str = { "#" };
-	String [] ignore_comment_str = { "#>" };
+	List<String> comment_str = new ArrayList<String>();
+	comment_str.add("#");
+	List<String> ignore_comment_str = new ArrayList<String>();
+	ignore_comment_str.add("#>");
+	List<String> newComments = StringUtil.toList(new_comments);
 	PrintWriter out = null;
 
 	if ( Message.isDebugOn ) {
 		Message.printDebug ( 2, rtn, "in writeStateModGraphFile printing file: " + outstrfile );
 	}
 	try {
-		out = IOUtil.processFileHeaders ( instrfile, outstrfile, new_comments, comment_str, ignore_comment_str, 0 );
+		out = IOUtil.processFileHeaders ( instrfile, outstrfile, newComments, comment_str, ignore_comment_str, 0 );
 		SMDumpGraphFile ( theGraphOpts, out );
 		out.flush();
 		out.close();
@@ -1622,14 +1629,17 @@ throws IOException
 public static void writeStateModOutputControlFile ( String instrfile, String outstrfile, List<StateMod_GraphNode> theOC, String[] new_comments )
 throws IOException
 {	String rtn = "StateMod_GraphNode.writeStateModOutputControlFile";
-	String [] comment_str = { "#" };
-	String [] ignore_comment_str = { "#>" };
+	List<String> comment_str = new ArrayList<String>();
+	comment_str.add("#");
+	List<String> ignore_comment_str = new ArrayList<String>();
+	ignore_comment_str.add("#>");
+	List<String> newComments = StringUtil.toList(new_comments);
 	PrintWriter out = null;
 	if ( Message.isDebugOn ) {
 		Message.printDebug ( 1, rtn, "Printing file: " + outstrfile );
 	}
 	try {
-		out = IOUtil.processFileHeaders ( instrfile, outstrfile, new_comments, comment_str, ignore_comment_str, 0 );
+		out = IOUtil.processFileHeaders ( instrfile, outstrfile, newComments, comment_str, ignore_comment_str, 0 );
 		SMDumpOutputControlFile ( theOC, out );
 		out.flush();
 		out.close();

@@ -62,6 +62,7 @@ reference window and the main window interact in ways, such as by allowing
 positioning by clicking on the reference window, and responding to network
 changes from the main window.
 */
+@SuppressWarnings("serial")
 public class StateMod_NetworkReference_JComponent 
 extends GRJComponentDevice 
 implements MouseListener, MouseMotionListener {

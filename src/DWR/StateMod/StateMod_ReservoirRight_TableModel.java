@@ -92,8 +92,9 @@ This table model displays reservoir right data.  The model can display rights
 data for a single reservoir or for 1+ reservoirs.  The difference is specified
 in the constructor and affects how many columns of data are shown.
 */
+@SuppressWarnings("serial")
 public class StateMod_ReservoirRight_TableModel 
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel<StateMod_ReservoirRight> {
 
 /**
 Number of columns in the table model.  For table models that display rights 
@@ -142,7 +143,7 @@ Constructor.
 @param editable whether the table data can be modified or not.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_ReservoirRight_TableModel(List data, boolean editable)
+public StateMod_ReservoirRight_TableModel(List<StateMod_ReservoirRight> data, boolean editable)
 throws Exception {
 	this(data, editable, true);
 }
@@ -156,7 +157,7 @@ a single reservoir's right data.  This means that the reservoir ID field will
 not be shown.  If false then the reservoir right field will be included.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_ReservoirRight_TableModel(List data, boolean editable,
+public StateMod_ReservoirRight_TableModel(List<StateMod_ReservoirRight> data, boolean editable,
 boolean singleReservoir)
 throws Exception {
 	if (data == null) {
@@ -183,7 +184,7 @@ Returns the class of the data stored in a given column.
 @param col the column for which to return the data class.
 @return the class of the data stored in a given column.
 */
-public Class getColumnClass (int col) {
+public Class<?> getColumnClass (int col) {
 	// necessary for table models that display rights for 1+ reservoirs,
 	// so that the -1st column (ID) can also be displayed.  By doing it
 	// this way, code can be shared between the two kinds of table models
@@ -448,7 +449,7 @@ public void setValueAt(Object value, int row, int col) {
 	}
 	double dval;
 	int ival;
-	StateMod_ReservoirRight rr = (StateMod_ReservoirRight)_data.get(row);
+	StateMod_ReservoirRight rr = _data.get(row);
 
 	// necessary for table models that display rights for 1+ reservoirs,
 	// so that the -1st column (ID) can also be displayed.  By doing it

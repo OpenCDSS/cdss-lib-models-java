@@ -155,6 +155,7 @@ import RTi.Util.Message.Message;
 /**
 This class is a gui for displaying and editing Instream Flow information.
 */
+@SuppressWarnings("serial")
 public class StateMod_InstreamFlow_JFrame extends JFrame
 implements ActionListener, ItemListener, KeyListener, MouseListener, 
 WindowListener, JWorksheet_SortListener {
@@ -316,11 +317,13 @@ public StateMod_InstreamFlow_JFrame ( StateMod_DataSet dataset, StateMod_DataSet
 	__dataset_wm = dataset_wm;
 	__instreamFlowComponent = __dataset.getComponentForComponentType(StateMod_DataSet.COMP_INSTREAM_STATIONS);
 
-	__instreamFlowsVector = (List)__instreamFlowComponent.getData();
+	@SuppressWarnings("unchecked")
+	List<StateMod_InstreamFlow> isfList = (List<StateMod_InstreamFlow>)__instreamFlowComponent.getData();
+	__instreamFlowsVector = isfList;
 	int size = __instreamFlowsVector.size();
 	StateMod_InstreamFlow isf = null;
 	for (int i = 0; i < size; i++) {
-		isf = (StateMod_InstreamFlow)__instreamFlowsVector.get(i);
+		isf = __instreamFlowsVector.get(i);
 		isf.createBackup();
 	}
 
@@ -345,11 +348,13 @@ public StateMod_InstreamFlow_JFrame ( StateMod_DataSet dataset, StateMod_DataSet
 	__dataset_wm = dataset_wm;
 	__instreamFlowComponent = __dataset.getComponentForComponentType(StateMod_DataSet.COMP_INSTREAM_STATIONS);
 
-	__instreamFlowsVector = (List)__instreamFlowComponent.getData();
+	@SuppressWarnings("unchecked")
+	List<StateMod_InstreamFlow> isfList = (List<StateMod_InstreamFlow>)__instreamFlowComponent.getData();
+	__instreamFlowsVector = isfList;
 	int size = __instreamFlowsVector.size();
 	StateMod_InstreamFlow isf = null;
 	for (int i = 0; i < size; i++) {
-		isf = (StateMod_InstreamFlow)__instreamFlowsVector.get(i);
+		isf = __instreamFlowsVector.get(i);
 		isf.createBackup();
 	}
 
@@ -531,7 +536,7 @@ Checks the text fields for validity before they are saved back into the data obj
 @return true if the text fields are okay, false if not.
 */
 private boolean checkInput() {
-	List errors = new Vector();
+	List<String> errors = new Vector<String>();
 	int errorCount = 0;
 
 	// for each field, check if it contains valid input.  If not,
@@ -640,7 +645,7 @@ private void displayTSViewJFrame(Object o)
 	props.set("Product.TotalWidth", "600");
 	props.set("Product.TotalHeight", "400");
 
-	List tslist = new Vector();
+	List<TS> tslist = new Vector<TS>();
 
 	int sub = 0;
 	int its = 0;

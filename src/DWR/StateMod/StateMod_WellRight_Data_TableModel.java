@@ -49,8 +49,9 @@ This table model displays well right data.  The model can display rights data
 for a single well or for 1+ wells.  The difference is specified in the
 constructor and affects how many columns of data are shown.
 */
+@SuppressWarnings("serial")
 public class StateMod_WellRight_Data_TableModel 
-extends JWorksheet_AbstractRowTableModel implements StateMod_Data_TableModel
+extends JWorksheet_AbstractRowTableModel<StateMod_WellRight> implements StateMod_Data_TableModel
 {
 
 /**
@@ -100,9 +101,9 @@ Constructor.
 @param data the data that will be displayed in the table.
 @param editable whether the table data is editable or not
 */
-public StateMod_WellRight_Data_TableModel(List data, boolean editable) {
+public StateMod_WellRight_Data_TableModel(List<StateMod_WellRight> data, boolean editable) {
 	if (data == null) {
-		_data = new Vector();
+		_data = new Vector<StateMod_WellRight>();
 	}
 	else {
 		_data = data;
@@ -117,7 +118,7 @@ Returns the class of the data stored in a given column.
 @param col the column for which to return the data class.
 @return the class of the data stored in a given column.
 */
-public Class getColumnClass (int col) {
+public Class<?> getColumnClass (int col) {
 	switch (col) {
 		case COL_RIGHT_ID: return String.class;
 		case COL_RIGHT_NAME: return String.class;
@@ -362,7 +363,7 @@ public Object getValueAt(int row, int col)
 		row = _sortOrder[row];
 	}
 
-	StateMod_WellRight wellr = (StateMod_WellRight)_data.get(row);
+	StateMod_WellRight wellr = _data.get(row);
 
 	switch (col) {
 		case COL_RIGHT_ID: return wellr.getID();

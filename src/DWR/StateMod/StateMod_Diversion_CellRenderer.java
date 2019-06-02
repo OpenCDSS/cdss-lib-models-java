@@ -43,6 +43,7 @@ import RTi.Util.GUI.JWorksheet_AbstractExcelCellRenderer;
 /**
 This class renders cells for diversion station tables.
 */
+@SuppressWarnings("serial")
 public class StateMod_Diversion_CellRenderer
 extends JWorksheet_AbstractExcelCellRenderer {
 

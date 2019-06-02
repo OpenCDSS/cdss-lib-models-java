@@ -33,8 +33,9 @@ import RTi.Util.IO.Validators;
 /**
 This table model display data in plan tables.
 */
+@SuppressWarnings("serial")
 public class StateMod_Plan_Data_TableModel 
-extends JWorksheet_AbstractRowTableModel implements StateMod_Data_TableModel {
+extends JWorksheet_AbstractRowTableModel<StateMod_Plan> implements StateMod_Data_TableModel {
 
 /**
 Number of columns in the table model (this includes all data - other code
@@ -80,9 +81,9 @@ Constructor.  This builds the Model for displaying the diversion data.
 @param data the data that will be displayed in the table.
 @param editable whether the data can be edited or not
 */
-public StateMod_Plan_Data_TableModel(List data, boolean editable) {
+public StateMod_Plan_Data_TableModel(List<StateMod_Plan> data, boolean editable) {
 	if (data == null) {
-		_data = new Vector();
+		_data = new Vector<StateMod_Plan>();
 	}
 	else {
 		_data = data;
@@ -96,7 +97,7 @@ public StateMod_Plan_Data_TableModel(List data, boolean editable) {
 Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 */
-public Class getColumnClass (int columnIndex) {
+public Class<?> getColumnClass (int columnIndex) {
 	switch (columnIndex) {
 		case COL_ID: return String.class;
 		case COL_NAME: return String.class;
@@ -260,30 +261,30 @@ public Validator[] getValidators(int col)
 {
 	Validator[] no_checks = new Validator[] {};
 	// Daily ID must be an ID, zero, 3, or 4.
-	Validator [] dailyID = new Validator[] {
-		Validators.regexValidator( "^[0-9a-zA-Z\\.]+$" ),
-		Validators.isEquals( new Integer( 0 ) ),
-		Validators.isEquals( new Integer( 3 ) ),
-		Validators.isEquals( new Integer( 4 ) )};
-	Validator [] dailyIDValidators = new Validator[] {
-		Validators.notBlankValidator(),
-		Validators.or( dailyID ) };
+	//Validator [] dailyID = new Validator[] {
+	//	Validators.regexValidator( "^[0-9a-zA-Z\\.]+$" ),
+	//	Validators.isEquals( new Integer( 0 ) ),
+	//	Validators.isEquals( new Integer( 3 ) ),
+	//	Validators.isEquals( new Integer( 4 ) )};
+	//Validator [] dailyIDValidators = new Validator[] {
+	//	Validators.notBlankValidator(),
+	//	Validators.or( dailyID ) };
 	// Demand type must be between 1 and 5
-	Validator[] demand_type = new Validator[] {
-		Validators.notBlankValidator(),
-		Validators.rangeValidator( 0, 6 ) };
+	//Validator[] demand_type = new Validator[] {
+	//	Validators.notBlankValidator(),
+	//	Validators.rangeValidator( 0, 6 ) };
 	// Use type must be less than 6 and greater than -1
-	Validator[] use_type = new Validator[] {
-		Validators.notBlankValidator(),
-		Validators.rangeValidator( -1, 6 ) };
+	//Validator[] use_type = new Validator[] {
+	//	Validators.notBlankValidator(),
+	//	Validators.rangeValidator( -1, 6 ) };
 	// Demand source must be greater than 0, less than 9
 	// or equal to -999
-	Validator[] demands = new Validator[] {
-		Validators.rangeValidator( 0, 9 ),
-		Validators.isEquals( new Integer( -999 ) )};
-	Validator[] demand_source = new Validator[] {
-		Validators.notBlankValidator(),
-		Validators.or( demands ) };
+	//Validator[] demands = new Validator[] {
+	//	Validators.rangeValidator( 0, 9 ),
+	//	Validators.isEquals( new Integer( -999 ) )};
+	//Validator[] demand_source = new Validator[] {
+	//	Validators.notBlankValidator(),
+	//	Validators.or( demands ) };
 	// Efficiencies must be between 0 and 100
 	Validator [] generalAndRangeZeroToHundred = new Validator [] { 
 		Validators.notBlankValidator(),

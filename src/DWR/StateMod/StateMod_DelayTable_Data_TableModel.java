@@ -49,8 +49,9 @@ import RTi.Util.IO.Validator;
 /**
 This class displays delay table related data.
 */
+@SuppressWarnings("serial")
 public class StateMod_DelayTable_Data_TableModel 
-extends JWorksheet_AbstractRowTableModel implements StateMod_Data_TableModel {
+extends JWorksheet_AbstractRowTableModel<StateMod_DelayTable> implements StateMod_Data_TableModel {
 
 /**
 Number of columns in the table model.
@@ -78,16 +79,16 @@ The worksheet that this model is displayed in.
 private JWorksheet __worksheet = null;
 
 /**
-A Vector that maps rows in the display when totals are NOT being shown to rows
+A list that maps rows in the display when totals are NOT being shown to rows
 in the overall data Vectors.  Used to make switching between displays with and
 without totals relatively efficient.  See getValueAt() and setupData().
 */
-private List __rowMap = null;
+private List<Object> __rowMap = null;
 
 /**
 The Vectors of data that will actually be shown in the table.
 */
-private List[] __data = null;
+private List<Object>[] __data = null;
 
 /**
 References to columns.
@@ -106,7 +107,7 @@ the delay tables are daily.
 @param returnIsPercent whether the return amounts are in percents (true) or fractions (false).
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_DelayTable_Data_TableModel (List data, boolean monthlyData, boolean editable)
+public StateMod_DelayTable_Data_TableModel (List<StateMod_DelayTable> data, boolean monthlyData, boolean editable)
 throws Exception {
 	if (data == null) {
 		throw new Exception ("Invalid data Vector passed to " 
@@ -123,7 +124,7 @@ throws Exception {
 Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 */
-public Class getColumnClass (int columnIndex) {
+public Class<?> getColumnClass (int columnIndex) {
 	switch (columnIndex) {
 		case COL_ID:		return String.class;
 		case COL_DATE:		return Integer.class;
@@ -253,20 +254,21 @@ public boolean isCellEditable(int rowIndex, int columnIndex) {
 
 /**
 Sets up the data to be displayed in the table.
-@param data a Vector of StateMod_DelayTable objects from which the data to b
+@param data a list of StateMod_DelayTable objects from which the data to b
 be displayed in the table will be gathered.
 */
-private void setupData(List data) {
+@SuppressWarnings("unchecked")
+private void setupData(List<StateMod_DelayTable> data) {
 	int num = 0;
 	int size = data.size();
 	StateMod_DelayTable dt = null;
 	String id = null;
 	__data = new List[__COLUMNS];
 	for (int i = 0; i < __COLUMNS; i++) {
-		__data[i] = new Vector();
+		__data[i] = new Vector<Object>();
 	}
 
-	__rowMap = new Vector();
+	__rowMap = new Vector<Object>();
 
 	double total = 0;
 	int rowCount = 0;

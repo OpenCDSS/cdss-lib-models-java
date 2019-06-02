@@ -161,14 +161,14 @@ public StateMod_NodeNetwork append ( StateMod_NodeNetwork networkToAppend,
 	
 	List<HydrologyNode> appendNetworkNodeList = networkToAppend.getNodeList();
 	List<PropList> appendNetworkLinkList = networkToAppend.getLinkList();
-	List<PropList> appendNetworkLayoutList = networkToAppend.getLayoutList();
+	//List<PropList> appendNetworkLayoutList = networkToAppend.getLayoutList();
 	List<HydrologyNode> appendNetworkAnnotationList = networkToAppend.getAnnotationList();
 	// Get the list of confluences, which have internally assigned identifiers like "CONFL_1"
 	// (although the first one may just be "CONFL"
 	// It is likely that there are duplicate identifiers so find the maximum confluence ID number
 	// and change all the confluences in the network being appended to continue the series.
 	int [] types = { HydrologyNode.NODE_TYPE_CONFLUENCE };
-	List<String> conflIDList = new Vector();
+	List<String> conflIDList = new Vector<String>();
 	try {
 		conflIDList = getNodeIdentifiersByType(types);
 	}
@@ -183,7 +183,7 @@ public StateMod_NodeNetwork append ( StateMod_NodeNetwork networkToAppend,
 		}
 	}
 	// Get the confluence nodes in the network to append...
-	List<String> conflIDAppendList = new Vector();
+	List<String> conflIDAppendList = new Vector<String>();
 	try {
 		conflIDAppendList = networkToAppend.getNodeIdentifiersByType(types);
 	}
@@ -192,7 +192,7 @@ public StateMod_NodeNetwork append ( StateMod_NodeNetwork networkToAppend,
 	}
 	Collections.sort(conflIDAppendList);
 	// Create a hash and define the translation
-	Hashtable confIDLookup = new Hashtable();
+	Hashtable<String,String> confIDLookup = new Hashtable<String,String>();
 	int conflNum = max + 1;
 	Message.printStatus(2,routine,
 		"Renumbering confluence nodes in appended network to start with CONFL_" + conflNum);
@@ -379,11 +379,11 @@ public StateMod_NodeNetwork append ( StateMod_NodeNetwork networkToAppend,
 		// Links are just two identifiers so no need to adjust coordinates.
 		networkLinkList.add(linkToAppend);
 	}
-	for ( PropList layoutToAppend: appendNetworkLayoutList ) {
+	//for ( PropList layoutToAppend: appendNetworkLayoutList ) {
 		// For now use the layout from the original network
 		// TODO SAM 2011-01-04 Any need to adjust any coordinates?  Check layout consistency?
 		//networkLayoutList.add(layoutToAppend);
-	}
+	//}
 	for ( HydrologyNode annotationToAppend: appendNetworkAnnotationList ) {
 		// Adjust the coordinates and add
 		annotationToAppend.setX((annotationToAppend.getX() + shiftXAlignNetworks1)*scale +
@@ -478,7 +478,7 @@ private void append_RemoveNodesDownsteamOfAppendNode ( String routine, Hydrology
 	HydrologyNode node = appendedUpstreamNode.getDownstreamNode();
 	if ( node != null ) {
 		// Not at the bottom of the network so remove downstream nodes.
-		List<HydrologyNode> downstreamNodesToRemoveList = new Vector();
+		List<HydrologyNode> downstreamNodesToRemoveList = new Vector<HydrologyNode>();
 		// Move to the bottom of the network and save node references in a list...
 		while ( true ) {
 			// This node needs to be removed.
@@ -554,7 +554,7 @@ public static StateMod_NodeNetwork createFromStateModVector(List<StateMod_RiverN
 		}
 	}
 
-	List<HydrologyNode> v = new Vector();
+	List<HydrologyNode> v = new Vector<HydrologyNode>();
 	for (int i = 0; i < size; i++) {
 		v.add(nodeArray[i]);
 	}
@@ -575,7 +575,7 @@ public List<StateMod_RiverNetworkNode> createStateModRiverNetwork() {
 	HydrologyNode node = getMostUpstreamNode();	
 	HydrologyNode dsNode = null;
 	StateMod_RiverNetworkNode rnn = null;
-	List<StateMod_RiverNetworkNode> v = new Vector();
+	List<StateMod_RiverNetworkNode> v = new Vector<StateMod_RiverNetworkNode>();
 	int node_type; // Type for current node.
 	int dsNode_type; // Type for downstream node.
 	HydrologyNode node_downstream = null; // Used to find a real
@@ -1726,10 +1726,10 @@ Reads a HydroBase_NodeNetwork from an XML Network file.
 public static StateMod_NodeNetwork readXMLNetworkFile(String filename) 
 throws Exception {
 	String routine = "StateMod_NodeNetwork.readXMLNetworkFile";
-	List<HydrologyNode> networkNodeList = new Vector(); // List of all nodes read
-	List<PropList> networkLinkList = new Vector(); // List of all links read (lines from one node to another)
-	List<PropList> networkLayoutList = new Vector(); // List of all layouts
-	List<HydrologyNode> networkAnnotationList = new Vector(); // List of all annotations read - these are built-in
+	List<HydrologyNode> networkNodeList = new Vector<HydrologyNode>(); // List of all nodes read
+	List<PropList> networkLinkList = new Vector<PropList>(); // List of all links read (lines from one node to another)
+	List<PropList> networkLayoutList = new Vector<PropList>(); // List of all layouts
+	List<HydrologyNode> networkAnnotationList = new Vector<HydrologyNode>(); // List of all annotations read - these are built-in
 													// as opposed to run-time annotations from the StateMod GUI
 
 	DOMParser parser = null;
@@ -1852,7 +1852,7 @@ private static StateMod_NodeNetwork readXMLNetworkFile_BuildNetworkFromXMLNodes(
 	}
 
 	// Put the nodes back in a list for placement back into the node network.
-	List<HydrologyNode> v = new Vector();
+	List<HydrologyNode> v = new Vector<HydrologyNode>();
 	for (int i = 0; i < size; i++) {
 		v.add(nodes[i]);
 	}

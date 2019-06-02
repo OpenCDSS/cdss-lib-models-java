@@ -44,8 +44,9 @@ import RTi.Util.IO.Validator;
 /**
 This class is a table model for displaying location climate station data.
 */
+@SuppressWarnings("serial")
 public class StateCU_Location_ClimateStation_TableModel 
-extends JWorksheet_AbstractRowTableModel implements StateCU_Data_TableModel {
+extends JWorksheet_AbstractRowTableModel<StateCU_Location> implements StateCU_Data_TableModel {
 
 /**
 Number of columns in the table model.
@@ -77,13 +78,13 @@ The parent location for which subdata is displayed.
 /**
 The data displayed in the table.
 */
-private List[] __data = null;
+private List<Object>[] __data = null;
 
 /**
 Constructor.  This builds the Model for displaying location data
 @param data the data that will be displayed in the table.
 */
-public StateCU_Location_ClimateStation_TableModel(List data) {
+public StateCU_Location_ClimateStation_TableModel(List<StateCU_Location> data) {
 	this(data, false);
 }
 
@@ -92,9 +93,9 @@ Constructor.  This builds the Model for displaying location data
 @param data the data that will be displayed in the table.
 @param editable whether the data are editable or not.
 */
-public StateCU_Location_ClimateStation_TableModel(List data, boolean editable) {
+public StateCU_Location_ClimateStation_TableModel(List<StateCU_Location> data, boolean editable) {
 	if (data == null) {
-		data = new Vector();
+		data = new Vector<StateCU_Location>();
 	}
 	_data = data;
 	__editable = editable;
@@ -103,11 +104,10 @@ public StateCU_Location_ClimateStation_TableModel(List data, boolean editable) {
 }
 
 /**
-From AbstractTableModel.  Returns the class of the data stored in a given
-column.
+From AbstractTableModel.  Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 */
-public Class getColumnClass (int columnIndex) {
+public Class<?> getColumnClass (int columnIndex) {
 	switch (columnIndex) {
 		case __COL_ID:		return String.class;
 		case __COL_STA_ID:	return String.class;
@@ -234,6 +234,7 @@ public boolean isCellEditable(int rowIndex, int columnIndex) {
 /**
 Sets up the data Vectors to display the location climate station data in the GUI.
 */
+@SuppressWarnings("unchecked")
 private void setupData() {
 	int num = 0;
 	int size = _data.size();
@@ -241,13 +242,13 @@ private void setupData() {
 	String id = null;
 	__data = new List[__COLUMNS];
 	for (int i = 0; i < __COLUMNS; i++) {
-		__data[i] = new Vector();
+		__data[i] = new Vector<Object>();
 	}
 
 	int rows = 0;
 	
 	for (int i = 0; i < size; i++) {
-		l = (StateCU_Location)_data.get(i);
+		l = _data.get(i);
 		id = l.getID();
 		num = l.getNumClimateStations();
 

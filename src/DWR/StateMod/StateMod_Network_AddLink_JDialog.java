@@ -47,6 +47,7 @@ import RTi.Util.GUI.SimpleJComboBox;
 /**
 Dialog for adding nodes interactively to the network.
 */
+@SuppressWarnings("serial")
 public class StateMod_Network_AddLink_JDialog
 extends JDialog
 implements ActionListener, ItemListener {
@@ -153,7 +154,7 @@ private void setupGUI() {
 
 	int y = 0;
 
-	List<String> nodeIds = new Vector(__nodes.length);
+	List<String> nodeIds = new Vector<String>(__nodes.length);
 	for (int i = 0; i < __nodes.length; i++) {	
 		nodeIds.add(__nodes[i].getCommonID());
 	}
@@ -195,7 +196,7 @@ private void setupGUI() {
 		1, y, 1, 1, 1, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	
-	List<String> lineStyleChoices = new Vector();
+	List<String> lineStyleChoices = new Vector<String>();
 	lineStyleChoices.add ( "" + GRLineStyleType.DASHED );
 	lineStyleChoices.add ( "" + GRLineStyleType.SOLID );
 	__lineStyleComboBox = new SimpleJComboBox(lineStyleChoices);
@@ -208,7 +209,7 @@ private void setupGUI() {
 		1, y, 1, 1, 1, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	
-	List<String> arrowEndChoices = new Vector();
+	List<String> arrowEndChoices = new Vector<String>();
 	arrowEndChoices.add ( "" + GRArrowStyleType.NONE );
 	arrowEndChoices.add ( "" + GRArrowStyleType.SOLID );
 	__fromArrowStyleComboBox = new SimpleJComboBox(arrowEndChoices);

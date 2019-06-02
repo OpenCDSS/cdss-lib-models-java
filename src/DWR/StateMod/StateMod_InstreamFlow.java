@@ -873,10 +873,12 @@ public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset 
 	}
 	// Get the network list if available for checks below
 	DataSetComponent comp = null;
-	List rinList = null;
+	List<StateMod_RiverNetworkNode> rinList = null;
 	if ( dataset != null ) {
 		comp = dataset.getComponentForComponentType(StateMod_DataSet.COMP_RIVER_NETWORK);
-		rinList = (List)comp.getData();
+		@SuppressWarnings("unchecked")
+		List<StateMod_RiverNetworkNode> dataList = (List<StateMod_RiverNetworkNode>)comp.getData();
+		rinList = dataList;
 		if ( (rinList != null) && (rinList.size() == 0) ) {
 			// Set to null to simplify checks below
 			rinList = null;
@@ -916,7 +918,8 @@ public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset 
 	// Verify that the daily ID is in the data set (daily ID is allowed to be missing)
 	if ( (dataset != null) && !StateMod_Util.isMissing(dailyID) ) {
 		DataSetComponent comp2 = dataset.getComponentForComponentType(StateMod_DataSet.COMP_INSTREAM_STATIONS);
-		List ifsList = (List)comp2.getData();
+		@SuppressWarnings("unchecked")
+		List<StateMod_InstreamFlow> ifsList = (List<StateMod_InstreamFlow>)comp2.getData();
 		if ( dailyID.equals("0") || dailyID.equals("3") || dailyID.equals("4") ) {
 			// OK
 		}

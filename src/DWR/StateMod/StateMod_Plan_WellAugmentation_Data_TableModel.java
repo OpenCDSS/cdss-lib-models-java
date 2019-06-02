@@ -33,8 +33,9 @@ import RTi.Util.IO.Validator;
 /**
 This class displays well augmentation plan data.
 */
+@SuppressWarnings("serial")
 public class StateMod_Plan_WellAugmentation_Data_TableModel 
-extends JWorksheet_AbstractRowTableModel implements StateMod_Data_TableModel {
+extends JWorksheet_AbstractRowTableModel<StateMod_Plan_WellAugmentation> implements StateMod_Data_TableModel {
 
 /**
 Number of columns in the table model.
@@ -78,10 +79,10 @@ Constructor.
 @param editable whether the table data is editable or not
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_Plan_WellAugmentation_Data_TableModel ( List data, boolean editable )
+public StateMod_Plan_WellAugmentation_Data_TableModel ( List<StateMod_Plan_WellAugmentation> data, boolean editable )
 throws Exception {
 	if (data == null) {
-		_data = new Vector();
+		_data = new Vector<StateMod_Plan_WellAugmentation>();
 	}
 	else {
 		_data = data;
@@ -97,7 +98,7 @@ throws Exception {
 Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 */
-public Class getColumnClass (int columnIndex) {
+public Class<?> getColumnClass (int columnIndex) {
 	switch (columnIndex) {
 		case COL_PLAN_ID: return String.class;
 		case COL_WELL_RIGHT_ID: return String.class;
@@ -290,7 +291,7 @@ public void setValueAt(Object value, int row, int col) {
 		row = _sortOrder[row];
 	}
 	
-	StateMod_Plan_WellAugmentation wellAug = (StateMod_Plan_WellAugmentation)_data.get(row);
+	StateMod_Plan_WellAugmentation wellAug = _data.get(row);
 	
 	switch (col) {
 		case COL_PLAN_ID:

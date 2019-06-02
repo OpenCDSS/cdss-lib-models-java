@@ -53,8 +53,9 @@ This class is a JFrame for displaying Diversion Right data in a worksheet.
 Diversion rights for 1+ diversions can be displayed in the same worksheet.
 The worksheet data can be exported to a file or printed.
 */
+@SuppressWarnings("serial")
 public class StateMod_DiversionRight_Data_JFrame 
-extends StateMod_Data_JFrame {
+extends StateMod_Data_JFrame<StateMod_DiversionRight> {
 
 /**
 Constructor. 
@@ -65,7 +66,7 @@ which case an empty worksheet is shown.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_DiversionRight_Data_JFrame(List data, String titleString, boolean editable)
+public StateMod_DiversionRight_Data_JFrame(List<StateMod_DiversionRight> data, String titleString, boolean editable)
 throws Exception {
 	super(data, titleString, editable);
 	setSize(655, getHeight());
@@ -78,7 +79,7 @@ protected void apply() {
 	StateMod_DiversionRight right = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		right = (StateMod_DiversionRight)_data.get(i);
+		right = _data.get(i);
 		right.createBackup();
 	}
 }
@@ -108,7 +109,7 @@ protected void cancel() {
 	StateMod_DiversionRight right = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		right = (StateMod_DiversionRight)_data.get(i);
+		right = _data.get(i);
 		right.restoreOriginal();
 	}
 }
@@ -121,7 +122,7 @@ protected void createDataBackup() {
 	StateMod_DiversionRight right = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		right = (StateMod_DiversionRight)_data.get(i);
+		right = _data.get(i);
 		right.createBackup();
 	}
 }

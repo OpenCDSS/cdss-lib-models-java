@@ -43,11 +43,12 @@ import java.util.List;
 import RTi.Util.GUI.JScrollWorksheet;
 
 /**
-This class is a JFrame for displaying a Vector of StateMod_RiverNetworkNode data
+This class is a JFrame for displaying a list of StateMod_RiverNetworkNode data
 in a worksheet.  The worksheet data can be exported to a file or printed.
 */
-public class StateMod_RiverNetworkNode_Data_JFrame 
-extends StateMod_Data_JFrame {
+@SuppressWarnings("serial")
+public class StateMod_RiverNetworkNode_Data_JFrame
+extends StateMod_Data_JFrame<StateMod_RiverNetworkNode> {
 
 /**
 Constructor. 
@@ -56,7 +57,7 @@ which case an empty worksheet is shown.
 @param titleString the String to display as the GUI title.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_RiverNetworkNode_Data_JFrame(List data, String titleString)
+public StateMod_RiverNetworkNode_Data_JFrame(List<StateMod_RiverNetworkNode> data, String titleString)
 throws Exception {
 	super(data, titleString, false);
 	setSize(720, getHeight());
@@ -70,7 +71,7 @@ protected void apply() {
 	StateMod_RiverNetworkNode rnn = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		rnn = (StateMod_RiverNetworkNode)_data.get(i);
+		rnn = _data.get(i);
 		rnn.createBackup();
 	}
 }
@@ -99,7 +100,7 @@ protected void cancel() {
 	StateMod_RiverNetworkNode rnn = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		rnn = (StateMod_RiverNetworkNode)_data.get(i);
+		rnn = _data.get(i);
 		rnn.restoreOriginal();
 	}
 }
@@ -112,7 +113,7 @@ protected void createDataBackup() {
 	StateMod_RiverNetworkNode rnn = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		rnn = (StateMod_RiverNetworkNode)_data.get(i);
+		rnn = _data.get(i);
 		rnn.createBackup();
 	}
 }

@@ -206,6 +206,7 @@ import RTi.Util.Time.YearType;
 /**
 This class is a gui for displaying and editing graphing templates.
 */
+@SuppressWarnings("serial")
 public class StateMod_GraphingTool_JFrame extends JFrame 
 implements ActionListener, ItemListener, MouseListener, TSSupplier, 
 WindowListener {
@@ -274,9 +275,9 @@ Combobox for selecting the kind of graph to make.
 private SimpleJComboBox __graphType_JComboBox;
 
 /**
-Vector of time series to graph.
+List of time series to graph.
 */
-private List __tsVector = null;
+private List<TS> __tsVector = null;
 
 /**
 The dataset for the statemod run containing all the data.
@@ -329,8 +330,7 @@ public void actionPerformed(ActionEvent ae)
 		if ( autoLineCopy() && (row > 0)) {
 			// Copy the previous row's contents.  This facilitates
 			// setting up the new row...
-			TSIdent old_tsident = (TSIdent)
-				__worksheet.getRowData((row - 1));
+			TSIdent old_tsident = (TSIdent)__worksheet.getRowData((row - 1));
 			new_tsident.setType(old_tsident.getType());
 			// The alias is used for the station type...
 			new_tsident.setAlias( old_tsident.getAlias());
@@ -370,10 +370,8 @@ public void actionPerformed(ActionEvent ae)
 		}
 		else {	// Add the a blank row using the new TSIdent...
 			__worksheet.addRow(new_tsident);
-			__worksheet.setCellEditable(
-				row, __tableModel._COL_ID, false);
-			__worksheet.setCellEditable(
-				row, __tableModel._COL_DATA_TYPE, false);
+			__worksheet.setCellEditable(row, __tableModel._COL_ID, false);
+			__worksheet.setCellEditable(row, __tableModel._COL_DATA_TYPE, false);
 		}
 		checkGUIState ();
 	}
@@ -628,7 +626,8 @@ protected void getTimeSeries ()
 	//	use StateMod_TS.readTimeSeries() to read the time seris from
 	//	the text input file.
 
-	List tsident_Vector = __worksheet.getAllData();
+	@SuppressWarnings("unchecked")
+	List<TSIdent> tsident_Vector = (List<TSIdent>)__worksheet.getAllData();
 
 	// tsident_Vector will contain vector of TSIdent objects.
 	int numTS = tsident_Vector.size();
@@ -638,7 +637,7 @@ protected void getTimeSeries ()
 	// will keep the rows of the worksheet consistent with the time series
 	// list...
 
-	__tsVector = new Vector(numTS);
+	__tsVector = new Vector<TS>(numTS);
 	for ( int i = 0; i < numTS; i++ ) {
 		__tsVector.add(null);
 	}
@@ -683,16 +682,14 @@ protected void getTimeSeries ()
 	String data_type = null;	// Data type for reset.
 	JGUIUtil.setWaitCursor(this, true);
 	for (int i = 0; i < numTS; i++) {
-		setMessages("Retrieving time series "
-			+ (i + 1) + " of " + numTS, "Wait");
-		try {	tsident = new TSIdent (
-				(TSIdent)tsident_Vector.get(i) );
+		setMessages("Retrieving time series " + (i + 1) + " of " + numTS, "Wait");
+		try {
+			tsident = new TSIdent ( tsident_Vector.get(i) );
 		}
 		catch ( Exception e ) {
 			// Should not happen because it is a copy...
 			Message.printWarning ( 2, routine,
-			"Error creating TSIdent copy for \"" +
-				(TSIdent)tsident_Vector.get(i) );
+			"Error creating TSIdent copy for \"" + tsident_Vector.get(i) );
 			continue;	// TS will be null in the Vector of TS
 		}
 		// Reset the ID to the first token because the ID from the
@@ -718,8 +715,7 @@ protected void getTimeSeries ()
 			if ( input_name.startsWith("*") ) {
 				// Replace the asterisk with the current
 				// base name...
-				input_name = __dataset.getBaseName() +
-						input_name.substring(1);
+				input_name = __dataset.getBaseName() + input_name.substring(1);
 			}
 			try {	ts = StateMod_BTS.readTimeSeries (
 					tsident.toString(true), input_name,
@@ -752,8 +748,7 @@ protected void getTimeSeries ()
 
 		if ( ts == null ) {
 			Message.printWarning ( 1, routine,
-				"Error reading time series for row " +
-				(i + 1), this );
+				"Error reading time series for row " + (i + 1), this );
 		}
 
 		__tsVector.set(i,ts);
@@ -818,8 +813,7 @@ private void loadTSProduct ()
 		lastDirectorySelected );
 
 	fc.setDialogTitle("Select Graph Product");
-	SimpleFileFilter tsp_ff = new SimpleFileFilter("tsp",
-			"Time Series Product");
+	SimpleFileFilter tsp_ff = new SimpleFileFilter("tsp", "Time Series Product");
 	fc.addChoosableFileFilter(tsp_ff);
 	fc.setFileFilter(tsp_ff);
 	fc.setDialogType(JFileChooser.OPEN_DIALOG);	
@@ -849,7 +843,7 @@ private void loadTSProduct ()
 	TSIdent new_tsident;	// New TSIdent to add to worksheet table model
 	StateMod_Data smdata;	// StateMod data matching the TSID.
 	DataSetComponent comp = null;
-	List comp_data = null;
+	List<? extends StateMod_Data> comp_data = null;
 	String station_type = null;	// Station type for row.
 	int pos = 0;
 	String loc_main;	// Main part of the location in the TSID
@@ -869,8 +863,7 @@ private void loadTSProduct ()
 
 		__ignoreItemStateChange = true;
 		try {	JGUIUtil.selectTokenMatches (
-				__graphType_JComboBox, true, " -", 0, 0,
-				prop_val, "Line" );
+				__graphType_JComboBox, true, " -", 0, 0, prop_val, "Line" );
 		}
 		catch ( Exception e ) {
 			__graphType_JComboBox.select ( "Line" );
@@ -880,8 +873,7 @@ private void loadTSProduct ()
 		// Loop through time series identifiers and add a row...
 
 		for ( int i = 0; ; i++ ) {
-			prop_val = tsproduct.getLayeredPropValue (
-					"TSID", 0, i );
+			prop_val = tsproduct.getLayeredPropValue ( "TSID", 0, i );
 			if ( prop_val == null ) {
 				// No more data...
 				break;
@@ -895,94 +887,87 @@ private void loadTSProduct ()
 			// it is assumed to be a reservoir account and only the
 			// first part of the identifier is used to match the
 			// stations in the data set.
-			comp = __dataset.getComponentForComponentType(
-				StateMod_DataSet.COMP_DIVERSION_STATIONS );
-			comp_data = (List)comp.getData();
+			comp = __dataset.getComponentForComponentType(StateMod_DataSet.COMP_DIVERSION_STATIONS );
+			@SuppressWarnings("unchecked")
+			List<StateMod_Diversion> ddsList = (List<StateMod_Diversion>)comp.getData();
 			loc_main = new_tsident.getLocation();
 			res_account = null;
 			if ( loc_main.indexOf("-") > 0 ) {
 				// Save the account before truncating...
-				res_account =
-					StringUtil.getToken(loc_main,"-",0,1);
-				// Now truncate the location to only the main
-				// part...
+				res_account = StringUtil.getToken(loc_main,"-",0,1);
+				// Now truncate the location to only the main part...
 				loc_main =StringUtil.getToken(loc_main,"-",0,0);
 			}
-			pos = StateMod_Util.indexOf ( comp_data, loc_main );
+			pos = StateMod_Util.indexOf ( ddsList, loc_main );
 			if ( pos >= 0 ) {
 				// TSID is for a diversion...
-				station_type =
-				StateMod_Util.STATION_TYPE_DIVERSION;
+				station_type = StateMod_Util.STATION_TYPE_DIVERSION;
+				comp_data = ddsList;
 			}
 			if ( pos < 0 ) {
 				// Check reservoirs...
-				comp = __dataset.getComponentForComponentType(
-					StateMod_DataSet.
-					COMP_RESERVOIR_STATIONS );
-				comp_data = (List)comp.getData();
-				pos = StateMod_Util.indexOf(comp_data,loc_main);
+				comp = __dataset.getComponentForComponentType( StateMod_DataSet.COMP_RESERVOIR_STATIONS );
+				@SuppressWarnings("unchecked")
+				List<StateMod_Reservoir> resList = (List<StateMod_Reservoir>)comp.getData();
+				pos = StateMod_Util.indexOf(resList,loc_main);
 				if ( pos >= 0 ) {
 					// TSID is for a reservoir...
-					station_type =
-					StateMod_Util.STATION_TYPE_RESERVOIR;
+					station_type = StateMod_Util.STATION_TYPE_RESERVOIR;
+					comp_data = resList;
 				}
 			}
 			if ( pos < 0 ) {
 				// Check instream flows...
-				comp = __dataset.getComponentForComponentType(
-					StateMod_DataSet.
-					COMP_INSTREAM_STATIONS );
-				comp_data = (List)comp.getData();
-				pos = StateMod_Util.indexOf(comp_data,loc_main);
+				comp = __dataset.getComponentForComponentType( StateMod_DataSet.COMP_INSTREAM_STATIONS );
+				@SuppressWarnings("unchecked")
+				List<StateMod_InstreamFlow> ifsList = (List<StateMod_InstreamFlow>)comp.getData();
+				pos = StateMod_Util.indexOf(ifsList,loc_main);
 				if ( pos >= 0 ) {
 					// TSID is for an instream flow...
-					station_type = StateMod_Util.
-					STATION_TYPE_INSTREAM_FLOW;
+					station_type = StateMod_Util. STATION_TYPE_INSTREAM_FLOW;
+					comp_data = ifsList;
 				}
 			}
 			if ( pos < 0 ) {
 				// Check stream gage...
-				comp = __dataset.getComponentForComponentType(
-					StateMod_DataSet.
-					COMP_STREAMGAGE_STATIONS );
-				comp_data = (List)comp.getData();
-				pos = StateMod_Util.indexOf(comp_data,loc_main);
+				comp = __dataset.getComponentForComponentType(StateMod_DataSet.COMP_STREAMGAGE_STATIONS );
+				@SuppressWarnings("unchecked")
+				List<StateMod_StreamGage> risList = (List<StateMod_StreamGage>)comp.getData();
+				pos = StateMod_Util.indexOf(risList,loc_main);
 				if ( pos >= 0 ) {
 					// TSID is for a stream gage...
-					station_type = StateMod_Util.
-					STATION_TYPE_STREAMGAGE;
+					station_type = StateMod_Util.STATION_TYPE_STREAMGAGE;
+					comp_data = risList;
 				}
 			}
 			if ( pos < 0 ) {
 				// Check stream estimate...
-				comp = __dataset.getComponentForComponentType(
-					StateMod_DataSet.
-					COMP_STREAMESTIMATE_STATIONS );
-				comp_data = (List)comp.getData();
-				pos = StateMod_Util.indexOf(comp_data,loc_main);
+				comp = __dataset.getComponentForComponentType( StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS );
+				@SuppressWarnings("unchecked")
+				List<StateMod_StreamEstimate> sesList = (List<StateMod_StreamEstimate>)comp.getData();
+				pos = StateMod_Util.indexOf(sesList,loc_main);
 				if ( pos >= 0 ) {
 					// TSID is for a stream estimate...
-					station_type = StateMod_Util.
-					STATION_TYPE_STREAMESTIMATE;
+					station_type = StateMod_Util.STATION_TYPE_STREAMESTIMATE;
+					comp_data = sesList;
 				}
 			}
 			if ( pos < 0 ) {
 				// Check well...
-				comp = __dataset.getComponentForComponentType(
-					StateMod_DataSet.COMP_WELL_STATIONS );
-				comp_data = (List)comp.getData();
-				pos = StateMod_Util.indexOf(comp_data,loc_main);
+				comp = __dataset.getComponentForComponentType(StateMod_DataSet.COMP_WELL_STATIONS );
+				@SuppressWarnings("unchecked")
+				List<StateMod_Well> wesList = (List<StateMod_Well>)comp.getData();
+				pos = StateMod_Util.indexOf(wesList,loc_main);
 				if ( pos >= 0 ) {
 					// TSID is for a well...
-					station_type =
-					StateMod_Util.STATION_TYPE_WELL;
+					station_type = StateMod_Util.STATION_TYPE_WELL;
+					comp_data = wesList;
 				}
 			}
 			if ( pos < 0 ) {
 				Message.printWarning ( 1, routine,
 				"Unable to determine station type for \"" +
-				prop_val + "\" (" + loc_main +
-				").  Not loading." );
+				prop_val + "\" (" + loc_main + ").  Not loading." );
 				__dirty = true;	// Because something lost
 				continue;
 			}
@@ -992,7 +977,7 @@ private void loadTSProduct ()
 			new_tsident.setAlias ( station_type );
 			// Replace the location with the ID - name combination
 			// for the matched station.
-			smdata = (StateMod_Data)comp_data.get(pos);
+			smdata = comp_data.get(pos);
 			if ( res_account != null ) {
 				// Need to handle the account in the ID and
 				// also the name...
@@ -1004,11 +989,10 @@ private void loadTSProduct ()
 					StringUtil.atoi(res_account) - 1).
 					getName() ) );
 			}
-			else {	// All other data with a "simple" ID - Name
-				// choice...
+			else {
+				// All other data with a "simple" ID - Name choice...
 				new_tsident.setLocation(
-				StateMod_Util.formatDataLabel( smdata.getID(),
-					smdata.getName() ) );
+				StateMod_Util.formatDataLabel( smdata.getID(), smdata.getName() ) );
 			}
 			// Replace the data type with DataType - Input|Output
 			// to match the data type JComboBox.  "StateModB" time
@@ -1016,16 +1000,12 @@ private void loadTSProduct ()
 			// input.  Also reset the input type to exactly match
 			// what is in the list so there is no
 			// uppercase/lowercase problem later.
-			if (	new_tsident.getInputType().equalsIgnoreCase(
-				"StateModB") ) {
-				new_tsident.setType(new_tsident.getType() +
-				" - Output" );
+			if ( new_tsident.getInputType().equalsIgnoreCase("StateModB") ) {
+				new_tsident.setType(new_tsident.getType() + " - Output" );
 				new_tsident.setInputType ( "StateModB" );
 			}
-			else if(new_tsident.getInputType().equalsIgnoreCase(
-				"StateMod") ) {
-				new_tsident.setType(new_tsident.getType() +
-				" - Input" );
+			else if(new_tsident.getInputType().equalsIgnoreCase( "StateMod") ) {
+				new_tsident.setType(new_tsident.getType() + " - Input" );
 				new_tsident.setInputType ( "StateMod" );
 			}
 			else {	Message.printWarning ( 1, routine,
@@ -1037,12 +1017,10 @@ private void loadTSProduct ()
 			// Make sure the interval matches a recognized value.
 			// Reset to the exact string so there is not a problem
 			// with uppercase/lowercase.
-			if (	new_tsident.getInterval().
-				equalsIgnoreCase("Month") ) {
+			if ( new_tsident.getInterval().equalsIgnoreCase("Month") ) {
 				new_tsident.setInterval ( "Month" );
 			}
-			else if(new_tsident.getInterval().
-				equalsIgnoreCase("Day") ) {
+			else if( new_tsident.getInterval().equalsIgnoreCase("Day") ) {
 				new_tsident.setInterval ( "Day" );
 			}
 			else {	Message.printWarning ( 1, routine,
@@ -1052,26 +1030,19 @@ private void loadTSProduct ()
 				continue;
 			}
 			__worksheet.addRow(new TSIdent());
-			__tableModel.fillIDColumn(
-				row, new_tsident.getAlias());
+			__tableModel.fillIDColumn( row, new_tsident.getAlias());
 			__tableModel.fillDataTypeColumn(row, false,
 				new_tsident.getAlias(),
 				new_tsident.getLocation(), 
 				new_tsident.getInterval() ); 			
-			__tableModel.setValueAt(new_tsident.getAlias(), 
-				row, __tableModel._COL_STATION_TYPE);
-			__tableModel.setValueAt(new_tsident.getLocation(), 
-				row, __tableModel._COL_ID);
-			__tableModel.setValueAt(new_tsident.getInterval(), 
-				row, __tableModel._COL_INTERVAL);
-			__tableModel.setValueAt(new_tsident.getType(), 
-				row, __tableModel._COL_DATA_TYPE);
-			__tableModel.setValueAt(new_tsident.getInputType(),
-				row, __tableModel._COL_INPUT_TYPE);
-			__tableModel.setValueAt(new_tsident.getInputName(), 
-				row, __tableModel._COL_INPUT_NAME);
+			__tableModel.setValueAt(new_tsident.getAlias(), row, __tableModel._COL_STATION_TYPE);
+			__tableModel.setValueAt(new_tsident.getLocation(), row, __tableModel._COL_ID);
+			__tableModel.setValueAt(new_tsident.getInterval(), row, __tableModel._COL_INTERVAL);
+			__tableModel.setValueAt(new_tsident.getType(), row, __tableModel._COL_DATA_TYPE);
+			__tableModel.setValueAt(new_tsident.getInputType(), row, __tableModel._COL_INPUT_TYPE);
+			__tableModel.setValueAt(new_tsident.getInputName(), row, __tableModel._COL_INPUT_NAME);
 			
-			// REVISIT - SAM not sure what the order of calls
+			// TODO - SAM not sure what the order of calls
 			// should be?  Does everything cascade each time a cell
 			// value is set?
 			//
@@ -1166,7 +1137,7 @@ public TS readTimeSeries ( TS req_ts, String fname, DateTime req_date1, DateTime
 Method needed for TSSupplier interface, to supply the time series for the graph.
 This method is not used.
 */
-public List readTimeSeriesList ( String tsident, DateTime req_date1, DateTime req_date2,
+public List<TS> readTimeSeriesList ( String tsident, DateTime req_date1, DateTime req_date2,
 	String req_units, boolean read_data )
 {	return null;
 }
@@ -1174,7 +1145,7 @@ public List readTimeSeriesList ( String tsident, DateTime req_date1, DateTime re
 /**
 Method needed for TSSupplier interface - not used.
 */
-public List readTimeSeriesList ( TSIdent tsident, String fname, DateTime req_date1,
+public List<TS> readTimeSeriesList ( TSIdent tsident, String fname, DateTime req_date1,
 	DateTime req_date2, String req_units, boolean read_data )
 {	return null;
 }
@@ -1219,14 +1190,15 @@ private void saveTSProduct ()
 	int sub = 1;
 	int its = 0;
 	props.set ( "Product.GraphType="+ __graphType_JComboBox.getSelected() );
-	List tsident_Vector = __worksheet.getAllData();
+	@SuppressWarnings("unchecked")
+	List<TSIdent> tsident_Vector = (List<TSIdent>)__worksheet.getAllData();
 	int nrows = tsident_Vector.size();
 	TSIdent tsident = null;
 	String id;			// Location for reset.
 	String data_type = null;	// Data type for reset.
 	for ( int i = 0; i < nrows; i++ ) {
 		try {
-			tsident = new TSIdent ( (TSIdent)tsident_Vector.get(i) );
+			tsident = new TSIdent ( tsident_Vector.get(i) );
 		}
 		catch ( Exception e ) {
 			// Should not happen.
@@ -1376,7 +1348,7 @@ private void setupGUI() {
 	int[] widths = null;
 	JScrollWorksheet jsw = null;
 	try {
-		__tableModel = new StateMod_GraphingTool_TableModel (this, __dataset, new Vector() );
+		__tableModel = new StateMod_GraphingTool_TableModel (this, __dataset, new Vector<TSIdent>() );
 			
 		StateMod_GraphingTool_CellRenderer crg = new
 			StateMod_GraphingTool_CellRenderer(__tableModel);

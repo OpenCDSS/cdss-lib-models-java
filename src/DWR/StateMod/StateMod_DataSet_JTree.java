@@ -112,6 +112,7 @@ import RTi.Util.String.StringUtil;
 This StateMod_DataSet_JTree class displays a StateMod_DataSet and its components
 in a JTree.  It can be constructed to show all the data, or just the high-level objects.
 */
+@SuppressWarnings("serial")
 public class StateMod_DataSet_JTree extends SimpleJTree
 implements ActionListener, MouseListener
 {
@@ -344,7 +345,7 @@ public void actionPerformed(ActionEvent event)
 			}
 			props.set ( "InitialView=Graph" );
 			props.set ( "GraphType=Bar" );
-			List tslist = new Vector(1);
+			List<TS> tslist = new Vector<TS>(1);
 			tslist.add ( ts );
 			try {
 				new TSViewJFrame ( tslist, props );
@@ -397,7 +398,7 @@ Clear all data from the tree.
 public void clear() {
 	String routine = "StateMod_DataSet_JTree.clear";
 	SimpleJTree_Node node = getRoot();
-	List v = getChildrenList(node);
+	List<SimpleJTree_Node> v = getChildrenList(node);
 	int size = 0;
 	if (v != null) {
 		size = v.size();
@@ -405,7 +406,7 @@ public void clear() {
 
 	for (int i = 0; i < size; i++) {
 		try {
-			removeNode((SimpleJTree_Node)v.get(i), false);
+			removeNode(v.get(i), false);
 		}
 		catch (Exception e) {
 			Message.printWarning(2, routine, "Cannot remove node " + node.toString());
@@ -420,7 +421,7 @@ after a data set has been read.
 */
 public void displayDataSet()
 {	String routine = "StateMod_DataSet_JTree.displayDataSet";
-	List v = __dataset.getComponentGroups();
+	List<DataSetComponent> v = __dataset.getComponentGroups();
 	int size = 0;
 	if (v != null) {
 		size = v.size();
@@ -529,7 +530,7 @@ private boolean displayDataSetComponent ( DataSetComponent comp, SimpleJTree_Nod
 	}
 	else {
 		// Continue (REVISIT - what components would this happen for?)...
-		Message.printWarning ( 2, routine, "Unexpected non-Vector for " + comp.getComponentName() );
+		Message.printWarning ( 2, routine, "Unexpected non-List for " + comp.getComponentName() );
 		return hadData;
 	}
 	StateCU_Data cudata;

@@ -287,7 +287,9 @@ public StateMod_StreamEstimate_JFrame (	StateMod_DataSet dataset,
 	__dataset = dataset;
 	__dataset_wm = dataset_wm;
 	__stationsComp = __dataset.getComponentForComponentType( StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS);
-	__stationsVector = (List<StateMod_StreamEstimate>)__stationsComp.getData();
+	@SuppressWarnings("unchecked")
+	List<StateMod_StreamEstimate> dataList = (List<StateMod_StreamEstimate>)__stationsComp.getData();
+	__stationsVector = dataList;
 	int size = __stationsVector.size();
 	StateMod_StreamEstimate s = null;
 	for (int i = 0; i < size; i++) {
@@ -297,7 +299,9 @@ public StateMod_StreamEstimate_JFrame (	StateMod_DataSet dataset,
 
 	__coefficientsComp = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS);
-	__coefficientsVector = (List<StateMod_StreamEstimate_Coefficients>)__coefficientsComp.getData();	
+	@SuppressWarnings("unchecked")
+	List<StateMod_StreamEstimate_Coefficients> dataList2 = (List<StateMod_StreamEstimate_Coefficients>)__coefficientsComp.getData();	
+	__coefficientsVector = dataList2;
 	size = __coefficientsVector.size();
 	StateMod_StreamEstimate_Coefficients c = null;
 	for (int i = 0; i < size; i++) {
@@ -329,23 +333,25 @@ public StateMod_StreamEstimate_JFrame (	StateMod_DataSet dataset,
 
 	__dataset = dataset;
 	__dataset_wm = dataset_wm;
-	__stationsComp = __dataset.getComponentForComponentType(
-		StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS);
-	__stationsVector = (List<StateMod_StreamEstimate>)__stationsComp.getData();
+	__stationsComp = __dataset.getComponentForComponentType(StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS);
+	@SuppressWarnings("unchecked")
+	List<StateMod_StreamEstimate> dataList = (List<StateMod_StreamEstimate>)__stationsComp.getData();
+	__stationsVector = dataList;
 	int size = __stationsVector.size();
 	StateMod_StreamEstimate s = null;
 	for (int i = 0; i < size; i++) {
-		s = (StateMod_StreamEstimate)__stationsVector.get(i);
+		s = __stationsVector.get(i);
 		s.createBackup();
 	}
 
-	__coefficientsComp = __dataset.getComponentForComponentType(
-		StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS);
-	__coefficientsVector = (List<StateMod_StreamEstimate_Coefficients>)__coefficientsComp.getData();
+	__coefficientsComp = __dataset.getComponentForComponentType(StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS);
+	@SuppressWarnings("unchecked")
+	List<StateMod_StreamEstimate_Coefficients> dataList2 = (List<StateMod_StreamEstimate_Coefficients>)__coefficientsComp.getData();
+	__coefficientsVector = dataList2;
 	size = __coefficientsVector.size();
 	StateMod_StreamEstimate_Coefficients c = null;
 	for (int i = 0; i < size; i++) {
-		c = (StateMod_StreamEstimate_Coefficients)__coefficientsVector.get(i);
+		c = __coefficientsVector.get(i);
 		c.createBackup();
 	}
 

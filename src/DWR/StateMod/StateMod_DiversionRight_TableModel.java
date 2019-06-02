@@ -60,8 +60,9 @@ This table model displays diversion right data.  The model can display rights
 data for a single diversion or for 1+ diversion.  The difference is specified
 in the constructor and affects how many columns of data are shown.
 */
+@SuppressWarnings("serial")
 public class StateMod_DiversionRight_TableModel 
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel<StateMod_DiversionRight> {
 
 /**
 Number of columns in the table model.  For table models that display rights
@@ -103,7 +104,7 @@ Constructor.  This builds the table model for displaying the diversion right dat
 or data for multiple diversions is shown (false).
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_DiversionRight_TableModel(List data, boolean editable, boolean singleDiversion)
+public StateMod_DiversionRight_TableModel(List<StateMod_DiversionRight> data, boolean editable, boolean singleDiversion)
 throws Exception {
 	if (data == null) {
 		throw new Exception ("Invalid data Vector passed to " 
@@ -130,7 +131,7 @@ Returns the class of the data stored in a given column.
 base 0.
 @return the class of the data stored in a given column.
 */
-public Class getColumnClass (int col) {
+public Class<?> getColumnClass (int col) {
 	// necessary for table models that display rights for 1+ diversions,
 	// so that the -1st column (ID) can also be displayed.  By doing it
 	// this way, code can be shared between the two kinds of table models
@@ -234,7 +235,7 @@ public Object getValueAt(int row, int col) {
 	if (_sortOrder != null) {
 		row = _sortOrder[row];
 	}
-	StateMod_DiversionRight dr = (StateMod_DiversionRight)_data.get(row);
+	StateMod_DiversionRight dr = _data.get(row);
 
 	// necessary for table models that display rights for 1+ diversions,
 	// so that the -1st column (ID) can also be displayed.  By doing it

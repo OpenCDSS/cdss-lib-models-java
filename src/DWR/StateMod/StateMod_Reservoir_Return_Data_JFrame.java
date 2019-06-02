@@ -33,7 +33,7 @@ a worksheet.  The worksheet data can be exported to a file or printed.
 */
 @SuppressWarnings("serial")
 public class StateMod_Reservoir_Return_Data_JFrame 
-extends StateMod_Data_JFrame {
+extends StateMod_Data_JFrame<StateMod_ReturnFlow> {
 
 /**
 Constructor. 
@@ -58,7 +58,7 @@ protected void apply() {
 	StateMod_ReturnFlow rf = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		rf = (StateMod_ReturnFlow)_data.get(i);
+		rf = _data.get(i);
 		rf.createBackup();
 	}
 }
@@ -93,7 +93,7 @@ protected void cancel() {
 	StateMod_ReturnFlow rf = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		rf = (StateMod_ReturnFlow)_data.get(i);
+		rf = _data.get(i);
 		rf.restoreOriginal();
 	}
 }
@@ -105,7 +105,7 @@ protected void createDataBackup() {
 	StateMod_ReturnFlow rf = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		rf = (StateMod_ReturnFlow)_data.get(i);
+		rf = _data.get(i);
 		rf.createBackup();
 	}
 }

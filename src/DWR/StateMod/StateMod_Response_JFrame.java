@@ -112,6 +112,7 @@ This class is a GUI that displays a table of all the data set components,
 their description and their filename.  Data set components that are dirty
 can have their filenames changed.  Others cannot.
 */
+@SuppressWarnings("serial")
 public class StateMod_Response_JFrame extends JFrame 
 implements ActionListener, KeyListener, MouseListener, WindowListener {
 

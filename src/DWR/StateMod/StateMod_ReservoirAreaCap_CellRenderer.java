@@ -42,6 +42,7 @@ import RTi.Util.GUI.JWorksheet_AbstractExcelCellRenderer;
 /**
 This class renders cells for reservoir area/capacity/seepage tables.
 */
+@SuppressWarnings("serial")
 public class StateMod_ReservoirAreaCap_CellRenderer
 extends JWorksheet_AbstractExcelCellRenderer {
 

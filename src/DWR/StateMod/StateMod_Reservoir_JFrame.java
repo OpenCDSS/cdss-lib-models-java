@@ -335,11 +335,13 @@ public StateMod_Reservoir_JFrame ( StateMod_DataSet dataset, StateMod_DataSet_Wi
 	__dataset_wm = dataset_wm;
 	__reservoirComponent = __dataset.getComponentForComponentType( StateMod_DataSet.COMP_RESERVOIR_STATIONS);
 
-	__reservoirsVector = (List<StateMod_Reservoir>)__reservoirComponent.getData();
+	@SuppressWarnings("unchecked")
+	List<StateMod_Reservoir> dataList = (List<StateMod_Reservoir>)__reservoirComponent.getData();
+	__reservoirsVector = dataList;
 
 	int size = __reservoirsVector.size();
 	for (int i = 0; i < size; i++) {
-		StateMod_Reservoir r = (StateMod_Reservoir)__reservoirsVector.get(i);
+		StateMod_Reservoir r = __reservoirsVector.get(i);
 		r.createBackup();
 	}
 
@@ -364,11 +366,13 @@ public StateMod_Reservoir_JFrame ( StateMod_DataSet dataset, StateMod_DataSet_Wi
 	__dataset_wm = dataset_wm;
 	__reservoirComponent = __dataset.getComponentForComponentType(StateMod_DataSet.COMP_RESERVOIR_STATIONS);
 
-	__reservoirsVector = (List<StateMod_Reservoir>)__reservoirComponent.getData();
+	@SuppressWarnings("unchecked")
+	List<StateMod_Reservoir> dataList = (List<StateMod_Reservoir>)__reservoirComponent.getData();
+	__reservoirsVector = dataList;
 
 	int size = __reservoirsVector.size();
 	for (int i = 0; i < size; i++) {
-		StateMod_Reservoir r = (StateMod_Reservoir)__reservoirsVector.get(i);
+		StateMod_Reservoir r = __reservoirsVector.get(i);
 		r.createBackup();
 	}
 
@@ -621,7 +625,7 @@ private void displayTSViewJFrame(Object o)
 	int sub = 0;
 	int its = 0;
 	TS ts = null;
-	StateMod_Reservoir res =((StateMod_Reservoir)__reservoirsVector.get(__currentReservoirIndex));
+	StateMod_Reservoir res = __reservoirsVector.get(__currentReservoirIndex);
 	@SuppressWarnings("unchecked")
 	List<MonthTS> precip_tslist = (List<MonthTS>)(__dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_PRECIPITATION_TS_MONTHLY)).getData();
@@ -907,7 +911,7 @@ private void processTableSelection(int index) {
 		return;
 	}
 
-	StateMod_Reservoir res = (StateMod_Reservoir)__reservoirsVector.get(__currentReservoirIndex);
+	StateMod_Reservoir res = __reservoirsVector.get(__currentReservoirIndex);
 
 	JGUIUtil.enableComponents(__disables, __textUneditables, __editable);
 		
@@ -1088,7 +1092,7 @@ private void saveInformation(int record) {
 		return;
 	}
 
-	StateMod_Reservoir res = (StateMod_Reservoir)__reservoirsVector.get(record);
+	StateMod_Reservoir res = __reservoirsVector.get(record);
 	//Message.printStatus(1, "", "Name: '" + res.getName() + "'");
 	//Message.printStatus(1, "", "Name: '" + __reservoirName.getText() + "'");
 	//Message.printStatus(1, "", "\t\t(" + res.isDirty() + ")");
@@ -1136,7 +1140,7 @@ private void saveDailyID(int record) {
 		return;
 	}
 
-	StateMod_Reservoir res = (StateMod_Reservoir)__reservoirsVector.get(record);
+	StateMod_Reservoir res = __reservoirsVector.get(record);
 
 	if (!__resDailyID.getSelected().equalsIgnoreCase(res.getCresdy())) {
 		String id = __resDailyID.getSelected();
@@ -1754,7 +1758,7 @@ public void windowClosing(WindowEvent e) {
 	int size = __reservoirsVector.size();
 	boolean changed = false;
 	for (int i = 0; i < size; i++) {
-		StateMod_Reservoir r = (StateMod_Reservoir)__reservoirsVector.get(i);
+		StateMod_Reservoir r = __reservoirsVector.get(i);
 		if (!changed && r.changed()) {
 			changed = true;
 		}

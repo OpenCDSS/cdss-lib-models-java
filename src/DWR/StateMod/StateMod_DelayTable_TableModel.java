@@ -56,7 +56,7 @@ This class displays delay table related data.
 */
 @SuppressWarnings("serial")
 public class StateMod_DelayTable_TableModel 
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel<StateMod_DelayTable> {
 
 /**
 Number of columns in the table model.
@@ -71,7 +71,7 @@ private boolean __editable = false;
 /**
 Return values under a delay table.
 */
-private List __subDelays = null;
+private List<Double> __subDelays = null;
 
 /**
 Indicate whether the delay table is for monthly (true) or daily (false) data.
@@ -99,11 +99,11 @@ Constructor.
 @param returnIsPercent whether the return amounts are in percents (true) or fractions (false).
 @throws Exception if an invalid data or dmi was passed in.
 */
-public StateMod_DelayTable_TableModel (	List data, boolean monthlyData,
+public StateMod_DelayTable_TableModel (	List<StateMod_DelayTable> data, boolean monthlyData,
 					boolean editable, boolean returnIsPercent)
 throws Exception {
 	if (data == null) {
-		throw new Exception ("Invalid data Vector passed to " 
+		throw new Exception ("Invalid data list passed to " 
 			+ "StateMod_DelayTable_TableModel constructor.");
 	}
 	_rows = data.size();
@@ -143,7 +143,7 @@ public String getColumnName(int columnIndex) {
 	switch (columnIndex) {
 		// REVISIT (SAM - 2005-01-20)
 		// how is this class being used with Well Depletion displays
-		// in the StateMod GUI?  We might needa  flag for the header.
+		// in the StateMod GUI?  We might need a  flag for the header.
 		case COL_ID:		
 			return "DELAY\nTABLE ID";
 		case COL_DATE:	
@@ -201,7 +201,7 @@ public Object getValueAt(int row, int col) {
 
 	switch (col) {
 		case COL_ID:		
-			StateMod_DelayTable dt = (StateMod_DelayTable)_data.get(row);
+			StateMod_DelayTable dt = _data.get(row);
 			return dt.getTableID();
 		case COL_DATE:	
 			return new Integer(row + 1);	
@@ -239,7 +239,8 @@ Sets the delay table data that will be displayed for a particular delay.
 */
 public void setSubDelays(List<Double> subDelays) {
 	__subDelays = subDelays;
-	_data = subDelays;
+	// TODO smalers 2019-06-01 figure out what is going on here
+	//_data = subDelays;
 	if (__subDelays == null) {
 		_rows = 0;
 	}

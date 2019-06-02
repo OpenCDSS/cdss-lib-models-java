@@ -41,12 +41,13 @@ import java.util.List;
 import RTi.Util.GUI.JScrollWorksheet;
 
 /**
-This class is a JFrame for displaying a Vector of StateMod_Diversion 
+This class is a JFrame for displaying a list of StateMod_Diversion 
 collection data in a worksheet.  The worksheet data can be exported to 
 a file or printed.
 */
+@SuppressWarnings("serial")
 public class StateMod_Diversion_Collection_Data_JFrame 
-extends StateMod_Data_JFrame {
+extends StateMod_Data_JFrame<StateMod_Diversion> {
 
 /**
 Constructor. 
@@ -56,7 +57,7 @@ Constructor.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_Diversion_Collection_Data_JFrame(List data, String titleString, boolean editable)
+public StateMod_Diversion_Collection_Data_JFrame(List<StateMod_Diversion> data, String titleString, boolean editable)
 throws Exception {
 	super(data, titleString, editable);
 	setSize(423, getHeight());
@@ -70,7 +71,7 @@ protected void apply() {
 	StateMod_Diversion div = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		div = (StateMod_Diversion)_data.get(i);
+		div = _data.get(i);
 		div.createBackup();
 	}
 }
@@ -99,7 +100,7 @@ protected void cancel() {
 	StateMod_Diversion div = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		div = (StateMod_Diversion)_data.get(i);
+		div = _data.get(i);
 		div.restoreOriginal();
 	}
 }
@@ -112,7 +113,7 @@ protected void createDataBackup() {
 	StateMod_Diversion div = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		div = (StateMod_Diversion)_data.get(i);
+		div = _data.get(i);
 		div.createBackup();
 	}
 }

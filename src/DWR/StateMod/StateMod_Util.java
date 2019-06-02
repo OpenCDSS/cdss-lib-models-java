@@ -1193,13 +1193,12 @@ public static List<String> createIdentifierList ( StateMod_DataSet dataset,
 	for ( int i = 0; i < associatedPlanAllowedTypes.length; i++ ) {
 		// Get the data objects
 		sourceOrDestType = associatedPlanAllowedTypes[i].getMatchingSourceOrDestinationType ();
-		List dataList = getDataList(sourceOrDestType, dataset, null, false);
+		List<? extends StateMod_Data> dataList = getDataList(sourceOrDestType, dataset, null, false);
 		// Format the identifiers...
 		String type = "" + associatedPlanAllowedTypes[i];
 		if ( (dataList != null) && (dataList.size() > 0) ) {
 			// Format the identifiers...
-			@SuppressWarnings("unchecked")
-			List<String> idList2 = createIdentifierListFromStateModData((List<StateMod_Data>)dataList, includeName, type);
+			List<String> idList2 = createIdentifierListFromStateModData(dataList, includeName, type);
 			// Add to the list (probably no need to sort, especially since type is included
 			idList.addAll(idList2);
 		}
@@ -1227,23 +1226,13 @@ public static List<String> createIdentifierList ( StateMod_DataSet dataset,
 		// Get the data objects
 		// TODO SAM 2011-02-02 Why was true added below?
 		//List dataList = getDataList(sourceOrDestTypes[i], dataset, null, true);
-		List dataList = getDataList(sourceOrDestTypes[i], dataset, null, false);
+		List<? extends StateMod_Data> dataList = getDataList(sourceOrDestTypes[i], dataset, null, false);
 		if ( (dataList != null) && (dataList.size() > 0) ) {
 			// Format the identifiers...
 			String type = "" + sourceOrDestTypes[i];
-			Object object0 = dataList.get(0);
-			if ( object0 instanceof StateMod_Data ) {
-				@SuppressWarnings("unchecked")
-				List<String> idList2 = createIdentifierListFromStateModData((List<StateMod_Data>)dataList, includeName, type);
-				// Add to the list (probably no need to sort, especially since type is included
-				idList.addAll(idList2);
-			}
-			else if ( object0 instanceof TS ) {
-				@SuppressWarnings("unchecked")
-				List<String> idList2 = createIdentifierListFromTS((List<TS>)dataList, includeName, type);
-				// Add to the list (probably no need to sort, especially since type is included
-				idList.addAll(idList2);
-			}
+			List<String> idList2 = createIdentifierListFromStateModData(dataList, includeName, type);
+			// Add to the list (probably no need to sort, especially since type is included
+			idList.addAll(idList2);
 		}
 	}
 	return idList;
@@ -1273,7 +1262,7 @@ followed by " - xxxx", where xxxx is the value returned from StateMod_Data.getNa
 @param type if non-null and non-blank, include as "(type)" before the name, to indicate a location type,
 for example "ID - (Reservoir) Name".
 */
-public static List<String> createIdentifierListFromStateModData ( List<? extends StateMod_Data> smdataList, boolean includeName, String type )
+public static <T extends StateMod_Data> List<String> createIdentifierListFromStateModData ( List<T> smdataList, boolean includeName, String type )
 {	List<String> v = null;
 	if ( smdataList == null ) {
 		v = new Vector<String>();
@@ -1352,6 +1341,7 @@ public static List<String> createIdentifierListFromTS ( List<TS> tslist, boolean
 	return v;
 }
 
+// TODO smalers 2019-06-01 generics could be done better but don't want to break TSUtil
 /**
 Create a sum of the time series in a list, representing the total water for
 a data set.  This time series can be used for summaries.
@@ -1367,18 +1357,21 @@ no value is available, the total will be missing.
 information for the new time series.
 @exception Exception if there is an error creating the time series.
 */
-public static TS createTotalTS ( List<TS> tslist, String dataset_location,
+public static <T> T createTotalTS ( List<T> tslist, String dataset_location,
 					String dataset_datasource, String dataset_description, int comp_type )
 throws Exception
 {	String routine = "StateMod_Util.createTotalTS";
 	TS newts = null;
 	String interval = "";
+	boolean doMonth = false;
+	boolean doDay = false;
 	if ( (comp_type == StateMod_DataSet.COMP_DIVERSION_TS_MONTHLY) ||
 		(comp_type == StateMod_DataSet.COMP_DEMAND_TS_MONTHLY) ||
 		(comp_type == StateMod_DataSet.COMP_WELL_PUMPING_TS_MONTHLY) ||
 		(comp_type == StateMod_DataSet.COMP_WELL_DEMAND_TS_MONTHLY) ) {
 		newts = new MonthTS();
 		interval = "Month";
+		doMonth = true;
 	}
 	else if((comp_type == StateMod_DataSet.COMP_DIVERSION_TS_DAILY) ||
 		(comp_type == StateMod_DataSet.COMP_DEMAND_TS_DAILY) ||
@@ -1386,6 +1379,7 @@ throws Exception
 		(comp_type == StateMod_DataSet.COMP_WELL_DEMAND_TS_DAILY) ) {
 		newts = new DayTS();
 		interval = "Day";
+		doDay = true;
 	}
 	else {
 	    Message.printWarning ( 3, routine,
@@ -1406,7 +1400,8 @@ throws Exception
 	newts.setDataUnits ( StateMod_DataSet.lookupTimeSeriesDataUnits(comp_type));
 	// Get the period for the total time series...
 	// Try to get from the data...
-	TSLimits valid_dates = TSUtil.getPeriodFromTS ( tslist, TSUtil.MAX_POR);
+	@SuppressWarnings("unchecked")
+	TSLimits valid_dates = TSUtil.getPeriodFromTS ( (List<TS>)tslist, TSUtil.MAX_POR);
 	DateTime start = valid_dates.getDate1();
 	DateTime end = valid_dates.getDate2();
 	if ( (start == null) || (end == null) ) {
@@ -1418,10 +1413,10 @@ throws Exception
 	newts.setDate2 ( end );
 	newts.setDate2Original ( end );
 	newts.allocateDataSpace ();
-	TSUtil.add ( newts, tslist );
+	TSUtil.add ( newts, (List<TS>)tslist );
 	// Reset the description to something short...
 	newts.setDescription ( dataset_description );
-	return newts;
+	return (T)newts;
 }
 
 /**
@@ -1606,7 +1601,8 @@ create the time series header information.
 @return a list of time series created from a list of water rights.
 @exception Exception if there is an error
 */
-public static List<TS> createWaterRightTimeSeriesList ( List<? extends StateMod_Right> smrights,
+@SuppressWarnings("unchecked")
+public static <T extends TS> List<T> createWaterRightTimeSeriesList ( List<? extends StateMod_Right> smrights,
 		int interval_base, int spatial_aggregation, int parcel_year,
 		boolean include_dataset_totals,
 		DateTime OutputStart_DateTime, DateTime OutputEnd_DateTime,
@@ -1638,8 +1634,8 @@ throws Exception
 		FreeWaterMethod_int = UseSeniorRightAppropriationDate_int;
 	}
 
-	List<TS> tslist = new Vector<TS>();
-	TS ts = null;	// Time series to add.
+	List<T> tslist = new Vector<T>();
+	T ts = null;	// Time series to add.
 	StateMod_Right smright;
 	StateMod_WellRight smwellright; // Only for parcel processing.
 	boolean need_to_create_ts;	// Indicate whether new TS needed
@@ -1654,7 +1650,7 @@ throws Exception
 	// Get the locations that have water rights.
 	List<String> loc_Vector = null;
 	if ( spatial_aggregation == BYPARCEL ) {
-		loc_Vector = getWaterRightParcelList ( (List<StateMod_Right>)smrights, parcel_year );
+		loc_Vector = getWaterRightParcelList ( smrights, parcel_year );
 	}
 	else {
 	    // Process by location or individual rights...
@@ -1678,7 +1674,7 @@ throws Exception
 	    Message.printStatus ( 2, routine, "Found " + loc_size + " rights from " + smrights_size + " rights.");
 	}
 	String loc_id = null;	// Identifier for a location or parcel
-	List<StateMod_Right> loc_rights = null;
+	List<? extends StateMod_Right> loc_rights = null;
 	DateTime min_DateTime = null;
 	DateTime max_DateTime = null;
 	double decree = 0;	// Decree for water right
@@ -1709,7 +1705,7 @@ throws Exception
 		free_right_count = 0;
 		if ( (spatial_aggregation == BYLOC) || (spatial_aggregation == BYPARCEL) ) {
 			for ( int i = 0; i < size; i++ ) {
-				smright = (StateMod_Right)loc_rights.get(i);
+				smright = loc_rights.get(i);
 				if ( smright == null ) {
 					continue;
 				}
@@ -1731,7 +1727,7 @@ throws Exception
 		}
 		// Now process each right for the location...
 		for ( int i = 0; i < size; i++ ) {
-			smright = (StateMod_Right)loc_rights.get(i);
+			smright = loc_rights.get(i);
 			if ( smright == null ) {
 				continue;
 			}
@@ -1779,7 +1775,7 @@ throws Exception
 				pos = TSUtil.indexOf ( tslist, smright.getLocationIdentifier(), "Location", 1 );
 				if ( pos >= 0 ) {
 					// Will add to the matched right
-					ts = (TS)tslist.get(pos);
+					ts = tslist.get(pos);
 				}
 				else {
 				    // Need to create a new total right.
@@ -1794,7 +1790,7 @@ throws Exception
 				pos = TSUtil.indexOf ( tslist, smwellright.getParcelID(), "Location", 1 );
 				if ( pos >= 0 ) {
 					// Will add to the matched right
-					ts = (TS)tslist.get(pos);
+					ts = tslist.get(pos);
 				}
 				else {
 				    // Need to create a new total right.
@@ -1846,7 +1842,7 @@ throws Exception
 				else if ( interval_base == TimeInterval.IRREGULAR ) {
 					tsid = id + ".StateMod." + datatype + ".Irregular";
 				}
-				ts = TSUtil.newTimeSeries ( tsid, true );
+				ts = (T)TSUtil.newTimeSeries ( tsid, true );
 				ts.setIdentifier ( tsid );
 				if ( spatial_aggregation == BYLOC ) {
 					ts.setDescription ( smright.getLocationIdentifier() + " Total " + nodetype + " Rights for Location" );
@@ -1973,7 +1969,7 @@ throws Exception
 		else if ( interval_base == TimeInterval.YEAR ) {
 			tsid = "DataSet.StateMod." + datatype + ".Year";
 		}
-		TS totalts = TSUtil.newTimeSeries ( tsid, true );
+		T totalts = (T)TSUtil.newTimeSeries ( tsid, true );
 		totalts.setIdentifier ( tsid );
 
 		TSLimits limits = TSUtil.getPeriodFromTS ( tslist, TSUtil.MAX_POR );
@@ -1989,7 +1985,7 @@ throws Exception
 		DateTime date = null;
 		double value;
 		for ( int i = 0; i < size; i++ ) {
-			ts = (TS)tslist.get(i);
+			ts = tslist.get(i);
 			if ( !units_set && (ts.getDataUnits().length() > 0) ) {
 				totalts.setDataUnits ( ts.getDataUnits() );
 				totalts.setDataUnitsOriginal ( ts.getDataUnits() );
@@ -2080,7 +2076,6 @@ dataset.  Note that this is always a calendar date.  The time series that are ch
 */
 public static DateTime findEarliestDateInPOR(StateMod_DataSet dataset)
 {	DateTime newDate = null;
-	List<TS> tsVector = null;
 	DateTime tempDate = null;
 
 	int numFiles = 8;
@@ -2099,7 +2094,8 @@ public static DateTime findEarliestDateInPOR(StateMod_DataSet dataset)
 
 	for (int i = 0; i < numFiles; i++) {
 		if (dataset.getComponentForComponentType(files[i]).hasData()) {
-			tsVector = (List)((dataset.getComponentForComponentType(files[i])).getData());
+			@SuppressWarnings("unchecked")
+			List<MonthTS> tsVector = (List<MonthTS>)(dataset.getComponentForComponentType(files[i])).getData();
 			if ( newDate == null ) {
 				tempDate = findEarliestDateInPORHelper(tsVector,seedDate);
 			}
@@ -2125,10 +2121,10 @@ non-zero date (no need to check all time series after that).
 @return first date of the time series or null if the first date of the time
 series is not earlier than newDate
 */
-private static DateTime findEarliestDateInPORHelper(List<TS> tsVector, DateTime newDate) {
+private static <T extends TS> DateTime findEarliestDateInPORHelper(List<T> tsVector, DateTime newDate) {
 	DateTime date = null;
 	if (tsVector.size() > 0) {
-		date = (tsVector.get(0)).getDate1();
+		date = tsVector.get(0).getDate1();
 		if (date.getYear() > 0 && date.lessThan(newDate)) {
 			return date;
 		}
@@ -2245,7 +2241,7 @@ or -1 if the right should be inserted at the end (no other option).
 @param data_Vector a list of StateMod_*Right, with data members populated.
 @param item A single StateMod_*Right to insert.
 */
-public static int findWaterRightInsertPosition ( List<? extends StateMod_Data> data_Vector, StateMod_Data item )
+public static <T extends StateMod_Data> int findWaterRightInsertPosition ( List<T> data_Vector, StateMod_Data item )
 {	if ( (data_Vector == null) || (data_Vector.size() == 0) ) {
 		// Add at the end...
 		return -1;
@@ -2595,104 +2591,140 @@ Depending on the type, this may return a list of stations or rights.
 @param returnStations if the list is a list of rights, then specifying true will return the list of stations
 associated with the rights (ignored in cases where the type is stations)
 */
-public static List getDataList (
+public static List<? extends StateMod_Data> getDataList (
 	StateMod_OperationalRight_Metadata_SourceOrDestinationType type, StateMod_DataSet dataset,
 	String idToMatch, boolean returnStations )
 {
-	List dataList = new Vector();
 	if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.CARRIER ) {
 		// Diversions where irturn = 3
-		List<StateMod_Diversion> stationList2 = (List<StateMod_Diversion>)dataset.getComponentForComponentType(
+		@SuppressWarnings("unchecked")
+		List<StateMod_Diversion> divList = (List<StateMod_Diversion>)dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_DIVERSION_STATIONS).getData();
-		for ( StateMod_Diversion div: stationList2 ) {
+		List<StateMod_Diversion> divList2 = new Vector<StateMod_Diversion>();
+		for ( StateMod_Diversion div: divList ) {
 			if ( div.getIrturn() == 3 ) {
 				if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(div.getID()) ) {
-					dataList.add ( div );
+					divList2.add ( div );
 				}
 			}
 		}
+		return divList2;
 	}
 	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.DIVERSION ) {
 		// All diversion stations
-		dataList = (List<StateMod_Diversion>)dataset.getComponentForComponentType(
+		@SuppressWarnings("unchecked")
+		List<StateMod_Diversion> divList = (List<StateMod_Diversion>)dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_DIVERSION_STATIONS).getData();
+		return divList;
 	}
 	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.DIVERSION_RIGHT ) {
 		// Diversions rights
-		List<StateMod_DiversionRight> dataList2 = (List<StateMod_DiversionRight>)dataset.getComponentForComponentType(
+		@SuppressWarnings("unchecked")
+		List<StateMod_DiversionRight> divrList = (List<StateMod_DiversionRight>)dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_DIVERSION_RIGHTS).getData();
-		for ( StateMod_DiversionRight divRight : dataList2 ) {
+		// Get the diversion station associated with the right
+		@SuppressWarnings("unchecked")
+		List<StateMod_Diversion> divList = (List<StateMod_Diversion>)dataset.getComponentForComponentType(
+			StateMod_DataSet.COMP_DIVERSION_STATIONS).getData();
+		List<StateMod_Diversion> divList2 = new Vector<StateMod_Diversion>();
+		List<StateMod_DiversionRight> divrList2 = new Vector<StateMod_DiversionRight>();
+		for ( StateMod_DiversionRight divRight : divrList ) {
 			if ( returnStations ) {
-				// Get the diversion station associated with the right
-				List divList = (List<StateMod_Diversion>)dataset.getComponentForComponentType(
-					StateMod_DataSet.COMP_DIVERSION_STATIONS).getData();
 				int pos = indexOf (divList, divRight.getLocationIdentifier());
 				if ( pos >= 0 ) {
 					if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(divRight.getID()) ) {
-						dataList.add ( divList.get(pos));
+						divList2.add ( divList.get(pos));
 					}
 				}
 			}
 			else {
 				if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(divRight.getID()) ) {
-					dataList.add ( divRight );
+					divrList2.add ( divRight );
 				}
 			}
+		}
+		if ( returnStations ) {
+			return divList2;
+		}
+		else {
+			return divrList2;
 		}
 	}
 	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.INSTREAM_FLOW ) {
 		// All instream flow stations
-		dataList = (List<StateMod_InstreamFlow>)dataset.getComponentForComponentType(
+		@SuppressWarnings("unchecked")
+		List<StateMod_InstreamFlow> ifsList = (List<StateMod_InstreamFlow>)dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_INSTREAM_STATIONS).getData();
+		return ifsList;
 	}
 	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.INSTREAM_FLOW_RIGHT ) {
 		// InstreamFlows rights
-		List<StateMod_InstreamFlowRight> dataList2 = (List<StateMod_InstreamFlowRight>)dataset.getComponentForComponentType(
+		@SuppressWarnings("unchecked")
+		List<StateMod_InstreamFlowRight> ifrList = (List<StateMod_InstreamFlowRight>)dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_INSTREAM_RIGHTS).getData();
-		for ( StateMod_InstreamFlowRight instreamRight : dataList2 ) {
+		// Get the instream flow station associated with the right
+		@SuppressWarnings("unchecked")
+		List<StateMod_InstreamFlow> ifsList = (List<StateMod_InstreamFlow>)dataset.getComponentForComponentType(
+				StateMod_DataSet.COMP_INSTREAM_STATIONS).getData();
+		List<StateMod_InstreamFlow> ifsList2 = new Vector<StateMod_InstreamFlow>();
+		List<StateMod_InstreamFlowRight> ifrList2 = new Vector<StateMod_InstreamFlowRight>();
+		for ( StateMod_InstreamFlowRight instreamRight : ifrList ) {
 			if ( returnStations ) {
-				// Get the instream flow station associated with the right
-				List instreamList = (List<StateMod_InstreamFlow>)dataset.getComponentForComponentType(
-					StateMod_DataSet.COMP_INSTREAM_STATIONS).getData();
-				int pos = indexOf (instreamList, instreamRight.getLocationIdentifier());
+				int pos = indexOf (ifsList, instreamRight.getLocationIdentifier());
 				if ( pos >= 0 ) {
 					if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(instreamRight.getID()) ) {
-						dataList.add ( instreamList.get(pos));
+						ifsList2.add ( ifsList.get(pos));
 					}
 				}
 			}
 			else {
 				if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(instreamRight.getID()) ) {
-					dataList.add ( instreamRight );
+					ifrList2.add ( instreamRight );
 				}
 			}
+		}
+		if ( returnStations ) {
+			return ifsList2;
+		}
+		else {
+			return ifrList2;
 		}
 	}
 	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.OPERATIONAL_RIGHT ) {
 		// All operational rights
-		dataList = (List<StateMod_OperationalRight>)dataset.getComponentForComponentType(
+		@SuppressWarnings("unchecked")
+		List<StateMod_OperationalRight> oprList = (List<StateMod_OperationalRight>)dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_OPERATION_RIGHTS).getData();
+		return oprList;
 	}
 	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.OTHER ) {
 		// Stations in the network that are not in any other list
-		dataList = (List<StateMod_RiverNetworkNode>)dataset.getComponentForComponentType(
+		@SuppressWarnings("unchecked")
+		List<StateMod_RiverNetworkNode> rinList = (List<StateMod_RiverNetworkNode>)dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_RIVER_NETWORK).getData();
-		List divList = (List<StateMod_Diversion>)dataset.getComponentForComponentType(
+		@SuppressWarnings("unchecked")
+		List<StateMod_Diversion> divList = (List<StateMod_Diversion>)dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_DIVERSION_STATIONS).getData();
-		List resList = (List<StateMod_Reservoir>)dataset.getComponentForComponentType(
+		@SuppressWarnings("unchecked")
+		List<StateMod_Reservoir> resList = (List<StateMod_Reservoir>)dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_RESERVOIR_STATIONS).getData();
-		List ifsList = (List<StateMod_InstreamFlow>)dataset.getComponentForComponentType(
+		@SuppressWarnings("unchecked")
+		List<StateMod_InstreamFlow> ifsList = (List<StateMod_InstreamFlow>)dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_INSTREAM_STATIONS).getData();
-		List wellList = (List<StateMod_Well>)dataset.getComponentForComponentType(
+		@SuppressWarnings("unchecked")
+		List<StateMod_Well> wellList = (List<StateMod_Well>)dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_WELL_STATIONS).getData();
-		List gageList = (List<StateMod_StreamGage>)dataset.getComponentForComponentType(
+		@SuppressWarnings("unchecked")
+		List<StateMod_StreamGage> gageList = (List<StateMod_StreamGage>)dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_STREAMGAGE_STATIONS).getData();
-		List estList = (List<StateMod_StreamEstimate>)dataset.getComponentForComponentType(
+		@SuppressWarnings("unchecked")
+		List<StateMod_StreamEstimate> estList = (List<StateMod_StreamEstimate>)dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS).getData();
-		List planList = (List<StateMod_Plan>)dataset.getComponentForComponentType(
+		@SuppressWarnings("unchecked")
+		List<StateMod_Plan> planList = (List<StateMod_Plan>)dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_PLANS).getData();
-		List<StateMod_RiverNetworkNode> returnList = new Vector();
-		for ( StateMod_RiverNetworkNode node: (List<StateMod_RiverNetworkNode>)dataList ) {
+		List<StateMod_RiverNetworkNode> returnList = new Vector<StateMod_RiverNetworkNode>();
+		for ( StateMod_RiverNetworkNode node: rinList ) {
 			// Check the other lists
 			if ( StateMod_Util.indexOf(divList, node.getID()) >= 0 ) {
 				// Diversion so not other
@@ -2731,214 +2763,279 @@ public static List getDataList (
 	}
 	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_ACCOUNTING ) {
 		// Plan where iPlnTyp = 11
-		List<StateMod_Plan> dataList2 = (List<StateMod_Plan>)dataset.getComponentForComponentType(
+		@SuppressWarnings("unchecked")
+		List<StateMod_Plan> planList = (List<StateMod_Plan>)dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_PLANS).getData();
-		for ( StateMod_Plan plan: dataList2 ) {
+		List<StateMod_Plan> planList2 = new Vector<StateMod_Plan>();
+		for ( StateMod_Plan plan: planList ) {
 			if ( plan.getIPlnTyp() == 11) {
 				if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(plan.getID()) ) {
-					dataList.add ( plan );
+					planList2.add ( plan );
 				}
 			}
 		}
+		return planList2;
 	}
 	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_OUT_OF_PRIORITY ) {
 		// Plan where iPlnTyp = 9
-		List<StateMod_Plan> dataList2 = (List<StateMod_Plan>)dataset.getComponentForComponentType(
+		@SuppressWarnings("unchecked")
+		List<StateMod_Plan> planList = (List<StateMod_Plan>)dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_PLANS).getData();
-		for ( StateMod_Plan plan: dataList2 ) {
+		List<StateMod_Plan> planList2 = new Vector<StateMod_Plan>();
+		for ( StateMod_Plan plan: planList ) {
 			if ( plan.getIPlnTyp() == 9 ) {
 				if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(plan.getID()) ) {
-					dataList.add ( plan );
+					planList2.add ( plan );
 				}
 			}
 		}
+		return planList2;
 	}
 	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_RECHARGE ) {
 		// Plan where iPlnTyp = 8
-		List<StateMod_Plan> dataList2 = (List<StateMod_Plan>)dataset.getComponentForComponentType(
+		@SuppressWarnings("unchecked")
+		List<StateMod_Plan> planList = (List<StateMod_Plan>)dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_PLANS).getData();
-		for ( StateMod_Plan plan: dataList2 ) {
+		List<StateMod_Plan> planList2 = new Vector<StateMod_Plan>();
+		for ( StateMod_Plan plan: planList ) {
 			if ( plan.getIPlnTyp() == 8 ) {
 				if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(plan.getID()) ) {
-					dataList.add ( plan );
+					planList2.add ( plan );
 				}
 			}
 		}
+		return planList2;
 	}
 	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_RELEASE_LIMIT ) {
 		// Plan where iPlnTyp = 12
-		List<StateMod_Plan> dataList2 = (List<StateMod_Plan>)dataset.getComponentForComponentType(
+		@SuppressWarnings("unchecked")
+		List<StateMod_Plan> planList = (List<StateMod_Plan>)dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_PLANS).getData();
-		for ( StateMod_Plan plan: dataList2 ) {
+		List<StateMod_Plan> planList2 = new Vector<StateMod_Plan>();
+		for ( StateMod_Plan plan: planList ) {
 			if ( plan.getIPlnTyp() == 12 ) {
 				if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(plan.getID()) ) {
-					dataList.add ( plan );
+					planList2.add ( plan );
 				}
 			}
 		}
+		return planList2;
 	}
 	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_REUSE_TO_DIVERSION) {
 		// Plan where iPlnTyp = 4
-		List<StateMod_Plan> dataList2 = (List<StateMod_Plan>)dataset.getComponentForComponentType(
+		@SuppressWarnings("unchecked")
+		List<StateMod_Plan> planList = (List<StateMod_Plan>)dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_PLANS).getData();
-		for ( StateMod_Plan plan: dataList2 ) {
+		List<StateMod_Plan> planList2 = new Vector<StateMod_Plan>();
+		for ( StateMod_Plan plan: planList ) {
 			if ( plan.getIPlnTyp() == 4 ) {
 				if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(plan.getID()) ) {
-					dataList.add ( plan );
+					planList2.add ( plan );
 				}
 			}
 		}
+		return planList2;
 	}
 	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_REUSE_TO_DIVERSION_FROM_TRANSMOUNTAIN) {
 		// Plan where iPlnTyp = 6
-		List<StateMod_Plan> dataList2 = (List<StateMod_Plan>)dataset.getComponentForComponentType(
+		@SuppressWarnings("unchecked")
+		List<StateMod_Plan> planList = (List<StateMod_Plan>)dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_PLANS).getData();
-		for ( StateMod_Plan plan: dataList2 ) {
+		List<StateMod_Plan> planList2 = new Vector<StateMod_Plan>();
+		for ( StateMod_Plan plan: planList ) {
 			if ( plan.getIPlnTyp() == 6 ) {
 				if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(plan.getID()) ) {
-					dataList.add ( plan );
+					planList2.add ( plan );
 				}
 			}
 		}
+		return planList2;
 	}
 	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_REUSE_TO_RESERVOIR) {
 		// Plan where iPlnTyp = 3
-		List<StateMod_Plan> dataList2 = (List<StateMod_Plan>)dataset.getComponentForComponentType(
+		@SuppressWarnings("unchecked")
+		List<StateMod_Plan> planList = (List<StateMod_Plan>)dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_PLANS).getData();
-		for ( StateMod_Plan plan: dataList2 ) {
+		List<StateMod_Plan> planList2 = new Vector<StateMod_Plan>();
+		for ( StateMod_Plan plan: planList ) {
 			if ( plan.getIPlnTyp() == 3 ) {
 				if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(plan.getID()) ) {
-					dataList.add ( plan );
+					planList2.add ( plan );
 				}
 			}
 		}
+		return planList2;
 	}
 	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_REUSE_TO_RESERVOIR_FROM_TRANSMOUNTAIN) {
 		// Plan where iPlnTyp = 5
-		List<StateMod_Plan> dataList2 = (List<StateMod_Plan>)dataset.getComponentForComponentType(
+		@SuppressWarnings("unchecked")
+		List<StateMod_Plan> planList = (List<StateMod_Plan>)dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_PLANS).getData();
-		for ( StateMod_Plan plan: dataList2 ) {
+		List<StateMod_Plan> planList2 = new Vector<StateMod_Plan>();
+		for ( StateMod_Plan plan: planList ) {
 			if ( plan.getIPlnTyp() == 5 ) {
 				if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(plan.getID()) ) {
-					dataList.add ( plan );
+					planList2.add ( plan );
 				}
 			}
 		}
+		return planList2;
 	}
 	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_SPECIAL_WELL_AUGMENTATION ) {
 		// Plan where iPlnTyp = 10
-		List<StateMod_Plan> dataList2 = (List<StateMod_Plan>)dataset.getComponentForComponentType(
+		@SuppressWarnings("unchecked")
+		List<StateMod_Plan> planList = (List<StateMod_Plan>)dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_PLANS).getData();
-		for ( StateMod_Plan plan: dataList2 ) {
+		List<StateMod_Plan> planList2 = new Vector<StateMod_Plan>();
+		for ( StateMod_Plan plan: planList ) {
 			if ( plan.getIPlnTyp() == 10 ) {
 				if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(plan.getID()) ) {
-					dataList.add ( plan );
+					planList2.add ( plan );
 				}
 			}
 		}
+		return planList2;
 	}
 	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_TC) {
 		// Plan where iPlnTyp = 1
-		List<StateMod_Plan> dataList2 = (List<StateMod_Plan>)dataset.getComponentForComponentType(
+		@SuppressWarnings("unchecked")
+		List<StateMod_Plan> planList = (List<StateMod_Plan>)dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_PLANS).getData();
-		for ( StateMod_Plan plan: dataList2 ) {
+		List<StateMod_Plan> planList2 = new Vector<StateMod_Plan>();
+		for ( StateMod_Plan plan: planList ) {
 			if ( plan.getIPlnTyp() == 1) {
 				if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(plan.getID()) ) {
-					dataList.add ( plan );
+					planList2.add ( plan );
 				}
 			}
 		}
+		return planList2;
 	}
 	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_TRANSMOUNTAIN_IMPORT) {
 		// Plan where iPlnTyp = 7
-		List<StateMod_Plan> dataList2 = (List<StateMod_Plan>)dataset.getComponentForComponentType(
+		@SuppressWarnings("unchecked")
+		List<StateMod_Plan> planList = (List<StateMod_Plan>)dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_PLANS).getData();
-		for ( StateMod_Plan plan: dataList2 ) {
+		List<StateMod_Plan> planList2 = new Vector<StateMod_Plan>();
+		for ( StateMod_Plan plan: planList ) {
 			if ( plan.getIPlnTyp() == 7) {
 				if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(plan.getID()) ) {
-					dataList.add ( plan );
+					planList2.add ( plan );
 				}
 			}
 		}
+		return planList2;
 	}
 	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_WELL_AUGMENTATION) {
 		// Plan where iPlnTyp = 2
-		List<StateMod_Plan> dataList2 = (List<StateMod_Plan>)dataset.getComponentForComponentType(
+		@SuppressWarnings("unchecked")
+		List<StateMod_Plan> planList = (List<StateMod_Plan>)dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_PLANS).getData();
-		for ( StateMod_Plan plan: dataList2 ) {
+		List<StateMod_Plan> planList2 = new Vector<StateMod_Plan>();
+		for ( StateMod_Plan plan: planList ) {
 			if ( plan.getIPlnTyp() == 2 ) {
 				if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(plan.getID()) ) {
-					dataList.add ( plan );
+					planList2.add ( plan );
 				}
 			}
 		}
+		return planList2;
 	}
 	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.RESERVOIR ) {
 		// All reservoir stations
-		dataList = (List<StateMod_Reservoir>)dataset.getComponentForComponentType(
+		@SuppressWarnings("unchecked")
+		List<StateMod_Reservoir> resList = (List<StateMod_Reservoir>)dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_RESERVOIR_STATIONS).getData();
+		return resList;
 	}
 	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.RESERVOIR_RIGHT ) {
 		// Reservoir rights
-		List<StateMod_ReservoirRight> dataList2 = (List<StateMod_ReservoirRight>)dataset.getComponentForComponentType(
+		@SuppressWarnings("unchecked")
+		List<StateMod_ReservoirRight> rerList = (List<StateMod_ReservoirRight>)dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_RESERVOIR_RIGHTS).getData();
-		for ( StateMod_ReservoirRight resRight : dataList2 ) {
+		@SuppressWarnings("unchecked")
+		List<StateMod_Reservoir> resList = (List<StateMod_Reservoir>)dataset.getComponentForComponentType(
+			StateMod_DataSet.COMP_RESERVOIR_STATIONS).getData();
+		List<StateMod_Reservoir> resList2 = new Vector<StateMod_Reservoir>();
+		List<StateMod_ReservoirRight> rerList2 = new Vector<StateMod_ReservoirRight>();
+		for ( StateMod_ReservoirRight resRight : rerList ) {
 			if ( returnStations ) {
 				// Get the reservoir station associated with the right
-				List resList = (List<StateMod_Reservoir>)dataset.getComponentForComponentType(
-					StateMod_DataSet.COMP_RESERVOIR_STATIONS).getData();
 				int pos = indexOf (resList, resRight.getLocationIdentifier());
 				if ( pos >= 0 ) {
 					if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(resRight.getID()) ) {
-						dataList.add ( resList.get(pos));
+						resList2.add ( resList.get(pos));
 					}
 				}
 			}
 			else {
 				if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(resRight.getID()) ) {
-					dataList.add ( resRight );
+					rerList2.add ( resRight );
 				}
 			}
+		}
+		if ( returnStations ) {
+			return resList2;
+		}
+		else {
+			return rerList2;
 		}
 	}
 	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.RIVER_NODE ) {
 		// All river nodes
-		dataList = (List<StateMod_RiverNetworkNode>)dataset.getComponentForComponentType(
+		@SuppressWarnings("unchecked")
+		List<StateMod_RiverNetworkNode> rinList = (List<StateMod_RiverNetworkNode>)dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_RIVER_NETWORK).getData();
+		return rinList;
 	}
 	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.STREAM_GAGE ) {
 		// All stream gage stations
-		dataList = (List<StateMod_StreamGage>)dataset.getComponentForComponentType(
+		@SuppressWarnings("unchecked")
+		List<StateMod_StreamGage> risList = (List<StateMod_StreamGage>)dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_STREAMGAGE_STATIONS).getData();
+		return risList;
 	}
 	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.WELL ) {
 		// All well stations
-		dataList = (List<StateMod_Well>)dataset.getComponentForComponentType(
+		@SuppressWarnings("unchecked")
+		List<StateMod_Well> wesList = (List<StateMod_Well>)dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_WELL_STATIONS).getData();
+		return wesList;
 	}
 	else if ( type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.WELL_RIGHT ) {
 		// Wells rights
-		List<StateMod_WellRight> dataList2 = (List<StateMod_WellRight>)dataset.getComponentForComponentType(
+		@SuppressWarnings("unchecked")
+		List<StateMod_WellRight> werList = (List<StateMod_WellRight>)dataset.getComponentForComponentType(
 			StateMod_DataSet.COMP_WELL_RIGHTS).getData();
-		for ( StateMod_WellRight wellRight : dataList2 ) {
+		@SuppressWarnings("unchecked")
+		List<StateMod_Well> wellList = (List<StateMod_Well>)dataset.getComponentForComponentType(
+			StateMod_DataSet.COMP_WELL_STATIONS).getData();
+		List<StateMod_Well> wesList2 = new Vector<StateMod_Well>();
+		List<StateMod_WellRight> werList2 = new Vector<StateMod_WellRight>();
+		for ( StateMod_WellRight wellRight : werList ) {
 			if ( returnStations ) {
 				// Get the well station associated with the right
-				List wellList = (List<StateMod_Well>)dataset.getComponentForComponentType(
-					StateMod_DataSet.COMP_WELL_STATIONS).getData();
 				int pos = indexOf (wellList, wellRight.getLocationIdentifier());
 				if ( pos >= 0 ) {
 					if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(wellRight.getID()) ) {
-						dataList.add ( wellList.get(pos));
+						wesList2.add ( wellList.get(pos));
 					}
 				}
 			}
 			else {
 				if ( (idToMatch == null) || idToMatch.equalsIgnoreCase(wellRight.getID()) ) {
-					dataList.add ( wellRight );
+					werList2.add ( wellRight );
 				}
 			}
 		}
+		if ( returnStations ) {
+			return wesList2;
+		}
+		else {
+			return werList2;
+		}
 	}
+	/* TODO smalers 2019-05-29 is the following needed given that return is handled in each clause?
 	if ( (idToMatch != null) &&
 		((type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.DIVERSION) ||
 		(type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.INSTREAM_FLOW) ||
@@ -2948,14 +3045,16 @@ public static List getDataList (
 		(type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.STREAM_GAGE) ||
 		(type == StateMod_OperationalRight_Metadata_SourceOrDestinationType.WELL)) ) {
 		// Further process the initial lists
-		List<StateMod_Data> dataList2 = new Vector();
-		for ( StateMod_Data smdata: (List<StateMod_Data>)dataList ) {
+		List<StateMod_Data> dataList2 = new Vector<StateMod_Data>();
+		for ( StateMod_Data smdata: dataList ) {
 			if ( smdata.getID().equalsIgnoreCase(idToMatch) ) {
 				dataList2.add(smdata);
 			}
 		}
 		dataList = dataList2;
 	}
+	*/
+	List<StateMod_Data> dataList = new Vector<StateMod_Data>();
 	return dataList;
 }
 
@@ -3019,41 +3118,42 @@ rights is compared with the supplied station identifier.
 @return the list of water rights that match the station identifier.  A non-null
 list is guaranteed (but may have zero length).
 */
-public static List<? extends StateMod_Right> getRightsForStation ( String station_id, List<? extends StateMod_Right> rights_Vector )
-{	List<StateMod_Right> matches = new Vector<StateMod_Right>();
+public static <T extends StateMod_Right> List<T> getRightsForStation ( String station_id, List<T> rights_Vector )
+{	List<T> matches = new Vector<T>();
 	int size = 0;
 	if ( rights_Vector != null ) {
 		size = rights_Vector.size();
 	}
-	Object o;
+	T right;
 	StateMod_DiversionRight ddr;
 	StateMod_InstreamFlowRight ifr;
 	StateMod_ReservoirRight rer;
 	StateMod_WellRight wer;
+	// TODO smalers 2019-05-28 could streamline if StateMod_Right is guaranteed to have "cgoto" equivalent
 	for ( int i = 0; i < size; i++ ) {
-		o = (Object)rights_Vector.get(i);
-		if ( o instanceof StateMod_DiversionRight ) {
-			ddr = (StateMod_DiversionRight)o;
+		right = rights_Vector.get(i);
+		if ( right instanceof StateMod_DiversionRight ) {
+			ddr = (StateMod_DiversionRight)right;
 			if ( ddr.getCgoto().equalsIgnoreCase(station_id) ) {
-				matches.add ( ddr );
+				matches.add ( right );
 			}
 		}
-		else if ( o instanceof StateMod_InstreamFlowRight ) {
-			ifr = (StateMod_InstreamFlowRight)o;
+		else if ( right instanceof StateMod_InstreamFlowRight ) {
+			ifr = (StateMod_InstreamFlowRight)right;
 			if ( ifr.getCgoto().equalsIgnoreCase(station_id) ) {
-				matches.add ( ifr );
+				matches.add ( right );
 			}
 		}
-		else if ( o instanceof StateMod_ReservoirRight ) {
-			rer = (StateMod_ReservoirRight)o;
+		else if ( right instanceof StateMod_ReservoirRight ) {
+			rer = (StateMod_ReservoirRight)right;
 			if ( rer.getCgoto().equalsIgnoreCase(station_id) ) {
-				matches.add ( rer );
+				matches.add ( right );
 			}
 		}
-		else if ( o instanceof StateMod_WellRight ) {
-			wer = (StateMod_WellRight)o;
+		else if ( right instanceof StateMod_WellRight ) {
+			wer = (StateMod_WellRight)right;
 			if ( wer.getCgoto().equalsIgnoreCase(station_id) ) {
-				matches.add ( wer );
+				matches.add ( right );
 			}
 		}
 	}
@@ -3830,13 +3930,13 @@ requested parcel year.
 @param req_parcel_year Parcel year for data or -1 to use all (only used with well rights).
 @return a list of locations for water rights, in the order found in the original list.
 */
-public static List<StateMod_Right> getWaterRightsForLocation ( List<? extends StateMod_Right> smrights, String loc_id, int req_parcel_year )
-{	List<StateMod_Right> matchlist = new Vector<StateMod_Right>();	// Returned data
+public static <T extends StateMod_Right> List<T> getWaterRightsForLocation ( List<T> smrights, String loc_id, int req_parcel_year )
+{	List<T> matchlist = new Vector<T>();	// Returned data
 	int size = 0;
 	if ( smrights != null ) {
 		size = smrights.size();
 	}
-	StateMod_Right right = null;
+	T right = null;
 	int parcel_year;
 	for ( int i = 0; i < size; i++ ) {
 		right = smrights.get(i);
@@ -3864,14 +3964,14 @@ nodes at which the rights apply.
 @param req_parcel_year Parcel year for data or -1 to use all (only used with well rights).
 @return a list of locations for water rights, in the order found in the original list.
 */
-public static List<StateMod_Right> getWaterRightsForLocationAndRightIdentifier (
-		List<? extends StateMod_Right> smrights, String loc_id, String right_id, int req_parcel_year )
-{	List<StateMod_Right> matchlist = new Vector<StateMod_Right>();	// Returned data
+public static <T extends StateMod_Right> List<T> getWaterRightsForLocationAndRightIdentifier (
+		List<T> smrights, String loc_id, String right_id, int req_parcel_year )
+{	List<T> matchlist = new Vector<T>();	// Returned data
 	int size = 0;
 	if ( smrights != null ) {
 		size = smrights.size();
 	}
-	StateMod_Right right = null;
+	T right = null;
 	int parcel_year;
 	for ( int i = 0; i < size; i++ ) {
 		right = smrights.get(i);
@@ -3983,7 +4083,7 @@ locations at which well rights have been matched.
 @param req_parcel_year a requested year to constrain the parcel list (or -1 to return all).
 @return a list of parcels for water rights, in the order found in the original list.
 */
-public static List<String> getWaterRightParcelList ( List<StateMod_Right> smrights, int req_parcel_year )
+public static List<String> getWaterRightParcelList ( List<? extends StateMod_Right> smrights, int req_parcel_year )
 {	List<String> loclist = new Vector<String>();	// Returned data
 	int size = 0;
 	if ( smrights != null ) {
@@ -4029,8 +4129,8 @@ Get a list of parcel years from a list of well water rights.
 @param smrights a list of StateMod_WellRight to process.
 @return a list of parcel years for water rights, in ascending order.
 */
-public static int [] getWaterRightParcelYearList ( List smrights )
-{	List yearlist = new Vector();	// Returned data
+public static int [] getWaterRightParcelYearList ( List<? extends StateMod_WellRight> smrights )
+{	List<Integer> yearlist = new Vector<Integer>();	// Returned data
 	int size = 0;
 	if ( smrights != null ) {
 		size = smrights.size();
@@ -4041,12 +4141,12 @@ public static int [] getWaterRightParcelYearList ( List smrights )
 	int parcel_year = 0;	// Year for parcels.
 	int j = 0; // Loop index for found years.
 	for ( int i = 0; i < size; i++ ) {
-		right = (StateMod_WellRight)smrights.get(i);
+		right = smrights.get(i);
 		parcel_year = right.getParcelYear();
 		// Search the list to see if it is a new item...
 		found = false;
 		for ( j = 0; j < size_years; j++ ) {
-			if ( parcel_year == ((Integer)yearlist.get(j)).intValue()) {
+			if ( parcel_year == yearlist.get(j).intValue()) {
 				found = true;
 				break;
 			}
@@ -4059,7 +4159,7 @@ public static int [] getWaterRightParcelYearList ( List smrights )
 	}
 	int [] parcel_years = new int[yearlist.size()];
 	for ( int i = 0; i < size_years; i++ ) {
-		parcel_years[i] = ((Integer)yearlist.get(i)).intValue();
+		parcel_years[i] = yearlist.get(i).intValue();
 	}
 	// Sort the array...
 	MathUtil.sort ( parcel_years, MathUtil.SORT_QUICK, MathUtil.SORT_ASCENDING,	null, false );
@@ -4155,12 +4255,12 @@ public static boolean isVersionAtLeast ( String version, String knownVersion )
 }
 
 /**
-Find the position of a StateMod_Data object in the data Vector, using the
+Find the position of a StateMod_Data object in the data list, using the
 identifier.  The position for the first match is returned.
 @return the position, or -1 if not found.
 @param id StateMod_Data identifier.
 */
-public static int indexOf ( List data, String id )
+public static int indexOf ( List<? extends StateMod_Data> data, String id )
 {	int size = 0;
 	if ( id == null ) {
 		return -1;
@@ -4170,7 +4270,7 @@ public static int indexOf ( List data, String id )
 	}
 	StateMod_Data d = null;
 	for (int i = 0; i < size; i++) {
-		d = (StateMod_Data)data.get(i);
+		d = data.get(i);
 		if ( id.equalsIgnoreCase ( d._id ) ) {
 			return i;
 		}
@@ -4184,14 +4284,14 @@ The position for the first match is returned.
 @return the position, or -1 if not found.
 @param name StateMod_Data name.
 */
-public static int indexOfName ( List data, String name )
+public static int indexOfName ( List<? extends StateMod_Data> data, String name )
 {	int size = 0;
 	if ( data != null ) {
 		size = data.size();
 	}
 	StateMod_Data d = null;
 	for (int i = 0; i < size; i++) {
-		d = (StateMod_Data)data.get(i);
+		d = data.get(i);
 		if ( name.equalsIgnoreCase ( d._name ) ) {
 			return i;
 		}
@@ -4206,7 +4306,7 @@ This method can only be used for station data objects that have a river node ide
 @return the position, or -1 if not found.
 @param id StateMod_Data identifier.
 */
-public static int indexOfRiverNodeID ( List data, String id )
+public static int indexOfRiverNodeID ( List<? extends StateMod_Data> data, String id )
 {	int size = 0;
 	if ( data != null ) {
 		size = data.size();
@@ -4215,7 +4315,7 @@ public static int indexOfRiverNodeID ( List data, String id )
 	for (int i = 0; i < size; i++) {
 		// Stream gage and stream estimate have their own CGOTO
 		// data members.  All other use the data in the StateMod_Data base class.
-		d = (StateMod_Data)data.get(i);
+		d = data.get(i);
 		if ( d instanceof StateMod_StreamGage ) {
 			if ( id.equalsIgnoreCase ( ((StateMod_StreamGage)d).getCgoto() ) ) {
 				return i;
@@ -4317,14 +4417,14 @@ from the specified CGoto.
 @param ID CGoto ID to search for
 @param theData vector of StateMod_Data objects
 */
-public static int locateIndexFromCGOTO(String ID, List theData) {
+public static int locateIndexFromCGOTO(String ID, List<StateMod_Data> theData) {
 	int num = 0;
 	if (theData != null) {
 		num = theData.size();
 	}
 	
 	for (int i = 0; i<num; i++) {
-		if (ID.equalsIgnoreCase( ((StateMod_Data)theData.get(i)).getCgoto())) {
+		if (ID.equalsIgnoreCase( theData.get(i).getCgoto())) {
 			return i;
 		}
 	}
@@ -4337,14 +4437,14 @@ Locates the index of a data object derived from StateMod_Data in a Vector.
 @param theData vector of StateMod_Data objects
 @return index or -999 when not found
 */
-public static int locateIndexFromID(String ID, List theData) {
+public static <T extends StateMod_Data> int locateIndexFromID(String ID, List<T> theData) {
 	int num = 0;
 	if (theData != null) {
 		num = theData.size();
 	}
 	
 	for (int i = 0; i < num; i++) {
-		if (ID.equalsIgnoreCase( ((StateMod_Data)theData.get(i)).getID())) {
+		if (ID.equalsIgnoreCase( theData.get(i).getID())) {
 			return i;
 		}
 	}
@@ -6312,7 +6412,7 @@ compared with the location part of the time series identifier.
 1 but for some time series (e.g., reservoir targets) the second match may be requested.
 @return matching time series or null if no match is found.
 */
-public static TS lookupTimeSeries (	String id, List tslist, int match_count )
+public static <T extends TS> T lookupTimeSeries ( String id, List<T> tslist, int match_count )
 {	if ( (id == null) || id.equals("") ) {
 		return null;
 	}
@@ -6320,15 +6420,13 @@ public static TS lookupTimeSeries (	String id, List tslist, int match_count )
 	if ( tslist != null ) {
 		size = tslist.size();
 	}
-	TS ts = null;
-	Object o = null;
+	T ts = null;
 	int match_count2 = 0;
 	for ( int i = 0; i < size; i++ ) {
-		o = tslist.get(i);
-		if ( o == null ) {
+		ts = tslist.get(i);
+		if ( ts == null ) {
 			continue;
 		}
-		ts = (TS)o;
 		if ( id.equalsIgnoreCase(ts.getLocation()) ) {
 			++match_count2;
 			if ( match_count2 == match_count ) {
@@ -7012,18 +7110,18 @@ private static String lookupWellRightPropValue(String propType, String field) {
 }
 
 /**
-Removes all the objects that match the specified object (with a compareTo() call) from the Vector.
-@param v the Vector from which to remove the element.
+Removes all the objects that match the specified object (with a compareTo() call) from the list.
+@param v the list from which to remove the element.
 @param data the object to match and remove.
 */
-public static void removeFromVector(List v, StateMod_Data data) {
+public static <T extends StateMod_Data>void removeFromVector(List<T> v, T data) {
 	if (v == null || v.size() == 0) {
 		return;
 	}
 	int size = v.size();
-	StateMod_Data element = null;
+	T element = null;
 	for (int i = size - 1; i >= 0; i--) {
-		element = (StateMod_Data)v.get(i);
+		element = v.get(i);
 		if (element.compareTo(data) == 0) {
 			v.remove(i);
 		}
@@ -7174,7 +7272,7 @@ throws Exception
 			Message.printWarning(2, routine, "Error running \"" + command + "\"");
 			throw new Exception("Error running \"" + command + "\"");
 		}
-		List output = sp.getOutputList();
+		List<String> output = sp.getOutputList();
 		int size = 0;
 		if (output != null) {
 			size = output.size();	
@@ -7245,7 +7343,7 @@ Sorts a list of StateMod_Data objects, depending on the compareTo() method for t
 @return a new sorted list with references to the same data objects in the
 passed-in list.  If a null Vector is passed in, an empty list will be returned.
 */
-public static <T> List<T> sortStateMod_DataVector ( List<T> data )
+public static <T extends Comparable<? super T>> List<T> sortStateMod_DataVector ( List<T> data )
 {	return sortStateMod_DataVector ( data, true );
 }
 
@@ -7257,11 +7355,11 @@ If false, return the original list, with sorted contents.
 @return a sorted list with references to the same data objects in the
 passed-in list.  If null is passed in, an empty list will be returned.
 */
-public static <T> List<T> sortStateMod_DataVector ( List<T> data, boolean returnNew )
+public static <T extends Comparable<? super T>> List<T> sortStateMod_DataVector ( List<T> data, boolean returnNew )
 {	if (data == null) {
 		return new Vector<T>();
 	}
-	List dataSorted = data;
+	List<T> dataSorted = data;
 	int size = data.size();
 	if ( returnNew ) {
 		if (size == 0) {
@@ -7329,8 +7427,8 @@ created for returned information.
 cross check is ignored).
 @return validation results
 */
-public static StateMod_ComponentValidation validateTimeSeries ( StateMod_ComponentValidation validation,
-	boolean checkForMissing, boolean checkForNegative, TS ts, List<StateMod_Data> stationList )
+public static <T extends TS> StateMod_ComponentValidation validateTimeSeries ( StateMod_ComponentValidation validation,
+	boolean checkForMissing, boolean checkForNegative, T ts, List<? extends StateMod_Data> stationList )
 throws Exception
 {
 	if ( validation == null ) {

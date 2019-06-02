@@ -1040,7 +1040,7 @@ private void setupGUI( int index ) {
 	int[] widthsR = null;
 	JScrollWorksheet jswR = null;
 	try {
-		StateMod_DelayTable_TableModel tmd = new StateMod_DelayTable_TableModel(new Vector<Double>(),
+		StateMod_DelayTable_TableModel tmd = new StateMod_DelayTable_TableModel(new Vector<StateMod_DelayTable>(),
 			__monthly_data, __editable, percent);
 		tmd.setSubDelays(new Vector<Double>());
 		StateMod_DelayTable_CellRenderer crd = new

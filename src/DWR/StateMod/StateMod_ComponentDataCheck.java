@@ -36,6 +36,7 @@ NoticeEnd */
 
 package DWR.StateMod;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -84,56 +85,122 @@ public CheckFile checkComponentType( PropList props )
 {
 	// reset general data problem count
 	__gen_problems = 0;
-	// check for component data.  If none exists then do no checks.
-	List data_vector = getComponentData( __type );
-	if ( data_vector == null || data_vector.size() == 0 ) {
-		return __check_file;
-	}
 	// find out which data type is being checked
 	// and call the associated check method.
 	switch( __type) {
+		// check for component data.  If none exists then do no checks.
 		case StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY:
-			checkDelayTableMonthlyData( props, data_vector );
+			@SuppressWarnings("unchecked")
+			List<StateMod_DelayTable> dlymList = (List<StateMod_DelayTable>)getComponentData( __type );
+			if ( dlymList == null || dlymList.size() == 0 ) {
+				return __check_file;
+			}
+			checkDelayTableMonthlyData( props, dlymList );
 			break;
 		case StateMod_DataSet.COMP_DELAY_TABLES_DAILY:
-			checkDelayTableDailyData( props, data_vector );
+			@SuppressWarnings("unchecked")
+			List<StateMod_DelayTable> dlydList = (List<StateMod_DelayTable>)getComponentData( __type );
+			if ( dlydList == null || dlydList.size() == 0 ) {
+				return __check_file;
+			}
+			checkDelayTableDailyData( props, dlydList );
 			break;
 		case StateMod_DataSet.COMP_DIVERSION_STATIONS:  
-			checkDiversionStationData( props, data_vector );
-		break;
+			@SuppressWarnings("unchecked")
+			List<StateMod_Diversion> ddsList = (List<StateMod_Diversion>)getComponentData( __type );
+			if ( ddsList == null || ddsList.size() == 0 ) {
+				return __check_file;
+			}
+			checkDiversionStationData( props, ddsList );
+			break;
 		case StateMod_DataSet.COMP_DIVERSION_RIGHTS:
-			checkDiversionRightsData( props, data_vector );
-		break;
+			@SuppressWarnings("unchecked")
+			List<StateMod_DiversionRight> ddrList = (List<StateMod_DiversionRight>)getComponentData( __type );
+			if ( ddrList == null || ddrList.size() == 0 ) {
+				return __check_file;
+			}
+			checkDiversionRightsData( props, ddrList );
+			break;
 		case StateMod_DataSet.COMP_INSTREAM_STATIONS:
-			checkInstreamFlowStationData( props, data_vector );
-		break;
+			@SuppressWarnings("unchecked")
+			List<StateMod_InstreamFlow> ifsList = (List<StateMod_InstreamFlow>)getComponentData( __type );
+			if ( ifsList == null || ifsList.size() == 0 ) {
+				return __check_file;
+			}
+			checkInstreamFlowStationData( props, ifsList );
+			break;
 		case StateMod_DataSet.COMP_INSTREAM_RIGHTS:
-			checkInstreamFlowRightData( props, data_vector );
-		break;
+			@SuppressWarnings("unchecked")
+			List<StateMod_InstreamFlowRight> ifrList = (List<StateMod_InstreamFlowRight>)getComponentData( __type );
+			if ( ifrList == null || ifrList.size() == 0 ) {
+				return __check_file;
+			}
+			checkInstreamFlowRightData( props, ifrList );
+			break;
 		case StateMod_DataSet.COMP_RESERVOIR_STATIONS:
-			checkReservoirStationData( props, data_vector );
-		break;
+			@SuppressWarnings("unchecked")
+			List<StateMod_Reservoir> resList = (List<StateMod_Reservoir>)getComponentData( __type );
+			if ( resList == null || resList.size() == 0 ) {
+				return __check_file;
+			}
+			checkReservoirStationData( props, resList );
+			break;
 		case StateMod_DataSet.COMP_RESERVOIR_RIGHTS:
-			checkReservoirRightData( props, data_vector );
-		break;
+			@SuppressWarnings("unchecked")
+			List<StateMod_ReservoirRight> rerList = (List<StateMod_ReservoirRight>)getComponentData( __type );
+			if ( rerList == null || rerList.size() == 0 ) {
+				return __check_file;
+			}
+			checkReservoirRightData( props, rerList );
+			break;
 		case StateMod_DataSet.COMP_RIVER_NETWORK:
-			checkRiverNetworkData( props, data_vector );
-		break;
+			@SuppressWarnings("unchecked")
+			List<StateMod_RiverNetworkNode> rinList = (List<StateMod_RiverNetworkNode>)getComponentData( __type );
+			if ( rinList == null || rinList.size() == 0 ) {
+				return __check_file;
+			}
+			checkRiverNetworkData( props, rinList );
+			break;
 		case StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS:
-			checkStreamEstimateStationData( props, data_vector );
-		break;
+			@SuppressWarnings("unchecked")
+			List<StateMod_StreamEstimate> sesList = (List<StateMod_StreamEstimate>)getComponentData( __type );
+			if ( sesList == null || sesList.size() == 0 ) {
+				return __check_file;
+			}
+			checkStreamEstimateStationData( props, sesList );
+			break;
 		case StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS:
-			checkStreamEstimateCoefficientData( props, data_vector );
-		break;
+			@SuppressWarnings("unchecked")
+			List<StateMod_StreamEstimate_Coefficients> ribList = (List<StateMod_StreamEstimate_Coefficients>)getComponentData( __type );
+			if ( ribList == null || ribList.size() == 0 ) {
+				return __check_file;
+			}
+			checkStreamEstimateCoefficientData( props, ribList );
+			break;
 		case StateMod_DataSet.COMP_STREAMGAGE_STATIONS:
-			checkStreamGageStationData( props, data_vector );
-		break;
+			@SuppressWarnings("unchecked")
+			List<StateMod_StreamGage> risList = (List<StateMod_StreamGage>)getComponentData( __type );
+			if ( risList == null || risList.size() == 0 ) {
+				return __check_file;
+			}
+			checkStreamGageStationData( props, risList );
+			break;
 		case StateMod_DataSet.COMP_WELL_STATIONS:  
-			checkWellStationData( props, data_vector );
-		break;
+			@SuppressWarnings("unchecked")
+			List<StateMod_Well> wesList = (List<StateMod_Well>)getComponentData( __type );
+			if ( wesList == null || wesList.size() == 0 ) {
+				return __check_file;
+			}
+			checkWellStationData( props, wesList );
+			break;
 		case StateMod_DataSet.COMP_WELL_RIGHTS:
-			checkWellStationRights( props, data_vector );
-		break;
+			@SuppressWarnings("unchecked")
+			List<StateMod_WellRight> werList = (List<StateMod_WellRight>)getComponentData( __type );
+			if ( werList == null || werList.size() == 0 ) {
+				return __check_file;
+			}
+			checkWellStationRights( props, werList );
+			break;
 		default: ;
 	}
 	return __check_file;
@@ -145,7 +212,7 @@ Performs data checks on delay table daily data.
 on checking this data.
 @param data_vector Vector of data to check.
  */
-private void checkDelayTableDailyData ( PropList props, List data_vector )
+private void checkDelayTableDailyData ( PropList props, List<StateMod_DelayTable> data_vector )
 {
 	
 }
@@ -156,7 +223,7 @@ Performs data checks on delay table monthly data.
 on checking this data.
 @param data_vector Vector of data to check.
  */
-private void checkDelayTableMonthlyData ( PropList props, List data_vector )
+private void checkDelayTableMonthlyData ( PropList props, List<StateMod_DelayTable> data_vector )
 {
 	
 }
@@ -165,28 +232,27 @@ private void checkDelayTableMonthlyData ( PropList props, List data_vector )
 Performs data checks on diversion rights data. 
 @param props A property list for specific properties
 on checking this data.
-@param der_vector Vector of data to check.
+@param ddrList list of data to check.
  */
-private void checkDiversionRightsData( PropList props, List der_vector )
+private void checkDiversionRightsData( PropList props, List<StateMod_DiversionRight> ddrList )
 {
 	// create elements for the checks and check file
-	String[] header = StateMod_DiversionRight.getDataHeader();
-	List data = new Vector();
+	String[] header = StateMod_DiversionRight.getDataCheckTableHeader();
+	List<StateMod_ComponentValidationProblem> data = new Vector<StateMod_ComponentValidationProblem>();
 	String title = "Diversion Rights";
 	
 	// Perform the general validation using the Data Table Model
-	StateMod_Data_TableModel tm = new StateMod_DiversionRight_Data_TableModel(
-			der_vector, false );
-	List checked = performDataValidation( tm, title );
+	StateMod_Data_TableModel tm = new StateMod_DiversionRight_Data_TableModel( ddrList, false );
+	List<String []> checked = performDataValidation( tm, title );
 	//String [] columnHeader = getDataTableModelColumnHeader( tm );
 	String [] columnHeader = getColumnHeader( tm );
 	
 	//	 do specific checks
 	int size = 0;
-	if ( der_vector != null ) {
-		size = der_vector.size();
+	if ( ddrList != null ) {
+		size = ddrList.size();
 	}
-	data = doSpecificDataChecks( der_vector, props );
+	data = doSpecificDataChecks( ddrList, props );
 	// add the data and checks to the check file	
 	// provides basic header information for this data check table 
 	String info = "The following diversion rights (" + data.size() + 
@@ -195,7 +261,7 @@ private void checkDiversionRightsData( PropList props, List der_vector )
 	
 	// create data models for Check file
 	CheckFile_DataModel dm = new CheckFile_DataModel(
-		data, header, title, info, data.size(), size );
+		toCheckDataModelArray(data), header, title, info, data.size(), size );
 	CheckFile_DataModel gen_dm = new CheckFile_DataModel(
 		checked, columnHeader, title + " Missing or Invalid Data",
 		"", __gen_problems, size );
@@ -208,17 +274,17 @@ Performs data checks on diversion station data.
 on checking this data.
 @param des_vector Vector of data to check.
  */
-private void checkDiversionStationData( PropList props, List des_vector )
+private void checkDiversionStationData( PropList props, List<StateMod_Diversion> des_vector )
 {
 	// create elements for the checks and check file
 	String[] header = StateMod_Diversion.getDataHeader();
-	List data = new Vector();
+	List<StateMod_ComponentValidationProblem> data = new Vector<StateMod_ComponentValidationProblem>();
 	String title = "Diversion Station";
 	
 	// perform the general validation using the Data Table Model
 	StateMod_Data_TableModel tm = new StateMod_Diversion_Data_TableModel(
 			des_vector, false );
-	List checked = performDataValidation( tm, title );
+	List<String []> checked = performDataValidation( tm, title );
 	//String [] columnHeader = getDataTableModelColumnHeader( tm );
 	String [] columnHeader = getColumnHeader( tm );
 	
@@ -236,7 +302,7 @@ private void checkDiversionStationData( PropList props, List des_vector )
 
 	// create data models for Check file
 	CheckFile_DataModel dm = new CheckFile_DataModel(
-			data, header, title, info, data.size(), size );
+			toCheckDataModelArray(data), header, title, info, data.size(), size );
 	CheckFile_DataModel gen_dm = new CheckFile_DataModel(
 			checked, columnHeader, title + " Missing or Invalid Data",
 			"", __gen_problems, size );
@@ -250,17 +316,17 @@ on checking this data.
 @param data_vector Vector of data to check.
  */
 private void checkInstreamFlowRightData ( 
-PropList props, List data_vector )
+PropList props, List<StateMod_InstreamFlowRight> data_vector )
 {
 	//	 Create elements for the checks and check file
 	String[] header = StateMod_InstreamFlowRight.getDataHeader();
-	List data = new Vector();
+	List<StateMod_ComponentValidationProblem> data = new Vector<StateMod_ComponentValidationProblem>();
 	String title = "Instream Flow Right";
 	
 	// Perform the general validation using the Data Table Model
 	StateMod_Data_TableModel tm = 
 		new StateMod_InstreamFlowRight_Data_TableModel( data_vector, false );
-	List checked = performDataValidation( tm, title );
+	List<String []> checked = performDataValidation( tm, title );
 	//String [] columnHeader = getDataTableModelColumnHeader( tm );
 	String [] columnHeader = getColumnHeader( tm );
 	
@@ -277,7 +343,7 @@ PropList props, List data_vector )
 
 	// Create data models for Check file
 	CheckFile_DataModel dm = new CheckFile_DataModel(
-			data, header, title, info, data.size(), size );
+			toCheckDataModelArray(data), header, title, info, data.size(), size );
 	CheckFile_DataModel gen_dm = new CheckFile_DataModel(
 			checked, columnHeader, title + " Missing or Invalid Data",
 			"", __gen_problems, size );
@@ -291,17 +357,17 @@ on checking this data.
 @param data_vector Vector of data to check.
  */
 private void checkInstreamFlowStationData ( 
-PropList props, List data_vector )
+PropList props, List<StateMod_InstreamFlow> data_vector )
 {
 	//	 Create elements for the checks and check file
 	String[] header = StateMod_InstreamFlow.getDataHeader();
-	List data = new Vector();
+	List<StateMod_ComponentValidationProblem> data = new Vector<StateMod_ComponentValidationProblem>();
 	String title = "Instream Flow Station";
 	
 	// Perform the general validation using the Data Table Model
 	StateMod_Data_TableModel tm = 
 		new StateMod_InstreamFlow_Data_TableModel( data_vector, false );
-	List checked = performDataValidation( tm, title );
+	List<String []> checked = performDataValidation( tm, title );
 	//String [] columnHeader = getDataTableModelColumnHeader( tm );
 	String [] columnHeader = getColumnHeader( tm );
 	
@@ -318,7 +384,7 @@ PropList props, List data_vector )
 
 	// Create data models for Check file
 	CheckFile_DataModel dm = new CheckFile_DataModel(
-			data, header, title, info, data.size(), size );
+			toCheckDataModelArray(data), header, title, info, data.size(), size );
 	CheckFile_DataModel gen_dm = new CheckFile_DataModel(
 			checked, columnHeader, title + " Missing or Invalid Data",
 			"", __gen_problems, size );
@@ -331,17 +397,17 @@ Performs data checks on reservoir right data.
 on checking this data.
 @param data_vector Vector of data to check.
  */
-private void checkReservoirRightData ( PropList props, List data_vector )
+private void checkReservoirRightData ( PropList props, List<StateMod_ReservoirRight> data_vector )
 {
 	//	 Create elements for the checks and check file
 	String[] header = StateMod_ReservoirRight.getDataHeader();
-	List data = new Vector();
+	List<StateMod_ComponentValidationProblem> data = new Vector<StateMod_ComponentValidationProblem>();
 	String title = "Reservoir Right";
 	
 	// Perform the general validation using the Data Table Model
 	StateMod_Data_TableModel tm = 
 		new StateMod_ReservoirRight_Data_TableModel( data_vector, false );
-	List checked = performDataValidation( tm, title );
+	List<String []> checked = performDataValidation( tm, title );
 	//String [] columnHeader = getDataTableModelColumnHeader( tm );
 	String [] columnHeader = getColumnHeader( tm );
 	
@@ -358,7 +424,7 @@ private void checkReservoirRightData ( PropList props, List data_vector )
 
 	// Create data models for Check file
 	CheckFile_DataModel dm = new CheckFile_DataModel(
-			data, header, title, info, data.size(), size );
+			toCheckDataModelArray(data), header, title, info, data.size(), size );
 	CheckFile_DataModel gen_dm = new CheckFile_DataModel(
 			checked, columnHeader, title + " Missing or Invalid Data",
 			"", __gen_problems, size );
@@ -371,17 +437,17 @@ Performs data checks on reservoir station data.
 on checking this data.
 @param data_vector Vector of data to check.
  */
-private void checkReservoirStationData ( PropList props, List data_vector )
+private void checkReservoirStationData ( PropList props, List<StateMod_Reservoir> data_vector )
 {
 	//	 Create elements for the checks and check file
 	String[] header = StateMod_Reservoir.getDataHeader();
-	List data = new Vector();
+	List<StateMod_ComponentValidationProblem> data = new Vector<StateMod_ComponentValidationProblem>();
 	String title = "Reservoir Station";
 	
 	// Perform the general validation using the Data Table Model
 	StateMod_Data_TableModel tm = 
 		new StateMod_Reservoir_Data_TableModel( data_vector, false );
-	List checked = performDataValidation( tm, title );
+	List<String []> checked = performDataValidation( tm, title );
 	//String [] columnHeader = getDataTableModelColumnHeader( tm );
 	String [] columnHeader = getColumnHeader( tm );
 	
@@ -398,7 +464,7 @@ private void checkReservoirStationData ( PropList props, List data_vector )
 
 	// Create data models for Check file
 	CheckFile_DataModel dm = new CheckFile_DataModel(
-			data, header, title, info, data.size(), size );
+			toCheckDataModelArray(data), header, title, info, data.size(), size );
 	CheckFile_DataModel gen_dm = new CheckFile_DataModel(
 			checked, columnHeader, title + " Missing or Invalid Data",
 			"", __gen_problems, size );
@@ -411,17 +477,17 @@ Performs general and specific data checks on river network data.
 @param data_vector Vector of data to check.
 on checking this data.
  */
-private void checkRiverNetworkData ( PropList props, List data_vector )
+private void checkRiverNetworkData ( PropList props, List<StateMod_RiverNetworkNode> data_vector )
 {
 	//	 Create elements for the checks and check file
 	String[] header = StateMod_RiverNetworkNode.getDataHeader();
-	List data = new Vector();
+	List<StateMod_ComponentValidationProblem> data = new Vector<StateMod_ComponentValidationProblem>();
 	String title = "River Network Node";
 	
 	// Perform the general validation using the Data Table Model
 	StateMod_Data_TableModel tm = 
 		new StateMod_RiverNetworkNode_Data_TableModel( data_vector );
-	List checked = performDataValidation( tm, title );
+	List<String []> checked = performDataValidation( tm, title );
 	//String [] columnHeader = getDataTableModelColumnHeader( tm );
 	String [] columnHeader = getColumnHeader( tm );
 	
@@ -438,7 +504,7 @@ private void checkRiverNetworkData ( PropList props, List data_vector )
 
 	// Create data models for Check file
 	CheckFile_DataModel dm = new CheckFile_DataModel(
-			data, header, title, info, data.size(), size );
+			toCheckDataModelArray(data), header, title, info, data.size(), size );
 	CheckFile_DataModel gen_dm = new CheckFile_DataModel(
 			checked, columnHeader, title + " Missing or Invalid Data",
 			"", __gen_problems, size );
@@ -459,7 +525,9 @@ private String checkStatus( Status status, Object value )
 	if ( status.getLevel() == Status.ERROR ) {
 		return createHTMLErrorTooltip( status, value );
 	}
-	else { return value.toString(); }
+	else {
+		return value.toString();
+	}
 }
 
 /**
@@ -470,18 +538,18 @@ stream estimate coefficient data.
 on checking this data.
  */
 private void checkStreamEstimateCoefficientData ( 
-PropList props, List data_vector )
+PropList props, List<StateMod_StreamEstimate_Coefficients> data_vector )
 {
 	//	 Create elements for the checks and check file
 	String[] header = StateMod_StreamEstimate_Coefficients.getDataHeader();
-	List data = new Vector();
+	List<StateMod_ComponentValidationProblem> data = new Vector<StateMod_ComponentValidationProblem>();
 	String title = "Stream Estimate Coefficients";
 	
 	// Perform the general validation using the Data Table Model
 	StateMod_Data_TableModel tm = 
 		new StateMod_StreamEstimateCoefficients_Data_TableModel( 
 		data_vector, false );
-	List checked = performDataValidation( tm, title );
+	List<String []> checked = performDataValidation( tm, title );
 	//String [] columnHeader = getDataTableModelColumnHeader( tm );
 	String [] columnHeader = getColumnHeader( tm );
 	
@@ -498,7 +566,7 @@ PropList props, List data_vector )
 
 	// Create data models for Check file
 	CheckFile_DataModel dm = new CheckFile_DataModel(
-			data, header, title, info, data.size(), size );
+			toCheckDataModelArray(data), header, title, info, data.size(), size );
 	CheckFile_DataModel gen_dm = new CheckFile_DataModel(
 			checked, columnHeader, title + " Missing or Invalid Data",
 			"", __gen_problems, size );
@@ -512,17 +580,17 @@ Performs general and specific data checks on stream estimate station data.
 on checking this data.
  */
 private void checkStreamEstimateStationData ( 
-PropList props, List data_vector )
+PropList props, List<StateMod_StreamEstimate> data_vector )
 {
 	// Create elements for the checks and check file
 	String[] header = StateMod_StreamEstimate.getDataHeader();
-	List data = new Vector();
+	List<StateMod_ComponentValidationProblem> data = new Vector<StateMod_ComponentValidationProblem>();
 	String title = "Stream Estimate Station";
 	
 	// Perform the general validation using the Data Table Model
 	StateMod_Data_TableModel tm = 
 		new StateMod_StreamEstimate_Data_TableModel( data_vector, false );
-	List checked = performDataValidation( tm, title );
+	List<String []> checked = performDataValidation( tm, title );
 	//String [] columnHeader = getDataTableModelColumnHeader( tm );
 	String [] columnHeader = getColumnHeader( tm );
 	
@@ -539,7 +607,7 @@ PropList props, List data_vector )
 
 	// Create data models for Check file
 	CheckFile_DataModel dm = new CheckFile_DataModel(
-			data, header, title, info, data.size(), size );
+			toCheckDataModelArray(data), header, title, info, data.size(), size );
 	CheckFile_DataModel gen_dm = new CheckFile_DataModel(
 			checked, columnHeader, title + " Missing or Invalid Data",
 			"", __gen_problems, size );
@@ -552,17 +620,17 @@ Performs general and specific data checks on stream gage station data.
 @param data_vector Vector of data to check.
 on checking this data.
  */
-private void checkStreamGageStationData( PropList props, List data_vector )
+private void checkStreamGageStationData( PropList props, List<StateMod_StreamGage> data_vector )
 {
 	// Create elements for the checks and check file
 	String[] header = StateMod_StreamGage.getDataHeader();
-	List data = new Vector();
+	List<StateMod_ComponentValidationProblem> data = new Vector<StateMod_ComponentValidationProblem>();
 	String title = "Stream Gage Station";
 	
 	// Perform the general validation using the Data Table Model
 	StateMod_Data_TableModel tm = 
 		new StateMod_StreamGage_Data_TableModel( data_vector, false );
-	List checked = performDataValidation( tm, title );
+	List<String []> checked = performDataValidation( tm, title );
 	//String [] columnHeader = getDataTableModelColumnHeader( tm );
 	String [] columnHeader = getColumnHeader( tm );
 	
@@ -579,7 +647,7 @@ private void checkStreamGageStationData( PropList props, List data_vector )
 
 	// Create data models for Check file
 	CheckFile_DataModel dm = new CheckFile_DataModel(
-			data, header, title, info, data.size(), size );
+			toCheckDataModelArray(data), header, title, info, data.size(), size );
 	CheckFile_DataModel gen_dm = new CheckFile_DataModel(
 			checked, columnHeader, title + " Missing or Invalid Data",
 			"", __gen_problems, size );
@@ -592,7 +660,7 @@ Performs general and specific data checks on well station data.
 @param wes_Vector Vector of data to check.
 on checking this data.
  */
-private void checkWellStationData( PropList props, List wes_Vector )
+private void checkWellStationData( PropList props, List<StateMod_Well> wes_Vector )
 {
 	// create elements for the checks and check file
 	String[] header = StateMod_Well.getDataHeader();
@@ -602,7 +670,7 @@ private void checkWellStationData( PropList props, List wes_Vector )
 	// using this components data table model
 	StateMod_Data_TableModel tm = new StateMod_Well_Data_TableModel(
 		wes_Vector, false );
-	List checked = performDataValidation( tm, title );
+	List<String []> checked = performDataValidation( tm, title );
 	//String [] columnHeader = getDataTableModelColumnHeader( tm );
 	String [] columnHeader = getColumnHeader( tm );
 	
@@ -611,7 +679,7 @@ private void checkWellStationData( PropList props, List wes_Vector )
 	if ( wes_Vector != null ) {
 		size = wes_Vector.size();
 	}
-	List data = new Vector();
+	List<StateMod_ComponentValidationProblem> data = new Vector<StateMod_ComponentValidationProblem>();
 	data = doSpecificDataChecks( wes_Vector, props );
 	// add the data and checks to the check file
 	// provides basic header information for this data check table 
@@ -624,7 +692,7 @@ private void checkWellStationData( PropList props, List wes_Vector )
 	
 	// create data models for Check file
 	CheckFile_DataModel dm = new CheckFile_DataModel(
-			data, header, title, info, data.size(), size );
+			toCheckDataModelArray(data), header, title, info, data.size(), size );
 	CheckFile_DataModel gen_dm = new CheckFile_DataModel(
 			checked, columnHeader, title + " Missing or Invalid Data",
 			"", __gen_problems, size );
@@ -645,27 +713,27 @@ Helper method to check well rights component data.  The following are checked:
 	This requires that the dataset include well stations.<li>
 </ol>
 */
-private void checkWellStationRights ( PropList props, List wer_Vector)
+private void checkWellStationRights ( PropList props, List<StateMod_WellRight> wer_Vector)
 {		
 	int size = 0;
 	// create elements for the checks and check file
 	String[] header = StateMod_WellRight.getDataHeader();
-	List data = new Vector();
+	List<StateMod_ComponentValidationProblem> data = new Vector<StateMod_ComponentValidationProblem>();
 	String title = "Well Rights";
 	
 	// Do the general data validation
 	// using this components data table model
 	StateMod_Data_TableModel tm = new StateMod_WellRight_Data_TableModel(
 		wer_Vector, false );
-	List checked = performDataValidation( tm, title );
+	List<String []> checked = performDataValidation( tm, title );
 	//String [] columnHeader = getDataTableModelColumnHeader( tm );
 	String [] columnHeader = getColumnHeader( tm );
 	
 	// check Well Station data
 	PropList props_rights = new PropList( "Well Rights" );
 	props_rights.add("checkRights=true");
-	List wes_Vector = getComponentData( 
-		StateMod_DataSet.COMP_WELL_STATIONS );
+	@SuppressWarnings("unchecked")
+	List<StateMod_Well> wes_Vector = (List<StateMod_Well>)getComponentData(StateMod_DataSet.COMP_WELL_STATIONS );
 	if ( wes_Vector != null && wes_Vector.size() > 0 ) {
 		checkWellStationData( props_rights, wes_Vector );
 	}
@@ -693,7 +761,7 @@ private void checkWellStationRights ( PropList props, List wer_Vector)
 
 	// create data models for Check file
 	CheckFile_DataModel dm = new CheckFile_DataModel(
-			data, header, title, info, data.size(), size );
+			toCheckDataModelArray(data), header, title, info, data.size(), size );
 	CheckFile_DataModel gen_dm = new CheckFile_DataModel(
 			checked, columnHeader, title + " Missing or Invalid Data",
 			"", __gen_problems, size );
@@ -708,14 +776,14 @@ by formatting the capacity and decree sum to .NN precision.
 private void checkWellRights_CapacityData()
 {	
 	// get component data
-	List wes_Vector = (List)getComponentData( 
-			StateMod_DataSet.COMP_WELL_STATIONS);
-	List wer_Vector = (List)getComponentData(
-			StateMod_DataSet.COMP_WELL_RIGHTS);
+	@SuppressWarnings("unchecked")
+	List<StateMod_Well> wes_Vector = (List<StateMod_Well>)getComponentData(StateMod_DataSet.COMP_WELL_STATIONS);
+	@SuppressWarnings("unchecked")
+	List<StateMod_WellRight> wer_Vector = (List<StateMod_WellRight>)getComponentData(StateMod_DataSet.COMP_WELL_RIGHTS);
 	if ( wes_Vector == null || wer_Vector == null ) {
 		return;
 	}
-	List data = new Vector();
+	List<String []> data = new Vector<String []>();
 	int size = 0;
 	
 	// initialize some info for the check file
@@ -724,14 +792,11 @@ private void checkWellRights_CapacityData()
 	
 	// check that there data available
 	StateMod_Well wes_i = null;
-	if ( wes_Vector == null ) {
-		return;
-	}
 	// loop through the vector of data and perform specific
 	// data checks
 	size = wes_Vector.size();
 	for ( int i = 0; i < size; i++ ) {
-		wes_i = (StateMod_Well)wes_Vector.get(i);
+		wes_i = wes_Vector.get(i);
 		if ( wes_i == null ) {
 			continue;
 		}
@@ -765,9 +830,9 @@ intelligence and checks are stored in the component itself.
 @param data List of data objects to check.
 @return List of data that failed the data checks.
  */
-private List doSpecificDataChecks( List data, PropList props )
+private List<StateMod_ComponentValidationProblem> doSpecificDataChecks( List<? extends StateMod_ComponentValidator> data, PropList props )
 {
-	List checks = new Vector();
+	List<StateMod_ComponentValidationProblem> checks = new Vector<StateMod_ComponentValidationProblem>();
 	if ( data == null ) {
 		return checks;
 	}
@@ -777,7 +842,7 @@ private List doSpecificDataChecks( List data, PropList props )
 	// the StateMod_Component interface.
 	StateMod_ComponentValidator comp = null;
 	for ( int i = 0; i < data.size(); i++ ) {
-		comp = (StateMod_ComponentValidator)data.get( i );
+		comp = data.get( i );
 		StateMod_ComponentValidation validation = comp.validateComponent( __dataset );
 		if ( validation.size() > 0 ) {
 			checks.addAll( validation.getAll() );
@@ -825,11 +890,11 @@ type.  This is maintained by the StateMod dataset.
 @param type Component type to get data for. 
 @return Vector of data for a specific component.
  */
-private List getComponentData( int type )
+private List<? extends StateMod_Data> getComponentData( int type )
 {
-	DataSetComponent comp = 
-		__dataset.getComponentForComponentType( type );
-	List data_vector = ( List )comp.getData();
+	DataSetComponent comp = __dataset.getComponentForComponentType( type );
+	@SuppressWarnings("unchecked")
+	List<? extends StateMod_Data> data_vector = (List<? extends StateMod_Data>)comp.getData();
 	
 	return data_vector; 
 }
@@ -853,17 +918,16 @@ private String[] getDataTableModelColumnHeader( StateMod_Data_TableModel tm )
 }
 
 /**
-Performs data validation based on the validators found in
+Performs basic data validation based on the validators found in
 the table model for the current component.
 @param tm Interface implemented by each data table model.
 @return List of data that has gone through data validation.
 If any element fails any one of its validators the content
 of that element is formatted to tag it as an error.
  */
-private List performDataValidation( StateMod_Data_TableModel tm, 
-String title )
+private List<String[]> performDataValidation( StateMod_Data_TableModel tm, String title )
 {
-	List data = new Vector();
+	List<String[]> data = new Vector<String[]>();
 	if ( tm == null ) {
 		return data;
 	}
@@ -891,7 +955,9 @@ String title )
 			}	
 			// Run all validators found in the table model
 			for ( int k = 0; k < vals.length; k++ ) {
+				// Run all the validators to get a status on the data
 				status = vals[k].validate( tm.getValueAt( i, j ) );
+				// Format the status as HTML
 				row[j] = checkStatus( status, tm.getValueAt( i, j ) );
 				// if the current validator fails then don't
 				// check finer grained validators since there is no need.
@@ -909,6 +975,25 @@ String title )
 		}
 	}
 	return data;
+}
+
+//TODO smalers 2019-05-29 need to fix this to actually translate the data
+/**
+ * Convert a ComponentValidationProblem to String[] needed for general data check report formatting.
+ * Each ComponentValidationProblem has data for a specific column.
+ */
+private List<String []> toCheckDataModelArray( List<StateMod_ComponentValidationProblem> problems ) {
+	List<String []> checkDataModelDataList = new ArrayList<String []>();
+	for ( StateMod_ComponentValidationProblem problem : problems ) {
+		if ( problem == null ) {
+			// code to prevent compiler warning not being used - fix when fill out this logic
+		}
+		String [] checkData = new String[3];
+		checkData[0] = "";
+		checkData[1] = "";
+		checkData[2] = "";
+	}
+	return checkDataModelDataList;
 }
 
 }

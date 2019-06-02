@@ -107,6 +107,7 @@ import RTi.Util.String.StringUtil;
 /**
 This class is a gui for displaying and editing diversion rights.
 */
+@SuppressWarnings("serial")
 public class StateMod_Diversion_Right_JFrame extends JFrame
 implements ActionListener, KeyListener, MouseListener, WindowListener {
 
@@ -264,8 +265,9 @@ private boolean saveData() {
 	boolean needToSave = false;
 
 	// if the Vectors are differently-sized, they're different
-	List wv = __worksheet.getAllData();		// w for worksheet
-	List dv = __currentDiv.getRights();		// d for diversion
+	@SuppressWarnings("unchecked")
+	List<StateMod_DiversionRight> wv = (List<StateMod_DiversionRight>)__worksheet.getAllData();		// w for worksheet
+	List<StateMod_DiversionRight> dv = __currentDiv.getRights();		// d for diversion
 
 	needToSave = !(StateMod_DiversionRight.equals(wv, dv));
 
@@ -279,12 +281,13 @@ private boolean saveData() {
 
 	// at this point, remove the old diversion rights from the original
 	// component Vector
-	List diversionRights =(List)(__dataset.getComponentForComponentType(
+	@SuppressWarnings("unchecked")
+	List<StateMod_DiversionRight> diversionRights =(List<StateMod_DiversionRight>)(__dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_DIVERSION_RIGHTS)).getData();
 	int size = dv.size();
 	StateMod_DiversionRight dr;	
 	for (int i = 0; i < size; i++) {
-		dr = (StateMod_DiversionRight)dv.get(i);
+		dr = dv.get(i);
 		StateMod_Util.removeFromVector(diversionRights, dr);
 	}
 
@@ -303,7 +306,7 @@ private boolean saveData() {
 	// REVISIT (JTS - 2003-10-10)
 	// here we are sorting the full data array -- may be a performance
 	// issue
-	List sorted = StateMod_Util.sortStateMod_DataVector(diversionRights);
+	List<StateMod_DiversionRight> sorted = StateMod_Util.sortStateMod_DataVector(diversionRights);
 	__dataset.getComponentForComponentType(StateMod_DataSet.COMP_DIVERSION_RIGHTS)
 		.setData(sorted);
 	__currentDiv.disconnectRights();
@@ -319,7 +322,8 @@ exist.
 */
 private int checkInput() {
 	String routine = "StateMod_Diversion_Right_JFrame.checkInput";
-	List v = __worksheet.getAllData();
+	@SuppressWarnings("unchecked")
+	List<StateMod_DiversionRight> v = (List<StateMod_DiversionRight>)__worksheet.getAllData();
 
 	int size = v.size();
 	StateMod_DiversionRight right = null;
@@ -330,7 +334,7 @@ private int checkInput() {
 	String adminNum;
 	int fatalCount = 0;
 	for (int i = 0; i < size; i++) {
-		right = (StateMod_DiversionRight)(v.get(i));
+		right = v.get(i);
 
 		id = right.getID();
 		name = right.getName();
@@ -522,19 +526,17 @@ private void setupGUI() {
 	p1.add(cancelJButton);
 	p1.add(__closeJButton);
 
-	PropList p = new PropList("StateMod_Diversion_Right_JFrame"
-		+ ".JWorksheet");
+	PropList p = new PropList("StateMod_Diversion_Right_JFrame" + ".JWorksheet");
 	p.add("JWorksheet.ShowPopupMenu=true");
 	p.add("JWorksheet.AllowCopy=true");
 	p.add("JWorksheet.SelectionMode=SingleRowSelection");
 	
 	int widths[] = null;
 	JScrollWorksheet jsw = null;
-	try {	List v = new Vector();
-	List v2 = __currentDiv.getRights();
+	try {	List<StateMod_DiversionRight> v = new Vector<StateMod_DiversionRight>();
+	List<StateMod_DiversionRight> v2 = __currentDiv.getRights();
 		for (int i = 0; i < v2.size(); i++) {
-			v.add(((StateMod_DiversionRight)
-				(v2.get(i))).clone());
+			v.add((StateMod_DiversionRight)v2.get(i).clone());
 		}
 		StateMod_DiversionRight_TableModel tmd = new
 			StateMod_DiversionRight_TableModel( v, 
@@ -560,7 +562,7 @@ private void setupGUI() {
 	__worksheet.addMouseListener(this);	
 	__worksheet.addKeyListener(this);
 
-	List v = new Vector();
+	List<String> v = new Vector<String>(2);
 	v.add("0 - Off");
 	v.add("1 - On");
 

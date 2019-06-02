@@ -74,6 +74,7 @@ This StateCU_DataSet_JTree class displays a StateCU_DataSet and its components
 in a JTree.  It can be constructed to show all the data, or just the high-level
 objects.
 */
+@SuppressWarnings("serial")
 public class StateCU_DataSet_JTree extends SimpleJTree
 implements ActionListener, MouseListener
 {
@@ -160,14 +161,14 @@ Clear all data from the tree.
 public void clear ()
 {	String routine = "StateCU_DataSet_JTree.clear";
 	SimpleJTree_Node node = getRoot();
-	List v = getChildrenList(node);
+	List<SimpleJTree_Node> v = getChildrenList(node);
 	int size = 0;
 	if ( v != null ) {
 		size = v.size();
 	}
 	for ( int i = 0; i < size; i++ ) {
 		try {	removeNode (
-			(SimpleJTree_Node)v.get(i), false );
+			v.get(i), false );
 		}
 		catch ( Exception e ) {
 			Message.printWarning ( 2, routine,
@@ -183,7 +184,7 @@ after a data set has been read.
 */
 public void displayDataSet ()
 {	String routine = "StateCU_DataSet_JTree.displayDataSet";
-	List v = __dataset.getComponentGroups();
+	List<DataSetComponent> v = __dataset.getComponentGroups();
 	int size = 0;
 	if ( v != null ) {
 		size = v.size();
@@ -199,7 +200,7 @@ public void displayDataSet ()
 	for ( int i = 0; i < size; i++ ) {
 		isGroup = false;
 		hasData = false;
-		comp = (DataSetComponent)v.get(i);
+		comp = v.get(i);
 		if ( (comp == null) || !comp.isVisible() ) {
 			continue;
 		}
@@ -234,11 +235,9 @@ public void displayDataSet ()
 		if ( __display_data_objects ) {
 			// Display the primary object in each group
 			int primary_type = __dataset.
-				lookupPrimaryComponentTypeForComponentGroup
-				( comp.getComponentType() );
+				lookupPrimaryComponentTypeForComponentGroup ( comp.getComponentType() );
 			if ( primary_type >= 0 ) {
-				comp = __dataset.getComponentForComponentType (
-						primary_type );
+				comp = __dataset.getComponentForComponentType ( primary_type );
 			}
 			if ( (comp == null) || !comp.isVisible() ) {
 				continue;
@@ -247,15 +246,16 @@ public void displayDataSet ()
 			if ( data_Object == null ) {
 				continue;
 			}
-			List data = null;
+			List<Object> data = null;
 			if ( data_Object instanceof List ) {
-				data = (List)comp.getData();
+				@SuppressWarnings("unchecked")
+				List<Object> dataList = (List<Object>)comp.getData();
+				data = dataList;
 			}
-			else {	// Continue (REVISIT - what components would
+			else {
+				// Continue (REVISIT - what components would
 				// this happen for?)...
-				Message.printWarning ( 2, routine,
-				"Unexpected non-Vector for " +
-				comp.getComponentName() );
+				Message.printWarning ( 2, routine, "Unexpected non-List for " + comp.getComponentName() );
 			}
 			StateCU_Data cudata;
 			StateMod_Data smdata;
@@ -264,21 +264,17 @@ public void displayDataSet ()
 				dsize = data.size();
 			}
 			for ( int idata = 0; idata < dsize; idata++ ) {
-				if (	comp.getComponentType() ==
-					StateCU_DataSet.
-					COMP_DELAY_TABLES_MONTHLY ) {
+				if ( comp.getComponentType() == StateCU_DataSet.COMP_DELAY_TABLES_MONTHLY ) {
 					// StateMod data object so have to
 					// handle separately because StateCU
 					// uses the StateMod group...
-					smdata = (StateMod_Data)
-						data.get(idata);
+					smdata = (StateMod_Data)data.get(idata);
 					name = smdata.getName();
 					node2 = new SimpleJTree_Node ( name );
 					node2.setData ( smdata );
 				}
 				else {	// StateCU data object...
-					cudata = (StateCU_Data)
-						data.get(idata);
+					cudata = (StateCU_Data)data.get(idata);
 					name = cudata.getName();
 					node2 = new SimpleJTree_Node ( name );
 					node2.setData ( cudata );
@@ -305,13 +301,14 @@ public void displayDataSet ()
 			}
 		}
 		else {	// Add the components in the group...
-Message.printStatus ( 1, "", "Not displaying data objects" );
-			List v2 = (List)comp.getData();
+			Message.printStatus ( 1, "", "Not displaying data objects" );
+			@SuppressWarnings("unchecked")
+			List<Object> v2 = (List<Object>)comp.getData();
 			int size2 = 0;
 			if ( v2 != null ) {
 				size2 = v2.size();
 			}
-Message.printStatus ( 1, "", "group has " + size2 + " subcomponents" );
+			Message.printStatus ( 1, "", "group has " + size2 + " subcomponents" );
 			for ( int j = 0; j < size2; j++ ) {
 				comp = (DataSetComponent)v2.get(j);
 				if ( !comp.isVisible () ) {

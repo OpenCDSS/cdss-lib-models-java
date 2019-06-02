@@ -44,6 +44,7 @@ import RTi.Util.GUI.JWorksheet_AbstractExcelCellRenderer;
 /**
 This class renders cells for stream estimate station coefficients tables.
 */
+@SuppressWarnings("serial")
 public class StateMod_StreamEstimate_Coefficients_CellRenderer
 extends JWorksheet_AbstractExcelCellRenderer {
 

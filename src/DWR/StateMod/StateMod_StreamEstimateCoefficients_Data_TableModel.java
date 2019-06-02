@@ -46,8 +46,9 @@ import RTi.Util.IO.Validator;
 /**
 This table model displays stream estimate station coefficients data.
 */
+@SuppressWarnings("serial")
 public class StateMod_StreamEstimateCoefficients_Data_TableModel 
-extends JWorksheet_AbstractRowTableModel implements StateMod_Data_TableModel {
+extends JWorksheet_AbstractRowTableModel<StateMod_StreamEstimate_Coefficients> implements StateMod_Data_TableModel {
 
 /**
 Number of columns in the table model.
@@ -73,16 +74,16 @@ private boolean __editable = true;
 /**
 The data displayed in the table (calculated by setupData()).
 */
-private List[] __data = null;
+private List<Object>[] __data = null;
 
 /**
 Constructor.  
 @param data the data that will be displayed in the table.
 @param editable whether the data are editable or not.
 */
-public StateMod_StreamEstimateCoefficients_Data_TableModel(List data, boolean editable) {
+public StateMod_StreamEstimateCoefficients_Data_TableModel(List<StateMod_StreamEstimate_Coefficients> data, boolean editable) {
 	if (data == null) {
-		_data = new Vector();
+		_data = new Vector<StateMod_StreamEstimate_Coefficients>();
 	}
 	else {
 		_data = data;
@@ -99,7 +100,7 @@ From AbstractTableModel; returns the class of the data stored in a given
 column.
 @param columnIndex the column for which to return the data class.
 */
-public Class getColumnClass (int columnIndex) {
+public Class<?> getColumnClass (int columnIndex) {
 	switch (columnIndex) {
 		case COL_ID:			return String.class;
 		case COL_STREAM_NAME:		return Double.class;
@@ -252,13 +253,14 @@ Sets up the data to be displayed in the table.
 @param data a Vector of StateMod_StreamEstimate_Coefficients objects from 
 which the data to be be displayed in the table will be gathered.
 */
-private void setupData(List data) {
+@SuppressWarnings("unchecked")
+private void setupData(List<StateMod_StreamEstimate_Coefficients> data) {
 	int num = 0;
 	int size = data.size();
 	StateMod_StreamEstimate_Coefficients coeff = null;
 	__data = new List[__COLUMNS];
 	for (int i = 0; i < __COLUMNS; i++) {
-		__data[i] = new Vector();
+		__data[i] = new Vector<Object>();
 	}
 
 	String id = null;
@@ -266,7 +268,7 @@ private void setupData(List data) {
 	int M = 0;
 	int N = 0;
 	for (int i = 0; i < size; i++) {
-		coeff = (StateMod_StreamEstimate_Coefficients)data.get(i);
+		coeff = data.get(i);
 		id = coeff.getID();
 		M = coeff.getM();
 		N = coeff.getN();

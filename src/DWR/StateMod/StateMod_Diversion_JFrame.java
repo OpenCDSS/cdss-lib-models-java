@@ -253,6 +253,7 @@ import RTi.GR.GRShape;
 import RTi.GRTS.TSProduct;
 import RTi.GRTS.TSViewJFrame;
 import RTi.TS.DayTS;
+import RTi.TS.MonthTS;
 import RTi.TS.TS;
 import RTi.TS.TSUtil;
 import RTi.Util.GUI.JGUIUtil;
@@ -478,7 +479,9 @@ public StateMod_Diversion_JFrame ( StateMod_DataSet dataset,
 	__diversionsComponent = __dataset.getComponentForComponentType(
 		StateMod_DataSet.COMP_DIVERSION_STATIONS);
 
-	__diversionsVector = (List<StateMod_Diversion>)__diversionsComponent.getData();	
+	@SuppressWarnings("unchecked")
+	List<StateMod_Diversion> dataList = (List<StateMod_Diversion>)__diversionsComponent.getData();	
+	__diversionsVector = dataList;
 	int size = __diversionsVector.size();
 	StateMod_Diversion div = null;
 	for (int i = 0; i < size; i++) {
@@ -507,7 +510,9 @@ public StateMod_Diversion_JFrame ( StateMod_DataSet dataset, StateMod_DataSet_Wi
 	__dataset_wm = dataset_wm;
 	__diversionsComponent = __dataset.getComponentForComponentType(StateMod_DataSet.COMP_DIVERSION_STATIONS);
 
-	__diversionsVector = (List<StateMod_Diversion>)__diversionsComponent.getData();	
+	@SuppressWarnings("unchecked")
+	List<StateMod_Diversion> dataList = (List<StateMod_Diversion>)__diversionsComponent.getData();	
+	__diversionsVector = dataList;
 	int size = __diversionsVector.size();
 	StateMod_Diversion div = null;
 	for (int i = 0; i < size; i++) {
@@ -694,7 +699,6 @@ private int checkInput()
 		warning += "\nAWC (" + awc + ") is not a number.";
 		++fatal_count;
 	}
-	// Non-fatal errors (need to be corrected somehow)...
 	if ( __dataset != null ) {
 		DataSetComponent comp = __dataset.getComponentForComponentType (StateMod_DataSet.COMP_RIVER_NETWORK );
 		@SuppressWarnings("unchecked")
@@ -728,6 +732,10 @@ private int checkInput()
 			return 1;
 		}
 		else {
+			// TODO smalers 2019-05-30 Non-fatal errors (need to be corrected somehow)...
+			if ( nonfatal_count > 0 ) {
+				// put in so compiler won't complain about being unused
+			}
 			// Nonfatal errors...
 			Message.printStatus ( 1, routine, "Returning -1 from checkInput()" );
 			return -1;
@@ -1015,7 +1023,6 @@ public void displayTSViewJFrame(String type)
 	DayTS dayts = null;
 	int pos;
 	DataSetComponent comp;
-	List data;
 	if ( (__ts_diversion_daily_JCheckBox.isSelected() && __ts_diversion_daily_JCheckBox.isEnabled()) ||
 		(__ts_diversion_est_daily_JCheckBox.isSelected() && __ts_diversion_est_daily_JCheckBox.isEnabled()) ||
 		(__ts_demand_daily_JCheckBox.isSelected() && __ts_demand_daily_JCheckBox.isEnabled() ) ||
@@ -1047,10 +1054,11 @@ public void displayTSViewJFrame(String type)
 			else if(!cdividy.equals("0") && !cdividy.equals("4") ) {
 				// Get the daily time series from another diversion...
 				comp = __dataset.getComponentForComponentType( StateMod_DataSet.COMP_DIVERSION_TS_DAILY );
-				data = (List)comp.getData();
-				pos = TSUtil.indexOf ((List)comp.getData(), cdividy, "Location", 0 );
+				@SuppressWarnings("unchecked")
+				List<DayTS> dataList = (List<DayTS>)comp.getData();
+				pos = TSUtil.indexOf (dataList, cdividy, "Location", 0 );
 				if ( pos >= 0 ) {
-					dayts = (DayTS)data.get(pos);
+					dayts = dataList.get(pos);
 				}
 			}
 			ts = StateMod_Util.createDailyEstimateTS ( div.getID(), div.getName(), "Diversion", "CFS",
@@ -1077,10 +1085,11 @@ public void displayTSViewJFrame(String type)
 			else if(!cdividy.equals("0") && !cdividy.equals("4") ) {
 				// Get the daily time series from another diversion...
 				comp = __dataset.getComponentForComponentType(StateMod_DataSet.COMP_DEMAND_TS_DAILY );
-				data = (List)comp.getData();
-				pos = TSUtil.indexOf ((List)comp.getData(),	cdividy, "Location", 0 );
+				@SuppressWarnings("unchecked")
+				List<DayTS> dataList = (List<DayTS>)comp.getData();
+				pos = TSUtil.indexOf (dataList, cdividy, "Location", 0 );
 				if ( pos >= 0 ) {
-					dayts = (DayTS)data.get(pos);
+					dayts = dataList.get(pos);
 				}
 			}
 			ts = StateMod_Util.createDailyEstimateTS (
@@ -1108,10 +1117,11 @@ public void displayTSViewJFrame(String type)
 				// Get the daily time series from another diversion...
 				comp = __dataset.getComponentForComponentType(
 					StateMod_DataSet.COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_DAILY );
-				data = (List)comp.getData();
-				pos = TSUtil.indexOf ((List)comp.getData(), cdividy, "Location", 0 );
+				@SuppressWarnings("unchecked")
+				List<DayTS> dataList = (List<DayTS>)comp.getData();
+				pos = TSUtil.indexOf (dataList, cdividy, "Location", 0 );
 				if ( pos >= 0 ) {
-					dayts = (DayTS)data.get(pos);
+					dayts = dataList.get(pos);
 				}
 			}
 			ts = StateMod_Util.createDailyEstimateTS (
@@ -1591,11 +1601,15 @@ private void processTableSelection(int index, boolean try_to_save )
 		// Enable if the monthly time series for this diversion is
 		// available (and daily if an identifier is specified)...
 		comp_m = __dataset.getComponentForComponentType ( StateMod_DataSet.COMP_DIVERSION_TS_MONTHLY );
-		pos_m = TSUtil.indexOf ( (List)comp_m.getData(), monthid, "Location", 0 );
+		@SuppressWarnings("unchecked")
+		List<MonthTS> dataList = (List<MonthTS>)comp_m.getData();
+		pos_m = TSUtil.indexOf ( dataList, monthid, "Location", 0 );
 		if ( cdividy.equalsIgnoreCase(div.getID()) ) {
 			// The daily time series for this diversion must also be available...
 			comp_d = __dataset.getComponentForComponentType (StateMod_DataSet.COMP_DIVERSION_TS_DAILY );
-			pos_d = TSUtil.indexOf ((List)comp_d.getData(), cdividy, "Location", 0 );
+			@SuppressWarnings("unchecked")
+			List<DayTS> dataList2 = (List<DayTS>)comp_d.getData();
+			pos_d = TSUtil.indexOf (dataList2, cdividy, "Location", 0 );
 		}
 		else {
 			// Set so the following logic will pass...
@@ -1652,12 +1666,15 @@ private void processTableSelection(int index, boolean try_to_save )
 		// Enable if the monthly time series for this diversion is
 		// available (and daily if an identifier is specified)...
 		comp_m = __dataset.getComponentForComponentType ( StateMod_DataSet.COMP_DEMAND_TS_MONTHLY );
-		pos_m = TSUtil.indexOf ( (List)comp_m.getData(), monthid,
-				"Location", 0 );
+		@SuppressWarnings("unchecked")
+		List<MonthTS> dataList = (List<MonthTS>)comp_m.getData();
+		pos_m = TSUtil.indexOf ( dataList, monthid, "Location", 0 );
 		if ( cdividy.equalsIgnoreCase(div.getID()) ) {
 			// The daily time series for this diversion must also be available...
 			comp_d = __dataset.getComponentForComponentType ( StateMod_DataSet.COMP_DEMAND_TS_DAILY );
-			pos_d = TSUtil.indexOf ((List)comp_d.getData(), cdividy, "Location", 0 );
+			@SuppressWarnings("unchecked")
+			List<DayTS> dataList2 = (List<DayTS>)comp_d.getData();
+			pos_d = TSUtil.indexOf (dataList2, cdividy, "Location", 0 );
 		}
 		else {
 			// Set so the following logic will pass...
@@ -1707,12 +1724,16 @@ private void processTableSelection(int index, boolean try_to_save )
 		// available (and daily if an identifier is specified)...
 		comp_m = __dataset.getComponentForComponentType (
 			StateMod_DataSet.COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_MONTHLY );
-		pos_m = TSUtil.indexOf ( (List)comp_m.getData(), monthid, "Location", 0 );
+		@SuppressWarnings("unchecked")
+		List<MonthTS> dataList = (List<MonthTS>)comp_m.getData();
+		pos_m = TSUtil.indexOf ( dataList, monthid, "Location", 0 );
 		if ( cdividy.equalsIgnoreCase(div.getID()) ) {
 			// The daily time series for this diversion must also be available...
 			comp_d = __dataset.getComponentForComponentType (
 				StateMod_DataSet.COMP_CONSUMPTIVE_WATER_REQUIREMENT_TS_DAILY );
-			pos_d = TSUtil.indexOf ((List)comp_d.getData(), cdividy, "Location", 0 );
+			@SuppressWarnings("unchecked")
+			List<DayTS> dataList2 = (List<DayTS>)comp_d.getData();
+			pos_d = TSUtil.indexOf (dataList2, cdividy, "Location", 0 );
 		}
 		else {
 			// Set so the following logic will pass...

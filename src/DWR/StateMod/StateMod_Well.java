@@ -464,7 +464,7 @@ public String[] checkComponentData_Capacity( List<StateMod_WellRight> wer_Vector
 	int onoff = 0;		// On/off switch for right
 	int size_rights = 0;
 	String id_i = null;
-	List rights = null;
+	List<StateMod_WellRight> rights = null;
 	id_i = getID();
 	StateMod_WellRight wer_i = null;
 	rights = StateMod_Util.getRightsForStation ( id_i, wer_Vector );
@@ -2595,7 +2595,7 @@ public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset 
 	id_i = getID();
 	if ( getAreaw() <= 0.0 ) {
 		if ( checkRights ) {
-			List rights = StateMod_Util.getRightsForStation ( id_i, wer_Vector );
+			List<StateMod_WellRight> rights = StateMod_Util.getRightsForStation ( id_i, wer_Vector );
 			if ( (rights != null) && (rights.size() != 0) ) {
 				return null;
 			}
@@ -2618,6 +2618,18 @@ public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset 
 					wes_well_parcel_area += parcel.getArea();
 				}
 			}
+		}
+		if ( wes_parcel_count < 0 ) {
+			// TODO add so compiler does not complain about unused variable
+		}
+		if ( wes_well_parcel_count < 0 ) {
+			// TODO add so compiler does not complain about unused variable
+		}
+		if ( wes_parcel_area < 0 ) {
+			// TODO add so compiler does not complain about unused variable
+		}
+		if ( wes_well_parcel_area < 0 ) {
+			// TODO add so compiler does not complain about unused variable
 		}
 		// new format for check file
 		/*String [] data_table = {
@@ -2643,6 +2655,7 @@ public StateMod_ComponentValidation validateComponent( StateMod_DataSet dataset 
 FIXME SAM 2009-06-03 Evaluate how to call from above to add more specific checks.
 Check the well stations.
 */
+@SuppressWarnings("unused")
 private void validateComponent2 ( List<StateMod_WellRight> werList, List<StateMod_Well> wesList, String idpattern_Java,
 	int warningCount, int warningLevel, String commandTag, CommandStatus status )
 {	//String routine = getClass().getSimpleName() + ".checkWellRights";
@@ -2763,6 +2776,7 @@ by formatting the capacity and decree sum to .NN precision.
 @param message_list Vector of string to be printed to the check file, which will
 be added to in this method.
 */
+@SuppressWarnings("unused")
 private int validateComponent_checkWellRights_SumToCapacity ( List<StateMod_Well> wesList, List<StateMod_WellRight> werList,
 	int warningCount, int warningLevel, String commandTag, CommandStatus status  )
 {	String routine = getClass().getName() + "checkWellRights_SumToCapacity";
@@ -2778,9 +2792,9 @@ private int validateComponent_checkWellRights_SumToCapacity ( List<StateMod_Well
 	int onoff = 0;		// On/off switch for right
 	int size_rights = 0;
 	String id_i = null;
-	List rights = null;
+	List<StateMod_WellRight> rights = null;
 	for ( int i = 0; i < size; i++ ) {
-		wes_i = (StateMod_Well)wesList.get(i);
+		wes_i = wesList.get(i);
 		if ( wes_i == null ) {
 			continue;
 		}
@@ -2798,7 +2812,7 @@ private int validateComponent_checkWellRights_SumToCapacity ( List<StateMod_Well
 		// end of the period will be compared with the current well capacity)...
 		decree_sum = 0.0;
 		for ( int iright = 0; iright < size_rights; iright++ ) {
-			wer_i = (StateMod_WellRight)rights.get(iright);
+			wer_i = rights.get(iright);
 			decree = wer_i.getDcrdivw();
 			onoff = wer_i.getSwitch();
 			if ( decree < 0.0 ) {

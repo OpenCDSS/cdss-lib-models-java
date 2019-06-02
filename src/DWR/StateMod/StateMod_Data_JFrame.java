@@ -134,7 +134,7 @@ derived classes.  This will be added in the future but for now multiple windows
 will be able to be opened, etc.
 */
 @SuppressWarnings("serial")
-public abstract class StateMod_Data_JFrame 
+public abstract class StateMod_Data_JFrame <T>
 extends JFrame
 implements ActionListener, WindowListener {
 
@@ -190,7 +190,7 @@ by this class's constructor when the derived classes call super().  Must be
 passed to this class via the constructor in order for the Apply|Cancel|OK 
 buttons to function properly.
 */
-protected List _data = null;
+protected List<T> _data = null;
 
 /**
 Constructor.  This constructor should only be called if initialize() will be called later.
@@ -209,7 +209,7 @@ which case an empty worksheet is shown.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_Data_JFrame(List data, String titleString, boolean editable) 
+public StateMod_Data_JFrame(List<T> data, String titleString, boolean editable) 
 throws Exception {
 	super();
 
@@ -269,7 +269,7 @@ Derived classes should implement the method similar to:<pre>
 protected void apply() {
 	StateMod_Reservoir res = null;
 	for (int i = 0; i < _data.size(); i++) {
-		res = (StateMod_Reservoir)_data.elementAt(i);
+		res = _data.elementAt(i);
 		res.createBackup();
 	}
 }
@@ -280,8 +280,7 @@ protected abstract void apply();
 /**
 Called by setupGUI, this builds the table model and cell renderer 
 necessary for a worksheet, then builds the JScrollWorksheet and returns it.
-@return the JScrollWorksheet that was made and which should be displayed in
-the GUI.
+@return the JScrollWorksheet that was made and which should be displayed in the GUI.
 */
 protected abstract JScrollWorksheet buildJScrollWorksheet()
 throws Exception;
@@ -293,7 +292,7 @@ Derived classes should implement the method similar to:<pre>
 protected void cancel() {
 	StateMod_Reservoir res = null;
 	for (int i = 0; i < _data.size(); i++) {
-		res = (StateMod_Reservoir)_data.elementAt(i);
+		res = _data.elementAt(i);
 		res.restoreOriginal();
 	}
 }
@@ -316,7 +315,7 @@ Derived classes should implement the method similar to:<pre>
 protected void createDataBackup() {
 	StateMod_Reservoir res = null;
 	for (int i = 0; i < _data.size(); i++) {
-		res = (StateMod_Reservoir)_data.elementAt(i);
+		res = _data.elementAt(i);
 		res.createBackup();
 	}
 }
@@ -365,16 +364,14 @@ throws Exception {
 		String linesep = System.getProperty("line.separator");
 		int size = strings.size();
 		for (int i = 0; i < size; i++) {
-			oStream.print(
-				strings.get(i).toString() + linesep);
+			oStream.print( strings.get(i).toString() + linesep);
 		}
 		oStream.flush(); 
 		oStream.close(); 
 	}
 	catch (Exception IOError) {
 		JGUIUtil.setWaitCursor(this, false);
-		throw new Exception("Error writing to file \"" 
-			+ filename + "\"." );
+		throw new Exception("Error writing to file \"" + filename + "\"." );
 	}
 
 	JGUIUtil.setWaitCursor(this, false);
@@ -460,8 +457,7 @@ in order that the kind of delimiter for the file can be known when the data
 is formatted for output.  Currently the only kinds of files that the data
 can be exported to are delimited files.  No StateMod files are yet supported.<p>
 Also sets the last selected file dialog directory to whatever directory the
-file is located in, if the file selection was approved (i.e., Cancel was not
-pressed).
+file is located in, if the file selection was approved (i.e., Cancel was not pressed).
 @param title the title of the file chooser.
 @param formats a Vector of the valid formats for the file chooser.
 @return a two-element String array where the first element is the name of the
@@ -474,10 +470,8 @@ protected String[] getFilenameAndFormat() {
 	fc.setDialogTitle("Select Export File");
 
 	SimpleFileFilter tabFF = new SimpleFileFilter("txt", "Tab-delimited");
-	SimpleFileFilter commaFF = new SimpleFileFilter("csv", 
-		"Comma-delimited");
-	SimpleFileFilter semiFF = new SimpleFileFilter("txt", 
-		"Semicolon-delimited");
+	SimpleFileFilter commaFF = new SimpleFileFilter("csv", "Comma-delimited");
+	SimpleFileFilter semiFF = new SimpleFileFilter("txt", "Semicolon-delimited");
 	SimpleFileFilter pipeFF = new SimpleFileFilter("txt", "Pipe-delimited");
 
 	fc.addChoosableFileFilter(commaFF);
@@ -542,10 +536,10 @@ which case an empty worksheet is shown.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public void initialize(List data, String titleString, boolean editable) 
+public void initialize(List<T> data, String titleString, boolean editable) 
 throws Exception {
 	if (data == null) {
-		_data = new Vector();
+		_data = new Vector<T>();
 	}
 	else {
 		_data = data;

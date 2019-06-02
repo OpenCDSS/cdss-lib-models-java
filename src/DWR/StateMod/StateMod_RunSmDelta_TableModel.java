@@ -65,9 +65,9 @@ import RTi.Util.GUI.SimpleFileFilter;
 /**
 This table model display delta plot data.
 */
-@SuppressWarnings({ "serial", "rawtypes" })
+@SuppressWarnings({ "serial" })
 public class StateMod_RunSmDelta_TableModel 
-extends JWorksheet_AbstractRowTableModel {
+extends JWorksheet_AbstractRowTableModel<StateMod_GraphNode> {
 
 /**
 Number of columns in the table model.
@@ -126,8 +126,8 @@ Constructor.
 @throws Exception if an invalid data or dmi was passed in.
 */
 public StateMod_RunSmDelta_TableModel(StateMod_RunSmDelta_JFrame parent,
-List data, List<StateMod_Reservoir> reservoirs, List<StateMod_Diversion> diversions, List<StateMod_InstreamFlow> instreamFlows,
-List<StateMod_StreamGage> streamGages, List<StateMod_Well> wells)
+List<StateMod_GraphNode> data, List<StateMod_Reservoir> reservoirs, List<StateMod_Diversion> diversions,
+List<StateMod_InstreamFlow> instreamFlows, List<StateMod_StreamGage> streamGages, List<StateMod_Well> wells)
 throws Exception {
 	__parent = parent;
 
@@ -207,7 +207,7 @@ public boolean canAddRow() {
 	if (_rows == 0) {
 		return true;
 	}
-	StateMod_GraphNode gn = (StateMod_GraphNode)_data.get(0);
+	StateMod_GraphNode gn = _data.get(0);
 	if (gn.getFileName().trim().equals("")) {
 		return false;
 	}

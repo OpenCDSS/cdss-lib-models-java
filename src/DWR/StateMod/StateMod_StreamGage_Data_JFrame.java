@@ -52,7 +52,8 @@ import RTi.Util.GUI.JScrollWorksheet;
 This class is a JFrame for displaying a Vector of StateMod_StreamGage data in
 a worksheet.  The worksheet data can be exported to a file or printed.
 */
-public class StateMod_StreamGage_Data_JFrame extends StateMod_Data_JFrame {
+@SuppressWarnings("serial")
+public class StateMod_StreamGage_Data_JFrame extends StateMod_Data_JFrame<StateMod_StreamGage> {
 
 /**
 Constructor. 
@@ -63,7 +64,7 @@ which case an empty worksheet is shown.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_StreamGage_Data_JFrame(List data, String titleString, boolean editable)
+public StateMod_StreamGage_Data_JFrame(List<StateMod_StreamGage> data, String titleString, boolean editable)
 throws Exception {
 	super(data, titleString, editable);
 	setSize(510, getHeight());
@@ -76,7 +77,7 @@ protected void apply() {
 	StateMod_StreamGage gage = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		gage = (StateMod_StreamGage)_data.get(i);
+		gage = _data.get(i);
 		gage.createBackup();
 	}
 }
@@ -101,7 +102,7 @@ protected void cancel() {
 	StateMod_StreamGage gage = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		gage = (StateMod_StreamGage)_data.get(i);
+		gage = _data.get(i);
 		gage.restoreOriginal();
 	}
 }
@@ -113,7 +114,7 @@ protected void createDataBackup() {
 	StateMod_StreamGage gage = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		gage = (StateMod_StreamGage)_data.get(i);
+		gage = _data.get(i);
 		gage.createBackup();
 	}
 }

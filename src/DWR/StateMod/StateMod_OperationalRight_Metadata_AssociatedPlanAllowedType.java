@@ -95,6 +95,8 @@ public StateMod_OperationalRight_Metadata_SourceOrDestinationType getMatchingSou
 			return StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_ACCOUNTING;
 		case PLAN_RELEASE_LIMIT:
 			return StateMod_OperationalRight_Metadata_SourceOrDestinationType.PLAN_RELEASE_LIMIT;
+		case NA:
+			return null;
 	}
 	// No match
 	return null;
