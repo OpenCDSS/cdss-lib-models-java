@@ -471,7 +471,7 @@ Constructor.
 */
 public StateMod_Diversion_JFrame ( StateMod_DataSet dataset,
 	StateMod_DataSet_WindowManager dataset_wm, boolean editable )
-{	
+{
 	StateMod_GUIUtil.setTitle(this, dataset, "Diversions", null);
 	JGUIUtil.setIcon(this, JGUIUtil.getIconImage());
 	__dataset = dataset;
@@ -503,7 +503,7 @@ Constructor.
 */
 public StateMod_Diversion_JFrame ( StateMod_DataSet dataset, StateMod_DataSet_WindowManager dataset_wm,
 	StateMod_Diversion diversion, boolean editable)
-{	
+{
 	StateMod_GUIUtil.setTitle(this, dataset, "Diversions", null);
 	JGUIUtil.setIcon(this, JGUIUtil.getIconImage());
 	__dataset = dataset;

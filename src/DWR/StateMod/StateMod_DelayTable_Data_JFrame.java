@@ -56,6 +56,7 @@ import java.awt.event.ActionEvent;
 import java.util.List;
 
 import javax.swing.JCheckBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -115,11 +116,11 @@ false, they are showing daily data.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_DelayTable_Data_JFrame(List<StateMod_DelayTable> data, String titleString, boolean monthlyData, boolean editable)
+public StateMod_DelayTable_Data_JFrame(JFrame parent, List<StateMod_DelayTable> data, String titleString, boolean monthlyData, boolean editable)
 throws Exception {
-	super();
+	super(parent, -1, -1, data, titleString, editable);
 	__monthlyData = monthlyData;
-	initialize(data, titleString, editable);
+	//initialize(data, titleString, editable);
 
 	JPanel panel = new JPanel();
 	panel.setLayout(new GridBagLayout());

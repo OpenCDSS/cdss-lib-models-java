@@ -47,6 +47,8 @@ package DWR.StateMod;
 import java.util.List;
 import java.util.Vector;
 
+import javax.swing.JFrame;
+
 import RTi.Util.GUI.JScrollWorksheet;
 import RTi.Util.Message.Message;
 
@@ -70,50 +72,13 @@ the data can be edited, if false they can not.
 If false, they are evap stations.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_ReservoirClimate_Data_JFrame(List<StateMod_Reservoir> data, String titleString,
+@SuppressWarnings("unchecked")
+public StateMod_ReservoirClimate_Data_JFrame(JFrame parent, List<StateMod_ReservoirClimate> data, String titleString,
 boolean editable, boolean precip)
 throws Exception {
-	super();
-
-	int j = 0;
-	int size = 0;
-	int size2 = 0;
-	StateMod_Reservoir r = null;
-	StateMod_ReservoirClimate c = null;
-	List<StateMod_ReservoirClimate> climates = null;
-	List<StateMod_ReservoirClimate> v = new Vector<StateMod_ReservoirClimate>();
-	
-	if (data != null) {
-		size = data.size();
-	}
-	
-	for (int i = 0; i < size; i++) {
-		r = data.get(i);
-		climates = r.getClimates();
-		if (climates == null) {
-			continue;
-		}
-	
-		size2 = climates.size();
-
-		for (j = 0; j < size2; j++) {
-			c = climates.get(j);
-			if (c == null) {
-				// skip
-			}
-			else if (!precip && c.getType() == StateMod_ReservoirClimate.CLIMATE_EVAP) {
-			    	c.setCgoto(r.getID());
-			    	v.add(c);
-			}
-			else if (precip && c.getType() == StateMod_ReservoirClimate.CLIMATE_PTPX) {
-			    	c.setCgoto(r.getID());
-			    	v.add(c);
-			}			
-		}
-	}
-		
-	initialize(v, titleString, editable);
-	setSize(377, getHeight());
+	super(parent, 400, -1, data, titleString, editable);
+	//initialize(v, titleString, editable);
+	//setSize(377, getHeight());
 }
 
 /**
@@ -130,7 +95,7 @@ protected void apply() {
 
 /**
 Creates a JScrollWorksheet for the current data and returns it.
-@return a JScrollWorksheet containing the data Vector passed in to the constructor.
+@return a JScrollWorksheet containing the data list for climate stations.
 */
 protected JScrollWorksheet buildJScrollWorksheet() 
 throws Exception {
@@ -167,6 +132,49 @@ protected void createDataBackup() {
 		clim = (StateMod_ReservoirClimate)_data.get(i);
 		clim.createBackup();
 	}
+}
+
+/**
+ * Create the list of StateMod_ReservoirClimate from a list of StateMod_Reservoir.
+ */
+public static List<StateMod_ReservoirClimate> createDataList ( List<StateMod_Reservoir> data, boolean precip ) {
+	int j = 0;
+	int size = 0;
+	int size2 = 0;
+	StateMod_Reservoir r = null;
+	StateMod_ReservoirClimate c = null;
+	List<StateMod_ReservoirClimate> climates = null;
+	List<StateMod_ReservoirClimate> v = new Vector<StateMod_ReservoirClimate>();
+	
+	if (data != null) {
+		size = data.size();
+	}
+	
+	for (int i = 0; i < size; i++) {
+		r = data.get(i);
+		climates = r.getClimates();
+		if (climates == null) {
+			continue;
+		}
+	
+		size2 = climates.size();
+
+		for (j = 0; j < size2; j++) {
+			c = climates.get(j);
+			if (c == null) {
+				// skip
+			}
+			else if (!precip && c.getType() == StateMod_ReservoirClimate.CLIMATE_EVAP) {
+			    	c.setCgoto(r.getID());
+			    	v.add(c);
+			}
+			else if (precip && c.getType() == StateMod_ReservoirClimate.CLIMATE_PTPX) {
+			    	c.setCgoto(r.getID());
+			    	v.add(c);
+			}			
+		}
+	}
+	return v;
 }
 
 }

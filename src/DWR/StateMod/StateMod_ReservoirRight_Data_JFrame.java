@@ -46,6 +46,8 @@ package DWR.StateMod;
 
 import java.util.List;
 
+import javax.swing.JFrame;
+
 import RTi.Util.GUI.JScrollWorksheet;
 
 /**
@@ -66,11 +68,11 @@ which case an empty worksheet is shown.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_ReservoirRight_Data_JFrame(List<StateMod_ReservoirRight> data, String titleString,
+public StateMod_ReservoirRight_Data_JFrame(JFrame parent, List<StateMod_ReservoirRight> data, String titleString,
 boolean editable)
 throws Exception {
-	super(data, titleString, editable);
-	setSize(750, 350);
+	super(parent, 990, 350, data, titleString, editable);
+	//setSize(750, 350);
 	PRINT_PORTRAIT_LINES = 75;
 	PRINT_LANDSCAPE_LINES = 44;
 }

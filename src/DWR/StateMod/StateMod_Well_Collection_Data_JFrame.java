@@ -38,6 +38,8 @@ package DWR.StateMod;
 
 import java.util.List;
 
+import javax.swing.JFrame;
+
 import RTi.Util.GUI.JScrollWorksheet;
 
 /**
@@ -56,10 +58,10 @@ Constructor.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_Well_Collection_Data_JFrame(List<StateMod_Well> data, String titleString, boolean editable)
+public StateMod_Well_Collection_Data_JFrame(JFrame parent, List<StateMod_Well> data, String titleString, boolean editable)
 throws Exception {
-	super(data, titleString, editable);
-	setSize(550, getHeight());
+	super(parent, 550, -1, data, titleString, editable);
+	//setSize(550, getHeight());
 }
 
 /**

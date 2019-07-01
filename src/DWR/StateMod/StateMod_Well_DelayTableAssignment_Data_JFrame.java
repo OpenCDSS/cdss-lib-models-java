@@ -41,6 +41,7 @@ import java.awt.event.ActionEvent;
 import java.util.List;
 
 import javax.swing.JCheckBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -79,14 +80,13 @@ the data can be edited, if false they can not.
 @param isDepletion whether the data are depletions or not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_Well_DelayTableAssignment_Data_JFrame(List<StateMod_Well> data, 
+public StateMod_Well_DelayTableAssignment_Data_JFrame(JFrame parent, List<StateMod_Well> data, 
 String titleString, boolean editable, boolean isDepletion)
 throws Exception {
-	super();
+	super(parent, -1, -1, data, titleString, editable);
 	
 	__isDepletion = isDepletion;
-	
-	initialize(data, titleString, editable);
+	//initialize(data, titleString, editable);
 
 	JPanel panel = new JPanel();
 	panel.setLayout(new GridBagLayout());
