@@ -173,6 +173,21 @@ The worksheet that is created in the derived classes.
 protected JWorksheet _worksheet = null;
 
 /**
+ * The parent JFrame, used to center the display component on parent's display.
+ */
+private JFrame parent = null;
+
+/**
+ * The requested visible width.
+ */
+private int widthReq = -1;
+
+/**
+ * The requested visible height.
+ */
+private int heightReq = -1;
+
+/**
 Generic properties that can be used in any worksheet in the derived classes. 
 These are available so that all the derived classes' worksheets can be uniform
 and have the same properties.
@@ -211,8 +226,29 @@ the data can be edited, if false they can not.
 */
 public StateMod_Data_JFrame(List<T> data, String titleString, boolean editable) 
 throws Exception {
+	this(null, -1, -1, data, titleString, editable);
+}
+
+/**
+Constructor. 
+@param parent parent UI JFrame, used to center the component on the parent's display.
+@param parent widthReq requested width, or -1 to use default.
+@param parent heightReq requested height, or -1 to use default.
+@param data the data to display in the worksheet.  Can be null or empty, in
+which case an empty worksheet is shown.
+@param titleString the String to display as the GUI's title.
+@param editable whether the data in the JFrame can be edited or not.  If true
+the data can be edited, if false they can not.
+@throws Exception if there is an error building the worksheet.
+*/
+public StateMod_Data_JFrame(JFrame parent, int widthReq, int heightReq,
+	List<T> data, String titleString, boolean editable) 
+throws Exception {
 	super();
 
+	this.parent = parent;
+	this.widthReq = widthReq;
+	this.heightReq = heightReq;
 	initialize(data, titleString, editable);
 }
 
@@ -670,8 +706,31 @@ throws Exception {
 	setTitle(_titleString);
 	pack();
 
-	setSize(800, 400);
-	JGUIUtil.center(this);
+	int widthDefault = 800;
+	int heightDefault = 400;
+	if ( (this.widthReq > 0) && (this.heightReq > 0) ) {
+		// Use requested size, which generally displays all data columns
+		setSize(this.widthReq, this.heightReq);
+	}
+	else if ( this.widthReq > 0 ) {
+		// Use requested size, which generally displays all data columns
+		setSize(this.widthReq, heightDefault);
+	}
+	else if ( this.heightReq > 0 ) {
+		// Use requested size, which generally displays all data columns
+		setSize(widthDefault, this.heightReq);
+	}
+	else {
+		// Default size
+		setSize(widthDefault, heightDefault);
+	}
+	// Now center, which depends on the dimensions
+	if ( this.parent == null ) {
+		JGUIUtil.center(this);
+	}
+	else {
+		JGUIUtil.center(this,this.parent);
+	}
 	
 	setVisible(true);
 

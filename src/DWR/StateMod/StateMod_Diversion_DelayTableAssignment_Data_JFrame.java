@@ -42,6 +42,7 @@ import java.awt.event.ActionEvent;
 import java.util.List;
 
 import javax.swing.JCheckBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -74,9 +75,9 @@ Constructor.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_Diversion_DelayTableAssignment_Data_JFrame(List<StateMod_Diversion> data, String titleString, boolean editable)
+public StateMod_Diversion_DelayTableAssignment_Data_JFrame(JFrame parent, List<StateMod_Diversion> data, String titleString, boolean editable)
 throws Exception {
-	super(data, titleString, editable);
+	super(parent, 410, -1, data, titleString, editable);
 
 	JPanel panel = new JPanel();
 	panel.setLayout(new GridBagLayout());
@@ -92,7 +93,7 @@ throws Exception {
 	getContentPane().add("North", panel);	
 	pack();
 	
-	setSize(410, getHeight());
+	//setSize(410, getHeight());
 	__tableModel = (StateMod_Diversion_DelayTableAssignment_Data_TableModel)
 		_worksheet.getTableModel();
 	__tableModel.setJWorksheet(_worksheet);

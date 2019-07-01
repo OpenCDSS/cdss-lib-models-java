@@ -48,6 +48,8 @@ package DWR.StateMod;
 import java.util.List;
 import java.util.Vector;
 
+import javax.swing.JFrame;
+
 import RTi.Util.GUI.JScrollWorksheet;
 
 /**
@@ -68,40 +70,12 @@ which case an empty worksheet is shown.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_ReservoirAreaCap_Data_JFrame(List<StateMod_Reservoir> data, String titleString, boolean editable)
+public StateMod_ReservoirAreaCap_Data_JFrame(JFrame parent, List<StateMod_ReservoirAreaCap> data, String titleString, boolean editable)
 throws Exception {
-	super();
+	super(parent, 425, -1, data, titleString, editable);
 	
-	int j = 0;
-	int size = 0;
-	int size2 = 0;
-	StateMod_Reservoir r = null;
-	StateMod_ReservoirAreaCap a = null;
-	List<StateMod_ReservoirAreaCap> areacaps = null;
-	List<StateMod_ReservoirAreaCap> v = new Vector<StateMod_ReservoirAreaCap>();
-	
-	if (data != null) {
-		size = data.size();
-	}
-	
-	for (int i = 0; i < size; i++) {
-		r = data.get(i);
-		areacaps = r.getAreaCaps();
-		if (areacaps == null) {
-			continue;
-		}
-	
-		size2 = areacaps.size();
-
-		for (j = 0; j < size2; j++) {
-			a = areacaps.get(j);
-			a.setCgoto(r.getID());
-		    v.add(a);
-		}
-	}	
-	
-	initialize(v, titleString, editable);
-	setSize(400, getHeight());
+	//initialize(v, titleString, editable);
+	//setSize(400, getHeight());
 }
 
 /**
@@ -157,4 +131,38 @@ protected void createDataBackup() {
 	}
 }
 
+/**
+ * Create the list of data from a list of reservoirs, used to initialize the display.
+ */
+public static List<StateMod_ReservoirAreaCap> createDataList ( List<StateMod_Reservoir> data ) {
+	int j = 0;
+	int size = 0;
+	int size2 = 0;
+	StateMod_Reservoir r = null;
+	StateMod_ReservoirAreaCap a = null;
+	List<StateMod_ReservoirAreaCap> areacaps = null;
+	List<StateMod_ReservoirAreaCap> v = new Vector<StateMod_ReservoirAreaCap>();
+	
+	if (data != null) {
+		size = data.size();
+	}
+	
+	for (int i = 0; i < size; i++) {
+		r = data.get(i);
+		areacaps = r.getAreaCaps();
+		if (areacaps == null) {
+			continue;
+		}
+	
+		size2 = areacaps.size();
+
+		for (j = 0; j < size2; j++) {
+			a = areacaps.get(j);
+			a.setCgoto(r.getID());
+		    v.add(a);
+		}
+	}	
+	return v;
+}
+	
 }

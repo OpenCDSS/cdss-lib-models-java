@@ -49,6 +49,8 @@ import java.util.List;
 //import java.util.Vector;
 import java.util.Vector;
 
+import javax.swing.JFrame;
+
 import RTi.Util.GUI.JScrollWorksheet;
 
 /**
@@ -58,7 +60,7 @@ worksheet.  The worksheet data can be exported to a file or printed.
 */
 @SuppressWarnings("serial")
 public class StateMod_ReservoirAccount_Data_JFrame 
-extends StateMod_Data_JFrame<StateMod_Reservoir> {
+extends StateMod_Data_JFrame<StateMod_ReservoirAccount> {
 
 /**
 Constructor. 
@@ -69,10 +71,71 @@ which case an empty worksheet is shown.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_ReservoirAccount_Data_JFrame(List<StateMod_Reservoir> data, String titleString, boolean editable)
+public StateMod_ReservoirAccount_Data_JFrame(JFrame parent, List<StateMod_ReservoirAccount> data, String titleString, boolean editable)
 throws Exception {
-	super();
-	
+	super(parent, 700, -1, data, titleString, editable);
+	//initialize(v, titleString, editable);
+	//setSize(691, getHeight());
+}
+
+/**
+Called when the Apply button is pressed. This commits any changes to the data objects.
+*/
+protected void apply() {
+	// TODO smalers 2019-06-01 This should backup StateMod_ReservoirAcccount - original code had bug
+	StateMod_ReservoirAccount acct = null;
+	int size = _data.size();
+	for (int i = 0; i < size; i++) {
+		acct = _data.get(i);
+		acct.createBackup();
+	}
+	// Put this in to alert about bad code
+	throw new RuntimeException("Code needs to be updated for reservoir accounts");
+}
+
+/**
+Creates a JScrollWorksheet for the current data and returns it.
+@return a JScrollWorksheet containing the data Vector passed in to the constructor.
+*/
+protected JScrollWorksheet buildJScrollWorksheet() 
+throws Exception {
+	StateMod_ReservoirAccount_Data_TableModel tableModel 
+		= new StateMod_ReservoirAccount_Data_TableModel(_data, _editable);
+	StateMod_ReservoirAccount_Data_CellRenderer cellRenderer 
+		= new StateMod_ReservoirAccount_Data_CellRenderer(tableModel);
+
+	// _props is defined in the super class
+	return new JScrollWorksheet(cellRenderer, tableModel, _props);
+}
+
+/**
+Called when the cancel button is pressed.  This discards any changes made to the data objects.
+*/
+protected void cancel() {
+	StateMod_ReservoirAccount acct = null;
+	int size = _data.size();
+	for (int i = 0; i < size; i++) {
+		acct = _data.get(i);
+		acct.restoreOriginal();
+	}
+}
+
+/**
+Creates backups of all the data objects in the list so that changes can later be cancelled if necessary.
+*/
+protected void createDataBackup() {
+	StateMod_ReservoirAccount acct = null;
+	int size = _data.size();
+	for (int i = 0; i < size; i++) {
+		acct = _data.get(i);
+		acct.createBackup();
+	}
+}
+
+/**
+ * Create the data list for display.	
+ */
+public static List<StateMod_ReservoirAccount> createDataList ( List<StateMod_Reservoir> data ) {
 	int j = 0;
 	int size = 0;
 	int size2 = 0;
@@ -100,76 +163,7 @@ throws Exception {
 		   	v.add(a);
 		}
 	}
-	// TODO need to fix 
-	//initialize(v, titleString, editable);
-	setSize(691, getHeight());
-	throw new RuntimeException("Code needs to be updated for reservoir accounts");
-}
-
-/**
-Called when the Apply button is pressed. This commits any changes to the data objects.
-*/
-protected void apply() {
-	// TODO smalers 2019-06-01 This should backup StateMod_ReservoirAcccount - original code had bug
-	StateMod_Reservoir acct = null;
-	int size = _data.size();
-	for (int i = 0; i < size; i++) {
-		acct = _data.get(i);
-		acct.createBackup();
-	}
-	// Put this in to alert about bad code
-	throw new RuntimeException("Code needs to be updated for reservoir accounts");
-}
-
-/**
-Creates a JScrollWorksheet for the current data and returns it.
-@return a JScrollWorksheet containing the data Vector passed in to the constructor.
-*/
-protected JScrollWorksheet buildJScrollWorksheet() 
-throws Exception {
-	/*
-	StateMod_ReservoirAccount_Data_TableModel tableModel 
-		= new StateMod_ReservoirAccount_Data_TableModel(_data, _editable);
-	StateMod_ReservoirAccount_Data_CellRenderer cellRenderer 
-		= new StateMod_ReservoirAccount_Data_CellRenderer(tableModel);
-
-	// _props is defined in the super class
-	return new JScrollWorksheet(cellRenderer, tableModel, _props);
-	*/
-	// TODO smalers 2019-06-01 This should backup StateMod_ReservoirAcccount - original code had bug
-	throw new RuntimeException("Code needs to be updated for reservoir accounts");
-}
-
-/**
-Called when the cancel button is pressed.  This discards any changes made to the data objects.
-*/
-protected void cancel() {
-	// TODO smalers 2019-06-01 This should backup StateMod_ReservoirAcccount - original code had bug
-	/*
-	StateMod_ReservoirAccount acct = null;
-	int size = _data.size();
-	for (int i = 0; i < size; i++) {
-		acct = _data.get(i);
-		acct.restoreOriginal();
-	}
-	*/
-	throw new RuntimeException("Code needs to be updated for reservoir accounts");
-}
-
-/**
-Creates backups of all the data objects in the list so that changes can later be cancelled if necessary.
-*/
-protected void createDataBackup() {
-	// TODO smalers 2019-06-01 This should backup StateMod_ReservoirAcccount - original code had bug
-	/*
-	StateMod_ReservoirAccount acct = null;
-	int size = _data.size();
-	for (int i = 0; i < size; i++) {
-		acct = _data.get(i);
-		acct.createBackup();
-	}
-	*/
-	throw new RuntimeException("Code needs to be updated for reservoir accounts");
+	return v;
 }
 
 }

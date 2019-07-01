@@ -40,6 +40,8 @@ package DWR.StateMod;
 
 import java.util.List;
 
+import javax.swing.JFrame;
+
 import RTi.Util.GUI.JScrollWorksheet;
 
 /**
@@ -57,10 +59,10 @@ which case an empty worksheet is shown.
 @param titleString the String to display as the GUI title.
 @throws Exception if there is an error building the worksheet.
 */
-public StateMod_RiverNetworkNode_Data_JFrame(List<StateMod_RiverNetworkNode> data, String titleString)
+public StateMod_RiverNetworkNode_Data_JFrame(JFrame parent, List<StateMod_RiverNetworkNode> data, String titleString)
 throws Exception {
-	super(data, titleString, false);
-	setSize(720, getHeight());
+	super(parent, 720, -1, data, titleString, false);
+	//setSize(720, getHeight());
 }
 
 /**
