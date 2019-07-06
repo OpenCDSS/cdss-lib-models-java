@@ -282,18 +282,14 @@ protected GeoRecord _georecord;
 // reservoir collections are always the same for the full period.
 
 /**
-Types of collections.  An aggregate merges the water rights whereas
-a system keeps all the water rights but just has one ID.
-*/
-public static String COLLECTION_TYPE_AGGREGATE = "Aggregate";
-public static String COLLECTION_TYPE_SYSTEM = "System";
-
-private String __collection_type = StateMod_Util.MISSING_STRING;
+ * Collection type for the reservoir, or null if not a collection.
+ */
+private StateMod_Reservoir_CollectionType __collection_type = null;
 
 /**
-Used by DMI software - currently no options.
+Used by DMI software for aggregate reservoirs to indicate what is being aggregated, currently must always be RESERVOIR.
 */
-private String __collection_part_type = "Reservoir";
+private StateMod_Reservoir_CollectionPartType __collection_part_type = StateMod_Reservoir_CollectionPartType.RESERVOIR;
 
 /**
 The identifiers for data that are collected - null if not a collection location.
@@ -763,26 +759,6 @@ public void disconnectRights ()
 }
 
 /**
-Clean up before garbage collection.
-*/
-protected void finalize()
-throws Throwable {
-	_owners = null;
-	_climate_Vector = null;
-	_areacapvals = null;
-	_cresdy = null;
-	_rights = null;
-	_content_MonthTS = null;
-	_content_DayTS = null;
-	_mintarget_MonthTS = null;
-	_maxtarget_MonthTS = null;
-	_mintarget_DayTS = null;
-	_maxtarget_DayTS = null;
-	_georecord = null;
-	super.finalize();
-}
-
-/**
 Retrieve the owner at a particular index.
 */
 public StateMod_ReservoirAccount getAccount(int index) {
@@ -858,7 +834,7 @@ public List<String> getCollectionPartIDs ( int year )
 Returns the collection part type ("Reservoir").
 @return the collection part type ("Reservoir").
 */
-public String getCollectionPartType() {
+public StateMod_Reservoir_CollectionPartType getCollectionPartType() {
 	return __collection_part_type;
 }
 
@@ -866,7 +842,7 @@ public String getCollectionPartType() {
 Return the collection type, "Aggregate" or "System".
 @return the collection type, "Aggregate" or "System".
 */
-public String getCollectionType()
+public StateMod_Reservoir_CollectionType getCollectionType()
 {	return __collection_type;
 }
 
@@ -1564,7 +1540,7 @@ public void setCollectionPartIDs ( List<String> ids )
 Set the collection type.
 @param collection_type The collection type, either "Aggregate" or "System".
 */
-public void setCollectionType ( String collection_type )
+public void setCollectionType ( StateMod_Reservoir_CollectionType collection_type )
 {	__collection_type = collection_type;
 }
 
@@ -2645,9 +2621,9 @@ throws Exception
 	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	String[] line = new String[fieldCount];	
-	String colType = null;
+	StateMod_Reservoir_CollectionType colType = null;
 	String id = null;
-	String partType = null;
+	StateMod_Reservoir_CollectionPartType partType = null;
 	StringBuffer buffer = new StringBuffer();
 	PrintWriter out = null;
 	List<String> ids = null;
@@ -2699,9 +2675,9 @@ throws Exception
 				for ( int k = 0; k < ids.size(); k++ ) { 
 					line[0] = StringUtil.formatString(id,formats[0]).trim();
 					line[1] = StringUtil.formatString(years[iyear],formats[1]).trim();
-					line[2] = StringUtil.formatString(colType,formats[2]).trim();
-					line[3] = StringUtil.formatString(partType,formats[3]).trim();
-					line[4] = StringUtil.formatString(((String)(ids.get(k))),formats[4]).trim();
+					line[2] = StringUtil.formatString(colType.toString(),formats[2]).trim();
+					line[3] = StringUtil.formatString(partType.toString(),formats[3]).trim();
+					line[4] = StringUtil.formatString(ids.get(k),formats[4]).trim();
 	
 					buffer = new StringBuffer();	
 					for (int ifield = 0; ifield < fieldCount; ifield++) {

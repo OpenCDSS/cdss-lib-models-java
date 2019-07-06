@@ -144,8 +144,7 @@ public String getColumnName(int columnIndex) {
 Returns the format that the specified column should be displayed in when
 the table is being displayed in the given table format. 
 @param column column for which to return the format.
-@return the format (as used by StringUtil.formatString() in which to display the
-column.
+@return the format (as used by StringUtil.formatString() in which to display the column.
 */
 public String getFormat(int column) {
 	switch (column) {
@@ -191,12 +190,12 @@ public int[] getColumnWidths() {
 	for (int i = 0; i < __COLUMNS; i++) {
 		widths[i] = 0;
 	}
-	widths[__COL_ID] =		8;
-//	widths[__COL_DIV] =		6;
-	widths[__COL_YEAR] =		5;
-	widths[__COL_COL_TYPE] =	9;
-	widths[__COL_PART_TYPE] =	5;
-	widths[__COL_PART_ID] =		6;
+	widths[__COL_ID] = 8;
+//	widths[__COL_DIV] = 6;
+	widths[__COL_YEAR] = 5;
+	widths[__COL_COL_TYPE] = 9;
+	widths[__COL_PART_TYPE] = 5;
+	widths[__COL_PART_ID] = 6;
 	return widths;
 }
 
@@ -204,8 +203,7 @@ public int[] getColumnWidths() {
 Returns whether the cell is editable or not.  In this model, all the cells in
 columns 3 and greater are editable.
 @param rowIndex unused.
-@param columnIndex the index of the column to check whether it is editable
-or not.
+@param columnIndex the index of the column to check whether it is editable or not.
 @return whether the cell is editable or not.
 */
 public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -217,8 +215,7 @@ public boolean isCellEditable(int rowIndex, int columnIndex) {
 }
 
 /**
-Sets up the data Vectors to display the diversion collection data in the
-GUI.
+Sets up the data lists to display the diversion collection data in the GUI.
 */
 @SuppressWarnings("unchecked")
 private void setupData() {
@@ -227,9 +224,9 @@ private void setupData() {
 	int size = _data.size();
 	int size2 = 0;
 	StateMod_Diversion l = null;
-	String colType = null;
+	StateMod_Diversion_CollectionType colType = null;
 	String id = null;
-	String partType = null;
+	StateMod_Diversion_CollectionPartType partType = null;
 	List<String> ids = null;
 	__data = new List[__COLUMNS];
 	for (int i = 0; i < __COLUMNS; i++) {
@@ -267,8 +264,8 @@ private void setupData() {
 				__data[__COL_ID].add(id);
 //				__data[__COL_DIV].add(div);
 				__data[__COL_YEAR].add(new Integer(years[j]));
-				__data[__COL_COL_TYPE].add(colType);
-				__data[__COL_PART_TYPE].add(partType);
+				__data[__COL_COL_TYPE].add(colType.toString());
+				__data[__COL_PART_TYPE].add(partType.toString());
 				__data[__COL_PART_ID].add(ids.get(k));
 				rows++;
 			}

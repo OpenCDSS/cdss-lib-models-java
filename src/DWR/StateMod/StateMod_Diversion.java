@@ -368,47 +368,12 @@ protected List<StateMod_Parcel> _parcel_Vector = new Vector<StateMod_Parcel>();
 // Collections are set up to be specified by year, although currently for
 // diversions collections are always the same for the full period.
 
-/**
-Types of collections.  An aggregate merges the water rights whereas
-a system keeps all the water rights but just has one ID.  See email from Erin
-Wilson 2004-09-01, to reiterate current modeling procedures:
-<pre>
-<ol>
-<li>Multistructure should be used to represent two or more structures
-that divert from DIFFERENT TRIBUTARIES to serve the same demand
-(irrigated acreage or M&I demand).  In the Historic model used to
-estimate Baseflows, the historic diversions need to be represented on
-the correct tributary, so all structures are in the network.  Average
-efficiencies need to be set for these structures, since IWR has been
-assigned to only one structure.  In Baseline and Calculated mode, the
-multistruct(x,x) command will assign all demand to the primary structure
-and zero out the demand for the secondary structures.  Water rights will
-continue to be assigned to each individual structure, and operating
-rules need to be included to allow the model to divert from the
-secondary structure location (under their water right) to meet the
-primary structure demand.</li>
-<li>Divsystems should be used to represents two or more structures with
-intermingled lands and/or diversions that divert from the SAME
-TRIBUTARY.  Only the primary structure should be included in the
-network.  The Divsystem(x,x) command will combine historic diversions,
-capacities, and acreages for use in the Historic model and to create
-Baseflows.  Water rights for all structures will be assigned explicitly
-to the primary structure.  No operating rules or set efficiency commands are required.</li>
-<li>Aggregates.  The only difference between Divsystems and Aggregates
-is that the water rights are not necessarily assigned explicitly, but
-are generally grouped into water rights classes.</li>
-</pre>
-*/
-public static String COLLECTION_TYPE_AGGREGATE = "Aggregate";
-public static String COLLECTION_TYPE_SYSTEM = "System";
-public static String COLLECTION_TYPE_MULTISTRUCT = "MultiStruct";
-
-private String __collection_type = StateMod_Util.MISSING_STRING;
+private StateMod_Diversion_CollectionType __collection_type = null;
 
 /**
-Used by DMI software - currently no options.
+Used by DMI software - currently only DITCH is used.
 */
-private String __collection_part_type = "Ditch";
+private StateMod_Diversion_CollectionPartType __collection_part_type = StateMod_Diversion_CollectionPartType.DITCH;
 
 /**
 The identifiers for data that are collected - null if not a collection location.
@@ -1078,22 +1043,6 @@ public void disconnectRights ()
 }
 
 /**
-Clean up for garbage collection.
-*/
-protected void finalize()
-throws Throwable {
-	_cdividy = null;
-	_username = null;
-	_rivret = null;
-	_rights = null;
-	_demand_DayTS = null;
-	_diversion_MonthTS = null;
-	_demand_MonthTS = null;
-	_georecord = null;
-	super.finalize();
-}
-
-/**
 Return the irrigated acreage.
 */
 public double getArea() {
@@ -1183,7 +1132,7 @@ public List<String> getCollectionPartIDs ( int year )
 Returns the collection part type ("Ditch").
 @return the collection part type ("Ditch").
 */
-public String getCollectionPartType() {
+public StateMod_Diversion_CollectionPartType getCollectionPartType() {
 	return __collection_part_type;
 }
 
@@ -1191,7 +1140,7 @@ public String getCollectionPartType() {
 Return the collection type, "Aggregate", "System", or "MultiStruct".
 @return the collection type, "Aggregate", "System", or "MultiStruct".
 */
-public String getCollectionType()
+public StateMod_Diversion_CollectionType getCollectionType()
 {	return __collection_type;
 }
 
@@ -2092,10 +2041,9 @@ public void setCollectionPartIDs ( List<String> ids )
 
 /**
 Set the collection type.
-@param collection_type The collection type, either
-COLLECTION_TYPE_AGGREGATE, COLLECTION_TYPE_SYSTEM, or COLLECTION_TYPE_MULTISTRUCT.
+@param collection_type The collection type.
 */
-public void setCollectionType ( String collection_type )
+public void setCollectionType ( StateMod_Diversion_CollectionType collection_type )
 {	__collection_type = collection_type;
 }
 
@@ -3075,9 +3023,9 @@ throws Exception
 	List<String> ignoredCommentIndicators = new Vector<String>(1);
 	ignoredCommentIndicators.add ( "#>");
 	String[] line = new String[fieldCount];
-	String colType = null;
+	StateMod_Diversion_CollectionType colType = null;
 	String id = null;
-	String partType = null;	
+	StateMod_Diversion_CollectionPartType partType = null;	
 	StringBuffer buffer = new StringBuffer();
 	List<String> ids = null;
 
@@ -3126,9 +3074,9 @@ throws Exception
 				for ( k = 0; k < ids.size(); k++ ) {
 					line[0] = StringUtil.formatString(id,formats[0]).trim();
 					line[1] = StringUtil.formatString(years[iyear],formats[1]).trim();
-					line[2] = StringUtil.formatString(colType,formats[2]).trim();
-					line[3] = StringUtil.formatString(partType,formats[3]).trim();
-					line[4] = StringUtil.formatString(((String)(ids.get(k))),formats[4]).trim();
+					line[2] = StringUtil.formatString(colType.toString(),formats[2]).trim();
+					line[3] = StringUtil.formatString(partType.toString(),formats[3]).trim();
+					line[4] = StringUtil.formatString(ids.get(k),formats[4]).trim();
 		
 					buffer = new StringBuffer();	
 					for (int ifield = 0; ifield < fieldCount; ifield++) {

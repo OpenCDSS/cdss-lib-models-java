@@ -121,7 +121,7 @@ public static StateCU_Location getLocationForPartID ( List<StateCU_Location> CUL
 	for ( int i = 0; i < size; i++ ) {
 		culoc = CULocation_List.get(i);
 		// Only check aggregates/collections that are composed of ditches.
-		if ( !culoc.getCollectionPartType().equalsIgnoreCase(StateCU_Location.COLLECTION_PART_TYPE_DITCH) ) {
+		if ( culoc.getCollectionPartType() != StateCU_Location_CollectionPartType.DITCH ) {
 			continue;
 		}
 		// Get the part identifiers...

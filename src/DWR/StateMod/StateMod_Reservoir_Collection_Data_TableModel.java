@@ -227,9 +227,9 @@ private void setupData() {
 	int size = _data.size();
 	int size2 = 0;
 	StateMod_Reservoir l = null;
-	String colType = null;
+	StateMod_Reservoir_CollectionType colType = null;
 	String id = null;
-	String partType = null;
+	StateMod_Reservoir_CollectionPartType partType = null;
 	List<String> ids = null;
 	__data = new List[__COLUMNS];
 	for (int i = 0; i < __COLUMNS; i++) {
@@ -239,7 +239,7 @@ private void setupData() {
 	int rows = 0;
 	
 	for (int i = 0; i < size; i++) {
-		l = (StateMod_Reservoir)_data.get(i);
+		l = _data.get(i);
 		id = l.getID();
 //		div = new Integer(l.getCollectionDiv());
 
@@ -267,8 +267,8 @@ private void setupData() {
 				__data[__COL_ID].add(id);
 //				__data[__COL_DIV].add(div);
 				__data[__COL_YEAR].add(new Integer(years[j]));
-				__data[__COL_COL_TYPE].add(colType);
-				__data[__COL_PART_TYPE].add(partType);
+				__data[__COL_COL_TYPE].add(colType.toString());
+				__data[__COL_PART_TYPE].add(partType.toString());
 				__data[__COL_PART_ID].add(ids.get(k));
 				rows++;
 			}

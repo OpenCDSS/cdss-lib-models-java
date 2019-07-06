@@ -109,26 +109,12 @@ public class StateCU_Location extends StateCU_Data
 implements StateCU_ComponentValidator
 {
 
-/**
-Types of collections.  An aggregate merges the water rights whereas
-a system keeps all the water rights but just has one ID.
-*/
-public static String COLLECTION_TYPE_AGGREGATE = "Aggregate";
-public static String COLLECTION_TYPE_SYSTEM = "System";
-
-/**
-Types of collection parts, either Ditch or Parcel
-*/
-public static String COLLECTION_PART_TYPE_DITCH = "Ditch";
-public static String COLLECTION_PART_TYPE_PARCEL = "Parcel";
-public static String COLLECTION_PART_TYPE_WELL = "WEll";
-
-private String __collection_type = StateCU_Util.MISSING_STRING;
+private StateCU_Location_CollectionType __collection_type = null;
 
 /**
 Collection part type (see COLLECTION_PART_TYPE_*), used by DMI software.
 */
-private String __collection_part_type = StateCU_Util.MISSING_STRING;
+private StateCU_Location_CollectionPartType __collection_part_type = null;
 
 /**
 The identifiers for data that are collected - null if not a collection
@@ -145,7 +131,7 @@ If the list of identifiers is consistent for the entire period then the
 __collectionYear array will have a size of 0 and the __collectionIDTypeList will be a single list.
 This list is only used for well collections that use well identifiers for the parts.
 */
-private List<List <String>> __collectionIDTypeList = null;
+private List<List<StateCU_Location_CollectionPartIdType>> __collectionIDTypeList = null;
 
 /**
 An array of years that correspond to the aggregate/system.  Parcel
@@ -259,15 +245,15 @@ public List<String> getCollectionPartIDsForYear ( int year )
 {	if ( (__collectionIDList == null) || (__collectionIDList.size() == 0) ) {
 		return null;
 	}
-	if ( __collection_part_type.equalsIgnoreCase(COLLECTION_PART_TYPE_DITCH) ) {
+	if ( __collection_part_type == StateCU_Location_CollectionPartType.DITCH ) {
 		// The list of part IDs will be the first and only list (same for all years)...
 		return __collectionIDList.get(0);
 	}
-	else if ( __collection_part_type.equalsIgnoreCase(COLLECTION_PART_TYPE_WELL) ) {
+	else if ( __collection_part_type == StateCU_Location_CollectionPartType.WELL ) {
 		// The list of part IDs will be the first and only list (same for all years)...
 		return __collectionIDList.get(0);
 	}
-	else if ( __collection_part_type.equalsIgnoreCase(COLLECTION_PART_TYPE_PARCEL) ) {
+	else if ( __collection_part_type == StateCU_Location_CollectionPartType.PARCEL ) {
 		// The list of part IDs needs to match the year.
 		for ( int i = 0; i < __collectionYear.length; i++ ) {
 			if ( year == __collectionYear[i] ) {
@@ -283,7 +269,7 @@ Return the collection part ID type list.  This is used with well locations when 
 by well identifiers (WDIDs and permit receipt numbers).
 @return the list of collection part ID types, or null if not defined.
 */
-public List<String> getCollectionPartIDTypes () {
+public List<StateCU_Location_CollectionPartIdType> getCollectionPartIDTypes () {
 	if (__collectionIDTypeList == null ) {
 		return null;
 	}
@@ -293,9 +279,9 @@ public List<String> getCollectionPartIDTypes () {
 }
 
 /**
-Return the collection part type, COLLECTION_PART_TYPE_DITCH or COLLECTION_PART_TYPE_PARCEL.
+Return the collection part type, DITCH, PARCEL, or WELL.
 */
-public String getCollectionPartType()
+public StateCU_Location_CollectionPartType getCollectionPartType()
 {	return __collection_part_type;
 }
 
@@ -303,7 +289,7 @@ public String getCollectionPartType()
 Return the collection type, "Aggregate", "System", or "MultiStruct".
 @return the collection type, "Aggregate", "System", or "MultiStruct".
 */
-public String getCollectionType()
+public StateCU_Location_CollectionType getCollectionType()
 {	return __collection_type;
 }
 
@@ -454,9 +440,9 @@ Indicate whether the CU Location has groundwater only supply.  This will
 be the case if the location is a collection with part type of "Parcel".
 */
 public boolean hasGroundwaterOnlySupply ()
-{	String collectionPartType = getCollectionPartType();
-	if ( isCollection() && (collectionPartType.equalsIgnoreCase(COLLECTION_PART_TYPE_PARCEL) ||
-		collectionPartType.equalsIgnoreCase(COLLECTION_PART_TYPE_WELL))) {
+{	StateCU_Location_CollectionPartType collectionPartType = getCollectionPartType();
+	if ( isCollection() && ((collectionPartType == StateCU_Location_CollectionPartType.PARCEL) ||
+		(collectionPartType == StateCU_Location_CollectionPartType.WELL)) ) {
 		// TODO SAM 2007-05-11 Rectify part types with StateMod
 		return true;
 	}
@@ -695,10 +681,10 @@ Set the collection list for an aggregate/system.  It is assumed that the
 collection applies to all years of data.
 @param ids The identifiers indicating the locations to collection.
 */
-public void setCollectionPartIDs ( List<String> ids, List<String> idTypes )
+public void setCollectionPartIDs ( List<String> ids, List<StateCU_Location_CollectionPartIdType> idTypes )
 {	
 	__collectionIDList = new ArrayList<List<String>>();
-	__collectionIDTypeList = new ArrayList<List<String>>();
+	__collectionIDTypeList = new ArrayList<List<StateCU_Location_CollectionPartIdType>>();
 	__collectionYear = new int[1];
 
 	// Now assign...
@@ -752,10 +738,9 @@ public void setCollectionPartIDsForYear ( int year, List<String> ids )
 
 /**
 Set the collection part type.
-@param collection_part_type The collection part type,
-either COLLECTION_PART_TYPE_DITCH or COLLECTION_PART_TYPE_PARCEL.
+@param collection_part_type The collection part type.
 */
-public void setCollectionPartType ( String collection_part_type )
+public void setCollectionPartType ( StateCU_Location_CollectionPartType collection_part_type )
 {	__collection_part_type = collection_part_type;
 }
 
@@ -763,7 +748,7 @@ public void setCollectionPartType ( String collection_part_type )
 Set the collection type.
 @param collection_type The collection type, either "Aggregate" or "System".
 */
-public void setCollectionType ( String collection_type )
+public void setCollectionType ( StateCU_Location_CollectionType collection_type )
 {	__collection_type = collection_type;
 }
 
@@ -1527,12 +1512,12 @@ throws Exception {
 	List<String> ignoreCommentString = new ArrayList<String>(1);
 	ignoreCommentString.add ( "#>" );
 	String[] field = new String[fieldCount];
-	String colType = null;
+	StateCU_Location_CollectionType colType = null;
 	String id = null;
-	String partType = null;	
+	StateCU_Location_CollectionPartType partType = null;	
 	StringBuffer buffer = new StringBuffer();
 	List<String> ids = null;
-	List<String> idTypes = null;
+	List<StateCU_Location_CollectionPartIdType> idTypes = null;
 
 	try {
 		// Add some basic comments at the top of the file.  However, do this to a copy of the
@@ -1588,8 +1573,8 @@ throws Exception {
 					field[0] = StringUtil.formatString(id,formats[0]).trim();
 					field[1] = StringUtil.formatString(div,formats[1]).trim();
 					field[2] = StringUtil.formatString(years[j],formats[2]).trim();
-					field[3] = StringUtil.formatString(colType,formats[3]).trim();
-					field[4] = StringUtil.formatString(partType,formats[4]).trim();
+					field[3] = StringUtil.formatString(colType.toString(),formats[3]).trim();
+					field[4] = StringUtil.formatString(partType.toString(),formats[4]).trim();
 					field[5] = StringUtil.formatString(ids.get(k),formats[5]).trim();
 					field[6] = "";
 					if ( numIdTypes > k ) {
