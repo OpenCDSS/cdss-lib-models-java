@@ -246,12 +246,12 @@ private void setupData() {
 	int nParts = 0;
 	int nIdTypes = 0;
 	StateCU_Location culoc = null;
-	String colType = null;
+	StateCU_Location_CollectionType colType = null;
 	String id = null;
-	String partType = null;
+	StateCU_Location_CollectionPartType partType = null;
 	List<String> ids = null;
-	List<String> idTypes = null;
-	String idType = null;
+	List<StateCU_Location_CollectionPartIdType> idTypes = null;
+	StateCU_Location_CollectionPartIdType idType = null;
 	__data = new List[__COLUMNS];
 	for (int i = 0; i < __COLUMNS; i++) {
 		__data[i] = new Vector<Object>();
@@ -302,14 +302,14 @@ private void setupData() {
 				__data[__COL_ID].add(id);
 				__data[__COL_DIV].add(div);
 				__data[__COL_YEAR].add(new Integer(years[j]));
-				__data[__COL_COL_TYPE].add(colType);
-				__data[__COL_PART_TYPE].add(partType);
+				__data[__COL_COL_TYPE].add(colType.toString());
+				__data[__COL_PART_TYPE].add(partType.toString());
 				__data[__COL_PART_ID].add(ids.get(k));
-				idType = "";
+				idType = null;
 				if ( nIdTypes != 0 ) {
-					idType = (String)idTypes.get(k); // Should align with ids.get(k)
+					idType = idTypes.get(k); // Should align with ids.get(k)
 				}
-				__data[__COL_PART_ID_TYPE].add(idType);
+				__data[__COL_PART_ID_TYPE].add(idType.toString());
 				rows++;
 			}
 		}

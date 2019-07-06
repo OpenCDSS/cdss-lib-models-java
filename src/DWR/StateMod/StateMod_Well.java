@@ -268,35 +268,17 @@ List of parcel data, in particular to allow StateDMI to detect when a well had n
 */
 protected List<StateMod_Parcel> _parcel_Vector = new Vector<StateMod_Parcel>();
 
-// Collections are set up to be specified by year for wells, using parcels as the parts.
+// Collections are set up to be specified by year for wells, using:
+// - parcels as the parts for legacy Rio Grande
+// - well WDIDs as the parts otherwise (current approach)
+
+private StateMod_Well_CollectionType __collection_type = null;
 
 /**
-Types of collections.  An aggregate merges the water rights/permits whereas
-a system keeps all the water rights but just has one ID.
+Collection part type (DITCH, PARCEL, WELL).
+Used by DMI software when the well is a collection.
 */
-public static String COLLECTION_TYPE_AGGREGATE = "Aggregate";
-public static String COLLECTION_TYPE_SYSTEM = "System";
-
-/**
- * How aggregates are specified, as collection of ditches, parcels, or wells.
- * If wells, see COLLECTION_WELL_PART_ID_TYPE_*.
- */
-public static String COLLECTION_PART_TYPE_DITCH = "Ditch";
-public static String COLLECTION_PART_TYPE_PARCEL = "Parcel";
-public static String COLLECTION_PART_TYPE_WELL = "Well";
-
-/**
- * Indicates the type of aggregate part ID when aggregating wells.
- */
-public static String COLLECTION_WELL_PART_ID_TYPE_WDID = "WDID";
-public static String COLLECTION_WELL_PART_ID_TYPE_RECEIPT = "Receipt";
-
-private String __collection_type = StateMod_Util.MISSING_STRING;
-
-/**
-Used by DMI software - currently no options.
-*/
-private String __collection_part_type = COLLECTION_PART_TYPE_PARCEL;
+private StateMod_Well_CollectionPartType __collection_part_type = null;
 
 /**
 The identifiers for data that are collected - null if not a collection
@@ -307,13 +289,14 @@ __collectionYear array will have a size of 0 and the __collectionIDList will be 
 private List<List <String>> __collectionIDList = null;
 
 /**
-The identifiers types for data that are collected - null if not a collection
-location.  This is a List of Lists corresponding to each __collectionYear element.
+The identifiers types for data that are collected - null if not a collection location.
+This is a List of Lists corresponding to each __collectionYear element.
 If the list of identifiers is consistent for the entire period then the
 __collectionYear array will have a size of 0 and the __collectionIDTypeList will be a single list.
-This list is only used for well collections that use well identifiers for the parts.
+This list is only used for well collections that use well identifiers for the parts,
+where the identifier can be WDID or RECEIPT type.
 */
-private List<List <String>> __collectionIDTypeList = null;
+private List<List <StateMod_Well_CollectionPartIdType>> __collectionIDTypeList = null;
 
 /**
 An array of years that correspond to the aggregate/system.  Well collections are defined by year.
@@ -1039,11 +1022,12 @@ public List<String> getCollectionPartIDs ( int year )
 {	if ( (__collectionIDList == null) || (__collectionIDList.size() == 0) ) {
 		return null;
 	}
-	if ( __collection_part_type.equalsIgnoreCase("Ditch") || __collection_part_type.equalsIgnoreCase("Well") ) {
+	if ( __collection_part_type == StateMod_Well_CollectionPartType.DITCH ||
+		__collection_part_type == StateMod_Well_CollectionPartType.WELL ) {
 		// The list of part IDs will be the first and only list (year irrelevant)...
 		return (List<String>)__collectionIDList.get(0);
 	}
-	else if ( __collection_part_type.equalsIgnoreCase("Parcel") ) {
+	else if ( __collection_part_type == StateMod_Well_CollectionPartType.PARCEL ) {
 		// The list of part IDs needs to match the year.
 		for ( int i = 0; i < __collectionYear.length; i++ ) {
 			if ( year == __collectionYear[i] ) {
@@ -1055,17 +1039,17 @@ public List<String> getCollectionPartIDs ( int year )
 }
 
 /**
-Return the collection part type (see COLLECTION_PART_TYPE_*).
+Return the collection part type.
 */
-public String getCollectionPartType()
+public StateMod_Well_CollectionPartType getCollectionPartType()
 {	return __collection_part_type;
 }
 
 /**
-Return the collection type, "Aggregate" or "System".
-@return the collection type, "Aggregate" or "System".
+Return the collection type.
+@return the collection type.
 */
-public String getCollectionType()
+public StateMod_Well_CollectionType getCollectionType()
 {	return __collection_type;
 }
 
@@ -1458,9 +1442,9 @@ Indicate whether the well has groundwater only supply.  This will
 be the case if the location is a collection with part type of "Parcel" or "Well".
 */
 public boolean hasGroundwaterOnlySupply ()
-{	String collectionPartType = getCollectionPartType();
-	if ( isCollection() && (collectionPartType.equalsIgnoreCase(COLLECTION_PART_TYPE_PARCEL) ||
-		(collectionPartType.equalsIgnoreCase(COLLECTION_PART_TYPE_WELL))) ) {
+{	StateMod_Well_CollectionPartType collectionPartType = getCollectionPartType();
+	if ( isCollection() && ((collectionPartType == StateMod_Well_CollectionPartType.PARCEL) ||
+		(collectionPartType == StateMod_Well_CollectionPartType.WELL)) ) {
 		// TODO SAM 2007-05-11 Rectify part types with StateCU
 		return true;
 	}
@@ -1898,10 +1882,10 @@ public void setCollectionDiv ( int collection_div )
 Set the collection list for an aggregate/system for the entire period, used when specifying well ID lists.
 @param partIdList The identifiers indicating the locations in the collection.
 */
-public void setCollectionPartIDs ( List<String> partIdList, List<String> partIdTypeList )
+public void setCollectionPartIDs ( List<String> partIdList, List<StateMod_Well_CollectionPartIdType> partIdTypeList )
 {		__collectionIDList = new ArrayList<List<String>> ( 1 );
 		__collectionIDList.add ( partIdList );
-		__collectionIDTypeList = new ArrayList<List<String>> ( 1 );
+		__collectionIDTypeList = new ArrayList<List<StateMod_Well_CollectionPartIdType>> ( 1 );
 		__collectionIDTypeList.add ( partIdTypeList );
 		__collectionYear = new int[1];
 		__collectionYear[0] = 0;
@@ -1954,7 +1938,7 @@ Return the collection part ID type list.  This is used with well locations when 
 by well identifiers (WDIDs and permit receipt numbers).
 @return the list of collection part ID types, or null if not defined.
 */
-public List<String> getCollectionPartIDTypes () {
+public List<StateMod_Well_CollectionPartIdType> getCollectionPartIDTypes () {
 	if (__collectionIDTypeList == null ) {
 		return null;
 	}
@@ -1967,15 +1951,15 @@ public List<String> getCollectionPartIDTypes () {
 Set the collection part type.
 @param collection_part_type The collection part type (see COLLECTION_PART_TYPE_*).
 */
-public void setCollectionPartType ( String collection_part_type )
+public void setCollectionPartType ( StateMod_Well_CollectionPartType collection_part_type )
 {	__collection_part_type = collection_part_type;
 }
 
 /**
 Set the collection type.
-@param collection_type The collection type, either "Aggregate" or "System".
+@param collection_type The collection type, either AGGREGATE or SYSTEM.
 */
-public void setCollectionType ( String collection_type )
+public void setCollectionType ( StateMod_Well_CollectionType collection_type )
 {	__collection_type = collection_type;
 }
 
@@ -3297,7 +3281,7 @@ throws Exception {
 	String partType = null;
 	StringBuffer buffer = new StringBuffer();
 	List<String> ids = null;
-	List<String> idTypes = null;
+	List<StateMod_Well_CollectionPartIdType> idTypes = null;
 
 	try {
 		// Add some basic comments at the top of the file.  However, do this to a copy of the
@@ -3330,7 +3314,7 @@ throws Exception {
 		out.println(buffer.toString());
 		
 		for (int i = 0; i < size; i++) {
-			well = (StateMod_Well)data.get(i);
+			well = data.get(i);
 			id = well.getID();
 			years = well.getCollectionYears();
 			if (years == null) {
@@ -3339,8 +3323,8 @@ throws Exception {
 			else {
 				numYears = years.length;
 			}
-			colType = well.getCollectionType();
-			partType = well.getCollectionPartType();
+			colType = well.getCollectionType().toString();
+			partType = well.getCollectionPartType().toString();
 			idTypes = well.getCollectionPartIDTypes(); // Currently crosses all years
 			int numIdTypes = 0;
 			if ( idTypes != null ) {
@@ -3355,11 +3339,11 @@ throws Exception {
 					field[1] = StringUtil.formatString(years[iyear], formats[1]).trim();
 					field[2] = StringUtil.formatString(colType, formats[2]).trim();
 					field[3] = StringUtil.formatString(partType, formats[3]).trim();
-					field[4] = StringUtil.formatString( ((String)(ids.get(k))), formats[4]).trim();
+					field[4] = StringUtil.formatString(ids.get(k), formats[4]).trim();
 					field[5] = "";
 					if ( numIdTypes > k ) {
 						// Have data to output
-						field[5] = StringUtil.formatString(((String)(idTypes.get(k))),formats[5]).trim();
+						field[5] = StringUtil.formatString(idTypes.get(k).toString(),formats[5]).trim();
 					}
 	
 					buffer = new StringBuffer();	

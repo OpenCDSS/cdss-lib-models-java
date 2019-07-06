@@ -145,12 +145,12 @@ private int __parcelMatchClass;
 /**
  * Collection type (if a collection), StateMod_Well.COLLECTION_TYPE_*.
  */
-private String __collectionType = "";
+private StateMod_Well_CollectionType __collectionType = null;
 
 /**
  * Collection part type (if a collection), StateMod_Well.COLLECTION_PART_TYPE_*.
  */
-private String __collectionPartType = "";
+private StateMod_Well_CollectionPartType __collectionPartType = null;
 
 /**
  * Collection part ID (if a collection), ID corresponding to the part type.
@@ -158,9 +158,9 @@ private String __collectionPartType = "";
 private String __collectionPartId = "";
 
 /**
- * Collection part ID type (if a collection), StateMod_Well.COLLECTION_WELL_PART_ID_TYPE_*.
+ * Collection part ID type (if a collection).
  */
-private String __collectionPartIdType = "";
+private StateMod_Well_CollectionPartIdType __collectionPartIdType = null;
 
 /**
  * Well WDID.	
@@ -365,7 +365,7 @@ public String getCollectionPartId ()
 Return the collection part ID type.
 @return the collection part ID type.
 */
-public String getCollectionPartIdType ()
+public StateMod_Well_CollectionPartIdType getCollectionPartIdType ()
 {	return __collectionPartIdType;
 }
 
@@ -373,7 +373,7 @@ public String getCollectionPartIdType ()
 Return the collection part type.
 @return the collection part type.
 */
-public String getCollectionPartType ()
+public StateMod_Well_CollectionPartType getCollectionPartType ()
 {	return __collectionPartType;
 }
 
@@ -381,7 +381,7 @@ public String getCollectionPartType ()
 Return the collection type.
 @return the collection type.
 */
-public String getCollectionType ()
+public StateMod_Well_CollectionType getCollectionType ()
 {	return __collectionType;
 }
 
@@ -799,10 +799,10 @@ throws Exception {
 			aRight.setParcelID(((String)v.get(8)).trim());
 			if ( fileHasExtendedComments ) {
 				try {
-					aRight.setCollectionType((String)v.get(9));
-					aRight.setCollectionPartType((String)v.get(10));
+					aRight.setCollectionType(StateMod_Well_CollectionType.valueOfIgnoreCase((String)v.get(9)));
+					aRight.setCollectionPartType(StateMod_Well_CollectionPartType.valueOfIgnoreCase((String)v.get(10)));
 					aRight.setCollectionPartId((String)v.get(11));
-					aRight.setCollectionPartIdType((String)v.get(12));
+					aRight.setCollectionPartIdType(StateMod_Well_CollectionPartIdType.valueOfIgnoreCase((String)v.get(12)));
 					aRight.setXWDID((String)v.get(13));
 					try {
 						DateTime dt = DateTime.parse((String)v.get(14));
@@ -868,12 +868,12 @@ public void setCollectionPartId(String collectionPartId) {
 Set the collection part ID type.
 @param collectionPartId collection part ID type.
 */
-public void setCollectionPartIdType(String collectionPartIdType) {
+public void setCollectionPartIdType(StateMod_Well_CollectionPartIdType collectionPartIdType) {
 	if (collectionPartIdType == null) {
 		return;
 	}
-	if (!collectionPartIdType.equals(__collectionPartIdType)) {
-		__collectionPartIdType = collectionPartIdType.trim();
+	if ( collectionPartIdType != __collectionPartIdType ) {
+		__collectionPartIdType = collectionPartIdType;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_WELL_RIGHTS, true);
@@ -885,12 +885,12 @@ public void setCollectionPartIdType(String collectionPartIdType) {
 Set the collection part type.
 @param collectionPartType collection part type.
 */
-public void setCollectionPartType(String collectionPartType) {
+public void setCollectionPartType(StateMod_Well_CollectionPartType collectionPartType) {
 	if (collectionPartType == null) {
 		return;
 	}
-	if (!collectionPartType.equals(__collectionPartType)) {
-		__collectionPartType = collectionPartType.trim();
+	if ( collectionPartType != __collectionPartType ) {
+		__collectionPartType = collectionPartType;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_WELL_RIGHTS, true);
@@ -902,12 +902,12 @@ public void setCollectionPartType(String collectionPartType) {
 Set the collection type.
 @param collectionType collection part type.
 */
-public void setCollectionType(String collectionType) {
+public void setCollectionType(StateMod_Well_CollectionType collectionType) {
 	if (collectionType == null) {
 		return;
 	}
-	if (!collectionType.equals(__collectionType)) {
-		__collectionType = collectionType.trim();
+	if ( collectionType != __collectionType ) {
+		__collectionType = collectionType;
 		setDirty ( true );
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(StateMod_DataSet.COMP_WELL_RIGHTS, true);
@@ -1541,28 +1541,29 @@ throws Exception {
 			}
 			if ( writeExtendedDataComments) {
 				// Also add the additional properties
-				String collectionType = right.getCollectionType();
-				if ( collectionType == null ) {
-					collectionType = "";
+				StateMod_Well_CollectionType collectionType = right.getCollectionType();
+				String collectionTypeString = "";
+				if ( collectionType != null ) {
+					collectionTypeString = collectionType.toString();
 				}
-				collectionType = StringUtil.formatString(collectionType,"%-14.14s");
-				String partType = right.getCollectionPartType();
-				if ( partType == null ) {
-					partType = "";
+				collectionTypeString = StringUtil.formatString(collectionTypeString,"%-14.14s");
+				StateMod_Well_CollectionPartType partType = right.getCollectionPartType();
+				String partTypeString = "";
+				if ( partType != null ) {
+					partTypeString = partType.toString();
 				}
-				partType = StringUtil.formatString(partType,"%-8.8s");
+				partTypeString = StringUtil.formatString(partTypeString,"%-8.8s");
 				String partId = right.getCollectionPartId();
 				if ( partId == null ) {
 					partId = "";
 				}
 				partId = StringUtil.formatString(partId,"%-20.20s");
-				String partIdType = right.getCollectionPartIdType();
-				if ( partIdType == null ) {
-					partIdType = "        ";
+				StateMod_Well_CollectionPartIdType partIdType = right.getCollectionPartIdType();
+				String partIdTypeString = "";
+				if ( partIdType != null ) {
+					partIdTypeString = partIdType.toString();
 				}
-				else {
-					partIdType = StringUtil.formatString(partIdType,"%-8.8s");
-				}
+				partIdTypeString = StringUtil.formatString(partIdTypeString,"%-8.8s");
 				String wdid = right.getXWDID();
 				if ( wdid == null ) {
 					wdid = "        ";
@@ -1655,7 +1656,7 @@ throws Exception {
 				else {
 					proratedYieldString = String.format("%8.2f", proratedYield/.002228); // Convert decree as CFS to GPM
 				}
-				iline = iline + " " + collectionType + " " + partType + " " + partId + " " + partIdType + " "
+				iline = iline + " " + collectionType + " " + partTypeString + " " + partId + " " + partIdTypeString + " "
 					+ wdid + " " + approDateString + " " + approDateAdminNumberString + " " + use + " " + receipt + " " + permitDateString
 					+ " " + permitDateAdminNumberString + " " + yieldGPMString + " " + yieldCFSString + " "
 					+ apexGPMString + " " + apexCFSString + " " + ditchFractionString + " "

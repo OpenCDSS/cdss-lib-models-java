@@ -238,12 +238,12 @@ private void setupData() {
 	int nParts = 0;
 	int nIdTypes = 0;
 	StateMod_Well well = null;
-	String colType = null;
+	StateMod_Well_CollectionType colType = null;
 	String id = null;
-	String partType = null;
+	StateMod_Well_CollectionPartType partType = null;
 	List<String> ids = null;
-	List<String> idTypes = null;
-	String idType = null;
+	List<StateMod_Well_CollectionPartIdType> idTypes = null;
+	StateMod_Well_CollectionPartIdType idType = null;
 	__data = new List[__COLUMNS];
 	for (int i = 0; i < __COLUMNS; i++) {
 		__data[i] = new Vector<Object>();
@@ -292,14 +292,13 @@ private void setupData() {
 			for (int k = 0; k < nParts; k++) {
 				__data[__COL_ID].add(id);
 				__data[__COL_YEAR].add(new Integer(years[j]));
-				__data[__COL_COL_TYPE].add(colType);
-				__data[__COL_PART_TYPE].add(partType);
+				__data[__COL_COL_TYPE].add(colType.toString());
+				__data[__COL_PART_TYPE].add(partType.toString());
 				__data[__COL_PART_ID].add(ids.get(k));
-				idType = "";
 				if ( nIdTypes != 0 ) {
 					idType = idTypes.get(k); // Should align with ids.get(k)
 				}
-				__data[__COL_PART_ID_TYPE].add(idType);
+				__data[__COL_PART_ID_TYPE].add(idType.toString());
 				rows++;
 			}
 		}

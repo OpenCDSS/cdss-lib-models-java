@@ -437,7 +437,7 @@ public void displayDataSet()
 	for (int i = 0; i < size; i++) {
 		hadData = false;
 		isGroup = false;
-		comp = (DataSetComponent)v.get(i);
+		comp = v.get(i);
 		if ( (comp == null) || !comp.isVisible()) {
 			continue;
 		}
@@ -524,9 +524,9 @@ private boolean displayDataSetComponent ( DataSetComponent comp, SimpleJTree_Nod
 	if ( data_Object == null ) {
 		return hadData;
 	}
-	List data = null;
+	List<?> data = null;
 	if (data_Object instanceof List) {
-		data = (List)comp.getData();
+		data = (List<?>)comp.getData();
 	}
 	else {
 		// Continue (REVISIT - what components would this happen for?)...
