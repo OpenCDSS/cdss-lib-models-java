@@ -44,6 +44,8 @@ package DWR.StateCU;
 
 import java.util.List;
 
+import javax.swing.JFrame;
+
 import DWR.StateMod.StateMod_Data_JFrame;
 import RTi.Util.GUI.JScrollWorksheet;
 
@@ -63,13 +65,13 @@ Constructor.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateCU_CropCharacteristics_Data_JFrame(List<StateCU_CropCharacteristics> data, String titleString,
+public StateCU_CropCharacteristics_Data_JFrame(JFrame parent, List<StateCU_CropCharacteristics> data, String titleString,
 boolean editable)
 throws Exception {
-	super(data, titleString, editable);
+	super(parent, 750, -1, data, titleString, editable);
 	PRINT_PORTRAIT_LINES = -1;
 	PRINT_LANDSCAPE_LINES = 55;
-	setSize(750, getHeight());
+	//setSize(750, getHeight());
 }
 
 /**

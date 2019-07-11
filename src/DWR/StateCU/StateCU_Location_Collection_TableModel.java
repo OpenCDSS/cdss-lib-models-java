@@ -302,14 +302,29 @@ private void setupData() {
 				__data[__COL_ID].add(id);
 				__data[__COL_DIV].add(div);
 				__data[__COL_YEAR].add(new Integer(years[j]));
-				__data[__COL_COL_TYPE].add(colType.toString());
-				__data[__COL_PART_TYPE].add(partType.toString());
+				if ( colType == null ) {
+					__data[__COL_COL_TYPE].add(null);
+				}
+				else {
+					__data[__COL_COL_TYPE].add(colType.toString());
+				}
+				if ( partType == null ) {
+					__data[__COL_PART_TYPE].add(null);
+				}
+				else  {
+					__data[__COL_PART_TYPE].add(partType.toString());
+				}
 				__data[__COL_PART_ID].add(ids.get(k));
 				idType = null;
 				if ( nIdTypes != 0 ) {
 					idType = idTypes.get(k); // Should align with ids.get(k)
 				}
-				__data[__COL_PART_ID_TYPE].add(idType.toString());
+				if ( idType == null) {
+					__data[__COL_PART_ID_TYPE].add(null);
+				}
+				else {
+					__data[__COL_PART_ID_TYPE].add(idType.toString());
+				}
 				rows++;
 			}
 		}

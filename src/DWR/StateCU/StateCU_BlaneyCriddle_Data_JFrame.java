@@ -40,6 +40,8 @@ package DWR.StateCU;
 
 import java.util.List;
 
+import javax.swing.JFrame;
+
 import DWR.StateMod.StateMod_Data_JFrame;
 import RTi.Util.GUI.JScrollWorksheet;
 
@@ -59,10 +61,10 @@ Constructor.
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
-public StateCU_BlaneyCriddle_Data_JFrame(List<StateCU_BlaneyCriddle> data, String titleString, boolean editable)
+public StateCU_BlaneyCriddle_Data_JFrame(JFrame parent, List<StateCU_BlaneyCriddle> data, String titleString, boolean editable)
 throws Exception {
-	super(data, titleString, editable);
-	setSize(500, 600);
+	super(parent, 500, 600, data, titleString, editable);
+	//setSize(500, 600);
 }
 
 /**
