@@ -231,24 +231,27 @@ A hashtable for the file pointers (instances of StateMod_BTS).  This is used to 
 private static Hashtable<String,StateMod_BTS> __file_Hashtable = new Hashtable<String,StateMod_BTS>();
 /**
 Direct access file record length, bytes.  140 is the B43 for 9.62, but this is reset below.
+Use a long to avoid casting when calculating position.
 */
-private int	__recordLength = 140;
+private long __recordLength = 140;
 /**
 Length of the header in bytes, including lists of stations (everything before the time series data).  This
 is assigned after reading the number of stations.  The first record format various between versions but
 always fits into one record.
+Use a long to avoid casting when calculating position.
 */
-private int	__headerLength = 0;
+private long __headerLength = 0;
 /**
 Number of bytes for one full interval (month or day) of data for all stations, to
 simplify iterations.  This is assigned after reading the number of stations.
+Use a long to avoid casting when calculating position.
 */
-private int	__intervalBytes = 0;
+private long __intervalBytes = 0;
 /**
 Estimated size of the file, calculated from the header information - used for
 debugging and to check for premature end of file.
 */
-private int	__estimatedFileLengthBytes = 0;
+private long __estimatedFileLengthBytes = 0;
 /**
 Interval base for the binary file that is being read.
 */
@@ -503,6 +506,8 @@ the owner/accounts for a reservoir.
 */
 private long calculateFilePosition ( DateTime date, int ista, int its, int iparam )
 {	long pos = -1;
+	// For very large files, the integer math below can result in positions that are larger
+	// than integer maximum value 2147483647.  Therefore, make sure that input are long values.
 	if ( __intervalBase == TimeInterval.MONTH ) {
 		if ( __comp_type == StateMod_DataSet.COMP_RESERVOIR_STATIONS ) {
 			int nowner2_cum_prev = 0;
@@ -510,20 +515,20 @@ private long calculateFilePosition ( DateTime date, int ista, int its, int ipara
 				nowner2_cum_prev = __nowner2_cum2[ista - 1];
 			}
 			pos = __headerLength	// First static records + lists of stations Previous full months...
-			+ (date.getAbsoluteMonth() - __date1.getAbsoluteMonth())*__intervalBytes
+			+ (long)(date.getAbsoluteMonth() - __date1.getAbsoluteMonth())*__intervalBytes
 			// Reservoir accounts...
 			+ nowner2_cum_prev*__recordLength
 			// Previous account time series for this station...
 			+ its*__recordLength
 			// Previous parameters for this station (each value is a 4-byte float)...
-			+ iparam*4;
+			+ iparam*4L;
 		}
 		else {
 		    // Non-reservoirs have only one time series per station.
 			pos = __headerLength	// First static records + lists of stations
-			+ (date.getAbsoluteMonth() - __date1.getAbsoluteMonth())*__intervalBytes // Previous full months...
+			+ (long)(date.getAbsoluteMonth() - __date1.getAbsoluteMonth())*__intervalBytes // Previous full months...
 			+ ista*__recordLength // Previous stations for current month...
-			+ iparam*4; // Previous parameters for this station (each value is a 4-byte float)...
+			+ iparam*4L; // Previous parameters for this station (each value is a 4-byte float)...
 		}
 	}
 	else {
@@ -535,27 +540,27 @@ private long calculateFilePosition ( DateTime date, int ista, int its, int ipara
 			}
 			pos = __headerLength	// First static records + lists of stations
 			// Previous full months...
-			+ (date.getAbsoluteMonth() - __date1.getAbsoluteMonth())*31*__intervalBytes
+			+ (long)(date.getAbsoluteMonth() - __date1.getAbsoluteMonth())*31L*__intervalBytes
 			// Previous full days in month...
-			+ (date.getDay() - 1)*__intervalBytes
+			+ (long)(date.getDay() - 1)*__intervalBytes
 			// Reservoir accounts...
 			+ nowner2_cum_prev*__recordLength
 			// Previous account time series for this station...
 			+ its*__recordLength +
 			// Previous parameters for this station (each value is a 4-byte float)...
-			+ iparam*4;
+			+ iparam*4L;
 		}
 		else {
 		    // Non-reservoirs have only one time series per station.
 			pos = __headerLength	// First static records + lists of stations
 			// Previous full months...
-			+ (date.getAbsoluteMonth() - __date1.getAbsoluteMonth())*31*__intervalBytes
+			+ (long)(date.getAbsoluteMonth() - __date1.getAbsoluteMonth())*31L*__intervalBytes
 			// Previous full days...
-			+ (date.getDay() - 1)*__intervalBytes
+			+ (long)(date.getDay() - 1)*__intervalBytes
 			// Previous stations for current day...
 			+ ista*__recordLength
 			// Previous parameters for this station (each value is a 4-byte float)...
-			+ iparam*4;
+			+ iparam*4L;
 		}
 	}
 	return pos;
@@ -835,17 +840,17 @@ throws IOException
 	__date2.setDay ( TimeUtil.numDaysInMonth(__date2) );
 
 	// Header length, used to position for data records...
-	int offset = 0;
+	long offset = 0;
 	if ( StateMod_Util.isVersionAtLeast(__version, StateMod_Util.VERSION_11_00) ) {
 		// Offset in addition to header in older format files...
-		offset = 1		// Program version info
-			+ __maxparm*3	// Parameter list
-			+ 1;		// Unit
+		offset = 1L		// Program version info
+			+ __maxparm*3L	// Parameter list
+			+ 1L;		// Unit
 	}
 	int resTotalAccountRec = 1;
 	__headerLength = __recordLength*(
 			offset	// header rec + parameters for new files
-			+ 4	// period, counts, month names, month days
+			+ 4L	// period, counts, month names, month days
 			+ __numsta	// Number of river nodes
 			+ __numdiv	// Number of diversions
 			+ __numifr	// Number of ISF reaches
@@ -1094,7 +1099,7 @@ throws IOException
 {	String routine = "StateMod_BTS.readHeader";
 	int dl = 1;
 
-	int header_rec = 0;
+	long header_rec = 0;
 	if ( StateMod_Util.isVersionAtLeast(__version, StateMod_Util.VERSION_11_00) ) {
 		// Need to skip the first record that has the file version information.
 		// The period for the file is in record 2...
@@ -1119,7 +1124,7 @@ throws IOException
 
 	// Record 3 - numbers of various stations...
 
-	__fp.seek ( (header_rec + 1)*__recordLength );
+	__fp.seek ( (header_rec + 1L)*__recordLength );
 	__numsta = __fp.readLittleEndianInt ();
 	if ( Message.isDebugOn ) {
 		Message.printDebug ( dl, routine, "numsta=" + __numsta );
@@ -1177,7 +1182,7 @@ throws IOException
 
 	// Record 4 - month names...
 
-	__fp.seek ( (header_rec + 2)*__recordLength );
+	__fp.seek ( (header_rec + 2L)*__recordLength );
 	__xmonam = new String[14];
 	char [] xmonam = new char[3];
 	int j = 0;
@@ -1195,7 +1200,7 @@ throws IOException
 
 	// Record 5 - number of days per month
 
-	__fp.seek ( (header_rec + 3)*__recordLength );
+	__fp.seek ( (header_rec + 3L)*__recordLength );
 	__mthday = new int[12];
 	for ( int i = 0; i < 12; i++ ) {
 		__mthday[i] = __fp.readLittleEndianInt();
@@ -1243,7 +1248,7 @@ throws IOException
 
 	// Record 6 - river stations...
 
-	int offset2 = (header_rec + 4)*__recordLength;
+	long offset2 = (header_rec + 4L)*__recordLength;
 	__cstaid = new String[__numsta];
 	__stanam = new String[__numsta];
 	int counter = 0;
@@ -1266,7 +1271,7 @@ throws IOException
 
 	// Record 7 - diversion stations...
 
-	offset2 = (header_rec + 4 + __numsta)*__recordLength;
+	offset2 = (header_rec + 4L + __numsta)*__recordLength;
 	if ( __numdiv > 0 ) {
 		__cdivid = new String[__numdiv];
 		__divnam = new String[__numdiv];
@@ -1290,7 +1295,7 @@ throws IOException
 
 	// Record 8 - instream flow stations...
 
-	offset2 = (header_rec + 4 + __numsta + __numdiv)*__recordLength;
+	offset2 = (header_rec + 4L + __numsta + __numdiv)*__recordLength;
 	if ( __numifr > 0 ) {
 		__cifrid = new String[__numifr];
 		__xfrnam = new String[__numifr];
@@ -1313,7 +1318,7 @@ throws IOException
 
 	// Record 9 - reservoir stations...
 
-	offset2 = (header_rec + 4 + __numsta + __numdiv + __numifr)*__recordLength;
+	offset2 = (header_rec + 4L + __numsta + __numdiv + __numifr)*__recordLength;
 	// The value of __nowner is the record number (1+) of the first owner
 	// for the current reservoir.  Therefore, the number of owners is
 	// calculated for the current reservoir by taking the number of owners
@@ -1429,7 +1434,7 @@ throws IOException
 	// Record 10 - base flow stations...
 
 	int resTotalAccountRec = 1;
-	offset2 = (header_rec + 4 + __numsta + __numdiv + __numifr + __numres + resTotalAccountRec)*__recordLength;
+	offset2 = (header_rec + 4L + __numsta + __numdiv + __numifr + __numres + resTotalAccountRec)*__recordLength;
 	if ( __numrun > 0 ) {
 		__crunid = new String[__numrun];
 		__runnam = new String[__numrun];
@@ -1452,7 +1457,7 @@ throws IOException
 
 	// Record 11 - well stations...
 
-	offset2 = (header_rec + 4 + __numsta + __numdiv + __numifr + __numres + resTotalAccountRec + __numrun)* __recordLength;
+	offset2 = (header_rec + 4L + __numsta + __numdiv + __numifr + __numres + resTotalAccountRec + __numrun)* __recordLength;
 	if ( __numdivw > 0 ) {
 		__cdividw = new String[__numdivw];
 		__divnamw = new String[__numdivw];
@@ -1491,7 +1496,7 @@ throws IOException
 		// parameters that are actually needed for this file.
 		for ( int ip = 0; ip < 3; ip++ ) {
 			// Parameter lists for div, res, well binary files.
-			offset2 = (header_rec + 4 + __numsta + __numdiv + __numifr + (__numres + resTotalAccountRec) +
+			offset2 = (header_rec + 4L + __numsta + __numdiv + __numifr + (__numres + resTotalAccountRec) +
 				__numrun + __numdivw + ip*__maxparm)*__recordLength;
 			if ( __maxparm > 0 ) {
 				// Reallocate each time so as to not step on the saved array below...
@@ -1499,7 +1504,7 @@ throws IOException
 			}
 			for ( int i = 0; i < __maxparm; i++ ) {
 				// 4 is to skip the counter at the beginning of the line...
-				__fp.seek ( offset2 + i*__recordLength + 4 );
+				__fp.seek ( offset2 + i*__recordLength + 4L );
 				parameters[i] = __fp.readLittleEndianString1(24).trim();
 				//* Use during development...
 				if ( Message.isDebugOn ) {
@@ -1556,8 +1561,8 @@ throws IOException
 	}
 
 	if ( StateMod_Util.isVersionAtLeast(__version, StateMod_Util.VERSION_11_00) ) {
-		offset2 = (header_rec + 4 + __numsta + __numdiv + __numifr +
-			(__numres + resTotalAccountRec) + __numrun + __numdivw + __maxparm*3)* __recordLength;
+		offset2 = (header_rec + 4L + __numsta + __numdiv + __numifr +
+			(__numres + resTotalAccountRec) + __numrun + __numdivw + __maxparm*3L)* __recordLength;
 		__fp.seek ( offset2 );
 		if ( __numparm > 0 ) {
 			__unit = new String[__numparm];
@@ -2169,7 +2174,7 @@ throws Exception
 								// StateMod does not handle.
 								continue;
 							}
-							filepos = calculateFilePosition( date, ista2,its,iparam);
+							filepos = calculateFilePosition( date, ista2, its, iparam);
 							if ( Message.isDebugOn){
 								Message.printDebug ( 2, routine, "Reading for "+ date +
 								" ista2="+ista2+ " iparam="+ iparam + " its=" + its +
