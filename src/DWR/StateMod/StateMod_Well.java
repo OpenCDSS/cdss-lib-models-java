@@ -999,6 +999,22 @@ public double [] getCalculatedEfficiencyStddevs()
 }
 
 /**
+Returns the table header for capacity data tables.
+@return String[] header - Array of header elements.
+ */
+public static String[] getCapacityHeader()
+{
+	return new String[] {
+			"Num",
+			"Well Station ID",
+			"Well Station Name",
+			"Collection Type",
+			"Well Capacity (CFS)",
+			"Sum of Rights (CFS)",
+			"Number of Rights (CFS)", };
+}
+
+/**
 @return the well id to use for daily data
 */
 public String getCdividyw() {
@@ -1036,6 +1052,20 @@ public List<String> getCollectionPartIDs ( int year )
 		}
 	}
 	return null;
+}
+
+/**
+Return the collection part ID type list.  This is used with well locations when aggregating
+by well identifiers (WDIDs and permit receipt numbers).
+@return the list of collection part ID types, or null if not defined.
+*/
+public List<StateMod_Well_CollectionPartIdType> getCollectionPartIDTypes () {
+	if (__collectionIDTypeList == null ) {
+		return null;
+	}
+	else {
+		return __collectionIDTypeList.get(0); // Currently does not vary by year
+	}
 }
 
 /**
@@ -1192,45 +1222,6 @@ public GeoRecord getGeoRecord() {
 }
 
 /**
-Returns the table header for capacity data tables.
-@return String[] header - Array of header elements.
- */
-public static String[] getCapacityHeader()
-{
-	return new String[] {
-			"Num",
-			"Well Station ID",
-			"Well Station Name",
-			"Collection Type",
-			"Well Capacity (CFS)",
-			"Sum of Rights (CFS)",
-			"Number of Rights (CFS)", };
-}
-
-/**
-Return the average monthly efficiencies to be used for modeling (12 monthly values + annual average),
-for the data set calendar type.  This is ONLY used by StateDMI and does not need
-to be considered in comparison code.
-*/
-public double [] getModelEfficiencies()
-{	return __model_efficiencies;
-}
-
-/**
-@return historical time series for this well.
-*/
-public DayTS getPumpingDayTS() {
-	return _pumping_DayTS;
-}
-
-/**
-@return historical time series for this well.
-*/
-public MonthTS getPumpingMonthTS() {
-	return _pumping_MonthTS;
-}
-
-/**
 @return the demand code(see StateMod documentation for acceptable values)
 */
 public int getIdvcomw() {
@@ -1320,6 +1311,15 @@ public StateMod_WellRight getLastRight()
 }
 
 /**
+Return the average monthly efficiencies to be used for modeling (12 monthly values + annual average),
+for the data set calendar type.  This is ONLY used by StateDMI and does not need
+to be considered in comparison code.
+*/
+public double [] getModelEfficiencies()
+{	return __model_efficiencies;
+}
+
+/**
 @return the number of return flow locations.
 There is not a set function for this data because it is automatically
 calculated whenever a return flow is added or removed.
@@ -1387,6 +1387,20 @@ public static String getPrimaryDefault ( boolean include_notes )
 	else {
 		return "0";
 	}
+}
+
+/**
+@return historical time series for this well.
+*/
+public DayTS getPumpingDayTS() {
+	return _pumping_DayTS;
+}
+
+/**
+@return historical time series for this well.
+*/
+public MonthTS getPumpingMonthTS() {
+	return _pumping_MonthTS;
 }
 
 /**
@@ -1880,10 +1894,12 @@ public void setCollectionDiv ( int collection_div )
 
 /**
 Set the collection list for an aggregate/system for the entire period, used when specifying well ID lists.
+For this version the list is constant for all years
 @param partIdList The identifiers indicating the locations in the collection.
 */
 public void setCollectionPartIDs ( List<String> partIdList, List<StateMod_Well_CollectionPartIdType> partIdTypeList )
-{		__collectionIDList = new ArrayList<List<String>> ( 1 );
+{		// Size is 1 because list is constant for the entire period
+		__collectionIDList = new ArrayList<List<String>> ( 1 );
 		__collectionIDList.add ( partIdList );
 		__collectionIDTypeList = new ArrayList<List<StateMod_Well_CollectionPartIdType>> ( 1 );
 		__collectionIDTypeList.add ( partIdTypeList );
@@ -1930,20 +1946,6 @@ public void setCollectionPartIDsForYear ( int year, List<String> partIdList )
 			__collectionIDList.set ( pos, partIdList );
 			__collectionYear[pos] = year;
 		}
-	}
-}
-
-/**
-Return the collection part ID type list.  This is used with well locations when aggregating
-by well identifiers (WDIDs and permit receipt numbers).
-@return the list of collection part ID types, or null if not defined.
-*/
-public List<StateMod_Well_CollectionPartIdType> getCollectionPartIDTypes () {
-	if (__collectionIDTypeList == null ) {
-		return null;
-	}
-	else {
-		return __collectionIDTypeList.get(0); // Currently does not vary by year
 	}
 }
 
@@ -2188,22 +2190,6 @@ public void setGeoRecord ( GeoRecord georecord )
 }
 
 /**
-Set the historical daily pumping time series.
-@param pumping_DayTS time series known to refer to this well.
-*/
-public void setPumpingDayTS(DayTS pumping_DayTS) {
-	_pumping_DayTS = pumping_DayTS;
-}
-
-/**
-Set the historical monthly pumping time series.
-@param pumping_MonthTS time series known to refer to this well.
-*/
-public void setPumpingMonthTS(MonthTS pumping_MonthTS) {
-	_pumping_MonthTS = pumping_MonthTS;
-}
-
-/**
 Set the demand code
 @param idvcomw demand code to use
 */
@@ -2344,6 +2330,22 @@ public void setPrimary(String primary) {
 		return;
 	}
 	setPrimary(StringUtil.atod(primary.trim()));
+}
+
+/**
+Set the historical daily pumping time series.
+@param pumping_DayTS time series known to refer to this well.
+*/
+public void setPumpingDayTS(DayTS pumping_DayTS) {
+	_pumping_DayTS = pumping_DayTS;
+}
+
+/**
+Set the historical monthly pumping time series.
+@param pumping_MonthTS time series known to refer to this well.
+*/
+public void setPumpingMonthTS(MonthTS pumping_MonthTS) {
+	_pumping_MonthTS = pumping_MonthTS;
 }
 
 // TODO - need to handle dirty flag
@@ -3288,10 +3290,10 @@ throws Exception {
 		// incoming comments so that they are not modified in the calling code.
 		List<String> newComments2 = null;
 		if ( newComments == null ) {
-			newComments2 = new Vector<String>();
+			newComments2 = new ArrayList<String>();
 		}
 		else {
-			newComments2 = new Vector<String>(newComments);
+			newComments2 = new ArrayList<String>(newComments);
 		}
 		newComments2.add(0,"");
 		newComments2.add(1,"StateMod well station collection information as delimited list file.");
@@ -3323,8 +3325,20 @@ throws Exception {
 			else {
 				numYears = years.length;
 			}
-			colType = well.getCollectionType().toString();
-			partType = well.getCollectionPartType().toString();
+			StateMod_Well_CollectionType collectionType = well.getCollectionType();
+			if ( collectionType == null ) {
+				colType = "";
+			}
+			else {
+				colType = collectionType.toString();
+			}
+			StateMod_Well_CollectionPartType collectionPartType = well.getCollectionPartType();
+			if ( collectionPartType == null ) {
+				partType = "";
+			}
+			else {
+				partType = collectionPartType.toString();
+			}
 			idTypes = well.getCollectionPartIDTypes(); // Currently crosses all years
 			int numIdTypes = 0;
 			if ( idTypes != null ) {

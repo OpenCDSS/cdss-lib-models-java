@@ -98,7 +98,7 @@ protected void cancel() {
 	StateMod_Well well = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		well = (StateMod_Well)_data.get(i);
+		well = _data.get(i);
 		well.restoreOriginal();
 	}
 }
@@ -110,7 +110,7 @@ protected void createDataBackup() {
 	StateMod_Well well = null;
 	int size = _data.size();
 	for (int i = 0; i < size; i++) {
-		well = (StateMod_Well)_data.get(i);
+		well = _data.get(i);
 		well.createBackup();
 	}
 }
