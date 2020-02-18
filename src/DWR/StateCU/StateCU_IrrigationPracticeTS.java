@@ -21,69 +21,6 @@ CDSS Models Java Library is free software:  you can redistribute it and/or modif
 
 NoticeEnd */
 
-// ----------------------------------------------------------------------------
-// StateCU_IrrigationPracticeTS - StateCU irrigation practice time series
-// ----------------------------------------------------------------------------
-// Copyright:   See the COPYRIGHT file
-// ----------------------------------------------------------------------------
-// History:
-//
-// 2003-02-23	Steven A. Malers, RTi	Copy CUCropPatternTS and update since
-//					data objects are similar.
-// 2003-06-04	SAM, RTi		Rename class from CUParameterTS to
-//					StateCU_ParameterTS.  Use new TS
-//					package.
-// 2003-07-08	SAM, RTi		Rename class from StateCU_ParameterTS to
-//					StateCU_IrrigationPracticeTS and update
-//					to current file format description as
-//					per Leonard Rice.
-// 2003-10-14	SAM, RTi		Handle water year format - basically
-//					the data are stored in the year type
-//					and other code will need to handle.  In
-//					most cases it is irrelevant.
-// 2004-02-10	SAM, RTi		* Add readTimeSeries() method to
-//					  facilitate use by TSTool.
-//					* Change time series names to better
-//					  integrate into TSTool.
-// 2004-03-03	SAM, RTi		* Initialize time series to appropriate
-//					  values.
-//					* Add total acreage time series in
-//					  writeVector().
-// 2004-03-22	SAM, RTi		* Add getTimeSeriesDataTypes() to
-//					  generically return the data type
-//					  strings.
-//					* Add getTimeSeries ( String ) to
-//					  simplify generic use by other code.
-// 2004-06-02	SAM, RTi		* Add a header to the output, similar
-//					  to the crop pattern time series file.
-//					* Remove some code to support the old
-//					  TSP file since it is not being used.
-// 2004-09-20	SAM, RTi		* Change file format to legacy format as
-//					  per Ray Bennett 2004-08-25 email:
-//					  i4,1x,a12,3f6.0,2f8.0,f12.0,f3.0,f8.0
-// 2005-01-19	SAM, RTi		* Add toTSVector() to facilitate
-//				  	  extracting the time series data.
-// 2005-03-21	SAM, RTi		* Add addToGacre().
-// 2005-04-01	SAM, RTi		* Overload toTSVector() to include the
-//					  data set total.
-// 2005-06-09	SAM, RTi		* Add isIrrigationPracticeTSFile().
-//					* Overload readStateCUFile() to take a
-//					  PropList and handle the Version
-//					  property.
-// 2005-11-17	SAM, RTi		* On output, write the beginning and
-//					  ending month, units, and year type.
-// 2007-01-11	Kurt Tometich, RTi	Adding support for 4 new land acreage
-//							fields in the new version as well as support the
-//							old format Version 10.
-// 2007-02-18	SAM, RTi		Review KAT changes.
-//					Clean code based on Eclipse feedback.
-//					Overload getTimeSeriesDataTypes() to default to current
-//					format but support old format.
-// 2007-04-17	SAM, RTi		Confirm ability to read very old format without
-//					the header to compare with newer formats.
-// ----------------------------------------------------------------------------
-// EndHeader
-
 package DWR.StateCU;
 
 import java.io.BufferedReader;
@@ -93,7 +30,6 @@ import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import RTi.TS.DateValueTS;
 import RTi.TS.TS;
@@ -211,8 +147,9 @@ private String __filename = "";
 
 /**
 The list of StateCU_Parcel observations, as an archive of observations to use with data filling.
+These are created by the ReadIrrigationPracticeTSFromHydroBase command.
 */
-private List<StateCU_Parcel> __parcel_List = new Vector<StateCU_Parcel>();
+private List<StateCU_Parcel> __parcel_List = new ArrayList<>();
 
 /**
 Construct a new StateCU_IrrigationPracticeTS object for the specified CU
@@ -1150,7 +1087,7 @@ Return the parcels for a requested year.  These values can be used in data filli
 @return the list of StateCU_Parcel for a year
 */
 public List<StateCU_Parcel> getParcelListForYear ( int year )
-{	List<StateCU_Parcel> parcels = new Vector<StateCU_Parcel>();
+{	List<StateCU_Parcel> parcels = new ArrayList<>();
 	int size = __parcel_List.size();
 	StateCU_Parcel parcel;
 	for ( int i = 0; i < size; i++ ) {
@@ -1471,7 +1408,7 @@ throws Exception
 }
 
 /**
-Read the StateCU TSP file and return as a Vector of StateCU_IrrigationPracticeTS.
+Read the StateCU TSP file and return as a list of StateCU_IrrigationPracticeTS.
 @param filename filename containing irrigation practice time series records.
 @param date1_req Requested start of period.
 @param date2_req Requested end of period.
@@ -1495,7 +1432,7 @@ throws Exception
 {	String routine = "StateCU_IrrigationPracticeTS.readStateCUFile";
 	String iline = null;
 	List<Object> v = new ArrayList<Object>();
-	List<StateCU_IrrigationPracticeTS> ipyts_Vector = new ArrayList<StateCU_IrrigationPracticeTS>();
+	List<StateCU_IrrigationPracticeTS> ipytsList = new ArrayList<>();
 	if ( props == null ) {
 		props = new PropList ( "IPY" );
 	}
@@ -1766,12 +1703,12 @@ throws Exception
 				// First year of data in the file.
 				// Create an object for the CU Location.  It is assumed
 				// that the structures are always listed in the first year at least (and probably every year).
-				pos = StateCU_Util.indexOf ( ipyts_Vector, culoc );
+				pos = StateCU_Util.indexOf ( ipytsList, culoc );
 				if ( pos >= 0 ) {
 					// Should not happen!  The CU Location is apparently listed twice in the first year...
 					Message.printWarning ( 2, routine, "CU Location \"" + culoc +
 					"\" is listed more than once in the first year." );
-					ipyts = (StateCU_IrrigationPracticeTS)ipyts_Vector.get(pos);
+					ipyts = ipytsList.get(pos);
 				}
 				else {
 					if ( Version_10 ) {
@@ -1782,12 +1719,12 @@ throws Exception
 						ipyts = new StateCU_IrrigationPracticeTS (
 							culoc, date1, date2, year_type, full_filename, 12 );
 					}
-					ipyts_Vector.add ( ipyts );
+					ipytsList.add ( ipyts );
 				}
 			}
 			else {
 				// Find the object of interest for this CU Location so it can be used to set data values...
-				pos = StateCU_Util.indexOf ( ipyts_Vector, culoc );
+				pos = StateCU_Util.indexOf ( ipytsList, culoc );
 				if ( pos < 0 ) {
 					// Should not happen!  Apparently the CU Location was not listed in the first year...
 					++pos_error_count;
@@ -1795,10 +1732,10 @@ throws Exception
 					"\" found in year " + year + " but was not listed in the first" + " year." );
 					ipyts = new StateCU_IrrigationPracticeTS(culoc,
 						date1, date2, year_type, full_filename );
-					ipyts_Vector.add ( ipyts );
+					ipytsList.add ( ipyts );
 				}
 				else {
-					ipyts = ipyts_Vector.get(pos);
+					ipyts = ipytsList.get(pos);
 				}
 			}
 			// Now set the values...
@@ -1895,7 +1832,7 @@ throws Exception
 			in.close();
 		}
 	}
-	return ipyts_Vector;
+	return ipytsList;
 }
 
 /**
@@ -1930,7 +1867,7 @@ throws Exception
 /**
 Read all the time series from a StateCU format file.
 The IOUtil.getPathUsingWorkingDir() method is applied to the filename.
-@return a pointer to a newly-allocated Vector of time series if successful, null if not.
+@return a pointer to a newly-allocated list of time series if successful, null if not.
 @param fname Name of file to read.
 @param date1 Starting date to initialize period (NULL to read the entire time series).
 @param date2 Ending date to initialize period (NULL to read the entire time series).
@@ -1967,13 +1904,13 @@ throws Exception
 {	// TODO - can optimize this later to only read one time series...
 	// First read the whole file...
 
-	List<StateCU_IrrigationPracticeTS> data_Vector = readStateCUFile ( full_filename, req_date1, req_date2 );
+	List<StateCU_IrrigationPracticeTS> dataList = readStateCUFile ( full_filename, req_date1, req_date2 );
 	// If all the time series are required, return all...
 	int size = 0;
-	if ( data_Vector != null ) {
-		size = data_Vector.size();
+	if ( dataList != null ) {
+		size = dataList.size();
 	}
-	List<TS> tslist = new Vector<TS>(size*8);
+	List<TS> tslist = new ArrayList<>(size*8);
 	StateCU_IrrigationPracticeTS ipy;
 	TSIdent tsident = null;
 	String req_data_type = null;
@@ -1984,7 +1921,7 @@ throws Exception
 	boolean include_ts = true;
 	for ( int i = 0; i < size; i++ ) {
 		include_ts = true;
-		ipy = data_Vector.get(i);
+		ipy = dataList.get(i);
 		if ( req_tsident != null ) {
 			// Check to see if the location match...
 			if ( !ipy.getID().equalsIgnoreCase(tsident.getLocation() ) ) {
@@ -2414,8 +2351,8 @@ in particular, if the totals for different data sets will be graphed or manipula
 */
 public static List<TS> toTSList ( List<StateCU_IrrigationPracticeTS> dataList, boolean include_dataset_totals,
 	String dataset_location, String dataset_datasource )
-{	String routine = "StateCU_IrrigationPracticeTS.toTSVector";
-	List<TS> tslist = new Vector<TS>();
+{	String routine = "StateCU_IrrigationPracticeTS.toTSList";
+	List<TS> tslist = new ArrayList<>();
 	int size = 0;
 	if ( dataList != null ) {
 		size = dataList.size();
@@ -2979,9 +2916,9 @@ if no comments are available.
 public static void writeStateCUFile ( String filename_prev, String filename,
 	List<StateCU_IrrigationPracticeTS> data_List, List<String> new_comments, DateTime start, DateTime end, PropList props )
 throws IOException
-{	List<String> commentStr = new Vector<String>(1);
+{	List<String> commentStr = new ArrayList<>(1);
 	commentStr.add ( "#" );
-	List<String> ignoreCommentStr = new Vector<String>(1);
+	List<String> ignoreCommentStr = new ArrayList<>(1);
 	ignoreCommentStr.add ( "#>" );
 	PrintWriter out = null;
 	String full_filename_prev = IOUtil.getPathUsingWorkingDir ( filename_prev );
@@ -3027,7 +2964,7 @@ public static void writeDateValueFile (	String filename_prev, String filename,
 					List<StateCU_IrrigationPracticeTS> dataList, List<String> new_comments )
 throws Exception
 {	// For now ignore the previous file and new comments.
-	// Create a new Vector with the time series data...
+	// Create a new list with the time series data...
 	List<TS> tslist = toTSList ( dataList );
 	// Now write using a standard DateValueTS call...
 	String full_filename = IOUtil.getPathUsingWorkingDir ( filename );
@@ -3102,7 +3039,7 @@ DateTime start, DateTime end, PropList props ) throws IOException
 		header1 = "Yr  CULocation   Surf  Flood Spr  AcGW   AcSprnk PumpingMax GMode  AcTot";
 	}
 	
-	List<Object> v = new Vector<Object>(11);	// Reuse for all output lines.
+	List<Object> v = new ArrayList<Object>(11);	// Reuse for all output lines.
 
 	out.println ( cmnt );
 	out.println ( cmnt + "  StateCU Irrigation Practice Time Series (IPY) File" );
