@@ -49,12 +49,19 @@ implements Cloneable, Comparable<StateCU_Data> {
 
 /**
 Supply amount (rate) associated with the supply, CFS for wells.
+This is associated with water rights or permits.
 */
-private double	__amount;
+private double	__supplyAmount;
 
 // Indicate if a groundwater and/or surface water supply (likely only one but not both)
 private boolean __is_ground = false;
 private boolean __is_surface = false;
+
+/**
+ * Source of the parcel data, for example "HB-PUTS" for parcel use time series and "HB-WTP" for well to parcel.
+ */
+private String dataSource = "";
+
 
 /**
 Constructor.
@@ -89,10 +96,10 @@ public int compareTo(StateCU_Data data) {
 
 	StateCU_Supply supply = (StateCU_Supply)data;
 
-	if (__amount < supply.__amount) {
+	if (this.__supplyAmount < supply.__supplyAmount) {
 		return -1;
 	}
-	else if (__amount > supply.__amount) {
+	else if (this.__supplyAmount > supply.__supplyAmount) {
 		return 1;
 	}
 
@@ -163,7 +170,7 @@ public boolean equals(StateCU_Supply supply) {
 	 	return false;
 	}
 
-	if ( (__amount == supply.__amount) &&
+	if ( (this.__supplyAmount == supply.__supplyAmount) &&
 			(__is_ground == supply.__is_ground) &&
 			(__is_surface == supply.__is_surface) ) {
 		return true;
@@ -172,26 +179,26 @@ public boolean equals(StateCU_Supply supply) {
 }
 
 /**
-Clean up before garbage collection.
+Returns the data source.
+@return the data source.
 */
-protected void finalize()
-throws Throwable {
-	super.finalize();
+public String getDataSource() {
+	return this.dataSource;
 }
 
 /**
 Returns the supply amount.
 @return the supply amount (CFS for wells).
 */
-public double getAmount() {
-	return __amount;
+public double getSupplyAmount() {
+	return this.__supplyAmount;
 }
 
 /**
 Initializes member variables.
 */
-private void initialize() {
-	__amount = StateCU_Util.MISSING_DOUBLE;
+protected void initialize() {
+	this.__supplyAmount = StateCU_Util.MISSING_DOUBLE;
 }
 
 /**
@@ -218,7 +225,7 @@ public void restoreOriginal() {
 	StateCU_Supply supply = (StateCU_Supply)_original;
 	super.restoreOriginal();
 
-	__amount = supply.__amount;
+	this.__supplyAmount = supply.__supplyAmount;
 	__is_ground = supply.__is_ground;
 	__is_surface = supply.__is_surface;
 	_isClone = false;
@@ -226,11 +233,19 @@ public void restoreOriginal() {
 }
 
 /**
-Set the supply amount.
-@param amount the supply amount.
+Set the data source.
+@param dataSource Data source to set.
 */
-public void setAmount ( double amount ) {
-	if (amount != __amount) {
+public void setDataSource(String dataSource ) {
+	this.dataSource = dataSource;
+}
+
+/**
+Set the supply amount.
+@param supplyAmount the supply amount.
+*/
+public void setSupplyAmount ( double supplyAmount ) {
+	if (supplyAmount != this.__supplyAmount) {
 		/* REVISIT SAM 2006-04-09
 		Supply is not currently part of the data set.
 		if ( !_isClone && _dataset != null ) {
@@ -238,7 +253,7 @@ public void setAmount ( double amount ) {
 			true);
 		}
 		*/
-		__amount = amount;
+		this.__supplyAmount = supplyAmount;
 	}
 }
 
@@ -281,7 +296,7 @@ Returns a String representation of this object.
 @return a String representation of this object.
 */
 public String toString() {
-	return super.toString() + ", " + _id + ", " + __amount + ", " + __is_ground +
+	return super.toString() + ", " + _id + ", " + this.__supplyAmount + ", " + __is_ground +
 	", " + __is_surface;
 }
 

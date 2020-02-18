@@ -21,120 +21,6 @@ CDSS Models Java Library is free software:  you can redistribute it and/or modif
 
 NoticeEnd */
 
-// ----------------------------------------------------------------------------
-// StateCU_CropPatternTS.java - base class for StateCU crop pattern time series
-// ----------------------------------------------------------------------------
-// Copyright:   See the COPYRIGHT file
-// ----------------------------------------------------------------------------
-// History:
-// 2002-09-26	J. Thomas Sapienza, RTi	Initial version from CUTimeSeries.java
-// 2002-09-30	JTS, RTi		Added the output code, added code to
-//					translate missing data to 0s for doing
-//					totals and percents.
-// 2003-02-23	Steven A. Malers, RTi	Rework for the official StateDMI
-//					release.
-// 2003-06-04	SAM, RTi		Change name of class from
-//					CUCropPatternTS to
-//					StateCU_CropPatternTS.
-//					Update to use new TS package.
-// 2003-07-07	SAM, RTi		Update to use new format as per Erin
-//					Wilson.  This involves using a header
-//					record, number of crops, and formatting
-//					more suitable for a spreadsheet.  The
-//					old code is commented out in case we
-//					need to support reading the old files.
-//					The units have been added to the
-//					constructor since they are in the file
-//					header.
-// 2004-02-05	SAM, RTi		Update for use with TSTool.
-//					* Add readTimeSeries() and
-//					  readTimeSeriesList() methods to read
-//					  time series only, which can be used by
-//					  TSTool and other software for pure
-//					  time series analysis and manipulation.
-//					* Change so data types have "CropArea-"
-//					  in front.
-// 2004-02-28	SAM, RTi		* Move some utility code from
-//					  StateCU_Data to StateCU_Util.
-// 2004-02-29	SAM, RTi		* Fix writeStateCU to use the exact
-//					  format (without extra formats) so that
-//					  StringUtil.formatString() does not
-//					  complain.
-// 2004-03-02	SAM, RTi		* Add removeAllTS() to remove all time
-//					  series for the location.  This is
-//					  called before resetting the time
-//					  series.
-//					* Add translateCropName() to deal with
-//					  StateDMI input not being of the
-//					  correct crop type.
-// 2004-03-03	SAM, RTi		* Add translateCropName() to support
-//					  StateDMI.
-//					* Add removeCropName() to support
-//					  StateDMI.
-// 2004-03-11	SAM, RTi		* Add option to write the crop acreage
-//					  in addition to the fraction.
-// 2004-03-31	SAM, RTi		* Erin Wilson agreed to add the acreage
-//					  in addition to the percent so make it
-//					  happen - also line up the columns.
-// 2004-05-17	SAM, RTi		* Add setCropAreasToZero() to simplify
-//					  processing in StateDMI.
-// 2004-06-02	SAM, RTi		* Add a header to the output, similar
-//					  to the irrigation practice time series
-//					  file.
-//					* Remove commented code for old format.
-// 2004-06-24	SAM, RTi		* Update translateCropName() to combine
-//					  the crops if the new crop name is the
-//					  same as an existing crop name.
-// 2005-01-19	SAM, RTi		* Add toTSVector() utility method to
-//					  simplify getting a vector of all the
-//					  time series.
-// 2005-02-25	SAM, RTi		* Add setTotalArea() to allow data to be
-//					  reset.
-//					* Add setCropArea() to simplify data
-//					  reset.
-// 2005-03-31	SAM, RTi		* Add overload toTSVector() method to
-//					  add total time series to the raw
-//					  data Vector, for use by StateDMI and
-//					  other applications.  In the future,
-//					  it may make sense to have this method
-//					  be optionally called when reading the
-//					  IPY file in TSTool, etc.
-// 2005-06-03	SAM, RTI		* Add WriteOnlyTotal and overload the
-//					  writeStateCUFile to take a PropList.
-// 2005-06-08	SAM, RTi		* Overload readStateCUFile() to take a
-//					  PropList and support a Version
-//					  property.
-// 2005-07-28	SAM, RTi		* When writing the area for each crop,
-//					  calculate to the precision of the
-//					  fraction, so that the numbers agree.
-// 2005-11-17	SAM, RTi		* The start/end months and year type
-//					  were not previously included.
-// 2005-11-30	SAM, RTi		* Fix so that trying to set data outside
-//					  the period in memory results in no
-//					  action.
-//					* When reading time series, the
-//					  requested period was being used to
-//					  initialize memory but was not being
-//					  used to optimize the read start/stop.
-//					  Put in a REVISIT for now to note that
-//					  an improvement can be made when there
-//					  is time.
-// 2007-01-09	Kurt Tometich RTi
-//						Added a new method isVersion10() to detect
-//						whether the file being read is Version10 or
-//						newer.  
-//						Updated the writeVector and readStateCUFile methods
-//						for version10 and newer formats.
-// 2007-01-29	SAM, RTi		Review KAT's code.
-// 2007-03-02	SAM, RTi		Final cleanup before release.
-// 2007-03-21	SAM, RTi		Change isVersion10() to be less fragile.
-// 2007-04-13	SAM, RTi		Reenable support for really old format where no
-//						period of record header was used.
-// 2007-05-18	SAM, RTi		Add saving parcel data for each year of
-//						observations to facilitate filling later.
-// ----------------------------------------------------------------------------
-// EndHeader
-
 package DWR.StateCU;
 
 import java.io.BufferedReader;
@@ -142,8 +28,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import RTi.TS.DateValueTS;
 import RTi.TS.TS;
@@ -174,13 +60,13 @@ private String __filename = "";
 /**
 The list of crop time series.  The data type for each time series is the crop type.
 */
-private List<TS> __tslist = new Vector<TS>();
+private List<YearTS> __tslist = new ArrayList<>();
 
 /**
 The list of StateCU_Parcel observations, as an archive of observations to use with data filling.
-These are read from HydroBase.
+These are read from HydroBase by StateDMI ReadCropPatternTSFromHydroBase command.
 */
-private List<StateCU_Parcel> __parcel_Vector = new Vector<StateCU_Parcel>();
+private List<StateCU_Parcel> __parcelList = new ArrayList<>();
 
 /**
 Total acres (total of all crops) for each year in the period.  This is computed
@@ -209,7 +95,7 @@ private DateTime __temp_DateTime = new DateTime();
 List of crop types for the time series.  This is consistent with the data
 sub-types for the time series.  The list is maintained to simplify use at output.
 */
-private List<String> __crop_name_Vector = null;
+private List<String> __cropNameList = null;
 
 /**
 Construct a new StateCU_CropPatternTS object for the specified CU Location identifier.
@@ -234,8 +120,8 @@ identifier.  This is typically only called by readStateCUFile().
 public StateCU_CropPatternTS ( String id, DateTime date1, DateTime date2, String units, String filename )
 {	super();
 	_id = id;
-	__tslist = new Vector<TS>();
-	__crop_name_Vector = new Vector<String>();
+	__tslist = new ArrayList<>();
+	__cropNameList = new ArrayList<>();
 	__units = units;
 	__filename = filename;
 	if ( (date1 == null) || (date2 == null) ) {
@@ -260,7 +146,7 @@ later filling and checks can more easily be performed.
 @param parcel StateCU_Parcel to add.
 */
 public void addParcel ( StateCU_Parcel parcel )
-{	__parcel_Vector.add ( parcel );
+{	__parcelList.add ( parcel );
 	String routine = "StateCU_CropPatternTS.addParcel";
 	Message.printStatus(2, routine, "Adding parcel " + parcel.toString() );
 }
@@ -303,11 +189,11 @@ public YearTS addTS ( String crop_name, boolean overwrite )
 	if ( pos < 0 ) {
 		pos = __tslist.size();
 		__tslist.add ( yts );
-		__crop_name_Vector.add ( crop_name );
+		__cropNameList.add ( crop_name );
 	}
 	else {
 		__tslist.set ( pos, yts );
-		__crop_name_Vector.set ( pos, crop_name );
+		__cropNameList.set ( pos, crop_name );
 	} 
 	//Message.printStatus ( 1, "", "SAMX Adding time series for " + _id +
 		//" " + crop_name + " for " + __date1 + " to " + __date2 +
@@ -332,7 +218,7 @@ public double getCropArea (String crop_name, int year, boolean return_fraction)
 	if ( (year < __date1.getYear()) || (year > __date2.getYear()) ) {
 		return -999.0;
 	}
-	YearTS yts = (YearTS)__tslist.get(pos);
+	YearTS yts = __tslist.get(pos);
 	__temp_DateTime.setYear ( year );
 	if ( return_fraction ) {
 		// Need to consider a total that is zero or missing..
@@ -366,18 +252,18 @@ public double getCropArea (String crop_name, int year, boolean return_fraction)
 Return the list of crops for this CU Location.
 */
 public List<String> getCropNames ()
-{	return __crop_name_Vector;
+{	return __cropNameList;
 }
 
 /**
 Return the list of distinct crop names for a list of StateCU_CropPatternTS.
 The list will be sorted alphabetically.
 @param dataList A list of StateCU_CropPatternTS to process.
-@return a list of distinct crop names, determined from data_Vector.  A
+@return a list of distinct crop names, determined from dataList.  A
 non-null list is guaranteed, but may be empty.
 */
 public static List<String> getCropNames ( List<StateCU_CropPatternTS> dataList )
-{	List<String> v = new Vector<String> ( 10 );
+{	List<String> v = new ArrayList<> ( 10 );
 	int size = 0;
 	StateCU_CropPatternTS cds = null;
 	if ( dataList != null ) {
@@ -400,7 +286,7 @@ public static List<String> getCropNames ( List<StateCU_CropPatternTS> dataList )
 		if ( crop_names != null ) {
 			ncrops = crop_names.size();
 		}
-		// Loop through each crop and add to the main Vector if it is not already in that list...
+		// Loop through each crop and add to the main list if it is not already in that list...
 		for ( j = 0; j < ncrops; j++ ) {
 			crop_name = crop_names.get(j);
 			vsize = v.size();
@@ -421,7 +307,7 @@ public static List<String> getCropNames ( List<StateCU_CropPatternTS> dataList )
 	// Alphabetize...
 
 	if ( v.size() == 0 ) {
-		return new Vector<String>();
+		return new ArrayList<String>();
 	}
 	else {
 		return ( StringUtil.sortStringList ( v ) );
@@ -439,7 +325,7 @@ public YearTS getCropPatternTS ( String crop_name )
 		return null;
 	}
 	else {
-		return (YearTS)__tslist.get(pos);
+		return __tslist.get(pos);
 	}
 }
 
@@ -460,17 +346,25 @@ public DateTime getDate2()
 }
 
 /**
+Return the full parcel list.
+@return the list of StateCU_Parcel
+*/
+public List<StateCU_Parcel> getParcelList () {
+	return this.__parcelList;
+}
+
+/**
 Return the parcels for a requested year and crop type.  These values can be used in data filling.
 @param year Parcel year of interest or <= number if all years should be returned.
 @param crop Crop type of interest or null if all crops should be returned.
 @return the list of StateCU_Parcel for a year
 */
 public List<StateCU_Parcel> getParcelListForYearAndCropName ( int year, String crop )
-{	List<StateCU_Parcel> parcels = new Vector<StateCU_Parcel>();
-	int size = __parcel_Vector.size();
+{	List<StateCU_Parcel> parcels = new ArrayList<StateCU_Parcel>();
+	int size = __parcelList.size();
 	StateCU_Parcel parcel;
 	for ( int i = 0; i < size; i++ ) {
-		parcel = __parcel_Vector.get(i);
+		parcel = __parcelList.get(i);
 		if ( (year > 0) && (parcel.getYear() != year) ) {
 			// Requested year does not match.
 			continue;
@@ -512,7 +406,7 @@ public int indexOf ( String crop_name )
 {	int size = __tslist.size();
 	YearTS yts = null;
 	for (int i = 0; i < size; i++) {
-		yts = (YearTS)__tslist.get(i);
+		yts = __tslist.get(i);
 		if(yts.getDataType().equalsIgnoreCase("CropArea-"+crop_name)){
 			return i;
 		}
@@ -632,7 +526,7 @@ private static boolean isVersion_10( String filename ) throws IOException
 }
 
 /**
-Read the StateCU CDS file and return as a Vector of StateCU_CropPattern.
+Read the StateCU CDS file and return as a list of StateCU_CropPattern.
 @param filename filename containing CDS records.
 @param date1_req Requested start of period.
 @param date2_req Requested end of period.
@@ -643,7 +537,7 @@ throws Exception
 }
 
 /**
-Read the StateCU CDS file and return as a Vector of StateCU_CropPattern.
+Read the StateCU CDS file and return as a list of StateCU_CropPattern.
 @param filename filename containing CDS records.
 @param date1_req Requested start of period.
 @param date2_req Requested end of period.
@@ -684,8 +578,8 @@ public static List<StateCU_CropPatternTS> readStateCUFile ( String filename, Dat
 throws Exception
 {	String routine = "StateCU_CropPatternTS.readStateCUFile";
 	String iline = null;
-	List<Object> v = new Vector<Object> ( 5 );
-	List<StateCU_CropPatternTS> cupat_Vector = new Vector<StateCU_CropPatternTS> ( 100 );
+	List<Object> v = new ArrayList<>( 5 );
+	List<StateCU_CropPatternTS> cupatList = new ArrayList<StateCU_CropPatternTS> ( 100 );
 	
 	String full_filename = IOUtil.getPathUsingWorkingDir ( filename );
 	Message.printStatus(2,routine, "Reading StateCU CDS file: " + full_filename );
@@ -1059,34 +953,34 @@ throws Exception
 				// Create an object for the CU Location.  It is
 				// assumed that a structure is listed for each
 				// year, even if it has zero crops for a year.
-				pos = StateCU_Util.indexOf(cupat_Vector, culoc);
+				pos = StateCU_Util.indexOf(cupatList, culoc);
 				if ( pos >= 0 ) {
 					// Should not happen!  The CU Location is apparently listed twice in the
 					// first year...
 					Message.printWarning ( 1, routine,
 					"CU Location \"" + culoc + "\" is listed more than once in the first year." );
-					cupat = (StateCU_CropPatternTS)cupat_Vector.get(pos);
+					cupat = cupatList.get(pos);
 				}
 				else {
 					cupat = new StateCU_CropPatternTS ( culoc, date1, date2, units_file, full_filename );
-					cupat_Vector.add ( cupat );
+					cupatList.add ( cupat );
 					//Message.printStatus ( 1, "", "SAMX created new StateCU_CropPatternTS:" + cupat );
 				}
 			}
 			else {
 				// Find the object of interest for this CU Location so it can be used to set data
 				// values...
-				pos = StateCU_Util.indexOf(cupat_Vector, culoc);
+				pos = StateCU_Util.indexOf(cupatList, culoc);
 				if ( pos < 0 ) {
 					// Should not happen!  Apparently the CU Location was not listed in the first year...
 					Message.printWarning ( 3, routine, "CU Location \"" + culoc + "\" found in year " +
 						year + " but was not listed in the first year." );
 					cupat = new StateCU_CropPatternTS ( culoc, date1, date2, units_file, full_filename );
-					cupat_Vector.add ( cupat );
+					cupatList.add ( cupat );
 					//Message.printStatus ( 1, "", "SAMX created new StateCU_CropPatternTS:" + cupat );
 				}
 				else {
-					cupat = (StateCU_CropPatternTS)cupat_Vector.get(pos);
+					cupat = cupatList.get(pos);
 				}
 			}
 		}
@@ -1113,7 +1007,7 @@ throws Exception
 			in.close();
 		}
 	}
-	return cupat_Vector;
+	return cupatList;
 }
 
 /**
@@ -1186,14 +1080,14 @@ throws Exception
 {	// TODO - can optimize this later to only read one time series...
 	// First read the whole file...
 
-	List<StateCU_CropPatternTS> data_Vector = readStateCUFile ( full_filename, req_date1, req_date2 );
+	List<StateCU_CropPatternTS> dataList = readStateCUFile ( full_filename, req_date1, req_date2 );
 	// If all the time series are required, return all...
 	int size = 0;
-	if ( data_Vector != null ) {
-		size = data_Vector.size();
+	if ( dataList != null ) {
+		size = dataList.size();
 	}
 	// Guess at non-zero size (assume 1.5 crops per structure)...
-	List<TS> tslist = new Vector<TS>((size + 1)*3/2);
+	List<TS> tslist = new ArrayList<>((size + 1)*3/2);
 	StateCU_CropPatternTS cds;
 	int nts = 0, j;
 	TSIdent tsident = null;
@@ -1204,7 +1098,7 @@ throws Exception
 	boolean include_ts = true;
 	for ( int i = 0; i < size; i++ ) {
 		include_ts = true;
-		cds = data_Vector.get(i);
+		cds = dataList.get(i);
 		if ( req_tsident != null ) {
 			// Check to see if the location match...
 			if ( !cds.getID().equalsIgnoreCase(	tsident.getLocation() ) ) {
@@ -1248,7 +1142,7 @@ public void refresh ()
 		__temp_DateTime.setYear ( year );
 		total_area = -999.0;
 		for ( int i = 0; i < size; i++ ) {
-			yts = (YearTS)__tslist.get(i);
+			yts = __tslist.get(i);
 			area = yts.getDataValue ( __temp_DateTime );
 			if ( !yts.isDataMissing(area) ) {
 				if ( total_area < 0.0 ) {
@@ -1273,8 +1167,8 @@ Remove all the time series from the object.  This can be used, for example, when
 resetting the time series to override a read.
 */
 public void removeAllTS ()
-{	if ( __crop_name_Vector != null ) {
-		__crop_name_Vector.clear();
+{	if ( __cropNameList != null ) {
+		__cropNameList.clear();
 	}
 	if ( __tslist != null ) {
 		__tslist.clear();
@@ -1287,26 +1181,26 @@ Remove a the time series for a crop name.
 */
 public void removeCropName ( String crop_name )
 {	int size = 0;
-	if ( __crop_name_Vector != null ) {
-		size = __crop_name_Vector.size();
+	if ( __cropNameList != null ) {
+		size = __cropNameList.size();
 	}
-	// Remove from the crop names Vector...
+	// Remove from the crop names list...
 	for ( int i = 0; i < size; i++ ) {
-		if ( ((String)__crop_name_Vector.get(i)).equalsIgnoreCase(crop_name) ) {
+		if ( __cropNameList.get(i).equalsIgnoreCase(crop_name) ) {
 			// Remove the crop name...
-			__crop_name_Vector.remove(i);
+			__cropNameList.remove(i);
 			--i;
 			--size;
 		}
 	}
-	// Remove from the time series Vector...
+	// Remove from the time series list...
 	size = 0;
 	if ( __tslist != null ) {
 		size = __tslist.size();
 	}
-	TS ts;
+	YearTS ts;
 	for ( int i = 0; i < size; i++ ) {
-		ts = (TS)__tslist.get(i);
+		ts = __tslist.get(i);
 		if ( ts.getIdentifier().getSubType().equalsIgnoreCase(crop_name) ) {
 			__tslist.remove(i);
 			--i;
@@ -1392,7 +1286,7 @@ public void setCropAreasToZero ( int year, boolean set_all )
 		}
 		else { // Process each time series...
 			for ( int i = 0; i < size; i++ ) {
-				yts = (YearTS)__tslist.get(i);
+				yts = __tslist.get(i);
 				if ( set_all || yts.isDataMissing(yts.getDataValue(__temp_DateTime)) ) {
 					yts.setDataValue ( __temp_DateTime, 0.0 );
 					Message.printStatus ( 2, "StateCU_CropPatternTS.setCropAreasToZero",
@@ -1435,7 +1329,7 @@ public void setPatternUsingAreas ( int year, int ncrops, String [] crop_names, d
 			yts = addTS ( crop_names[i], true );
 		}
 		else if ( pos >= 0 ) {
-			yts = (YearTS)__tslist.get(pos);
+			yts = __tslist.get(pos);
 		}
 		yts.setDataValue ( __temp_DateTime, crop_areas[i] );
 		// FIXME SAM 2007-10-03 Need to consolidate into refresh(year) and reuse code
@@ -1485,7 +1379,7 @@ public void setPatternUsingFractions ( int year, double total_area, int ncrops, 
 			yts = addTS ( crop_names[i], true );
 		}
 		else if ( pos >= 0 ) {
-			yts = (YearTS)__tslist.get(pos);
+			yts = __tslist.get(pos);
 		}
 		yts.setDataValue (__temp_DateTime,total_area*crop_fractions[i]);
 	}
@@ -1505,7 +1399,7 @@ an infinite loop will occur.
 public void setTotalArea ( int year, double total_area )
 throws Exception
 {	double old_total_area = getTotalArea ( year );
-	int ncrops = __crop_name_Vector.size();
+	int ncrops = __cropNameList.size();
 	if ( old_total_area <= 0.0 ) {
 		// TODO SAM 2007-06-20 Evaluate how to handle when all crops are zero or missing.
 		if ( ncrops > 0 ) {
@@ -1527,7 +1421,7 @@ throws Exception
 		String crop_name;
 		double area;
 		for ( int i = 0; i < ncrops; i++ ) {
-			crop_name = (String)__crop_name_Vector.get(i);
+			crop_name = __cropNameList.get(i);
 			area = getCropArea ( crop_name, year, false );
 			setCropArea ( crop_name, year, area*factor );
 		}
@@ -1539,7 +1433,7 @@ Return a string representation of this object (the crop name list as a string).
 @return a string representation of this object.
 */
 public String toString()
-{	return _id + " " + __crop_name_Vector;
+{	return _id + " " + __cropNameList;
 }
 
 /**
@@ -1575,7 +1469,7 @@ If not specified, "StateCU" will be used.
 public static List<TS> toTSList ( List<StateCU_CropPatternTS> dataList, boolean include_location_totals,
 	boolean include_dataset_totals, String dataset_location, String dataset_datasource )
 {	String routine = "StateCU_CropPatternTS.toTSList";
-	List<TS> tslist = new Vector<TS>();
+	List<TS> tslist = new ArrayList<>();
 	int size = 0;
 	if ( dataList != null ) {
 		size = dataList.size();
@@ -1589,7 +1483,7 @@ public static List<TS> toTSList ( List<StateCU_CropPatternTS> dataList, boolean 
 	int end_year = 0, start_year = 0, year;	// For data set totals.
 	YearTS yts = null, yts2;		// For data set totals.
 	String units = "";			// Units for new time series.
-	List<TS> dataset_ts_Vector = null;	// List of data set total time series.
+	List<YearTS> datasetTsList = null;	// List of data set total time series.
 	int j, k, nts;
 	if ( include_dataset_totals ) {
 		// Get a list of unique crops in the time series list...
@@ -1622,10 +1516,10 @@ public static List<TS> toTSList ( List<StateCU_CropPatternTS> dataList, boolean 
 			}
 		}
 		// Add a time series for each distinct crop and for the data set total...
-		dataset_ts_Vector = new Vector<TS>( ndistinct_crops );
+		datasetTsList = new ArrayList<>( ndistinct_crops );
 		for ( j = 0; j < ndistinct_crops; j++ ) {
 			// Add a new time series for all the distinct crops...
-			crop_name = (String)distinct_crop_names.get(j);
+			crop_name = distinct_crop_names.get(j);
 			yts = new YearTS ();
 			try {
 				TSIdent tsident = new TSIdent (
@@ -1645,24 +1539,24 @@ public static List<TS> toTSList ( List<StateCU_CropPatternTS> dataList, boolean 
 			yts.setDate1Original(new DateTime(start_DateTime));
 			yts.setDate2Original(new DateTime(end_DateTime));
 			yts.allocateDataSpace();
-			dataset_ts_Vector.add ( yts );
+			datasetTsList.add ( yts );
 		}
 	}
 	for ( int i = 0; i < size; i++ ) {
-		cds = (StateCU_CropPatternTS)dataList.get(i);
+		cds = dataList.get(i);
 		nts = cds.__tslist.size();
 		for ( j = 0; j < nts; j++ ) {
-			yts = (YearTS)cds.__tslist.get(j);
+			yts = cds.__tslist.get(j);
 			tslist.add ( yts );
 			crop_name = yts.getDataType();
 			if ( include_dataset_totals ) {
 				// Add to the data set total...
 				for ( k = 0; k < ndistinct_crops; k++ ) {
 					// Need to concatenate to compare...
-					crop_name2 = "CropArea-" + (String)distinct_crop_names.get(k);
+					crop_name2 = "CropArea-" + distinct_crop_names.get(k);
 					if ( crop_name2.equalsIgnoreCase(crop_name ) ) {
 						// Matching crop name - add it...
-						yts2 = (YearTS)dataset_ts_Vector.get(k);
+						yts2 = datasetTsList.get(k);
 						try {
 							TSUtil.add ( yts2, yts);
 						}
@@ -1672,7 +1566,7 @@ public static List<TS> toTSList ( List<StateCU_CropPatternTS> dataList, boolean 
 					}
 				}
 				// Add to the overall total...
-				yts2 = (YearTS)dataset_ts_Vector.get( ndistinct_crops - 1);
+				yts2 = (YearTS)datasetTsList.get( ndistinct_crops - 1);
 				try {
 					TSUtil.add ( yts2, yts );
 				}
@@ -1719,7 +1613,7 @@ public static List<TS> toTSList ( List<StateCU_CropPatternTS> dataList, boolean 
 		// the data set, by crop and overall total.  Do this after all
 		// other time series have been added.  Also reset the description to be more concise.
 		for ( j = 0; j < ndistinct_crops; j++ ) {
-			yts = (YearTS)dataset_ts_Vector.get(j);
+			yts = datasetTsList.get(j);
 			yts.setDescription ( yts.getLocation() + " " + yts.getDataType() );
 			tslist.add ( yts );
 		}
@@ -1740,8 +1634,8 @@ public void translateCropName ( String old_crop_name, String new_crop_name )
 throws Exception
 {	String routine = "StateCU_CropPatternTS.translateCropName";
 	int size = 0;
-	if ( __crop_name_Vector != null ) {
-		size = __crop_name_Vector.size();
+	if ( __cropNameList != null ) {
+		size = __cropNameList.size();
 	}
 
 	// Check to see if the new crop name is the same as an old crop name...
@@ -1749,7 +1643,7 @@ throws Exception
 	int existing_crop_pos = -1;	// Position matching new crop name -
 					// will be >= 0 if the new name already is in use.
 	for ( int i = 0; i < size; i++ ) {
-		if ( ((String)__crop_name_Vector.get(i)).equalsIgnoreCase(new_crop_name) ) {
+		if ( __cropNameList.get(i).equalsIgnoreCase(new_crop_name) ) {
 			existing_crop_pos = i;
 			Message.printStatus ( 2, routine, getID() + " new crop name matches an existing crop name. " +
 			"Crop data for \"" + old_crop_name + "\" will be added to existing \"" + new_crop_name + "\"" );
@@ -1762,10 +1656,10 @@ throws Exception
 	int old_crop_pos = -1;	// The position of the old crop time series, before changing its name.
 	boolean found = false;
 	for ( int i = 0; i < size; i++ ) {
-		if ( ((String)__crop_name_Vector.get(i)).equalsIgnoreCase(old_crop_name) ) {
+		if ( __cropNameList.get(i).equalsIgnoreCase(old_crop_name) ) {
 			// Reset the crop name...
 			found = true;
-			__crop_name_Vector.set(i,new_crop_name);
+			__cropNameList.set(i,new_crop_name);
 			// This crop either needs to be renamed or merged with another crop of the same name...
 			if ( existing_crop_pos >= 0 ) {
 				old_crop_pos = i;
@@ -1785,10 +1679,10 @@ throws Exception
 	if ( __tslist != null ) {
 		size = __tslist.size();
 	}
-	TS ts = null;
+	YearTS ts = null;
 	// Search for and modify the time series...
 	for ( int i = 0; i < size; i++ ) {
-		ts = (TS)__tslist.get(i);
+		ts = __tslist.get(i);
 		if ( ts.getIdentifier().getSubType().equalsIgnoreCase( old_crop_name) ) {
 			// This crop needs to be renamed, but only do so if
 			// not merging.  If merging keep the same name so the add comments make sense
@@ -1807,10 +1701,10 @@ throws Exception
 		// Need to add the translated crop to the existing crop and
 		// remove the translated crop.  The overall crop totals will
 		// remain the same so their is no need to recompute the totals.
-		TS ts_existing = (TS)__tslist.get(existing_crop_pos);
+		YearTS ts_existing = __tslist.get(existing_crop_pos);
 		TSUtil.add ( ts_existing, ts );
 		__tslist.remove ( old_crop_pos );
-		__crop_name_Vector.remove ( old_crop_pos );
+		__cropNameList.remove ( old_crop_pos );
 	}
 }
 
@@ -1850,7 +1744,7 @@ public StateCU_ComponentValidation validateComponent ( StateCU_DataSet dataset )
 					"Verify that crop areas are >= 0 for year.") );
 			}
 			for ( int i = 0; i < size; i++ ) {
-				yts = (YearTS)__tslist.get(i);
+				yts = __tslist.get(i);
 				area = yts.getDataValue ( __temp_DateTime );
 				crop = getCropNames().get(i);
 				if ( !(area >= 0.0) ) {
@@ -1930,9 +1824,9 @@ if no comments are available.
 public static void writeStateCUFile ( String filename_prev, String filename,
 		List<StateCU_CropPatternTS> dataList, List<String> new_comments, DateTime req_date1, DateTime req_date2, PropList props )
 throws IOException
-{	List<String> commentStr = new Vector<String>(1);
+{	List<String> commentStr = new ArrayList<>(1);
 	commentStr.add ( "#" );
-	List<String> ignoreCommentStr = new Vector<String>(1);
+	List<String> ignoreCommentStr = new ArrayList<>(1);
 	ignoreCommentStr.add ( "#>" );
 	PrintWriter out = null;
 	String full_filename_prev = IOUtil.getPathUsingWorkingDir ( filename_prev );
@@ -1991,7 +1885,7 @@ throws IOException
 	String rec2_format = "  Record 2 format (5x,a30,f10.3,f10.3) - for each crop for Record 1";
 	
 	if ( props == null ) {
-		props = new PropList ( "writeVector" );
+		props = new PropList ( "writeList" );
 	}
 	
 	boolean WriteCropArea_boolean = true; // Default
@@ -2031,7 +1925,7 @@ throws IOException
 		}
 	}
 
-	List<Object> v = new Vector<Object>(3);	// Reuse for all output lines.
+	List<Object> v = new ArrayList<>(3);	// Reuse for all output lines.
 
 	out.println ( cmnt );
 	out.println ( cmnt + "  StateCU Crop Patterns (CDS) File" );

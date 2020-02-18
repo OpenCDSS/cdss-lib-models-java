@@ -21,72 +21,6 @@ CDSS Models Java Library is free software:  you can redistribute it and/or modif
 
 NoticeEnd */
 
-//------------------------------------------------------------------------------
-// StateCU_Location - class to hold StateCU Location data, compatible with
-//			StateCU STR file
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-//
-// 2002-09-16	J. Thomas Sapienza, RTi	Initial version. 
-// 2002-09-19	JTS, RTi		Region2 changed from int to String
-// 2002-09-23	JTS, RTi		Added toStringForSTRFile()
-// 2002-10-08	JTS, RTi		Added "filled"
-// 2002-10-09	JTS, RTi		Formatting was SLIGHTLY off.
-// 2002-11-06	Steven A. Malers, RTi	Review code for official software
-//					release:
-//					* simplify names of data members.
-//					* rely on CUData base class for some
-//					  data and behavior.
-//					* remove code related to "fill".
-//					* add writeSTRFile to streamline output.
-// 2002-05-12	SAM, RTi		Change STR to StateCU in read/write
-//					methods.	
-// 2003-06-04	SAM, RTi		Change name of class from CULocation to
-//					StateCU_Location.
-// 2003-07-01	SAM, RTi		* Support the new format.  The format in
-//					  the old documentation will not be
-//					  supported.
-// 2004-02-25	SAM, RTi		* Finalize new format based on StateCU
-//					  4.35 release.
-//					* Add a Vector to store aggregate
-//					  information.  For now only store the
-//					  identifiers but it may make sense in
-//					  the future to store objects.
-//					* Allow climate station data to be
-//					  set dynamically because of resets.
-// 2004-02-27	SAM, RTi		* Fix read code to handle climate
-//					  stations on 2nd+ lines.
-// 2004-02-29	SAM, RTi		* Change so setting the aggregate list
-//					  also sets a date.
-//					* Add isCollection().
-// 2004-03-01	SAM, RTi		* Change "aggregate" to "collection"
-//					  since aggregate and system are the
-//					  collection types.  Using aggregate was
-//					  becoming confusing.
-//					* Parcel identifiers are not unique
-//					  unless the division is included so add
-//					  the division for the collection.  It
-//					  should not vary by year.
-// 2004-04-04	SAM, RTi		* Fix some justification problems in the
-//					  output of numerical fields.
-// 2005-01-17	J. Thomas Sapienza, RTi	* Added createBackup().
-//					* Added restoreOriginal().
-// 2005-03-07	SAM, RTi		* Add getCollectionType().
-// 2005-03-29	SAM, RTi		* Add Elevation label to header - must
-//					  have been an oversight.
-// 2005-04-19	JTS, RTi		* Added writeListFile().
-//   					* Added writeClimateStationListFile().
-// 2005-05-24	SAM, RTi		* Update writeStateCUFile() to include
-//					  properties, to allow old and new
-//					  versions to be written.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-// 2007-05-11	SAM, RTi		Add hasGroundwaterOnlySupply() and
-//					  hasSurfaceWaterSupply().
-//------------------------------------------------------------------------------
-// EndHeader
-
 package DWR.StateCU;
 
 import java.io.BufferedReader;
@@ -145,7 +79,6 @@ it is expected that the same division number is assigned to all the data.
 */
 private int __collection_div = StateCU_Util.MISSING_INT;
 
-
 /** 
 CULocation Elevation.
 */
@@ -193,10 +126,43 @@ private double[] __precipitation_station_weights = null;
 private double[] __temperature_station_weights = null;
 
 /**
+The list of StateCU_Parcel observations, as an archive of observations to use with data processing.
+These are read from HydroBase by StateDMI ReadCULocationParcelsFromHydroBase command.
+*/
+private List<StateCU_Parcel> __parcelList = new ArrayList<>();
+
+/**
 Construct a StateCU_Location instance and set to missing and empty data.
 */
 public StateCU_Location()
 {	super();
+}
+
+/**
+ * Add a parcel to the parcel list.
+ * If the combination of year and parcelId are found, move the supplies to the matched entry. 
+ */
+public void addParcel ( StateCU_Parcel parcelToAdd ) {
+	boolean found = false;
+	StateCU_Parcel parcelFound = null;
+	for ( StateCU_Parcel parcel : this.__parcelList ) {
+		if ( (parcel.getYear() == parcelToAdd.getYear()) && parcel.getID().equals(parcelToAdd.getID()) ) {
+			found = true;
+			parcelFound = parcel;
+			break;
+		}
+	}
+	if ( found ) {
+		// Add the supply to the found parcel
+		// - don't remove the supply from the passed in parcel, but may want to do that
+		for ( StateCU_Supply supply : parcelToAdd.getSupplyList() ) {
+			parcelFound.addSupply(supply);
+		}
+	}
+	else {
+		// Add the parcel to the list
+		this.__parcelList.add(parcelToAdd);
+	}
 }
 
 /**
@@ -328,6 +294,14 @@ public String getClimateStationID ( int pos )
 	else {
 		return "";
 	}
+}
+
+/**
+Return the full parcel list.
+@return the list of StateCU_Parcel
+*/
+public List<StateCU_Parcel> getParcelList () {
+	return this.__parcelList;
 }
 
 /**
@@ -475,7 +449,30 @@ public boolean isCollection()
 }
 
 /**
-Read the StateCU STR file and return as a Vector of StateCU_Location.
+ * Indicate whether the specified identifier is in a collection.
+ * This assumes that the newer approach is used, NOT parcel aggregation.
+ * @param id identifier to search for in collection ID list for the location.
+ * @return true if the provided identifier is in the list of identifiers in the collection, of any type.
+ */
+public boolean isIdInCollection(String id) {
+	if ( !isCollection() ) {
+		// Not a collection
+		return false;
+	}
+	else {
+		// Is a collection
+		List<String> collectionIdList = getCollectionPartIDsForYear ( 0 );
+		for ( String collectionId : collectionIdList ) {
+			if ( collectionId.equalsIgnoreCase(id) ) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+/**
+Read the StateCU STR file and return as a list of StateCU_Location.
 @param filename filename containing STR data.
 */
 public static List<StateCU_Location> readStateCUFile ( String filename )
@@ -597,6 +594,17 @@ throws IOException
 		in.close();
 	}
 	return culoc_List;
+}
+
+/**
+ * Recalculate parcel supply counts.
+ * - update counts on parcels for number of wells and number of ditches.
+ * - for well supply, update the area irrigated based on the count.
+ */
+public void recalcParcels () {
+	for ( StateCU_Parcel parcel : this.__parcelList ) {
+		parcel.refreshSupplyCount();
+	}
 }
 
 /**
@@ -1040,8 +1048,8 @@ throws IOException
 }
 
 /**
-Write a Vector of StateCU_Location to an opened file.
-@param dataList A Vector of StateCU_Location to write.
+Write a list of StateCU_Location to an opened file.
+@param dataList A list of StateCU_Location to write.
 @param out output PrintWriter.
 @param props Properties to control the write.  See the writeStateCUFile() method for a description.
 @exception IOException if an error occurs.
@@ -1188,7 +1196,7 @@ throws IOException
 }
 
 /**
-Writes a Vector of StateCU_Location objects to a list file.  A header is 
+Writes a list of StateCU_Location objects to a list file.  A header is 
 printed to the top of the file, containing the commands used to generate the 
 file.  Any strings in the body of the file that contain the field delimiter 
 will be wrapped in "...".  <p>

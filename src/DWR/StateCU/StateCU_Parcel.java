@@ -27,44 +27,70 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
-This class is not part of the core StateCU classes.  Instead, it is used with
-StateDMI to track whether a CU Location has parcels.  The data may ultimately be
-useful in StateCU and is definitely useful for data checks in StateDMI.
+This class is not part of the core StateCU model classes.
+Instead, it is used with StateDMI to track whether a CU Location has parcels.
+The data may ultimately be useful in StateCU and is definitely useful for data checks in StateDMI,
+for example to make sure a parcel is not counted more than once in acreage totals for the location.
 */
 public class StateCU_Parcel extends StateCU_Data 
 implements Cloneable, Comparable<StateCU_Data> {
 
-// Base class has ID and name (not useful and same as ID)
-
+// Base class has ID (parcel_id) and name (name is not not useful and same as CULocation ID)
+	
 /**
-Crop name.
-*/
-private String __crop;
-
-/**
-Area associated with the parcel, acres (should reflect percent_irrig from HydroBase).
-*/
-private double __area;
-
-/**
-Area units.
-*/
-private String __area_units;
+ * Location ID - this is redundant with the identifier of the object hat has a list of these objects,
+ * but is necessary when the parcel list is formed for many locations.
+ * For example, this can be set to StateCU or StateMod location.
+ */
+private String locationId = "";
 
 /**
 Year for the data.
 */
-private int __year;
+private int year;
+
+/**
+Crop name.
+*/
+private String crop;
+
+/**
+Parcel total area - see supply information for what was actually irrigated.
+*/
+private double area;
+
+/**
+Area units.
+*/
+private String areaUnits;
 
 /**
 Irrigation method.
 */
-private String __irrigation_method;
+private String irrigationMethod;
+
+/**
+ * Source of the parcel data, for example "HB-PUTS" for parcel use time series and "HB-WTP" for well to parcel.
+ */
+private String dataSource = "";
+
+/**
+ * Count of groundwater supplies for the parcel, used to prorate the parcel area to each of those wells.
+ * Call refreshSupplyCount to update.
+ */
+private int supplyFromGWCount = 0;
+
+/**
+ * Count of surface water supplies for the parcel, used to prorate the parcel area to each of those ditches.
+ * Call refreshSupplyCount() to update.
+ */
+private int supplyFromSWCount = 0;
 
 /**
 Water supply sources - initialize so non-null.
+These map to irrigated lands GIS data.
 */
-private List<StateCU_Supply> __supply_List = new ArrayList<StateCU_Supply>();
+private List<StateCU_Supply> supplyList = new ArrayList<>();
 
 /**
 Constructor.
@@ -78,7 +104,7 @@ public StateCU_Parcel() {
 Add a supply object.
 */
 public void addSupply ( StateCU_Supply supply )
-{	__supply_List.add ( supply );
+{	this.supplyList.add ( supply );
 }
 
 /**
@@ -104,27 +130,27 @@ public int compareTo(StateCU_Data data) {
 	}
 	
 	StateCU_Parcel parcel = (StateCU_Parcel)data;
-	res = __crop.compareTo(parcel.getCrop());
+	res = this.crop.compareTo(parcel.getCrop());
 	if ( res != 0) {
 		return res;
 	}
 	
-	res = __irrigation_method.compareTo(parcel.getIrrigationMethod());
+	res = this.irrigationMethod.compareTo(parcel.getIrrigationMethod());
 	if ( res != 0) {
 		return res;
 	}
 
-	if (__area < parcel.__area) {
+	if (this.area < parcel.area) {
 		return -1;
 	}
-	else if (__area > parcel.__area) {
+	else if (this.area > parcel.area) {
 		return 1;
 	}
 
-	if (__year < parcel.__year) {
+	if (this.year < parcel.year) {
 		return -1;
 	}
-	else if (__year > parcel.__year) {
+	else if (this.year > parcel.year) {
 		return 1;
 	}
 
@@ -193,9 +219,9 @@ public boolean equals(StateCU_Parcel parcel) {
 	 	return false;
 	}
 
-	if ( __crop.equals(parcel.__crop) && __irrigation_method.equalsIgnoreCase(parcel.__irrigation_method) &&
-		(__area == parcel.__area) && __area_units.equalsIgnoreCase(parcel.__area_units) &&
-		(__year == parcel.__year) ) {
+	if ( this.crop.equals(parcel.crop) && this.irrigationMethod.equalsIgnoreCase(parcel.irrigationMethod) &&
+		(this.area == parcel.area) && this.areaUnits.equalsIgnoreCase(parcel.areaUnits) &&
+		(this.year == parcel.year) ) {
 		
 		return true;
 	}
@@ -203,21 +229,11 @@ public boolean equals(StateCU_Parcel parcel) {
 }
 
 /**
-Clean up before garbage collection.
-*/
-protected void finalize()
-throws Throwable {
-	super.finalize();
-	__crop = null;
-	__irrigation_method = null;
-}
-
-/**
 Returns the area for the crop (acres).
 @return the area for the crop (acres).
 */
 public double getArea() {
-	return __area;
+	return this.area;
 }
 
 /**
@@ -225,7 +241,7 @@ Returns the area units for the crop.
 @return the area units for the crop.
 */
 public String getAreaUnits() {
-	return __area_units;
+	return this.areaUnits;
 }
 
 /**
@@ -233,7 +249,15 @@ Returns the crop.
 @return the crop.
 */
 public String getCrop() {
-	return __crop;
+	return this.crop;
+}
+
+/**
+Returns the data source.
+@return the data source.
+*/
+public String getDataSource() {
+	return this.dataSource;
 }
 
 /**
@@ -241,7 +265,31 @@ Returns the irrigation method.
 @return the irrigation method.
 */
 public String getIrrigationMethod() {
-	return __irrigation_method;
+	return this.irrigationMethod;
+}
+
+/**
+Returns the location identifier.
+@return the location identifier.
+*/
+public String getLocationId() {
+	return this.locationId;
+}
+
+/**
+Returns the count of groundwater supply.
+@return the count of groundwater supply.
+*/
+public int getSupplyFromGWCount() {
+	return this.supplyFromGWCount;
+}
+
+/**
+Returns the count of surface water supply.
+@return the count of surface water supply.
+*/
+public int getSupplyFromSWCount() {
+	return this.supplyFromSWCount;
 }
 
 /**
@@ -249,7 +297,7 @@ Return the list of StateCU_Supply for the parcel.
 @return the list of StateCU_Supply for the parcel.
 */
 public List<StateCU_Supply> getSupplyList() {
-	return __supply_List;
+	return this.supplyList;
 }
 
 /**
@@ -267,7 +315,7 @@ Returns the year for the crop.
 @return the year for the crop.
 */
 public int getYear() {
-	return __year;
+	return this.year;
 }
 
 /**
@@ -275,10 +323,10 @@ Indicate whether the parcel has groundwater supply.  This will be true if
 any of the StateCU_Supply associated with the parcel return isGroundWater as true.
 */
 public boolean hasGroundWaterSupply ()
-{	int size = __supply_List.size();
+{	int size = supplyList.size();
 	StateCU_Supply supply = null;
 	for ( int i = 0; i < size; i++ ) {
-		supply = (StateCU_Supply)__supply_List.get(i);
+		supply = this.supplyList.get(i);
 		if ( supply.isGroundWater() ) {
 			return true;
 		}
@@ -290,11 +338,50 @@ public boolean hasGroundWaterSupply ()
 Initializes member variables.
 */
 private void initialize() {
-	__crop = "";
-	__irrigation_method = "";
-	__area = StateCU_Util.MISSING_DOUBLE;
-	__area_units = "";
-	__year = StateCU_Util.MISSING_INT;
+	// Parent class
+	this._id = "";
+	// This class
+	this.area = StateCU_Util.MISSING_DOUBLE;
+	this.areaUnits = "";
+	this.crop = "";
+	this.irrigationMethod = "";
+	this.locationId = "";
+	this.supplyFromGWCount = 0;
+	this.supplyFromSWCount = 0;
+	this.year = StateCU_Util.MISSING_INT;
+}
+
+/**
+ * Refresh the counts of well and ditch supply.
+ */
+public void refreshSupplyCount () {
+	// Count the number of groundwater supplies (wells) and surface water supplies (ditches)
+	int countGW = 0;
+	int countSW = 0;
+	for ( StateCU_Supply supply : this.supplyList ) {
+		if ( supply.isGroundWater() ) {
+			++countGW;
+		}
+		if ( supply.isSurfaceWater() ) {
+			++countSW;
+		}
+	}
+	this.supplyFromGWCount = countGW;
+	this.supplyFromSWCount = countSW;
+	// Loop through the well supply parcels and update the areaIrrig based on count
+	for ( StateCU_Supply supply : this.supplyList ) {
+		if ( supply instanceof StateCU_SupplyFromGW ) {
+			if ( this.supplyFromGWCount == 0 ) {
+				((StateCU_SupplyFromGW) supply).setAreaIrrig(0.0);
+			}
+			else {
+				((StateCU_SupplyFromGW) supply).setAreaIrrig(this.area/this.supplyFromGWCount);
+			}
+		}
+		else if ( supply instanceof StateCU_SupplyFromSW ) {
+			// TODO smalers 2020-02-17 this is currently handled via HydroBase data
+		}
+	}
 }
 
 /**
@@ -305,11 +392,15 @@ public void restoreOriginal() {
 	StateCU_Parcel parcel = (StateCU_Parcel)_original;
 	super.restoreOriginal();
 
-	__crop = parcel.__crop;
-	__irrigation_method = parcel.__irrigation_method;
-	__area = parcel.__area;
-	__area_units = parcel.__area_units;
-	__year = parcel.__year;
+	this.area = parcel.area;
+	this.areaUnits = parcel.areaUnits;
+	this.crop = parcel.crop;
+	this.dataSource = parcel.dataSource;
+	this.irrigationMethod = parcel.irrigationMethod;
+	this.locationId = parcel.locationId;
+	this.supplyFromGWCount = parcel.supplyFromGWCount;
+	this.supplyFromSWCount = parcel.supplyFromSWCount;
+	this.year = parcel.year;
 	_isClone = false;
 	_original = null;
 }
@@ -319,14 +410,14 @@ Set the crop area.
 @param area area to set.
 */
 public void setArea(double area) {
-	if (area != __area) {
+	if (area != this.area) {
 		/* TODO SAM 2006-04-09 Parcels are not currently part of the data set.
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(_dataset.COMP_RESERVOIR_STATIONS,
 			true);
 		}
 		*/
-		__area = area;
+		this.area = area;
 	}
 }
 
@@ -335,14 +426,14 @@ Set the area units.
 @param area_units Area units to set.
 */
 public void setAreaUnits(String area_units ) {
-	if ( !area_units.equalsIgnoreCase(__area_units) ) {
+	if ( !area_units.equalsIgnoreCase(this.areaUnits) ) {
 		/* TODO SAM 2006-04-09 parcels are not currently part of StateMod data set.
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(_dataset.COMP_RESERVOIR_STATIONS,
 			true);
 		}
 		*/
-		__area_units = area_units;
+		this.areaUnits = area_units;
 	}
 }
 
@@ -351,31 +442,47 @@ Set the crop.
 @param crop Crop to set.
 */
 public void setCrop(String crop ) {
-	if ( !crop.equalsIgnoreCase(__crop) ) {
+	if ( !crop.equalsIgnoreCase(this.crop) ) {
 		/* TODO SAM 2006-04-09 parcels are not currently part of StateMod data set.
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(_dataset.COMP_RESERVOIR_STATIONS,
 			true);
 		}
 		*/
-		__crop = crop;
+		this.crop = crop;
 	}
 }
 
 /**
-Set the irrigation method.
-@param irrigation_method Irrigation method to set.
+Set the data source.
+@param dataSource Data source to set.
 */
-public void setIrrigationMethod(String irrigation_method ) {
-	if ( !irrigation_method.equalsIgnoreCase(__irrigation_method) ) {
+public void setDataSource(String dataSource ) {
+	this.dataSource = dataSource;
+}
+
+/**
+Set the irrigation method.
+@param irrigationMethod Irrigation method to set.
+*/
+public void setIrrigationMethod(String irrigationMethod ) {
+	if ( !irrigationMethod.equalsIgnoreCase(this.irrigationMethod) ) {
 		/* TODO SAM 2006-04-09 parcels are not currently part of StateMod data set.
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(_dataset.COMP_RESERVOIR_STATIONS,
 			true);
 		}
 		*/
-		__irrigation_method = irrigation_method;
+		this.irrigationMethod = irrigationMethod;
 	}
+}
+
+/**
+Set the location identifier (StateCU Location ID or StateMod node ID).
+@param locationId Location ID.
+*/
+public void setLocationId(String locationId ) {
+	this.locationId = locationId;
 }
 
 /**
@@ -402,14 +509,14 @@ Set the year associated with the crop.
 @param year Year to set.
 */
 public void setYear(int year) {
-	if ( year != __year) {
+	if ( year != this.year) {
 		/* TODO SAM 2006-04-09 parcels are not currently part of StateMod data set.
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(_dataset.COMP_RESERVOIR_STATIONS,
 			true);
 		}
 		*/
-		__year = year;
+		this.year = year;
 	}
 }
 
@@ -418,8 +525,8 @@ Returns a String representation of this object.
 @return a String representation of this object.
 */
 public String toString() {
-	return super.toString() + ", " + __crop + ", " + __irrigation_method + ", " +
-	__area + ", " + __area_units + ", " + __year;
+	return super.toString() + ", " + this.crop + ", " + this.irrigationMethod + ", " +
+	this.area + ", " + this.areaUnits + ", " + this.year;
 }
 
 }
