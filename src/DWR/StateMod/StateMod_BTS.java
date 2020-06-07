@@ -138,10 +138,10 @@ NoticeEnd */
 package DWR.StateMod;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Vector;
 
 import RTi.TS.DayTS;
 import RTi.TS.MonthTS;
@@ -205,6 +205,7 @@ private String __version = null;
 Program that created the file, typically "StateMod".
 */
 private String __headerProgram = "";
+
 /**
 Date for the software version, in format YYYY/MM/DD.
 */
@@ -216,24 +217,29 @@ private String __headerDate = "";
 Name of the binary file being operated on (may or may not be an absolute path).
 */
 private String __tsfile;
+
 /**
 Full path to binary file being operated on.  This is used as the key in the __file_Hashtable.
 */
 private String __tsfileFull;
+
 /**
 Pointer to random access file (StateMod binary files are assumed to be little endian since they are written
 by Lahey FORTRAN code on a PC).  If necessary, the year value can be examined to determine the file endian-ness.
 */
 private EndianRandomAccessFile __fp;
+
 /**
 A hashtable for the file pointers (instances of StateMod_BTS).  This is used to increase performance.
 */
 private static Hashtable<String,StateMod_BTS> __file_Hashtable = new Hashtable<String,StateMod_BTS>();
+
 /**
 Direct access file record length, bytes.  140 is the B43 for 9.62, but this is reset below.
 Use a long to avoid casting when calculating position.
 */
 private long __recordLength = 140;
+
 /**
 Length of the header in bytes, including lists of stations (everything before the time series data).  This
 is assigned after reading the number of stations.  The first record format various between versions but
@@ -241,58 +247,72 @@ always fits into one record.
 Use a long to avoid casting when calculating position.
 */
 private long __headerLength = 0;
+
 /**
 Number of bytes for one full interval (month or day) of data for all stations, to
 simplify iterations.  This is assigned after reading the number of stations.
 Use a long to avoid casting when calculating position.
 */
 private long __intervalBytes = 0;
+
 /**
 Estimated size of the file, calculated from the header information - used for
 debugging and to check for premature end of file.
 */
 private long __estimatedFileLengthBytes = 0;
+
 /**
 Interval base for the binary file that is being read.
 */
 private int	__intervalBase = TimeInterval.MONTH;
+
 /**
 Start of the data, in calendar year, to proper date precision.
 */
 private DateTime __date1 = null;
+
 /**
 End of the data, in calendar year, to proper date precision.
 */
 private DateTime __date2 = null;
+
 /**
 Number of parameters for each data record, for the current file.  Set below depending on
 file contents and version.  This will be set equal to one of __ndivO, __nresO, __nwelO.
 */
 private int __numparm = 0;
+
 /**
 Maximum length of parameter list, for all files.
 */
 private int __maxparm = 0;
+
 /**
 Number of parameters specific to the diversion file.
 */
 private int __ndivO = 0;
+
 /**
 Number of parameters specific to the reservoir file.
 */
 private int __nresO = 0;
+
 /**
 Number of parameters specific to the well file.
 */
 private int __nwelO = 0;
+
 /**
 List of the official parameter names.
 */
 private String  [] __parameters = null;
+private String  [] __parametersUpper = null;
+
 /**
 Units for each parameter.
 */
 private String  [] __unit = null;
+
 /**
 Component type for the binary file: COMP_DIVERSION_STATIONS, COMP_RESERVOIR_STATIONS, or COMP_WELL_STATIONS.
 */
@@ -305,151 +325,204 @@ private int __comp_type = StateMod_DataSet.COMP_UNKNOWN;
 Beginning year of simulation.
 */
 private int	__iystr0 = 0;
+
 /**
 Ending year of simulation.
 */
 private int	__iyend0 = 0;
+
 /**
 Number of river nodes.
 */
 private int	__numsta = 0;
+
 /**
 Number of diversions.
 */
 private int	__numdiv = 0;
+
 /**
 Number of instream flow locations.
 */
 private int	__numifr = 0;
+
 /**
 Number of reservoirs.
 */
 private int	__numres = 0;
+
 /**
 Number of reservoir owners.
 */
 private int	__numown = 0;
+
 /**
 Number of active reservoirs.
 */
 private int	__nrsact = 0;
+
 /**
 Number of baseflow (stream gage + stream estimate)
 */
 private int	__numrun = 0;
+
 /**
 Number of wells.
 */
 private int	__numdivw= 0;
+
 /**
 Number of ?
 */
 private int	__numdxw = 0;
+
 /**
 List of month names, used to determine whether the data are water or calendar year.
 */
 private String [] __xmonam = null;
+
 /**
 Number of days per month, corresponding to __xmonam.  This is used to convert CFS
 to ACFT.  Note February always has 28 days.
 */
 private int [] __mthday = null;
+
 /**
 __mthday, always in calendar order.
 */
 private int [] __mthdayCalendar = null;
+
 /**
 List of river node IDs.  The data records are in this order.
 */
 private String[] __cstaid = null;
+
 /**
 Station names for river nodes.
 */
 private String[] __stanam = null;
+
 /**
 List of diversion IDs.
 */
 private String[] __cdivid = null;
+
 /**
 Diversion names.
 */
 private String[] __divnam = null;
+
 /**
 River node position for diversion (1+).
 */
 private int[] __idvsta = null;
+
 /**
 List of instream flow IDs.
 */
 private String[] __cifrid = null;
+
 /**
 Instream flow names.
 */
 private String[] __xfrnam = null;
+
 /**
 River node position for instream flow (1+).
 */
 private int[] __ifrsta = null;
+
 /**
 List of reservoir IDs.
 */
 private String[] __cresid = null;
+
 /**
 Reservoir names.
 */
 private String[] __resnam = null;
+
 /**
 River node position for reservoir (1+).
 */
 private int[] __irssta = null;
+
 /**
 Indicates whether reservoir is on or off.  Reservoirs that are off do not have output records.
 */
 private int[] __iressw = null;
+
 /**
 Number of owners (accounts) for each reservoir, cumulative, and does not include, totals, which are
 stored as account 0 for each reservoir.
 */
 private int[] __nowner = null;
+
 /**
 Number of owners (accounts) for each reservoir (not cumulative like __nowner).
 This DOES include the total account, which is account 0.
 */
 private int[] __nowner2 = null;
+
 /**
 Number of owners (accounts) for each reservoir, cumulative, including the current reservoir.  This includes the total
 and is only for active reservoirs.  This is used when figuring out how many records to skip for previous stations.
 */
 private int[] __nowner2_cum = null;
+
 /**
 Number of owners (accounts) for each reservoir, cumulative, taking into account that inactive reservoirs are at
 the end of the list of time series and can be ignored.
 */
 private int[] __nowner2_cum2 = null;
+
 /**
 List of stream gage and stream estimate IDs (nodes that have baseflows).
 */
 private String[] __crunid = null;
+
 /**
 Stream gage and stream estimate names.
 */
 private String[] __runnam = null;
+
 /**
 River node position for station (1+).
 */
 private int[] __irusta = null;
+
 /**
 List of well IDs.
 */
 private String[] __cdividw = null;
+
 /**
 Well names.
 */
 private String[] __divnamw = null;
+
 /**
 River node position for well (1+).
 */
 private int[] __idvstw = null;
+
+/**
+ * Station types consistent with:
+	int DIV = 0;  // Diversion stations
+	int ISF = 1;  // Instream flow stations
+	int RES = 2;  // Reservoir stations
+	int BF = 3;   // Baseflow stations
+	int WEL = 4;  // Wells
+	int RIV = 5;  // River nodes (to find nodes only in RIN file)
+*/
+private String [] nodeTypes = {
+	"Diversion",
+	"InstreamFlow",
+	"Resevoir",
+	"Baseflow",
+	"Well",
+	"River"
+};
 
 /**
 Open a binary StateMod binary time series file.  It is assumed that the file
@@ -1530,6 +1603,13 @@ throws IOException
 				__numparm = __nwelO;
 				Message.printStatus ( 2, routine, "Saving well parameters list." );
 			}
+			if ( __parameters != null ) {
+				// Save uppercase parameters to streamline comparisons
+				__parametersUpper = new String[__parameters.length];
+				for ( int iParam = 0; iParam < __parameters.length; ++iParam ) {
+					__parametersUpper[iParam] = __parameters[iParam].toUpperCase();
+				}
+			}
 		}
 	}
 	else {
@@ -1775,7 +1855,7 @@ throws Exception
 }
 
 /**
-Read a list of time series from the binary file.  A Vector of new time series is returned.
+Read a list of time series from the binary file.  A list of new time series is returned.
 @param tsident_pattern A regular expression for TSIdents to return.  For example
 * or null returns all time series.  *.*.XXX.* returns only time series matching
 data type XXX.  Currently only location and data type (output parameter) are checked and only a
@@ -1791,8 +1871,36 @@ main location part is first matched and the the reservoir account is checked if 
 @exception IOException if the interval for the time series does not match that
 for the file or if a write error occurs.
 */
-public List<TS> readTimeSeriesList (	String tsident_pattern, DateTime date1,
-					DateTime date2, String req_units, boolean read_data )
+public List<TS> readTimeSeriesList ( String tsident_pattern, DateTime date1,
+	DateTime date2, String req_units, boolean read_data ) throws Exception {
+	String [] includeDataTypes = null;
+	String [] excludeDataTypes = null;
+	return readTimeSeriesList ( tsident_pattern, date1, date2,
+		includeDataTypes, excludeDataTypes, req_units, read_data );
+}
+
+/**
+Read a list of time series from the binary file.  A Vector of new time series is returned.
+@param tsident_pattern A regular expression for TSIdents to return.  For example
+* or null returns all time series.  *.*.XXX.* returns only time series matching
+data type XXX.  Currently only location and data type (output parameter) are checked and only a
+* wildcard can be specified, if used.  This is useful for TSTool in order to
+list all stations that have a data type.  For reservoirs, only the main location
+can be matched, and the returned list of time series will include time series
+for all accounts.  When matching a specific time series (no wildcards), the
+main location part is first matched and the the reservoir account is checked if the main location is matched.
+@param date1 First date/time to read, or null to read the full period.
+@param date2 Last date/time to read, or null to read the full period.
+@param req_units Requested units for the time series (currently not implemented).
+@param includeDataTypes an array of data types (matching StateMod parameters) to include or null to include all.
+@param excludeDataTypes an array of data types (matching StateMod parameters) to exclude or null to exclude none.
+The data types are excluded after 'includeDataTypes' is considered.
+@param read_data True if all data should be read or false to only read the headers.
+@exception IOException if the interval for the time series does not match that
+for the file or if a write error occurs.
+*/
+public List<TS> readTimeSeriesList ( String tsident_pattern, DateTime date1, DateTime date2,
+	String [] includeDataTypes, String [] excludeDataTypes, String req_units, boolean read_data )
 throws Exception
 {	String routine = "StateMod_BTS.readTimeSeriesList";
 	// Using previously read information, loop through each time series
@@ -1804,9 +1912,12 @@ throws Exception
 	// reading the header.  This needs to be considered.
 
 	int iparam = 0;
-	List<TS> tslist = new Vector<TS>();
+	List<TS> tslist = new ArrayList<>();
+	boolean defaultPattern = false; // Whether a default pattern is used for TSID, used to speed up processing
 	if ( (tsident_pattern == null) || (tsident_pattern.length() == 0) ) {
+		// Set a default pattern
 		tsident_pattern = "*.*.*.*.*";
+		defaultPattern = true;
 	}
 	TSIdent tsident_regexp = new TSIdent ( tsident_pattern );
 					// TSIdent containing the regular expression parts.
@@ -1846,6 +1957,58 @@ throws Exception
 		Message.printDebug ( dl, routine, "Reading time series for \"" +
 		tsident_pattern + "\" __numsta = " + __numsta );
 	}
+	
+	// If include/exclude lists are provided, convert to uppercase to speed comparisons
+	boolean [] includeParameters = null;
+	if ( (includeDataTypes != null) || (excludeDataTypes != null) ) {
+		// Have one or both lists
+		// - initialize to false and then fill in below
+		includeParameters = new boolean[__parameters.length];
+		for ( int iParam = 0; iParam < __parameters.length; iParam++ ) {
+			includeParameters[iParam] = false;
+		}
+	}
+	if ( includeDataTypes != null ) {
+		for ( int iInclude = 0; iInclude < includeDataTypes.length; ++iInclude ) {
+			includeDataTypes[iInclude] = includeDataTypes[iInclude].toUpperCase();
+		}
+		// See if the parameter matches the requested data type
+		// - currently it must be an exact match with no wildcard matching, also case is ignored
+		int iInclude, iParam;
+		for ( iParam = 0; iParam < __parameters.length; iParam++ ) {
+			includeParameters[iParam] = false;
+			for ( iInclude = 0; iInclude < includeDataTypes.length; ++iInclude ) {
+				if ( includeDataTypes[iInclude].equals(__parametersUpper[iParam]) ) {
+					// Turn on the parameter
+					includeParameters[iParam] = true;
+					break;
+				}
+			}
+		}
+	}
+	if ( excludeDataTypes != null ) {
+		for ( int iExclude = 0; iExclude < excludeDataTypes.length; ++iExclude ) {
+			excludeDataTypes[iExclude] = excludeDataTypes[iExclude].toUpperCase();
+		}
+		// See if the parameter matches the requested data type
+		// - currently it must be an exact match with no wildcard matching, also case is ignored
+		int iExclude, iParam;
+		for ( iParam = 0; iParam < __parameters.length; iParam++ ) {
+			for ( iExclude = 0; iExclude < excludeDataTypes.length; ++iExclude ) {
+				if ( excludeDataTypes[iExclude].equals(__parametersUpper[iParam])) {
+					// Turn off the parameter
+					includeParameters[iParam] = false;
+					break;
+				}
+			}
+		}
+	}
+	if ( includeParameters != null ) {
+		for ( int iParam = 0; iParam < __parameters.length; iParam++ ) {
+			Message.printStatus(2, routine, "includeParameters[" + iParam + "] = " + includeParameters[iParam] + " for " + __parameters[iParam]);
+		}
+	}
+
 	// This is used to track matches to ensure that the same
 	// station/datatype combination is only included once.  It is possible
 	// that baseflow stations are listed in more than one list of stations.
@@ -1978,7 +2141,7 @@ throws Exception
 				current_tsident.setLocation ( ids[iid] );
 				current_tsident.setType ( __parameters[iparam] );
 				// Other TSID fields are left blank to match all.
-				if ( !current_tsident.matches(
+				if ( !defaultPattern && !current_tsident.matches(
 					tsident_regexp_loc,
 					tsident_regexp_source,
 					tsident_regexp_type,
@@ -1990,6 +2153,11 @@ throws Exception
 					// match the location and parameter since that is all that is in the file.
 					//Message.printStatus ( 1, routine,"Requested \"" + tsident_pattern +
 					//"\" does not match \"" +ids[iid] + "\" \""+__parameter[iparam]+ "\"" );
+					continue;
+				}
+				// Additional data type checks to limit output
+				if ( (includeParameters != null) && !includeParameters[iparam] ) {
+					// Was not found in the include list so ignore.
 					continue;
 				}
 				if ( Message.isDebugOn ) {
@@ -2158,6 +2326,8 @@ throws Exception
 					    ts.setDate2 ( new DateTime( date2) );
 					}
 					ts.addToGenesis ( "Read from \"" + __tsfile + " for " + date1 +	" to " + date2 );
+					// Set properties
+					setTimeSeriesProperties(ts, istatype);
 					tslist.add ( ts );
 					if ( read_data ) {
 						if ( Message.isDebugOn ) {
@@ -2227,6 +2397,15 @@ throws Exception
 	}
 	// TODO 2007-01-18 old comment - Might return null if match_found == false????
 	return tslist;
+}
+
+/**
+ * Set time series properties.
+ * @param ts time series.
+ * @param istatype StateMod station type.
+ */
+private void setTimeSeriesProperties ( TS ts, int istatype ) {
+	ts.setProperty("NodeType", this.nodeTypes[istatype] );
 }
 
 /**
