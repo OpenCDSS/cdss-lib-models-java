@@ -1422,6 +1422,28 @@ throws Exception
 		Message.printWarning ( 3, routine, e );
 		throw new Exception ( message + " (" + e + ") - CHECK DATA FILE FORMAT." );
 	}
+	// Post-process the list of time series to handle special cases
+	// - *.tar file has two time series that are otherwise not unique
+	if ( fullFilename.toUpperCase().endsWith(".TAR") ) {
+		// Two time series will be found per location:
+		// - set time series property "target=Min" for first time series or "target=Max" for second time series
+		String locIdPrev = null;
+		String locId = null;
+		for ( TS ts : tslist ) {
+			locId = ts.getLocation();
+			if ( (locIdPrev == null) || !locId.equals(locIdPrev) )  {
+				// First time series in pair
+				// - set the property
+				ts.setProperty("target", "Min");
+			}
+			else {
+				// Second time series in pair
+				ts.setProperty("target", "Max");
+			}
+			// Set the previous ID to the current so next loop can compare.
+			locIdPrev = locId;
+		}
+	}
 	return tslist;
 }
 
