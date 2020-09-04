@@ -56,7 +56,7 @@ Collection part type, e.g., "Well" or "Parcel".
 private String collectionPartType = "";
 
 /**
- * Indicate whether to include in CDS acreate.
+ * Indicate whether to include in CDS acreage.
  */
 private boolean includeInCdsArea = true;
 
