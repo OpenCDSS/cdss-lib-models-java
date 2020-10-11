@@ -335,6 +335,22 @@ public boolean hasGroundWaterSupply ()
 }
 
 /**
+Indicate whether the parcel has surface water supply.  This will be true if
+any of the StateCU_Supply associated with the parcel return isSurfaceWater as true.
+*/
+public boolean hasSurfaceWaterSupply ()
+{	int size = supplyList.size();
+	StateCU_Supply supply = null;
+	for ( int i = 0; i < size; i++ ) {
+		supply = this.supplyList.get(i);
+		if ( supply.isSurfaceWater() ) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
 Initializes member variables.
 */
 private void initialize() {

@@ -59,13 +59,23 @@ __collectionYear array will have a size of 0 and the __collectionIDList will be 
 private List<List <String>> __collectionIDList = null;
 
 /**
-The identifiers types for data that are collected - null if not a collection
-location.  This is a List of Lists corresponding to each __collectionYear element.
+The identifiers types for data that are collected - null if not a collection location.
+This is a List of Lists corresponding to each __collectionYear element.
 If the list of identifiers is consistent for the entire period then the
 __collectionYear array will have a size of 0 and the __collectionIDTypeList will be a single list.
-This list is only used for well collections that use well identifiers for the parts.
+This list is only used for well collections that use well identifiers (WDID or Receipt) for the parts.
 */
 private List<List<StateCU_Location_CollectionPartIdType>> __collectionIDTypeList = null;
+
+/**
+The WDs for data that are collected - null if not a collection location.
+This is a List of Lists corresponding to each __collectionYear element.
+If the list of identifiers is consistent for the entire period then the
+__collectionYear array will have a size of 0 and the __collectionIDWDList will be a single list.
+This list is only used for well collections that use well identifiers (WDID or Receipt) for the parts.
+This is needed for receipts in particular because the WD for cached data lookups cannot be determined from WDID.
+*/
+private List<List<Integer>> __collectionIDWDList = null;
 
 /**
 An array of years that correspond to the aggregate/system.  Parcel
@@ -130,6 +140,11 @@ The list of StateCU_Parcel observations, as an archive of observations to use wi
 These are read from HydroBase by StateDMI ReadCULocationParcelsFromHydroBase command.
 */
 private List<StateCU_Parcel> __parcelList = new ArrayList<>();
+
+/**
+ * Location type, initially implemented for use with the Parcel data component.
+ */
+private StateCU_LocationType __locationType = StateCU_LocationType.UNKNOWN;
 
 /**
 Construct a StateCU_Location instance and set to missing and empty data.
@@ -203,7 +218,8 @@ public int getCollectionDiv ()
 /**
 Return the collection part ID list for the specific year.  For ditches, only one
 aggregate/system list is currently supported so the same information is returned
-regardless of the year value.  For wells, the collection is done for a specific year.
+regardless of the year value.  For wells, if the collection part type is WELL, the list is the same for all years,
+or if PARCEL, for a specific year.
 @param year The year of interest, only used for well identifiers when collection is specified with parcels.
 @return the list of collection part IDS, or null if not defined.
 */
@@ -241,6 +257,37 @@ public List<StateCU_Location_CollectionPartIdType> getCollectionPartIDTypes () {
 	}
 	else {
 		return __collectionIDTypeList.get(0); // Currently does not vary by year
+	}
+}
+
+/**
+ * Return the WD for the collection part.
+ * This is used when getting the WD for receipt so that data query can occur.
+ * @param partID part identifier to search for
+ * @return the WD for the requested part ID, or null if not found.
+ */
+public Integer getCollectionPartIDWD ( String partId ) {
+	// Current approach (2020) is to not use year
+	List<String> partIds = this.__collectionIDList.get(0);
+	for ( int i = 0; i < partIds.size(); i++ ) {
+		if ( partId.equals(partIds.get(i)) ) {
+			return this.__collectionIDWDList.get(0).get(i);
+		}
+	}
+	return null;
+}
+
+/**
+Return the collection part ID WD list.  This is used with well locations when aggregating
+by well identifiers (WDIDs and permit receipt numbers), to store WD for the parts.
+@return the list of collection part WDs, or null if not defined.
+*/
+public List<Integer> getCollectionPartIDWDs () {
+	if (__collectionIDWDList == null ) {
+		return null;
+	}
+	else {
+		return __collectionIDWDList.get(0); // Currently does not vary by year
 	}
 }
 
@@ -318,6 +365,14 @@ Return the latitude.
 */
 public double getLatitude()
 {	return __latitude;
+}
+
+/**
+Return the location type.
+@return the location type.
+*/
+public StateCU_LocationType getLocationType()
+{	return this.__locationType;
 }
 
 /**
@@ -469,6 +524,24 @@ public boolean isIdInCollection(String id) {
 		}
 	}
 	return false;
+}
+
+/**
+ * Lookup a StateCU_Location in a list, using the ID.
+ * @param culocList list of StateCU_Location to search.
+ * @param id identifier to match
+ * @return matching SateCU_Location or null if not matched
+ */
+public static StateCU_Location lookupForId ( List<StateCU_Location> culocList, String id ) {
+	if ( culocList == null ) {
+		return null;
+	}
+	for ( StateCU_Location culoc : culocList ) {
+		if ( culoc.getID().equals(id) ) {
+			return culoc;
+		}
+	}
+	return null;
 }
 
 /**
@@ -687,17 +760,24 @@ public void setCollectionPartIDs ( List<String> ids )
 /**
 Set the collection list for an aggregate/system.  It is assumed that the
 collection applies to all years of data.
-@param ids The identifiers indicating the locations to collection.
+@param partIdList The identifiers indicating the locations in the collection.
+@param partIdTypeList the part identifier types, used when well and part ID may be Well or Receipt or Parcel (Parcel is being phased out).
+@param partIdWDList the part identifier WD, used in particular when well and part is Receipt.
 */
-public void setCollectionPartIDs ( List<String> ids, List<StateCU_Location_CollectionPartIdType> idTypes )
+public void setCollectionPartIDs ( List<String> partIdList,
+	List<StateCU_Location_CollectionPartIdType> partIdTypeList,
+	List<Integer> partIdWDList )
 {	
-	__collectionIDList = new ArrayList<List<String>>();
-	__collectionIDTypeList = new ArrayList<List<StateCU_Location_CollectionPartIdType>>();
-	__collectionYear = new int[1];
+	__collectionIDList = new ArrayList<List<String>>(1);
+	__collectionIDList.add ( partIdList );
 
-	// Now assign...
-	__collectionIDList.add ( ids );
-	__collectionIDTypeList.add ( idTypes );
+	__collectionIDTypeList = new ArrayList<List<StateCU_Location_CollectionPartIdType>>(1);
+	__collectionIDTypeList.add ( partIdTypeList );
+
+	__collectionIDWDList = new ArrayList<List<Integer>>(1);
+	__collectionIDWDList.add ( partIdWDList );
+
+	__collectionYear = new int[1];
 	__collectionYear[0] = 0;
 }
 
@@ -774,6 +854,14 @@ Set the latitude.
 */
 public void setLatitude ( double latitude )
 {	__latitude = latitude;
+}
+
+/**
+Set the location type.
+@param location type
+*/
+public void setLocationType ( StateCU_LocationType locationType )
+{	__locationType = locationType;
 }
 
 /**

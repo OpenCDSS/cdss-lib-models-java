@@ -61,8 +61,8 @@ the data can be edited, if false they can not.
 */
 public StateCU_Location_Collection_Data_JFrame(JFrame parent, List<StateCU_Location> data, String titleString, boolean editable)
 throws Exception {
-	super(parent, 650, -1, data, titleString, editable);
-	setSize(650, getHeight());
+	super(parent, 700, -1, data, titleString, editable);
+	setSize(700, getHeight());
 }
 
 /**

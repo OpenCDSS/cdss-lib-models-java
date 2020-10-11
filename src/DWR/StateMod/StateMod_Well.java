@@ -299,6 +299,16 @@ where the identifier can be WDID or RECEIPT type.
 private List<List <StateMod_Well_CollectionPartIdType>> __collectionIDTypeList = null;
 
 /**
+The WDs for data that are collected - null if not a collection location.
+This is a List of Lists corresponding to each __collectionYear element.
+If the list of identifiers is consistent for the entire period then the
+__collectionYear array will have a size of 0 and the __collectionIDWDList will be a single list.
+This list is only used for well collections that use well identifiers (WDID or Receipt) for the parts.
+This is needed for receipts in particular because the WD for cached data lookups cannot be determined from WDID.
+*/
+private List<List<Integer>> __collectionIDWDList = null;
+
+/**
 An array of years that correspond to the aggregate/system.  Well collections are defined by year.
 */
 private int [] __collectionYear = null;
@@ -1055,6 +1065,37 @@ public List<String> getCollectionPartIDs ( int year )
 }
 
 /**
+Return the collection part ID list for the specific year.
+If the collection part type is WELL, the list is the same for all years,
+or if PARCEL, for a specific year.
+@param year The year of interest, only used for well identifiers when collection is specified with parcels.
+@return the list of collection part IDS, or null if not defined.
+*/
+public List<String> getCollectionPartIDsForYear ( int year )
+{	if ( (__collectionIDList == null) || (__collectionIDList.size() == 0) ) {
+		return null;
+	}
+	if ( __collection_part_type == StateMod_Well_CollectionPartType.DITCH ) {
+		// The list of part IDs will be the first and only list (same for all years)...
+		return __collectionIDList.get(0);
+	}
+	else if ( __collection_part_type == StateMod_Well_CollectionPartType.WELL ) {
+		// The list of part IDs will be the first and only list (same for all years)...
+		return __collectionIDList.get(0);
+	}
+	else if ( __collection_part_type == StateMod_Well_CollectionPartType.PARCEL ) {
+		// TODO smalers 2020-10-10 leave in for now but should not be used.
+		// The list of part IDs needs to match the year.
+		for ( int i = 0; i < __collectionYear.length; i++ ) {
+			if ( year == __collectionYear[i] ) {
+				return __collectionIDList.get(i);
+			}
+		}
+	}
+	return null;
+}
+
+/**
 Return the collection part ID type list.  This is used with well locations when aggregating
 by well identifiers (WDIDs and permit receipt numbers).
 @return the list of collection part ID types, or null if not defined.
@@ -1065,6 +1106,20 @@ public List<StateMod_Well_CollectionPartIdType> getCollectionPartIDTypes () {
 	}
 	else {
 		return __collectionIDTypeList.get(0); // Currently does not vary by year
+	}
+}
+
+/**
+Return the collection part ID WD list.  This is used with well locations when aggregating
+by well identifiers (WDIDs and permit receipt numbers), to store WD for the parts.
+@return the list of collection part WDs, or null if not defined.
+*/
+public List<Integer> getCollectionPartIDWDs () {
+	if (__collectionIDWDList == null ) {
+		return null;
+	}
+	else {
+		return __collectionIDWDList.get(0); // Currently does not vary by year
 	}
 }
 
@@ -1896,15 +1951,25 @@ public void setCollectionDiv ( int collection_div )
 Set the collection list for an aggregate/system for the entire period, used when specifying well ID lists.
 For this version the list is constant for all years
 @param partIdList The identifiers indicating the locations in the collection.
+@param partIdTypeList the part identifier types, used when well and part ID may be Well or Receipt or Parcel (Parcel is being phased out).
+@param partIdWDList the part identifier WD, used in particular when well and part is Receipt.
 */
-public void setCollectionPartIDs ( List<String> partIdList, List<StateMod_Well_CollectionPartIdType> partIdTypeList )
-{		// Size is 1 because list is constant for the entire period
-		__collectionIDList = new ArrayList<List<String>> ( 1 );
-		__collectionIDList.add ( partIdList );
-		__collectionIDTypeList = new ArrayList<List<StateMod_Well_CollectionPartIdType>> ( 1 );
-		__collectionIDTypeList.add ( partIdTypeList );
-		__collectionYear = new int[1];
-		__collectionYear[0] = 0;
+public void setCollectionPartIDs (
+	List<String> partIdList,
+	List<StateMod_Well_CollectionPartIdType> partIdTypeList,
+	List<Integer> partIdWDList )
+{	// Size is 1 because list is constant for the entire period
+	__collectionIDList = new ArrayList<List<String>> ( 1 );
+	__collectionIDList.add ( partIdList );
+
+	__collectionIDTypeList = new ArrayList<List<StateMod_Well_CollectionPartIdType>> ( 1 );
+	__collectionIDTypeList.add ( partIdTypeList );
+
+	__collectionIDWDList = new ArrayList<List<Integer>>(1);
+	__collectionIDWDList.add ( partIdWDList );
+
+	__collectionYear = new int[1];
+	__collectionYear[0] = 0;
 }
 
 /**
