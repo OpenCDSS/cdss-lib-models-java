@@ -50,7 +50,7 @@ extends JWorksheet_AbstractRowTableModel<StateCU_Location> {
 /**
 Number of columns in the table model.
 */
-private int __COLUMNS = 7;
+private int __COLUMNS = 8;
 
 /**
 Column references.
@@ -62,7 +62,8 @@ private final int
 	__COL_COL_TYPE = 3,
 	__COL_PART_TYPE = 4,
 	__COL_PART_ID = 5,
-	__COL_PART_ID_TYPE = 6;
+	__COL_PART_ID_TYPE = 6,
+	__COL_PART_WD = 7; // Water district, used when well RECEIPT are used, so can look up in cache using WD
 
 /**
 Whether the data are editable or not.
@@ -110,6 +111,7 @@ public Class<?> getColumnClass (int columnIndex) {
 		case __COL_PART_TYPE: return String.class;
 		case __COL_PART_ID: return String.class;
 		case __COL_PART_ID_TYPE: return String.class;
+		case __COL_PART_WD: return Integer.class;
 	}
 	return String.class;
 }
@@ -135,6 +137,7 @@ public String getColumnName(int columnIndex) {
 		case __COL_PART_TYPE: return "\nPART\nTYPE";
 		case __COL_PART_ID: return "\nPART\nID";
 		case __COL_PART_ID_TYPE: return "PART\nID\nTYPE";
+		case __COL_PART_WD: return "\nPART\nWD";
 	}
 
 	return " ";
@@ -148,12 +151,16 @@ public String[] getColumnToolTips() {
 	String[] tips = new String[__COLUMNS];
 
 	tips[__COL_ID] = "StateCU location ID for aggregate/system";
-	tips[__COL_DIV] = "Water division for aggregate/system (used when aggregating using parcel IDs)";
-	tips[__COL_YEAR] = "Year for aggregate/system (used when aggregating parcels)";
+	tips[__COL_DIV] = "Water division for aggregate/system (used when aggregating using parcel IDs, BEING PHASED OUT, "
+			+ "BEING PHASED OUT BECAUSE WDID OR RECEIPT IS USED FOR PART ID)";
+	tips[__COL_YEAR] = "Year for aggregate/system (used when aggregating parcels, "
+			+ "BEING PHASED OUT BECAUSE WDID OR RECEIPT IS USED FOR PART ID)";
 	tips[__COL_COL_TYPE] = "Aggregate (aggregate water rights) or system (consider water rights individually)";
 	tips[__COL_PART_TYPE] = "Ditch, Well, or Parcel identifiers are specified as parts of aggregate/system";
 	tips[__COL_PART_ID] = "The identifier for the aggregate/system parts";
-	tips[__COL_PART_ID_TYPE] = "The identifier type for the aggregate/system, WDID or Receipt when applied to wells";
+	tips[__COL_PART_ID_TYPE] = "The identifier type for the aggregate/system, WDID or Receipt when applied to wells, "
+			+ "WDID for diversions and reservoirs.";
+	tips[__COL_PART_WD] = "The Water District for part, used with well receipt to allow data query optimization by Water District.";
 	return tips;
 }
 
@@ -161,8 +168,7 @@ public String[] getColumnToolTips() {
 Returns the format that the specified column should be displayed in when
 the table is being displayed in the given table format. 
 @param column column for which to return the format.
-@return the format (as used by StringUtil.formatString() in which to display the
-column.
+@return the format (as used by StringUtil.formatString() in which to display the column.
 */
 public String getFormat(int column) {
 	switch (column) {
@@ -173,6 +179,7 @@ public String getFormat(int column) {
 		case __COL_PART_TYPE: return "%-20.20s"; 
 		case __COL_PART_ID: return "%-20.20s";
 		case __COL_PART_ID_TYPE: return "%-7.7s"; // Hold Receipt
+		case __COL_PART_WD: return "%2d";
 	}
 	return "%-8s";	
 }
@@ -216,6 +223,7 @@ public int[] getColumnWidths() {
 	widths[__COL_PART_TYPE] = 5;
 	widths[__COL_PART_ID] = 6;
 	widths[__COL_PART_ID_TYPE] = 8;
+	widths[__COL_PART_WD] = 8;
 	return widths;
 }
 
@@ -235,7 +243,7 @@ public boolean isCellEditable(int rowIndex, int columnIndex) {
 }
 
 /**
-Sets up the data Vectors to display the location collection data in the GUI.
+Sets up the data lists to display the location collection data in the GUI.
 */
 @SuppressWarnings("unchecked")
 private void setupData() {
@@ -251,7 +259,9 @@ private void setupData() {
 	StateCU_Location_CollectionPartType partType = null;
 	List<String> ids = null;
 	List<StateCU_Location_CollectionPartIdType> idTypes = null;
+	List<Integer> idWDs = null;
 	StateCU_Location_CollectionPartIdType idType = null;
+	Integer idWD = null;
 	__data = new List[__COLUMNS];
 	for (int i = 0; i < __COLUMNS; i++) {
 		__data[i] = new Vector<Object>();
@@ -285,6 +295,7 @@ private void setupData() {
 			}
 			// Part ID types for the year.
 			idTypes = culoc.getCollectionPartIDTypes();
+			idWDs = culoc.getCollectionPartIDWDs();
 			if (ids == null) {
 				nParts = 0;
 			}
@@ -316,14 +327,22 @@ private void setupData() {
 				}
 				__data[__COL_PART_ID].add(ids.get(k));
 				idType = null;
+				idWD = null;
 				if ( nIdTypes != 0 ) {
 					idType = idTypes.get(k); // Should align with ids.get(k)
+					idWD = idWDs.get(k); // Should align with ids.get(k)
 				}
 				if ( idType == null) {
 					__data[__COL_PART_ID_TYPE].add(null);
 				}
 				else {
 					__data[__COL_PART_ID_TYPE].add(idType.toString());
+				}
+				if ( idWD == null) {
+					__data[__COL_PART_WD].add(null);
+				}
+				else {
+					__data[__COL_PART_WD].add(idWD);
 				}
 				rows++;
 			}
