@@ -417,6 +417,19 @@ public double getOrographicTemperatureAdjustment(int pos) {
 }
 
 /**
+ * Return an instance of StateCU_Parcel_Validator, to check StateCU_Parcel instances for
+ * a StateCU_Location.
+ * This is used with the CheckParcels command to validate parcels for a CU Location.
+ * @param culocList a list of all CU Locations for deep check.
+ * @param deepCheck whether to perform deep checks, including confirming that parcel only shows up in
+ * @return StateCU_Parcel_Validator instance that can be used to validate the StateCU_Parcel for the StateCU_Location.
+ */
+public StateCU_ComponentValidator getParcelValidator ( List<StateCU_Location> culocList, boolean deepCheck ) {
+	// Return a new instance of the validator since there are not that many CU Locations.
+	return new StateCU_Location_ParcelValidator(this, culocList, deepCheck );
+}
+
+/**
 Return the precipitation station weight.
 @param pos Index (0+) for climate (precipitation) station.
 @return the precipitation station weight.
@@ -671,8 +684,9 @@ throws IOException
 
 /**
  * Recalculate parcel supply counts.
- * - update counts on parcels for number of wells and number of ditches.
+ * - update counts on parcels for number of surface and groundwater supplies
  * - for well supply, update the area irrigated based on the count.
+ * - this is done by parcel/year
  */
 public void recalcParcels () {
 	for ( StateCU_Parcel parcel : this.__parcelList ) {

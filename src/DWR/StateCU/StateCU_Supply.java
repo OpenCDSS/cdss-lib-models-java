@@ -247,7 +247,7 @@ Set the supply amount.
 public void setSupplyAmount ( double supplyAmount ) {
 	if (supplyAmount != this.__supplyAmount) {
 		/* REVISIT SAM 2006-04-09
-		Supply is not currently part of the data set.
+		Supply is not currently part of the StateCU data set, just used by StateDMI.
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(_dataset.COMP_RESERVOIR_STATIONS,
 			true);

@@ -26,6 +26,8 @@ package DWR.StateCU;
 import java.util.ArrayList;
 import java.util.List;
 
+import RTi.Util.Message.Message;
+
 /**
 This class is not part of the core StateCU model classes.
 Instead, it is used with StateDMI to track whether a CU Location has parcels.
@@ -75,13 +77,15 @@ private String irrigationMethod;
 private String dataSource = "";
 
 /**
- * Count of groundwater supplies for the parcel, used to prorate the parcel area to each of those wells.
+ * Count of groundwater supplies for the parcel for the year,
+ * used to prorate the parcel area to each of those wells.
  * Call refreshSupplyCount to update.
  */
 private int supplyFromGWCount = 0;
 
 /**
- * Count of surface water supplies for the parcel, used to prorate the parcel area to each of those ditches.
+ * Count of surface water supplies for the parcel for the year,
+ * used to prorate the parcel area to each of those ditches.
  * Call refreshSupplyCount() to update.
  */
 private int supplyFromSWCount = 0;
@@ -369,6 +373,7 @@ private void initialize() {
 
 /**
  * Refresh the counts of well and ditch supply.
+ * This must be called after parcel data are read from HydroBase or other data.
  */
 public void refreshSupplyCount () {
 	// Count the number of groundwater supplies (wells) and surface water supplies (ditches)
@@ -385,6 +390,7 @@ public void refreshSupplyCount () {
 	this.supplyFromGWCount = countGW;
 	this.supplyFromSWCount = countSW;
 	// Loop through the well supply parcels and update the areaIrrig based on count
+	// - divide the parcel area by the number of wells
 	for ( StateCU_Supply supply : this.supplyList ) {
 		if ( supply instanceof StateCU_SupplyFromGW ) {
 			if ( this.supplyFromGWCount == 0 ) {
@@ -395,7 +401,20 @@ public void refreshSupplyCount () {
 			}
 		}
 		else if ( supply instanceof StateCU_SupplyFromSW ) {
-			// TODO smalers 2020-02-17 this is currently handled via HydroBase data
+			// TODO smalers 2020-02-17 this is currently handled via HydroBase data when read
+			// - percent irrig
+			// - recalculate and see if the number is accurate
+			StateCU_SupplyFromSW swSupply = (StateCU_SupplyFromSW)supply;
+			double swIrrigAreaCalc = this.getArea() * swSupply.getAreaIrrigPercent();
+			double swIrrigAreaCalcMin = swIrrigAreaCalc*.99999; 
+			double swIrrigAreaCalcMax = swIrrigAreaCalc*1.00001; 
+			if ( (swSupply.getAreaIrrig() < swIrrigAreaCalcMin) || (swSupply.getAreaIrrig() > swIrrigAreaCalcMax) ) {
+				// The calculated area does not match that for the parcel - HydroBase load error?
+				// - TODO smalers 2020-10-12 need to evaluate whether needs to result in command warning
+				Message.printWarning(2, "", "Input data surface supply area (" + swSupply.getAreaIrrig() +
+					") does not equal calculated area from total area and percent_irrig (" + swIrrigAreaCalc +
+					") for location \"" + getLocationId() + "\" parcel " + getID() + " year " + getYear() );
+			}
 		}
 	}
 }
