@@ -41,7 +41,8 @@ Irrigated area for the supply.
 private double areaIrrig;
 
 /**
-Percent of parcel irrigated by the supply.
+Percent of parcel irrigated by the supply, from HydroBase.
+This is actually a fraction 0 to 1.
 */
 private double areaIrrigPercent;
 
