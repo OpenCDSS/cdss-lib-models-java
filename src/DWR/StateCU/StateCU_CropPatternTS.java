@@ -153,51 +153,94 @@ public void addParcel ( StateCU_Parcel parcel )
 
 /**
 Add another crop time series, using the period that was defined in the constructor.
+The new time series is added at the end of the time series list (not alphabetical by crop name).
 @param crop_name Name of crop for this time series (only include the crop name, not the leading "CropArea-").
 @param overwrite If false, the time series is only added if it does not already
 exist.  If true, the time series is added regardless and replaces the existing time series.
-@return the position that the time series was added in the list (zero reference).
+@return the time series that was added.
 @exception Exception if there is an error adding the time series.
 */
-public YearTS addTS ( String crop_name, boolean overwrite )
-{	int pos = indexOf ( crop_name );
+public YearTS addTS ( String crop_name, boolean overwrite ) {
+	// Default behavior is to sort by crop name
+	// - TODO smalers 2020-10-13 legacy behavior was to not sort but better to sort
+	boolean sortByCrop = true;
+	return this.addTS ( crop_name, overwrite, sortByCrop );
+}
+
+/**
+Add another crop time series, using the period that was defined in the constructor.
+@param cropName Name of crop for this time series (only include the crop name, not the leading "CropArea-").
+@param overwrite If false, the time series is only added if it does not already
+exist.  If true, the time series is added regardless and replaces the existing time series.
+@param sortByCrop whether to sort added time series by crop name
+@return the time series that was added.
+@exception Exception if there is an error adding the time series.
+*/
+public YearTS addTS ( String cropName, boolean overwrite, boolean sortByCrop )
+{	int pos = indexOf ( cropName );
 	YearTS yts = null;
 	if ( (pos < 0) || overwrite ) {
+		// No time series found or time series found and want to replace the existing with a new time series.
+		// - create the new time series
 		yts = new YearTS();
 		try {
-			TSIdent tsident = new TSIdent ( _id, "StateCU", "CropArea-" + crop_name, "Year", "" );
+			TSIdent tsident = new TSIdent ( _id, "StateCU", "CropArea-" + cropName, "Year", "" );
 			yts.setIdentifier ( tsident );
 			yts.getIdentifier().setInputType ( "StateCU" );
-			if ( __filename != null ) {
-				yts.getIdentifier().setInputName ( __filename );
+			if ( this.__filename != null ) {
+				yts.getIdentifier().setInputName ( this.__filename );
 			}
 		}
 		catch ( Exception e ) {
 			// This should NOT happen because the TSID is being controlled...
 			Message.printWarning ( 2, "StateCU_CropPatternTS.addTS",
-			"Error adding time series for \"" + crop_name + "\"" );
+			"Error adding time series for \"" + cropName + "\"" );
 		}
-		yts.setDataUnits ( __units );
-		yts.setDataUnitsOriginal ( __units );
-		yts.setDescription ( _id + " " + crop_name + " crop area" );
-		yts.setDate1(new DateTime(__date1));
-		yts.setDate2(new DateTime(__date2));
-		yts.setDate1Original(new DateTime(__date1));
-		yts.setDate2Original(new DateTime(__date2));
+		yts.setDataUnits ( this.__units );
+		yts.setDataUnitsOriginal ( this.__units );
+		yts.setDescription ( this._id + " " + cropName + " crop area" );
+		yts.setDate1(new DateTime(this.__date1));
+		yts.setDate2(new DateTime(this.__date2));
+		yts.setDate1Original(new DateTime(this.__date1));
+		yts.setDate2Original(new DateTime(this.__date2));
 		yts.allocateDataSpace();
 	}
 	if ( pos < 0 ) {
-		pos = __tslist.size();
-		__tslist.add ( yts );
-		__cropNameList.add ( crop_name );
+		// Not found in the list, need to add
+		if ( !sortByCrop || (this.__tslist.size() == 0) ) {
+			// Just add at the end.
+			this.__tslist.add ( yts );
+			this.__cropNameList.add ( cropName );
+		}
+		else {
+			// Have existing time series and want to insert alphabetically by crop name.
+			// Find the insert position.  If previously added time series were sorted,
+			// the following works.
+			int posInsert = -1;
+			for ( int i = 0; i < this.__cropNameList.size(); i++ ) {
+				if ( this.__cropNameList.get(i).compareTo(cropName) > 0 ) {
+					// __cropNameList[i] is after new crop
+					// -insert before __cropNmeList[i]
+					posInsert = i;
+					break;
+				}
+			}
+			if ( posInsert < 0 ) {
+				// Did not find next crop so insert at the end
+				this.__tslist.add ( yts );
+				this.__cropNameList.add ( cropName );
+			}
+			else {
+				// Found crop to insert before
+				this.__tslist.add ( posInsert, yts );
+				this.__cropNameList.add ( posInsert, cropName );
+			}
+		}
 	}
 	else {
-		__tslist.set ( pos, yts );
-		__cropNameList.set ( pos, crop_name );
+		this.__tslist.set ( pos, yts );
+		this.__cropNameList.set ( pos, cropName );
 	} 
-	//Message.printStatus ( 1, "", "SAMX Adding time series for " + _id +
-		//" " + crop_name + " for " + __date1 + " to " + __date2 +
-		//" at " + pos );
 	return yts;
 }
 
@@ -579,7 +622,7 @@ throws Exception
 {	String routine = "StateCU_CropPatternTS.readStateCUFile";
 	String iline = null;
 	List<Object> v = new ArrayList<>( 5 );
-	List<StateCU_CropPatternTS> cupatList = new ArrayList<StateCU_CropPatternTS> ( 100 );
+	List<StateCU_CropPatternTS> cupatList = new ArrayList<> ( 100 );
 	
 	String full_filename = IOUtil.getPathUsingWorkingDir ( filename );
 	Message.printStatus(2,routine, "Reading StateCU CDS file: " + full_filename );
@@ -1429,6 +1472,45 @@ throws Exception
 }
 
 /**
+ * Sort the time series by crop name.
+ * Alphabetical sort should generally be done so that file comparisons are easier.
+ */
+private void sortTimeSeriesByCropName () {
+	// Keep the original lists in case there are external references to them,
+	// although this is probably a low risk if lookups are by location ID or TSID.
+	// Create new lists and copy the original
+	List<String> cropNameList2 = new ArrayList<>();
+	List<YearTS> tsList2 = new ArrayList<>();
+	// Copy the existing lists to temporary lists
+	for ( int i = 0; i < this.__cropNameList.size(); i++ ) {
+		cropNameList2.add(this.__cropNameList.get(i));
+		tsList2.add(this.__tslist.get(i));
+	}
+	// Clear out the existing lists
+	this.__cropNameList.clear();
+	this.__tslist.clear();
+	// Loop through the temporary list and find the first in the alphabetical list,
+	// then set in the original list.
+	while ( cropNameList2.size() > 0 ) {
+		// Find the earliest remaining crop name
+		String earliest = null;
+		int i_earliest = -1;
+		for ( int i = 0; i < cropNameList2.size(); i++ ) {
+			if ( (earliest == null) || cropNameList2.get(i).compareTo(earliest) < 0 ) {
+				earliest = cropNameList2.get(i);
+				i_earliest = i;
+			}
+		}
+		// Copy the reference
+		this.__cropNameList.add(cropNameList2.get(i_earliest));
+		cropNameList2.remove(i_earliest);
+		this.__tslist.add(tsList2.get(i_earliest));
+		tsList2.remove(i_earliest);
+	}
+	// The temporary lists will garbage collect
+}
+
+/**
 Return a string representation of this object (the crop name list as a string).
 @return a string representation of this object.
 */
@@ -1625,6 +1707,7 @@ public static List<TS> toTSList ( List<StateCU_CropPatternTS> dataList, boolean 
 Translate the crop name from the current value to a new value.  The time series
 identifiers are adjusted.  This is used by StateDMI to correct crop names in
 input to those used in the DSS.  If a match of the old_crop_name is not found, then nothing occurs.
+The time series list is resorted if necessary to make sure that the crop names are alphabetical.
 @param old_crop_name Old crop name.
 @param new_crop_name New crop name to be used.
 @exception Exception if there is an error (generally only if add fails when
@@ -1637,6 +1720,10 @@ throws Exception
 	if ( __cropNameList != null ) {
 		size = __cropNameList.size();
 	}
+	
+	// Default is to sort by crop name
+	// - TODO this was added for StateDMI 5.x to simplify comparison of CDS files
+	boolean sortCropName = true;
 
 	// Check to see if the new crop name is the same as an old crop name...
 
@@ -1700,11 +1787,15 @@ throws Exception
 	if ( existing_crop_pos >= 0 ) {
 		// Need to add the translated crop to the existing crop and
 		// remove the translated crop.  The overall crop totals will
-		// remain the same so their is no need to recompute the totals.
+		// remain the same so there is no need to recompute the totals.
 		YearTS ts_existing = __tslist.get(existing_crop_pos);
 		TSUtil.add ( ts_existing, ts );
 		__tslist.remove ( old_crop_pos );
 		__cropNameList.remove ( old_crop_pos );
+	}
+	
+	if ( sortCropName ) {
+		sortTimeSeriesByCropName();
 	}
 }
 

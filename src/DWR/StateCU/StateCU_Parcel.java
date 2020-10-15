@@ -106,9 +106,10 @@ public StateCU_Parcel() {
 
 /**
 Add a supply object.
+Append to after the same year.
 */
-public void addSupply ( StateCU_Supply supply )
-{	this.supplyList.add ( supply );
+public void addSupply ( StateCU_Supply supply ) {
+	this.supplyList.add ( supply );
 }
 
 /**
