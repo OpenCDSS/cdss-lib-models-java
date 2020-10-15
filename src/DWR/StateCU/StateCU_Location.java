@@ -168,15 +168,48 @@ public void addParcel ( StateCU_Parcel parcelToAdd ) {
 		}
 	}
 	if ( found ) {
-		// Add the supply to the found parcel
+		// Add the supply to the existing found parcel
 		// - don't remove the supply from the passed in parcel, but may want to do that
 		for ( StateCU_Supply supply : parcelToAdd.getSupplyList() ) {
 			parcelFound.addSupply(supply);
 		}
 	}
 	else {
-		// Add the parcel to the list
-		this.__parcelList.add(parcelToAdd);
+		// Add the new parcel to the list.
+		// - add after the same year, if was already added so that year lines up for main model node ID
+		boolean sortByYear = true;
+		if ( (this.__parcelList.size() == 0) || !sortByYear ) {
+			// Just add at the end
+			this.__parcelList.add(parcelToAdd);
+		}
+		else {
+			// Have at least one parcel.
+			// Search to insert at end of matched year or before higher year, for example:
+			//    1954
+			//    1954
+			//    1970
+			//    1970
+			//    1980
+			//    1980
+			StateCU_Parcel parcel = null;
+			int ifound = -1;
+			for ( int i = 0; i < this.__parcelList.size(); i++ ) {
+				parcel = this.__parcelList.get(i);
+				if ( parcel.getYear() > parcelToAdd.getYear() ) {
+					ifound = i;
+					break;
+				}
+			}
+			if ( ifound >= 0 ) {
+				// Found a year that is <= the current year.
+				// Add after that year, may be a new slot in the list
+				this.__parcelList.add(ifound,parcelToAdd);
+			}
+			else {
+				// Did not find a year that is >  the current year so add at the end
+				this.__parcelList.add(parcelToAdd);
+			}
+		}
 	}
 }
 
