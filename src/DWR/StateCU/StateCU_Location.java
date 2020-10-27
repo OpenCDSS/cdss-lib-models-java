@@ -55,6 +55,7 @@ The identifiers for data that are collected - null if not a collection
 location.  This is a List of Lists corresponding to each __collectionYear element.
 If the list of identifiers is consistent for the entire period then the
 __collectionYear array will have a size of 0 and the __collectionIDList will be a single list.
+The items in this list should be consistent in order and number with the __collectionIDTypeList and __collectionIDWDList.
 */
 private List<List <String>> __collectionIDList = null;
 
@@ -64,6 +65,7 @@ This is a List of Lists corresponding to each __collectionYear element.
 If the list of identifiers is consistent for the entire period then the
 __collectionYear array will have a size of 0 and the __collectionIDTypeList will be a single list.
 This list is only used for well collections that use well identifiers (WDID or Receipt) for the parts.
+The items in this list should be consistent in order and number with the __collectionIDWDList and __collectionIDList.
 */
 private List<List<StateCU_Location_CollectionPartIdType>> __collectionIDTypeList = null;
 
@@ -74,6 +76,7 @@ If the list of identifiers is consistent for the entire period then the
 __collectionYear array will have a size of 0 and the __collectionIDWDList will be a single list.
 This list is only used for well collections that use well identifiers (WDID or Receipt) for the parts.
 This is needed for receipts in particular because the WD for cached data lookups cannot be determined from WDID.
+The items in this list should be consistent in order and number with the __collectionIDTypeList and __collectionIDList.
 */
 private List<List<Integer>> __collectionIDWDList = null;
 

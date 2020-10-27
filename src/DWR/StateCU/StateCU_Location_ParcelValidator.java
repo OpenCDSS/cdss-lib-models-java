@@ -106,16 +106,52 @@ public class StateCU_Location_ParcelValidator implements StateCU_ComponentValida
 				double parcelAreaMin = parcel.getArea()*.99999;
 				double parcelAreaMax = parcel.getArea()*1.00001;
 				if ( (swSupplyArea < parcelAreaMin) || (swSupplyArea > parcelAreaMax) ) {
-					validation.add(new StateCU_ComponentValidationProblem(this,
-						"CU location \"" + id + "\" year " + parcelYear + " parcel " + parcel.getID() +
-						" has " + swSupplyCount + " surface water supplies and sum of fractional areas from ditch supplies (" +
-						swSupplyArea + ") does not equal parcel area (" + parcel.getArea() + ").",
-						"Check irrigated parcels data.") );
-					if ( gwSupplyCount > 0 ) {
-						// Could be more of an issue since SW acres control and also have groundwater
-						validation.add(new StateCU_ComponentValidationProblem(this,
-							"Also have groundwater at this location but SW acres are used - could be an issue.",
-							"Check irrigated parcels data.") );
+					// It is possible that the parcel is associated with another model node so search for it
+					// - only need to do this when the initial issue is detected because full search is slow
+					// Still have an issue so add the validation warning.
+					String culocIDs = parcel.getLocationId();
+					if ( (swSupplyArea < parcelAreaMin) || (swSupplyArea > parcelAreaMax) ) {
+						for ( StateCU_Location culoc : this.culocList ) {
+							if ( parcel.getLocationId().equals(culoc.getID())) {
+								// Don't process the same CU location as itself
+								continue;
+							}
+							// See if the CU location has a parcel that matches the one being validated.
+							List<StateCU_Parcel> parcelList2 = culoc.getParcelList();
+							boolean culocidAdded = false;
+							for ( StateCU_Parcel parcel2 : parcelList2 ) {
+								if ( (parcel.getYear() == parcel2.getYear()) && (parcel.getID().equals(parcel2.getID())) ) {
+									// Same parcel in the other culoc so see if any surface water supply
+									if ( !culocidAdded ) {
+										// Only add the culoc ID once
+										culocIDs += ", " + parcel2.getLocationId();
+										culocidAdded = true;
+									}
+									for ( StateCU_Supply supply : parcel2.getSupplyList() ) {
+										if ( supply instanceof StateCU_SupplyFromSW ) {
+											++swSupplyCount;
+											swSupplyArea += ((StateCU_SupplyFromSW)supply).getAreaIrrig();
+										}
+									}
+									// Increment the groundwater supply count
+									gwSupplyCount += parcel2.getSupplyFromGWCount();
+								}
+							}
+						}
+						if ( (swSupplyArea < parcelAreaMin) || (swSupplyArea > parcelAreaMax) ) {
+							validation.add(new StateCU_ComponentValidationProblem(this,
+								"CU location \"" + id + "\" year " + parcelYear + " parcel " + parcel.getID() +
+								" has " + swSupplyCount + " surface water supplies across locations (" + culocIDs +
+								") and sum of fractional areas from ditch supplies (" +
+								swSupplyArea + ") does not equal parcel area (" + parcel.getArea() + ").",
+								"Check irrigated parcels data.") );
+							if ( gwSupplyCount > 0 ) {
+								// Possible issue since SW acres control and also have groundwater
+								validation.add(new StateCU_ComponentValidationProblem(this,
+									"Also have groundwater at locations for parcel but SW acres (with warning) are used - total parcel area may not be properly handled.",
+									"Check irrigated parcels data to ensure that parcel surface water supply acres match the total parcel area.") );
+							}
+						}
 					}
 				}
 			}
@@ -129,23 +165,51 @@ public class StateCU_Location_ParcelValidator implements StateCU_ComponentValida
 		
 		if ( this.deepCheck ) {
 			// Loop through all parcels in the dataset and make sure that the same parcel does
-			// not show up another CU location.
+			// not show up under another CU location.
 			// - require the year to also be the same, although not sure this is required for uniqueness
+			boolean parcelHasGroundWaterSupply;
+			boolean parcelHasSurfaceWaterSupply;
+			boolean parcel2HasGroundWaterSupply;
+			boolean parcel2HasSurfaceWaterSupply;
 			for ( StateCU_Parcel parcel : parcelList ) {
+				parcelHasGroundWaterSupply = parcel.hasGroundWaterSupply();
+				parcelHasSurfaceWaterSupply = parcel.hasSurfaceWaterSupply();
 				for ( StateCU_Location culoc2 : this.culocList ) {
 					if ( culoc.getID().equals(culoc2.getID()) ) {
 						// Don't compare the same parcel 
 						continue;
 					}
 					for ( StateCU_Parcel parcel2 : culoc2.getParcelList() ) {
+						parcel2HasGroundWaterSupply = parcel2.hasGroundWaterSupply();
+						parcel2HasSurfaceWaterSupply = parcel2.hasSurfaceWaterSupply();
 						if ( parcel.getYear() == parcel2.getYear() ) {
 							// Year is the same.
 							if ( parcel.getID().equals(parcel2.getID()) ) {
-								// Parcel ID is also the same.
-								validation.add(new StateCU_ComponentValidationProblem(this,
-									"CU locations \"" + id + "\" and \"" + culoc2.getID() +
-									"\" have parcels with same year (" + parcel.getYear() + ") and parcel ID (" + parcel.getID() + ").",
-									"Check irrigated parcels data.  Check collection assignments.") );
+								// Parcel ID is the same.
+								// Only an issue if parcel has only groundwater supply in both cases,
+								// or only surface supply in both cases.
+								if ( parcelHasGroundWaterSupply && parcel2HasGroundWaterSupply && !parcelHasSurfaceWaterSupply && !parcel2HasSurfaceWaterSupply ) {
+									validation.add(new StateCU_ComponentValidationProblem(this,
+										"CU locations \"" + id + "\" and \"" + culoc2.getID() +
+										"\" have parcel with same year (" + parcel.getYear() + "), parcel ID (" + parcel.getID() +
+										") and both only have groundwater supply.",
+										"Check irrigated parcels data.  Check collection assignments.  "
+										+ "A parcel can only be in two model nodes if one of the nodes has "
+										+ "commingled groundwater supply and the other is groundwater-only supply.") );
+								}
+								/* TODO smalers 2020-10-17 Leave this out for now
+								 * Surface water supply only is OK if the parts add up to parcel total.
+								else if ( !parcelHasGroundWaterSupply && !parcel2HasGroundWaterSupply && parcelHasSurfaceWaterSupply && parcel2HasSurfaceWaterSupply ) {
+									// OK i
+									validation.add(new StateCU_ComponentValidationProblem(this,
+										"CU locations \"" + id + "\" and \"" + culoc2.getID() +
+										"\" have parcel with same year (" + parcel.getYear() + "), parcel ID (" + parcel.getID() +
+										") and both only have surface water supply.",
+										"Check irrigated parcels data.  Check collection assignments.  "
+										+ "A parcel can only be in two model nodes if one of the nodes has "
+										+ "commingled groundwater supply and the other is groundwater-only supply.") );
+								}
+								*/
 							}
 						}
 					}
