@@ -36,17 +36,15 @@ NoticeEnd */
 package DWR.StateCU;
 
 /**
-This class is not part of the core StateCU classes.  Instead, it is used with
-StateDMI to track the water supply for a parcel.  The data may ultimately be
-useful in StateCU and is definitely useful for data checks in StateDMI.  For
-groundwater only lands, the supply consists of well right/permit identifiers
-and decree/yield for amount.
+This class is not part of the core StateCU classes.
+It is used with StateDMI to track the water supply for a parcel when processing
+data files that derive from parcel/supply data.
 */
 public class StateCU_Supply extends StateCU_Data 
 implements Cloneable, Comparable<StateCU_Data> {
 
 // Base class has ID and name
-
+	
 /**
 Supply amount (rate) associated with the supply, CFS for wells.
 This is associated with water rights or permits.
@@ -61,7 +59,6 @@ private boolean __is_surface = false;
  * Source of the parcel data, for example "HB-PUTS" for parcel use time series and "HB-WTP" for well to parcel.
  */
 private String dataSource = "";
-
 
 /**
 Constructor.
@@ -215,6 +212,14 @@ Indicate whether the supply is a surface water source.
 */
 public boolean isSurfaceWater() {
 	return __is_surface;
+}
+
+/**
+ * Recalculate the internally-computed values such as irrigated acreage fraction.
+ * This should be overridden in the derived classes.
+ */
+public void recompute () {
+	throw new RuntimeException ( "StateCU_Supply.recompute() should be implemented in child class.");
 }
 
 /**

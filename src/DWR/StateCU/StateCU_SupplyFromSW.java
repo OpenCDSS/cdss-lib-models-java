@@ -36,15 +36,32 @@ implements Cloneable, Comparable<StateCU_Data> {
 // Base class has ID and name
 
 /**
-Irrigated area for the supply.
+Irrigated area for the supply, after accounting for fraction.
 */
 private double areaIrrig;
 
 /**
-Percent of parcel irrigated by the supply, from HydroBase.
-This is actually a fraction 0 to 1.
+Irrigated area for the supply, after accounting for fraction, from HydroBase.
 */
-private double areaIrrigPercent;
+private double areaIrrigHydroBase;
+
+/**
+Fraction of parcel irrigated by the supply, calculated as 1/(number of surface supplies).
+This is a fraction 0 to 1.
+*/
+private double areaIrrigFraction;
+
+/**
+Fraction of parcel irrigated by the supply, from HydroBase.
+This is a fraction 0 to 1.
+*/
+private double areaIrrigFractionHydroBase;
+
+/**
+Whether the fraction computed by number of surface supplies is different from HydroBase fraction.
+"ERROR" if different or "" if the same.
+*/
+private String areaIrrigFractionHydroBaseError = "";
 
 /**
 Collection part ID type, e.g., always "WDID".
@@ -92,7 +109,7 @@ public int compareTo(StateCU_Data data) {
 		return res;
 	}
 
-	StateCU_SupplyFromSW supply = (StateCU_SupplyFromSW)data;
+	//StateCU_SupplyFromSW supply = (StateCU_SupplyFromSW)data;
 
 	/*
 	if (this.__supplyAmount < supply.__supplyAmount) {
@@ -137,19 +154,48 @@ public boolean equals(StateCU_SupplyFromSW supply) {
 }
 
 /**
-Returns the area irrigated.
-@return the area irrigated.
+Returns the parcel area irrigated, calculated using the fraction.
+@return the parcel area irrigated, calculated using the fraction.
 */
 public double getAreaIrrig() {
 	return this.areaIrrig;
 }
 
 /**
-Returns the area irrigated percent.
-@return the area irrigated percent.
+Returns the parcel area irrigated, calculated using the fraction from HydroBase.
+@return the parcel area irrigated, calculated using the fraction from HydroBase.
 */
-public double getAreaIrrigPercent() {
-	return this.areaIrrigPercent;
+public double getAreaIrrigHydroBase() {
+	return this.areaIrrigHydroBase;
+}
+
+/**
+Returns the parcel area irrigated fraction.
+@return the parcel area irrigated fraction.
+*/
+public double getAreaIrrigFraction() {
+	return this.areaIrrigFraction;
+}
+
+/**
+Returns the parcel area irrigated fraction, from HydroBase.
+@return the parcel area irrigated fraction, from HydroBase.
+*/
+public double getAreaIrrigFractionHydroBase() {
+	return this.areaIrrigFractionHydroBase;
+}
+
+/**
+Returns "ERROR" if calculated irrigated area fraction differs from HydroBase value.
+This is used by code that prints parcel reports.
+@return "ERROR" if different, "" if the same.
+*/
+public String getAreaIrrigFractionHydroBaseError() {
+	// Should be calculated in the parcel recompute.
+	//if ( this.isDirty() ) {
+	//	recompute();
+	//}
+	return this.areaIrrigFractionHydroBaseError;
 }
 
 /**
@@ -187,7 +233,9 @@ protected void initialize() {
 	super.setIsSurfaceWater(true);
 	// Class data
 	this.areaIrrig = StateCU_Util.MISSING_DOUBLE;
-	this.areaIrrigPercent = StateCU_Util.MISSING_DOUBLE;
+	this.areaIrrigHydroBase = StateCU_Util.MISSING_DOUBLE;
+	this.areaIrrigFraction = StateCU_Util.MISSING_DOUBLE;
+	this.areaIrrigFractionHydroBase = StateCU_Util.MISSING_DOUBLE;
 	this.wdid = "";
 }
 
@@ -212,7 +260,7 @@ Cancels any changes made to this object within a GUI since createBackup()
 was called and sets _original to null.
 */
 public void restoreOriginal() {
-	StateCU_SupplyFromSW supply = (StateCU_SupplyFromSW)_original;
+	//StateCU_SupplyFromSW supply = (StateCU_SupplyFromSW)_original;
 	super.restoreOriginal();
 
 	/*
@@ -225,7 +273,7 @@ public void restoreOriginal() {
 }
 
 /**
-Set the area irrigated.
+Set the area irrigated, calculated using the fraction.
 @param areaIrrig
 */
 public void setAreaIrrig ( double areaIrrig ) {
@@ -233,11 +281,35 @@ public void setAreaIrrig ( double areaIrrig ) {
 }
 
 /**
-Set the area irrigated percent.
-@param areaIrrig
+Set the area irrigated, calculated using the fraction from HydroBase.
+@param areaIrrigHydroBase
 */
-public void setAreaIrrigPercent ( double areaIrrigPercent ) {
-	this.areaIrrigPercent = areaIrrigPercent;
+public void setAreaIrrigHydroBase ( double areaIrrigHydroBase ) {
+	this.areaIrrigHydroBase = areaIrrigHydroBase;
+}
+
+/**
+Set the area irrigated fraction, calculated.
+@param areaIrrigFraction
+*/
+public void setAreaIrrigFraction ( double areaIrrigFraction ) {
+	this.areaIrrigFraction = areaIrrigFraction;
+}
+
+/**
+Set the area irrigated fraction, from HydroBase.
+@param areaIrrigFractionHydroBase
+*/
+public void setAreaIrrigFractionHydroBase ( double areaIrrigFractionHydroBase ) {
+	this.areaIrrigFractionHydroBase = areaIrrigFractionHydroBase;
+}
+
+/**
+Set the area irrigated fraction, from HydroBase, error indicator.
+@param areaIrrigFractionHydroBase
+*/
+public void setAreaIrrigFractionHydroBaseError ( String error ) {
+	this.areaIrrigFractionHydroBaseError = error;
 }
 
 /**

@@ -157,27 +157,27 @@ public StateCU_Location()
 }
 
 /**
- * Add a parcel to the parcel list.
- * If the combination of year and parcelId are found, move the supplies to the matched entry. 
+ * Add a parcel to the parcel list for the location if not already added.
+ * Any additions to the supply should be handled elsewhere, such as when creating/updating the parcel object during read.
  */
 public void addParcel ( StateCU_Parcel parcelToAdd ) {
-	boolean found = false;
 	StateCU_Parcel parcelFound = null;
 	for ( StateCU_Parcel parcel : this.__parcelList ) {
 		if ( (parcel.getYear() == parcelToAdd.getYear()) && parcel.getID().equals(parcelToAdd.getID()) ) {
-			found = true;
 			parcelFound = parcel;
 			break;
 		}
 	}
-	if ( found ) {
-		// Add the supply to the existing found parcel
-		// - don't remove the supply from the passed in parcel, but may want to do that
+	/*
+	if ( parcelFound != null ) {
+		// Add the supply to the existing found parcel if it has not already been added
 		for ( StateCU_Supply supply : parcelToAdd.getSupplyList() ) {
 			parcelFound.addSupply(supply);
 		}
 	}
 	else {
+	*/
+	if ( parcelFound == null ) {
 		// Add the new parcel to the list.
 		// - add after the same year, if was already added so that year lines up for main model node ID
 		boolean sortByYear = true;
@@ -458,11 +458,12 @@ public double getOrographicTemperatureAdjustment(int pos) {
  * This is used with the CheckParcels command to validate parcels for a CU Location.
  * @param culocList a list of all CU Locations for deep check.
  * @param deepCheck whether to perform deep checks, including confirming that parcel only shows up in
+ * @param areaPrecision number of digits to perform area comparisons
  * @return StateCU_Parcel_Validator instance that can be used to validate the StateCU_Parcel for the StateCU_Location.
  */
-public StateCU_ComponentValidator getParcelValidator ( List<StateCU_Location> culocList, boolean deepCheck ) {
+public StateCU_ComponentValidator getParcelValidator ( List<StateCU_Location> culocList, boolean deepCheck, int areaPrecision ) {
 	// Return a new instance of the validator since there are not that many CU Locations.
-	return new StateCU_Location_ParcelValidator(this, culocList, deepCheck );
+	return new StateCU_Location_ParcelValidator(this, culocList, deepCheck, areaPrecision );
 }
 
 /**
@@ -716,18 +717,6 @@ throws IOException
 		in.close();
 	}
 	return culoc_List;
-}
-
-/**
- * Recalculate parcel supply counts.
- * - update counts on parcels for number of surface and groundwater supplies
- * - for well supply, update the area irrigated based on the count.
- * - this is done by parcel/year
- */
-public void recalcParcels () {
-	for ( StateCU_Parcel parcel : this.__parcelList ) {
-		parcel.refreshSupplyCount();
-	}
 }
 
 /**

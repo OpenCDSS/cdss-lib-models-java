@@ -41,9 +41,10 @@ Irrigated area for the supply.
 private double areaIrrig;
 
 /**
-Percent of parcel irrigated by the supply.
+Fraction of parcel irrigated by the well supply,
+calculated as the 1 over the number of wells that irrigate the parcel.
 */
-private double areaIrrigPercent;
+private double areaIrrigFraction;
 
 /**
 Collection part ID type, e.g., "Well" or "Receipt".
@@ -58,7 +59,9 @@ private String collectionPartType = "";
 /**
  * Indicate whether to include in CDS acreage.
  */
+/* TODO smalers 2020-11-06 now hancled in StateCU_Parcel
 private boolean includeInCdsArea = true;
+*/
 
 /**
 WDID for the ditch, either explicit ID or a part.
@@ -146,19 +149,19 @@ public boolean equals(StateCU_SupplyFromGW supply) {
 }
 
 /**
-Returns the area irrigated.
-@return the area irrigated.
+Returns the parcel area irrigated.
+@return the parcel area irrigated.
 */
 public double getAreaIrrig() {
 	return this.areaIrrig;
 }
 
 /**
-Returns the area irrigated percent.
-@return the area irrigated percent.
+Returns the parcel area irrigated fraction (0 to 1).
+@return the parcel area irrigated fraction (0 to 1).
 */
-public double getAreaIrrigPercent() {
-	return this.areaIrrigPercent;
+public double getAreaIrrigFraction() {
+	return this.areaIrrigFraction;
 }
 
 /**
@@ -181,9 +184,11 @@ public String getCollectionPartType() {
 Returns whether to include in CDS area.
 @return whether to include in CDS area.
 */
+/* TODO smalers 2020-11-06 now handled in StateCU_Parcel
 public boolean getIncludeInCdsArea() {
 	return this.includeInCdsArea;
 }
+*/
 
 /**
 Returns the WDID for the supply.
@@ -211,7 +216,7 @@ protected void initialize() {
 	super.setIsSurfaceWater(false);
 	// Data for this class
 	this.areaIrrig = StateCU_Util.MISSING_DOUBLE;
-	this.areaIrrigPercent = StateCU_Util.MISSING_DOUBLE;
+	this.areaIrrigFraction = StateCU_Util.MISSING_DOUBLE;
 	this.wdid = "";
 }
 
@@ -229,6 +234,12 @@ Indicate whether the supply is a surface water source.
 */
 public boolean isSurfaceWater() {
 	return false;
+}
+
+/**
+ * Recalculate the internally-computed values such as irrigated acreage fraction.
+ */
+public void recompute () {
 }
 
 /**
@@ -260,8 +271,8 @@ public void setAreaIrrig ( double areaIrrig ) {
 Set the area irrigated percent.
 @param areaIrrig
 */
-public void setAreaIrrigPercent ( double areaIrrigPercent ) {
-	this.areaIrrigPercent = areaIrrigPercent;
+public void setAreaIrrigFraction ( double areaIrrigFraction ) {
+	this.areaIrrigFraction = areaIrrigFraction;
 }
 
 /**
@@ -284,9 +295,11 @@ public void setCollectionPartType ( String collectionPartType ) {
 Set whether to include in CDS area
 @param includeInCdsArea whether to include in CDS area
 */
+/** TODO smalers 2020-11-06 now handled in StateCU_Parcel
 public void setIncludeInCdsArea ( boolean includeInCdsArea ) {
 	this.includeInCdsArea = includeInCdsArea;
 }
+*/
 
 /**
 Set the Receipt for the supply.

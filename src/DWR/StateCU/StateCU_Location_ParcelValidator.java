@@ -47,18 +47,26 @@ public class StateCU_Location_ParcelValidator implements StateCU_ComponentValida
 	 * Whether checks are deep, and slower.
 	 */
 	private boolean deepCheck = false;
+	
+	/**
+	 * Precision (number of digits) for area comparison checks.
+	 * The modeler may need to change depending on how roundoff impacts the numbers.
+	 */
+	private int areaPrecision = 3;
 
 	/**
 	 * Constructor for the validator.
 	 * @param culoc CU Location for which to check parcels.
 	 * @param culocList a list of all CU Locations for deep check.
-	 * @param deepCheck whether to perform deep checks, including confirming that parcel only shows up in
-	 * one 
+	 * @param deepCheck whether to perform deep checks, currently disabled
+	 * @param areaPrecision number of digits for area checks
 	 */
-	public StateCU_Location_ParcelValidator ( StateCU_Location culoc, List<StateCU_Location> culocList, boolean deepCheck ) {
+	public StateCU_Location_ParcelValidator ( StateCU_Location culoc, List<StateCU_Location> culocList,
+		boolean deepCheck, int areaPrecision ) {
 		this.culoc = culoc;
 		this.culocList = culocList;
 		this.deepCheck = deepCheck;
+		this.areaPrecision = areaPrecision;
 	}
 
 	/**
@@ -80,6 +88,7 @@ public class StateCU_Location_ParcelValidator implements StateCU_ComponentValida
 		// For only one year.
 		int swSupplyCount = 0;
 		int gwSupplyCount = 0;
+		String areaFormat = "%." + this.areaPrecision + "f";
 		for ( StateCU_Parcel parcel : parcelList ) {
 			// This is for a specific year
 			parcelYear = parcel.getYear();
@@ -98,21 +107,41 @@ public class StateCU_Location_ParcelValidator implements StateCU_ComponentValida
 				// Do a check to make sure that sum of calculated ditch irrigated acres using percent_irrig is <= the parcel area
 				// TODO smalers 2020-10-12 if fails, need to check whether CULocation is a MultiStruct?
 				double swSupplyArea = 0.0;
+				double swSupplyAreaHydroBase = 0.0;
 				for ( StateCU_Supply supply : parcel.getSupplyList() ) {
 					if ( supply instanceof StateCU_SupplyFromSW ) {
 						swSupplyArea += ((StateCU_SupplyFromSW)supply).getAreaIrrig();
+						swSupplyAreaHydroBase += ((StateCU_SupplyFromSW)supply).getAreaIrrigHydroBase();
 					}
 				}
-				double parcelAreaMin = parcel.getArea()*.99999;
-				double parcelAreaMax = parcel.getArea()*1.00001;
-				if ( (swSupplyArea < parcelAreaMin) || (swSupplyArea > parcelAreaMax) ) {
-					// It is possible that the parcel is associated with another model node so search for it
+				// Use formatted strings to compare since roundoff can be an issue
+				// TODO smalers 2020-11-07 tried to use 3 digits but see a difference in .001 so use 2 digits
+				if ( !String.format(areaFormat, parcel.getArea()).equals(String.format(areaFormat, swSupplyArea)) ) {
+					validation.add(new StateCU_ComponentValidationProblem(this,
+						"CU location \"" + id + "\" year " + parcelYear + " parcel " + parcel.getID() +
+						" has " + swSupplyCount + " surface water supplies across locations (" + parcel.getModelIdListString() +
+						") and sum of fractional areas from ditch supplies (" +
+						String.format(areaFormat, swSupplyArea) + ") does not equal parcel area (" +
+						String.format(areaFormat, parcel.getArea()) + ").",
+						"Check irrigated parcels data.") );
+					if ( gwSupplyCount > 0 ) {
+						// Possible issue since SW acres control and also have groundwater
+						validation.add(new StateCU_ComponentValidationProblem(this,
+							"Also have groundwater at locations for parcel but SW acres (with warning) are used - total parcel area may not be properly handled.",
+							"Check irrigated parcels data to ensure that parcel surface water supply acres match the total parcel area.") );
+					}
+							
+					// TODO smalers 2020-11-05 old code that does not apply with new data management
+					// - remove when the code checks out
+					// It is possible that the parcel is associated with another model node so search for them
 					// - only need to do this when the initial issue is detected because full search is slow
 					// Still have an issue so add the validation warning.
-					String culocIDs = parcel.getLocationId();
+					/*
 					if ( (swSupplyArea < parcelAreaMin) || (swSupplyArea > parcelAreaMax) ) {
-						for ( StateCU_Location culoc : this.culocList ) {
-							if ( parcel.getLocationId().equals(culoc.getID())) {
+						String culocIDs = "";
+						for ( int iculoc = 0; iculoc < parcel.getModelLocListSize(); iculoc++ ) {
+							StateCU_Location culoc = parcel.getStateCULocation(iculoc);
+							if ( culoc.getID().equals(culoc.getID())) {
 								// Don't process the same CU location as itself
 								continue;
 							}
@@ -124,7 +153,7 @@ public class StateCU_Location_ParcelValidator implements StateCU_ComponentValida
 									// Same parcel in the other culoc so see if any surface water supply
 									if ( !culocidAdded ) {
 										// Only add the culoc ID once
-										culocIDs += ", " + parcel2.getLocationId();
+										culocIDs += ", " + parcel2.getModelIdListString();
 										culocidAdded = true;
 									}
 									for ( StateCU_Supply supply : parcel2.getSupplyList() ) {
@@ -153,6 +182,19 @@ public class StateCU_Location_ParcelValidator implements StateCU_ComponentValida
 							}
 						}
 					}
+					*/
+				}
+
+				// Also check whether supply area that is calculated matches HydroBase
+				// TODO smalers 2020-11-07 tried to use 3 digits but see a difference in .001 so use 2 digits
+				if ( !String.format(areaFormat, swSupplyArea).equals(String.format(areaFormat, swSupplyAreaHydroBase))) {
+					validation.add(new StateCU_ComponentValidationProblem(this,
+						"CU location \"" + id + "\" year " + parcelYear + " parcel " + parcel.getID() +
+						" has " + swSupplyCount + " surface water supplies across locations (" + parcel.getModelIdListString() +
+						") and sum of fractional areas from ditch supplies (" +
+						String.format(areaFormat, swSupplyArea) + ") does not equal sum of fractional areas using HydroBase fractions (" +
+						String.format(areaFormat, swSupplyAreaHydroBase) + ").",
+						"Check irrigated parcels data.") );
 				}
 			}
 		}
@@ -163,7 +205,11 @@ public class StateCU_Location_ParcelValidator implements StateCU_ComponentValida
 				"Check irrigated parcels data.  Should not be included as irrigated location?") );
 		}
 		
-		if ( this.deepCheck ) {
+		// TODO smalers 2020-11-05 Disable the following for now
+		// - based on conversations with Kara Sobieski and current design these checks are not appropriate
+		boolean enableDeepCheck = false;
+		if ( this.deepCheck && enableDeepCheck ) {
+			// TODO smalers 2020-11-05 this check is actually not valid.  Only the above is valid.
 			// Loop through all parcels in the dataset and make sure that the same parcel does
 			// not show up under another CU location.
 			// - require the year to also be the same, although not sure this is required for uniqueness
