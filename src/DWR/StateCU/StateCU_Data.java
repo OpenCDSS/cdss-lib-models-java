@@ -32,7 +32,7 @@ implements Cloneable, Comparable<StateCU_Data> {
 
 protected String _id = StateCU_Util.MISSING_STRING;
 protected String _name = StateCU_Util.MISSING_STRING;
-protected boolean _is_dirty = false;
+protected boolean _isDirty = false;
 
 /**
 Whether this object is a clone (i.e., data that can be cancelled out of).
@@ -124,7 +124,7 @@ Indicates whether the data object is dirty (has been modified).
 @return true if the data object is dirty (has been modified).
 */
 public boolean isDirty ()
-{	return _is_dirty;
+{	return _isDirty;
 }
 
 /**
@@ -132,9 +132,9 @@ Set whether the data object is dirty (has been modified).
 @param is_dirty true if the object is being marked as dirty.
 @return true if the data object is dirty (has been modified).
 */
-public boolean isDirty ( boolean is_dirty )
-{	_is_dirty = is_dirty;
-	return _is_dirty;
+public boolean isDirty ( boolean isDirty )
+{	_isDirty = isDirty;
+	return _isDirty;
 }
 
 /**
@@ -144,6 +144,16 @@ public void restoreOriginal() {
 	StateCU_Data d = (StateCU_Data)_original;
 	_id = d._id;
 	_name = d._name;
+}
+
+/**
+Sets whether the data is dirty or not,
+meaning something has been modified that may impact derived values.
+The 'recompute()' method can be called in lazy fashion to update those derived values.
+Set whether the object data are dirty or not.
+*/
+public void setDirty(boolean dirty) {
+	this._isDirty = dirty;
 }
 
 /**

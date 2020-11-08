@@ -26,6 +26,7 @@ package DWR.StateCU;
 import java.util.ArrayList;
 import java.util.List;
 
+import DWR.StateMod.StateMod_Data;
 import RTi.Util.Message.Message;
 
 /**
@@ -40,16 +41,45 @@ implements Cloneable, Comparable<StateCU_Data> {
 // Base class has ID (parcel_id) and name (name is not not useful and same as CULocation ID)
 	
 /**
- * Location ID - this is redundant with the identifier of the object hat has a list of these objects,
+ * Location ID - this is redundant with the identifier of the object that has a list of these objects,
  * but is necessary when the parcel list is formed for many locations.
  * For example, this can be set to StateCU or StateMod location.
  */
-private String locationId = "";
+//private String locationId = "";
+/**
+ * List of model locations used with parcels.
+ * This is a list of StateCU_Location (StateCU_Data) when processing a StateCU dataset or
+ * a list of StateMod_Diversion or StateMod_Well (StateMod_Data) when processing a StateMod dataset.
+ * A dataset will have one or the other.
+ */
+private List<StateCU_Location> cuLocList = new ArrayList<>();
+private List<StateMod_Data> smLocList = new ArrayList<>();
+
+/**
+ * The location identifier for CDS file that contains the parcel.
+*/
+private String cdsLocationId = "";
 
 /**
 Year for the data.
 */
 private int year;
+
+/**
+ * Water division for the parcel.
+ */
+private int div;
+
+/**
+ * Water district for the parcel.
+ */
+private int wd;
+
+/**
+ * Integer identifier, used to speed performance.
+ * Value is consistent with base class ID.
+ */
+private int idInt = -1; // -1 for getter causes recompute of value from getID()
 
 /**
 Crop name.
@@ -72,9 +102,22 @@ Irrigation method.
 private String irrigationMethod;
 
 /**
- * Source of the parcel data, for example "HB-PUTS" for parcel use time series and "HB-WTP" for well to parcel.
+ * Whether to include the parcel in the *.cds file.
+ * The recompute() method indicates the status.
  */
-private String dataSource = "";
+private IncludeParcelInCdsType includeInCdsType = IncludeParcelInCdsType.UNKNOWN;
+
+/**
+ * Error message when this.includeInCdsType=IncludeParcelInCdsType.ERROR.
+ */
+private String includeInCdsError = "";
+
+/**
+ * Source of the parcel data, for example "HB-PUTS" for parcel use (ditch) time series and "HB-WTP" for well to parcel.
+ * The first source used for the parcel will be assigned.
+ */
+// TODO smalers 2020-11-05 move to StateCU_Supply since the source is derived from diversion or well relationship.
+//private String dataSource = "";
 
 /**
  * Count of groundwater supplies for the parcel for the year,
@@ -109,7 +152,21 @@ Add a supply object.
 Append to after the same year.
 */
 public void addSupply ( StateCU_Supply supply ) {
-	this.supplyList.add ( supply );
+	// Only add the supply if not already added
+	boolean found = false;
+	for ( StateCU_Supply supply0 : this.supplyList ) {
+		if ( supply0.getID().equals(supply.getID()) ) {
+			// Supply can be well via ditch relationship and separate well-only lands.
+			// Don't re-add the supply.
+			found = true;
+			break;
+		}
+	}
+	if ( !found ) {
+		this.supplyList.add ( supply );
+		// Assume that this will require a recompute of calculated values.
+		this.setDirty(true);
+	}
 }
 
 /**
@@ -234,19 +291,27 @@ public boolean equals(StateCU_Parcel parcel) {
 }
 
 /**
-Returns the area for the crop (acres).
-@return the area for the crop (acres).
+Returns the area for the parcel (acres).
+@return the area for the parcel (acres).
 */
 public double getArea() {
 	return this.area;
 }
 
 /**
-Returns the area units for the crop.
-@return the area units for the crop.
+Returns the area units for the parcel.
+@return the area units for the parcel.
 */
 public String getAreaUnits() {
 	return this.areaUnits;
+}
+
+/**
+Returns the CDS location identifier.
+@return the CDS location identifier.
+*/
+public String getCdsLocationId() {
+	return this.cdsLocationId;
 }
 
 /**
@@ -261,8 +326,37 @@ public String getCrop() {
 Returns the data source.
 @return the data source.
 */
+/* TODO smalers 2020-11-05 moved to StateCU_Supply
 public String getDataSource() {
 	return this.dataSource;
+}
+*/
+
+/**
+Returns the water division for the parcel.
+@return the water division for the parcel.
+*/
+public int getDiv() {
+	return this.div;
+}
+
+/**
+Returns the integer ID for the parcel.
+@return the integer ID for the parcel.
+*/
+public int getIdInt() {
+	if ( this.idInt < 0 ) {
+		this.idInt = Integer.parseInt(getID());
+	}
+	return this.idInt;
+}
+
+/**
+Returns the integer ID for the parcel.
+@return the integer ID for the parcel.
+*/
+public IncludeParcelInCdsType getIncludeParcelInCdsType() {
+	return this.includeInCdsType;
 }
 
 /**
@@ -277,8 +371,66 @@ public String getIrrigationMethod() {
 Returns the location identifier.
 @return the location identifier.
 */
+/* TODO smalers 2020-11-05 change to list of model objects.
 public String getLocationId() {
 	return this.locationId;
+}
+*/
+
+/**
+ * Return a formatted string containing the list of model identifiers.
+ * All model identifiers are included, separated by commas.
+ */
+public String getModelIdListString () {
+	StringBuilder b = new StringBuilder();
+	if ( this.cuLocList.size() > 0 ) {
+		for ( int i = 0; i < this.cuLocList.size(); i++ ) {
+			if ( i > 0 ) {
+				b.append(", ");
+			}
+			b.append(this.cuLocList.get(i).getID());
+		}
+	}
+	else {
+		for ( int i = 0; i < this.smLocList.size(); i++ ) {
+			if ( i > 0 ) {
+				b.append(", ");
+			}
+			b.append(this.smLocList.get(i).getID());
+		}
+	}
+	return b.toString();
+}
+
+/**
+ * Returns the StateCU_Location at an index.
+ * @return the StateCU_Location at an index.
+ */
+public StateCU_Location getStateCULocation ( int index ) {
+	return this.cuLocList.get(index);
+}
+
+/**
+ * Returns the StateMod_Data at an index.
+ * @return the model location at an index.
+ */
+public StateMod_Data getStateModStation ( int index ) {
+	return this.smLocList.get(index);
+}
+
+/**
+ * Returns the model location list size.
+ * @return the model location list size.
+ */
+public int getModelLocListSize () {
+	// Return the size of the largest list:
+	// - only one should be non-zero
+	if ( this.cuLocList.size() > 0 ) {
+		return cuLocList.size();
+	}
+	else {
+		return this.smLocList.size();
+	}
 }
 
 /**
@@ -286,6 +438,10 @@ Returns the count of groundwater supply.
 @return the count of groundwater supply.
 */
 public int getSupplyFromGWCount() {
+	if ( this.isDirty() ) {
+		// Need to recompute because something derived data are not current.
+		recompute();
+	}
 	return this.supplyFromGWCount;
 }
 
@@ -294,6 +450,10 @@ Returns the count of surface water supply.
 @return the count of surface water supply.
 */
 public int getSupplyFromSWCount() {
+	if ( this.isDirty() ) {
+		// Need to recompute because something derived data are not current.
+		recompute();
+	}
 	return this.supplyFromSWCount;
 }
 
@@ -316,8 +476,16 @@ public int getWellCount() {
 */
 
 /**
-Returns the year for the crop.
-@return the year for the crop.
+Returns the water district for the parcel.
+@return the water district for the parcel.
+*/
+public int getWD() {
+	return this.wd;
+}
+
+/**
+Returns the year for the parcel.
+@return the year for the parcel.
 */
 public int getYear() {
 	return this.year;
@@ -328,15 +496,13 @@ Indicate whether the parcel has groundwater supply.  This will be true if
 any of the StateCU_Supply associated with the parcel return isGroundWater as true.
 */
 public boolean hasGroundWaterSupply ()
-{	int size = supplyList.size();
-	StateCU_Supply supply = null;
-	for ( int i = 0; i < size; i++ ) {
-		supply = this.supplyList.get(i);
-		if ( supply.isGroundWater() ) {
-			return true;
-		}
+{
+	if ( getSupplyFromGWCount() > 0 ) {
+		return true;
 	}
-	return false;
+	else {
+		return false;
+	}
 }
 
 /**
@@ -344,15 +510,13 @@ Indicate whether the parcel has surface water supply.  This will be true if
 any of the StateCU_Supply associated with the parcel return isSurfaceWater as true.
 */
 public boolean hasSurfaceWaterSupply ()
-{	int size = supplyList.size();
-	StateCU_Supply supply = null;
-	for ( int i = 0; i < size; i++ ) {
-		supply = this.supplyList.get(i);
-		if ( supply.isSurfaceWater() ) {
-			return true;
-		}
+{
+	if ( getSupplyFromSWCount() > 0 ) {
+		return true;
 	}
-	return false;
+	else {
+		return false;
+	}
 }
 
 /**
@@ -366,17 +530,28 @@ private void initialize() {
 	this.areaUnits = "";
 	this.crop = "";
 	this.irrigationMethod = "";
-	this.locationId = "";
+	// TODO smalers 2020-11-05 
+	//this.locationId = "";
 	this.supplyFromGWCount = 0;
 	this.supplyFromSWCount = 0;
 	this.year = StateCU_Util.MISSING_INT;
+	// Dirty until a data request is made
+	this.setDirty(true);
 }
 
 /**
- * Refresh the counts of well and ditch supply.
- * This must be called after parcel data are read from HydroBase or other data.
+ * Recalculate derived data.
+ * This should be called in lazy fashion when retrieving derived values and the object is dirty.
+ * <ul>
+ * <li>counts of well and ditch supply - to avoid looping in repeated calls and </li>
+ * This method is called if the object is detected to be in a dirty state,
+ * meaning data have been set but derived values have not been updated.
  */
-public void refreshSupplyCount () {
+public void recompute () {
+	if ( !this.isDirty() ) {
+		// No reason to recompute
+		return;
+	}
 	// Count the number of groundwater supplies (wells) and surface water supplies (ditches)
 	int countGW = 0;
 	int countSW = 0;
@@ -390,34 +565,74 @@ public void refreshSupplyCount () {
 	}
 	this.supplyFromGWCount = countGW;
 	this.supplyFromSWCount = countSW;
-	// Loop through the well supply parcels and update the areaIrrig based on count
+
+	// Loop through the well supply parcels and update the irrigAreaFraction and irrigArea based on count
 	// - divide the parcel area by the number of wells
+	// - divide the diversion area by the number of diversions
 	for ( StateCU_Supply supply : this.supplyList ) {
 		if ( supply instanceof StateCU_SupplyFromGW ) {
+			StateCU_SupplyFromGW gwSupply = (StateCU_SupplyFromGW)supply;
 			if ( this.supplyFromGWCount == 0 ) {
-				((StateCU_SupplyFromGW) supply).setAreaIrrig(0.0);
+				gwSupply.setAreaIrrigFraction(0.0);
 			}
 			else {
-				((StateCU_SupplyFromGW) supply).setAreaIrrig(this.area/this.supplyFromGWCount);
+				gwSupply.setAreaIrrigFraction(1.0/this.supplyFromGWCount);
 			}
+			gwSupply.setAreaIrrig(this.area*gwSupply.getAreaIrrigFraction());
 		}
 		else if ( supply instanceof StateCU_SupplyFromSW ) {
 			// TODO smalers 2020-02-17 this is currently handled via HydroBase data when read
 			// - percent irrig
 			// - recalculate and see if the number is accurate
 			StateCU_SupplyFromSW swSupply = (StateCU_SupplyFromSW)supply;
-			double swIrrigAreaCalc = this.getArea() * swSupply.getAreaIrrigPercent();
-			double swIrrigAreaCalcMin = swIrrigAreaCalc*.99999; 
-			double swIrrigAreaCalcMax = swIrrigAreaCalc*1.00001; 
-			if ( (swSupply.getAreaIrrig() < swIrrigAreaCalcMin) || (swSupply.getAreaIrrig() > swIrrigAreaCalcMax) ) {
-				// The calculated area does not match that for the parcel - HydroBase load error?
-				// - TODO smalers 2020-10-12 need to evaluate whether needs to result in command warning
-				Message.printWarning(2, "", "Input data surface supply area (" + swSupply.getAreaIrrig() +
-					") does not equal calculated area from total area and percent_irrig (" + swIrrigAreaCalc +
-					") for location \"" + getLocationId() + "\" parcel " + getID() + " year " + getYear() );
+
+			if ( this.supplyFromSWCount == 0 ) {
+				// This should never happen because the list has at least one item
+				swSupply.setAreaIrrigFraction(0.0);
+			}
+			else {
+				swSupply.setAreaIrrigFraction(1.0/this.supplyFromSWCount);
+			}
+			swSupply.setAreaIrrig(this.area*swSupply.getAreaIrrigFraction());
+
+			// Verify that the calculated area for the supply matches the HydroBase value
+			// - this is in StateCU_Location validation
+			// - also set a value in the supply to allow output in parcel report
+			// - the tolerance on the comparison is important - making too tight results in errors comparing numbers
+			
+			// Precision of 1 avoids warnings except for "large" differences
+			// - this should the same as the default for CheckParcels(AreaFormat) parameter. 
+			int areaPrecision = 1;
+			String areaFormat = "%." + areaPrecision + "f";
+			if ( !String.format(areaFormat, swSupply.getAreaIrrigFraction()).equals(
+				String.format(areaFormat, swSupply.getAreaIrrigFractionHydroBase())) ) {
+				//Message.printWarning(3, "", "Calculated supply fraction is " + swSupply.getAreaIrrigFraction() +
+				//	" HydroBase fraction is " + swSupply.getAreaIrrigFractionHydroBase() );
+				swSupply.setAreaIrrigFractionHydroBaseError("ERROR");
+			}
+			else {
+				swSupply.setAreaIrrigFractionHydroBaseError("");
 			}
 		}
 	}
+	
+	// If parcel has a surface supply, add to the CDS
+	/* TODO smalers 2020-11-06 fix this
+	for ( StateCU_Supply supply : this.supplyList ) {
+		if ( supply instanceof StateCU_SupplyFromSW ) {
+			StateCU_SupplyFromSW swSupply = (StateCU_SupplyFromSW)supply;
+			swSupply.setIncludeInCdsArea(false);
+		}
+		else if ( supply instanceof StateCU_SupplyFromGW ) {
+			if ( this.getSupplyFromSWCount() > 0 ) {
+				supplyFromGW.setIncludeInCdsArea(false);
+			}
+		}
+	}
+	*/
+
+	// Set not dirty
+	this.setDirty(false);
 }
 
 /**
@@ -431,9 +646,13 @@ public void restoreOriginal() {
 	this.area = parcel.area;
 	this.areaUnits = parcel.areaUnits;
 	this.crop = parcel.crop;
-	this.dataSource = parcel.dataSource;
+	// TODO smalers 2020-11-05 moved to StateCU_Supply
+	// this.dataSource = parcel.dataSource;
 	this.irrigationMethod = parcel.irrigationMethod;
-	this.locationId = parcel.locationId;
+	// TODO smalers 2020-11-05 change from single string since multiple locations can be associated with the parcel
+	//this.locationId = parcel.locationId;
+	this.cuLocList = parcel.cuLocList;
+	this.smLocList = parcel.smLocList;
 	this.supplyFromGWCount = parcel.supplyFromGWCount;
 	this.supplyFromSWCount = parcel.supplyFromSWCount;
 	this.year = parcel.year;
@@ -474,6 +693,14 @@ public void setAreaUnits(String area_units ) {
 }
 
 /**
+Set the CDS location identifier (StateCU Location) where the parcel is counted.
+@param locationId Location ID.
+*/
+public void setCdsLocationId ( String cdsLocationId ) {
+	this.cdsLocationId = cdsLocationId;
+}
+
+/**
 Set the crop.
 @param crop Crop to set.
 */
@@ -493,8 +720,30 @@ public void setCrop(String crop ) {
 Set the data source.
 @param dataSource Data source to set.
 */
+/* TODO smalers 2020-11-05 moved to StateCU_Supply
 public void setDataSource(String dataSource ) {
 	this.dataSource = dataSource;
+}
+*/
+
+/**
+Set the water division associated with the crop.
+@param wd water division to set.
+*/
+public void setDiv(int div) {
+	if ( div != this.div) {
+		this.div = div;
+	}
+}
+
+/**
+Set the water district associated with the crop.
+@param wd water district to set.
+*/
+public void setIdInt(int idInt) {
+	if ( idInt != this.idInt) {
+		this.idInt = idInt;
+	}
 }
 
 /**
@@ -517,8 +766,41 @@ public void setIrrigationMethod(String irrigationMethod ) {
 Set the location identifier (StateCU Location ID or StateMod node ID).
 @param locationId Location ID.
 */
+/*
 public void setLocationId(String locationId ) {
 	this.locationId = locationId;
+}
+*/
+
+/**
+Set the StateCU_Location associated with the parcel.
+If already in the list it won't be added again.
+@param culoc StateCU_Location
+*/
+public void setStateCULocation(StateCU_Location culoc) {
+	boolean found = false;
+	String culocId = culoc.getID();
+	for ( StateCU_Location culoc2 : this.cuLocList ) {
+		if ( culocId.equals(culoc2.getID())) {
+			found = true;
+			break;
+		}
+	}
+	if ( !found ) {
+		this.cuLocList.add(culoc);
+	}
+}
+
+/**
+Set the water district from the parcel ID.
+Parcel ID is of the form 21011060, where first digit is division, digits 2-3 are the water district.
+@param parcelID containing the water district.
+*/
+public void setWDFromParcelID( int parcelID ) {
+	if ( parcelID > 100 ) {
+		String s = "" + parcelID;
+		this.wd = Integer.parseInt(s.substring(1,3));
+	}
 }
 
 /**
@@ -539,6 +821,16 @@ public void setWellCount(int well_count) {
 	}
 }
 */
+
+/**
+Set the water district associated with the crop.
+@param wd water district to set.
+*/
+public void setWD(int wd) {
+	if ( wd != this.wd) {
+		this.wd = wd;
+	}
+}
 
 /**
 Set the year associated with the crop.
