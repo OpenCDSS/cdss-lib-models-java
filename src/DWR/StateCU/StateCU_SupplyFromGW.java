@@ -66,12 +66,12 @@ private boolean includeInCdsArea = true;
 /**
 WDID for the ditch, either explicit ID or a part.
 */
-private String wdid;
+private String wdid = "";
 
 /**
 Receipt for the ditch, either explicit ID or a part.
 */
-private String receipt;
+private String receipt = "";
 
 /**
 Constructor.

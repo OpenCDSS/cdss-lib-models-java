@@ -252,6 +252,16 @@ public int getCollectionDiv ()
 }
 
 /**
+Return the collection part ID list.
+This is used with the new design where collection information for ditches and wells
+is the same regardless of year.
+@return the list of collection part IDS, or null if not defined.
+*/
+public List<String> getCollectionPartIDs () {
+	return getCollectionPartIDsForYear ( 0 );
+}
+
+/**
 Return the collection part ID list for the specific year.  For ditches, only one
 aggregate/system list is currently supported so the same information is returned
 regardless of the year value.  For wells, if the collection part type is WELL, the list is the same for all years,
@@ -551,6 +561,51 @@ public boolean isCollection()
 	else {
 		return true;
 	}
+}
+
+/**
+ * Indicate whether the specified WDID identifier matches the CU Location or is in a collection.
+ * This assumes that the newer approach is used, NOT parcel aggregation.
+ * @param wdid WDID identifier to search for in collection ID list for the location, used with ditches.
+ * @return true if the provided identifier is in the list of identifiers in the collection, of any type.
+ */
+public boolean idIsIn(String wdid) {
+	return idIsIn(wdid, null);
+}
+
+/**
+ * Indicate whether the specified identifier matches the CU Location or is in a collection.
+ * This assumes that the newer approach is used, NOT parcel aggregation.
+ * The receipt is used if location is a collection and part identifier is receipt.
+ * @param wdid WDID identifier to search for in collection ID list for the location, used with wells and ditches.
+ * @param receipt receipt identifier to search for in collection ID list for the location, used with wells.
+ * @return true if the provided identifier is in the list of identifiers in the collection, of any type.
+ */
+public boolean idIsIn(String wdid, String receipt) {
+	if ( !isCollection() ) {
+		// Not a collection, only WDID supported
+		return wdid.equalsIgnoreCase(getID());
+	}
+	else {
+		// Is a collection
+		List<String> collectionIdList = getCollectionPartIDsForYear ( 0 );
+		if ( collectionIdList != null ) {
+			List<StateCU_Location_CollectionPartIdType> collectionIdPartTypeList = getCollectionPartIDTypes();
+			for ( int i = 0; i < collectionIdList.size(); i++ ) {
+				if ( collectionIdPartTypeList.get(i) == StateCU_Location_CollectionPartIdType.WDID ) {
+					if ( collectionIdList.get(i).equalsIgnoreCase(wdid) ) {
+						return true;
+					}
+				}
+				else if ( collectionIdPartTypeList.get(i) == StateCU_Location_CollectionPartIdType.RECEIPT ) {
+					if ( collectionIdList.get(i).equalsIgnoreCase(receipt) ) {
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
 }
 
 /**

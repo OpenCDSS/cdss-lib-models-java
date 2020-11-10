@@ -58,7 +58,8 @@ private List<StateMod_Data> smLocList = new ArrayList<>();
 /**
  * The location identifier for CDS file that contains the parcel.
 */
-private String cdsLocationId = "";
+// TODO smalers 2020-11-08 replaced with cuLocForCds;
+//private String cdsLocationId = "";
 
 /**
 Year for the data.
@@ -102,17 +103,6 @@ Irrigation method.
 private String irrigationMethod;
 
 /**
- * Whether to include the parcel in the *.cds file.
- * The recompute() method indicates the status.
- */
-private IncludeParcelInCdsType includeInCdsType = IncludeParcelInCdsType.UNKNOWN;
-
-/**
- * Error message when this.includeInCdsType=IncludeParcelInCdsType.ERROR.
- */
-private String includeInCdsError = "";
-
-/**
  * Source of the parcel data, for example "HB-PUTS" for parcel use (ditch) time series and "HB-WTP" for well to parcel.
  * The first source used for the parcel will be assigned.
  */
@@ -154,16 +144,38 @@ Append to after the same year.
 public void addSupply ( StateCU_Supply supply ) {
 	// Only add the supply if not already added
 	boolean found = false;
+	StateCU_SupplyFromGW supplyFromGW, supplyFromGW0;
+	StateCU_SupplyFromSW supplyFromSW, supplyFromSW0;
 	for ( StateCU_Supply supply0 : this.supplyList ) {
-		if ( supply0.getID().equals(supply.getID()) ) {
-			// Supply can be well via ditch relationship and separate well-only lands.
-			// Don't re-add the supply.
-			found = true;
-			break;
+		if ( (supply instanceof StateCU_SupplyFromSW) && (supply0 instanceof StateCU_SupplyFromSW)) {
+			supplyFromSW = (StateCU_SupplyFromSW)supply;
+			supplyFromSW0 = (StateCU_SupplyFromSW)supply0;
+			if ( supplyFromSW.getWDID().equals(supplyFromSW0.getWDID()) ) {
+				// Supply can be well via ditch relationship and separate well-only lands.
+				// Don't re-add the supply.
+				found = true;
+				break;
+			}
+		}
+		else if ( (supply instanceof StateCU_SupplyFromGW) && (supply0 instanceof StateCU_SupplyFromGW) ) {
+			supplyFromGW = (StateCU_SupplyFromGW)supply;
+			supplyFromGW0 = (StateCU_SupplyFromGW)supply0;
+			if ( (supplyFromGW.getWDID().equals(supplyFromGW0.getWDID())) ||
+				(supplyFromGW.getReceipt().equals(supplyFromGW0.getReceipt())) ) { 
+				// Supply can be well via ditch relationship and separate well-only lands.
+				// Don't re-add the supply.
+				// - TODO smalers 2020-11-08 this could be an issue if WDID matches a receipt,
+				//   but unlikely to occur at the same parcel.
+				found = true;
+				break;
+			}
 		}
 	}
 	if ( !found ) {
 		this.supplyList.add ( supply );
+		if ( Message.isDebugOn ) {
+			Message.printDebug(2,"addSupply", "        Adding supply for year " + this.getYear() + " parcel ID " + getID() + " supply ID " + supply.getID() );
+		}
 		// Assume that this will require a recompute of calculated values.
 		this.setDirty(true);
 	}
@@ -310,9 +322,11 @@ public String getAreaUnits() {
 Returns the CDS location identifier.
 @return the CDS location identifier.
 */
+/* TODO smalers 2020-11-08 replace with culocForCds
 public String getCdsLocationId() {
 	return this.cdsLocationId;
 }
+*/
 
 /**
 Returns the crop.
@@ -349,14 +363,6 @@ public int getIdInt() {
 		this.idInt = Integer.parseInt(getID());
 	}
 	return this.idInt;
-}
-
-/**
-Returns the integer ID for the parcel.
-@return the integer ID for the parcel.
-*/
-public IncludeParcelInCdsType getIncludeParcelInCdsType() {
-	return this.includeInCdsType;
 }
 
 /**
@@ -571,29 +577,29 @@ public void recompute () {
 	// - divide the diversion area by the number of diversions
 	for ( StateCU_Supply supply : this.supplyList ) {
 		if ( supply instanceof StateCU_SupplyFromGW ) {
-			StateCU_SupplyFromGW gwSupply = (StateCU_SupplyFromGW)supply;
+			StateCU_SupplyFromGW supplyFromGW = (StateCU_SupplyFromGW)supply;
 			if ( this.supplyFromGWCount == 0 ) {
-				gwSupply.setAreaIrrigFraction(0.0);
+				supplyFromGW.setAreaIrrigFraction(0.0);
 			}
 			else {
-				gwSupply.setAreaIrrigFraction(1.0/this.supplyFromGWCount);
+				supplyFromGW.setAreaIrrigFraction(1.0/this.supplyFromGWCount);
 			}
-			gwSupply.setAreaIrrig(this.area*gwSupply.getAreaIrrigFraction());
+			supplyFromGW.setAreaIrrig(this.area*supplyFromGW.getAreaIrrigFraction());
 		}
 		else if ( supply instanceof StateCU_SupplyFromSW ) {
 			// TODO smalers 2020-02-17 this is currently handled via HydroBase data when read
 			// - percent irrig
 			// - recalculate and see if the number is accurate
-			StateCU_SupplyFromSW swSupply = (StateCU_SupplyFromSW)supply;
+			StateCU_SupplyFromSW supplyFromSW = (StateCU_SupplyFromSW)supply;
 
 			if ( this.supplyFromSWCount == 0 ) {
 				// This should never happen because the list has at least one item
-				swSupply.setAreaIrrigFraction(0.0);
+				supplyFromSW.setAreaIrrigFraction(0.0);
 			}
 			else {
-				swSupply.setAreaIrrigFraction(1.0/this.supplyFromSWCount);
+				supplyFromSW.setAreaIrrigFraction(1.0/this.supplyFromSWCount);
 			}
-			swSupply.setAreaIrrig(this.area*swSupply.getAreaIrrigFraction());
+			supplyFromSW.setAreaIrrig(this.area*supplyFromSW.getAreaIrrigFraction());
 
 			// Verify that the calculated area for the supply matches the HydroBase value
 			// - this is in StateCU_Location validation
@@ -604,14 +610,14 @@ public void recompute () {
 			// - this should the same as the default for CheckParcels(AreaFormat) parameter. 
 			int areaPrecision = 1;
 			String areaFormat = "%." + areaPrecision + "f";
-			if ( !String.format(areaFormat, swSupply.getAreaIrrigFraction()).equals(
-				String.format(areaFormat, swSupply.getAreaIrrigFractionHydroBase())) ) {
-				//Message.printWarning(3, "", "Calculated supply fraction is " + swSupply.getAreaIrrigFraction() +
-				//	" HydroBase fraction is " + swSupply.getAreaIrrigFractionHydroBase() );
-				swSupply.setAreaIrrigFractionHydroBaseError("ERROR");
+			if ( !String.format(areaFormat, supplyFromSW.getAreaIrrigFraction()).equals(
+				String.format(areaFormat, supplyFromSW.getAreaIrrigFractionHydroBase())) ) {
+				//Message.printWarning(3, "", "Calculated supply fraction is " + supplyFromSW.getAreaIrrigFraction() +
+				//	" HydroBase fraction is " + supplyFromSW.getAreaIrrigFractionHydroBase() );
+				supplyFromSW.setAreaIrrigFractionHydroBaseError("ERROR");
 			}
 			else {
-				swSupply.setAreaIrrigFractionHydroBaseError("");
+				supplyFromSW.setAreaIrrigFractionHydroBaseError("");
 			}
 		}
 	}
@@ -620,8 +626,8 @@ public void recompute () {
 	/* TODO smalers 2020-11-06 fix this
 	for ( StateCU_Supply supply : this.supplyList ) {
 		if ( supply instanceof StateCU_SupplyFromSW ) {
-			StateCU_SupplyFromSW swSupply = (StateCU_SupplyFromSW)supply;
-			swSupply.setIncludeInCdsArea(false);
+			StateCU_SupplyFromSW supplyFromSW = (StateCU_SupplyFromSW)supply;
+			supplyFromSW.setIncludeInCdsArea(false);
 		}
 		else if ( supply instanceof StateCU_SupplyFromGW ) {
 			if ( this.getSupplyFromSWCount() > 0 ) {
@@ -696,9 +702,9 @@ public void setAreaUnits(String area_units ) {
 Set the CDS location identifier (StateCU Location) where the parcel is counted.
 @param locationId Location ID.
 */
-public void setCdsLocationId ( String cdsLocationId ) {
-	this.cdsLocationId = cdsLocationId;
-}
+//public void setCdsLocationId ( String cdsLocationId ) {
+	//this.cdsLocationId = cdsLocationId;
+//}
 
 /**
 Set the crop.
@@ -741,9 +747,7 @@ Set the water district associated with the crop.
 @param wd water district to set.
 */
 public void setIdInt(int idInt) {
-	if ( idInt != this.idInt) {
-		this.idInt = idInt;
-	}
+	this.idInt = idInt;
 }
 
 /**

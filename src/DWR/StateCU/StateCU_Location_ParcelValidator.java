@@ -83,19 +83,20 @@ public class StateCU_Location_ParcelValidator implements StateCU_ComponentValida
 		List<StateCU_Parcel> parcelList = culoc.getParcelList();
 		int parcelYear;
 		// All years.
-		int swSupplyCountAll = 0;
-		int gwSupplyCountAll = 0;
+		int swSupplyCountAllYears = 0;
+		int gwSupplyCountAllYears = 0;
 		// For only one year.
 		int swSupplyCount = 0;
 		int gwSupplyCount = 0;
 		String areaFormat = "%." + this.areaPrecision + "f";
+		StateCU_SupplyFromSW supplyFromSW;
 		for ( StateCU_Parcel parcel : parcelList ) {
-			// This is for a specific year
+			// A parcel corresponds to a specific year
 			parcelYear = parcel.getYear();
 			swSupplyCount = parcel.getSupplyFromSWCount();
 			gwSupplyCount = parcel.getSupplyFromGWCount();
-			swSupplyCountAll += swSupplyCount;
-			gwSupplyCountAll += gwSupplyCount;
+			swSupplyCountAllYears += swSupplyCount;
+			gwSupplyCountAllYears += gwSupplyCount;
 
 			if ( (swSupplyCount == 0) && (gwSupplyCount == 0) ) {
 				validation.add(new StateCU_ComponentValidationProblem(this,
@@ -103,19 +104,39 @@ public class StateCU_Location_ParcelValidator implements StateCU_ComponentValida
 					"Check irrigated parcels data.  Should not be included in irrigated acres?") );
 			}
 
-			if ( swSupplyCount > 1 ) {
-				// Do a check to make sure that sum of calculated ditch irrigated acres using percent_irrig is <= the parcel area
-				// TODO smalers 2020-10-12 if fails, need to check whether CULocation is a MultiStruct?
+			if ( swSupplyCount > 0 ) {
+				// Do a check to make sure that sum of calculated ditch irrigated acres using percent_irrig is the
+				// same as the parcel area.
+				// - TODO smalers 2020-10-12 if fails, need to check whether CULocation is a MultiStruct
+				//   with more than one one ditch supplying a parcel?
 				double swSupplyArea = 0.0;
-				double swSupplyAreaHydroBase = 0.0;
 				for ( StateCU_Supply supply : parcel.getSupplyList() ) {
 					if ( supply instanceof StateCU_SupplyFromSW ) {
-						swSupplyArea += ((StateCU_SupplyFromSW)supply).getAreaIrrig();
-						swSupplyAreaHydroBase += ((StateCU_SupplyFromSW)supply).getAreaIrrigHydroBase();
+						supplyFromSW = (StateCU_SupplyFromSW)supply;
+						swSupplyArea += supplyFromSW.getAreaIrrig();
+
+						double areaIrrigFraction = supplyFromSW.getAreaIrrigFraction();
+						double areaIrrigFractionHydroBase = supplyFromSW.getAreaIrrigFractionHydroBase();
+						if ( !String.format(areaFormat, areaIrrigFraction).equals(String.format(areaFormat, areaIrrigFractionHydroBase))) {
+							validation.add(new StateCU_ComponentValidationProblem(this,
+								"CU location \"" + id + "\" year " + parcelYear + " parcel " + parcel.getID() +
+								" supply ID \"" + supply.getID() + "\" parcel area fraction from ditch supply number of ditches(" +
+								String.format(areaFormat, areaIrrigFraction) + ") does not equal parcel area fraction from HydroBase (" +
+								String.format(areaFormat, areaIrrigFractionHydroBase) + ").",
+								"Check irrigated parcels data and supply assignment.") );
+							supplyFromSW.setAreaIrrigFractionHydroBaseError("ERROR");
+						}
+						// TODO smalers 2020-11-08 the following ws redundant - remove when the above checks out
+						if ( !String.format(areaFormat, supplyFromSW.getAreaIrrigFraction()).equals(
+							String.format(areaFormat, supplyFromSW.getAreaIrrigFractionHydroBase())) ) {
+							//Message.printWarning(3, "", "Calculated supply fraction is " + supplyFromSW.getAreaIrrigFraction() +
+							//	" HydroBase fraction is " + supplyFromSW.getAreaIrrigFractionHydroBase() );
+							//supplyFromSW.setAreaIrrigFractionHydroBaseError("ERROR");
+						}
 					}
 				}
 				// Use formatted strings to compare since roundoff can be an issue
-				// TODO smalers 2020-11-07 tried to use 3 digits but see a difference in .001 so use 2 digits
+				// TODO smalers 2020-11-07 tried to use 3 digits but see a difference in .001 so use precision from command parameter.
 				if ( !String.format(areaFormat, parcel.getArea()).equals(String.format(areaFormat, swSupplyArea)) ) {
 					validation.add(new StateCU_ComponentValidationProblem(this,
 						"CU location \"" + id + "\" year " + parcelYear + " parcel " + parcel.getID() +
@@ -123,7 +144,7 @@ public class StateCU_Location_ParcelValidator implements StateCU_ComponentValida
 						") and sum of fractional areas from ditch supplies (" +
 						String.format(areaFormat, swSupplyArea) + ") does not equal parcel area (" +
 						String.format(areaFormat, parcel.getArea()) + ").",
-						"Check irrigated parcels data.") );
+						"Check irrigated parcels data and supply assignment.") );
 					if ( gwSupplyCount > 0 ) {
 						// Possible issue since SW acres control and also have groundwater
 						validation.add(new StateCU_ComponentValidationProblem(this,
@@ -184,29 +205,19 @@ public class StateCU_Location_ParcelValidator implements StateCU_ComponentValida
 					}
 					*/
 				}
-
-				// Also check whether supply area that is calculated matches HydroBase
-				// TODO smalers 2020-11-07 tried to use 3 digits but see a difference in .001 so use 2 digits
-				if ( !String.format(areaFormat, swSupplyArea).equals(String.format(areaFormat, swSupplyAreaHydroBase))) {
-					validation.add(new StateCU_ComponentValidationProblem(this,
-						"CU location \"" + id + "\" year " + parcelYear + " parcel " + parcel.getID() +
-						" has " + swSupplyCount + " surface water supplies across locations (" + parcel.getModelIdListString() +
-						") and sum of fractional areas from ditch supplies (" +
-						String.format(areaFormat, swSupplyArea) + ") does not equal sum of fractional areas using HydroBase fractions (" +
-						String.format(areaFormat, swSupplyAreaHydroBase) + ").",
-						"Check irrigated parcels data.") );
-				}
 			}
 		}
 
-		if ( (swSupplyCountAll == 0) && (gwSupplyCountAll == 0) ) {
+		if ( (swSupplyCountAllYears == 0) && (gwSupplyCountAllYears == 0) ) {
+			// This should probably never happen.
 			validation.add(new StateCU_ComponentValidationProblem(this,
 				"CU location \"" + id + "\" has parcels with 0 supplies for all years.  At least 1 supply is required.",
 				"Check irrigated parcels data.  Should not be included as irrigated location?") );
 		}
 		
 		// TODO smalers 2020-11-05 Disable the following for now
-		// - based on conversations with Kara Sobieski and current design these checks are not appropriate
+		// - based on conversations with Kara Sobieski, ArkDSS data, and current design these checks are not appropriate.
+		// - a well might be included with a D&W and also separately in a Well-only list.
 		boolean enableDeepCheck = false;
 		if ( this.deepCheck && enableDeepCheck ) {
 			// TODO smalers 2020-11-05 this check is actually not valid.  Only the above is valid.

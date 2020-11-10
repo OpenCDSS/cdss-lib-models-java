@@ -39,13 +39,15 @@ package DWR.StateCU;
 This class is not part of the core StateCU classes.
 It is used with StateDMI to track the water supply for a parcel when processing
 data files that derive from parcel/supply data.
+The StateCU_Data parent class has ID and name.
+The child classes store WDID and receipt identifiers to allow look back to the StateCU_Location and StateMod_Data.
 */
 public class StateCU_Supply extends StateCU_Data 
 implements Cloneable, Comparable<StateCU_Data> {
 
-// Base class has ID and name
-	
 /**
+TODO smalers 2020-11-08 is this not currently used?
+- It may not work for rights since multiple rights per supply ID.
 Supply amount (rate) associated with the supply, CFS for wells.
 This is associated with water rights or permits.
 */
@@ -54,6 +56,24 @@ private double	__supplyAmount;
 // Indicate if a groundwater and/or surface water supply (likely only one but not both)
 private boolean __is_ground = false;
 private boolean __is_surface = false;
+
+/**
+ * Whether to include the parcel in the *.cds file.
+ * If set to YES, the cuLocForCds value contains the StateCU_Location that includes the parcel.
+ * The parcel recompute() method indicates the status.
+ */
+private IncludeParcelInCdsType includeInCdsType = IncludeParcelInCdsType.UNKNOWN;
+
+/**
+ * CU Location that the parcel is included in.
+ * This is assigned in readCropPatternTSFromHydrobase().
+ */
+private StateCU_Location cuLocForCds = null;
+
+/**
+ * Error message when this.includeInCdsType=IncludeParcelInCdsType.ERROR.
+ */
+private String includeInCdsError = "";
 
 /**
  * Source of the parcel data, for example "HB-PUTS" for parcel use time series and "HB-WTP" for well to parcel.
@@ -117,10 +137,8 @@ public void createBackup() {
 // Not sure if something like this is needed.
 /**
 Compare two rights Vectors and see if they are the same.
-@param v1 the first Vector of StateMod_ReservoirAreaCap s to check.  Can not
-be null.
-@param v2 the second Vector of StateMod_ReservoirAreaCap s to check.  Can not
-be null.
+@param v1 the first Vector of StateMod_ReservoirAreaCap s to check.  Can not be null.
+@param v2 the second Vector of StateMod_ReservoirAreaCap s to check.  Can not be null.
 @return true if they are the same, false if not.
 */
 /*
@@ -184,6 +202,22 @@ public String getDataSource() {
 }
 
 /**
+Returns the integer ID for the parcel.
+@return the integer ID for the parcel.
+*/
+public IncludeParcelInCdsType getIncludeParcelInCdsType() {
+	return this.includeInCdsType;
+}
+
+/**
+Returns the StateCU_Location that includes the parcel.
+@return the StateCU_Location that includes the parcel, null if no location has been set for CDS.
+*/
+public StateCU_Location getStateCULocationForCds() {
+	return this.cuLocForCds;
+}
+
+/**
 Returns the supply amount.
 @return the supply amount (CFS for wells).
 */
@@ -196,6 +230,9 @@ Initializes member variables.
 */
 protected void initialize() {
 	this.__supplyAmount = StateCU_Util.MISSING_DOUBLE;
+	// Will be set in child classes
+	this.__is_ground = false;
+	this.__is_surface = false;
 }
 
 /**
@@ -203,7 +240,7 @@ Indicate whether the supply is a groundwater source.
 @return true if a groundwater supply, false if not.
 */
 public boolean isGroundWater() {
-	return __is_ground;
+	return this.__is_ground;
 }
 
 /**
@@ -211,7 +248,7 @@ Indicate whether the supply is a surface water source.
 @return true if a surface water supply, false if not.
 */
 public boolean isSurfaceWater() {
-	return __is_surface;
+	return this.__is_surface;
 }
 
 /**
@@ -246,12 +283,36 @@ public void setDataSource(String dataSource ) {
 }
 
 /**
+Set the error for including in CDS.
+@param includeInCdsError error if whether to include in CDS could not be determined.
+*/
+public void setIncludeInCdsError(String includeInCdsError ) {
+	this.includeInCdsError  = includeInCdsError;
+}
+
+/**
+Set whether the parcel is included in the CDS.
+@param includeInCdsType indicates how included in the CDS
+*/
+public void setIncludeInCdsType(IncludeParcelInCdsType includeInCdsType ) {
+	this.includeInCdsType  = includeInCdsType ;
+}
+
+/**
+Set the StateCU_Location that includes the parcel.
+@param culoc the StateCU_Location that includes the parcel.
+*/
+public void setStateCULocationForCds( StateCU_Location culoc) {
+	this.cuLocForCds = culoc;
+}
+
+/**
 Set the supply amount.
 @param supplyAmount the supply amount.
 */
 public void setSupplyAmount ( double supplyAmount ) {
 	if (supplyAmount != this.__supplyAmount) {
-		/* REVISIT SAM 2006-04-09
+		/* TODO SAM 2006-04-09
 		Supply is not currently part of the StateCU data set, just used by StateDMI.
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(_dataset.COMP_RESERVOIR_STATIONS,
@@ -268,7 +329,7 @@ Set whether it is a groundwater supply.
 */
 public void setIsGroundWater ( boolean is_ground ) {
 	if (is_ground != __is_ground) {
-		/* REVISIT SAM 2006-04-09
+		/* TODO SAM 2006-04-09
 		Supply is not currently part of the data set.
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(_dataset.COMP_RESERVOIR_STATIONS,
@@ -285,7 +346,7 @@ Set whether it is a surface water supply.
 */
 public void setIsSurfaceWater ( boolean is_surface ) {
 	if (is_surface != __is_surface ) {
-		/* REVISIT SAM 2006-04-09
+		/* TODO SAM 2006-04-09
 		Supply is not currently part of the data set.
 		if ( !_isClone && _dataset != null ) {
 			_dataset.setDirty(_dataset.COMP_RESERVOIR_STATIONS,
