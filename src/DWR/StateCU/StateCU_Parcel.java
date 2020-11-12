@@ -501,8 +501,8 @@ public int getYear() {
 Indicate whether the parcel has groundwater supply.  This will be true if
 any of the StateCU_Supply associated with the parcel return isGroundWater as true.
 */
-public boolean hasGroundWaterSupply ()
-{
+public boolean hasGroundWaterSupply () {
+	// The following checks whether recompute is needed.
 	if ( getSupplyFromGWCount() > 0 ) {
 		return true;
 	}
@@ -515,8 +515,8 @@ public boolean hasGroundWaterSupply ()
 Indicate whether the parcel has surface water supply.  This will be true if
 any of the StateCU_Supply associated with the parcel return isSurfaceWater as true.
 */
-public boolean hasSurfaceWaterSupply ()
-{
+public boolean hasSurfaceWaterSupply () {
+	// The following checks whether recompute is needed.
 	if ( getSupplyFromSWCount() > 0 ) {
 		return true;
 	}
@@ -584,7 +584,11 @@ public void recompute () {
 			else {
 				supplyFromGW.setAreaIrrigFraction(1.0/this.supplyFromGWCount);
 			}
-			supplyFromGW.setAreaIrrig(this.area*supplyFromGW.getAreaIrrigFraction());
+			double areaIrrigFractionDW = 1.0;
+			if ( this.supplyFromSWCount > 1 ) {
+				areaIrrigFractionDW = 1.0/this.supplyFromSWCount;
+			}
+			supplyFromGW.setAreaIrrig(this.area*supplyFromGW.getAreaIrrigFraction()*areaIrrigFractionDW);
 		}
 		else if ( supply instanceof StateCU_SupplyFromSW ) {
 			// TODO smalers 2020-02-17 this is currently handled via HydroBase data when read
