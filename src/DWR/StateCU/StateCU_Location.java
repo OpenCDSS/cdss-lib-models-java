@@ -398,6 +398,21 @@ public List<StateCU_Parcel> getParcelList () {
 }
 
 /**
+Return the full parcel list for the requested year.
+@param year requested year for parcels
+@return the list of StateCU_Parcel for the requested year
+*/
+public List<StateCU_Parcel> getParcelList ( int year ) {
+	List<StateCU_Parcel> parcelList = new ArrayList<>();
+	for ( StateCU_Parcel parcel : this.__parcelList ) {
+		if ( parcel.getYear() == year ) {
+			parcelList.add(parcel);
+		}
+	}
+	return parcelList;
+}
+
+/**
 Return the elevation.
 @return the elevation.
 */

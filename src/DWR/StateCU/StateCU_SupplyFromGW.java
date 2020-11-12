@@ -43,6 +43,8 @@ private double areaIrrig;
 /**
 Fraction of parcel irrigated by the well supply,
 calculated as the 1 over the number of wells that irrigate the parcel.
+If a D&W node, the additional surface water fraction must be
+multiplied when computing the irrigated area (see StateCU_Parcel.recompute()).
 */
 private double areaIrrigFraction;
 
@@ -238,6 +240,7 @@ public boolean isSurfaceWater() {
 
 /**
  * Recalculate the internally-computed values such as irrigated acreage fraction.
+ * Currently does not do anything since parcel recompute() does the work.
  */
 public void recompute () {
 }
