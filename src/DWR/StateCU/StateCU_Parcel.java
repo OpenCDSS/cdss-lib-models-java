@@ -124,6 +124,12 @@ private int supplyFromGWCount = 0;
 private int supplyFromSWCount = 0;
 
 /**
+ *  General error string, for example no supplies.
+ *  The setError() method should be used to set as one or more phrases, each ending in period.
+ */
+private String error = "";
+
+/**
 Water supply sources - initialize so non-null.
 These map to irrigated lands GIS data.
 */
@@ -143,14 +149,17 @@ Append to after the same year.
 */
 public void addSupply ( StateCU_Supply supply ) {
 	// Only add the supply if not already added
+	// - don't compare blank strings
 	boolean found = false;
 	StateCU_SupplyFromGW supplyFromGW, supplyFromGW0;
 	StateCU_SupplyFromSW supplyFromSW, supplyFromSW0;
+	String supplyType = "";
 	for ( StateCU_Supply supply0 : this.supplyList ) {
 		if ( (supply instanceof StateCU_SupplyFromSW) && (supply0 instanceof StateCU_SupplyFromSW)) {
 			supplyFromSW = (StateCU_SupplyFromSW)supply;
 			supplyFromSW0 = (StateCU_SupplyFromSW)supply0;
-			if ( supplyFromSW.getWDID().equals(supplyFromSW0.getWDID()) ) {
+			supplyType = "SW";
+			if ( !supplyFromSW.getWDID().isEmpty() && supplyFromSW.getWDID().equals(supplyFromSW0.getWDID()) ) {
 				// Supply can be well via ditch relationship and separate well-only lands.
 				// Don't re-add the supply.
 				found = true;
@@ -160,8 +169,9 @@ public void addSupply ( StateCU_Supply supply ) {
 		else if ( (supply instanceof StateCU_SupplyFromGW) && (supply0 instanceof StateCU_SupplyFromGW) ) {
 			supplyFromGW = (StateCU_SupplyFromGW)supply;
 			supplyFromGW0 = (StateCU_SupplyFromGW)supply0;
-			if ( (supplyFromGW.getWDID().equals(supplyFromGW0.getWDID())) ||
-				(supplyFromGW.getReceipt().equals(supplyFromGW0.getReceipt())) ) { 
+			supplyType = "GW";
+			if ( (!supplyFromGW.getWDID().isEmpty() && (supplyFromGW.getWDID().equals(supplyFromGW0.getWDID()))) ||
+				(!supplyFromGW.getReceipt().isEmpty() && (supplyFromGW.getReceipt().equals(supplyFromGW0.getReceipt()))) ) { 
 				// Supply can be well via ditch relationship and separate well-only lands.
 				// Don't re-add the supply.
 				// - TODO smalers 2020-11-08 this could be an issue if WDID matches a receipt,
@@ -173,8 +183,11 @@ public void addSupply ( StateCU_Supply supply ) {
 	}
 	if ( !found ) {
 		this.supplyList.add ( supply );
-		if ( Message.isDebugOn ) {
-			Message.printDebug(2,"addSupply", "        Adding supply for year " + this.getYear() + " parcel ID " + getID() + " supply ID " + supply.getID() );
+		boolean debug = Message.isDebugOn;
+		debug = true;
+		if ( debug ) {
+			Message.printDebug(2,"addSupply", "        Adding " + supplyType + " supply for year " +
+				this.getYear() + " parcel ID " + getID() + " supply ID " + supply.getID() );
 		}
 		// Assume that this will require a recompute of calculated values.
 		this.setDirty(true);
@@ -352,6 +365,14 @@ Returns the water division for the parcel.
 */
 public int getDiv() {
 	return this.div;
+}
+
+/**
+Returns the general error.
+@return the general error.
+*/
+public String getError() {
+	return this.error;
 }
 
 /**
@@ -743,6 +764,36 @@ Set the water division associated with the crop.
 public void setDiv(int div) {
 	if ( div != this.div) {
 		this.div = div;
+	}
+}
+
+/**
+Set the general error.
+@param error general error for the supply data
+*/
+public void setError(String error) {
+	this.setError(error, false);
+}
+
+/**
+Set the general error.
+@param error general error for the supply data
+@param append whether to append the error to the existing error string (true) or replace (false)
+*/
+public void setError(String error, boolean append) {
+	if ( append ) {
+		if ( this.error.isEmpty() ) {
+			// Just set.
+			this.error  = error;
+		}
+		else {
+			// Append by adding a space.  Assume that each error is a sentence with trailing period.
+			this.error = this.error + " " + error;
+		}
+	}
+	else {
+		// Just set.
+		this.error  = error;
 	}
 }
 

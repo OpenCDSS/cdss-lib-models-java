@@ -81,6 +81,12 @@ private String includeInCdsError = "";
 private String dataSource = "";
 
 /**
+ *  General error string, for example supply ID has an error in GIS.
+ *  The setError() method should be used to set as one or more phrases, each ending in period.
+ */
+private String error = "";
+
+/**
 Constructor.
 */
 public StateCU_Supply() {
@@ -202,6 +208,14 @@ public String getDataSource() {
 }
 
 /**
+Returns the general error.
+@return the general error.
+*/
+public String getError() {
+	return this.error;
+}
+
+/**
 Returns the integer ID for the parcel.
 @return the integer ID for the parcel.
 */
@@ -280,6 +294,36 @@ Set the data source.
 */
 public void setDataSource(String dataSource ) {
 	this.dataSource = dataSource;
+}
+
+/**
+Set the general error.
+@param error general error for the supply data
+*/
+public void setError(String error) {
+	this.setError(error, false);
+}
+
+/**
+Set the general error.
+@param error general error for the supply data
+@param append whether to append the error to the existing error string (true) or replace (false)
+*/
+public void setError(String error, boolean append) {
+	if ( append ) {
+		if ( this.error.isEmpty() ) {
+			// Just set.
+			this.error  = error;
+		}
+		else {
+			// Append by adding a space.  Assume that each error is a sentence with trailing period.
+			this.error = this.error + " " + error;
+		}
+	}
+	else {
+		// Just set.
+		this.error  = error;
+	}
 }
 
 /**
