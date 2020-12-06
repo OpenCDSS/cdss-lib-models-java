@@ -98,6 +98,10 @@ public class StateCU_Location_ParcelValidator implements StateCU_ComponentValida
 			swSupplyCountAllYears += swSupplyCount;
 			gwSupplyCountAllYears += gwSupplyCount;
 
+			if ( this.culoc.hasGroundwaterOnlySupply() && parcel.hasSurfaceWaterSupply() ) {
+				// By definition groundwater only does not include parcels with surface water supply so don't check.
+				continue;
+			}
 			if ( (swSupplyCount == 0) && (gwSupplyCount == 0) ) {
 				validation.add(new StateCU_ComponentValidationProblem(this,
 					"CU location \"" + id + "\" year " + parcelYear + " has 0 supplies.  At least 1 supply is required.",
