@@ -313,7 +313,7 @@ public void setError(String error, boolean append) {
 	if ( append ) {
 		if ( this.error.isEmpty() ) {
 			// Just set.
-			this.error  = error;
+			this.error = error;
 		}
 		else {
 			// Append by adding a space.  Assume that each error is a sentence with trailing period.
@@ -322,7 +322,7 @@ public void setError(String error, boolean append) {
 	}
 	else {
 		// Just set.
-		this.error  = error;
+		this.error = error;
 	}
 }
 
