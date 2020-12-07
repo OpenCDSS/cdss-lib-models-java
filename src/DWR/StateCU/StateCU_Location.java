@@ -542,7 +542,8 @@ public List<List<String>> getTemp() {
 /**
 Indicate whether the CU Location has groundwater only supply.
 This will be the case if the location is a collection with part type of "Parcel" or "Well" (WDID or Receipt).
-
+IMPORTANT:  The determination is made based on whether a well collection,
+not by checking supply of parcels associated with the model node.
 */
 public boolean hasGroundwaterOnlySupply ()
 {	StateCU_Location_CollectionPartType collectionPartType = getCollectionPartType();

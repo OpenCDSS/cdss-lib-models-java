@@ -667,6 +667,51 @@ public void recompute () {
 }
 
 /**
+ * Remove the indicated supply from the parcel.
+ * @param partType part type for the supply
+ * @param id identifier for the supply
+ * @return the number of matching supplies removed, 0 or 1
+ */
+public int removeSupply ( StateCU_Location_CollectionPartIdType partType, String id ) {
+	// Loop through the supplies
+	StateCU_SupplyFromSW supplyFromSW = null;
+	StateCU_SupplyFromGW supplyFromGW = null;
+	StateCU_Supply foundSupply = null;
+	for ( StateCU_Supply supply: this.getSupplyList() ) {
+		if ( supply instanceof StateCU_SupplyFromSW ) {
+			supplyFromSW = (StateCU_SupplyFromSW)supply;
+			// Always WDID
+			if ( supplyFromSW.getWDID().equals(id) ) {
+				foundSupply = supply;
+				break;
+			}
+		}
+		else if ( supply instanceof StateCU_SupplyFromGW ) {
+			supplyFromGW = (StateCU_SupplyFromGW)supply;
+			// Check based on the part type
+			if ( partType == StateCU_Location_CollectionPartIdType.WDID ) {
+				if ( supplyFromGW.getWDID().equals(id) ) {
+					foundSupply = supply;
+					break;
+				}
+			}
+			else if ( partType == StateCU_Location_CollectionPartIdType.RECEIPT ) {
+				if ( supplyFromGW.getReceipt().equals(id) ) {
+					foundSupply = supply;
+					break;
+				}
+			}
+		}
+		// Remove the matching supply.
+		if ( foundSupply != null ) {
+			this.supplyList.remove(foundSupply);
+			return 1;
+		}
+	}
+	return 0;
+}
+
+/**
 Cancels any changes made to this object within a GUI since createBackup()
 was called and sets _original to null.
 */

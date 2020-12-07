@@ -177,7 +177,8 @@ exist.  If true, the time series is added regardless and replaces the existing t
 @exception Exception if there is an error adding the time series.
 */
 public YearTS addTS ( String cropName, boolean overwrite, boolean sortByCrop )
-{	int pos = indexOf ( cropName );
+{	String routine = getClass().getSimpleName() + ".addTS";
+	int pos = indexOf ( cropName );
 	YearTS yts = null;
 	if ( (pos < 0) || overwrite ) {
 		// No time series found or time series found and want to replace the existing with a new time series.
@@ -204,6 +205,8 @@ public YearTS addTS ( String cropName, boolean overwrite, boolean sortByCrop )
 		yts.setDate1Original(new DateTime(this.__date1));
 		yts.setDate2Original(new DateTime(this.__date2));
 		yts.allocateDataSpace();
+		Message.printStatus(2, routine, "Adding new crop pattern time series for \"" + this._id +
+			"\" crop \"" + cropName + "\" start=" + this.__date1 + " end=" + this.__date2 );
 	}
 	if ( pos < 0 ) {
 		// Not found in the list, need to add
@@ -238,6 +241,7 @@ public YearTS addTS ( String cropName, boolean overwrite, boolean sortByCrop )
 		}
 	}
 	else {
+		// Found a position in the list so overwrite the old time series with the new time series
 		this.__tslist.set ( pos, yts );
 		this.__cropNameList.set ( pos, cropName );
 	} 
@@ -1168,11 +1172,11 @@ throws Exception
 }
 
 /**
-Recalculate the total values for the structure for each year of data.  This
-method should be called if individual time series values are manipulated outside
-of file read methods.  Missing will be assigned if all the component time series
-are missing.  If no time series are available, the total will remain the same as
-previous, as determined by other code.
+Recalculate the total values for the structure for each year of data.
+This method should be called if individual time series values are manipulated outside of file read methods.
+Missing will be assigned if all the component time series are missing.
+Missing crop time series are ignored (total is all non-missing values).
+If no time series are available, the total will remain the same as previous, as determined by other code.
 */
 public void refresh ()
 {	int year1 = __date1.getYear();
@@ -1293,15 +1297,21 @@ throws Exception
 /**
 Set the areas for each crop to zero.  This is useful, for example, when crop
 patterns are being processed from individual records and any record in a year
-should cause other time series to be set to zero for the year.  A later reset
-of the zero can occur without issue.  However, leaving the value as -999 may
+should cause other time series to be set to zero for the year.
+A later reset of the zero can occur without issue.  However, leaving the value as -999 may
 result in unexpected filled values later.
+The total for the year is also set to either 0 (setAllToZero=true) or the total of
+non-missing values (setAllToZero=false).
+Calling the refresh() method at any point will also ensure that the total is updated.
 @param year The year to set data.  If negative, all years with non-missing values are processed.
-@param set_all If true, then all defined time series are set to zero.  If false,
+@param setAllToZero If true, then all defined time series are set to zero.  If false,
 then only missing values are set to zero.
 */
-public void setCropAreasToZero ( int year, boolean set_all )
+public void setCropAreasToZero ( int year, boolean setAllToZero )
 {	int size = 0;
+	// Set debug true for troubleshooting
+	//boolean debug = true;
+	boolean debug = Message.isDebugOn;
 	if ( __tslist != null ) {
 		size = __tslist.size();
 	}
@@ -1324,16 +1334,45 @@ public void setCropAreasToZero ( int year, boolean set_all )
 		if ( size == 0 ) {
 			// No time series so set the total to zero.
 			__total_area[iyear - __date1.getYear()] = 0.0;
-			Message.printStatus ( 2, "StateCU_CropPatternTS.setCropAreasToZero",
-				"Setting " + _id + " " + iyear + " crop total to zero since no crops." );
+			if ( debug ) {
+				Message.printStatus ( 2, "StateCU_CropPatternTS.setCropAreasToZero",
+					"Setting " + _id + " " + iyear + " crop total to zero because no crops." );
+			}
 		}
-		else { // Process each time series...
+		else {
+			// Process each time series for the year...
+			// Initialize the year's total to zero.
+			__total_area[iyear - __date1.getYear()] = 0.0;
 			for ( int i = 0; i < size; i++ ) {
 				yts = __tslist.get(i);
-				if ( set_all || yts.isDataMissing(yts.getDataValue(__temp_DateTime)) ) {
+				if ( setAllToZero ) {
 					yts.setDataValue ( __temp_DateTime, 0.0 );
+					if ( debug ) {
 					Message.printStatus ( 2, "StateCU_CropPatternTS.setCropAreasToZero",
-						"Setting " + _id + " " + iyear + " crop " + yts.getDataType() + " to zero." );
+						"Setting " + _id + " " + iyear + " crop " + yts.getDataType() +
+						" to zero becase requested to do so.  Total for all crops=" +
+						String.format("%.3f", __total_area[iyear - __date1.getYear()]) );
+					}
+				}
+				else if ( yts.isDataMissing(yts.getDataValue(__temp_DateTime)) ) {
+					yts.setDataValue ( __temp_DateTime, 0.0 );
+					if ( debug ) {
+					Message.printStatus ( 2, "StateCU_CropPatternTS.setCropAreasToZero",
+						"Setting " + _id + " " + iyear + " crop " + yts.getDataType() +
+						" to zero because missing. Total for all crops=" +
+						String.format("%.3f",__total_area[iyear - __date1.getYear()]) );
+					}
+				}
+				else {
+					// Time series value was not missing, increment the total with the non-missing value.
+					double value = yts.getDataValue(__temp_DateTime);
+					__total_area[iyear - __date1.getYear()] += value;
+					if ( debug ) {
+						Message.printStatus ( 2, "StateCU_CropPatternTS.setCropAreasToZero",
+							"Keeping " + _id + " " + iyear + " crop " + yts.getDataType() + " area=" +
+								String.format("%.3f", value) + " because not missing. Total for all crops=" +
+								String.format("%.3f", __total_area[iyear - __date1.getYear()]) );
+					}
 				}
 			}
 		}
@@ -2046,6 +2085,8 @@ throws IOException
 	out.println ( cmnt + "  Yr            tyr:  Year for data (calendar year)." );
 	out.println ( cmnt + "  CULocation    tid:  CU Location ID (e.g., structure/station).");
 	out.println ( cmnt + "  TotalAcres ttacre:  Total acreage for the CU Location." );
+	out.println ( cmnt + "                      >= 0.0 in years with irrigated lands data or filled years." );
+	out.println ( cmnt + "                      -999 in years without irrigated lands data and have not been filled." );
 	out.println ( cmnt + "  NCrop            :  Number of crops at location/year." );
 	out.println ( cmnt );
 	out.println ( cmnt + rec2_format);
@@ -2055,6 +2096,8 @@ throws IOException
 	out.println ( cmnt + "                      for the crop (0.0 to 1.0) - INFO ONLY." );
 	out.println ( cmnt + "                      Equal to total/crop acres." );
 	out.println ( cmnt + "                      Fractions should add to 1.0." );
+	out.println ( cmnt + "                      >= 0.0 in years with irrigated lands data or filled years." );
+	out.println ( cmnt + "                      -999 in years without irrigated lands data and have not been filled." );
 	if ( WriteCropArea_boolean ) {
 		out.println ( cmnt + "  Acres       acres:  Acreage for crop.");
 		out.println ( cmnt + "                      Should sum to the total acres.");
