@@ -227,6 +227,50 @@ public void createBackup() {
 }
 
 /**
+ * Get a list of all parcel years.
+ * This is used to know which years to zero out when there are no crops in the year,
+ * such as with the StateDMI ReadCropPatternTSFromParcels command.
+ * @param culocList list of StateCU_Location to process.
+ * @param yearStart start year to limit search.
+ * @param endStart end year to limit search.
+ */
+public static List<Integer> getParcelYears ( List<StateCU_Location> culocList, int yearStart, int yearEnd ) {
+	List<Integer> parcelYears = new ArrayList<>();
+	int parcelYear;
+	boolean found = false;
+	for ( StateCU_Location culoc : culocList ) {
+		List<StateCU_Parcel> parcelList = culoc.getParcelList();
+		for ( StateCU_Parcel parcel : parcelList ) {
+			parcelYear = parcel.getYear();
+			if ( parcelYear <= 0 ) {
+				// Missing parcel year.
+				continue;
+			}
+			if ( (yearStart > 0) && (parcelYear < yearStart) ) {
+				// Parcel year is before requested start.
+				continue;
+			}
+			if ( (yearEnd > 0) && (parcelYear > yearEnd) ) {
+				// Parcel year is after requested end.
+				continue;
+			}
+			// See if the parcel year has already been added
+			found = false;
+			for ( Integer iparcel : parcelYears ) {
+				if ( iparcel.equals(parcelYear) ) {
+					found = true;
+					break;
+				}
+			}
+			if ( !found ) {
+				parcelYears.add ( new Integer(parcelYear) );
+			}
+		}
+	}
+	return parcelYears;
+}
+
+/**
 Return the AWC.
 @return the AWC.
 */
@@ -558,6 +602,7 @@ public boolean hasGroundwaterOnlySupply ()
 /**
 Indicate whether the CU Location has surface water supply.  This will
 be the case if the location is NOT a groundwater only supply location.
+This is the opposite of hasGroundwaterOnlySupply() result.
 */
 public boolean hasSurfaceWaterSupply ()
 {
