@@ -38,7 +38,6 @@ package DWR.StateCU;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import RTi.Util.IO.CheckFile;
 import RTi.Util.IO.CheckFile_DataModel;
@@ -179,7 +178,7 @@ private void checkBlaneyCriddleData(PropList props, List<StateCU_BlaneyCriddle> 
 {
 	// Create elements for the checks and check file
 	String[] header = StateCU_BlaneyCriddle.getDataHeader();
-	List<StateCU_ComponentValidationProblem> data = new Vector<StateCU_ComponentValidationProblem>();
+	List<StateCU_ComponentValidationProblem> data = new ArrayList<>();
 	String title = "Blaney Criddle";
 	
 	// Perform the general validation using the Data Table Model
@@ -211,13 +210,13 @@ private void checkBlaneyCriddleData(PropList props, List<StateCU_BlaneyCriddle> 
 /**
 Performs general and specific data checks on climate station data. 
 @param props A property list for specific properties.
-@param climstaList Vector of data to check.
+@param climstaList List of data to check.
 */
 private void checkClimateStationData( PropList props, List<StateCU_ClimateStation> climstaList ) 
 {
 	// Create elements for the checks and check file
 	String[] header = StateCU_ClimateStation.getDataHeader();
-	List<StateCU_ComponentValidationProblem> data = new Vector<StateCU_ComponentValidationProblem>();
+	List<StateCU_ComponentValidationProblem> data = new ArrayList<>();
 	String title = "Climate Station";
 	
 	// Perform the general validation using the Data Table Model
@@ -263,7 +262,7 @@ private void checkCropCharacteristicsData(PropList props, List<StateCU_CropChara
 {
 	// Create elements for the checks and check file
 	String[] header = StateCU_CropCharacteristics.getDataHeader();
-	List<StateCU_ComponentValidationProblem> data = new Vector<StateCU_ComponentValidationProblem>();
+	List<StateCU_ComponentValidationProblem> data = new ArrayList<>();
 	String title = "Crop Characteristics";
 	
 	// Perform the general validation using the Data Table Model
@@ -318,7 +317,7 @@ private void checkDelayTableAssignmentData(PropList props, List<StateCU_DelayTab
 {
 	// Create elements for the checks and check file
 	String[] header = StateCU_DelayTableAssignment.getDataHeader();
-	List<StateCU_ComponentValidationProblem> data = new Vector<StateCU_ComponentValidationProblem>();
+	List<StateCU_ComponentValidationProblem> data = new ArrayList<>();
 	String title = "Delay Table Assignment";
 	
 	// Perform the general validation using the Data Table Model
@@ -368,7 +367,7 @@ private void checkLocationClimateStationsData(PropList props, List<StateCU_Locat
 	// Create elements for the checks and check file
 	// TODO need to update this class if actually implemented
 	String[] header = StateCU_CropCharacteristics.getDataHeader();
-	List<StateCU_ComponentValidationProblem> data = new Vector<StateCU_ComponentValidationProblem>();
+	List<StateCU_ComponentValidationProblem> data = new ArrayList<>();
 	String title = "Location Climate Station";
 	
 	// Perform the general validation using the Data Table Model
@@ -417,7 +416,7 @@ private void checkLocationData(PropList props, List<StateCU_Location> culocList)
 {
 	//	 Create elements for the checks and check file
 	String[] header = StateCU_Location.getDataHeader();
-	List<StateCU_ComponentValidationProblem> data = new Vector<StateCU_ComponentValidationProblem>();
+	List<StateCU_ComponentValidationProblem> data = new ArrayList<>();
 	String title = "CU Location";
 	
 	// Perform the general validation using the Data Table Model
@@ -476,7 +475,7 @@ intelligence and checks are stored in the component itself.
  */
 private List<StateCU_ComponentValidationProblem> doSpecificDataChecks( List<? extends StateCU_ComponentValidator> data, PropList props )
 {
-	List<StateCU_ComponentValidationProblem> checks = new Vector<StateCU_ComponentValidationProblem>();
+	List<StateCU_ComponentValidationProblem> checks = new ArrayList<>();
 	if ( data == null ) {
 		return checks;
 	}
@@ -487,6 +486,7 @@ private List<StateCU_ComponentValidationProblem> doSpecificDataChecks( List<? ex
 	StateCU_ComponentValidator comp = null;
 	for ( int i = 0; i < data.size(); i++ ) {
 		comp = data.get( i );
+
 		StateCU_ComponentValidation validation = comp.validateComponent(__dataset );
 		if ( validation.size() > 0 ) {
 			checks.addAll( validation.getAll() );
@@ -564,7 +564,7 @@ of that element is formatted to tag it as an error.
 private List<String []> performDataValidation( StateCU_Data_TableModel tm, 
 String title )
 {
-	List<String []> data = new Vector<String []>();
+	List<String []> data = new ArrayList<String []>();
 	if ( tm == null ) {
 		return data;
 	}

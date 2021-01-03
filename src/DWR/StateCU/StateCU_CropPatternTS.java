@@ -249,6 +249,57 @@ public YearTS addTS ( String cropName, boolean overwrite, boolean sortByCrop )
 }
 
 /**
+ * Compare two instances and return text documenting the differences.
+ * @param cds1 first instance to compare
+ * @param cds2 second instance to compare
+ * @param precision number of digits to compare time series.
+ * @return diffText text describing the difference between objects, empty list if the same
+ */
+public static List<String> compare ( StateCU_CropPatternTS cds1, StateCU_CropPatternTS cds2, int precision ) {
+	List<String> diffText = new ArrayList<>();
+	
+	diffText.add("CU Location " + cds1.getID() );
+	if ( cds2 == null ) {
+		diffText.add( "  No second object to compare." );
+	}
+	else {
+		if ( !cds1.getDate1().equals(cds2.getDate1()) ) {
+			diffText.add( "  Start is different:  " + cds1.getDate1() + " / " + cds2.getDate1() );
+		}
+		if ( !cds1.getDate2().equals(cds2.getDate2()) ) {
+			diffText.add( "  Start is different:  " + cds1.getDate2() + " / " + cds2.getDate2() );
+		}
+		if ( cds1.getCropNames().size() != cds2.getCropNames().size() ) {
+			diffText.add( "  Number of crops is different:  " + cds1.getCropNames().size() + " / " + cds2.getCropNames().size() );
+		}
+		// Loop through the crops
+		double val1, val2;
+		String sval1, sval2;
+		String format = "%." + precision + "f";
+		for ( String crop : cds1.getCropNames() ) {
+			YearTS ts1 = cds1.getCropPatternTS(crop);
+			YearTS ts2 = cds2.getCropPatternTS(crop);
+			for ( DateTime dt = ts1.getDate1(); dt.lessThanOrEqualTo(ts1.getDate2()); dt.addYear(1) ) {
+				val1 = ts1.getDataValue(dt);
+				sval1 = String.format(format, val1);
+				val2 = ts2.getDataValue(dt);
+				sval2 = String.format(format, val2);
+				if ( !sval1.equals(sval2) ) {
+					diffText.add("  " + dt.getYear() + " " + crop + " value different:  " + sval1 + " / " + sval2 );
+				}
+			}
+		}
+	}
+	if ( diffText.size() == 1 ) {
+		// Return an empty list.
+		return new ArrayList<String>();
+	}
+	else {
+		return diffText;
+	}
+}
+
+/**
 Get the crop acreage for the given year.
 @return the crop acreage for the given year.  Return -999.0 if the crop is not
 found or the requested year is outside the data period.
