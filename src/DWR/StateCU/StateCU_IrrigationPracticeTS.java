@@ -852,6 +852,165 @@ private void adjustSurfaceWaterIrrigationMethodAcres ( DateTime date, double Acs
 }
 
 /**
+ * Compare two instances and return text documenting the differences.
+ * @param ipy1 first instance to compare
+ * @param ipy2 second instance to compare
+ * @param precision number of digits to compare time series.
+ * @return diffText text describing the difference between objects, empty list if the same
+ */
+public static List<String> compare ( StateCU_IrrigationPracticeTS ipy1, StateCU_IrrigationPracticeTS ipy2, int precision ) {
+	List<String> diffText = new ArrayList<>();
+	
+	diffText.add("CU Location " + ipy1.getID() );
+	if ( ipy2 == null ) {
+		diffText.add( "  No second object to compare." );
+	}
+	else {
+		if ( !ipy1.getDate1().equals(ipy2.getDate1()) ) {
+			diffText.add( "  Start is different:  " + ipy1.getDate1() + " / " + ipy2.getDate1() );
+		}
+		if ( !ipy1.getDate2().equals(ipy2.getDate2()) ) {
+			diffText.add( "  Start is different:  " + ipy1.getDate2() + " / " + ipy2.getDate2() );
+		}
+		// Loop through the years and compare each time series value
+		double val1, val2;
+		String sval1, sval2;
+		int efficiencyPrecision = 2;
+		String format = "%." + precision + "f";
+		String efficiencyFormat = "%." + efficiencyPrecision + "f";
+		for ( DateTime dt = new DateTime(ipy1.getDate1()); dt.lessThanOrEqualTo(ipy1.getDate2()); dt.addYear(1) ) {
+			// Surface efficiency
+			YearTS ts1 = ipy1.getCeffTS();
+			YearTS ts2 = ipy2.getCeffTS();
+			val1 = ts1.getDataValue(dt);
+			sval1 = String.format(efficiencyFormat, val1);
+			val2 = ts2.getDataValue(dt);
+			sval2 = String.format(efficiencyFormat, val2);
+			if ( !sval1.equals(sval2) ) {
+				diffText.add("  " + dt.getYear() + " surface efficiency value different:  " + sval1 + " / " + sval2 );
+			}
+			// Flood efficiency
+			ts1 = ipy1.getFeffTS();
+			ts2 = ipy2.getFeffTS();
+			val1 = ts1.getDataValue(dt);
+			sval1 = String.format(efficiencyFormat, val1);
+			val2 = ts2.getDataValue(dt);
+			sval2 = String.format(efficiencyFormat, val2);
+			if ( !sval1.equals(sval2) ) {
+				diffText.add("  " + dt.getYear() + " flood efficiency value different:  " + sval1 + " / " + sval2 );
+			}
+			// Sprinkler efficiency
+			ts1 = ipy1.getSeffTS();
+			ts2 = ipy2.getSeffTS();
+			val1 = ts1.getDataValue(dt);
+			sval1 = String.format(efficiencyFormat, val1);
+			val2 = ts2.getDataValue(dt);
+			sval2 = String.format(efficiencyFormat, val2);
+			if ( !sval1.equals(sval2) ) {
+				diffText.add("  " + dt.getYear() + " sprinkler efficiency value different:  " + sval1 + " / " + sval2 );
+			}
+			// AcSWFl
+			ts1 = ipy1.getAcswflTS();
+			ts2 = ipy2.getAcswflTS();
+			val1 = ts1.getDataValue(dt);
+			sval1 = String.format(format, val1);
+			val2 = ts2.getDataValue(dt);
+			sval2 = String.format(format, val2);
+			if ( !sval1.equals(sval2) ) {
+				diffText.add("  " + dt.getYear() + " AcSWFl value different:  " + sval1 + " / " + sval2 );
+			}
+			// AcSWSpr
+			ts1 = ipy1.getAcswsprTS();
+			ts2 = ipy2.getAcswsprTS();
+			val1 = ts1.getDataValue(dt);
+			sval1 = String.format(format, val1);
+			val2 = ts2.getDataValue(dt);
+			sval2 = String.format(format, val2);
+			if ( !sval1.equals(sval2) ) {
+				diffText.add("  " + dt.getYear() + " AcSWSpr value different:  " + sval1 + " / " + sval2 );
+			}
+			// AcGWFl
+			ts1 = ipy1.getAcgwflTS();
+			ts2 = ipy2.getAcgwflTS();
+			val1 = ts1.getDataValue(dt);
+			sval1 = String.format(format, val1);
+			val2 = ts2.getDataValue(dt);
+			sval2 = String.format(format, val2);
+			if ( !sval1.equals(sval2) ) {
+				diffText.add("  " + dt.getYear() + " AcGWFl value different:  " + sval1 + " / " + sval2 );
+			}
+			// AcGWSpr
+			ts1 = ipy1.getAcgwsprTS();
+			ts2 = ipy2.getAcgwsprTS();
+			val1 = ts1.getDataValue(dt);
+			sval1 = String.format(format, val1);
+			val2 = ts2.getDataValue(dt);
+			sval2 = String.format(format, val2);
+			if ( !sval1.equals(sval2) ) {
+				diffText.add("  " + dt.getYear() + " AcGWSpr value different:  " + sval1 + " / " + sval2 );
+			}
+			// PumpingMax
+			ts1 = ipy1.getMprateTS();
+			ts2 = ipy2.getMprateTS();
+			val1 = ts1.getDataValue(dt);
+			sval1 = String.format(format, val1);
+			val2 = ts2.getDataValue(dt);
+			sval2 = String.format(format, val2);
+			if ( !sval1.equals(sval2) ) {
+				diffText.add("  " + dt.getYear() + " PumpingMax value different:  " + sval1 + " / " + sval2 );
+			}
+			// GMode
+			ts1 = ipy1.getGmodeTS();
+			ts2 = ipy2.getGmodeTS();
+			val1 = ts1.getDataValue(dt);
+			sval1 = String.format(format, val1);
+			val2 = ts2.getDataValue(dt);
+			sval2 = String.format(format, val2);
+			if ( !sval1.equals(sval2) ) {
+				diffText.add("  " + dt.getYear() + " GMode value different:  " + sval1 + " / " + sval2 );
+			}
+			// AcTot
+			ts1 = ipy1.getTacreTS();
+			ts2 = ipy2.getTacreTS();
+			val1 = ts1.getDataValue(dt);
+			sval1 = String.format(format, val1);
+			val2 = ts2.getDataValue(dt);
+			sval2 = String.format(format, val2);
+			if ( !sval1.equals(sval2) ) {
+				diffText.add("  " + dt.getYear() + " AcTot value different:  " + sval1 + " / " + sval2 );
+			}
+			// AcSW
+			ts1 = ipy1.getAcswTS();
+			ts2 = ipy2.getAcswTS();
+			val1 = ts1.getDataValue(dt);
+			sval1 = String.format(format, val1);
+			val2 = ts2.getDataValue(dt);
+			sval2 = String.format(format, val2);
+			if ( !sval1.equals(sval2) ) {
+				diffText.add("  " + dt.getYear() + " AcSW value different:  " + sval1 + " / " + sval2 );
+			}
+			// AcGW
+			ts1 = ipy1.getAcgwTS();
+			ts2 = ipy2.getAcgwTS();
+			val1 = ts1.getDataValue(dt);
+			sval1 = String.format(format, val1);
+			val2 = ts2.getDataValue(dt);
+			sval2 = String.format(format, val2);
+			if ( !sval1.equals(sval2) ) {
+				diffText.add("  " + dt.getYear() + " AcGW value different:  " + sval1 + " / " + sval2 );
+			}
+		}
+	}
+	if ( diffText.size() == 1 ) {
+		// Return an empty list.
+		return new ArrayList<String>();
+	}
+	else {
+		return diffText;
+	}
+}
+
+/**
 Returns acres ground water supplemented acres for the requested year.
 @param year Year to retrieve data.
 @param Acres ground water supplemented acres.
