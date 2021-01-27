@@ -29,6 +29,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import RTi.Util.IO.IOUtil;
@@ -457,6 +458,29 @@ public List<StateCU_Parcel> getParcelList ( int year ) {
 }
 
 /**
+Return the list of year for parcels associated with the location, sorted.
+@return the list of year for parcels associated with the location, sorted.
+*/
+public List<Integer> getParcelYearList () {
+	List<Integer> parcelYearList = new ArrayList<>();
+	boolean found;
+	for ( StateCU_Parcel parcel : this.__parcelList ) {
+		found = false;
+		for ( Integer year : parcelYearList ) {
+			if ( year.equals(parcel.getYear()) ) {
+				found = true;
+				break;
+			}
+		}
+		if ( !found ) {
+			parcelYearList.add(new Integer(parcel.getYear()));
+		}
+	}
+	Collections.sort(parcelYearList);
+	return parcelYearList;
+}
+
+/**
 Return the elevation.
 @return the elevation.
 */
@@ -654,14 +678,23 @@ public boolean idIsIn(String wdid, String receipt) {
 		if ( collectionIdList != null ) {
 			List<StateCU_Location_CollectionPartIdType> collectionIdPartTypeList = getCollectionPartIDTypes();
 			for ( int i = 0; i < collectionIdList.size(); i++ ) {
-				if ( collectionIdPartTypeList.get(i) == StateCU_Location_CollectionPartIdType.WDID ) {
+				if ( collectionIdPartTypeList == null ) {
+					// Not a well always assume a WDID.
 					if ( collectionIdList.get(i).equalsIgnoreCase(wdid) ) {
 						return true;
 					}
 				}
-				else if ( collectionIdPartTypeList.get(i) == StateCU_Location_CollectionPartIdType.RECEIPT ) {
-					if ( collectionIdList.get(i).equalsIgnoreCase(receipt) ) {
-						return true;
+				else {
+					// Well so check the part ID properly
+					if ( collectionIdPartTypeList.get(i) == StateCU_Location_CollectionPartIdType.WDID ) {
+						if ( collectionIdList.get(i).equalsIgnoreCase(wdid) ) {
+							return true;
+						}
+					}
+					else if ( collectionIdPartTypeList.get(i) == StateCU_Location_CollectionPartIdType.RECEIPT ) {
+						if ( collectionIdList.get(i).equalsIgnoreCase(receipt) ) {
+							return true;
+						}
 					}
 				}
 			}

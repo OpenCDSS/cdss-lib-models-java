@@ -1002,7 +1002,8 @@ public static List<String> compare ( StateCU_IrrigationPracticeTS ipy1, StateCU_
 		}
 	}
 	if ( diffText.size() == 1 ) {
-		// Return an empty list.
+		// Only the ID line.
+		// - return an empty list
 		return new ArrayList<String>();
 	}
 	else {
@@ -3177,7 +3178,8 @@ DateTime start, DateTime end, PropList props ) throws IOException
 		PrecisionForArea_int = StringUtil.atoi(PrecisionForArea);
 	}
 	
-	// Missing data handled by formatting all as strings...
+	// Missing data handled by formatting all as strings.
+	// Default formats are for current version (older version sets different format below).
 	String format0 = "%4.4s %-12.12s%6.6s%6.6s%6.6s%8.8s%8.8s%8.8s%8.8s%12.12s%3.3s%8.8s%8.8s%8.8s";
 	String format_MaxEfficiency = "%6.2f";
 	String header_format = "(6x,i4,11x,i4,7x,a3)";
@@ -3185,20 +3187,25 @@ DateTime start, DateTime end, PropList props ) throws IOException
 		PrecisionForArea_int + ",2(f8." + PrecisionForArea_int + "))";
 	String area_format0 = "%8.0f";	// For big numbers, regardless of precision
 	String area_format = "%8." + PrecisionForArea_int + "f";
-	String header0 = "                 Max  Efficiency";
-	String header1 = "Yr  CULocation   Surf Flood   Spr AcSWFl  AcSWSpr " +
-		"AcGWFl  AcGWSpr PumpingMax GMode AcTot  AcSW    AcGW  ";
+	String header0a = "               |                 |                    Has GW =========(calculated total)===========> ";
+	String header0b = "               |                 |    SW Only ========================(calculated total)==>          ";
+	String header0c = "               |                 |               |    Has GW     |              |         SW      Has";
+	String header0d = "               | Max  Efficiency |Flood   Sprink |Flood   Sprink |              |         Only    GW";
+	String header1  = "Yr  CULocation | Surf Flood   Spr|AcSWFl  AcSWSpr|AcGWFl  AcGWSpr|PumpingMax GMode AcTot  AcSW    AcGW  ";
 	// Update the formats if the version is 10
 	if( version10 ){
 		format0 = "%4.4s %-12.12s  %4.4s  %4.4s  %4.4s%8.8s%8.8s%12.12s%3.3s%8.8s";
 		format_MaxEfficiency = "%4.2f";
 		record_format = "(i4,1x,a12,3(2x,f4.2),2(i8),i12,i3,f8.0)";
 		header_format = "(i5,1x,i4,5x,i5,1x,i4,a5,a5)";
-		header0 = "                 Max  Efficiency";
+		header0a = "";
+		header0b = "";
+		header0c = "";
+		header0d = "                 Max  Efficiency";
 		header1 = "Yr  CULocation   Surf  Flood Spr  AcGW   AcSprnk PumpingMax GMode  AcTot";
 	}
 	
-	List<Object> v = new ArrayList<Object>(11);	// Reuse for all output lines.
+	List<Object> v = new ArrayList<>(11);	// Reuse for all output lines.
 
 	out.println ( cmnt );
 	out.println ( cmnt + "  StateCU Irrigation Practice Time Series (IPY) File" );
@@ -3255,8 +3262,13 @@ DateTime start, DateTime end, PropList props ) throws IOException
 		out.println ( cmnt + "  AcGW       swacre:  Acres with ground water supply (not read by StateCU). " );
 	}
 	out.println ( cmnt );
-	out.println ( cmnt +	
-		header0 );
+	if ( !header0a.isEmpty() ) {
+		// Latest version additional comments.
+		out.println ( cmnt + header0a );
+		out.println ( cmnt + header0b );
+		out.println ( cmnt + header0c );
+	}
+	out.println ( cmnt + header0d );
 	out.println ( cmnt + header1);
 	if ( version10 ) {
 		out.println ( cmnt + "-exb----------exxb--exxb--exxb--eb------eb------eb----------eb-eb------e" );

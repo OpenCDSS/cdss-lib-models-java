@@ -609,7 +609,9 @@ public void recompute () {
 			if ( this.supplyFromSWCount > 1 ) {
 				areaIrrigFractionDW = 1.0/this.supplyFromSWCount;
 			}
-			supplyFromGW.setAreaIrrig(this.area*supplyFromGW.getAreaIrrigFraction()*areaIrrigFractionDW);
+			// TODO smalers 2020-01-23 actually, D&W fraction does not apply - remove when checks out
+			//supplyFromGW.setAreaIrrig(this.area*supplyFromGW.getAreaIrrigFraction()*areaIrrigFractionDW);
+			supplyFromGW.setAreaIrrig(this.area*supplyFromGW.getAreaIrrigFraction());
 		}
 		else if ( supply instanceof StateCU_SupplyFromSW ) {
 			// TODO smalers 2020-02-17 this is currently handled via HydroBase data when read
