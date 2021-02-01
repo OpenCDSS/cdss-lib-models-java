@@ -65,13 +65,14 @@ private boolean __is_surface = false;
 private IncludeParcelInCdsType includeInCdsType = IncludeParcelInCdsType.UNKNOWN;
 
 /**
- * CU Location that the parcel is included in.
+ * CU Location that the supply is related to.
  * This is assigned in readCropPatternTSFromHydrobase().
  */
 private StateCU_Location cuLocForCds = null;
 
 /**
  * Error message when this.includeInCdsType=IncludeParcelInCdsType.ERROR.
+ * TODO smalers 2021-01-31 need to enable to provide more information.
  */
 private String includeInCdsError = "";
 
@@ -339,11 +340,15 @@ Set whether the parcel is included in the CDS.
 @param includeInCdsType indicates how included in the CDS
 */
 public void setIncludeInCdsType(IncludeParcelInCdsType includeInCdsType ) {
-	this.includeInCdsType  = includeInCdsType ;
+	this.includeInCdsType  = includeInCdsType;
 }
 
 /**
-Set the StateCU_Location that includes the parcel.
+Set the StateCU_Location that includes the parcel supply.
+Necessary because parcel may be related to D&W and WEL but
+the area for a supply is only assigned to one CU Location depending
+on whether surface supply is used for the parcel.
+If yes, then assign to D&W location.  If no, then assign to WEL location.
 @param culoc the StateCU_Location that includes the parcel.
 */
 public void setStateCULocationForCds( StateCU_Location culoc) {

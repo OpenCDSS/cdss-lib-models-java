@@ -64,12 +64,17 @@ Whether the fraction computed by number of surface supplies is different from Hy
 private String areaIrrigFractionHydroBaseError = "";
 
 /**
-Collection part ID type, e.g., always "WDID".
+Collection part ID, should be a WDID, used in the parcel report.
+*/
+private String collectionPartId = "";
+
+/**
+Collection part ID type, e.g., always "WDID", can be used in output.
 */
 private String collectionPartIdType = "WDID";
 
 /**
-Collection part type, e.g., always "Ditch".
+Collection part type, e.g., always "Ditch", can be used in output.
 */
 private String collectionPartType = "Ditch";
 
@@ -199,8 +204,16 @@ public String getAreaIrrigFractionHydroBaseError() {
 }
 
 /**
-Returns the collection part ID type.
-@return the collection part  IDtype.
+Returns the collection part ID, should be a WDID.
+@return the collection part ID.
+*/
+public String getCollectionPartId() {
+	return this.collectionPartId;
+}
+
+/**
+Returns the collection part ID type.:w
+@return the collection part ID type.
 */
 public String getCollectionPartIdType() {
 	return this.collectionPartIdType;
@@ -310,6 +323,14 @@ Set the area irrigated fraction, from HydroBase, error indicator.
 */
 public void setAreaIrrigFractionHydroBaseError ( String error ) {
 	this.areaIrrigFractionHydroBaseError = error;
+}
+
+/**
+Set the collection part ID, will be non-blank if a collection.
+@param collectionPartId
+*/
+public void setCollectionPartId ( String collectionPartId ) {
+	this.collectionPartId = collectionPartId;
 }
 
 /**

@@ -146,6 +146,13 @@ These are read from HydroBase by StateDMI ReadCULocationParcelsFromHydroBase com
 private List<StateCU_Parcel> __parcelList = new ArrayList<>();
 
 /**
+ * Indicate whether any SetCropPatternTS() commands are used in StateDMI.
+ * - used with parcel report output for troubleshooting
+ * - a list of years that are set are saved, to allow comparing with irrigated lands assessment years
+ */
+private List<Integer> __hasSetCropPatternTSCommands = new ArrayList<>();
+
+/**
  * Location type, initially implemented for use with the Parcel data component.
  */
 private StateCU_LocationType __locationType = StateCU_LocationType.UNKNOWN;
@@ -613,7 +620,7 @@ This will be the case if the location is a collection with part type of "Parcel"
 IMPORTANT:  The determination is made based on whether a well collection,
 not by checking supply of parcels associated with the model node.
 */
-public boolean hasGroundwaterOnlySupply ()
+public boolean isGroundwaterOnlySupplyModelNode ()
 {	StateCU_Location_CollectionPartType collectionPartType = getCollectionPartType();
 	if ( isCollection() && ((collectionPartType == StateCU_Location_CollectionPartType.PARCEL) ||
 		(collectionPartType == StateCU_Location_CollectionPartType.WELL)) ) {
@@ -624,13 +631,27 @@ public boolean hasGroundwaterOnlySupply ()
 }
 
 /**
+ * Indicate whether the location has had SetCropPatternTS commands in StateDMI.
+ * @param year the year to check whether a set command was used
+ * @return true if commands are used in a StateDMI command file
+ */
+public boolean hasSetCropPatternTSCommands( int year ) {
+	for ( Integer year0 : this.__hasSetCropPatternTSCommands ) {
+		if ( year0.equals(year) ) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
 Indicate whether the CU Location has surface water supply.  This will
 be the case if the location is NOT a groundwater only supply location.
-This is the opposite of hasGroundwaterOnlySupply() result.
+This is the opposite of isGroundwaterOnlySupplyModelNode() result.
 */
-public boolean hasSurfaceWaterSupply ()
+public boolean hasSurfaceWaterSupplyForModelNode ()
 {
-	if ( hasGroundwaterOnlySupply() ) {
+	if ( isGroundwaterOnlySupplyModelNode() ) {
 		return false;
 	}
 	return true;
@@ -669,30 +690,32 @@ public boolean idIsIn(String wdid) {
  */
 public boolean idIsIn(String wdid, String receipt) {
 	if ( !isCollection() ) {
-		// Not a collection, only WDID supported
+		// Not a collection, only WDID for surface water supported
 		return wdid.equalsIgnoreCase(getID());
 	}
 	else {
 		// Is a collection
 		List<String> collectionIdList = getCollectionPartIDsForYear ( 0 );
 		if ( collectionIdList != null ) {
-			List<StateCU_Location_CollectionPartIdType> collectionIdPartTypeList = getCollectionPartIDTypes();
-			for ( int i = 0; i < collectionIdList.size(); i++ ) {
-				if ( collectionIdPartTypeList == null ) {
-					// Not a well always assume a WDID.
+			if ( __collection_part_type == StateCU_Location_CollectionPartType.DITCH ) {
+				for ( int i = 0; i < collectionIdList.size(); i++ ) {
 					if ( collectionIdList.get(i).equalsIgnoreCase(wdid) ) {
+						// Provided WDID matches a collection part wdid
 						return true;
 					}
 				}
-				else {
+			}
+			else if ( __collection_part_type == StateCU_Location_CollectionPartType.WELL ) {
+				List<StateCU_Location_CollectionPartIdType> collectionIdPartTypeList = getCollectionPartIDTypes();
+				for ( int i = 0; i < collectionIdList.size(); i++ ) {
 					// Well so check the part ID properly
 					if ( collectionIdPartTypeList.get(i) == StateCU_Location_CollectionPartIdType.WDID ) {
-						if ( collectionIdList.get(i).equalsIgnoreCase(wdid) ) {
+						if ( !wdid.isEmpty() && collectionIdList.get(i).equalsIgnoreCase(wdid) ) {
 							return true;
 						}
 					}
 					else if ( collectionIdPartTypeList.get(i) == StateCU_Location_CollectionPartIdType.RECEIPT ) {
-						if ( collectionIdList.get(i).equalsIgnoreCase(receipt) ) {
+						if ( !receipt.isEmpty() && collectionIdList.get(i).equalsIgnoreCase(receipt) ) {
 							return true;
 						}
 					}
@@ -1035,6 +1058,26 @@ Set the elevation.
 */
 public void setElevation ( double elevation )
 {	__elevation = elevation;
+}
+
+/**
+ * Set whether the location has had SetCropPatternTS commands in StateDMI.
+ * @param year year that a set command is setting data
+ */
+public void setHasSetCropPatternTSCommands(int year) {
+	boolean found = false;
+	for ( Integer year0 : this.__hasSetCropPatternTSCommands ) {
+		if ( year0.equals(year) ) {
+			found = true;
+			break;
+		}
+	}
+	if ( !found ) {
+		// Add to the list
+		this.__hasSetCropPatternTSCommands.add(new Integer(year));
+		// Also sort in place
+		Collections.sort(this.__hasSetCropPatternTSCommands);
+	}
 }
 
 /**
