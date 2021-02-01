@@ -76,6 +76,12 @@ Receipt for the ditch, either explicit ID or a part.
 private String receipt = "";
 
 /**
+ * Ditch that is associated with the supply, if a D&W.
+ * Used with collections.
+ */
+private String associatedDitchCollectionID = "";
+
+/**
 Constructor.
 */
 public StateCU_SupplyFromGW() {
@@ -164,6 +170,14 @@ Returns the parcel area irrigated fraction (0 to 1).
 */
 public double getAreaIrrigFraction() {
 	return this.areaIrrigFraction;
+}
+
+/**
+Returns the associated ditch collection ID if a D&W.
+@return the associated ditch collection ID if a D&W.
+*/
+public String getAssociatedDitchCollectionID() {
+	return this.associatedDitchCollectionID;
 }
 
 /**
@@ -276,6 +290,14 @@ Set the area irrigated percent.
 */
 public void setAreaIrrigFraction ( double areaIrrigFraction ) {
 	this.areaIrrigFraction = areaIrrigFraction;
+}
+
+/**
+Set the associated ditch collection ID if a D&W, should be a WDID.
+This is used to confirm that the ditch is in the location for StateCU IPY calculations.
+*/
+public void setAssociatedDitchCollectionID ( String associatedDitchCollectionID ) {
+	this.associatedDitchCollectionID = associatedDitchCollectionID;
 }
 
 /**

@@ -226,7 +226,7 @@ public class StateCU_Location_ParcelValidator implements StateCU_ComponentValida
 			// This should probably never happen.
 			validation.add(new StateCU_ComponentValidationProblem(this,
 				"CU location \"" + id + "\" has parcels with 0 supplies for all years.  At least 1 supply is required.",
-				"Check irrigated parcels data.  Should not be included as irrigated location?") );
+				"Check irrigated parcels data.  Should not be included as irrigated location?  May be OK if set commands provide data later.") );
 		}
 
 		return validation;
