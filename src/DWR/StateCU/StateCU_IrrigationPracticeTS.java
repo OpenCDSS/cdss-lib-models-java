@@ -3018,7 +3018,11 @@ public StateCU_ComponentValidation validateComponent ( StateCU_DataSet dataset )
 				if ( !acSumFormatted.equals(tacreFormatted) ) {
 					validation.add(new StateCU_ComponentValidationProblem(this,
 						"Location \"" + id + "\" year " + year + " total acres (" + tacreFormatted +
-						") does not match total of acreage parts (" + acSumFormatted + ").",
+						") does not match total of acreage parts (" + acSumFormatted + ").  " +
+						"AcSwFl=" + String.format("%.1f", acswfl) +
+						" AcSwSpr=" + String.format("%.1f", acswspr) +
+						" AcGwFl=" + String.format("%.1f", acgwfl) +
+						" AcGwSpr=" + String.format("%.1f", acgwspr),
 						"Verify that commands to set parts are consistent with total.") );
 				}
 			}
@@ -3187,13 +3191,13 @@ DateTime start, DateTime end, PropList props ) throws IOException
 		PrecisionForArea_int + ",2(f8." + PrecisionForArea_int + "))";
 	String area_format0 = "%8.0f";	// For big numbers, regardless of precision
 	String area_format = "%8." + PrecisionForArea_int + "f";
-	String header0a = "               |                 |                    Has GW =========(calculated total)===========> ";
-	String header0b = "               |                 |    SW Only ========================(calculated total)==>          ";
-	String header0c = "               |                 |               |    Has GW     |              |         SW      Has";
-	String header0d = "               | Max  Efficiency |Flood   Sprink |Flood   Sprink |              |         Only    GW";
-	String header1  = "Yr  CULocation | Surf Flood   Spr|AcSWFl  AcSWSpr|AcGWFl  AcGWSpr|PumpingMax GMode AcTot  AcSW    AcGW  ";
+	String header0a = "               |                 |               /    Has GW ===>/====(calculated total)===========>   |";
+	String header0b = "               |                 |/   SW Only ==>/====================(calculated total)==>            |";
+	String header0c = "               |                 |               |    Has GW     |              |         SW      Has  |";
+	String header0d = "               | Max  Efficiency |Flood   Sprink |Flood   Sprink |              |         Only    GW   |";
+	String header1  = "Yr  CULocation | Surf Flood   Spr|AcSWFl  AcSWSpr|AcGWFl  AcGWSpr|PumpingMax GMode AcTot  AcSW    AcGW |";
 	// Update the formats if the version is 10
-	if( version10 ){
+	if( version10 ) {
 		format0 = "%4.4s %-12.12s  %4.4s  %4.4s  %4.4s%8.8s%8.8s%12.12s%3.3s%8.8s";
 		format_MaxEfficiency = "%4.2f";
 		record_format = "(i4,1x,a12,3(2x,f4.2),2(i8),i12,i3,f8.0)";

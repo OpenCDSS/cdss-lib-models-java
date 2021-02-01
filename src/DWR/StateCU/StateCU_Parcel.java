@@ -605,13 +605,21 @@ public void recompute () {
 			else {
 				supplyFromGW.setAreaIrrigFraction(1.0/this.supplyFromGWCount);
 			}
-			double areaIrrigFractionDW = 1.0;
-			if ( this.supplyFromSWCount > 1 ) {
-				areaIrrigFractionDW = 1.0/this.supplyFromSWCount;
+			boolean doTry = true;
+			if ( doTry ) {
+				double areaIrrigFractionDW = 1.0;
+				//if ( !supplyFromGW.getAssociatedDitchCollectionID().isEmpty() ) {
+					// Well was associated with D&W so prorate the area again
+					if ( this.supplyFromSWCount > 1 ) {
+						areaIrrigFractionDW = 1.0/this.supplyFromSWCount;
+					}
+				//}
+				supplyFromGW.setAreaIrrig(this.area*supplyFromGW.getAreaIrrigFraction()*areaIrrigFractionDW);
 			}
-			// TODO smalers 2020-01-23 actually, D&W fraction does not apply - remove when checks out
-			//supplyFromGW.setAreaIrrig(this.area*supplyFromGW.getAreaIrrigFraction()*areaIrrigFractionDW);
-			supplyFromGW.setAreaIrrig(this.area*supplyFromGW.getAreaIrrigFraction());
+			else {
+				// This works most of the time
+				supplyFromGW.setAreaIrrig(this.area*supplyFromGW.getAreaIrrigFraction());
+			}
 		}
 		else if ( supply instanceof StateCU_SupplyFromSW ) {
 			// TODO smalers 2020-02-17 this is currently handled via HydroBase data when read
@@ -650,7 +658,7 @@ public void recompute () {
 	}
 	
 	// If parcel has a surface supply, add to the CDS
-	/* TODO smalers 2020-11-06 fix this
+	/* TODO smalers 2020-11-06 fix this or remove once tests out
 	for ( StateCU_Supply supply : this.supplyList ) {
 		if ( supply instanceof StateCU_SupplyFromSW ) {
 			StateCU_SupplyFromSW supplyFromSW = (StateCU_SupplyFromSW)supply;
