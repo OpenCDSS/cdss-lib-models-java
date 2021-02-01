@@ -161,7 +161,7 @@ public class StateCU_Location_ParcelValidator implements StateCU_ComponentValida
 			swSupplyCountAllYears += swSupplyCount;
 			gwSupplyCountAllYears += gwSupplyCount;
 			
-			if ( this.culoc.hasGroundwaterOnlySupply() && parcel.hasSurfaceWaterSupply() ) {
+			if ( this.culoc.isGroundwaterOnlySupplyModelNode() && parcel.hasSurfaceWaterSupply() ) {
 				// By definition groundwater only does not include parcels with surface water supply so don't check.
 				continue;
 			}
