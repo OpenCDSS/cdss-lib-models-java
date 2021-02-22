@@ -38,6 +38,11 @@ public enum IncludeParcelInCdsType
      */
     NO("NO"),
     /**
+     * Parcel should not be included in the CDS because the supply is not modeled,
+     * for example a well that is not included in D&W or WEL node.
+     */
+    NOT_MODELED("NA"),
+    /**
      * Parcel should be included in the CDS.
      */
     YES("YES"),
@@ -48,6 +53,7 @@ public enum IncludeParcelInCdsType
     
     /**
      * The name that should be displayed when the best fit type is used in UIs and reports.
+     * Keep to 3 characters so that it can be output in the parcel report.
      */
     private final String displayName;
     

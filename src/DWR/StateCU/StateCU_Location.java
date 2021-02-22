@@ -496,6 +496,40 @@ public double getElevation()
 }
 
 /**
+ * Return the list of groundwater supplies for the location.
+ * The list of supplies includes only unique instances of the supply.
+ */
+public List<StateCU_SupplyFromGW> getGroundwaterSupplies() {
+	List<StateCU_SupplyFromGW> supplyFromGWList = new ArrayList<>();
+	StateCU_SupplyFromGW supplyFromGW = null;
+	for ( StateCU_Parcel parcel : getParcelList() ) {
+		for ( StateCU_Supply supply : parcel.getSupplyList() ) {
+			// Only get rights for modeled supplies.
+			// - handled in StateDMI
+			if ( supply.getIsModeled() ) {
+				if ( supply instanceof StateCU_SupplyFromGW ) {
+					// Groundwater supply.
+					// - add if not already in the list
+					supplyFromGW = (StateCU_SupplyFromGW)supply;
+					boolean found = false;
+					for ( StateCU_SupplyFromGW supply0 : supplyFromGWList ) {
+						if ( supply0.getWDID().equals(supplyFromGW.getWDID()) &&
+							supply0.getReceipt().equals(supplyFromGW.getReceipt()) ) {
+							found = true;
+							break;
+						}
+					}
+					if ( !found ) {
+						supplyFromGWList.add(supplyFromGW);
+					}
+				}
+			}
+		}
+	}
+	return supplyFromGWList;
+}
+
+/**
 Return the latitude.
 @return the latitude.
 */
@@ -764,6 +798,44 @@ public static StateCU_Location lookupForId ( List<StateCU_Location> culocList, S
 			return culoc;
 		}
 	}
+	return null;
+}
+
+/**
+ * Lookup a StateCU_Location well location that has collection part ID that matches the given IDs,
+ * for example WDID and receipt.
+ * @param culocList list of StateCU_Location to search.
+ * @param wdid first identifier to match
+ * @param receipt second identifier to match
+ * @return matching SateCU_Location or null if not matched
+ */
+public static StateCU_Location lookupForWellCollectionPartId ( List<StateCU_Location> culocList, String wdid, String receipt ) {
+	if ( culocList == null ) {
+		return null;
+	}
+	for ( StateCU_Location culoc : culocList ) {
+		if ( culoc.isCollection() ) {
+			if ( culoc.getLocationType() == StateCU_LocationType.WELL ) {
+				String partId;
+				List<String> partIdList = culoc.getCollectionPartIDs();
+				List<StateCU_Location_CollectionPartIdType> partIdTypeList = culoc.getCollectionPartIDTypes();
+				StateCU_Location_CollectionPartIdType partIdType;
+				for ( int i = 0; i < partIdList.size(); i++ ) {
+					partId = partIdList.get(i);
+					partIdType = partIdTypeList.get(i);
+					if ( (partIdType == StateCU_Location_CollectionPartIdType.WDID) &&
+						(wdid != null) && !wdid.isEmpty() && partId.equals(wdid) ) {
+						return culoc;
+					}
+					else if ( (partIdType == StateCU_Location_CollectionPartIdType.RECEIPT) &&
+						(receipt != null) && !receipt.isEmpty() && partId.equals(receipt) ) {
+						return culoc;
+					}
+				}
+			}
+		}
+	}
+	// Part was not found
 	return null;
 }
 
