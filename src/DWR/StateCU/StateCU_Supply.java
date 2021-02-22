@@ -58,6 +58,13 @@ private boolean __is_ground = false;
 private boolean __is_surface = false;
 
 /**
+ * Whether the supply is modeled.
+ * Generally this is true except when detecting supplies not in the dataset in
+ * StateDMI ReadParcelsFromHydroBase command.
+ */
+private boolean isModeled = true;
+
+/**
  * Whether to include the parcel in the *.cds file.
  * If set to YES, the cuLocForCds value contains the StateCU_Location that includes the parcel.
  * The parcel recompute() method indicates the status.
@@ -225,6 +232,14 @@ public IncludeParcelInCdsType getIncludeParcelInCdsType() {
 }
 
 /**
+Returns whether the supply is modeled.
+@return whether the supply is modeled.
+*/
+public boolean getIsModeled() {
+	return this.isModeled;
+}
+
+/**
 Returns the StateCU_Location that includes the parcel.
 @return the StateCU_Location that includes the parcel, null if no location has been set for CDS.
 */
@@ -387,6 +402,14 @@ public void setIsGroundWater ( boolean is_ground ) {
 		*/
 		__is_ground = is_ground;
 	}
+}
+
+/**
+Set whether it is a modeled.
+@param whether a supply is modeled.
+*/
+public void setIsModeled ( boolean isModeled ) {
+	this.isModeled = isModeled;
 }
 
 /**

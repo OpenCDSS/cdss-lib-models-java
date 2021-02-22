@@ -50,18 +50,20 @@ private double areaIrrigFraction;
 
 /**
 Collection part ID type, e.g., "Well" or "Receipt".
+Use string because the part ID type may be associated with StateCU_Location or StateMod_Well.
 */
 private String collectionPartIdType = "";
 
 /**
 Collection part type, e.g., "Well" or "Parcel".
+Use string because the part ID type may be associated with StateCU_Location or StateMod_Well.
 */
 private String collectionPartType = "";
 
 /**
  * Indicate whether to include in CDS acreage.
  */
-/* TODO smalers 2020-11-06 now hancled in StateCU_Parcel
+/* TODO smalers 2020-11-06 now handled in StateCU_Parcel
 private boolean includeInCdsArea = true;
 */
 

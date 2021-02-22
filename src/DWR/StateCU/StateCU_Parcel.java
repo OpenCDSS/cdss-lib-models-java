@@ -136,6 +136,12 @@ These map to irrigated lands GIS data.
 private List<StateCU_Supply> supplyList = new ArrayList<>();
 
 /**
+ * Indicate whether the parcel has been checked for unmodeled supplies.
+ * This is used by the StateDMI ReadParcelsFromHydroBase command.
+ */
+private boolean hasBeenCheckedForUnmodeledWells = false;
+
+/**
 Constructor.
 */
 public StateCU_Parcel() {
@@ -519,6 +525,15 @@ public int getYear() {
 }
 
 /**
+ * Check whether the parcel has been checked for unmodeled wells.
+ * This is used by the StateDMI ReadParcelsFromHydroBase() command.
+ * @return true if has been checked, false if not.
+ */
+public boolean getHasBeenCheckedForUnmodeledWells() {
+	return this.hasBeenCheckedForUnmodeledWells;
+}
+
+/**
 Indicate whether the parcel has groundwater supply.  This will be true if
 any of the StateCU_Supply associated with the parcel return isGroundWater as true.
 */
@@ -851,6 +866,17 @@ public void setError(String error, boolean append) {
 		this.error  = error;
 	}
 }
+
+/**
+ * Set whether the parcel has been checked for unmodeled wells.
+ * This is used by the StateDMI ReadParcelsFromHydroBase() command.
+ * @param hasBeenCheckedForUnmodeledWells whether the parcel has been
+ * checked for unmodeled wells.
+ */
+public void setHasBeenCheckedForUnmodeledWells( boolean hasBeenCheckedForUnmodeledWells ) {
+	this.hasBeenCheckedForUnmodeledWells = hasBeenCheckedForUnmodeledWells;
+}
+
 
 /**
 Set the water district associated with the crop.
