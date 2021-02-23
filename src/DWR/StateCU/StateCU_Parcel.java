@@ -492,10 +492,24 @@ public int getSupplyFromSWCount() {
 
 /**
 Return the list of StateCU_Supply for the parcel.
-@return the list of StateCU_Supply for the parcel.
+@return the list of StateCU_Supply for the parcel, guaranteed to be non-null but may be empty.
 */
 public List<StateCU_Supply> getSupplyList() {
 	return this.supplyList;
+}
+
+/**
+Return the list of StateCU_SupplyFromGW for the parcel.
+@return the list of StateCU_SupplyFromGW for the parcel, guaranteed to be non-null but may be empty.
+*/
+public List<StateCU_SupplyFromGW> getSupplyFromGWList() {
+	List<StateCU_SupplyFromGW> supplyFromGWList = new ArrayList<>();
+	for ( StateCU_Supply supply : this.supplyList ) {
+		if ( supply instanceof StateCU_SupplyFromGW ) {
+			supplyFromGWList.add((StateCU_SupplyFromGW)supply);
+		}
+	}
+	return supplyFromGWList;
 }
 
 /**
