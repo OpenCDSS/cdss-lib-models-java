@@ -279,7 +279,13 @@ public void restoreOriginal() {
 }
 
 /**
-Set the area irrigated.
+Set the area irrigated, considering:
+<ul>
+<li> If a GW-only, number of wells.</li>
+<li> If SW, number of ditches.</li>
+<li> If GW for D&W, need to multiply by the SW fraction from StateCU_Parcel.getSupplyFromSWFraction(),
+which accounts for the number of ditch/parcel relationships at a CU Location that match the CU Location.</li>
+</ul>
 @param areaIrrig
 */
 public void setAreaIrrig ( double areaIrrig ) {

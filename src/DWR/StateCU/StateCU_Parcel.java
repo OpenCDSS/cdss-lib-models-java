@@ -28,12 +28,12 @@ import java.util.List;
 
 import DWR.StateMod.StateMod_Data;
 import RTi.Util.Message.Message;
+import RTi.Util.String.StringUtil;
 
 /**
 This class is not part of the core StateCU model classes.
-Instead, it is used with StateDMI to track whether a CU Location has parcels.
-The data may ultimately be useful in StateCU and is definitely useful for data checks in StateDMI,
-for example to make sure a parcel is not counted more than once in acreage totals for the location.
+Instead, it is used with StateDMI to track CU Location parcel data.
+A unique parcel object is identified by year and parcel identifier (parent 'ID' and 'idInt').
 */
 public class StateCU_Parcel extends StateCU_Data 
 implements Cloneable, Comparable<StateCU_Data> {
@@ -491,6 +491,65 @@ public int getSupplyFromSWCount() {
 }
 
 /**
+Returns the summed fraction of irrigated area matching the location ID.
+This is used when processing IPY fractional areas.
+For example, if two ditches are associated with a parcel for model node 1234567,
+if both the surface supply CDS loc match the requested 'culocId,
+then the fraction will be .5 + .5 = 1.0.
+However, if one of the ditches was added to the parcel from another CU loc ID,
+then the fraction will be .5.
+@param StateCU_Location to match for SW supplies.
+@return the count of surface water supply.
+*/
+public double getSupplyFromSWFraction(String culocId) {
+	if ( this.isDirty() ) {
+		// Need to recompute because something derived data are not current.
+		recompute();
+	}
+	boolean debug = false;
+	double fraction = 0.0;
+	StateCU_SupplyFromSW supplyFromSW;
+	String routine = null;
+	if ( debug ) {
+		routine = getClass().getSimpleName() + ".getSupplyFromSWFraction";
+		Message.printStatus( 2, routine, "               Getting SW supply fraction for parcelId=" + getID() + " cuLoc=" + culocId + " have " + getSupplyFromSWCount() );
+	}
+	for ( StateCU_Supply supply: getSupplyList() ) {
+		if ( supply instanceof StateCU_SupplyFromSW ) {
+			supplyFromSW = (StateCU_SupplyFromSW)supply;
+			if ( debug ) {
+				Message.printStatus( 2, routine, "                 Getting SW supply fraction for parcelId=" +
+					getID() + " cuLoc=" + culocId + " supply=" + supply.getID());
+			}
+			if ( supplyFromSW.getStateCULocationForCds() == null ) {
+				if ( debug ) {
+					Message.printStatus( 2, routine, "                 StateCU_Location for CDS is null" );
+				}
+			}
+			else {
+				// Should only be null for CDS:UNK when set/fill are used
+				if ( culocId.equalsIgnoreCase(supplyFromSW.getStateCULocationForCds().getID()) ) {
+					fraction += supplyFromSW.getAreaIrrigFraction();
+					if ( debug ) {
+						Message.printStatus( 2, routine, "                 SW supply StateCU_Location for CDS (" +
+							supplyFromSW.getStateCULocationForCds().getID() + ") matches requested CU loc (" +
+								culocId + ") - fraction is " +
+								StringUtil.formatString(supplyFromSW.getAreaIrrigFraction(),"%.3f"));
+					}
+				}
+				else {
+					if ( debug ) {
+						Message.printStatus( 2, routine, "                 SW supply StateCU_Location for CDS (" +
+							supplyFromSW.getStateCULocationForCds().getID() + ") does not match requested CU loc (" + culocId + ").");
+					}
+				}
+			}
+		}
+	}
+	return fraction;
+}
+
+/**
 Return the list of StateCU_Supply for the parcel.
 @return the list of StateCU_Supply for the parcel, guaranteed to be non-null but may be empty.
 */
@@ -600,6 +659,11 @@ private void initialize() {
  * This should be called in lazy fashion when retrieving derived values and the object is dirty.
  * <ul>
  * <li>counts of well and ditch supply - to avoid looping in repeated calls and </li>
+ * <li>computes irrigated fraction of total parcel associated with supply - works for all
+ * cases except the area associated with D&W GW area - need to call getSupplyFromSWFraction with
+ * the StateCU_Location ID of interest - necessary because a well supply may be associated with
+ * a parcel associated with multiple ditches
+ * </ul>
  * This method is called if the object is detected to be in a dirty state,
  * meaning data have been set but derived values have not been updated.
  */
@@ -637,11 +701,18 @@ public void recompute () {
 			boolean doTry = true;
 			if ( doTry ) {
 				double areaIrrigFractionDW = 1.0;
+				// TODO smalers 2021-02-28 this will only be valid if the associated CU location is set
+				//double areaIrrigFractionDW = 0.0;
+				//if ( supply.getStateCULocationForCds() != null ) {
+					// Indicates how much 
+				//	areaIrrigFractionDW = getSupplyFromSWFraction(getStateCULocation(this.year).getID());
+				//}
 				//if ( !supplyFromGW.getAssociatedDitchCollectionID().isEmpty() ) {
 					// Well was associated with D&W so prorate the area again
-					if ( this.supplyFromSWCount > 1 ) {
-						areaIrrigFractionDW = 1.0/this.supplyFromSWCount;
-					}
+					// 2021-02-28 Ditch fraction is always 1.0 because GW supply shows up once per parcel
+					//if ( this.supplyFromSWCount > 1 ) {
+					//	areaIrrigFractionDW = 1.0/this.supplyFromSWCount;
+					//}
 				//}
 				supplyFromGW.setAreaIrrig(this.area*supplyFromGW.getAreaIrrigFraction()*areaIrrigFractionDW);
 			}
