@@ -153,6 +153,13 @@ private List<StateCU_Parcel> __parcelList = new ArrayList<>();
 private List<Integer> __hasSetCropPatternTSCommands = new ArrayList<>();
 
 /**
+ * Indicate whether any FillCropPatternTS() commands are used in StateDMI.
+ * - used with parcel report output for troubleshooting
+ * - a list of years that are set are saved, to allow comparing with irrigated lands assessment years
+ */
+private List<Integer> __hasFillCropPatternTSCommands = new ArrayList<>();
+
+/**
  * Location type, initially implemented for use with the Parcel data component.
  */
 private StateCU_LocationType __locationType = StateCU_LocationType.UNKNOWN;
@@ -665,13 +672,27 @@ public boolean isGroundwaterOnlySupplyModelNode ()
 }
 
 /**
- * Indicate whether the location has had SetCropPatternTS commands in StateDMI.
+ * Indicate whether the location has any FillCropPatternTS*() commands in StateDMI.
  * @param year the year to check whether a set command was used
- * @return true if commands are used in a StateDMI command file
+ * @return true if SetCropPatternTS*() commands are used in a StateDMI command file
+ */
+public boolean hasFillCropPatternTSCommands( int year ) {
+	for ( Integer year0 : this.__hasFillCropPatternTSCommands ) {
+		if ( year0.intValue() == year ) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
+ * Indicate whether the location has any SetCropPatternTS*() commands in StateDMI.
+ * @param year the year to check whether a set command was used
+ * @return true if SetCropPatternTS*() commands are used in a StateDMI command file
  */
 public boolean hasSetCropPatternTSCommands( int year ) {
 	for ( Integer year0 : this.__hasSetCropPatternTSCommands ) {
-		if ( year0.equals(year) ) {
+		if ( year0.intValue() == year ) {
 			return true;
 		}
 	}
@@ -1133,19 +1154,39 @@ public void setElevation ( double elevation )
 }
 
 /**
- * Set whether the location has had SetCropPatternTS commands in StateDMI.
+ * Set whether the location has a FillCropPatternTS*() command in StateDMI.
  * @param year year that a set command is setting data
  */
-public void setHasSetCropPatternTSCommands(int year) {
+public void setHasFillCropPatternTSCommands(int year) {
 	boolean found = false;
-	for ( Integer year0 : this.__hasSetCropPatternTSCommands ) {
-		if ( year0.equals(year) ) {
+	for ( Integer year0 : this.__hasFillCropPatternTSCommands ) {
+		if ( year0.intValue() == year ) {
 			found = true;
 			break;
 		}
 	}
 	if ( !found ) {
-		// Add to the list
+		// Add year to the list that has fill command.
+		this.__hasFillCropPatternTSCommands.add(new Integer(year));
+		// Also sort in place
+		Collections.sort(this.__hasFillCropPatternTSCommands);
+	}
+}
+
+/**
+ * Set whether the location has a SetCropPatternTS*() command in StateDMI.
+ * @param year year that a set command is setting data
+ */
+public void setHasSetCropPatternTSCommands(int year) {
+	boolean found = false;
+	for ( Integer year0 : this.__hasSetCropPatternTSCommands ) {
+		if ( year0.intValue() == year ) {
+			found = true;
+			break;
+		}
+	}
+	if ( !found ) {
+		// Add year to the list that has set command.
 		this.__hasSetCropPatternTSCommands.add(new Integer(year));
 		// Also sort in place
 		Collections.sort(this.__hasSetCropPatternTSCommands);
@@ -1387,6 +1428,16 @@ public StateCU_ComponentValidation validateComponent( StateCU_DataSet dataset )
 			"Specify as fraction 0 - 1.") );
 	}
 	return validation;
+}
+
+/**
+ * Check whether any locations have no set commands and have parcel/supplies with CDS:UNK.
+ * This is called by StateDMI CheckCropPatternTS and CheckIrrigationPracticeTS to point out
+ * locations that have not been processed and don't have set commands.
+ */
+public static StateCU_ComponentValidation validateStateCULocationSupplies(List<StateCU_Location> culocList) {
+		StateCU_ComponentValidation validation = new StateCU_ComponentValidation();
+		return validation;
 }
 
 /**

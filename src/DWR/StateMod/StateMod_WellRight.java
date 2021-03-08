@@ -1445,13 +1445,13 @@ throws Exception {
 		if ( writeDataComments || writeExtendedDataComments) {
 			if ( writeExtendedDataComments ) {
 				// Wider ParcelID since more recent includes WD in ID
-				header1_add = "                       ";
-				header2_add = " PYr--Cls----ParcelID  ";
+				header1_add = "|                      ";
+				header2_add = "|PYr--Cls----ParcelID  ";
 				header3_add = "xb--exb--exb----------e";
 			}
 			else {
-				header1_add = "                 ";
-				header2_add = " PYr--Cls--PID   ";
+				header1_add = "|               |";
+				header2_add = "|PYr--Cls--PID  |";
 				header3_add = "xb--exb--exb----e";
 			}
 			out.println(cmnt);
@@ -1461,8 +1461,8 @@ throws Exception {
 			out.println(cmnt + "            ParcelID:  Parcel ID for year.");
 		}
 		if ( writeExtendedDataComments ) {
-			header1_add = header1_add + "                                                                                                                                                             Ditch    Well   Prorated";
-			header2_add = header2_add + " CollectionType-PartType--------PartID--------IDType     WDID----ApproDate-ApproDateAN---------------Use               Receipt-PermitDate-PermtDateAN-YieldGPM-YieldCFS-APEXGPM--APEXCFS  Fraction-Fraction-YieldGPM";
+			header1_add = header1_add + "|                                                     |                                                              |                                       Ditch    Well   Prorated";
+			header2_add = header2_add + "|CollectionType PartType        PartID        IDType  |  WDID    ApproDate ApproDateAN               Use             | Receipt PermitDate PermtDateAN YieldGPM YieldCFS APEXGPM  APEXCFS |Fraction Fraction YieldGPM";
 			header3_add = header3_add + "xb------------exb------exb------------------exb------exb------exb--------exb---------exb----------------------------exb------exb--------exb---------exb------exb------exb------exb------exb------exb------exb------e";
 			out.println(cmnt);
 			out.println(cmnt + "The following are output if extended data comments are requested and are useful for understanding parcel/well/ditch/right/permit.");
