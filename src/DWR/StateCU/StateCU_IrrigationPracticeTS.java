@@ -74,13 +74,37 @@ public final static String TSTYPE_CropArea_GroundWaterSprinkler = "CropArea-Grou
 public final static String TSTYPE_PumpingMax = "PumpingMax";
 public final static String TSTYPE_GWUseMode = "GWUseMode";
 
+/**
+ * Maximum efficiency for delivering surface water supply to the farm headgate (fraction).
+ */
 private YearTS __ceff_ts = null;
+
+/**
+ *  Maximum application efficiency for flood irrigation (fraction).
+ */
 private YearTS __feff_ts = null;
+
+/**
+ * Maximum application efficiency for sprinkler irrigation (fraction).
+ */
 private YearTS __seff_ts = null;
+
 //private YearTS __gacre_ts = null;	// Old Version 10 time series
 //private YearTS __sacre_ts = null;	// Old Version 10 time series
-private YearTS __mprate_ts = null;	// Also referred to as Gwvol
-private YearTS __gmode_ts = null;	// Also referred to as Gwm
+
+/**
+ * Maximum pumping rate time series, also referred to as Gwvol.
+ * This is an integer value stored as double data so make sure to convert to add .1
+ * and cast to int when using data.
+ */
+private YearTS __mprate_ts = null;
+
+/**
+ * Groundwater mode, also referred to as Gwm.
+ * This is an integer value stored as double data so make sure to convert to add .1
+ * and cast to int when using data.
+ */
+private YearTS __gmode_ts = null;
 
 /**
 Total acres time series.
@@ -120,10 +144,6 @@ Ground water supplemented sprinkler.
 */
 private YearTS __acgwspr_ts = null;
 
-					// Integers are stored as double data
-					// so make sure to convert to add .1
-					// and cast to int when using data.
-
 /**
 Dates for the period of record (for all time series) - these will agree with
 the year type and therefore may not match the header year integer.
@@ -146,8 +166,8 @@ The file that is read, used to set the time series input name.
 private String __filename = "";
 
 /**
-The list of StateCU_Parcel observations, as an archive of observations to use with data filling.
-These are created by the ReadIrrigationPracticeTSFromHydroBase command.
+The list of StateCU_Parcel, as an archive of observations to use with data filling.
+The list is guaranteed to be non-null.
 */
 private List<StateCU_Parcel> __parcel_List = new ArrayList<>();
 
@@ -1248,10 +1268,7 @@ Return the parcels for a requested year.  These values can be used in data filli
 */
 public List<StateCU_Parcel> getParcelListForYear ( int year )
 {	List<StateCU_Parcel> parcels = new ArrayList<>();
-	int size = __parcel_List.size();
-	StateCU_Parcel parcel;
-	for ( int i = 0; i < size; i++ ) {
-		parcel = __parcel_List.get(i);
+	for ( StateCU_Parcel parcel : __parcel_List ) {
 		if ( (year > 0) && (parcel.getYear() != year) ) {
 			// Requested year does not match.
 			continue;
@@ -1442,14 +1459,10 @@ public String getYearType()
 
 /**
 Indicate whether the location has groundwater supply.  This will be true if
-any of the StateCU_Supply associated with the parcel return isGroundWater as
-true.
+any of the StateCU_Supply associated with the parcel return isGroundWater as true.
 */
 public boolean hasGroundWaterSupply ()
-{	int size = __parcel_List.size();
-	StateCU_Parcel parcel = null;
-	for ( int i = 0; i < size; i++ ) {
-		parcel = (StateCU_Parcel)__parcel_List.get(i);
+{	for ( StateCU_Parcel parcel : __parcel_List ) {
 		if ( parcel.hasGroundWaterSupply() ) {
 			return true;
 		}
@@ -2175,7 +2188,7 @@ public void refreshAcgw ( int year )
 	double acgwspr = getAcgwspr ( year );
 	boolean acgwfl_ismissing = __acgwfl_ts.isDataMissing(acgwfl);
 	boolean acgwspr_ismissing = __acgwspr_ts.isDataMissing(acgwspr);
-	if (  acgwfl_ismissing || acgwspr_ismissing ) {
+	if ( acgwfl_ismissing || acgwspr_ismissing ) {
 		// Set the total to missing...
 		setAcgw ( year, __acgw_ts.getMissing() );
 	}
@@ -2210,7 +2223,7 @@ public void refreshAcsw ( int year )
 	double acswspr = getAcswspr ( year );
 	boolean acswfl_ismissing = __acswfl_ts.isDataMissing(acswfl);
 	boolean acswspr_ismissing = __acswspr_ts.isDataMissing(acswspr);
-	if (  acswfl_ismissing || acswspr_ismissing ) {
+	if ( acswfl_ismissing || acswspr_ismissing ) {
 		// Set the total to missing...
 		setAcsw ( year, __acsw_ts.getMissing() );
 	}
@@ -2227,6 +2240,51 @@ public void refreshAcsw ( int year )
 	else {
 		// Set to the sum...
 		setAcsw ( year, (acswfl + acswspr) );
+	}
+}
+
+/**
+Refresh the total acreage as the total of 'groundwater total' and 'surface water only total'.
+The overloaded method is called for each year in the period.
+This methid is useful before writing the output to ensure that all totals are up to date.
+@param refreshGW specify 'true' to refresh groundwater total, which calls refreshAcgw().
+@param refreshSW specify 'true' to refresh surface water only total, which calls refreshAcsw().
+*/
+public void refreshTacre ( boolean refreshGW, boolean refreshSW ) {
+	for ( DateTime dt = new DateTime(this.__date1); dt.lessThanOrEqualTo(this.__date2); dt.addYear(1) ) {
+		refreshTacre ( dt.getYear(), refreshGW, refreshSW );
+	}
+}
+
+/**
+Refresh the total acreage as the total of 'groundwater total' and 'surface water only total'.
+For example, call this method when the file is read or values are set from a database.
+If either term is missing the result is missing.
+If both are non-missing the result is the sum.  In years with
+actual observations, there should be no missing.  The handling of missing may need
+to be evaluated in other cases where data filling steps are occurring.
+Call refreshAcgw() and refreshAcsw() independently to recompute those totals,
+or pass the other arguments.
+@param year Year to refresh data.
+@param refreshGW specify 'true' to refresh groundwater total, which calls refreshAcgw().
+@param refreshSW specify 'true' to refresh surface water only total, which calls refreshAcsw().
+*/
+public void refreshTacre ( int year, boolean refreshGW, boolean refreshSW ) {
+	if ( refreshGW ) {
+		refreshAcgw(year);
+	}
+	if ( refreshSW ) {
+		refreshAcsw(year);
+	}
+	double acgw = getAcgw ( year );
+	double acsw = getAcsw ( year );
+	if ( __acgw_ts.isDataMissing(acgw) || __acsw_ts.isDataMissing(acsw) ) {
+		// Set the total to missing...
+		setTacre ( year, __tacre_ts.getMissing() );
+	}
+	else {
+		// Set to the sum...
+		setTacre ( year, (acgw + acsw) );
 	}
 }
 
@@ -3143,8 +3201,8 @@ Write a list of StateCU_IrrigationPracticeTS to an opened file.
 @param end the DateTime for the end of output.
 @param props Properties that control output.  Version=10 will write the old
 format.  RecomputeVersion10Acreage=True|False indicates whether version 10 acreage
-should be recomputed from the parts (default=true).  PrecisionArea indicates the
-precision for area formatting.
+should be recomputed from the parts (default=true), but only for output (not in data object).
+PrecisionArea indicates the precision for area formatting.
 @exception IOException if an error occurs.
 */
 private static void writeList ( List<StateCU_IrrigationPracticeTS> data_List, PrintWriter out, 
@@ -3235,7 +3293,7 @@ DateTime start, DateTime end, PropList props ) throws IOException
 	out.println ( cmnt + "  CULocation  aspid:  CU Location ID (e.g., structure/station).");
 	out.println ( cmnt + "  Surf         ceff:  Maximum efficiency for delivering" );
 	out.println ( cmnt + "                      surface water supply to the farm" );
-	out.println ( cmnt + "                      headgage (fraction)." );
+	out.println ( cmnt + "                      headgate (fraction)." );
 	out.println ( cmnt + "  Flood        feff:  Maximum application efficiency for" );
 	out.println ( cmnt + "                      flood irrigation (fraction)." );
 	out.println ( cmnt + "  Spr          seff:  Maximum application efficiency for" );
