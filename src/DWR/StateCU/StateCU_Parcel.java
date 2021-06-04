@@ -701,7 +701,9 @@ public void recompute () {
 			boolean doTry = true;
 			if ( doTry ) {
 				double areaIrrigFractionDW = 1.0;
-				// TODO smalers 2021-02-28 this will only be valid if the associated CU location is set
+				// TODO smalers 2021-02-28 this will only be valid if the associated CU location is set.
+				// - CDS and IPY processing now use two loops, the first to set associated CU location,
+				//   and second to process the area
 				//double areaIrrigFractionDW = 0.0;
 				//if ( supply.getStateCULocationForCds() != null ) {
 					// Indicates how much 

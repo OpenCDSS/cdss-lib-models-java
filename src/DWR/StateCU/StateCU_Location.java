@@ -153,11 +153,25 @@ private List<StateCU_Parcel> __parcelList = new ArrayList<>();
 private List<Integer> __hasSetCropPatternTSCommands = new ArrayList<>();
 
 /**
+ * Indicate whether any SetIrrigationPracticeTS() commands are used in StateDMI.
+ * - used with parcel report output for troubleshooting
+ * - a list of years that are set are saved, to allow comparing with irrigated lands assessment years
+ */
+private List<Integer> __hasSetIrrigationPracticeTSCommands = new ArrayList<>();
+
+/**
  * Indicate whether any FillCropPatternTS() commands are used in StateDMI.
  * - used with parcel report output for troubleshooting
  * - a list of years that are set are saved, to allow comparing with irrigated lands assessment years
  */
 private List<Integer> __hasFillCropPatternTSCommands = new ArrayList<>();
+
+/**
+ * Indicate whether any FillIrrigationPracticeTS() commands are used in StateDMI.
+ * - used with parcel report output for troubleshooting
+ * - a list of years that are set are saved, to allow comparing with irrigated lands assessment years
+ */
+private List<Integer> __hasFillIrrigationPracticeTSCommands = new ArrayList<>();
 
 /**
  * Location type, initially implemented for use with the Parcel data component.
@@ -674,10 +688,24 @@ public boolean isGroundwaterOnlySupplyModelNode ()
 /**
  * Indicate whether the location has any FillCropPatternTS*() commands in StateDMI.
  * @param year the year to check whether a set command was used
- * @return true if SetCropPatternTS*() commands are used in a StateDMI command file
+ * @return true if FillCropPatternTS*() commands are used in a StateDMI command file
  */
 public boolean hasFillCropPatternTSCommands( int year ) {
 	for ( Integer year0 : this.__hasFillCropPatternTSCommands ) {
+		if ( year0.intValue() == year ) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
+ * Indicate whether the location has any FillIrrigationPracticeTS*() commands in StateDMI.
+ * @param year the year to check whether a set command was used
+ * @return true if FillIrrigationPracticeTS*() commands are used in a StateDMI command file
+ */
+public boolean hasFillIrrigationPracticeTSCommands( int year ) {
+	for ( Integer year0 : this.__hasFillIrrigationPracticeTSCommands ) {
 		if ( year0.intValue() == year ) {
 			return true;
 		}
@@ -692,6 +720,20 @@ public boolean hasFillCropPatternTSCommands( int year ) {
  */
 public boolean hasSetCropPatternTSCommands( int year ) {
 	for ( Integer year0 : this.__hasSetCropPatternTSCommands ) {
+		if ( year0.intValue() == year ) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
+ * Indicate whether the location has any SetIrrigationPracticeTS*() commands in StateDMI.
+ * @param year the year to check whether a set command was used
+ * @return true if SetIrrigationPracticeTS*() commands are used in a StateDMI command file
+ */
+public boolean hasSetIrrigationPracticeTSCommands( int year ) {
+	for ( Integer year0 : this.__hasSetIrrigationPracticeTSCommands ) {
 		if ( year0.intValue() == year ) {
 			return true;
 		}
@@ -1155,17 +1197,11 @@ public void setElevation ( double elevation )
 
 /**
  * Set whether the location has a FillCropPatternTS*() command in StateDMI.
+ * A true record is only added once for a year.
  * @param year year that a set command is setting data
  */
 public void setHasFillCropPatternTSCommands(int year) {
-	boolean found = false;
-	for ( Integer year0 : this.__hasFillCropPatternTSCommands ) {
-		if ( year0.intValue() == year ) {
-			found = true;
-			break;
-		}
-	}
-	if ( !found ) {
+	if ( !hasFillCropPatternTSCommands(year) ) {
 		// Add year to the list that has fill command.
 		this.__hasFillCropPatternTSCommands.add(new Integer(year));
 		// Also sort in place
@@ -1174,22 +1210,44 @@ public void setHasFillCropPatternTSCommands(int year) {
 }
 
 /**
+ * Set whether the location has a FillIrrigationPracticeTS*() command in StateDMI.
+ * A true record is only added once for a year.
+ * @param year year that a set command is setting data
+ */
+public void setHasFillIrrigationPracticeTSCommands(int year) {
+	if ( !hasFillIrrigationPracticeTSCommands(year) ) {
+		// Add year to the list that has fill command.
+		this.__hasFillIrrigationPracticeTSCommands.add(new Integer(year));
+		// Also sort in place
+		Collections.sort(this.__hasFillIrrigationPracticeTSCommands);
+	}
+}
+
+/**
  * Set whether the location has a SetCropPatternTS*() command in StateDMI.
+ * A true record is only added once for a year.
  * @param year year that a set command is setting data
  */
 public void setHasSetCropPatternTSCommands(int year) {
-	boolean found = false;
-	for ( Integer year0 : this.__hasSetCropPatternTSCommands ) {
-		if ( year0.intValue() == year ) {
-			found = true;
-			break;
-		}
-	}
-	if ( !found ) {
+	if ( !hasSetCropPatternTSCommands(year) ) {
 		// Add year to the list that has set command.
 		this.__hasSetCropPatternTSCommands.add(new Integer(year));
 		// Also sort in place
 		Collections.sort(this.__hasSetCropPatternTSCommands);
+	}
+}
+
+/**
+ * Set whether the location has a SetIrrigationPracticeTS*() command in StateDMI.
+ * A true record is only added once for a year.
+ * @param year year that a set command is setting data
+ */
+public void setHasSetIrrigationPracticeTSCommands(int year) {
+	if ( !hasSetIrrigationPracticeTSCommands(year) ) {
+		// Add year to the list that has set command.
+		this.__hasSetIrrigationPracticeTSCommands.add(new Integer(year));
+		// Also sort in place
+		Collections.sort(this.__hasSetIrrigationPracticeTSCommands);
 	}
 }
 
