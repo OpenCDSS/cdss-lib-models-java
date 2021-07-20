@@ -1373,9 +1373,9 @@ throws Exception {
 			
 	Message.printStatus(2, routine, "Writing well rights to: " + outfile);
 
-	List<String> commentIndicators = new ArrayList<String>(1);
+	List<String> commentIndicators = new ArrayList<>(1);
 	commentIndicators.add ( "#" );
-	List<String> ignoredCommentIndicators = new ArrayList<String>(1);
+	List<String> ignoredCommentIndicators = new ArrayList<>(1);
 	ignoredCommentIndicators.add ( "#>");
 	try {	
 		out = IOUtil.processFileHeaders(IOUtil.getPathUsingWorkingDir(infile),
@@ -1386,7 +1386,7 @@ throws Exception {
 		String cmnt = "#>";
 		String format_0 = "%-12.12s%-24.24s%-12.12s%16.16s%8.2F%8d";
 		StateMod_WellRight right = null;
-		List<Object> v = new ArrayList<Object>(6);
+		List<Object> v = new ArrayList<>(6);
 
 		out.println(cmnt);
 		out.println(cmnt + "***************************************************");
@@ -1656,7 +1656,7 @@ throws Exception {
 				else {
 					proratedYieldString = String.format("%8.2f", proratedYield/.002228); // Convert decree as CFS to GPM
 				}
-				iline = iline + " " + collectionType + " " + partTypeString + " " + partId + " " + partIdTypeString + " "
+				iline = iline + " " + collectionTypeString + " " + partTypeString + " " + partId + " " + partIdTypeString + " "
 					+ wdid + " " + approDateString + " " + approDateAdminNumberString + " " + use + " " + receipt + " " + permitDateString
 					+ " " + permitDateAdminNumberString + " " + yieldGPMString + " " + yieldCFSString + " "
 					+ apexGPMString + " " + apexCFSString + " " + ditchFractionString + " "
