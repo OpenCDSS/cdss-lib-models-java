@@ -24,6 +24,7 @@ NoticeEnd */
 package DWR.StateCU;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
@@ -950,12 +951,37 @@ throws IOException
 }
 
 /**
+ * Read 1+ time series from the binary time series.
+ * @param tsidentPattern A regular expression for TSIdents to return.  For example
+ * or null returns all time series.  *.*.XXX.* returns only time series matching
+ * data type XXX.  Currently only location and data type (output parameter) are
+ * checked and only a * (glob-style) wildcard can be specified, if used.
+ * This is useful for TSTool in order to
+ * list all stations that have a data type.  For reservoirs, only the main location
+ * can be matched, and the returned list of time series will include time series
+ * for all accounts.  When matching a specific time series (no wildcards), the
+ * main location part is first matched and the the reservoir account is checked
+ * if the main location is matched.
+ * @param reqDate1 First date/time to read, or null to read the full period.
+ * @param reqDate2 Last date/time to read, or null to read the full period.
+ * @param reqUnits Requested units for the time series (currently not implemented).
+ * @param readData True if all data should be read or false to only read the headers.
+ * @exception IOException if the interval for the time series does not match that
+ * for the file or if a write error occurs.
+ */
+public List<TS> readTimeSeriesList ( String tsidentPattern, DateTime reqDate1,
+					DateTime reqDate2, String reqUnits, boolean readData )
+throws Exception {
+	return readTimeSeriesList ( tsidentPattern, reqDate1, reqDate2, reqUnits, readData, null );
+}
+
+/**
 Read a list of time series from the binary file.  A Vector of new time series is returned.
 @param tsidentPattern A regular expression for TSIdents to return.  For example
 * or null returns all time series.  *.*.XXX.* returns only time series matching
 data type XXX.  Currently only location and data type (output parameter) are
-checked and only a
-* wildcard can be specified, if used.  This is useful for TSTool in order to
+checked and only a * (glob-style) wildcard can be specified, if used.
+This is useful for TSTool in order to
 list all stations that have a data type.  For reservoirs, only the main location
 can be matched, and the returned list of time series will include time series
 for all accounts.  When matching a specific time series (no wildcards), the
@@ -963,16 +989,22 @@ main location part is first matched and the the reservoir account is checked
 if the main location is matched.
 @param reqDate1 First date/time to read, or null to read the full period.
 @param reqDate2 Last date/time to read, or null to read the full period.
-@param reqUnits Requested units for the time series (currently not
-implemented).
+@param reqUnits Requested units for the time series (currently not implemented).
 @param readData True if all data should be read or false to only read the headers.
+@param outputVersion indicates if a transformation of file contents to a different
+version should occur, can be "Original" (default),
+"Latest" (most recent know version, currently 14), or "14".
+For example, older versions used "TO" for location for scenario total and new version uses "TOTAL".
 @exception IOException if the interval for the time series does not match that
 for the file or if a write error occurs.
 */
 public List<TS> readTimeSeriesList ( String tsidentPattern, DateTime reqDate1,
-					DateTime reqDate2, String reqUnits, boolean readData )
+					DateTime reqDate2, String reqUnits, boolean readData, String outputVersion )
 throws Exception
 {	String routine = "StateCUd_BTS.readTimeSeriesList";
+	if ( (outputVersion == null) || outputVersion.isEmpty() ) {
+		outputVersion = "Original"; // Default.
+	}
 	// Using previously read information, loop through each time series
 	// identifier and see if it matches what we are searching for...
 
@@ -982,7 +1014,7 @@ throws Exception
 	// SAM 2006-01-04 - non-static is used because there is a penalty
 	// reading the header.  This needs to be considered.
 
-	List<TS> tslist = new Vector<TS>();
+	List<TS> tslist = new ArrayList<>();
 	if ( (tsidentPattern == null) || (tsidentPattern.length() == 0) ) {
 	    // Match all parts when searching the data.
 		tsidentPattern = "*.*.*.*.*";
@@ -1103,6 +1135,14 @@ throws Exception
 						"StateCUB", __tsfile );
 				}
 				// Set time series header information...
+				if ( outputVersion.equalsIgnoreCase("Latest") || outputVersion.startsWith("14") ) {
+					// Update to the most recent format:
+					// - if the location is "TO", change to "TOTAL"
+					// - changing the TSID here does not impact other code
+					if ( tsident.getLocation().equals("TO") ) {
+						tsident.setLocation("TOTAL");
+					}
+				}
 				ts.setIdentifier ( tsident );
 				ts.setInputName ( __tsfile );
 				ts.setDescription ( __structureNames[iStructure]);
