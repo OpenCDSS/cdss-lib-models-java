@@ -940,7 +940,13 @@ throws IOException
 		// reservoirs have the accounts included at the end, but no
 		// total (__nowner2_cum is used for the block size but
 		// __nowner2_cum2 is used to locate specific time series).
-		__intervalBytes = __recordLength*__nowner2_cum[__numres - 1];
+		if ( this.__numres == 0 ) {
+			// No data will be present in the file so set to zero.
+			__intervalBytes = 0;
+		}
+		else {
+			__intervalBytes = __recordLength*__nowner2_cum[__numres - 1];
+		}
 	}
 	else if ( __comp_type == StateMod_DataSet.COMP_WELL_STATIONS ) {
 		__intervalBytes = __recordLength*__numdivw;
@@ -1423,7 +1429,8 @@ throws IOException
 		__iressw = new int[iend];
 		__nowner = new int[iend];
 	}
-	if ( __numres > 0 ) {
+	if ( __numres >= 0 ) {
+		// Zero-length arrays will be created if no reservoirs.
 		__nowner2 = new int[__numres];
 		__nowner2_cum = new int[__numres];
 		__nowner2_cum2 = new int[__numres];
@@ -1977,6 +1984,10 @@ throws Exception
 		int iInclude, iParam;
 		for ( iParam = 0; iParam < __parameters.length; iParam++ ) {
 			includeParameters[iParam] = false;
+			if ( __parametersUpper[iParam].equals("NA") ) {
+				// Never include parameter "NA" since a place-holder.
+				continue;
+			}
 			for ( iInclude = 0; iInclude < includeDataTypes.length; ++iInclude ) {
 				if ( includeDataTypes[iInclude].equals(__parametersUpper[iParam]) ) {
 					// Turn on the parameter
@@ -2156,7 +2167,11 @@ throws Exception
 					continue;
 				}
 				// Additional data type checks to limit output
-				if ( (includeParameters != null) && !includeParameters[iparam] ) {
+				if ( __parameters[iparam].equals("NA") ) {
+					// Never include parameter "NA".
+					continue;
+				}
+				else if ( (includeParameters != null) && !includeParameters[iparam] ) {
 					// Was not found in the include list so ignore.
 					continue;
 				}
