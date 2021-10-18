@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Vector;
 
 import RTi.TS.DayTS;
 import RTi.TS.MonthTS;
@@ -1134,7 +1133,7 @@ throws Exception
 						"Day","",
 						"StateCUB", __tsfile );
 				}
-				// Set time series header information...
+				// Set time series header information.
 				if ( outputVersion.equalsIgnoreCase("Latest") || outputVersion.startsWith("14") ) {
 					// Update to the most recent format:
 					// - if the location is "TO", change to "TOTAL"
