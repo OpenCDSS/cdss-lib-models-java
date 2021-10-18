@@ -2090,51 +2090,66 @@ throws Exception
 		}
 	}
 	
-	// If include/exclude lists are provided, convert to upper case to speed comparisons.
+	// If include/exclude lists are provided, convert to upper case to speed comparisons:
+	// - if null won't check for which parameters are included
 	boolean [] includeParameters = null;
 	if ( (includeDataTypes != null) || (excludeDataTypes != null) ) {
 		// Have one or both include/exclude lists:
 		// - initialize to false and then set to true below if including
 		includeParameters = new boolean[parameters.length];
-		for ( int iParam = 0; iParam < parameters.length; iParam++ ) {
+		for ( int iParam = 0; iParam < includeParameters.length; iParam++ ) {
 			includeParameters[iParam] = false;
 		}
-	}
-	if ( includeDataTypes != null ) {
-		for ( int iInclude = 0; iInclude < includeDataTypes.length; ++iInclude ) {
-			includeDataTypes[iInclude] = includeDataTypes[iInclude].toUpperCase();
-		}
-		// See if the parameter matches the requested data type:
-		// - currently it must be an exact match with no wildcard matching, also case is ignored
-		int iInclude, iParam;
-		for ( iParam = 0; iParam < parameters.length; iParam++ ) {
-			includeParameters[iParam] = false;
-			if ( parametersUpper[iParam].equals("NA") ) {
-				// Never include parameter "NA" since a place-holder.
-				continue;
-			}
-			for ( iInclude = 0; iInclude < includeDataTypes.length; ++iInclude ) {
-				if ( includeDataTypes[iInclude].equals(parametersUpper[iParam]) ) {
-					// Turn on the parameter.
+		// Now enable the data types to be included.
+		if ( includeDataTypes == null ) {
+			// Include all parameters initially and will be turned off by excludes.
+			for ( int iParam = 0; iParam < parameters.length; iParam++ ) {
+				if ( !parametersUpper[iParam].equals("NA") ) {
 					includeParameters[iParam] = true;
-					break;
 				}
 			}
 		}
-	}
-	if ( excludeDataTypes != null ) {
-		for ( int iExclude = 0; iExclude < excludeDataTypes.length; ++iExclude ) {
-			excludeDataTypes[iExclude] = excludeDataTypes[iExclude].toUpperCase();
-		}
-		// See if the parameter matches the requested data type:
-		// - currently it must be an exact match with no wildcard matching, also case is ignored
-		int iExclude, iParam;
-		for ( iParam = 0; iParam < parameters.length; iParam++ ) {
-			for ( iExclude = 0; iExclude < excludeDataTypes.length; ++iExclude ) {
-				if ( excludeDataTypes[iExclude].equals(parametersUpper[iParam])) {
-					// Turn off the parameter.
+		else {
+			// Only include specific parameters.
+			// First convert to upper case for comparisons below.
+			String [] includeDataTypesUpper = new String[includeDataTypes.length];
+			for ( int iInclude = 0; iInclude < includeDataTypes.length; ++iInclude ) {
+				includeDataTypesUpper[iInclude] = includeDataTypes[iInclude].toUpperCase();
+			}
+			// See if the parameter matches the requested include data type:
+			// - currently it must be an exact match with no wildcard matching, also case is ignored
+			int iInclude, iParam;
+			for ( iParam = 0; iParam < parameters.length; iParam++ ) {
+				if ( parametersUpper[iParam].equals("NA") ) {
+					// Never include parameter "NA" since a place-holder.
 					includeParameters[iParam] = false;
-					break;
+					continue;
+				}
+				for ( iInclude = 0; iInclude < includeDataTypes.length; ++iInclude ) {
+					if ( includeDataTypesUpper[iInclude].equals(parametersUpper[iParam]) ) {
+						// Turn on the parameter.
+						includeParameters[iParam] = true;
+						break;
+					}
+				}
+			}
+		}
+		if ( excludeDataTypes != null ) {
+			// First convert to upper case for comparisons below.
+			String [] excludeDataTypesUpper = new String[excludeDataTypes.length];
+			for ( int iExclude = 0; iExclude < excludeDataTypes.length; ++iExclude ) {
+				excludeDataTypesUpper[iExclude] = excludeDataTypes[iExclude].toUpperCase();
+			}
+			// See if the parameter matches the requested data type:
+			// - currently it must be an exact match with no wildcard matching, also case is ignored
+			int iExclude, iParam;
+			for ( iParam = 0; iParam < parameters.length; iParam++ ) {
+				for ( iExclude = 0; iExclude < excludeDataTypes.length; ++iExclude ) {
+					if ( excludeDataTypesUpper[iExclude].equals(parametersUpper[iParam])) {
+						// Turn off the parameter.
+						includeParameters[iParam] = false;
+						break;
+					}
 				}
 			}
 		}
