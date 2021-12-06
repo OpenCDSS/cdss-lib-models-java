@@ -119,10 +119,17 @@ implements Cloneable, Comparable<StateMod_Data>, StateMod_ComponentValidator, St
 Administration number.
 */
 private String _irtem;
+
 /**
 Decreed amount.
 */
 private double _dcrdivw;
+
+/**
+ * Decree amount formatted as as string.
+ * This is used to compare strings to ensure that only one is added per station.
+ */
+private String decreeString = "";
 
 // TODO SAM 2016-05-18 Evaluate how to make this more generic, but is tough due to complexity.
 // The following data are not part of the official StateMod specification but are useful
@@ -330,7 +337,7 @@ public static boolean equals(List<StateMod_WellRight> v1, List<StateMod_WellRigh
 }
 
 /**
-Tests to see if two diversion rights are equal.  Strings are compared with case sensitivity.
+Tests to see if two well rights are equal.  Strings are compared with case sensitivity.
 @param right the right to compare.
 @return true if they are equal, false otherwise.
 */
@@ -343,6 +350,125 @@ public boolean equals(StateMod_WellRight right) {
 		return true;
 	}
 	return false;
+}
+
+/**
+Tests to see if two well rights are equal, to avoid duplicate rights for output.
+The location ID must be the same since could be comparing one locations rights to
+a larger list.
+If the location ID is the same, the following are compared:
+<ul>
+<li>do care if a collection because this indicates how the location identifier is compared
+<li>do not care what the collection part type is because well rights can be associated multiple ways
+<li>administration number as string</li>
+<li>decree as string formatted to 2 digits after decimal</li>
+<li>If a collection:
+	<ul>
+	<li>collection part type</li>
+	<li>collection part ID</li>
+	</ul>
+</li>
+<li>If not a collection:
+	<ul>
+	<li>location ID</li>
+	</ul>
+</li>
+</ul>
+Strings are compared with case sensitivity.
+@param right the right to compare.
+@return true if they are equal, false otherwise.
+*/
+public boolean equalsForOutput(StateMod_WellRight right) {
+	// Location identifier must be the same.
+	if ( !getLocationIdentifier().equals(right.getLocationIdentifier()) ) {
+		return false;
+	}
+	if ( !getIrtem().equals(right.getIrtem()) ) {
+		// Administration numbers don't match.
+		return false;
+	}
+	if ( !getDecreeString().equals(right.getDecreeString()) ) {
+		// Decree does not match.
+		return false;
+	}
+	// Count whether collection type is set for either right.
+	int collectionTypeCount = 0;
+	if ( this.__collectionType != null ) {
+		++collectionTypeCount;
+	}
+	if ( right.__collectionType != null ) {
+		++collectionTypeCount;
+	}
+	if ( collectionTypeCount == 1 ) {
+		// Collection type is different because only one is null.
+		return false;
+	}
+	else if ( collectionTypeCount == 2 ) {
+		// Also check the values of collection type since both are set.
+		if ( this.__collectionType != right.__collectionType ) {
+			return false;
+		}
+		else {
+			// Collection type is the same for both so check the part ID type and value:
+			// - part type will be null if not set
+			int collectionPartTypeCount = 0;
+			if ( this.__collectionPartType != null ) {
+				++collectionPartTypeCount;
+			}
+			if ( right.__collectionPartType != null ) {
+				++collectionPartTypeCount;
+			}
+			if ( collectionPartTypeCount == 1 ) {
+				// Collection part type is different because only one is null.
+				return false;
+			}
+			else if ( collectionPartTypeCount == 2 ) {
+				// Collection part type is set for both.
+				if ( this.__collectionPartIdType != right.__collectionPartIdType ) {
+					// Collection part type is different.
+					return false;
+				}
+				else {
+					// Part ID type is the same so compare the ID.
+					if ( !this.__collectionPartId.equals(right.__collectionPartId) ) {
+						return false;
+					}
+				}
+			}
+		}
+	}
+	else if ( collectionTypeCount == 0 ) {
+		// Not a collection so check the location ID, which will be an explicit diversion WDID:
+		// - check for location identifier was done at the top so don't need to recheck here
+		// - main collection type is not used but the part type for Well WDID or permit is used
+		// - part type will be null if not set
+		// - this code is similar to the collectionTypeCount==2 code
+		int collectionPartTypeCount = 0;
+		if ( this.__collectionPartType != null ) {
+			++collectionPartTypeCount;
+		}
+		if ( right.__collectionPartType != null ) {
+			++collectionPartTypeCount;
+		}
+		if ( collectionPartTypeCount == 1 ) {
+			// Collection part type is different because only one is null.
+			return false;
+		}
+		else if ( collectionPartTypeCount == 2 ) {
+			// Collection part type is set for both.
+			if ( this.__collectionPartIdType != right.__collectionPartIdType ) {
+				// Collection part type is different.
+				return false;
+			}
+			else {
+				// Part ID type is the same so compare the ID.
+				if ( !this.__collectionPartId.equals(right.__collectionPartId) ) {
+					return false;
+				}
+			}
+		}
+	}
+	return true;
 }
 
 /**
@@ -411,6 +537,14 @@ Return the decree, as per the generic interface.
 */
 public double getDecree()
 {	return getDcrdivw();
+}
+
+/**
+Return the decree string.
+@return the decree string, formatted to 2 digits after the decimal.
+*/
+public String getDecreeString()
+{	return this.decreeString;
 }
 
 // TODO SAM 2007-05-15 Need to evaluate whether should be hard-coded.
@@ -957,6 +1091,8 @@ Set the decree, as per the generic interface.
 */
 public void setDecree(double decree)
 {	setDcrdivw(decree);
+	// Also set the string representation to streamline comparisons, when needed.
+	this.decreeString = String.format("%.2f", decree);
 }
 
 /**
