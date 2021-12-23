@@ -193,6 +193,7 @@ public void addParcel ( StateCU_Parcel parcelToAdd ) {
 	StateCU_Parcel parcelFound = null;
 	for ( StateCU_Parcel parcel : this.__parcelList ) {
 		if ( (parcel.getYear() == parcelToAdd.getYear()) && parcel.getID().equals(parcelToAdd.getID()) ) {
+			// Found an existing parcel.
 			parcelFound = parcel;
 			break;
 		}
@@ -207,11 +208,11 @@ public void addParcel ( StateCU_Parcel parcelToAdd ) {
 	else {
 	*/
 	if ( parcelFound == null ) {
-		// Add the new parcel to the list.
+		// Add the new parcel to the list:
 		// - add after the same year, if was already added so that year lines up for main model node ID
 		boolean sortByYear = true;
 		if ( (this.__parcelList.size() == 0) || !sortByYear ) {
-			// Just add at the end
+			// Just add at the end.
 			this.__parcelList.add(parcelToAdd);
 		}
 		else {
@@ -234,11 +235,11 @@ public void addParcel ( StateCU_Parcel parcelToAdd ) {
 			}
 			if ( ifound >= 0 ) {
 				// Found a year that is <= the current year.
-				// Add after that year, may be a new slot in the list
+				// Add after that year, may be a new slot in the list.
 				this.__parcelList.add(ifound,parcelToAdd);
 			}
 			else {
-				// Did not find a year that is >  the current year so add at the end
+				// Did not find a year that is > the current year so add at the end.
 				this.__parcelList.add(parcelToAdd);
 			}
 		}
@@ -519,6 +520,8 @@ public double getElevation()
 /**
  * Return the list of groundwater supplies for the location.
  * The list of supplies includes only unique instances of the supply.
+ * In other words, if parcels associated with the location return the same well more than once,
+ * the well will only be added to the returned list once.
  */
 public List<StateCU_SupplyFromGW> getGroundwaterSupplies() {
 	List<StateCU_SupplyFromGW> supplyFromGWList = new ArrayList<>();
@@ -531,16 +534,24 @@ public List<StateCU_SupplyFromGW> getGroundwaterSupplies() {
 				if ( supply instanceof StateCU_SupplyFromGW ) {
 					// Groundwater supply.
 					// - add if not already in the list
+					// - can have situation where sometimes receipt is blank so can't just compare WDID and the receipt.
 					supplyFromGW = (StateCU_SupplyFromGW)supply;
 					boolean found = false;
 					for ( StateCU_SupplyFromGW supply0 : supplyFromGWList ) {
-						if ( supply0.getWDID().equals(supplyFromGW.getWDID()) &&
-							supply0.getReceipt().equals(supplyFromGW.getReceipt()) ) {
+						if ( supply0.getWDID().isEmpty() && !supply0.getReceipt().isEmpty() && supply0.getReceipt().equals(supplyFromGW.getReceipt()) ) {
+							// Only have receipt.
+							found = true;
+							break;
+						}
+						else if ( !supply0.getWDID().isEmpty() && supply0.getWDID().equals(supplyFromGW.getWDID() ) ) {
+							// Have WDID so use it.
 							found = true;
 							break;
 						}
 					}
 					if ( !found ) {
+						// TODO smalers 2021-12-22 Use the following for troubleshooting, found that sometimes receipt is set and sometimes blank for the same WDID.
+						//Message.printStatus(2,"xxx","Adding groundwater supply wdid=\"" + supplyFromGW.getWDID() + "\" receipt=\"" + supplyFromGW.getReceipt() + "\"" );
 						supplyFromGWList.add(supplyFromGW);
 					}
 				}
