@@ -379,6 +379,168 @@ Strings are compared with case sensitivity.
 @return true if they are equal, false otherwise.
 */
 public boolean equalsForOutput(StateMod_WellRight right) {
+	String routine = "";
+	if ( Message.isDebugOn ) {
+		routine = getClass().getSimpleName() + ".equalsForOutput";
+	}
+	// Use for troubleshooting.
+	/*
+	if ( this.getLocationIdentifier().equals("1300975") ) {
+		String message =
+			"Water right 1 for location=" + this.getLocationIdentifier() +
+			" admin #=" + this.getAdministrationNumber() +
+			" decree=" + this.getDecreeString() +
+			" collection type=" + this.getCollectionType() +
+			" collection part ID type=" + this.getCollectionPartIdType() +
+			" collection part ID=" + this.getCollectionPartId();
+		Message.printStatus(2, routine, message);
+		message =
+			"Water right 2 for location=" + right.getLocationIdentifier() +
+			" admin #=" + right.getAdministrationNumber() +
+			" decree=" + right.getDecreeString() +
+			" collection type=" + right.getCollectionType() +
+			" collection part ID type=" + right.getCollectionPartIdType() +
+			" collection part ID=" + right.getCollectionPartId();
+		Message.printStatus(2, routine, message);
+	}
+	*/
+	// Location identifier must be the same.
+	if ( !getLocationIdentifier().equals(right.getLocationIdentifier()) ) {
+		// Should not normally happen because should only be called for the same station.
+		Message.printWarning(3, routine, "Right location ID different. Should not happen - check code logic to make sure calling for one station's rights.");
+		return false;
+	}
+	if ( !getIrtem().equals(right.getIrtem()) ) {
+		// Administration numbers don't match.
+		return false;
+	}
+	if ( !getDecreeString().equals(right.getDecreeString()) ) {
+		// Decree does not match.
+		return false;
+	}
+	// Must check the collection type because the well right is typically
+	// not the same as the 
+	// Count whether collection type is set for either right.
+	int collectionTypeCount = 0;
+	if ( this.__collectionType != null ) {
+		++collectionTypeCount;
+	}
+	if ( right.__collectionType != null ) {
+		++collectionTypeCount;
+	}
+	if ( collectionTypeCount == 1 ) {
+		// Collection type is different because only one is null.
+		// Should not normally happen because should only be called for the same station.
+		Message.printWarning(3, routine, "Right is for collection different.  Should not happen - check code logic to make sure calling for one station's rights.");
+		return false;
+	}
+	else if ( collectionTypeCount == 2 ) {
+		// Also check the values of collection type since both are set.
+		if ( this.__collectionType != right.__collectionType ) {
+			// Should not normally happen because should only be called for the same station.
+			Message.printWarning(3, routine, "Right collection type different.  Should not happen - check code logic to make sure calling for one station's rights.");
+			return false;
+		}
+		else {
+			// Collection type is the same for both so check the part ID type and value:
+			// - part type will be null if not set
+			int collectionPartTypeCount = 0;
+			if ( this.__collectionPartType != null ) {
+				++collectionPartTypeCount;
+			}
+			if ( right.__collectionPartType != null ) {
+				++collectionPartTypeCount;
+			}
+			if ( collectionPartTypeCount == 1 ) {
+				// Collection part type is different because only one is null.
+				return false;
+			}
+			else if ( collectionPartTypeCount == 2 ) {
+				// Collection part type is set for both.
+				if ( this.__collectionPartIdType != right.__collectionPartIdType ) {
+					// Collection part type is different, for example trying to compare water right and permit.
+					return false;
+				}
+				else {
+					// Part ID type is the same so compare the ID.
+					// - compare right ID to right ID
+					// - or compare permit ID to permit ID
+					if ( !this.__collectionPartId.equals(right.__collectionPartId) ) {
+						return false;
+					}
+				}
+			}
+		}
+	}
+	else if ( collectionTypeCount == 0 ) {
+		// Not a collection so check the location ID, which will be an explicit diversion WDID:
+		// - check for location identifier was done at the top so don't need to recheck here
+		// - main collection type is not used but the part type for Well WDID or permit is used
+		// - part type will be null if not set
+		// - this code is similar to the collectionTypeCount==2 code
+		int collectionPartTypeCount = 0;
+		if ( this.__collectionPartType != null ) {
+			++collectionPartTypeCount;
+		}
+		if ( right.__collectionPartType != null ) {
+			++collectionPartTypeCount;
+		}
+		if ( collectionPartTypeCount == 1 ) {
+			// Collection part type is different because only one is null.
+			return false;
+		}
+		else if ( collectionPartTypeCount == 2 ) {
+			// Collection part type is set for both.
+			if ( this.__collectionPartIdType != right.__collectionPartIdType ) {
+				// Collection part type is different, for example trying to compare water right and permit.
+				return false;
+			}
+			else {
+				// Part ID type is the same so compare the ID:
+				// - compare right ID to right ID
+				// - or compare permit ID to permit ID
+				if ( !this.__collectionPartId.equals(right.__collectionPartId) ) {
+					return false;
+				}
+			}
+		}
+	}
+	// Rights are the same.
+	return true;
+}
+
+/**
+This version was used with 5.1.1 and 5.1.2 but does not correctly remove all duplicates, maybe too complex.
+Tests to see if two well rights are equal, to avoid duplicate rights for output.
+The location ID must be the same since could be comparing one locations rights to
+a larger list.
+If the location ID is the same, the following are compared:
+<ul>
+<li>do care if a collection because this indicates how the location identifier is compared
+<li>do not care what the collection part type is because well rights can be associated multiple ways
+<li>administration number as string</li>
+<li>decree as string formatted to 2 digits after decimal</li>
+<li>If a collection:
+	<ul>
+	<li>collection part type</li>
+	<li>collection part ID</li>
+	</ul>
+</li>
+<li>If not a collection:
+	<ul>
+	<li>location ID</li>
+	</ul>
+</li>
+</ul>
+Strings are compared with case sensitivity.
+@param right the right to compare.
+@return true if they are equal, false otherwise.
+*/
+public boolean x_equalsForOutput(StateMod_WellRight right) {
+	String routine = "";
+	if ( Message.isDebugOn ) {
+		routine = getClass().getSimpleName() + ".equalsForOutput";
+	}
 	// Location identifier must be the same.
 	if ( !getLocationIdentifier().equals(right.getLocationIdentifier()) ) {
 		return false;

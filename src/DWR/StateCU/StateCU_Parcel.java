@@ -152,19 +152,38 @@ public StateCU_Parcel() {
 /**
 Add a supply object.
 Append to after the same year.
+@param supply supply to add
 */
-public void addSupply ( StateCU_Supply supply ) {
+public boolean addSupply ( StateCU_Supply supply ) {
+	return addSupply ( supply, false );
+}
+
+/**
+Add a supply object.  If the supply has already been added, don't add again.
+Append to after the same year.
+@param supply supply to add
+@param debug whether to print debug message when adding a supply, using level 2 debug
+@return whether the supply was added (false means already added)
+*/
+public boolean addSupply ( StateCU_Supply supply, boolean debug ) {
 	// Only add the supply if not already added
 	// - don't compare blank strings
 	boolean found = false;
 	StateCU_SupplyFromGW supplyFromGW, supplyFromGW0;
 	StateCU_SupplyFromSW supplyFromSW, supplyFromSW0;
+	// Supply type for message.  Need to set up front because supply list may be empty.
 	String supplyType = "";
+	if ( supply instanceof StateCU_SupplyFromSW ) {
+		supplyType = "SW";
+	}
+	else if ( supply instanceof StateCU_SupplyFromGW ) {
+		supplyType = "GW";
+	}
 	for ( StateCU_Supply supply0 : this.supplyList ) {
-		if ( (supply instanceof StateCU_SupplyFromSW) && (supply0 instanceof StateCU_SupplyFromSW)) {
+		// Only do comparison of the surface water supply types.
+		if ( (supply instanceof StateCU_SupplyFromSW) && (supply0 instanceof StateCU_SupplyFromSW) ) {
 			supplyFromSW = (StateCU_SupplyFromSW)supply;
 			supplyFromSW0 = (StateCU_SupplyFromSW)supply0;
-			supplyType = "SW";
 			if ( !supplyFromSW.getWDID().isEmpty() && supplyFromSW.getWDID().equals(supplyFromSW0.getWDID()) ) {
 				// Supply can be well via ditch relationship and separate well-only lands.
 				// Don't re-add the supply.
@@ -172,10 +191,10 @@ public void addSupply ( StateCU_Supply supply ) {
 				break;
 			}
 		}
+		// Only do comparison of the ground water supply types.
 		else if ( (supply instanceof StateCU_SupplyFromGW) && (supply0 instanceof StateCU_SupplyFromGW) ) {
 			supplyFromGW = (StateCU_SupplyFromGW)supply;
 			supplyFromGW0 = (StateCU_SupplyFromGW)supply0;
-			supplyType = "GW";
 			if ( (!supplyFromGW.getWDID().isEmpty() && (supplyFromGW.getWDID().equals(supplyFromGW0.getWDID()))) ||
 				(!supplyFromGW.getReceipt().isEmpty() && (supplyFromGW.getReceipt().equals(supplyFromGW0.getReceipt()))) ) { 
 				// Supply can be well via ditch relationship and separate well-only lands.
@@ -189,14 +208,21 @@ public void addSupply ( StateCU_Supply supply ) {
 	}
 	if ( !found ) {
 		this.supplyList.add ( supply );
-		boolean debug = Message.isDebugOn;
-		debug = true;
 		if ( debug ) {
-			Message.printDebug(2,"addSupply", "        Adding " + supplyType + " supply for year " +
+			Message.printStatus(2,"addSupply", "        Adding " + supplyType + " supply for year " +
 				this.getYear() + " parcel ID " + getID() + " supply ID " + supply.getID() );
 		}
 		// Assume that this will require a recompute of calculated values.
 		this.setDirty(true);
+		return true;
+	}
+	else {
+		// Already added.
+		if ( debug ) {
+			Message.printStatus(2,"addSupply", "        Not adding (already added) " + supplyType + " supply for year " +
+				this.getYear() + " parcel ID " + getID() + " supply ID " + supply.getID() );
+		}
+		return false;
 	}
 }
 
