@@ -942,7 +942,7 @@ Read the well rights file.
 public static List<StateMod_WellRight> readStateModFile(String filename)
 throws Exception {
 	String routine = "StateMod_WellRight.readStateModFile";
-	List<StateMod_WellRight> theWellRights = new ArrayList<StateMod_WellRight>();
+	List<StateMod_WellRight> theWellRights = new ArrayList<>();
 	int [] format_0 = {
 				StringUtil.TYPE_STRING,
 				StringUtil.TYPE_STRING,
@@ -1046,6 +1046,7 @@ throws Exception {
 
 	Message.printStatus(1, routine, "Reading well rights file: " + filename);
 
+	int lineErrorCount = 0;
 	try {
 		in = new BufferedReader(new FileReader(IOUtil.getPathUsingWorkingDir(filename)));
 		boolean formatSet = false;
@@ -1070,16 +1071,37 @@ throws Exception {
 			
 			aRight = new StateMod_WellRight();
 
+			int vSize = 0;
 			if (Message.isDebugOn) {
 				Message.printDebug(50, routine, "iline: " + iline);
 			}
-			StringUtil.fixedRead(iline, format_0, format_0w, v);
-			aRight.setID(((String)v.get(0)).trim());
-			aRight.setName(((String)v.get(1)).trim());
-			aRight.setCgoto(((String)v.get(2)).trim());
-			aRight.setIrtem(((String)v.get(3)).trim());
-			aRight.setDcrdivw((Double)v.get(4));
-			aRight.setSwitch((Integer)v.get(5));
+			try {
+				StringUtil.fixedRead(iline, format_0, format_0w, v);
+			}
+			catch ( Exception e ) {
+				Message.printWarning(3,routine,"Error reading line " + lineCount + " - data will be incomplete (" + e + "): " + iline );
+				++lineErrorCount;
+			}
+			// Transfer as much data as possible from the read.
+			vSize = v.size();
+			if ( vSize > 0 ) {
+				aRight.setID(((String)v.get(0)).trim());
+			}
+			if ( vSize > 1 ) {
+				aRight.setName(((String)v.get(1)).trim());
+			}
+			if ( vSize > 2 ) {
+				aRight.setCgoto(((String)v.get(2)).trim());
+			}
+			if ( vSize > 3 ) {
+				aRight.setIrtem(((String)v.get(3)).trim());
+			}
+			if ( vSize > 4 ) {
+				aRight.setDcrdivw((Double)v.get(4));
+			}
+			if ( vSize > 5 ) {
+				aRight.setSwitch((Integer)v.get(5));
+			}
 			/* If comments used
 			if ( v.size() > 6 ) {
 				// Save the comment at the end of the line
@@ -1090,40 +1112,79 @@ throws Exception {
 			}
 			*/
 			// Evaluate handling parcel data... 
-			aRight.setParcelYear((Integer)v.get(6));
-			aRight.setParcelMatchClass((Integer)v.get(7));
-			aRight.setParcelID(((String)v.get(8)).trim());
+			if ( vSize > 6 ) {
+				aRight.setParcelYear((Integer)v.get(6));
+			}
+			if ( vSize > 7 ) {
+				aRight.setParcelMatchClass((Integer)v.get(7));
+			}
+			if ( vSize > 8 ) {
+				aRight.setParcelID(((String)v.get(8)).trim());
+			}
 			if ( fileHasExtendedComments ) {
 				try {
-					aRight.setCollectionType(StateMod_Well_CollectionType.valueOfIgnoreCase((String)v.get(9)));
-					aRight.setCollectionPartType(StateMod_Well_CollectionPartType.valueOfIgnoreCase((String)v.get(10)));
-					aRight.setCollectionPartId((String)v.get(11));
-					aRight.setCollectionPartIdType(StateMod_Well_CollectionPartIdType.valueOfIgnoreCase((String)v.get(12)));
-					aRight.setXWDID((String)v.get(13));
+					if ( vSize > 9 ) {
+						aRight.setCollectionType(StateMod_Well_CollectionType.valueOfIgnoreCase((String)v.get(9)));
+					}
+					if ( vSize > 10 ) {
+						aRight.setCollectionPartType(StateMod_Well_CollectionPartType.valueOfIgnoreCase((String)v.get(10)));
+					}
+					if ( vSize > 11 ) {
+						aRight.setCollectionPartId((String)v.get(11));
+					}
+					if ( vSize > 12 ) {
+						aRight.setCollectionPartIdType(StateMod_Well_CollectionPartIdType.valueOfIgnoreCase((String)v.get(12)));
+					}
+					if ( vSize > 13 ) {
+						aRight.setXWDID((String)v.get(13));
+					}
 					try {
-						DateTime dt = DateTime.parse((String)v.get(14));
-						aRight.setXApproDate(dt.getDate(TimeZoneDefaultType.LOCAL));
+						if ( vSize > 14 ) {
+							DateTime dt = DateTime.parse((String)v.get(14));
+							aRight.setXApproDate(dt.getDate(TimeZoneDefaultType.LOCAL));
+						}
 					}
 					catch ( Exception e2 ) {
 					}
-					aRight.setXApproDateAdminNumber((String)v.get(15));
-					aRight.setXUse((String)v.get(16));
-					aRight.setXPermitReceipt((String)v.get(17));
+					if ( vSize > 15 ) {
+						aRight.setXApproDateAdminNumber((String)v.get(15));
+					}
+					if ( vSize > 16 ) {
+						aRight.setXUse((String)v.get(16));
+					}
+					if ( vSize > 17 ) {
+						aRight.setXPermitReceipt((String)v.get(17));
+					}
 					try {
-						DateTime dt = DateTime.parse((String)v.get(18));
-						aRight.setXPermitDate(dt.getDate(TimeZoneDefaultType.LOCAL));
+						if ( vSize > 18 ) {
+							DateTime dt = DateTime.parse((String)v.get(18));
+							aRight.setXPermitDate(dt.getDate(TimeZoneDefaultType.LOCAL));
+						}
 					}
 					catch ( Exception e2 ) {
 					} 
-					aRight.setXPermitDateAdminNumber((String)v.get(19));
-					aRight.setXYieldGPM((Double)v.get(20));
-					aRight.setXYieldApexGPM((Double)v.get(21));
-					aRight.setXFractionYield((Double)v.get(22));
-					aRight.setXDitchFraction((Double)v.get(23));
-					aRight.setXProratedYield((Double)v.get(24));
+					if ( vSize > 19 ) {
+						aRight.setXPermitDateAdminNumber((String)v.get(19));
+					}
+					if ( vSize > 20 ) {
+						aRight.setXYieldGPM((Double)v.get(20));
+					}
+					if ( vSize > 21 ) {
+						aRight.setXYieldApexGPM((Double)v.get(21));
+					}
+					if ( vSize > 22 ) {
+						aRight.setXFractionYield((Double)v.get(22));
+					}
+					if ( vSize > 23 ) {
+						aRight.setXDitchFraction((Double)v.get(23));
+					}
+					if ( vSize > 24 ) {
+						aRight.setXProratedYield((Double)v.get(24));
+					}
 				}
 				catch ( Exception e ) {
-					Message.printWarning(3,routine,"Error reading line " + lineCount + " (" + e + "): " + iline );
+				    Message.printWarning(3,routine,"Error reading line " + lineCount + " - data will be incomplete (" + e + "): " + iline );
+					++lineErrorCount;
 				}
 			}
 			// If extended comments
@@ -1139,6 +1200,9 @@ throws Exception {
 			in.close();
 		}
 		in = null;
+	}
+	if ( lineErrorCount > 0 ) {
+		throw new Exception ( "There were " + lineErrorCount + " errors reading the file.  Check the log file and fix.");
 	}
 	return theWellRights;
 }
@@ -1720,7 +1784,7 @@ throws Exception {
 				+ " 1x, a11," // Receipt date as administration number
 				+ " 1x, f8.2," // Yield (GPM)
 				+ " 1x, f8.2," // Yield (CFS)
-				+ " 1x, f8.2," // APEX (GPM)
+				+ " 1x, f8.0," // APEX (GPM)
 				+ " 1x, f8.2," // APEX (CFS)
 				+ " 1x, f8.2," // Well fraction
 				+ " 1x, f8.2," // Ditch fraction
@@ -1759,7 +1823,7 @@ throws Exception {
 			out.println(cmnt + "            ParcelID:  Parcel ID for year.");
 		}
 		if ( writeExtendedDataComments ) {
-			header1_add = header1_add + "|                                                     |                                                              |                                       Ditch    Well   Prorated";
+			header1_add = header1_add + "|                                                     |                                                              |                                                                      Ditch    Well   Prorated";
 			header2_add = header2_add + "|CollectionType PartType        PartID        IDType  |  WDID    ApproDate ApproDateAN               Use             | Receipt PermitDate PermtDateAN YieldGPM YieldCFS APEXGPM  APEXCFS |Fraction Fraction YieldGPM";
 			header3_add = header3_add + "xb------------exb------exb------------------exb------exb------exb--------exb---------exb----------------------------exb------exb--------exb---------exb------exb------exb------exb------exb------exb------exb------e";
 			out.println(cmnt);
