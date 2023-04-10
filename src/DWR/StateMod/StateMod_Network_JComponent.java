@@ -158,7 +158,7 @@ import javax.swing.JPopupMenu;
 import cdss.domain.hydrology.network.HydrologyNode;
 
 import RTi.GR.GRArrowStyleType;
-import RTi.GR.GRAspect;
+import RTi.GR.GRAspectType;
 import RTi.GR.GRColor;
 import RTi.GR.GRDrawingAreaUtil;
 import RTi.GR.GRJComponentDevice;
@@ -1891,7 +1891,7 @@ private GRJComponentDrawingArea createDrawingAreaFullScale ( StateMod_NodeNetwor
 	GRLimits dataLimits = calculateDataLimitsForMedia(drawingLimits, dataLimitsOrig, buffer, false );
 	// Create a drawing area that matches the drawing (media) and data (fill media at full scale) limits
 	GRJComponentDrawingArea drawingAreaFullScale = new GRJComponentDrawingArea(
-		this, "StateMod_Network DrawingArea full scale", GRAspect.TRUE, 
+		this, "StateMod_Network DrawingArea full scale", GRAspectType.TRUE, 
 		drawingLimits, GRUnits.DEVICE, GRLimits.DEVICE, dataLimits );
 	return drawingAreaFullScale;
 }
@@ -4661,7 +4661,7 @@ public int print(Graphics g, PageFormat pageFormat, int pageIndex)
 		imageableX, (pageHeight - imageableY - imageablePageHeight),
 		(imageableX + imageablePageWidth), (pageHeight - imageableY) );
 	this.__drawingArea = new GRJComponentDrawingArea(
-		this, "StateMod_Network DrawingArea", GRAspect.TRUE, 
+		this, "StateMod_Network DrawingArea", GRAspectType.TRUE, 
 		drawingLimits, GRUnits.DEVICE, GRLimits.DEVICE, getDataLimits());
 	Message.printStatus(2, routine, "Print drawing area limits (from printer imageable area): " + drawingLimits );
 	Message.printStatus(2, routine, "Print data limits (from network data): " + getDataLimits() );
