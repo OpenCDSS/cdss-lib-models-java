@@ -115,7 +115,7 @@ import com.sun.org.apache.xerces.internal.parsers.DOMParser;
 
 import cdss.domain.hydrology.network.HydrologyNode;
 
-import RTi.GR.GRAspect;
+import RTi.GR.GRAspectType;
 import RTi.GR.GRJComponentDrawingArea;
 import RTi.GR.GRLimits;
 import RTi.GR.GRUnits;
@@ -1685,8 +1685,7 @@ private void setupGUI() {
 	int hPixels = (int)(pageFormat.getWidth() / scale);
 	int vPixels = (int)(pageFormat.getHeight() / scale);	
 
-	int aspect = GRAspect.TRUE;
-	aspect = GRAspect.TRUE;
+	GRAspectType aspect = GRAspectType.TRUE;
 
 	int leftMargin = (int)(pageFormat.getImageableX() / scale);
 	int rightMargin = (int)((pageFormat.getWidth() 
@@ -1699,7 +1698,7 @@ private void setupGUI() {
 	__device.setTotalSize(hPixels, vPixels);
 	GRLimits drawingLimits = new GRLimits(0.0, 0.0, 1000, 1000);
 	GRJComponentDrawingArea drawingArea = new GRJComponentDrawingArea(
-		__device, "StateMod_Network DrawingArea", GRAspect.TRUE, 
+		__device, "StateMod_Network DrawingArea", GRAspectType.TRUE, 
 		drawingLimits, GRUnits.DEVICE, GRLimits.DEVICE, drawingLimits);	
 
 	__reference = new StateMod_NetworkReference_JComponent(this);
