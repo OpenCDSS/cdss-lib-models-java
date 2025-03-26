@@ -4,79 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-//------------------------------------------------------------------------------
-// StateMod_GraphNode - Created to store an array of graph options.  This 
-//	includes:
-//		* station type ( diversion, instream flow, reservoir, stream),
-//		* ID
-//		* data type (variable options: See the SMGUI documentation).
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-// 
-// 19 Aug 1997	Catherine E.		Created initial version of class.
-//		Nutting-Lane, RTi
-// 04 Mar 1998	CEN, RTi		Added scenario, wrote SMParseGraphFile>
-// 21 Dec 1998	CEN, RTi		Added throws IOException to read/write
-//					routines.
-// 18 Feb 2001	Steven A. Malers, RTi	Code review.  Add finalize().  Handle
-//					nulls and set unused variables to null.
-//					Alphabetize methods.  Change IO to
-//					IOUtil.
-// 19 Jul 2001	SAM, RTi		Update to use the StateMod version to
-//					determine the columns for output.
-//					Leave out wells from the visible choice
-//					for now.
-// 13 Aug 2001	SAM, RTi		Change so when writing graph template
-//					there are no single quotes around the
-//					location.  Enable wells to output.
-// 2001-12-27	SAM, RTi		Update to use new fixedRead() to
-//					improve performance.
-// 2002-05-01	SAM, RTi		Add getNodeTypes() as newer version of
-//					getGraphTypes().
-// 2002-06-20	SAM, RTi		Update getGraphTypes() to default to new
-//					StateMod if version is not known and
-//					add a flag indicating whether to return
-//					all types.
-// 2002-08-05	SAM, RTi		Update SMWriteDelpltFile() to have more
-//					current information.  Pass the file name
-//					to SMDumpDelpltFile() so that it can be
-//					shown in the header.  Change "instream
-//					flow" to "instream" to be consistent
-//					with Delplt.
-// 2002-09-16	SAM, RTi		Change historical streamflow data type
-//					from "Historical" to "StreamflowHist".
-//					This allows "StreamflowBase" to be
-//					added as appropriate.  Overload
-//					getGraphDataType() to accept a flag
-//					indicating whether a node is a base
-//					flow node.
-//------------------------------------------------------------------------------
-// 2003-07-07	J. Thomas Sapienza, RTi	Renamed to StateMod_GraphNode
-// 2003-08-25	JTS, RTi		* Renamed SMParseDelpltFile to 
-//					  readStateModDelPltFile.
-//					* Renamed SMWriteDelpltFile to 
-//					  writeStateModDelPltFile.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-//------------------------------------------------------------------------------
 
 package DWR.StateMod;
 
@@ -95,8 +38,7 @@ import RTi.Util.String.StringUtil;
 
 public class StateMod_GraphNode {
 
-// Note that the following lists are set up as newline delimited lists to
-// support the grid.
+// Note that the following lists are set up as newline delimited lists to support the grid.
 
 public static final int TYPES = 5;
 public static final int typesSize = 5;
@@ -458,21 +400,6 @@ public static List<String> arrayToVector(String[] array) {
 	}
 
 	return v;
-}
-
-/**
-Clean up before garbage collection.
-*/
-protected void finalize ()
-throws Throwable
-{	_type = null;
-	_ID = null;
-	_dtype = null;
-	_scenario = null;
-	_YrAve = null;
-	_fileName = null;
-	_IDVec = null;
-	super.finalize();
 }
 
 /**
@@ -1260,7 +1187,7 @@ throws IOException
 			v.add ( node.getID());
 			v.add ( node.getName());
 			v.add ( node.getType());
-			v.add ( new Integer ( node.getSwitch()));
+			v.add ( Integer.valueOf ( node.getSwitch()));
 
 			iline = StringUtil.formatString ( v, format );
 

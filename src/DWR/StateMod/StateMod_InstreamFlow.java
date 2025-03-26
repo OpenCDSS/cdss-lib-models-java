@@ -4,109 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-//------------------------------------------------------------------------------
-// StateMod_InstreamFlow - class derived from SMData.  Contains information 
-//	read from the instream flow file.
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-// 
-// 08 Sep 1997	Catherine E.		Created initial version of class.
-//		Nutting-Lane, RTi
-// 11 Feb 1998	CEN, RTi		Added _dataset.setDirty
-//					to all set
-//					routines.
-// 21 Dec 1998	CEN, RTi		Added throws IOException to read/write
-//					routines.
-// 25 Oct 1999	CEN, RTi		Added daily instream flow id.
-// 03 Mar 2000	Steven A. Malers, RTi	Add iifcom(data type switch).  Javadoc
-//					the constructor.  Add a finalize()
-//					method.  Also Javadoc the I/O code.
-// 15 Feb 2001	SAM, RTi		Add use_daily_data parameter to
-//					writeInstreamFlowFile()method to 
-//					allow comparison
-//					with older files.  Clean up javadoc some
-//					more.  Alphabetize methods.  Optimize
-//					memory by setting unused variables to
-//					null.  Handle null arguments better.
-//					Update header information with current
-//					variables.  Change IO to IOUtil.
-// 2001-12-27	SAM, RTi		Update to use new fixedRead()to
-//					improve performance.
-// 2002-09-09	SAM, RTi		Add GeoRecord reference to allow 2-way
-//					connection between spatial and StateMod
-//					data.
-// 2002-09-19	SAM, RTi		Use isDirty()instead of setDirty()to
-//					indicate edits.
-//------------------------------------------------------------------------------
-// 2003-06-04	J. Thomas Sapienza, RTi	Renamed from SMInsflow to 
-//					StateMod_InstreamFlow
-// 2003-06-10	JTS, RTI		* Folded dumpInstreamFlowFile() into
-//					  writeInstreamFlowFile()
-// 					* Renamed parseInstreamFlowFile() to
-//					  readInstreamFlowFile()
-// 2003-06-23	JTS, RTi		Renamed writeInstreamFlowFile() to
-//					writeStateModFile()
-// 2003-06-26	JTS, RTi		Renamed readInstreamFlowFile() to
-//					readStateModFile()
-// 2003-07-15	JTS, RTi		Changed code to use new dataset design.
-// 2003-08-03	SAM, RTi		Change isDirty() back to setDirty().
-// 2003-08-15	SAM, RTi		Change GeoRecordNoSwing to GeoRecord.
-// 2003-08-28	SAM, RTi		* Call setDirty() for each object and
-//					  the component.
-//					* Change the rights to a simple Vector
-//					  (not a linked list) and remove the
-//					  data member for the number of rights.
-//					* Clean up Javadoc for parameters.
-//					* Clean up handling of the time series.
-//					* Clean up method names to not have
-//					  "Insf" - this is redundant.
-// 2003-10-10	SAM, RTi		Add disconnectRights().
-// 2004-07-06	SAM, RTi		* Overload the constructor to allow data
-//					  to be set to missing or be initialized
-//					  to reasonable defaults.
-//					* Add getIifcomChoices() and
-//					  getDefaultIifcom().
-//					* Fix output header - was not lined up
-//					  correctly.
-// 2004-07-14	JTS, RTi		* Added acceptChanges().
-//					* Added changed().
-//					* Added clone().
-//					* Added compareTo().
-//					* Added createBackup().
-//					* Added restoreOriginal().
-//					* Now implements Cloneable.
-//					* Now implements Comparable.
-//					* Clone status is checked via _isClone
-//					  when the component is marked as dirty.
-// 2005-04-18	JTS, RTi		Added writeListFile().
-// 2006-03-06	SAM, RTi		Fix bug where all rights were being
-//					connected, not just the ones associated
-//					with this instream flow station/reach.
-// 2007-04-12	Kurt Tometich, RTi		Added checkComponentData() and
-//									getDataHeader() methods for check
-//									file and data check support.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-//------------------------------------------------------------------------------
-// EndHeader
 
 package DWR.StateMod;
 
@@ -452,21 +365,6 @@ Disconnect all rights.
 */
 public void disconnectRights ()
 {	_rights.clear();
-}
-
-/**
-Free memory for garbage collection.
-*/
-protected void finalize()
-throws Throwable {
-	_ifrrdn = null;
-	_cifridy = null;
-	_rights = null;
-	_demand_MonthTS = null;
-	_demand_average_MonthTS = null;
-	_demand_DayTS = null;
-	_georecord = null;
-	super.finalize();
 }
 
 /**
@@ -1030,11 +928,11 @@ throws Exception {
 			v.add(insf.getID());
 			v.add(insf.getName());
 			v.add(insf.getCgoto());
-			v.add(new Integer(insf.getSwitch()));
+			v.add(Integer.valueOf(insf.getSwitch()));
 			v.add(insf.getIfrrdn());
 			if (useDailyData) {
 				v.add(insf.getCifridy());
-				v.add(new Integer(insf.getIifcom()));
+				v.add(Integer.valueOf(insf.getIifcom()));
 				iline = StringUtil.formatString(v, format_0);
 			}
 			else {	

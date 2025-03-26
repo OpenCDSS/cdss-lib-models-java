@@ -4,19 +4,19 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
@@ -198,8 +198,8 @@ public Object getValueAt(int row, int col) {
 	switch (col) {
 		case __COL_ID: return station.getID();
 		case __COL_NAME: return station.getName();
-		case __COL_ELEVATION: return new Double(station.getElevation());
-		case __COL_LATITUDE: return new Double(station.getLatitude());
+		case __COL_ELEVATION: return Double.valueOf(station.getElevation());
+		case __COL_LATITUDE: return Double.valueOf(station.getLatitude());
 		case __COL_REGION1: return station.getRegion1();
 		case __COL_REGION2: return station.getRegion2();
 		case __COL_ZH:
@@ -207,14 +207,14 @@ public Object getValueAt(int row, int col) {
 				return null;
 			}
 			else {
-				return new Double(station.getZh());
+				return Double.valueOf(station.getZh());
 			}
 		case __COL_ZM:
 			if ( StateCU_Util.isMissing(station.getZm()) ) {
 				return null;
 			}
 			else {
-				return new Double(station.getZm());
+				return Double.valueOf(station.getZm());
 			}
 	}	
 

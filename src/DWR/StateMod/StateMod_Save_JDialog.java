@@ -4,53 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-//------------------------------------------------------------------------------
-// StateMod_Save_JDialog - dialog to manage response file in a worksheet 
-//	format
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-// 
-// 2003-09-10	J. Thomas Sapienza, RTi	Initial version.
-// 2003-10-15	Steven A. Malers, RTi	* Enable the save code.
-// 					* Select all files initially.
-// 2004-01-22	JTS, RTi		Updated to use JScrollWorksheet and
-//					the new row headers.
-// 2004-08-13	JTS, RTi		Added code for saving StateMod data
-// 					to appropriate files.
-// 2004-08-25	JTS, RTi		Updated the GUI.
-// 2006-03-04	SAM, RTi		* Change so that "Carry forward old
-//					  comments?" checkbox is selected by
-//					  default - users should not
-//					  accidentally discard old comments.
-//					* Allow a cancel when saving the
-//					  response file.
-//					* Don't actually save files that have
-//					  no name - this is a side-effect of
-//					  opening old data sets and removing
-//					  "dum" files from the response file.
-// 2006-08-22	SAM, RTi		* Add plans when writing.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-//------------------------------------------------------------------------------
-// EndHeader
 
 package DWR.StateMod;
 
@@ -220,21 +189,6 @@ Disposes of the JDialog and closes it.
 */
 private void closeWindow() {
 	dispose();
-}
-
-/**
-Clean up before garbage collection.
-*/
-protected void finalize()
-throws Throwable {
-	__parent = null;
-	__worksheet = null;
-	__cancelButton = null;
-	__helpButton = null;
-	__saveButton = null;
-	__dataset = null;
-	__tableModel = null;
-	super.finalize();
 }
 
 /**

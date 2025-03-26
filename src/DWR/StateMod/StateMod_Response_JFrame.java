@@ -4,76 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-//------------------------------------------------------------------------------
-// StateMod_Response_JFrame - dialog to manage response file in a worksheet 
-//	format
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-// 
-// 19 Oct 1999	Catherine E.		Created initial version of class
-//		Nutting-Lane, RTi
-// 01 Apr 2001	Steven A. Malers, RTi	Change GUI to GUIUtil.  Add finalize().
-//					Remove import *.
-// 13 Aug 2001	SAM, RTi		Change the numbers in the first column
-//					so the control file is the first number.
-// 2001-12-11	SAM, RTi		Change help key to "SMGUI.Response"
-//					(erroneously had big picture key
-//					before).
-// 2003-06-27	SAM, RTi		* Change so the explanation at the top
-//					  is enabled but not editable(before
-//					  was disabled and therefore gray - hard
-//					  to read).
-//					* Change "Save" button to "OK"
-//					  consistent with the reset of the GUI
-//					  since files are not actually saved
-//					  here.
-//------------------------------------------------------------------------------
-// 2003-09-10	J. Thomas Sapienza, RTi	Initial swing version from 
-//					SMResponseFrame.
-// 2003-09-18	JTS, RTi		Data set directory information is now
-//					shown at the top of the form.
-// 2003-09-23	JTS, RTi		Uses new StateMod_GUIUtil code for
-//					setting titles.
-// 2003-10-13	SAM, RTi		* If a file name changes, set the
-//					  response file component to dirty and
-//					  also set the component with the file
-//					  to dirty.
-//					* Comment out the help button.
-//					* Use the factory to get the file
-//					  chooser because of the Java bug.
-//					* Change OK to Close, add Apply, and
-//					  enable/disable components depending
-//					  on whether something has changed.
-// 2004-01-21	JTS, RTi		Updated to use JScrollWorksheet and
-//					the new row headers.
-// 2004-08-16	JTS, RTi		The response file is now marked dirty
-//					if any of the other filenames changed.
-// 2004-08-25	JTS, RTi		Revised the GUI setup.
-// 2006-03-04	SAM, RTi		Fix bug where the filename for the
-//					worksheet was being requested using the
-//					wrong column.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-//------------------------------------------------------------------------------
-// EndHeader
 
 package DWR.StateMod;
 
@@ -354,21 +300,6 @@ protected void closeWindow()
 	else {
 		JGUIUtil.close ( this );
 	}
-}
-
-/**
-Clean up before garbage collection.
-*/
-protected void finalize()
-throws Throwable {
-	__worksheet = null;
-	__close_JButton = null;
-	__cancel_JButton = null;
-	__dataset = null;
-	__dataset_wm = null;
-	__browse_JButton = null;
-	__tableModel = null;
-	super.finalize();
 }
 
 private void checkBrowseButtonState() {

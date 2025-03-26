@@ -4,37 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-// ----------------------------------------------------------------------------
-// StateMod_InstreamFlowRight_Data_TableModel - Table model for displaying 
-//	data in Instream Flow right data tables
-// ----------------------------------------------------------------------------
-// Copyright:   See the COPYRIGHT file
-// ----------------------------------------------------------------------------
-// History:
-//
-// 2005-03-31	J. Thomas Sapienza, RTi	Initial version.
-// 2006-04-11	JTS, RTi		Corrected the classes returned from
-//					getColumnClass().
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-// ----------------------------------------------------------------------------
-// EndHeader
 
 package DWR.StateMod;
 
@@ -195,8 +180,8 @@ public Object getValueAt( int row, int col ) {
 		case COL_RIGHT_NAME:	return infr.getName();
 		case COL_STRUCT_ID:	return infr.getCgoto();
 		case COL_ADMIN_NUM:	return infr.getIrtem();
-		case COL_DCR_AMT:	return new Double(infr.getDcrifr());
-		case COL_ON_OFF:	return new Integer(infr.getSwitch());
+		case COL_DCR_AMT:	return Double.valueOf(infr.getDcrifr());
+		case COL_ON_OFF:	return Integer.valueOf(infr.getSwitch());
 		default:		return "";
 	}
 }
@@ -276,9 +261,8 @@ public void setValueAt(Object value, int row, int col)
 			else if (value instanceof String) {
 				String onOff = (String)value;
 				int index = onOff.indexOf(" -");
-				ival = new Integer(
-					onOff.substring(0, index)).intValue();
-					ifr.setSwitch(ival);
+				ival = Integer.valueOf( onOff.substring(0, index)).intValue();
+				ifr.setSwitch(ival);
 			}
 			/*
 			ival = ((Integer)value).intValue();

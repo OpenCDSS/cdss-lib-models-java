@@ -4,7 +4,7 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -293,7 +293,7 @@ public static List<Integer> getParcelYears ( List<StateCU_Location> culocList, i
 				}
 			}
 			if ( !found ) {
-				parcelYears.add ( new Integer(parcelYear) );
+				parcelYears.add ( Integer.valueOf(parcelYear) );
 			}
 		}
 	}
@@ -502,7 +502,7 @@ public List<Integer> getParcelYearList () {
 			}
 		}
 		if ( !found ) {
-			parcelYearList.add(new Integer(parcel.getYear()));
+			parcelYearList.add(Integer.valueOf(parcel.getYear()));
 		}
 	}
 	Collections.sort(parcelYearList);
@@ -1214,7 +1214,7 @@ public void setElevation ( double elevation )
 public void setHasFillCropPatternTSCommands(int year) {
 	if ( !hasFillCropPatternTSCommands(year) ) {
 		// Add year to the list that has fill command.
-		this.__hasFillCropPatternTSCommands.add(new Integer(year));
+		this.__hasFillCropPatternTSCommands.add(Integer.valueOf(year));
 		// Also sort in place
 		Collections.sort(this.__hasFillCropPatternTSCommands);
 	}
@@ -1228,7 +1228,7 @@ public void setHasFillCropPatternTSCommands(int year) {
 public void setHasFillIrrigationPracticeTSCommands(int year) {
 	if ( !hasFillIrrigationPracticeTSCommands(year) ) {
 		// Add year to the list that has fill command.
-		this.__hasFillIrrigationPracticeTSCommands.add(new Integer(year));
+		this.__hasFillIrrigationPracticeTSCommands.add(Integer.valueOf(year));
 		// Also sort in place
 		Collections.sort(this.__hasFillIrrigationPracticeTSCommands);
 	}
@@ -1242,7 +1242,7 @@ public void setHasFillIrrigationPracticeTSCommands(int year) {
 public void setHasSetCropPatternTSCommands(int year) {
 	if ( !hasSetCropPatternTSCommands(year) ) {
 		// Add year to the list that has set command.
-		this.__hasSetCropPatternTSCommands.add(new Integer(year));
+		this.__hasSetCropPatternTSCommands.add(Integer.valueOf(year));
 		// Also sort in place
 		Collections.sort(this.__hasSetCropPatternTSCommands);
 	}
@@ -1256,7 +1256,7 @@ public void setHasSetCropPatternTSCommands(int year) {
 public void setHasSetIrrigationPracticeTSCommands(int year) {
 	if ( !hasSetIrrigationPracticeTSCommands(year) ) {
 		// Add year to the list that has set command.
-		this.__hasSetIrrigationPracticeTSCommands.add(new Integer(year));
+		this.__hasSetIrrigationPracticeTSCommands.add(Integer.valueOf(year));
 		// Also sort in place
 		Collections.sort(this.__hasSetIrrigationPracticeTSCommands);
 	}

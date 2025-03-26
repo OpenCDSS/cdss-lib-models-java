@@ -4,19 +4,19 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
@@ -288,16 +288,6 @@ public void createBackup() {
 	_original = (StateMod_Plan)clone();
 	((StateMod_Plan)_original)._isClone = false;
 	_isClone = true;
-}
-
-/**
-Clean up for garbage collection.
-*/
-protected void finalize()
-throws Throwable {
-	_Psource = null;
-	_georecord = null;
-	super.finalize();
 }
 
 /**
@@ -1154,12 +1144,12 @@ throws Exception
 			v.add(plan.getID());
 			v.add(plan.getName());
 			v.add(plan.getCgoto());
-			v.add(new Integer(plan.getSwitch()));
-			v.add(new Integer(plan.getIPlnTyp()));
-			v.add(new Integer(plan.getPeffFlag()));
-			v.add(new Integer(plan.getIPrf()));
-			v.add(new Integer(plan.getIPfail()));
-			v.add(new Double(plan.getPsto1()));
+			v.add(Integer.valueOf(plan.getSwitch()));
+			v.add(Integer.valueOf(plan.getIPlnTyp()));
+			v.add(Integer.valueOf(plan.getPeffFlag()));
+			v.add(Integer.valueOf(plan.getIPrf()));
+			v.add(Integer.valueOf(plan.getIPfail()));
+			v.add(Double.valueOf(plan.getPsto1()));
 			v.add(plan.getPsource());
 			v.add(plan.getIPAcc());
 			iline = StringUtil.formatString(v, formatLine1);

@@ -4,116 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-//------------------------------------------------------------------------------
-// StateMod_Well_JFrame - dialog to edit the well information.
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-// 
-// 28 Sep 1999	Catherine E.		Created initial version of class
-//		Nutting-Lane, RTi
-// 25 Oct 1999	CEN, RTi		Moved daily id to allow addition of
-//					daily id to diversion, reservoir and
-//					instream flow windows in a consistent
-//					manner.
-// 01 Apr 2001	Steven A. Malers, RTi	Change GUI to JGUIUtil.  Add finalize().
-//					Remove import *.
-// 15 Aug 2001	SAM, RTi		Add disabled buttons for new data.
-// 2001-12-11	SAM, RTi		Fixed bug where use type was getting
-//					set incorrectly(was using getNroutinew()
-//					instead of getIrturnw()).
-// 2002-09-19	SAM, RTi		Use isDirty()instead of setDirty()to
-//					indicate edits.
-//------------------------------------------------------------------------------
-// 2003-06-10	J. Thomas Sapienza, RTi	Initial swing version from
-//					SMwellsWindow
-// 2003-06-24	JTS, RTi		First functioning version.
-// 2003-07-15	JTS, RTi		* Added checkInput() framework for 
-//					validating user input prior to the 
-//					values being saved.
-// 					* Added status bar.
-//					* Changed to use new dataset design.
-// 2003-07-16	JTS, RTi		Added constructor that allows a well
-//					to be initially selected
-// 2003-07-17	JTS, RTI		Change so that constructor takes a 
-//					boolean that says whether the form's
-//					data can be modified.
-// 2003-07-23	JTS, RTi		Updated JWorksheet code following
-//					JWorksheet revisions.
-// 2003-08-03	SAM, RTi		* Change pumping component type.
-//					  indexOf() is now in StateMod_Util.
-//					* Require title as parameter in
-//					  constructor.
-// 2003-08-16	SAM, RTi		Change window ID to WINDOW_WELL.
-// 2003-08-26	SAM, RTi		Enable StateMod_DataSet_WindowManager.
-// 2003-08-27	JTS, RTi		Added selectID() to select an ID 
-//					on the worksheet from outside the GUI.
-// 2003-08-29	JTS, RTi		Update based on changes in
-//					StateMod_Well.
-// 2003-09-03	JTS, RTi		Removed buttons for graphing time
-//					series and replaced with JCheckBoxes.
-// 2003-09-05	JTS, RTi		* Changed some field labels.
-//					* Made Daily ID a combo box selection
-//					  and changed its load and save logic.
-//					* Added a combo box for Senior Supply.
-//					* Made Associated Diversion a combo box
-//					  selection and changed its load and 
-//					  save logic.
-//					* Organized the time series checkboxes
-//					  and added buttons to display time
-//					  series.
-// 					* Class is now an item listener in 
-//					  order to enable/disable graph buttons
-//					  based on selected checkboxes.
-// 2003-09-06	SAM, RTi		Fix problem with graph not sizing.
-// 2003-09-08	JTS, RTi		* Added checkTimeSeriesButtonsStates()
-//					  to enable time series display buttons
-//					  appropriately.
-//					* Added saveEfficiencies() so that
-//					  efficiency information is actually
-//					  saved.
-//					* Enable reading of monthly and
-//					  constant efficiencies.
-// 2003-09-09	JTS, RTi		* Put a label around the system 
-//				 	  efficiency panel.
-//					* Moved the system efficiency panel
-//					  above the time series and subforms
-//					  panels.
-// 2003-09-19	SAM, RTi		Add estimated daily historical and
-//					demands.
-// 2003-09-23	JTS, RTi		Uses new StateMod_GUIUtil code for
-//					setting titles.
-// 2004-01-22	JTS, RTi		Updated to use JScrollWorksheet and
-//					the new row headers.
-// 2005-01-18	JTS, RTi		Removed calls to removeColumn() as 
-//					the table model handles that now.
-// 2006-03-05	SAM, RTi		* Comment out the help button since
-//					  on-line help is not currently enabled.
-// 2006-03-06	JTS, RTi		If an associated diversion cannot be 
-//					found in the list, it is added (in order
-//					to support multiple ways in which N/A
-//					is typed in the data).
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-//------------------------------------------------------------------------------
-// EndHeader
 
 package DWR.StateMod;
 
@@ -751,55 +657,6 @@ private void displayTSViewJFrame(Object o)
 		Message.printWarning(1,routine,"Error displaying time series (" + e + " ).");
 		Message.printWarning(2, routine, e);
 	}
-}
-
-/**
-Clean up before garbage collection.
-*/
-protected void finalize()
-throws Throwable {
-	__worksheet = null;
-
-	__stationIDJTextField = null;
-	__nameJTextField = null;
-	__locationJTextField = null;
-	__capacityJTextField = null;
-	__dailyIDComboBox = null;
-	__associatedDiversionsComboBox = null;
-	__useTypeSimpleJComboBox = null;
-	__demandSrcCodeSimpleJComboBox = null;
-	__areaJTextField = null;
-	__wellSwitch_SimpleJComboBox = null;
-	__dataTypeSwitch_SimpleJComboBox = null;
-	__graph_JButton = null;
-	__table_JButton = null;
-	__summary_JButton = null;
-
-	__effCheckboxGroup = null;
-	__effConstant = null;
-	__effMonthly = null;
-	__monthlyEff = null;
-
-	__searchID = null;
-	__searchName = null;
-	__findNextWell = null;
-	__searchCriteriaGroup = null;
-	__searchIDJRadioButton = null;
-	__searchNameJRadioButton = null;
-
-	__waterRightsJButton = null;
-	__wellPumpMonthlyTS = null;
-	__demandsMonthlyTS = null;
-	__demandsDailyTS = null;
-	__wellPumpDailyTS = null;
-	__demandsEstDailyTS = null;
-	__returnFlowInformationJButton = null;
-	__depletionInformationJButton = null;
-
-	__helpJButton = null;
-	__closeJButton = null;
-
-	super.finalize();
 }
 
 /**

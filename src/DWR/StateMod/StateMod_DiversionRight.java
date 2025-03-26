@@ -4,96 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-//------------------------------------------------------------------------------
-// StateMod_DiversionRight - Derived from SMData class
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-// 
-// 27 Aug 1997	Catherine E.		Created initial version of class
-//		Nutting-Lane, RTi
-// 11 Feb 1998	Catherine E.		Added SMFileData.setDirty to all set
-//		Nutting-Lane, RTi	routines.  Added throws IOException to 
-//					read/write routines
-// 16 Feb 2001	Steven A. Malers, RTi	Update output header to be consistent
-//					with new documentation.  Add finalize().
-//					Alphabetize methods.  Set unused
-//					variables to null.  Handle null
-//					arguments.  Change IO to IOUtil.  Get
-//					rid of low-level debugs that are not
-//					needed.
-// 02 Mar 2001	SAM, RTi		Ray says to use F16.0 for rights and
-//					get rid of the 4x.
-// 2001-12-27	SAM, RTi		Update to use new fixedRead()to
-//					improve performance.
-// 2002-09-19	SAM, RTi		Use isDirty()instead of setDirty()to
-//					indicate edits.
-//------------------------------------------------------------------------------
-// 2003-06-04	J. Thomas Sapienza, RTi	Renamed from SMDivRights to 
-//					StateMod_DiversionRight
-// 2003-06-10	JTS, RTi		* Folded dumpDiversionRightsFile() into
-//					  writeDiversionRightsFile()
-//					* Renamed parseDiversionRightsFile() to
-//					  readDiversionRightsFile()
-// 2003-06-23	JTS, RTi		Renamed writeDiversionRightsFile() to
-//					writeStateModFile()
-// 2003-06-26	JTS, RTi		Renamed readDiversionRightsFile() to
-//					readStateModFile()
-// 2003-07-07	SAM, RTi		Check for null data set to allow the
-//					code to be used outside of a full
-//					StateMod data set implementation.
-// 2003-07-15	JTS, RTi		Changed code to use new dataset design.
-// 2003-08-03	SAM, RTi		Changed isDirty() back to setDirty().
-// 2003-08-27	SAM, RTi		Change default value of irtem to
-//					99999.
-// 2003-08-28	SAM, RTi		* Remove linked list logic since a
-//					  Vector of rights is now maintained in
-//					  StateMod_Diversion.
-//					* Call setDirty() on the individual
-//					  objects as well as the component.
-//					* Clean up Javadoc for parameters to
-//					  make more readable.
-// 2003-10-09	JTS, RTi		* Implemented Cloneable.
-//					* Added clone().
-//					* Added equals().
-//					* Implemented Comparable.
-//					* Added compareTo().
-// 2003-10-10	JTS, RTI		Added equals(Vector, Vector)
-// 2003-10-14	JTS, RTi		* Make sure diversion right is marked
-//					  not dirty after initial read and
-//					  construction.
-// 2003-10-15	JTS, RTi		Revised the clone() code.
-// 2004-10-28	SAM, RTi		Add getIdvrswChoices() and
-//					getIdvrswDefault().
-// 2005-01-13	JTS, RTi		* Added createBackup().
-// 					* Added restoreOriginal().
-// 2005-03-13	SAM, RTi		* Clean up output header information for
-//					  switch.
-// 2007-04-12	Kurt Tometich, RTi		Added checkComponentData() and
-//									getDataHeader() methods for check
-//									file and data check support.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-// 2007-05-16	SAM, RTi		Implement StateMod_Right interface.
-//------------------------------------------------------------------------------
-// EndHeader
 
 package DWR.StateMod;
 
@@ -235,15 +161,6 @@ public boolean equals(StateMod_DiversionRight right) {
 		return true;
 	}
 	return false;
-}
-
-/**
-Clean up before garbage collection.
-*/
-protected void finalize()
-throws Throwable {
-	_irtem = null;
-	super.finalize();
 }
 
 /**
@@ -664,8 +581,8 @@ throws Exception {
 			v.add(right.getName());
 			v.add(right.getCgoto());
 			v.add(right.getIrtem());
-			v.add(new Double(right.getDcrdiv()));
-			v.add(new Integer(right.getSwitch()));
+			v.add(Double.valueOf(right.getDcrdiv()));
+			v.add(Integer.valueOf(right.getSwitch()));
 			iline = StringUtil.formatString(v, format_0);
 			out.println(iline);
 		}

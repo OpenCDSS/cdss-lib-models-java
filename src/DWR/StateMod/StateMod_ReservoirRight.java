@@ -4,105 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-//------------------------------------------------------------------------------
-// StateMod_ReservoirRight - Derived from StateMod_Data class
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-// 
-// 02 Sep 1997	Catherine E.		Created initial version of class.
-//		Nutting-Lane, RTi
-// 21 Dec 1998	CEN, RTi		Added throws IOException to read/write
-//					routines.
-// 25 Jun 2000	Steven A. Malers, RTi	Make so that res rights < 1.0 are
-//					printed with 8.2 precision.  This is an
-//					issue in the Rio Grande for very small
-//					rights(e.g., stock ponds).
-// 17 Feb 2001	SAM, RTi		Code review.  Add finalize().  Clean up
-//					javadoc.  Handle nulls and set unused
-//					variables to null.  Alphabetize methods.
-//					Change so right admin numbers are right
-//					justified but add option to print old
-//					style.  Change IO to IOUtil.
-// 02 Mar 2001	SAM, RTi		Ray says to use F16.5 for water rights
-//					and get rid of the 4X.
-// 2001-12-27	SAM, RTi		Update to use new fixedRead()to
-//					improve performance.
-// 2002-09-19	SAM, RTi		Use isDirty()instead of setDirty()to
-//					indicate edits.
-//------------------------------------------------------------------------------
-// 2003-06-04	J. Thomas Sapienza, Rti	Renamed from SMResRights to 
-//					StateMod_ReservoirRight
-// 2003-06-10	JTS, RTi		* Folded dumpReservoirRightsFile() into
-//					  writeReservoirRightsFile()
-//					* Renamed parseReservoirRightsFile() to
-//					  readReservoirRightsFile()
-// 2003-06-23	JTS, RTi		Renamed writeReservoirRightsFile() to
-//					writeStateModFile()
-// 2003-06-26	JTS, RTi		Renamed readReservoirRightsFile() to
-//					readStateModFile()
-// 2003-07-15	JTS, RTi		Changed to use new dataset design.
-// 2003-08-03	SAM, RTi		Change isDirty() back to setDirty().
-// 2003-08-28	SAM, RTi		* Remove linked list data since a
-//					  Vector of rights is maintained in the
-//					  StateMod_Reservoir.
-//					* Clean up parameters to methods to be
-//					  clearer.
-//					* Alphabetize methods.
-// 2003-10-09	JTS, RTi		* Implemented Cloneable.
-//					* Added clone().
-//					* Added equals().
-//					* Implemented Comparable.
-//					* Added compareTo().
-// 					* Added equals(Vector, Vector)
-// 2003-10-15	JTS, RTi		* Revised the clone() code.
-//					* Added toString().
-// 2003-10-15	SAM, RTi		Changed some initial values to agree
-//					with the old GUI for new instances.
-// 2004-07-08	SAM, RTi		* Add getIrescoChoices() and
-//					  getIrescoDefault() for use by GUIs.
-//					* Add getItyrsrChoices() and
-//					  getItyrsrDefault().
-//					* Add getN2fillChoices() and
-//					  getN2fillDefault().
-// 2004-09-14	SAM, RTi		Open files considering the working
-//					directory.
-// 2004-10-28	SAM, RTi		Add getIrsrswChoices() and
-//					getIrsrswDefault().
-// 2004-10-29	SAM, RTi		Remove temporary data members used with
-//					table model.  Displaying the expanded
-//					strings only in the dropdown is OK and
-//					makes the code simpler.
-// 2004-11-11	SAM, RTi		Fix getIrescoChoices() - was showing
-//					a negative number in the note.
-// 2005-01-17	JTS, RTi		* Added createBackup().
-//					* Added restoreOriginal().
-// 2005-03-14	SAM, RTi		Clarify output header for switch.
-// 2005-04-18	JTS, RTi		Added writeListFile().
-// 2007-04-12	Kurt Tometich, RTi		Added checkComponentData() and
-//									getDataHeader() methods for check
-//									file and data check support.
-// 2007-05-16	SAM, RTi		Implement StateMod_Right interface.
-//------------------------------------------------------------------------------
-// EndHeader
 
 package DWR.StateMod;
 
@@ -277,16 +194,6 @@ public boolean equals(StateMod_ReservoirRight right) {
 		return true;
 	}
 	return false;
-}
-
-/**
-Clean up before garbage collection.
-*/
-protected void finalize()
-throws Throwable {
-	_rtem = null;
-	_copid = null;
-	super.finalize();
 }
 
 /**
@@ -984,11 +891,11 @@ throws Exception
 			v.add(right.getName());
 			v.add(right.getCgoto());
 			v.add(right.getRtem());
-			v.add(new Double(right.getDcrres()));
-			v.add(new Integer(right.getSwitch()));
-			v.add(new Integer(right.getIresco()));
-			v.add(new Integer(right.getItyrstr()));
-			v.add(new Integer(right.getN2fill()));
+			v.add(Double.valueOf(right.getDcrres()));
+			v.add(Integer.valueOf(right.getSwitch()));
+			v.add(Integer.valueOf(right.getIresco()));
+			v.add(Integer.valueOf(right.getItyrstr()));
+			v.add(Integer.valueOf(right.getN2fill()));
 			v.add(right.getCopid());
 			if (right.getDcrres()< 1.0) {
 				// Use the format for a small right(8.2)...

@@ -4,81 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-//------------------------------------------------------------------------------
-// StateMod_RunReport_JFrame - dialog to run report options of StateMod
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-// 
-// 21 Oct 1997	Catherine E.		Created initial version of class
-//		Nutting-Lane, RTi
-// 25 Feb 1998	CEN, RTi		Added help button.
-// 01 Apr 2001	Steven A. Malers, RTi	Change GUI to JGUIUtil.  Add finalize().
-//					Remove import *.
-// 13 Aug 2001	SAM, RTi		Handle exception when running StateMod.
-//					Actually - this code is no longer used
-//					becase ProcessManagerGUI is used.  Just
-//					remove this file from the makefile and
-//					remove the class file.
-// 2002-09-09	SAM, RTi		Actually, this class is used in the main
-//					GUI.  Not sure where the above comment
-//					came from.
-// 2003-01-01	SAM, RTi		Change the "Close" button to "Cancel".
-// 2003-07-10	SAM, RTi		* Change -xn to -xnm.
-//					* Add output file extensions to
-//					  descriptions.
-//					* Add -xwg.
-//					* Add -xsp.
-//					* Alphabetize report options.
-//					* Add -xwc.
-//					* Add -xdy, -xry, -xwy.
-//					* Change title.
-//					* Change the -xdg, -xrg, -xwg text
-//					  fields to choices.
-//------------------------------------------------------------------------------
-// 2003-08-21	J. Thomas Sapienza, RTi	Initial swing version.
-// 2003-08-26	SAM, RTi		Enable StateMod_DataSet_WindowManager.
-// 2003-09-15	JTS, RTi		Converted to use a tabbed pane to
-//					display all the run options.
-// 2003-09-16	JTS, RTi		Added mouse listeners to all JLabels
-//					and SimpleJComboBoxes so that 
-//					clicking on them selects their 
-//					associated JRadioButton.
-// 2003-09-23	JTS, RTi		Uses new StateMod_GUIUtil code for
-//					setting titles.
-// 2003-10-24	SAM, RTi		* Add stream gages for -xdg.  Put the
-//					  node type in the label.  Use
-//					  StateMod_Util to generate the lists.
-//					* Enable running StateMod to generate
-//					  the reports.
-//					* Comment out the help button - will add
-//					  tool tips if necessary.
-//					* Change that a radio button group is
-//					  used for each panel and then when
-//					  "Run StateMod Report" is pressed, use
-//					  the selected item from the visible
-//					  panel.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-//------------------------------------------------------------------------------
-// EndHeader
 
 // REVISIT:
 //
@@ -298,71 +239,6 @@ public void actionPerformed(ActionEvent e) {
 	else if (action.equals(__BUTTON_HELP)) {
 		// REVISIT HELP (JTS - 2003-08-21)
 	}
-}
-
-/**
-Clean up before garbage collection.
-*/
-protected void finalize()
-throws Throwable {
-	__xdgSimpleJComboBox = null;
-	__xrgSimpleJComboBox = null;
-	__xwgSimpleJComboBox = null;
-
-	__general_ButtonGroup = null;
-	__compare_ButtonGroup = null;
-	__graph_ButtonGroup = null;
-	__daily_ButtonGroup = null;
-	__other_ButtonGroup = null;
-	__xbnJRadioButton = null;
-	__xcuJRadioButton = null;
-	__xdcJRadioButton = null;
-	__xdgJRadioButton = null;
-	__xdyJRadioButton = null;
-	__xnmJRadioButton = null;
-	__xrcJRadioButton = null;
-	__xrgJRadioButton = null;
-	__xrxJRadioButton = null;
-	__xryJRadioButton = null;
-	__xscJRadioButton = null;
-	__xspJRadioButton = null;
-	__xstJRadioButton = null;
-	__xwbJRadioButton = null;
-	__xwcJRadioButton = null;
-	__xwgJRadioButton = null;
-	__xwrJRadioButton = null;
-	__xwyJRadioButton = null;
-
-	__xbnJLabel = null;
-	__xcuJLabel1 = null;
-	__xcuJLabel2 = null;
-	__xcuJLabel3 = null;
-	__xcuJLabel4 = null;
-	__xdcJLabel = null;
-	__xdgJLabel = null;
-	__xdyJLabel = null;
-	__xnmJLabel1 = null;
-	__xnmJLabel2 = null;
-	__xrcJLabel = null;
-	__xrgJLabel = null;
-	__xrxJLabel = null;
-	__xryJLabel = null;
-	__xscJLabel = null;
-	__xspJLabel = null;
-	__xstJLabel1 = null;
-	__xstJLabel2 = null;
-	__xstJLabel3 = null;
-	__xstJLabel4 = null;
-	__xstJLabel5 = null;
-	__xwbJLabel = null;
-	__xwcJLabel = null;
-	__xwgJLabel = null;
-	__xwrJLabel = null;
-	__xwyJLabel = null;	
-	
-	__runStateModJButton = null;
-	__cancelJButton = null;
-	super.finalize();
 }
 
 /**

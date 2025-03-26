@@ -4,101 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-//------------------------------------------------------------------------------
-// StateMod_DelayTable_JFrame - dialog to edit the delay information.
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-// 
-// 14 Mar 2000	CEN, RTi		Created class
-// 01 Apr 2001	Steven A. Malers, RTi	Change GUI to JGUIUtil.  Add finalize().
-//					Remove import *.
-// 04 May 2001	SAM, RTi		Verify that TSView code is properly
-//					configured for all views.
-// 13 Aug 2001	SAM, RTi		Update to handle returns as percent or
-//					decimal fraction.
-// 2002-03-07	SAM, RTi		Update to select the first item in the
-//					list when displayed - actually - don't
-//					do this because it may be slow,
-//					depending on what data are available.
-//------------------------------------------------------------------------------
-// 2003-06-09	J. Thomas Sapienza, RTi	Initial swing version from 
-//					SMdelaysWindow
-// 2003-06-17	JTS, RTi		Created first functional version.
-// 2003-06-19	JTS, RTi		Finished first functional version, 
-//					Javadoc'd.
-// 2003-06-20	JTS, RTi		Constructor now takes a data set as
-//					a parameter, instead of a data set
-//					component.
-// 2003-06-23	JTS, RTi		Implemented graphing of delay series.
-// 2003-07-15	JTS, RTi		* Added status bar.
-//					* Changed to use new dataset design.
-// 2003-07-17	JTS, RTI		Change so that constructor takes a 
-//					boolean that says whether the form's
-//					data can be modified.
-// 2003-07-23	JTS, RTi		Updated JWorksheet code following
-//					JWorksheet revisions.
-// 2003-08-03	SAM, RTi		* Changed isDirty() back to setDirty().
-//					* Require the title parameter in the
-//					  constructor.
-//					* Add a constructor to select a delay
-//					  table at creation.
-// 2003-08-16	SAM, RTi		* Change the window type to
-//					  WINDOW_DELAY_TABLE_MONTHLY and
-//					  WINDOW_DELAY_TABLE_DAILY.  The window
-//					  is used for both monthly and daily
-//					  delay tables but but both windows can
-//					  be open at the same time.
-//					* Require a flag for the constructor
-//					  indicating whether monthly or daily
-//					  delay tables are being displayed.
-// 2003-08-26	SAM, RTi		Enable StateMod_DataSet_WindowManager.
-// 2003-08-27	JTS, RTi		Added selectID() to select an ID 
-//					on the worksheet from outside the GUI.
-// 2003-09-04	SAM, RTi		* Change so daily delay table results in
-//					  a daily time series being created.
-//					* Pass flag to table model constructor
-//					  to indicate whether monthly or daily
-//					  data.
-// 2003-09-23	JTS, RTi		Uses new StateMod_GUIUtil code for
-//					setting titles.
-// 2003-10-14	JTS, RTi		Updated to use new data saving model.
-// 2004-01-21	JTS, RTi		Updated to use JScrollWorksheet and
-//					the new row headers.
-// 2004-07-15	JTS, RTi		* For data changes, enabled the
-//					  Apply and Cancel buttons through new
-//					  methods in the data classes.
-//					* Changed layout of buttons to be
-//					  aligned in the lower-right.
-// 2004-08-25	JTS, RTi		Based on the value of 'interv' in 
-//					the control file, the header for
-//					the return column says whether it is
-//					a percent or a fraction.
-// 2004-08-26	JTS, RTi		Implement Apply/Cancel/Close 
-//					functionality.
-// 2006-01-19	JTS, RTi		Made the dialog wider so that the 
-//					Graph button is displayed.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-//------------------------------------------------------------------------------
-// EndHeader
 
 package DWR.StateMod;
 
@@ -113,8 +34,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -446,7 +367,7 @@ public StateMod_DelayTable_JFrame (	StateMod_DelayTable delay,
 	}
 	StateMod_GUIUtil.setTitle(this, null, "Delay Table" + interval, 
 		null);				
-	__delaysVector = new Vector<StateMod_DelayTable>();
+	__delaysVector = new ArrayList<>();
 	__delaysVector.add(delay);
 
 	int size = __delaysVector.size();
@@ -542,12 +463,12 @@ public void actionPerformed(ActionEvent e) {
 					row += 1;
 				}
 			}
-			__worksheetR.insertRowAt(new Double(0), row);
+			__worksheetR.insertRowAt(Double.valueOf(0), row);
 			__worksheetR.scrollToRow(row);
 			__worksheetR.selectRow(row);			
 		}
 		else {
-			__worksheetR.addRow(new Double(0));
+			__worksheetR.addRow(Double.valueOf(0));
 			__worksheetR.scrollToRow(0);
 			__worksheetR.selectRow(0);	
 		}			
@@ -669,7 +590,7 @@ public void actionPerformed(ActionEvent e) {
 						currentDelay.getRet_val(j);
 					}
 				}
-				List<TS> tslist = new Vector<TS>();
+				List<TS> tslist = new ArrayList<>();
 				tslist.add(ts);
 
 				PropList graphProps = new PropList("TSView");
@@ -759,26 +680,6 @@ private void closeWindow() {
 	}
 	else {	JGUIUtil.close ( this );
 	}
-}
-
-/**
-Clean up before garbage collection.
-*/
-protected void finalize()
-throws Throwable {
-	__addReturn = null;
-	__closeJButton = null;
-	__deleteReturn = null;
-	__findNextDelay = null;
-	__graphDelayJButton = null;
-	__helpJButton = null;
-	__searchID = null;
-	__worksheetL = null;
-	__worksheetR = null;
-	__dataset = null;
-	__delayComponent = null;
-	__delaysVector = null;
-	super.finalize();
 }
 
 /**
@@ -1040,9 +941,9 @@ private void setupGUI( int index ) {
 	int[] widthsR = null;
 	JScrollWorksheet jswR = null;
 	try {
-		StateMod_DelayTable_TableModel tmd = new StateMod_DelayTable_TableModel(new Vector<StateMod_DelayTable>(),
+		StateMod_DelayTable_TableModel tmd = new StateMod_DelayTable_TableModel(new ArrayList<>(),
 			__monthly_data, __editable, percent);
-		tmd.setSubDelays(new Vector<Double>());
+		tmd.setSubDelays(new ArrayList<>());
 		StateMod_DelayTable_CellRenderer crd = new
 			StateMod_DelayTable_CellRenderer(tmd);
 		
@@ -1217,9 +1118,9 @@ or if rows were added or deleted to the right table.
 */
 private void updateRightTable(StateMod_DelayTable dt) {
 	List<Double> v = dt.getRet_val();
-	List<Double> v2 = new Vector<Double>();
+	List<Double> v2 = new ArrayList<>();
 	for (int i = 0; i < v.size(); i++) {
-		v2.add(new Double(v.get(i).doubleValue()));
+		v2.add(Double.valueOf(v.get(i).doubleValue()));
 	}
 
 	((StateMod_DelayTable_TableModel)__worksheetR.getModel()).setSubDelays(v2);

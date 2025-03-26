@@ -4,43 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-// ----------------------------------------------------------------------------
-// StateCU_Location_TableModel - Table model for displaying data for 
-//	location tables
-// ----------------------------------------------------------------------------
-// Copyright:   See the COPYRIGHT file
-// ----------------------------------------------------------------------------
-// History:
-// 2003-07-14	J. Thomas Sapienza, RTi	Initial version.
-// 2003-07-22	JTS, RTi		Revised following SAM's review.
-// 2004-02-28	Steven A. Malers, RTi	Moved some utility methods from
-//					StateCU_Data to StateCU_Util.
-// 2005-01-21	JTS, RTi		Added the editable flag.
-// 2005-01-24	JTS, RTi		Added the ability to display multiple
-//					locations in a single table model.
-// 2005-03-28	JTS, RTi		Adjusted column sizes.
-// 2005-03-29	JTS, RTi		* Removed the Collection Division 
-//					  column.
-//					* Adjusted the column order.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-// ----------------------------------------------------------------------------
 
 package DWR.StateCU;
 
@@ -322,13 +301,13 @@ public Object getValueAt(int row, int col) {
 		switch (col) {
 			case 1:
 			case 2:
-				StateCU_Location location = (StateCU_Location)_data.get(row);
+				StateCU_Location location = _data.get(row);
 				switch (col) {
 					case 1:	return location.getID();
 					case 2: return location.getName();
 				}	
 			case 3:	
-				return new Double(__delays.getDelayTablePercent(row));
+				return Double.valueOf(__delays.getDelayTablePercent(row));
 			case 4:	
 				return new String(__delays.getDelayTableID(	row));
 			case 5: 
@@ -340,9 +319,9 @@ public Object getValueAt(int row, int col) {
 				}
 				return (__stations.get(row)).getName();
 			case 7:	
-				return new Double(__parentLocation.getPrecipitationStationWeight(	row));
+				return Double.valueOf(__parentLocation.getPrecipitationStationWeight(	row));
 			case 8:	
-				return new Double(__parentLocation.getTemperatureStationWeight(row));	
+				return Double.valueOf(__parentLocation.getTemperatureStationWeight(row));	
 			case 9:
 			case 10:
 			case 11:
@@ -352,36 +331,32 @@ public Object getValueAt(int row, int col) {
 				switch (col) {
 					case 9:	return right.getID();
 					case 10:return right.getName();
-					case 11:return new Double(
-						right.getIrtem());
-					case 12:return new Double(
-						right.getDcrdiv());
-					case 13:return new Integer(
-						right.getSwitch());
+					case 11:return Double.valueOf(right.getIrtem());
+					case 12:return Double.valueOf(right.getDcrdiv());
+					case 13:return Integer.valueOf(right.getSwitch());
 				}
 			default:	return "";
 		}
 	}
 	else {
-		StateCU_Location location = (StateCU_Location)_data.get(row);	
+		StateCU_Location location = _data.get(row);	
 		switch (col) {
 			case __COL_ID:		
 				return location.getID();
 			case __COL_NAME:	
 				return location.getName();
 			case __COL_ELEVATION:	
-				return new Double(location.getElevation());
+				return Double.valueOf(location.getElevation());
 			case __COL_LATITUDE:	
-				return new Double(location.getLatitude());
+				return Double.valueOf(location.getLatitude());
 			case __COL_REGION1:	
 				return location.getRegion1();
 			case __COL_REGION2:	
 				return location.getRegion2();
 			case __COL_NUM_STA:
-				return new Integer(
-					location.getNumClimateStations());
+				return Integer.valueOf(location.getNumClimateStations());
 			case __COL_AWC:		
-				return new Double(location.getAwc());
+				return Double.valueOf(location.getAwc());
 		}
 	}
 	return "";

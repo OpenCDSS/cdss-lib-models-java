@@ -4,61 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-//------------------------------------------------------------------------------
-// StateMod_ReservoirAreaCap - class to store area capacity values for reservoir
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-// 
-// 02 Sep 1997	Catherine E.		Created initial version of class.
-//		Nutting-Lane, RTi
-// 11 Feb 1998	CEN, RTi		Added _dataset.setDirty
-//					to all set
-//					commands.
-// 17 Feb 2001	Steven A. Malers, RTi	Add finalize().  Clean up javadoc.
-//					Handle nulls.  Set variables to null
-//					when done.  Alphabetize methods.
-// 2002-09-19	SAM, RTi		Use isDirty()instead of setDirty()to
-//					indicate edits.
-//------------------------------------------------------------------------------
-// 2003-06-05	J. Thomas Sapienza 	Initial StateMod_ version.
-// 2003-06-10	JTS, RTi		Renamed from StateMod_AreaCap
-// 2003-07-15	JTS, RTi		Changed to use new dataset design.
-// 2003-08-03	SAM, RTi		Change isDirty() to setDirty().
-// 2003-10-09	JTS, RTi		* Implemented Cloneable.
-//					* Added clone().
-//					* Added equals().
-//					* Implemented Comparable.
-//					* Added compareTo().
-// 					* Added equals(Vector, Vector)
-// 2003-10-15	JTS, RTi		* Revised the clone() code.
-//					* Added toString().
-// 2004-07-02	SAM, RTi		Handle null _dataset.
-// 2005-01-17	JTS, RTi		* Added createBackup().
-//					* Added restoreOriginal().
-// 2005-03-30	JTS, RTi		Corrected class mis-type in 
-//					createBackup().
-// 2005-04-18	JTS, RTi		Added writeListFile().
-//------------------------------------------------------------------------------
-// EndHeader
 
 package DWR.StateMod;
 
@@ -208,14 +169,6 @@ public boolean equals(StateMod_ReservoirAreaCap ac) {
 		return true;
 	}
 	return false;
-}
-
-/**
-Clean up before garbage collection.
-*/
-protected void finalize()
-throws Throwable {
-	super.finalize();
 }
 
 /**

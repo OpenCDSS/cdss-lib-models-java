@@ -4,117 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-//------------------------------------------------------------------------------
-// StateMod_Control_JFrame - dialog to edit/view control
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-// 
-// 24 Mar 1998	Catherine E.		Created initial version of class.
-//		Nutting-Lane, RTi
-// 01 Apr 2001	Steven A. Malers, RTi	Change GUI to JGUIUtil.  Add finalize().
-//					Remove import *.
-// 2001-08-08	SAM, RTi		Update for 9.92 version(add the choices
-//					for ground water data).  Set background
-//					on data period to gray since it is not
-//					editable.  Add StateMod numeric values
-//					to labels.  Add more units.  Add number
-//					of precipitation and evaporation(view
-//					only).  List choices in numeric order
-//					according to StateMod conventions.
-//					Catch exceptions so that an unrecognized
-//					choice value is handled gracefully.
-//					Change so buttons are more consistent
-//					with industry standards - change OK to
-//					Close.  Change Close to cancel.  Add
-//					Apply.  Change the checkboxes to
-//					choices so they can be put in the order
-//					of the file, save GUI space, and more
-//					easily allow handling of new control
-//					values that are not coded into the GUI.
-//					Fix so that multiple copies of the
-//					window cannot be displayed.
-//------------------------------------------------------------------------------
-// 2003-06-24	J. Thomas Sapienza	Initial swing version.
-// 2003-07-15	JTS, RTi		* Added checkInput() framework for 
-//					validating user input prior to the 
-//					values being saved.
-// 					* Added status bar.
-// 2003-08-03	SAM, RTi		* Control information is now managed
-//					  in the StateMod_DataSet class and does
-//					  not have its own class - update calls
-//					  accordingly.
-//					* Require a title parameter in the
-//					  constructor.
-//					* Add an editable parameter in the
-//					  constructor
-// 2003-08-16	SAM, RTi		Change the window type to
-//					WINDOW_CONTROL.
-// 2003-08-26	SAM, RTi		Enable StateMod_DataSet_WindowManager.
-// 2003-09-02	JTS, RTi		Revised after SAM's review.
-//					* Changed various labels.
-//					* Added values to combo boxes.
-//					* Enabled combo boxes that had been
-//					  disabled.
-//					* Changed the layout of the units tab.
-//					* Changed the overall tab order.
-//					* Changed how unrecognized data is 
-//					  handled at open and save time.
-// 2003-09-04	JTS, RTi		* Changed references to files by only
-//					  their extension (e.g., "*.rsp") to
-//					  the file name (e.g., "response file").
-//					* Changed some text field sizes.
-//					* Compacted some tabs by rearranging
-//					  label positions.
-//					* GUI can now be opened in an 
-//					  uneditable state.
-// 2003-09-11	JTS, RTi		Massive revisions:
-//					* Completely changed the placement 
-//					  of variables within tabs.
-//					* Removed half the tabs and spread the
-//				 	  variables among the rest.
-//					* Removed the numpre and numeva 
-//					  variables.
-//					* Changed runDate1 and runDate2 to be
-//					  combo boxes.
-// 2003-09-19	JTS, RTi		* Warnings fwhen the data values are 
-//					  checked are now combined into one
-//					  large warning.
-//					* Corrected error in checking 'interv'
-//					  value.
-// 2003-09-23	JTS, RTi		Uses new StateMod_GUIUtil code for
-//					setting titles.
-// 2003-09-24	JTS, RTi		Change name of method that gets POR.
-// 2004-08-25	JTS, RTi		Updated GUI.
-// 2004-08-26	JTS, RTi		Changed the interv combo box behavior
-// 					so that it better handles other values.
-// 2006-03-04	SAM, RTi		Clarify note about how data period is
-//					determined.
-// 2006-08-22	SAM, RTi		* Recognize more options for "ichk".
-//					* Increase size of text field for
-//					  "ccall".
-//					* Add support for "isig".
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-//------------------------------------------------------------------------------
-// EndHeader
 
 package DWR.StateMod;
 
@@ -403,55 +308,6 @@ private void disableComponents() {
 	__soildSimpleJComboBox.setEditable(false);
 	__soildSimpleJComboBox.setEnabled(false);
 	__isigSimpleJComboBox.setEditable(false);
-}
-
-/**
-Clean up before garbage collection.
-*/
-protected void finalize()
-throws Throwable {
-	__applyJButton = null;
-	__cancelJButton = null;
-	__closeJButton = null;
-	__helpJButton = null;
-	__ccall = null;
-	__dataDate1 = null;
-	__dataDate2 = null;
-	__gwmaxrcJTextField = null;
-	__interv = null;
-	__ireopx = null;
-	__runDate1SimpleJComboBox = null;
-	__runDate2SimpleJComboBox = null;
-	__soildJTextField = null;
-	__title1 = null;
-	__title2 = null;
-	__factor = null;
-	__rfacto = null;
-	__dfacto = null;
-	__ffacto = null;
-	__cfacto = null;
-	__efacto = null;
-	__pfacto = null;
-	__cyr1SimpleJComboBox = null;
-	__icallSimpleJComboBox = null;
-	__ichkSimpleJComboBox = null;
-	__icondemSimpleJComboBox = null;
-	__idaySimpleJComboBox = null;
-	__ieffmaxSimpleJComboBox = null;
-	__intervSimpleJComboBox = null;
-	__iopfloSimpleJComboBox = null;
-	__ireachSimpleJComboBox = null;
-	__ireopxSimpleJComboBox = null;
-	__iresopSimpleJComboBox = null;
-	__isjripSimpleJComboBox = null;
-	__isprinkSimpleJComboBox = null;
-	__itsfileSimpleJComboBox = null;
-	__iwellSimpleJComboBox = null;
-	__monevaSimpleJComboBox = null;
-	__soildSimpleJComboBox = null;
-	__isigSimpleJComboBox = null;
-
-	super.finalize();
 }
 
 /**
@@ -1202,8 +1058,7 @@ private void setupGUI() {
 	}
 	else {
 		intervSelectIndex = 0;
-		__interv.setText((new Integer(__dataset.getInterv()))
-			.toString());
+		__interv.setText(Integer.valueOf(__dataset.getInterv()).toString());
 	}
 
 	__interv.setEditable(showIntervText);

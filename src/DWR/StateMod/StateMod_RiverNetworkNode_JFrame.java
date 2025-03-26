@@ -4,72 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-//------------------------------------------------------------------------------
-// StateMod_RiverNetworkNode_JFrame - dialog to edit the river network (.rin)
-//	information
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-// 
-// 07 Jan 1998	Catherine E.		Created initial version of class
-//		Nutting-Lane, RTi
-// 01 Apr 2001	Steven A. Malers, RTi	Change GUI to JGUIUtil.  Add finalize().
-//					Remove import *.
-// 2002-09-12	SAM, RTi		Move the baseflow time series display
-//					from the baseflows window to this
-//					window.  Actually, display both the
-//					baseflow and historic time series if
-//					available.
-//------------------------------------------------------------------------------
-// 2003-08-18	J. Thomas Sapienza, RTi	Initial Swing version.
-// 2003-08-20	JTS, RTi		* Added code so that the gui data is
-//					  editable.
-//					* Cleaned up the GUI.
-//					* Objects can now be pre-selected from
-//					  the second constructor.
-// 2003-08-26	SAM, RTi		Enable StateMod_DataSet_WindowManager.
-// 2003-08-27	JTS, RTi		Added selectID() to select an ID 
-//					on the worksheet from outside the GUI.
-// 2003-09-04	JTS, RTi		Added cancel and apply buttons.
-// 2003-09-23	JTS, RTi		Uses new StateMod_GUIUtil code for
-//					setting titles.
-// 2004-01-22	JTS, RTi		Updated to use JScrollWorksheet and
-//					the new row headers.
-// 2004-07-15	JTS, RTi		* For data changes, enabled the
-//					  Apply and Cancel buttons through new
-//					  methods in the data classes.
-//					* Changed layout of buttons to be
-//					  aligned in the lower-right.
-// 					* windowDeactivated() no longer saves
-//					  data as it was causing problems with
-//					  the cancel code.
-// 2004-07-17	JTS, RTi		Current and last indices were not 
-//					defaulting to -1 when the class was
-//					instantiated, and this was causing
-//					problems.
-// 2006-01-19	JTS, RTi		* Now implements JWorksheet_SortListener
-//					* Reselects the record that was selected
-//					  when the worksheet is sorted.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-//------------------------------------------------------------------------------
 
 package DWR.StateMod;
 
@@ -429,24 +379,6 @@ private void checkViewButtonState()
 	}
 }
  
-/**
-Clean up before garbage collection.
-*/
-protected void finalize()
-throws Throwable {
-	__searchCriteriaGroup = null;
-	__findNext = null;
-	__helpJButton = null;
-	__closeJButton = null;
-	__searchIDJRadioButton = null;
-	__searchNameJRadioButton = null;
-	__searchID = null;
-	__searchName = null;
-	__worksheet = null;
-	__dataset = null;
-	super.finalize();
-}
-
 /**
 Finds a river network node in the __riverNetworkNodesVector that has the
 specified id.

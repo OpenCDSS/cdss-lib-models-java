@@ -4,38 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-//------------------------------------------------------------------------------
-// StateCU_Location_JFrame - dialog to display location info
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-//
-// 2003-07-14	J. Thomas Sapienza, RTi	Initial version.
-// 2003-07-22	JTS, RTi		Revised following SAM's review. 
-// 2004-02-28	Steven A. Malers, RTi	Moved some methods from StateCU_Data to
-//					StateCU_Util.
-// 2005-01-17	JTS, RTi		Changed getOriginalRow() to 
-//					getOriginalRowNumber().
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-//------------------------------------------------------------------------------
 
 // TODO SAM 2011-06-22 This class was initially developed based on the StateMod GUI
 // code to prototype a StateCU GUI.  However, it was never used in production.
@@ -465,39 +449,6 @@ private void displayTSViewJFrame(String action) {
 }
 
 /**
-Clean up before garbage collection.
-*/
-protected void finalize()
-throws Throwable {
-	__searchCriteriaGroup = null;
-	__textUneditables = null;
-	__findNextLocation = null;
-	__disables = null;
-	__searchIDJRadioButton = null;
-	__searchNameJRadioButton = null;
-	__textDisables = null;
-	__searchID = null;
-	__searchName = null;
-	__locationIDJTextField = null;
-	__nameJTextField = null;
-	__latitudeJTextField = null;
-	__elevationJTextField = null;
-	__region1JTextField = null;
-	__region2JTextField = null;
-	__worksheet = null;
-	__dataset = null;
-	__locationComponent = null;
-	__locationsList = null;
-	__cropPatternCheckBox = null;
-	__irrigationPracticeCheckBox = null;
-	__diversionCheckBox = null;
-	__precipitationCheckBox = null;
-	__temperatureCheckBox = null;
-	__frostDatesCheckBox = null;
-	super.finalize();
-}
-
-/**
 Responds to key pressed events; does nothing.
 @param e the KeyEvent that happened.
 */
@@ -657,11 +608,11 @@ private void saveInformation(int record) {
 
 	location.setName(__nameJTextField.getText());
 	location.setID(__locationIDJTextField.getText());
-	location.setLatitude( new Double(__latitudeJTextField.getText()).doubleValue());
-	location.setElevation( new Double(__elevationJTextField.getText()).doubleValue());
+	location.setLatitude( Double.valueOf(__latitudeJTextField.getText()).doubleValue());
+	location.setElevation( Double.valueOf(__elevationJTextField.getText()).doubleValue());
 	location.setRegion1(__region1JTextField.getText());
 	location.setRegion2(__region2JTextField.getText());
-	location.setAwc( new Double(__awcJTextField.getText()).doubleValue());
+	location.setAwc( Double.valueOf(__awcJTextField.getText()).doubleValue());
 }
 
 /**

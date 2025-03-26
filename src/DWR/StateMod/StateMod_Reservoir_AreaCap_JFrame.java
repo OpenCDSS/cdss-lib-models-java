@@ -4,71 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-//------------------------------------------------------------------------------
-// StateMod_Reservoir_AreaCap_JFrame - frame to edit a reservoir's 
-//	content/area/seepage curve
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-// 
-// 24 Dec 1997	Catherine E.		Created initial version of class
-//		Nutting-Lane, RTi
-// 01 Apr 2001	Steven A. Malers, RTi	Change GUI to JGUIUtil.  Add finalize().
-//					Remove import *.
-//------------------------------------------------------------------------------
-// 2003-06-09	J. Thomas Sapienza, RTi	Initial swing version from 
-//					SMresAreaCapFrame
-// 2003-06-13	JTS, RTi		Began using StateMod_Reservoir code
-// 2003-06-16	JTS, RTi		Javadoc'd.
-// 2003-07-15	JTS, RTi		* Added status bar.
-//					* Changed to use new dataset design.
-// 2003-07-17	JTS, RTI		Change so that constructor takes a 
-//					boolean that says whether the form's
-//					data can be modified.
-// 2003-07-23	JTS, RTi		Updated JWorksheet code following
-//					JWorksheet revisions.
-// 2003-08-03	SAM, RTi		Changed isDirty() back to setDirty().
-// 2003-08-29	SAM, RTi		Change due to changes in
-//					StateMod_Reservoir.
-// 2003-09-23	JTS, RTi		Uses new StateMod_GUIUtil code for
-//					setting titles.
-// 2003-10-13	JTS, RTi		* Worksheet now uses multiple-line
-//					  headers.
-// 					* Added saveData().
-//					* Added checkInput().
-//					* Added apply and cancel buttons.
-// 2004-01-21	JTS, RTi		Updated to use JScrollWorksheet and
-//					the new row headers.
-// 2004-07-15	JTS, RTi		Changed layout of buttons to be
-//					aligned in the lower-right.
-// 2004-10-28	SAM, RTi		Use new table model that deals only with
-//					area/cap data.
-// 2005-01-21	JTS, RTi		Table model constructor changed.
-// 2006-02-28	SAM, RTi		* Use JFreeChart to display the area
-//					  capacity curves.
-//					* Change the "capacity" in the title to
-//					  "content".
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-//------------------------------------------------------------------------------
-// EndHeader
 
 package DWR.StateMod;
 
@@ -383,20 +334,6 @@ private void checkDeleteAreaCapButton() {
 	else {
 		__deleteAreaCap.setEnabled(true);
 	}
-}
-
-/**
-Clean up before garbage collection.
-*/
-protected void finalize()
-throws Throwable {
-	__currentRes = null;
-	__worksheet = null;
-	__addAreaCap = null;
-	__deleteAreaCap = null;
-	__helpJButton = null;
-	__closeJButton = null;
-	super.finalize();
 }
 
 /**

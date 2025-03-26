@@ -4,39 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-// ----------------------------------------------------------------------------
-// StateCU_ClimateStation.java - class for the StateCU climate station objects,
-//				CLI file
-// ----------------------------------------------------------------------------
-// Copyright:   See the COPYRIGHT file
-// ----------------------------------------------------------------------------
-// History:
-// 2003-05-07	Steven A. Malers, RTi	Initial version copied from
-//					CUClimateStationWeights.
-// 2003-06-04	SAM, RTi		Rename class from CUClimateStation to
-//					StateCU_ClimateStation.
-// 2005-01-17	J. Thomas Sapienza, RTi	* Added createBackup().
-//					* Added restoreOriginal().
-// 2005-04-18	JTS, RTi		Added writeListFile().
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-// ----------------------------------------------------------------------------
 
 package DWR.StateCU;
 
@@ -90,17 +73,6 @@ public void createBackup() {
 	_original = clone();
 	((StateCU_ClimateStation)_original)._isClone = false;
 	_isClone = true;
-}
-
-/**
-Clean up for garbage collection.
-@exception Throwable if there is an error.
-*/
-protected void finalize()
-throws Throwable
-{	__region1 = null;
-	__region2 = null;
-	super.finalize();
 }
 
 /**

@@ -4,60 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-//------------------------------------------------------------------------------
-// StateCU_CropCharacteristics - class to hold CU crop characteristics data,
-//			compatible with StateCU CCH file
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-//
-// 2002-11-14	Steven A. Malers, RTi	Copy CULocation class and update for
-//					the CCH file contents.
-// 2003-02-19	SAM, RTi		Change so any missing data are printed
-//					as blanks.
-// 2003-06-04	SAM, RTi		Rename class from CUCropCharacteristics
-//					to StateCU_CropCharacteristics.
-//					Change read/write methods to not use
-//					file extension in method name.
-// 2003-07-02	SAM, RTi		Change so that the identifier and name
-//					are the same.  The old crop number is
-//					no longer used but there is no name
-//					field.
-// 2005-01-17	J. Thomas Sapienza, RTi	* Added createBackup().
-//					* Added restoreOriginal().
-// 2005-04-18	JTS, RTi		Added writeListFile().
-// 2007-01-05   KAT, RTi		updates to the format
-// 							Old Format ver. 10 ("x" is a space): 
-//  						(a20,2(1x,i2,2x,i2),2x,i2,2x,2(i4,1x),3(f3,0,1x),
-//  						4(f4.1,1x),2(i2,1x),i3,1x,i2)
-// 							New Format (spaces are included):
-//  						(a30,10(i6),4(f6.1),4(i5))
-// 2007-01-29	SAM, RTi		Review KAT's code.  Clean code based on Eclipse
-//					information.
-// 2007-03-04	SAM, RTi		Some final code cleanup - formats were not quite
-//							in agreement with StateCU documentation.
-// 2007-03-19	SAM, RTi		Write the crop number as a sequential integer.
-// 2007-04-22	SAM, RTi		Minor change to fix extra EndHeader comment in
-//					output.  Add AutoAdjust to write method properties.
-//------------------------------------------------------------------------------
 
 package DWR.StateCU;
 
@@ -187,15 +149,6 @@ public void createBackup() {
 	_original = clone();
 	((StateCU_CropCharacteristics)_original)._isClone = false;
 	_isClone = true;
-}
-
-/**
-Clean up for garbage collection.
-@exception Throwable if there is an error.
-*/
-protected void finalize()
-throws Throwable
-{	super.finalize();
 }
 
 /**

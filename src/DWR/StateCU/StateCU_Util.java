@@ -4,7 +4,7 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,23 +20,6 @@ CDSS Models Java Library is free software:  you can redistribute it and/or modif
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-//-----------------------------------------------------------------------------
-// StateCU_Util - utility classes for StateCU package
-//-----------------------------------------------------------------------------
-// History:
-//
-// 2003-06-04	Steven A. Malers, RTi	* Change name of class from
-//					  StateCUUtil to StateCU_Util.
-//					* Update to use DateTime instead of
-//					  TSDate.
-// 2004-02-28	SAM, RTi		* Move indexOf(), indexOfName(), match()
-//					  from StateCU_Data.
-// 2005-03-08	SAM, RTi		* Add sortStateCU_DataVector(), similar
-//					  to the StateMod version.
-// 2005-04-05	SAM, RTi		* Add lookupTimeSeriesGraphTitle().
-// 2005-04-18	J. Thomas Sapienza, RTi	Added the lookup*() methods.
-//-----------------------------------------------------------------------------
 
 package DWR.StateCU;
 
@@ -140,8 +123,7 @@ public static StateCU_Location getLocationForPartID ( List<StateCU_Location> CUL
 Helper method to return general validators for numbers.
 @return List of Validators.
 */
-public static Validator[] getNumberValidators()
-{
+public static Validator[] getNumberValidators() {
 	//Validators.regexValidator( "^[0-9]+.*" ),
 	return new Validator[] { Validators.notBlankValidator(), Validators.rangeValidator( 0, 999999 )};
 }
@@ -150,11 +132,10 @@ public static Validator[] getNumberValidators()
 Helper method to return general validators for an on/off switch.
 @return List of Validators.
 */
-public static Validator[] getOnOffSwitchValidator()
-{
+public static Validator[] getOnOffSwitchValidator() {
 	Validator[] orValidator = new Validator[] {
-		Validators.isEquals( new Integer( 0 )),
-		Validators.isEquals( new Integer( 1 )) };		
+	Validators.isEquals( Integer.valueOf( 0 )),
+	Validators.isEquals( Integer.valueOf( 1 )) };		
 	return new Validator[] { Validators.notBlankValidator(), Validators.or( orValidator ) };
 }
 

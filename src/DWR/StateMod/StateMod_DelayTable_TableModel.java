@@ -4,46 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-// ----------------------------------------------------------------------------
-// StateMod_DelayTable_TableModel - class for displaying delay table data
-//	in a jworksheet
-// ----------------------------------------------------------------------------
-// Copyright:   See the COPYRIGHT file
-// ----------------------------------------------------------------------------
-// History:
-// 2003-06-09	J. Thomas Sapienza, RTi	Initial version.
-// 2003-07-29	JTS, RTi		JWorksheet_RowTableModel changed to
-//					JWorksheet_AbstractRowTableModel.
-// 2003-09-04	SAM, RTi		Add monthlyData boolean to the
-//					constructor.
-// 2004-01-21	JTS, RTi		Removed the row count column and 
-//					changed all the other column numbers.
-// 2004-08-25	JTS, RTi		Based on the value of 'interv' in 
-//					the control file, the header for
-//					the return column says whether it is
-//					a percent or a fraction.
-// 2004-10-28	SAM, RTi		Change setValueAt() to support sort.
-// 2005-03-28	JTS, RTi		Adjusted column sizes.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-// ----------------------------------------------------------------------------
-// EndHeader
 
 package DWR.StateMod;
 
@@ -204,13 +180,13 @@ public Object getValueAt(int row, int col) {
 			StateMod_DelayTable dt = _data.get(row);
 			return dt.getTableID();
 		case COL_DATE:	
-			return new Integer(row + 1);	
+			return Integer.valueOf(row + 1);	
 		case COL_RETURN_AMT:	
 			if (__subDelays != null) {
 				return __subDelays.get(row);
 			}
 			else {
-				return new Double(0.0);
+				return Double.valueOf(0.0);
 			}
 		default:	
 			return "";

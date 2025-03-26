@@ -4,103 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-//------------------------------------------------------------------------------
-// StateMod_InstreamFlow_JFrame - JFrame to edit the instream flow information.
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-// 
-// 06 Oct 1997	Catherine E.		Created initial version of class.
-//		Nutting-Lane, RTi
-// 22 Sep 1998	CEN, RTi		Changed list to multilist
-// 08 Mar 2000	CEN, RTi		Added radio buttons to search
-// 01 Apr 2001	Steven A. Malers, RTi	Change GUI to JGUIUtil.  Add finalize().
-//					Remove import *.
-// 04 May 2001	SAM, RTi		Enable TSView.
-// 15 Aug 2001	SAM, RTi		Select the first item initially.
-//------------------------------------------------------------------------------
-// 2003-06-09	J. Thomas Sapienza, RTi	Initial version from 
-//					SMinsflowsWindow
-// 2003-06-19	JTS, RTi		First functional version.
-// 2003-06-20	JTS, RTi		Constructor now takes a data set as
-//					a parameter, instead of a data set
-//					component.
-// 2003-06-23	JTS, RTi		Opened code related to graphing 
-//					monthly time series.
-// 2003-07-15	JTS, RTi		* Added checkInput() framework for 
-//					validating user input prior to the 
-//					values being saved.
-// 					* Added status bar.
-//					* Changed to use new dataset design.
-// 2003-07-16	JTS, RTi		Added constructor that allows an 
-//					instream flow to be initially selected.
-// 2003-07-17	JTS, RTI		Change so that constructor takes a 
-//					boolean that says whether the form's
-//					data can be modified.
-// 2003-07-23	JTS, RTi		Updated JWorksheet code following
-//					JWorksheet revisions.
-// 2003-08-03	SAM, RTi		* indexOf() is now in StateMod_Util.
-//					* Force title parameter in constructor.
-// 2003-08-16	SAM, RTi		Change the window type to
-//					WINDOW_INSTREAM.
-// 2003-08-26	SAM, RTi		Enable StateMod_DataSet_WindowManager.
-// 2003-08-27	JTS, RTi		Added selectID() to select an ID 
-//					on the worksheet from outside the GUI.
-// 2003-08-29	SAM, RTi		Update due to changed in
-//					StateMod_InstreamFlow.
-// 2003-09-03	JTS, RTi		Removed buttons for selecting time
-//					series, added checkboxes.  
-// 2003-09-04	JTS, RTi		* Changed Daily ID to be a combo box
-//					  and changed its save and load logic.
-//					* Added Data Type field.
-// 2003-09-05	JTS, RTi		Class is now an item listener in 
-//					order to enable/disable graph buttons
-//					based on selected checkboxes.
-// 2003-09-06	SAM, RTi		Fix size problem with graph.
-// 2003-09-08	JTS, RTi		* Added checkTimeSeriesButtonsStates()
-//					  to to properly determine when the
-//					  buttons should be enabled.
-//					* Adjusted the layout.
-// 2003-09-23	JTS, RTi		Uses new StateMod_GUIUtil code for
-//					setting titles.
-// 2004-01-21	JTS, RTi		Updated to use JScrollWorksheet and
-//					the new row headers.
-// 2004-07-15	JTS, RTi		* For data changes, enabled the
-//					  Apply and Cancel buttons through new
-//					  methods in the data classes.
-//					* Changed layout of buttons to be
-//					  aligned in the lower-right.
-// 2004-08-26	JTS, RTi		The apply button was closing the form
-//					instead of just applying changes.  
-//					Corrected.
-// 2004-10-28	SAM, RTi		Update to reflect the table model not
-//					having rights any more.
-// 2005-01-18	JTS, RTi		Removed calls to removeColumn() as 
-//					the table model handles that now.
-// 2006-01-19	JTS, RTi		* Now implements JWorksheet_SortListener
-//					* Reselects the record that was selected
-//					  when the worksheet is sorted.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-//------------------------------------------------------------------------------
-// EndHeader
 
 package DWR.StateMod;
 
@@ -706,41 +625,6 @@ private void displayTSViewJFrame(Object o)
 		Message.printWarning(1,routine,"Error displaying time series (" + e + ").");
 		Message.printWarning(2, routine, e);
 	}
-}
-
-/**
-Clean up before garbage collection.
-*/
-protected void finalize()
-throws Throwable {
-	__searchCriteriaGroup = null;
-	__applyJButton = null;
-	__cancelJButton = null;
-	__graph_JButton = null;
-	__summary_JButton = null;
-	__table_JButton = null;
-	__closeJButton = null;
-	__demandsMonthlyTS = null;
-	__demandsAveMonthlyTS = null;
-	__findNextInsf = null;
-	__helpJButton = null;
-	__demandsDailyTS = null;
-	__demandsEstDailyTS = null;
-	__waterRightsJButton = null;
-	__searchIDJRadioButton = null;
-	__searchNameJRadioButton = null;
-	__downstreamRiverNode = null;
-	__instreamDailyID = null;
-	__instreamFlowStationID = null;
-	__instreamFlowName = null;
-	__upstreamRiverNode = null;
-	__searchID = null;
-	__searchName = null;
-	__worksheet = null;
-	__insflowSwitch = null;
-	__instreamFlowsVector = null;
-	
-	super.finalize();
 }
 
 /**

@@ -4,38 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-// ----------------------------------------------------------------------------
-// StateMod_ReservoirRight_Data_TableModel - table model for displaying 
-//	reservoir right data
-// ----------------------------------------------------------------------------
-// Copyright:   See the COPYRIGHT file
-// ----------------------------------------------------------------------------
-// History:
-//
-// 2005-04-04	J. Thomas Sapienza, RTi	Initial version.
-// 2006-04-11	JTS, RTi		Corrected the classes returned from
-//							getColumnClass().
-// 2007-04-27	Kurt Tometich, RTi		Added getValidators method for check
-//									file and data check implementation.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-// ----------------------------------------------------------------------------
 
 package DWR.StateMod;
 
@@ -249,14 +233,14 @@ public Validator[] getValidators( int col ) {
 	Validator[] no_checks = new Validator[] {};
 	// Reservior right type must be -1 or 1
 	Validator [] right_type = new Validator[] {
-		Validators.isEquals( new Integer( -1 ) ),
-		Validators.isEquals( new Integer( 1 ) ) };
+		Validators.isEquals( Integer.valueOf( -1 ) ),
+		Validators.isEquals( Integer.valueOf( 1 ) ) };
 	Validator [] type_Validators = new Validator[] {
 		Validators.or( right_type ) };
 	// Reservoir fill type must be 1 or 2
 	Validator [] fill_type = new Validator[] {
-		Validators.isEquals( new Integer( 1 ) ),
-		Validators.isEquals( new Integer( 2 ) ) };
+		Validators.isEquals( Integer.valueOf( 1 ) ),
+		Validators.isEquals( Integer.valueOf( 2 ) ) };
 	Validator [] fill_Validators = new Validator[] {
 		Validators.or( fill_type ) };
 		
@@ -294,11 +278,11 @@ public Object getValueAt(int row, int col) {
 		case COL_RIGHT_NAME:	return rr.getName();
 		case COL_STRUCT_ID:	return rr.getCgoto();
 		case COL_ADMIN_NUM:	return rr.getRtem();
-		case COL_DCR_AMT:	return new Double(rr.getDcrres());
-		case COL_ON_OFF:	return new Integer(rr.getSwitch());
-		case COL_ACCOUNT_DIST:	return new Integer(rr.getIresco());
-		case COL_RIGHT_TYPE:	return new Integer(rr.getItyrstr());
-		case COL_FILL_TYPE:	return new Integer(rr.getN2fill());
+		case COL_DCR_AMT:	return Double.valueOf(rr.getDcrres());
+		case COL_ON_OFF:	return Integer.valueOf(rr.getSwitch());
+		case COL_ACCOUNT_DIST:	return Integer.valueOf(rr.getIresco());
+		case COL_RIGHT_TYPE:	return Integer.valueOf(rr.getItyrstr());
+		case COL_FILL_TYPE:	return Integer.valueOf(rr.getN2fill());
 		case COL_OOP_RIGHT:	return rr.getCopid();
 		default:		return "";
 	}
@@ -357,8 +341,7 @@ public void setValueAt(Object value, int row, int col) {
 			else if (value instanceof String) {
 				String onOff = (String)value;
 				int index = onOff.indexOf(" -");
-				ival = new Integer(onOff.substring(0,
-					index)).intValue();
+				ival = Integer.valueOf(onOff.substring(0, index)).intValue();
 				rr.setSwitch(ival);
 			}
 			break;
@@ -370,8 +353,7 @@ public void setValueAt(Object value, int row, int col) {
 			else if (value instanceof String) {
 				String acct = (String)value;
 				int index = acct.indexOf(" -");
-				ival = new Integer(acct.substring(0,
-					index)).intValue();
+				ival = Integer.valueOf(acct.substring(0, index)).intValue();
 				rr.setIresco(ival);
 			}
 			break;			
@@ -383,8 +365,7 @@ public void setValueAt(Object value, int row, int col) {
 			else if (value instanceof String) {
 				String right = (String)value;
 				int index = right.indexOf(" -");
-				ival = new Integer(right.substring(0,
-					index)).intValue();
+				ival = Integer.valueOf(right.substring(0, index)).intValue();
 				rr.setItyrstr(ival);
 			}	
 			break;			
@@ -396,8 +377,7 @@ public void setValueAt(Object value, int row, int col) {
 			else if (value instanceof String) {
 				String fill = (String)value;
 				int index = fill.indexOf(" -");
-				ival = new Integer(fill.substring(0,
-					index)).intValue();
+				ival = Integer.valueOf(fill.substring(0, index)).intValue();
 				rr.setN2fill(ival);
 			}
 			break;			

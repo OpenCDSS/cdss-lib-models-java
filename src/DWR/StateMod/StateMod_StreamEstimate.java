@@ -4,89 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-//------------------------------------------------------------------------------
-// StateMod_StreamEstimate - class derived from StateMod_Data.  Contains
-//	information the stream estimate station file (part of old .ris or new
-//	.ses?)
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-// 
-// 2003-08-14	Steven A. Malers, RTi	Copy StateMod_RiverStation and modify
-//					accordingly.  The two classes are
-//					essentially identical because they are
-//					being read from the same file.
-//					However, these baseflow nodes do not
-//					have historical data.
-// 2003-08-28	SAM, RTi		* Call setDirty() on each object in
-//					  addition to the data component.
-//					* Clean up handling of time series.
-// 2003-09-11	SAM, RTi		Rename class from
-//					StateMod_BaseFlowStation to
-//					StateMod_StreamEstimate and make
-//					appropriate changes throughout.
-// 2003-09-12	SAM, RTi		* Ray Bennett decided to keep one file
-//					  for the baseflow time series so no
-//					  need to split apart.
-//					* Rename processRiverData() to
-//					  processStreamData().
-// 2004-07-06	SAM, RTi		* Fix bug where writing the file was not
-//					  adjusting the path using the working
-//					  directory.
-//					* Add information to the header comments
-//					  to better explain the file contents.
-//					* Overload the constructor to allow
-//					  initialization to default values or
-//					  missing data.
-// 2004-07-10	SAM, RTi		Add the _related_smdata_type and
-//					_related_smdata_type2 data members.
-//					This allows the node types to
-//					be set when the list of stream estimate
-//					stations is read from the network file.
-//					This allows the node type to be properly
-//					set for the last 3 characters in the
-//					name, as has traditionally been done.
-//					This change is made for stream gage and
-//					stream estimate stations because in
-//					order to support old data sets, the
-//					stream estimate stations are combined
-//					with stream gage stations.
-// 2004-07-14	JTS, RTi		* Added acceptChanges().
-//					* Added changed().
-//					* Added clone().
-//					* Added compareTo().
-//					* Added createBackup().
-//					* Added restoreOriginal().
-//					* Now implements Cloneable.
-//					* Now implements Comparable.
-//					* Clone status is checked via _isClone
-//					  when the component is marked as dirty.
-// 2005-04-18	JTS, RTi		Added writeListFile().
-// 2007-04-12	Kurt Tometich, RTi		Added checkComponentData() and
-//									getDataHeader() methods for check
-//									file and data check support.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-
-//------------------------------------------------------------------------------
-// EndHeader
 
 package DWR.StateMod;
 
@@ -316,19 +249,6 @@ public void createBackup() {
 	_original = (StateMod_StreamEstimate)clone();
 	((StateMod_StreamEstimate)_original)._isClone = false;
 	_isClone = true;
-}
-
-/**
-Finalize data for garbage collection.
-*/
-protected void finalize ()
-throws Throwable
-{	
-	_baseflow_MonthTS = null;
-	_baseflow_DayTS = null;
-	_crunidy = null;
-	_georecord = null;
-	super.finalize();
 }
 
 /**

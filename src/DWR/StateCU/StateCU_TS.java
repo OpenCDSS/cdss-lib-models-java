@@ -4,50 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-// ----------------------------------------------------------------------------
-// StateCU_TS - class to read/write StateCU format time series
-// ----------------------------------------------------------------------------
-// History:
-//
-// 2004-02-05	Steven A. Malers, RTi	Initial version to support reading
-//					IWR and WSL files in TSTool.
-//					Copy and modify StateMod_TS.
-// 2004-02-16	SAM, RTi		* Finalize writeTimeSeriesList() to work
-//					  on frost dates.
-//					* Add readTimeSeriesListFromFrost
-//					  DatesFile to support TSTool - just
-//					  pull in code from HBFrostDatesYearTS
-//					  and do minimal cleanup.
-// 2004-04-05	SAM, RTi		* Add EndHeader at the end of the header
-//					  to make it easier to search for the
-//					  data section.
-// 2004-07-11	SAM, RTi		* Optimize the readTimeSeriesList()
-//					  method to read a list based on a
-//					  TSID pattern.
-// 2004-10-12	SAM, RTi		* Fix bug where frost dates file was not
-//					  being read because isFrostDatesFile()
-//					  was not handling missing data in the
-//					  first data record.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-// ----------------------------------------------------------------------------
-// EndHeader
 
 package DWR.StateCU;
 
@@ -1702,13 +1674,13 @@ throws Exception
 			+ "%d     %-12.12s%-24.24s";
 		v.clear();
 		v.add ( cmnt );
-		v.add ( new Integer ( i+1 ));
+		v.add ( Integer.valueOf ( i+1 ));
 		v.add ( tmpid );
 		v.add ( tmptype );
 		v.add ( tmpsource );
 		v.add ( tmpunits );
-		v.add ( new Integer ( ts.getDate1().getYear()));
-		v.add ( new Integer ( ts.getDate2().getYear()));
+		v.add ( Integer.valueOf ( ts.getDate1().getYear()));
+		v.add ( Integer.valueOf ( ts.getDate2().getYear()));
 		v.add ( tmplocation );
 		v.add ( tmpdesc );
 
@@ -1755,7 +1727,7 @@ throws Exception
 
 	double	days32fall, days28fall, days28spring, days32spring;
 	double	missing = -999.0;
-	Double	missing_Double = new Double ( missing );
+	Double	missing_Double = Double.valueOf ( missing );
 	
 	List<Object> iline_v = new Vector<Object>(30);
 	DateTime date = new DateTime ( DateTime.PRECISION_YEAR );
@@ -1772,7 +1744,7 @@ throws Exception
 			// This is always the same...
 
 			iline_format = "%4d %-12.12s";
-			iline_v.add ( new Integer (year));
+			iline_v.add ( Integer.valueOf (year));
 			iline_v.add ( (String)ids.get(j) );
 
 			// Get the data from the time series...

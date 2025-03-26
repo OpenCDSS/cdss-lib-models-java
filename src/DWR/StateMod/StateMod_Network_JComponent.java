@@ -4,19 +4,19 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
@@ -50,80 +50,6 @@ NoticeEnd */
 //
 // TODO SAM 2011-07-09 Need to figure out how to set the overall network limits... can't just use node
 // data because a new network with one node is a singularity.
-// ----------------------------------------------------------------------------
-// StateMod_Network_JComponent - class to control drawing of the network
-// ----------------------------------------------------------------------------
-// Copyright:   See the COPYRIGHT file
-// ----------------------------------------------------------------------------
-// History:
-//
-// 2004-03-16	J. Thomas Sapienza, RTi	Initial version.  
-// 2004-03-17 - 2004-03-22	JTS,RTi	Much more work getting a cleaner-
-//					working version. 
-// 2004-03-23	JTS, RTi		Javadoc'd.
-// 2004-06-30	JTS, RTi		Corrected Java bug caused by zooming
-//					out really far with antialiasing on.
-//					Antialiasing is now only in effect
-//					if the zoom is 100% or greater.
-// 2004-07-07	JTS, RTi		Added printNetworkInfo().
-// 2004-07-12	JTS, RTi		* Added annotations.
-//					* Added links.
-//					* Added capability to find nodes.
-// 2004-10-20	JTS, RTi		Added a black border that is drawn
-//					around the network in the GUI window.
-// 2004-10-21	JTS, RTi		* Added __legendLimitsDetermined
-//					  in order to know when the legend
-//					  limits have been calculated the first
-//					  time.
-//					* The legend is now positioned initially
-//					  (if it has never been positioned in
-//					  a network before) 5% of the total
-//					  network width from the left and 5% of
-//					  the total network height from the
-//					  bottom.
-// 2004-11-11	JTS, RTi		* The margin is now drawn by default and
-//					  automatically turned off when 
-//					  printing, unless in testing mode.
-//					* Antialiasing is turned on in printing.
-//					* Corrected a bug that was causing 
-//					  added nodes to not be able to
-//					  be clicked on in order to select them.
-// 2004-11-15	JTS, RTi		* When zooming out fully, the area 
-//					  outside the network is now drawn in 
-//					  grey.
-//					* Downstream xconfluence nodes are
-//					  now connected to their upstream nodes
-//					  with dotted lines.
-// 2005-04-08	JTS, RTi		saveXML() now takes a parameter that 
-//					will be used to fill in the JFileChooser
-//					filename, if not null.
-// 2005-04-19	JTS, RTi		Added ability to save the network as
-//					list files.
-// 2005-05-23	JTS, RTi		Modified the line-dashing for 
-//					XConfluence nodes so that even as line
-//					widths are scaled up for various zoom
-//					levels, the dashing remains looking
-//					good.
-// 2005-06-01	JTS, RTi		Added the ability to drag multiple nodes
-//					simultaneously.
-// 2005-11-21	JTS, RTi		Renaming a node connected to by a link
-//					was throwing an exception, so the link
-//					information was adjusted to keep up
-//					with nodes that are renamed.
-// 2005-12-20	JTS, RTi		The above fix introduced a new bug
-//					where __links was not being checked to
-//					make sure it is non-null.  This variable
-//					is now checked in all methods for null.
-// 2006-01-03	SAM, RTi		Fix problem with writing lists from the
-//					network.
-// 2006-01-04	JTS, RTi		Added separator to popup menu after
-//					"Find Node".
-// 2006-03-07	JTS, RTi		* Added finalize().
-//					* Add and delete node popup menu items
-//					  now are disabled if running in
-//					  StateModGUI.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-// ----------------------------------------------------------------------------
 
 package DWR.StateMod;
 
@@ -1459,7 +1385,7 @@ private void buildSelectedNodesLimits() {
 			continue;
 		}
 	
-		v.add(new Integer(i));
+		v.add(Integer.valueOf(i));
 	}
 
 	Integer I = null;
@@ -1947,15 +1873,14 @@ private void deleteLink() {
 	List<String> links = new Vector<String>();
 	List<Integer> nums = new Vector<Integer>();	
 
-	// Gather all the links in the network that reference the node
-	// that the popup menu was opened in
+	// Gather all the links in the network that reference the node that the popup menu was opened in.
 	for (int i = 0; i < size; i++) {
 		p = __links.get(i);
 		from = p.getValue("FromNodeID");
 		to = p.getValue("ToNodeID");
 		if (from.equals(id) || to.equals(id)) {
 			links.add("" + from + " -> " + to);
-			nums.add(new Integer(i));
+			nums.add(Integer.valueOf(i));
 		}
 	}
 
@@ -2727,39 +2652,6 @@ Called when a user presses OK on an Add Node dialog.
 protected void endAddNode() {
 	setNetworkChanged (true);
 	forceRepaint();
-}
-
-/**
-Cleans up member variables.
-*/
-public void finalize()
-throws Throwable {
-	__dashes = null;
-	__dots = null;
-	__bufferGraphics = null;
-	__drawingArea = null;
-	IOUtil.nullArray(__dragNodesLimits);
-	__dataLimits = null;
-	__draggedNodeLimits = null;
-	__holdLimits = null;
-	__legendDataLimits = null;
-	IOUtil.nullArray(__nodes);
-	__network = null;
-	__draggedNodes = null;
-	__deleteLinkMenuItem = null;
-	__addNodeMenuItem = null;
-	__deleteNodeMenuItem = null;
-	__annotationPopup = null;
-	__nodePopup = null;
-	__networkPopup = null;
-	__pageFormat = null;
-	__parent = null;
-	__referenceJComponent = null;
-	__holdPaperOrientation = null;
-	__holdPaperSize = null;
-	__annotations = null;
-	__links = null;
-	__undoOperations = null;
 }
 
 /**
@@ -4895,10 +4787,10 @@ private void processAnnotationsFromNetwork()
 		String xs = point.substring(0, index);
 		String ys = point.substring(index + 1, point.length());
 		String position = p.getValue("TextPosition");
-		double x = (new Double(xs)).doubleValue();
-		double y = (new Double(ys)).doubleValue();
+		double x = (Double.valueOf(xs)).doubleValue();
+		double y = (Double.valueOf(ys)).doubleValue();
 
-		int fontSize = new Integer(p.getValue("OriginalFontSize")).intValue();
+		int fontSize = Integer.valueOf(p.getValue("OriginalFontSize")).intValue();
 		fontSize = calculateScaledFont(p.getValue("FontName"), p.getValue("FontStyle"), fontSize, false);
 
 		GRLimits limits = GRDrawingAreaUtil.getTextExtents(
@@ -5534,7 +5426,7 @@ Takes a double and trims its decimal values so that it only has 6 places of prec
 */
 private double toSixDigits(double d) {
 	String s = StringUtil.formatString(d, "%20.6f");
-	Double D = new Double(s);
+	Double D = Double.valueOf(s);
 	return D.doubleValue();
 }
 
@@ -5697,7 +5589,7 @@ protected void updateAnnotation(int nodeNum, HydrologyNode node) {
 		|| !fontStyle.equals(vp.getValue("FontStyle"))
 		) {
 
-		int size = new Integer(p.getValue("OriginalFontSize")).intValue();
+		int size = Integer.valueOf(p.getValue("OriginalFontSize")).intValue();
 		size = calculateScaledFont(p.getValue("FontName"), p.getValue("FontStyle"), size, false);
 		GRLimits limits = GRDrawingAreaUtil.getTextExtents(	__drawingArea, text, GRUnits.DEVICE,
 			p.getValue("FontName"), p.getValue("FontStyle"), size);	
@@ -5715,9 +5607,9 @@ protected void updateAnnotation(int nodeNum, HydrologyNode node) {
 		}
 	
 		String temp = StringUtil.getToken(val, ",", 0, 0);
-		double x = (new Double(temp)).doubleValue();
+		double x = Double.valueOf(temp).doubleValue();
 		temp = StringUtil.getToken(val, ",", 0, 1);
-		double y = (new Double(temp)).doubleValue();
+		double y = Double.valueOf(temp).doubleValue();
 
 		if (position.equalsIgnoreCase("UpperRight")) {
 			vNode.setPosition(x, y, w, h);

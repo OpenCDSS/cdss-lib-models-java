@@ -11,64 +11,15 @@ CDSS Models Java Library is free software:  you can redistribute it and/or modif
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-//-----------------------------------------------------------------------------
-// StateCU_DataSet - an object to manage data in a StateCU data set.
-//-----------------------------------------------------------------------------
-// History:
-//
-// 2003-05-05	Steven A. Malers, RTi	Created class.
-// 2003-06-04	SAM, RTi		* Rename class from CUDataSet to
-//					  StateCU_DataSet.
-//					* Add getTypeName().
-//					* Add readXMLFile() method.
-//					* Add writeXMLFile() method.
-//					* Add the response file as a component.
-// 2003-06-30	SAM, RTi		* Add support for component groups and
-//					  group data components as per the
-//					  StateCU documentation.
-//					* Fold the StateCU_Control class into
-//					  this class since the response and
-//					  control file always go hand in hand.
-//					  Separate read/write methods are still
-//					  offered because the files are
-//					  separate.
-//					* Include iprtysm control file parameter
-//					  as per Erin May 15 email.
-//					* Remove obcout as per Erin July 1
-//					  email.
-//					* Add support for time series and other
-//					  files to enable full support of data
-//					  sets.
-//					* Change isDirty(boolean) to setDirty(),
-//					  consistent with other Java conventions
-//					  (e.g., setEnabled()).
-// 2003-07-13	SAM, RTi		* Extend the class from
-//					  RTi.Util.IO.DataSet to allow more
-//					  flexibility.
-// 2004-02-19	SAM, RTi		* Update based on StateCU 4.35 data set.
-//					* Use new file tags.
-// 2004-03-18	SAM, RTi		* Add well pumping file, similar to
-//					  historical diversions.
-// 2005-01-17	JTS, RTi		Commented out StateCU_FrostTS call
-//					around lines 1550 as it was causing
-//					compile-time errors.
-// 2005-03-29	SAM, RTi		Add sub-components for display only, and
-//					handle specifically in the lookup
-//					methods.  This is done similar to the
-//					StateMod features.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-//-----------------------------------------------------------------------------
-// EndHeader
 
 // FIXME SAM 2009-04-29 Need to remove code related to delay tables since not used by StateCU
 
@@ -633,16 +584,6 @@ throws Exception
 			Message.printWarning ( 2, routine, e );
 		}
 	}
-}
-
-/**
-Finalize before garbage collection.
-@exception Throwable if an error occurs.
-*/
-protected void finalize()
-throws Throwable
-{	__comments = null;
-	super.finalize();
 }
 
 /**

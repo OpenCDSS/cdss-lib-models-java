@@ -4,36 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-// ----------------------------------------------------------------------------
-// StateMod_StreamEstimateCoefficients_Data_TableModel - table model for 
-//	displaying stream estimate station coefficients data
-// ----------------------------------------------------------------------------
-// Copyright:   See the COPYRIGHT file
-// ----------------------------------------------------------------------------
-// History:
-//
-// 2005-04-05	J. Thomas Sapienza, RTi	Initial version.
-// 2007-04-27	Kurt Tometich, RTi		Added getValidators method for check
-//									file and data check implementation.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-// ----------------------------------------------------------------------------
 
 package DWR.StateMod;
 
@@ -277,22 +263,22 @@ private void setupData(List<StateMod_StreamEstimate_Coefficients> data) {
 			__data[COL_ID].add(id);
 	
 			if (j < N) {
-				__data[COL_STREAM_NAME].add(new Double(coeff.getCoefn(j)));
+				__data[COL_STREAM_NAME].add(Double.valueOf(coeff.getCoefn(j)));
 				__data[COL_UPSTREAM_GAGE].add(coeff.getUpper(j));
 			}
 			else {
-				__data[COL_STREAM_NAME].add(new Double(-999));
+				__data[COL_STREAM_NAME].add(Double.valueOf(-999));
 				__data[COL_UPSTREAM_GAGE].add("");
 			}
 
 			if (j < M) {
-				__data[COL_GAIN_TERM_PRO].add(new Double(coeff.getProratnf()));
-				__data[COL_GAIN_TERM_WT].add(new Double(coeff.getCoefm(j)));
+				__data[COL_GAIN_TERM_PRO].add(Double.valueOf(coeff.getProratnf()));
+				__data[COL_GAIN_TERM_WT].add(Double.valueOf(coeff.getCoefm(j)));
 				__data[COL_GAIN_TERM_GAGE_ID].add(coeff.getFlowm(j));
 			}
 			else {
-				__data[COL_GAIN_TERM_PRO].add(new Double(-999));
-				__data[COL_GAIN_TERM_WT].add(new Double(-999));
+				__data[COL_GAIN_TERM_PRO].add(Double.valueOf(-999));
+				__data[COL_GAIN_TERM_WT].add(Double.valueOf(-999));
 				__data[COL_GAIN_TERM_GAGE_ID].add("");
 			}
 			rowCount++;

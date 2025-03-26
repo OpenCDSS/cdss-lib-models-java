@@ -4,84 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-//------------------------------------------------------------------------------
-// StateMod_Data - super class for many of the StateModLib classes
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// Notes:	(1)This class is abstract and cannot be directly 
-//		instantiated.
-//		(2)Derived classes MUST override the toString()function.
-//------------------------------------------------------------------------------
-// History:
-// 
-// 19 Aug 1997	Catherine E.		Created initial version of class.
-//		Nutting-Lane, RTi
-// 07 Jan 1998	CEN, RTi		Adding operational rights type.
-// 11 Feb 1998	CEN, RTi		Adding SMFileData.setDirty to all set
-//					routines.
-// 06 Apr 1998	CEN, RTi		Adding java documentation style
-//					comments.
-// 17 Feb 2001	Steven A. Malers, RTi	Review code as part of upgrades.  Add
-//					finalize.  Add some javadoc.  Set unused
-//					variables to null.  Get rid of debugs
-//					that are no longer necessary.
-//					Alphabetize methods.  Handle null
-//					arguments.  Deprecated some methods that
-//					are now in SMUtil.
-// 2002-09-09	SAM, RTi		Add a comment about the GeoRecord
-//					reference in derived classes to allow
-//					two-way connections between spatial and
-//					StateMod data.
-// 2002-09-19	SAM, RTi		Use isDirty()instead of setDirty()to
-//					indicate edits.
-//------------------------------------------------------------------------------
-// 2003-06-05	J. Thomas Sapienza 	Initial StateMod_ version.
-// 2003-06-12	JTS, RTi		Added MISSING_* data
-// 2003-07-07	SAM, RTi		Handle null data set for cases where the
-//					code is used outside a full StateMod
-//					data set.	
-// 2003-07-16	JTS, RTi		Added indexOf and indexOfName
-// 2003-08-03	SAM, RTi		* Changed isDirty() back to setDirty().
-//					* Remove isMissing(), indexOf(),
-//					  lookup*() methods - they are now in
-//					  StateMod_Util.
-// 2003-10-09	JTS, RTi		* Now implements Cloneable.
-//					* Added clone().
-//					* Added equals().
-//					* Added rudimentary toString().
-//					* Now implements Comparable.
-//					* Added compareTo().
-// 2003-10-15	JTS, RTi		Revised the clone code.
-// 2004-07-14	JTS, RTi		* Added _isClone.
-//					* Added _original.
-//					* Added acceptChanges().
-//					* Added changed().
-//					* Added setDataSet().
-// 2005-04-13	JTS, RTi		Added writeToListFile(), which is used
-//					by subclasses.
-// 2007-04-27	Kurt Tometich, RTi		Fixed some warnings.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-// 2007-05-17	SAM, RTi		Add comment as data member to help with modeling
-//					procedure development.
-//------------------------------------------------------------------------------
 
 package DWR.StateMod;
 
@@ -328,18 +266,6 @@ public boolean equals(StateMod_Data data) {
 }
 
 /**
-Clean up before garbage collection.
-*/
-protected void finalize()
-throws Throwable {
-	_id = null;
-	_name = null;
-	_comment = null;
-	_cgoto = null;
-	_mapLabel = null;
-}
-
-/**
 Return the Cgoto.
 */
 public String getCgoto() {
@@ -525,7 +451,7 @@ Set the ID
 @param d the new ID
 */
 public void setID(double d) {
-	Double D = new Double(d);
+	Double D = Double.valueOf(d);
 	setID(D.toString());
 }
 
@@ -533,7 +459,7 @@ public void setID(double d) {
 Sets the map ID according to contents of aResponse.  However, because one 
 layer may turn the ID on and the next may turn it back off, a check is first 
 done to see if _mapLabel has already been set.  Therefore, before calling 
-setMapLabel in a loop, all _mapLabel members should be set to ""
+setMapLabel in a loop, all _mapLabel members should be set to "".
 */
 /*
 REVISIT(JTS - 2003-06-04)

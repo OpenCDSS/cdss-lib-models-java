@@ -4,90 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-//------------------------------------------------------------------------------
-// StateMod_WellRight - Derived from StateMod_Data class
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-// 
-// 01 Feb 1999	Catherine E.		Created initial version of class.
-//		Nutting-Lane, RTi
-// 19 Mar 2000	Steven A. Malers, RTi	Change some data members and methods to
-//					agree with recent StateMod documentation
-//						dcrwel -> dcrdivw
-//						rtem -> irtem
-// 18 Feb 2001	SAM, RTi		Code review.  Add finalize().  Handle
-//					nulls and set unused variables to null.
-//					Alphabetize methods.  Add ability to
-//					print old style(left-justified)rights
-//					but change default to right-justified.
-//					Change IO to IOUtil.  Remove unneeded
-//					debug messages.
-// 02 Mar 2001	SAM, RTi		Ray says to use F16.5 for rights and
-//					get rid of the 4x.
-// 2001-12-27	SAM, RTi		Update to use new fixedRead()to
-//					improve performance.
-// 2002-09-19	SAM, RTi		Use isDirty()instead of setDirty()to
-//					indicate edits.
-//------------------------------------------------------------------------------
-// 2003-06-04	J. Thomas Sapienza, RTi	Renamed from SMWellRights to 
-//					StateMod_WellRight
-// 2003-06-10	JTS, RTi		* Folded dumpWellRightsFile() into
-//					  writeWellRightsFile()
-//					* Renamed parseWellRightsFile() to
-//					  readWellRightsFile()
-// 2003-06-23	JTS, RTi		Renamed writeWellRightsFile() to
-//					writeStateModFile()
-// 2003-06-26	JTS, RTi		Renamed readWellRightsFile() to
-//					readStateModFile()
-// 2003-08-03	SAM, RTi		Changed isDirty() back to setDirty().
-// 2003-08-28	SAM, RTi		Remove use of linked list since
-//					StateMod_Well maintains a Vector of
-//					rights.
-// 2003-10-09	JTS, RTi		* Implemented Cloneable.
-//					* Added clone().
-//					* Added equals().
-//					* Implemented Comparable.
-//					* Added compareTo().
-// 					* Added equals(Vector, Vector)
-// 2004-09-16	SAM, RTi		* Change so that the read and write
-//					  methods adjust the file path using the
-//					  working directory.
-// 2005-01-17	JTS, RTi		* Added createBackup().
-//					* Added restoreOriginal().
-// 2005-03-10	SAM, RTi		* Clarify the header some for admin #
-//					  and switch.
-// 2005-03-28	JTS, RTi		Corrected wrong class name in 
-//					createBackup().
-// 2005-04-18	JTS, RTi		Added writeListFile().
-// 2007-04-12	Kurt Tometich, RTi		Added checkComponentData() and
-//									getDataHeader() methods for check
-//									file and data check support.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-// 2007-05-14	SAM, RTi		Implement the StateMod_Right interface to make
-//					it easier to handle rights generically in other code.
-// 2007-05-16	SAM, RTi		Add isWellRightFile() to help code like TSTool
-//					generically handle reading.  Add optional comment to output.
-//------------------------------------------------------------------------------
-// EndHeader
 
 package DWR.StateMod;
 
@@ -235,14 +167,6 @@ Constructor
 public StateMod_WellRight() {
 	super();
 	initialize();
-}
-
-/**
-Clean up before garbage collection.
-*/
-protected void finalize()throws Throwable {
-	_irtem = null;
-	super.finalize();
 }
 
 /**
@@ -537,9 +461,9 @@ Strings are compared with case sensitivity.
 @return true if they are equal, false otherwise.
 */
 public boolean x_equalsForOutput(StateMod_WellRight right) {
-	String routine = "";
+	//String routine = "";
 	if ( Message.isDebugOn ) {
-		routine = getClass().getSimpleName() + ".equalsForOutput";
+		//routine = getClass().getSimpleName() + ".equalsForOutput";
 	}
 	// Location identifier must be the same.
 	if ( !getLocationIdentifier().equals(right.getLocationIdentifier()) ) {
@@ -785,7 +709,7 @@ private static List<String> getSummaryCommentList(List<StateMod_WellRight> right
 			}
 		}
 		if ( !found ) {
-			parcelMatchClassList.add ( new Integer(parcelMatchClass));
+			parcelMatchClassList.add ( Integer.valueOf(parcelMatchClass));
 		}
 	}
 	// Now summarize information by class
@@ -1872,8 +1796,8 @@ throws Exception {
 			v.add(right.getName());
 			v.add(right.getCgoto());
 			v.add(right.getIrtem());
-			v.add(new Double(right.getDcrdivw()));
-			v.add(new Integer(right.getSwitch()));
+			v.add(Double.valueOf(right.getDcrdivw()));
+			v.add(Integer.valueOf(right.getSwitch()));
 			iline = StringUtil.formatString(v, format_0);
 			if ( writeDataComments || writeExtendedDataComments) {
 				comment = right.getComment(); // TODO SAM 2016-05-18 Figure out how this is used
