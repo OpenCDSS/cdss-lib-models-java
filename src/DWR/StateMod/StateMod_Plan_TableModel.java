@@ -4,34 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-// ----------------------------------------------------------------------------
-// StateMod_Plan_TableModel - Table model for displaying data in the
-//	plan tables.
-// ----------------------------------------------------------------------------
-// Copyright:   See the COPYRIGHT file
-// ----------------------------------------------------------------------------
-// History:
-// 2006-08-22	Steven A. Malers, RTi	Initial version, based on the
-//					StateMod_Diversion_TableModel.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-// ----------------------------------------------------------------------------
 
 package DWR.StateMod;
 
@@ -220,14 +208,14 @@ public Object getValueAt(int row, int col) {
 		case COL_ID:		return smp.getID();
 		case COL_NAME:		return smp.getName();
 		case COL_RIVER_NODE_ID:	return smp.getCgoto();
-		case COL_ON_OFF:	return new Integer(smp.getSwitch());
-		case COL_TYPE:		return new Integer(smp.getIPlnTyp());
-		case COL_EFFICIENCY:	return new Integer(smp.getPeffFlag());
+		case COL_ON_OFF:	return Integer.valueOf(smp.getSwitch());
+		case COL_TYPE:		return Integer.valueOf(smp.getIPlnTyp());
+		case COL_EFFICIENCY:	return Integer.valueOf(smp.getPeffFlag());
 		case COL_RETURN_FLOW_TABLE:
-					return new Integer(smp.getIPrf());
-		case COL_FAILURE_SWITCH:return new Integer(smp.getIPfail());
+					return Integer.valueOf(smp.getIPrf());
+		case COL_FAILURE_SWITCH:return Integer.valueOf(smp.getIPfail());
 		case COL_INITIAL_STORAGE:
-					return new Double(smp.getPsto1());
+					return Double.valueOf(smp.getPsto1());
 		case COL_SOURCE:	return smp.getPsource();
 		default:	return "";
 	}
@@ -308,9 +296,7 @@ public void setValueAt(Object value, int row, int col)
 			else if (value instanceof String) {
 				String onOff = (String)value;
 				index = onOff.indexOf(" -");
-				ival = new Integer(
-					onOff.substring(0,
-					index)).intValue();
+				ival = Integer.valueOf( onOff.substring(0, index)).intValue();
 				smp.setSwitch(ival);
 			}
 			break;
@@ -322,8 +308,7 @@ public void setValueAt(Object value, int row, int col)
 			else if (value instanceof String) {
 				String iPlnTyp = (String)value;
 				index = iPlnTyp.indexOf(" -");
-				ival = new Integer(
-					iPlnTyp.substring(0, index)).intValue();
+				ival = Integer.valueOf( iPlnTyp.substring(0, index)).intValue();
 				smp.setIPlnTyp(ival);
 			}
 			break;
@@ -338,21 +323,19 @@ public void setValueAt(Object value, int row, int col)
 			else if (value instanceof String) {
 				String iPrf = (String)value;
 				index = iPrf.indexOf(" -");
-				ival = new Integer(
-					iPrf.substring(0, index)).intValue();
+				ival = Integer.valueOf( iPrf.substring(0, index)).intValue();
 				smp.setIPrf(ival);
 			}
 			break;
 		case COL_FAILURE_SWITCH:
 			if (value instanceof Integer) {
 				ival = ((Integer)value).intValue();
-					smp.setIPfail(ival);
+				smp.setIPfail(ival);
 			}
 			else if (value instanceof String) {
 				String iPfail = (String)value;
 				index = iPfail.indexOf(" -");
-				ival = new Integer(
-					iPfail.substring(0, index)).intValue();
+				ival = Integer.valueOf( iPfail.substring(0, index)).intValue();
 				smp.setIPfail(ival);
 			}
 			break;

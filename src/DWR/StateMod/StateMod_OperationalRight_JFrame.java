@@ -4,19 +4,19 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
@@ -686,57 +686,6 @@ private void checkViewButtonState()
 	}
 	__showOnMap_JButton.setEnabled ( mapEnabled );
 	__showOnNetwork_JButton.setEnabled ( networkEnabled );
-}
-
-
-/**
-Clean up before garbage collection.
-*/
-protected void finalize()
-throws Throwable {
-	__searchCriteriaGroup = null;
-	__findNextOpr = null;
-	__helpJButton = null;
-	__closeJButton = null;
-	__applyJButton = null;
-	__cancelJButton = null;
-	__monthlySwitch_JPanel = null;
-	__interveningStructuresWithoutLoss_JPanel = null;
-	__searchIDJRadioButton = null;
-	__searchNameJRadioButton = null;
-	__destination_JComboBox = null;
-	__destinationAccount_JComboBox = null;
-	__source1_JComboBox = null;
-	__source2_JComboBox = null;
-	__source3_JComboBox = null;
-	__source4_JComboBox = null;
-	__source5_JComboBox = null;
-	__sourceAccount1_JComboBox = null;
-	__sourceAccount2_JComboBox = null;
-	__sourceAccount3_JComboBox = null;
-	__sourceAccount4_JComboBox = null;
-	__sourceAccount5_JComboBox = null;
-	__oprAdminNumber_JTextField = null;
-	__oprName_JTextField = null;
-	__oprID_JTextField = null;
-	__oprSwitch_JComboBox = null;
-	__searchID = null;
-	__searchName = null;
-	__worksheet = null;
-	__interveningStructuresWorksheet = null;
-	__ruleTypeSwitch_JComboBox = null;
-	__monthSwitch_JComboBox = null;
-	__dataset = null;
-	__operationalRightsComponent = null;
-	__operationalRights = null;
-	__opr8_JComboBox = null;
-	__sanJuan_JPanel = null;
-	__sanJuanSjmina_JTextField = null;
-	__sanJuanSjrela_JTextField = null;
-	__qdebt_JTextField = null;
-	__qdebtx_JTextField = null;
-
-	super.finalize();
 }
 
 /**

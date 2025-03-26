@@ -4,42 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-// ----------------------------------------------------------------------------
-// StateMod_Well_Data_TableModel - Table model for displaying data for well 
-//	station tables
-// ----------------------------------------------------------------------------
-// Copyright:   See the COPYRIGHT file
-// ----------------------------------------------------------------------------
-// History:
-//
-// 2005-04-04	J. Thomas Sapienza, RTi	Initial version.
-// 2006-04-11	JTS, RTi		Corrected the classes returned from
-//					getColumnClass().
-// 2007-03-29	Kurt Tometich, RTi		Added a getValidators() method
-//									that returns a list of validators
-//									for a given column of data.  This was
-//									added to abstract and simplify obtaining
-//									the types of validation for a given data
-//									type.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-// ----------------------------------------------------------------------------
 
 package DWR.StateMod;
 
@@ -422,15 +402,15 @@ public Object getValueAt(int row, int col)
 		case COL_RIVER_NODE_ID:
 			return well.getCgoto();
 		case COL_SWITCH:
-			return new Integer(well.getSwitch());
+			return Integer.valueOf(well.getSwitch());
 		case COL_DAILY_ID:	
 			return well.getCdividyw();
 		case COL_CAPACITY:	
-			return new Double(well.getDivcapw());
+			return Double.valueOf(well.getDivcapw());
 		case COL_DIVERSION_ID:
 			return well.getIdvcow2();
 		case COL_DEMAND_TYPE:
-			return new Integer(well.getIdvcomw());
+			return Integer.valueOf(well.getIdvcomw());
 		case COL_EFF_ANNUAL:
 			/*
 			double d = well.getDivefcw();
@@ -441,7 +421,7 @@ public Object getValueAt(int row, int col)
 			if (d == 0) {
 				d2 = 0;
 			}			
-			return new Double(d2);
+			return Double.valueOf(d2);
 			*/
 
 			// this is done to prevent -0.00 values
@@ -451,29 +431,29 @@ public Object getValueAt(int row, int col)
 			if (d == 0) {
 				d2 = 0;
 			}			
-			return new Double(d2);			
+			return Double.valueOf(d2);			
 			*/
-			return new Double(well.getDivefcw());
+			return Double.valueOf(well.getDivefcw());
 		case COL_AREA:
-			return new Double(well.getAreaw());
+			return Double.valueOf(well.getAreaw());
 		case COL_USE_TYPE:
-			return new Integer(well.getIrturnw());
+			return Integer.valueOf(well.getIrturnw());
 		case COL_DEMAND_SOURCE:
-			return new Integer(well.getDemsrcw());
+			return Integer.valueOf(well.getDemsrcw());
 		case COL_PRIMARY:	
-			return new Double(well.getPrimary());
-		case COL_EFF_01:	return new Double(well.getDiveff(0));
-		case COL_EFF_02:	return new Double(well.getDiveff(1));
-		case COL_EFF_03:	return new Double(well.getDiveff(2));
-		case COL_EFF_04:	return new Double(well.getDiveff(3));
-		case COL_EFF_05:	return new Double(well.getDiveff(4));
-		case COL_EFF_06:	return new Double(well.getDiveff(5));
-		case COL_EFF_07:	return new Double(well.getDiveff(6));
-		case COL_EFF_08:	return new Double(well.getDiveff(7));
-		case COL_EFF_09:	return new Double(well.getDiveff(8));
-		case COL_EFF_10:	return new Double(well.getDiveff(9));
-		case COL_EFF_11:	return new Double(well.getDiveff(10));
-		case COL_EFF_12:	return new Double(well.getDiveff(11));
+			return Double.valueOf(well.getPrimary());
+		case COL_EFF_01:	return Double.valueOf(well.getDiveff(0));
+		case COL_EFF_02:	return Double.valueOf(well.getDiveff(1));
+		case COL_EFF_03:	return Double.valueOf(well.getDiveff(2));
+		case COL_EFF_04:	return Double.valueOf(well.getDiveff(3));
+		case COL_EFF_05:	return Double.valueOf(well.getDiveff(4));
+		case COL_EFF_06:	return Double.valueOf(well.getDiveff(5));
+		case COL_EFF_07:	return Double.valueOf(well.getDiveff(6));
+		case COL_EFF_08:	return Double.valueOf(well.getDiveff(7));
+		case COL_EFF_09:	return Double.valueOf(well.getDiveff(8));
+		case COL_EFF_10:	return Double.valueOf(well.getDiveff(9));
+		case COL_EFF_11:	return Double.valueOf(well.getDiveff(10));
+		case COL_EFF_12:	return Double.valueOf(well.getDiveff(11));
 		default:	return "";
 	}
 }

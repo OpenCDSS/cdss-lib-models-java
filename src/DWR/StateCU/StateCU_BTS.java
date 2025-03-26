@@ -4,19 +4,19 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
@@ -334,39 +334,27 @@ private String escapeRegExpressionChars ( String s )
 }
 
 /**
-Finalize before garbage collection.
-*/
-protected void finalize ()
-throws Throwable
-{	__fp.close();
-	__fp = null;
-	__tsfile = null;
-	__full_tsfile = null;
-	super.finalize();
-}
-
-/**
 Return the interval base (TimeInterval.MONTH or TimeInterval.DAY).
 @return the data interval base.
 */
-public int getDataIntervalBase ()
-{	return __intervalBase;
+public int getDataIntervalBase () {
+	return __intervalBase;
 }
 
 /**
 Return the first date in the period.
 @return the first date in the period.
 */
-public DateTime getDate1 ()
-{	return __date1;
+public DateTime getDate1 () {
+	return __date1;
 }
 
 /**
 Return the last date in the period.
 @return the last date in the period.
 */
-public DateTime getDate2 ()
-{	return __date2;
+public DateTime getDate2 () {
+	return __date2;
 }
 
 /**
@@ -375,8 +363,8 @@ header.  Only the public parameters are provided (not extra ones that may be use
 Currently only the time series variables of type R (floats) are returned.
 @return the parameter list read from the file header.
 */
-public String [] getTimeSeriesParameters ()
-{	// Create a temporary array for output
+public String [] getTimeSeriesParameters () {
+	// Create a temporary array for output
     String [] temp = new String[__numTimeSeriesVar];
     int paramCount = 0; // count of returned parameters
     for ( int iTimeSeriesVar = 0; iTimeSeriesVar < __numTimeSeriesVar; ++iTimeSeriesVar ) {
@@ -544,7 +532,7 @@ throws IOException
     Object dataValue;
     for ( int iTimeSeriesVar = 0; iTimeSeriesVar < __numTimeSeriesVar; ++iTimeSeriesVar ) {
         if ( __tsVarTypes[iTimeSeriesVar].equals(TYPE_INT) ) {
-            dataValue = new Integer(__fp.readLittleEndianInt() );
+            dataValue = Integer.valueOf(__fp.readLittleEndianInt() );
             if ( __tsVarNames[iTimeSeriesVar].equals(TS_VAR_YEAR) ) {
                 startYear = ((Integer)dataValue).intValue();
             }
@@ -553,7 +541,7 @@ throws IOException
             }
         }
         else if ( __tsVarTypes[iTimeSeriesVar].equals(TYPE_REAL) ) {
-            dataValue = new Float(__fp.readLittleEndianFloat() );
+            dataValue = Float.valueOf(__fp.readLittleEndianFloat() );
         }
         else if ( __tsVarTypes[iTimeSeriesVar].equals(TYPE_CHAR) ) {
             dataValue = __fp.readLittleEndianString1(__tsVarLength[iTimeSeriesVar]).trim();
@@ -734,11 +722,11 @@ throws IOException
     for ( int iStructure = 0; iStructure < __numStructures; ++iStructure ) {
         for ( int iStructureVar = 0; iStructureVar < __numStructureVar; ++iStructureVar ) {
             if ( __structureVarTypes[iStructureVar].equals(TYPE_INT) ) {
-                __structureVarValues[iStructure][iStructureVar] = new Integer(__fp.readLittleEndianInt() );
+                __structureVarValues[iStructure][iStructureVar] = Integer.valueOf(__fp.readLittleEndianInt() );
                 __headerLengthBytes += 4;
             }
             else if ( __structureVarTypes[iStructureVar].equals(TYPE_REAL) ) {
-                __structureVarValues[iStructure][iStructureVar] = new Float(__fp.readLittleEndianFloat() );
+                __structureVarValues[iStructure][iStructureVar] = Float.valueOf(__fp.readLittleEndianFloat() );
                 __headerLengthBytes += 4;
             }
             else if ( __structureVarTypes[iStructureVar].equals(TYPE_CHAR) ) {
@@ -747,8 +735,7 @@ throws IOException
                 __headerLengthBytes += __structureVarLength[iStructureVar];
             }
             else {
-                throw new IOException ( "Structure variable type \"" + __structureVarTypes[iStructureVar] +
-                    "\" is not recognized." );
+                throw new IOException ( "Structure variable type \"" + __structureVarTypes[iStructureVar] + "\" is not recognized." );
             }
             if ( Message.isDebugOn ) {
                 Message.printDebug ( dl, routine, "Structure[" + iStructure + "] Var[" + iStructureVar + "] " +
@@ -924,10 +911,10 @@ throws IOException
         for ( int iTimeStep = 0; iTimeStep < __numTimeSteps; ++iTimeStep ) {
             for ( int iTimeSeriesVar = 0; iTimeSeriesVar < __numTimeSeriesVar; ++iTimeSeriesVar ) {
                 if ( __tsVarTypes[iTimeSeriesVar].equals(TYPE_INT) ) {
-                    dataValue = new Integer(__fp.readLittleEndianInt() );
+                    dataValue = Integer.valueOf(__fp.readLittleEndianInt() );
                 }
                 else if ( __tsVarTypes[iTimeSeriesVar].equals(TYPE_REAL) ) {
-                    dataValue = new Float(__fp.readLittleEndianFloat() );
+                    dataValue = Float.valueOf(__fp.readLittleEndianFloat() );
                 }
                 else if ( __tsVarTypes[iTimeSeriesVar].equals(TYPE_CHAR) ) {
                     dataValue = __fp.readLittleEndianString1(__tsVarLength[iTimeSeriesVar]).trim();
@@ -936,7 +923,7 @@ throws IOException
                     throw new IOException ( "Time series variable type \"" + __tsVarTypes[iTimeSeriesVar] +
                         "\" is not recognized." );
                 }
-                // Increment position by length of variable, for debugging below
+                // Increment position by length of variable, for debugging below.
                 pos += __tsVarLength[iTimeSeriesVar];
                 if ( Message.isDebugOn ) {
                     Message.printDebug ( dl, routine, "Structure[" + iStructure + "] time step [" + iTimeStep +

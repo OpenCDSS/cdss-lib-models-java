@@ -4,73 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-// ----------------------------------------------------------------------------
-// StateMod_Network_JFrame - main JFrame for viewing a network.
-// ----------------------------------------------------------------------------
-// Copyright:   See the COPYRIGHT file
-// ----------------------------------------------------------------------------
-// History:
-//
-// 2004-03-16	J. Thomas Sapienza, RTi	Initial version.  
-// 2004-07-08	JTS, RTi		Added support for multiple page layouts.
-// 2004-08-17	JTS, RTi		Corrected bug where data limits for 
-//					the reference window were not being
-//					set properly when a network was read
-//					in from an XML file.
-// 2004-08-25	JTS, RTi		* Removed deprecated constructors.
-// 					* The constructor that takes a pre-built
-//					  network can check that network for 
-//					  layouts and use them now.
-// 2004-10-20	JTS, RTi		* Reference window was not drawing
-//					  properly, so the way its bounds are
-//					  set when an XML file is read were 
-//					  corrected.
-//					* Renamed some variables to represent
-//					  the fact that the XML file now stores
-//					  the corner points, instead of the
-//					  lower-left point and the network 
-//					  width and height.
-// 2004-11-15	JTS, RTi		Changed the tooltip text for the 1:1
-//					button.
-// 2005-04-08	JTS, RTi		* Added a constructor that allows for
-//					  a new network to be built.
-//					* JFrame now keeps track of the network
-//					  file that it opened and read a network
-//					  from, for saving purposes.
-// 2005-04-11	JTS, RTi		Added 'saveOnExit' flag so that the
-//					network will prompt for it to be
-//					saved when the window is closed.
-// 2005-11-02	JTS, RTi		Changes with how icons are handled:
-//					* IOUtil.release() is used to help test 
-//					  that local-drive icons are never 
-//					  loaded for released apps.
-//					* Debug messages explain where the 
-//					  icons are loaded from.
-// 2006-03-07	JTS, RTi		* Added setInStateModGUI() and
-//					  inStateModGUI().
-//					* Added finalize().
-// 2006-05-01	JTS, RTi		* Corrected bug where the layout combo
-//					  box was not selecting an initial 
-//					  value.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-// ----------------------------------------------------------------------------
 
 package DWR.StateMod;
 
@@ -87,8 +36,8 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.awt.print.PageFormat;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -103,6 +52,8 @@ import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 // Before 2017-07-01 Xerces was used - as of this date rely on built-in XML support in Java
 //import org.apache.xerces.parsers.DOMParser;
@@ -111,7 +62,8 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.sun.org.apache.xerces.internal.parsers.DOMParser;
+// Java 8.
+//import com.sun.org.apache.xerces.internal.parsers.DOMParser;
 
 import cdss.domain.hydrology.network.HydrologyNode;
 
@@ -251,7 +203,7 @@ The font size stored in an XML file.
 private int __fontSize = -1;
 
 /**
-The index in the layout Vector of the currently-selected layout.
+The index in the layout list of the currently-selected layout.
 */
 private int __layoutIndex = 0;
 
@@ -905,7 +857,7 @@ no layouts defined in it.
 */
 private void createFirstLayout() {
 	if (__layouts == null) {
-		__layouts = new Vector<PropList>();
+		__layouts = new ArrayList<>();
 	}
 	PropList main = new PropList("Layout");
 	__id = "Page Layout #" + (__layouts.size() + 1);
@@ -973,50 +925,6 @@ Called when OK is pressed in the add node dialog.
 */
 protected void endAddNode() {
 	__device.endAddNode();
-}
-
-/**
-Cleans up member variables.
-*/
-public void finalize()
-throws Throwable {
-	__deleteButton = null;
-	__defaultLayoutCheckBox = null;
-	__nodeDescriptionTextField = null;
-	__nodeTypeTextField = null;
-	__nodeXYTextField = null;
-	__nodeDBXYTextField = null;
-	__nodeCommonIDTextField = null;
-	__locationJTextField = null;
-	__statusJTextField = null;
-	__infoJButton = null;
-	__panJButton = null;
-	__selectJButton = null;
-	__toolBar = null;
-	__printEntireNetworkJButton = null;
-	__printScreenJButton = null;
-	__refreshJButton = null;
-	__saveEntireNetworkAsImageJButton = null;
-	__saveScreenAsImageJButton = null;
-	__saveXMLJButton = null;
-	__undoJButton = null;
-	__redoJButton = null;
-	__zoomOutJButton = null;
-	__zoomInJButton = null;
-	__zoom1JButton = null;
-	__layoutComboBox = null;
-	__nodeSizeComboBox = null;
-	__orientationComboBox = null;
-	__paperSizeComboBox = null;
-	__printedFontSizeComboBox = null;
-	__device = null;
-	__reference = null;
-	__filename = null;
-	__orient = null;
-	__paperSize = null;
-	__id = null;
-	__layouts = null;
-	super.finalize();
 }
 
 /**
@@ -1365,7 +1273,7 @@ throws Exception {
 		if (elementName.equalsIgnoreCase("StateMod_Network")) {
 			children = docNode.getChildNodes();
 			processStateMod_NetworkNode(docNode);
-			__layouts = new Vector<PropList>();
+			__layouts = new ArrayList<>();
 			if (children != null) {
 				elementName = null;
 				int len = children.getLength();
@@ -1447,19 +1355,19 @@ throws Exception {
 		name = attributeNode.getNodeName();
 		value = attributeNode.getNodeValue();
 		if (name.equalsIgnoreCase("XMin")) {
-			__lx = new Double(value).doubleValue();
+			__lx = Double.valueOf(value).doubleValue();
 			__lxSet = true;
 		}
 		if (name.equalsIgnoreCase("YMin")) {
-			__by = new Double(value).doubleValue();
+			__by = Double.valueOf(value).doubleValue();
 			__bySet = true;
 		}
 		if (name.equalsIgnoreCase("XMax")) {
-			__rx = new Double(value).doubleValue();
+			__rx = Double.valueOf(value).doubleValue();
 			__wSet = true;
 		}
 		if (name.equalsIgnoreCase("YMax")) {
-			__ty = new Double(value).doubleValue();
+			__ty = Double.valueOf(value).doubleValue();
 			__hSet = true;
 		}
 	}
@@ -1477,10 +1385,21 @@ public void readXML(String filename)
 throws Exception {
 	String routine = "StateMod_Network_JFRame.readXML";
 
-	DOMParser parser = null;
+	// Java 8.
+	//DOMParser parser = null;
+	
+	// Java 11.
+	Document doc = null;
 	try {	
-		parser = new DOMParser();
-		parser.parse(filename);
+		// Java 8.
+		//parser = new DOMParser();
+		//parser.parse(filename);
+		
+		// Java 11.
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder builder = factory.newDocumentBuilder();
+		doc = builder.parse(filename);
+		doc.getDocumentElement().normalize();
 	}
 	catch (Exception e) {
 		Message.printWarning(2, routine, "Error reading StateCU Data set \"" + filename + "\"");
@@ -1489,11 +1408,12 @@ throws Exception {
 	}
 
 	// Now get information from the document.  For now don't hold the document as a data member...
-	Document doc = parser.getDocument();
+	// Java 8.
+	//Document doc = parser.getDocument();
 
 	// Loop through and process the document nodes, starting with the root node...
 
-	__layouts = new Vector<PropList>();
+	__layouts = new ArrayList<>();
 	processDocumentNodeForRead(doc);
 
 	StateMod_NodeNetwork network = StateMod_NodeNetwork.readXMLNetworkFile(filename);
@@ -1537,7 +1457,7 @@ throws Exception {
 	
 	PropList p = null;
 	String s = null;
-	List<String> ids = new Vector<String>();
+	List<String> ids = new ArrayList<>();
 	for (int i = 0; i < size; i++) {
 		p = __layouts.get(i);
 		s = p.getValue("IsDefault");
@@ -2201,7 +2121,7 @@ private void setupPaper() {
 	PropList main = null;
 	PropList p = null;
 	String s = null;
-	List<String> ids = new Vector<String>();
+	List<String> ids = new ArrayList<>();
 	for (int i = 0; i < size; i++) {
 		p = __layouts.get(i);
 		s = p.getValue("IsDefault");

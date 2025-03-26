@@ -4,77 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-// ----------------------------------------------------------------------------
-// StateMod_ReservoirAccount_TableModel - table model for displaying reservoir 
-//	account data
-// ----------------------------------------------------------------------------
-// Copyright:   See the COPYRIGHT file
-// ----------------------------------------------------------------------------
-// History:
-// 2003-06-09	J. Thomas Sapienza, RTi	Initial version.
-// 2003-06-11	JTS, RTi		Revised so that it displays real data
-//					instead of dummy data for the main
-//					Reservoir display.
-// 2003-06-13	JTS, RTi		* Created code for displaying the
-//					  area cap and climate data
-//					* Added code to handle editing
-//					  data
-// 2003-06-16	JTS, RTi		* Added code for the reservoir account
-//					  data
-//					* Added code for the reservoir right
-//					  data
-// 2003-06-17	JTS, RTi		Revised javadocs.
-// 2003-07-17	JTS, RTi		Constructor now takes a editable flag
-//					to specify whether the data should be
-//					editable.
-// 2003-07-29	JTS, RTi		JWorksheet_RowTableModel changed to
-//					JWorksheet_AbstractRowTableModel.
-// 2003-08-16	Steven A. Malers, RTi	Update because of changes in the
-//					StateMod_ReservoirClimate class.
-// 2003-08-22	JTS, RTi		* Changed headings for the rights table.
-//					* Changed headings for the owner account
-//					  table.
-//					* Added code to accomodate tables which
-//					  are now using comboboxes for entering
-//					  data.
-// 2003-08-25	JTS, RTi		Added partner table code for saving
-//					data in the reservoir climate gui.
-// 2003-08-28	SAM, RTi		* Change setRightsVector() call to
-//					  setRights().
-//					* Update for changes in
-//					  StateMod_Reservoir.
-// 2003-09-18	JTS, RTi		Added ID column for reservoir
-//					accounts.
-// 2003-10-10	JTS, RTi		* Removed reference to parent reservoir.
-//					* Added getColumnToolTips().
-// 2004-01-21	JTS, RTi		Removed the row count column and 
-//					changed all the other column numbers.
-// 2004-10-28	SAM, RTi		Split code out of
-//					StateMod_Reservoir_TableModel.
-//					Change setValueAt() to support sort.
-//					Define tool tips.
-// 2005-01-21	JTS, RTi		Added ability to display data for either
-//					one or many reservoirs.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-// ----------------------------------------------------------------------------
-// EndHeader
 
 package DWR.StateMod;
 
@@ -307,11 +252,11 @@ public Object getValueAt(int row, int col) {
 		case COL_RESERVOIR_ID:	return rac.getCgoto();
 		case COL_OWNER_ID:	return rac.getID();
 		case COL_OWNER_ACCOUNT:	return rac.getName();
-		case COL_MAX_STORAGE:	return new Double(rac.getOwnmax());
+		case COL_MAX_STORAGE:	return Double.valueOf(rac.getOwnmax());
 		case COL_INITIAL_STORAGE:	
-					return new Double(rac.getCurown());
-		case COL_PRORATE_EVAP:	return new Double(rac.getPcteva());
-		case COL_OWNERSHIP_TIE: return new Integer(rac.getN2own());
+					return Double.valueOf(rac.getCurown());
+		case COL_PRORATE_EVAP:	return Double.valueOf(rac.getPcteva());
+		case COL_OWNERSHIP_TIE: return Integer.valueOf(rac.getN2own());
 		default:	return "";
 	}
 }
@@ -417,7 +362,7 @@ public void setValueAt(Object value, int row, int col)
 				int index=((String)value).indexOf(" -");
 				String s = ((String)value).substring(
 					0, index);
-				dval = (new Double(s)).doubleValue();
+				dval = Double.valueOf(s).doubleValue();
 				rac.setPcteva(dval);
 			}
 			break;
@@ -429,9 +374,7 @@ public void setValueAt(Object value, int row, int col)
 			else if (value instanceof String) {
 				String n2owns = (String)value;
 				int index = n2owns.indexOf(" -");
-				ival = new Integer(
-					n2owns.substring(0,
-					index)).intValue();
+				ival = Integer.valueOf( n2owns.substring(0, index)).intValue();
 				rac.setN2own(ival);
 			}
 			break;

@@ -4,19 +4,19 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
@@ -32,6 +32,9 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Vector;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
 // Before 2017-07-01 used Xerces but Java is now distributed with embedded Xerces
 //import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;
@@ -39,7 +42,8 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.sun.org.apache.xerces.internal.parsers.DOMParser;
+// Java 8.
+//import com.sun.org.apache.xerces.internal.parsers.DOMParser;
 
 import RTi.DMI.DMIUtil;
 import RTi.GR.GRLimits;
@@ -819,15 +823,6 @@ public void fillLocations(StateMod_NodeDataProvider nodeDataProvider, boolean in
 	fillUpstreamLocations();
 
 	finalCheck(lx, by, rx, ty);
-}
-
-/**
-Finalize before garbage collection.
-*/
-protected void finalize()
-throws Throwable
-{
-	super.finalize();
 }
 
 /**
@@ -1732,10 +1727,21 @@ throws Exception {
 	List<HydrologyNode> networkAnnotationList = new Vector<HydrologyNode>(); // List of all annotations read - these are built-in
 													// as opposed to run-time annotations from the StateMod GUI
 
-	DOMParser parser = null;
+	// java 8.
+	//DOMParser parser = null;
+
+	// Java 11.
+	Document doc = null;
 	try {	
-		parser = new DOMParser();
-		parser.parse(filename);
+		// Java 8.
+		//parser = new DOMParser();
+		//parser.parse(filename);
+
+		// Java 11.
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder builder = factory.newDocumentBuilder();
+		doc = builder.parse(filename);
+		doc.getDocumentElement().normalize();
 	}
 	catch (Exception e) {
 		Message.printWarning(2, routine, "Error reading XML Network file \"" + filename + "\"");
@@ -1744,7 +1750,8 @@ throws Exception {
 	}
 
 	// Now get information from the document.  For now don't hold the document as a data member...
-	Document doc = parser.getDocument();
+	// Java 8.
+	//Document doc = parser.getDocument();
 
 	// Loop through and process the document nodes, starting with the root node.
 	// Pass data needed during processing but keep handing within static code
@@ -2077,14 +2084,14 @@ throws Exception {
 		name = attributeNode.getNodeName();
 		value = attributeNode.getNodeValue();
 		if (name.equalsIgnoreCase("AlternateX")) {
-			hnode.setDBX(new Double(value).doubleValue());
+			hnode.setDBX(Double.valueOf(value).doubleValue());
 		}
 		else if (name.equalsIgnoreCase("AlternateY")) {
-			hnode.setDBY(new Double(value).doubleValue());
+			hnode.setDBY(Double.valueOf(value).doubleValue());
 		}
 		else if (name.equalsIgnoreCase("Area")) {
 			area = value;
-			hnode.setArea(new Double(value).doubleValue());
+			hnode.setArea(Double.valueOf(value).doubleValue());
 		}
 		else if (name.equalsIgnoreCase("ComputationalOrder")) {
 			hnode.setComputationalOrder( Integer.decode(value).intValue());
@@ -2113,7 +2120,7 @@ throws Exception {
 			}
 		}		
 		else if (name.equalsIgnoreCase("LabelAngle")) {
-			hnode.setLabelAngle(new Double(value).doubleValue());
+			hnode.setLabelAngle(Double.valueOf(value).doubleValue());
 		}
 		else if (name.equalsIgnoreCase("LabelPosition")) {
 			int div = hnode.getLabelDirection() / 10;
@@ -2156,7 +2163,7 @@ throws Exception {
 		}
 		else if (name.equalsIgnoreCase("Precipitation")) {
 			precip = value;
-			hnode.setPrecip(new Double(value).doubleValue());
+			hnode.setPrecip(Double.valueOf(value).doubleValue());
 		}
 		else if (name.equalsIgnoreCase("ReachCounter")) {
 			hnode.setReachCounter( Integer.decode(value).intValue());
@@ -2193,7 +2200,7 @@ throws Exception {
 				Integer.decode(value).intValue());
 		}						
 		else if (name.equalsIgnoreCase("X")) {
-			hnode.setX(new Double(value).doubleValue());
+			hnode.setX(Double.valueOf(value).doubleValue());
 			// Left...
 			if ( Double.isNaN(extentDataFromNodes[0]) ) {
 				extentDataFromNodes[0] = hnode.getX();
@@ -2210,7 +2217,7 @@ throws Exception {
 			}
 		}
 		else if (name.equalsIgnoreCase("Y")) {
-			hnode.setY(new Double(value).doubleValue());
+			hnode.setY(Double.valueOf(value).doubleValue());
 			// Bottom...
 			if ( Double.isNaN(extentDataFromNodes[1]) ) {
 				extentDataFromNodes[1] = hnode.getY();
@@ -2286,42 +2293,42 @@ throws Exception {
 		name = attributeNode.getNodeName();
 		value = attributeNode.getNodeValue();
 		if (name.equalsIgnoreCase("XMin")) {
-			extentData[0] = new Double(value);
+			extentData[0] = Double.valueOf(value);
 			Message.printStatus(2, routine, "Read Xmin=" + extentData[0] );
 		}
 		else if (name.equalsIgnoreCase("YMin")) {
-			extentData[1] = new Double(value);
+			extentData[1] = Double.valueOf(value);
 			Message.printStatus(2, routine, "Read Ymin=" + extentData[1] );
 		}
 		else if (name.equalsIgnoreCase("XMax")) {
-			extentData[2] = new Double(value);
+			extentData[2] = Double.valueOf(value);
 			Message.printStatus(2, routine, "Read Xmax=" + extentData[2] );
 		}
 		else if (name.equalsIgnoreCase("YMax")) {
-			extentData[3] = new Double(value);
+			extentData[3] = Double.valueOf(value);
 			Message.printStatus(2, routine, "Read Ymax=" + extentData[3] );
 		}
 		else if (name.equalsIgnoreCase("EdgeBufferLeft")) {
-			edgeBuffer[0] = new Double(value);
+			edgeBuffer[0] = Double.valueOf(value);
 			Message.printStatus(2, routine, "Read EdgeBufferLeft=" + edgeBuffer[0] );
 		}
 		else if (name.equalsIgnoreCase("EdgeBufferRight")) {
-			edgeBuffer[1] = new Double(value);
+			edgeBuffer[1] = Double.valueOf(value);
 			Message.printStatus(2, routine, "Read EdgeBufferRight=" + edgeBuffer[1] );
 		}
 		else if (name.equalsIgnoreCase("EdgeBufferTop")) {
-			edgeBuffer[2] = new Double(value);
+			edgeBuffer[2] = Double.valueOf(value);
 			Message.printStatus(2, routine, "Read EdgeBufferTop=" + edgeBuffer[2] );
 		}
 		else if (name.equalsIgnoreCase("EdgeBufferBottom")) {
-			edgeBuffer[3] = new Double(value);
+			edgeBuffer[3] = Double.valueOf(value);
 			Message.printStatus(2, routine, "Read EdgeBufferBottom=" + edgeBuffer[3] );
 		}
 		else if (name.equalsIgnoreCase("LegendX")) {
-			extentData[4] = new Double(value);
+			extentData[4] = Double.valueOf(value);
 		}
 		else if (name.equalsIgnoreCase("LegendY")) {
-			extentData[5] = new Double(value);
+			extentData[5] = Double.valueOf(value);
 		}
 	}
 }

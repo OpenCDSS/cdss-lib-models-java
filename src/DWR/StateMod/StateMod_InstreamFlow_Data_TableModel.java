@@ -4,36 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-// ----------------------------------------------------------------------------
-// StateMod_InstreamFlow_Data_TableModel - Table model for displaying data in 
-//	the Instream Flow station tables
-// ----------------------------------------------------------------------------
-// Copyright:   See the COPYRIGHT file
-// ----------------------------------------------------------------------------
-// History:
-//
-// 2005-03-31	J. Thomas Sapienza, RTi	Initial version.
-// 2007-04-27	Kurt Tometich, RTi		Added getValidators method for check
-//									file and data check implementation.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-// ----------------------------------------------------------------------------
 
 package DWR.StateMod;
 
@@ -216,9 +202,9 @@ public Validator[] getValidators( int col ) {
 	Validator[] no_checks = new Validator[] {};
 	// Data type switch must be 0, 1 or 2.
 	Validator [] data_type = new Validator[] {
-		Validators.isEquals( new Integer( 0 ) ),
-		Validators.isEquals( new Integer( 1 ) ),
-		Validators.isEquals( new Integer( 2 ) ) };
+		Validators.isEquals( Integer.valueOf( 0 ) ),
+		Validators.isEquals( Integer.valueOf( 1 ) ),
+		Validators.isEquals( Integer.valueOf( 2 ) ) };
 	Validator [] data_type_Validators = new Validator[] {
 			Validators.or( data_type ) };
 	
@@ -251,10 +237,10 @@ public Object getValueAt(int row, int col) {
 		case COL_ID: 		return isf.getID();
 		case COL_NAME: 		return isf.getName();
 		case COL_NODE_ID:	return isf.getCgoto();
-		case COL_SWITCH:	return new Integer(isf.getSwitch());
+		case COL_SWITCH:	return Integer.valueOf(isf.getSwitch());
 		case COL_DAILY_ID:	return isf.getCifridy();
 		case COL_DOWN_NODE:	return isf.getIfrrdn();
-		case COL_DEMAND_TYPE:	return new Integer(isf.getIifcom());
+		case COL_DEMAND_TYPE:	return Integer.valueOf(isf.getIifcom());
 		default:		return "";
 	}
 }

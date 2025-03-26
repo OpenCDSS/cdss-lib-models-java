@@ -4,38 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-// ----------------------------------------------------------------------------
-// StateMod_DelayTable_Data_TableModel - class for displaying delay table data
-//	in a jworksheet
-// ----------------------------------------------------------------------------
-// Copyright:   See the COPYRIGHT file
-// ----------------------------------------------------------------------------
-// History:
-// 2005-03-29	J. Thomas Sapienza, RTi	Initial version.
-// 2005-03-31	JTS, RTi		Added the code to put TOTALS lines
-//					in the worksheet.
-// 2007-04-27	Kurt Tometich, RTi		Added getValidators method for check
-//									file and data check implementation.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-// ----------------------------------------------------------------------------
-// EndHeader
 
 package DWR.StateMod;
 
@@ -279,16 +263,16 @@ private void setupData(List<StateMod_DelayTable> data) {
 		num = dt.getNdly();
 		for (int j = 0; j < num; j++) {
 			__data[COL_ID].add(id);
-			__data[COL_DATE].add(new Integer(j + 1));
-			__data[COL_RETURN_AMT].add( new Double(dt.getRet_val(j)));
+			__data[COL_DATE].add(Integer.valueOf(j + 1));
+			__data[COL_RETURN_AMT].add( Double.valueOf(dt.getRet_val(j)));
 			total += dt.getRet_val(j);
-			__rowMap.add(new Integer(rowCount));
+			__rowMap.add(Integer.valueOf(rowCount));
 			rowCount++;
 		}
 
 		__data[COL_ID].add("TOTAL " + id);
-		__data[COL_DATE].add(new Integer(-999));
-		__data[COL_RETURN_AMT].add(new Double(total));
+		__data[COL_DATE].add(Integer.valueOf(-999));
+		__data[COL_RETURN_AMT].add(Double.valueOf(total));
 
 		rowCount++;
 	}

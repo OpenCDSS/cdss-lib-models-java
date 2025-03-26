@@ -4,91 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-//------------------------------------------------------------------------------
-// StateMod_DelayTable - Contains information read from the delay table file.
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-// 
-// 03 Sep 1997	Catherine E.		Created initial version of class.
-//		Nutting-Lane, RTi
-// 24 Mar 1998	CEN, RTi		Added setRet_val.
-// 21 Dec 1998	CEN, RTi		Added throws IOException to read/write
-//					routines.
-// 24 Jan 2000	CEN, RTi		Modified to accommodate Ray's new open
-//					format(not necessarily 12 entries per
-//					line).
-// 14 Mar 2000	CEN, RTi		Extends from SMData now to utilize
-//					search abilities in GUI(need to use ID
-//					field).
-// 17 Feb 2001	Steven A. Malers, RTi	Code review.  Change IO to IOUtil.  Add
-//					finalize().  Handle nulls.  Set to null
-//					when varialbles not used.  Update
-//					javadoc.  Alphabetize methods.
-// 13 Aug 2001	SAM, RTi		Add int to set the units as percent or
-//					fraction.
-// 2002-09-19	SAM, RTi		Use isDirty() instead of setDirty() to
-//					indicate edits.
-//------------------------------------------------------------------------------
-// 2003-06-04	J. Thomas Sapienza, RTi	Renamed from SMDelayTbl to 
-//					StateMod_DelayTable
-// 2003-06-10	JTS, RTi		* Folded dumpDelayTableFile() into
-//					  writeDelayTableFile()
-// 					* Renamed parseDelayTableFile() to
-//					  readDelayTableFile()
-// 2003-06-23	JTS, RTi		Renamed writeDelayTableFile() to
-//					writeStateModFile()
-// 2003-06-26	JTS, RTi		Renamed readDelayTableFile() to
-//					readStateModFile()
-// 2003-07-07	SAM, RTi		* Javadoc data and parameters that were
-//					  not documented.
-//					* Remove MAX_DELAYS - not used anywhere.
-//					* Remove _table_id since the base class
-//					  _id can be used.
-//					* Also set the base class name to the
-//					  same as the ID.
-//					* Check for null data set when reading
-//					  data since when using with StateCU
-//					  in StateDMI there is no StateMod data
-//					  set.
-// 2003-07-15	JTS, RTi		Changed code to use new dataset design.
-// 2003-08-03	SAM, RTi		Change isDirty() back to setDirty().
-// 2004-03-17	SAM, RTi		Add the scale() method to deal with
-//					percent/fraction issues.
-// 2004-07-14	JTS, RTi		* Added acceptChanges().
-//					* Added changed().
-//					* Added clone().
-//					* Added compareTo().
-//					* Added createBackup().
-//					* Added restoreOriginal().
-//					* Now implements Cloneable.
-//					* Now implements Comparable.
-//					* Clone status is checked via _isClone
-//					  when the component is marked as dirty.
-// 2005-04-18	JTS, RTi		Added writeListFile().
-// 2007-04-12	Kurt Tometich, RTi		Added checkComponentData() and
-//									getDataHeader() methods for check
-//									file and data check support.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-//------------------------------------------------------------------------------
 
 package DWR.StateMod;
 
@@ -150,7 +81,7 @@ public void acceptChanges() {
 Add a delay.
 */
 public void addRet_val(double d) {
-	addRet_val(new Double(d));
+	addRet_val(Double.valueOf(d));
 }
 
 /**
@@ -202,7 +133,7 @@ public Object clone() {
 		d._ret_val = new Vector<Double>();
 		int size = _ret_val.size();
 		for ( int i = 0; i < size; i++ ) {
-			d._ret_val.add( new Double(_ret_val.get(i).doubleValue()) );
+			d._ret_val.add( Double.valueOf(_ret_val.get(i).doubleValue()) );
 		}
 	}
 
@@ -321,16 +252,6 @@ public void createBackup() {
 }
 
 /**
-Clean up before garbage collection.
-*/
-protected void finalize()
-throws Throwable {
-	_ret_val = null;
-	_units = null;
-	super.finalize();
-}
-
-/**
 Returns the data column header for the specifically checked data.
 @return Data column header.
  */
@@ -392,7 +313,7 @@ private void initialize() {
 Insert a delay - same as add but the index of where to insert can be given
 */
 public void insertRet_val(double d, int index) {
-	Double D = new Double(d);
+	Double D = Double.valueOf(d);
 	insertRet_val(D, index);
 }
 
@@ -488,11 +409,11 @@ public void setRet_val(List<Double> v) {
 }
 
 public void setRet_val(int index, String str) {
-	setRet_val(index, new Double(str.trim()));
+	setRet_val(index, Double.valueOf(str.trim()));
 }
 
 public void setRet_val(int index, double d) {
-	setRet_val(index, new Double(d));
+	setRet_val(index, Double.valueOf(d));
 }
 	
 public void setRet_val(int index, Double d) {

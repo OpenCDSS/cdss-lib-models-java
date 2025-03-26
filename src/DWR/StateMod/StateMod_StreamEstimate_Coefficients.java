@@ -4,122 +4,30 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-//------------------------------------------------------------------------------
-// StateMod_StreamEstimate_Coefficients - class to store stream estimate
-//				station coefficient information
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-// 
-// 02 Sep 1997	Catherine E.		Created initial version of class.
-//		Nutting-Lane, RTi
-// 11 Feb 1998	CEN, RTi		Added _dataset.setDirty
-//					to all set
-//					routines.
-// 11 Mar 1998	CEN, RTi		Changed class to extend from Object
-//					(default)to StateMod_Data.  Removed utm
-//					abilities(use StateMod_Data's).
-// 04 Aug 1998	Steven A. Malers, RTi	Overload some of the routines for use in
-//					DMIs.  Add SMLocateBaseNode as per
-//					legacy code.
-// 21 Dec 1998	CEN, RTi		Added throws IOException to read/write
-//					routines.
-// 18 Feb 2001	SAM, RTi		Code review.  Clean up javadoc.  Handle
-//					nulls.  Set unused variables to null.
-//					Add finalize.  Alphabetize methods.
-//					Change IO to IOUtil.  Change so Vectors
-//					are initialize sized to 5 rather than
-//					15.  Update SMLocateBaseNode to use
-//					SMUtil for search.
-// 02 May 2001	SAM, RTi		Track down problem with warning reading
-//					baseflow.  Second line of read was
-//					trimming first, which caused the fixed
-//					read to have problems.  Not sure how
-//					the problem got introduced.
-// 2001-12-27	SAM, RTi		Update to use new fixedRead()to
-//					improve performance.
-// 2002-09-12	SAM, RTi		Remove baseflow time series code from
-//					here and move to the SMRiverInfo class,
-//					to handle the time series associated
-//					with .ris nodes.
-// 2002-09-19	SAM, RTi		Use isDirty() instead of setDirty() to
-//					indicate edits.
-//------------------------------------------------------------------------------
-// 2003-06-04	J. Thomas Sapienza, RTI	Renamed from SMRivBaseflows
-// 2003-06-10	JTS, RTi		* Folded dumpRiverBaseFlowsFile() into
-//					  writeRiverBaseFlowsFile()
-//					* Renamed parseRiverBaseFlowsFile() to
-//					  readRiverBaseFlowsFile()
-// 2003-06-23	JTS, RTi		Renamed writeRiverBaseFlowsFile() to
-//					writeStateModFile()
-// 2003-06-26	JTS, RTi		Renamed readRiverBaseFlowsFile() to
-//					readStateModFile()
-// 2003-07-15	JTS, RTi		Changed to use new dataset design.
-// 2003-08-03	SAM, RTi		* Rename class from StateMod_BaseFlows
-//					  to StateMod_BaseFlowCoefficients.
-//					* Changed isDirty() back to setDirty().
-//					* locateIndexFromID() is now in
-//					  StateMod_Util.
-// 2003-09-11	SAM, RTi		Rename class from
-//					StateMod_BaseFlowCoefficents to
-//					StateMod_StreamEstimate_Coefficients.
-// 2003-10-16	SAM, RTi		Remove description since it is not
-//					used in the file and the base class
-//					name could be used if needed.
-// 2004-03-15	JTS, RTi		Put description back in as it is now
-//					used by the makenet code in 
-//					HydroBase_NodeNetwork.
-// 2004-07-12	JTS, RTi		Removed description one more time.
-// 2004-07-14	JTS, RTi		* Added acceptChanges().
-//					* Added changed().
-//					* Added clone().
-//					* Added compareTo().
-//					* Added createBackup().
-//					* Added restoreOriginal().
-//					* Now implements Cloneable.
-//					* Now implements Comparable.
-//					* Clone status is checked via _isClone
-//					  when the component is marked as dirty.
-// 2004-08-13	SAM, RTi		* When writing, adjust file names for
-//					  working directory.
-//					* Handle null _dataset, for use with
-//					  StateDMI.
-//					* For setM() and setN(), if the size is
-//					  set to zero, clear out the data
-//					  vectors - this is used with the
-//					  StateDMI set command.
-// 2005-04-18	JTS, RTi		Added writeListFile().
-// 2007-04-12	Kurt Tometich, RTi		Added checkComponentData() and
-//									getDataHeader() methods for check
-//									file and data check support.
-//------------------------------------------------------------------------------
-// EndHeader
 
 package DWR.StateMod;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import RTi.Util.IO.DataSetComponent;
 import RTi.Util.IO.IOUtil;
@@ -186,7 +94,7 @@ public void acceptChanges() {
 }
 
 public void addCoefm(double d) {
-	addCoefm(new Double(d));
+	addCoefm(Double.valueOf(d));
 }
 
 public void addCoefm(Double d) {
@@ -203,7 +111,7 @@ public void addCoefm(Double d) {
 }
 
 public void addCoefn(double d) {
-	addCoefn(new Double(d));
+	addCoefn(Double.valueOf(d));
 }
 
 public void addCoefn(Double d) {
@@ -256,19 +164,19 @@ public Object clone() {
 	StateMod_StreamEstimate_Coefficients c = (StateMod_StreamEstimate_Coefficients)super.clone();
 	c._isClone = true;
 	// Copy contents of lists...
-	c._coefn = new Vector<Double>(_coefn.size());
+	c._coefn = new ArrayList<>(_coefn.size());
 	for ( int i = 0; i < _coefn.size(); i++ ) {
-		c._coefn.add(new Double(_coefn.get(i).doubleValue()));
+		c._coefn.add(Double.valueOf(_coefn.get(i).doubleValue()));
 	}
-	c._upper = new Vector<String>(_upper.size());
+	c._upper = new ArrayList<>(_upper.size());
 	for ( int i = 0; i < _upper.size(); i++ ) {
 		c._upper.add(_upper.get(i));
 	}
-	c._coefm = new Vector<Double>(_coefm.size());
+	c._coefm = new ArrayList<>(_coefm.size());
 	for ( int i = 0; i < _coefm.size(); i++ ) {
-		c._coefm.add(new Double(_coefm.get(i).doubleValue()));
+		c._coefm.add(Double.valueOf(_coefm.get(i).doubleValue()));
 	}
-	c._flowm = new Vector<String>(_flowm.size());
+	c._flowm = new ArrayList<>(_flowm.size());
 	for ( int i = 0; i < _flowm.size(); i++ ) {
 		c._flowm.add(_flowm.get(i));
 	}
@@ -448,19 +356,6 @@ public void createBackup() {
 }
 
 /**
-Clean up before garbage collection.
-*/
-protected void finalize()
-throws Throwable {
-	_flowX = null;
-	_coefn = null;
-	_upper = null;
-	_coefm = null;
-	_flowm = null;
-	super.finalize();
-}
-
-/**
 Retrieve the coefm corresponding to a particular index.
 */
 public double getCoefm(int index) {
@@ -563,10 +458,10 @@ private void initialize() {
 	_flowX = "";
 	_N = 0;
 	_M = 0;
-	_coefn = new Vector<Double>();
-	_upper = new Vector<String>();
-	_coefm = new Vector<Double>();
-	_flowm = new Vector<String>();
+	_coefn = new ArrayList<>();
+	_upper = new ArrayList<>();
+	_coefm = new ArrayList<>();
+	_flowm = new ArrayList<>();
 	_proratnf = 0;
 }
 
@@ -599,10 +494,10 @@ Add factor to vector of factors to weight the flow for gain.
 */
 public void setCoefm(int index, double str) {
 	if (_coefm.size()< index+1) {
-		addCoefm(new Double(str));
+		addCoefm(Double.valueOf(str));
 	}
 	else {	
-		_coefm.set(index,new Double(str));
+		_coefm.set(index,Double.valueOf(str));
 		if (!_isClone) {
 			if ( _dataset != null ) {
 				_dataset.setDirty( StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS,true);
@@ -625,10 +520,10 @@ Main version.
 */
 public void setCoefn(int index, double str) {
 	if (_coefn.size()< index+1) {
-		addCoefn(new Double(str));
+		addCoefn(Double.valueOf(str));
 	}
 	else {	
-		_coefn.set(index, new Double(str));
+		_coefn.set(index, Double.valueOf(str));
 		if (!_isClone) {
 			if ( _dataset != null ) {
 				_dataset.setDirty( StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS,true);
@@ -814,7 +709,7 @@ public void setUpper(int index, String str) {
 /**
 @return A in instance of StateMod_StreamEstimate_Coefficients from a vector of
 the same, or null if not found.
-@param baseflow Vector of StateMod_BaseFlowCoefficients data.
+@param baseflow list of StateMod_BaseFlowCoefficients data.
 @param id Baseflow node identifier to locate.
 */
 public static StateMod_StreamEstimate_Coefficients locateBaseNode(List<StateMod_StreamEstimate_Coefficients> baseflow, String id) {
@@ -834,10 +729,10 @@ Read stream estimate coefficients and store in a list.
 public static List<StateMod_StreamEstimate_Coefficients> readStateModFile(String filename)
 throws Exception {
 	String routine ="StateMod_StreamEstimate_Coefficients.readStateModFile";
-	List<StateMod_StreamEstimate_Coefficients> theBaseflows = new Vector<StateMod_StreamEstimate_Coefficients>();
+	List<StateMod_StreamEstimate_Coefficients> theBaseflows = new ArrayList<>();
 	
 	String iline = null;
-	List<Object> v = new Vector<Object>(2);	// used to retrieve from fixedRead
+	List<Object> v = new ArrayList<>(2);	// used to retrieve from fixedRead
 	String adnl = null;
 	int [] format_0 = {
 		StringUtil.TYPE_STRING,
@@ -1035,9 +930,9 @@ public static void writeStateModFile(String infile, String outfile,
 		List<StateMod_StreamEstimate_Coefficients> theBaseflows, List<String> newComments)
 throws Exception {
 	String routine = "StateMod_StreamEstimate_Coefficients.writeStateModFile";
-	List<String> commentIndicators = new Vector<String>(1);
+	List<String> commentIndicators = new ArrayList<>(1);
 	commentIndicators.add ( "#" );
-	List<String> ignoredCommentIndicators = new Vector<String>(1);
+	List<String> ignoredCommentIndicators = new ArrayList<>(1);
 	ignoredCommentIndicators.add ( "#>");
 	PrintWriter out = null;
 
@@ -1055,7 +950,7 @@ throws Exception {
 		String format_1 = "%-12.12s        %8d";
 		String format_2 = "%8.3f %-12.12s";
 		String format_3 = "            %8.3f%8d";
-		List<Object> v = new Vector<Object>(2);
+		List<Object> v = new ArrayList<>(2);
 
 		out.println(cmnt + "---------------------------------------------------------------------------");
 		out.println(cmnt +"  StateMod Stream Estimate Station Coefficient Data");
@@ -1108,13 +1003,13 @@ throws Exception {
 			// 1st line
 			v.clear();
 			v.add(bf.getFlowX());
-			v.add(new Integer(bf.getN()));
+			v.add(Integer.valueOf(bf.getN()));
 			iline = StringUtil.formatString(v, format_1);
 			out.print(iline);
 
 			for (int j = 0; j < bf.getN(); j++) {
 				v.clear();
-				v.add(new Double(bf.getCoefn(j)));
+				v.add(Double.valueOf(bf.getCoefn(j)));
 				v.add(bf.getUpper(j));
 				iline = StringUtil.formatString(v, format_2);
 				out.print(iline);
@@ -1123,13 +1018,13 @@ throws Exception {
 	
 			// 2nd line
 			v.clear();
-			v.add(new Double(bf.getProratnf()));
-			v.add(new Integer(bf.getM()));
+			v.add(Double.valueOf(bf.getProratnf()));
+			v.add(Integer.valueOf(bf.getM()));
 			iline = StringUtil.formatString(v, format_3);
 			out.print(iline);
 			for (int j = 0; j < bf.getM(); j++) {
 				v.clear();
-				v.add(new Double(bf.getCoefm(j)));
+				v.add(Double.valueOf(bf.getCoefm(j)));
 				v.add(bf.getFlowm(j));
 				iline = StringUtil.formatString(v, format_2);
 				out.print(iline);
@@ -1171,7 +1066,7 @@ throws Exception {
 		size = data.size();
 	}
 	
-	List<String> fields = new Vector<String>();
+	List<String> fields = new ArrayList<>();
 	fields.add("ID");
 	fields.add("Name");
 	fields.add("UpstreamGage");
@@ -1202,9 +1097,9 @@ throws Exception {
 	int N = 0;
 	PrintWriter out = null;
 	StateMod_StreamEstimate_Coefficients coeff = null;
-	List<String> commentIndicators = new Vector<String>(1);
+	List<String> commentIndicators = new ArrayList<>(1);
 	commentIndicators.add ( "#" );
-	List<String> ignoredCommentIndicators = new Vector<String>(1);
+	List<String> ignoredCommentIndicators = new ArrayList<>(1);
 	ignoredCommentIndicators.add ( "#>");
 	String[] line = new String[fieldCount];
 	String id = null;
@@ -1215,10 +1110,10 @@ throws Exception {
 		// incoming comments so that they are not modified in the calling code.
 		List<String> newComments2 = null;
 		if ( newComments == null ) {
-			newComments2 = new Vector<String>();
+			newComments2 = new ArrayList<>();
 		}
 		else {
-			newComments2 = new Vector<String>(newComments);
+			newComments2 = new ArrayList<>(newComments);
 		}
 		newComments2.add(0,"");
 		newComments2.add(1,"StateMod stream estimate coefficients as a delimited list file.");

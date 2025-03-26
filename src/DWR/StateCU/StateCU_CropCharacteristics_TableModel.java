@@ -4,43 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-// ----------------------------------------------------------------------------
-// StateCU_CropCharacteristics_TableModel - Table model for displaying data for 
-//	crop char tables
-// ----------------------------------------------------------------------------
-// Copyright:   See the COPYRIGHT file
-// ----------------------------------------------------------------------------
-// History:
-// 2003-07-14	J. Thomas Sapienza, RTi	Initial version.
-// 2005-01-21	JTS, RTi		Added the editable flag.
-// 2005-01-24	JTS, RTi		* Removed the row count column because
-//					  worksheets now handle that.
-//					* Added column reference variables.
-// 2005-03-28	JTS, RTi		* Adjusted column sizes.
-//					* Removed the ID column.
-//					* Added tool tips.
-// 2007-01-10   Kurt Tometich, RTi
-// 								Fixed the format for the cropName to 
-//								30 chars instead of 20.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-// ----------------------------------------------------------------------------
 
 package DWR.StateCU;
 
@@ -360,9 +339,9 @@ public Validator[] getValidators( int col ) {
 		Validators.rangeValidator( -1, 101 ) };
 	// The frost date flag must be 0,1 or 2
 	Validator [] frostFlag = new Validator[] {
-		Validators.isEquals( new Integer( 0 ) ),
-		Validators.isEquals( new Integer( 1 ) ),
-		Validators.isEquals( new Integer( 2 ) )};
+		Validators.isEquals( Integer.valueOf( 0 ) ),
+		Validators.isEquals( Integer.valueOf( 1 ) ),
+		Validators.isEquals( Integer.valueOf( 2 ) )};
 	Validator [] frostFlagValidators = new Validator[] {
 		Validators.notBlankValidator(),
 		Validators.or( frostFlag ) };
@@ -445,25 +424,24 @@ public Object getValueAt(int row, int col) {
 			case __COL_NAME: return crop.getName();
 			case __COL_DAY_PCT:			
 				if (__blaneyCriddle == null) {
-					return new Integer( 0 );
+					return Integer.valueOf( 0 );
 				}
 				if (__dayNotPercent) {
-					return new Integer(	__blaneyCriddle.getNckcp(row)); 
+					return Integer.valueOf(	__blaneyCriddle.getNckcp(row)); 
 				}
 				else {
-					return new Integer(	__blaneyCriddle.getNckca(row)); 
+					return Integer.valueOf(	__blaneyCriddle.getNckca(row)); 
 				}
 			case __COL_VALUE:
 				if (__blaneyCriddle == null) {
-					return new Double( 0 );
+					return Double.valueOf( 0 );
 				}
 	
 				if (__dayNotPercent) {
-					return new Double( __blaneyCriddle.getCkcp(row));
+					return Double.valueOf( __blaneyCriddle.getCkcp(row));
 				}
 				else {
-					return new Double( __blaneyCriddle.getCkca(row));
-	
+					return Double.valueOf( __blaneyCriddle.getCkca(row));
 				}
 		}
 	} 
@@ -471,39 +449,39 @@ public Object getValueAt(int row, int col) {
 		switch (col) {
 			case __COL_NAME:	return crop.getName();
 			case __COL_GDATE1:	
-				return new Integer(crop.getGdate1());
+				return Integer.valueOf(crop.getGdate1());
 			case __COL_GDATE2:	
-				return new Integer(crop.getGdate2());
+				return Integer.valueOf(crop.getGdate2());
 			case __COL_GDATE3:	
-				return new Integer(crop.getGdate3());
+				return Integer.valueOf(crop.getGdate3());
 			case __COL_GDATE4:	
-				return new Integer(crop.getGdate4());
+				return Integer.valueOf(crop.getGdate4());
 			case __COL_GDATE5:	
-				return new Integer(crop.getGdate5());
+				return Integer.valueOf(crop.getGdate5());
 			case __COL_GDATES:	
-				return new Integer(crop.getGdates());
+				return Integer.valueOf(crop.getGdates());
 			case __COL_TMOIS1:	
-				return new Double(crop.getTmois1());
+				return Double.valueOf(crop.getTmois1());
 			case __COL_TMOIS2:	
-				return new Double(crop.getTmois2());
+				return Double.valueOf(crop.getTmois2());
 			case __COL_MAD:		
-				return new Double(crop.getMad());
+				return Double.valueOf(crop.getMad());
 			case __COL_IRX:		
-				return new Double(crop.getIrx());
+				return Double.valueOf(crop.getIrx());
 			case __COL_FRX:		
-				return new Double(crop.getFrx());
+				return Double.valueOf(crop.getFrx());
 			case __COL_AWC:		
-				return new Double(crop.getAwc());
+				return Double.valueOf(crop.getAwc());
 			case __COL_APD:		
-				return new Double(crop.getApd());
+				return Double.valueOf(crop.getApd());
 			case __COL_TFLAG1:	
-				return new Integer(crop.getTflg1());
+				return Integer.valueOf(crop.getTflg1());
 			case __COL_TFLAG2:	
-				return new Integer(crop.getTflg2());
+				return Integer.valueOf(crop.getTflg2());
 			case __COL_CUT2:	
-				return new Integer(crop.getCut2());
+				return Integer.valueOf(crop.getCut2());
 			case __COL_CUT3:	
-				return new Integer(crop.getCut3());
+				return Integer.valueOf(crop.getCut3());
 		}
 	}
 	return "";

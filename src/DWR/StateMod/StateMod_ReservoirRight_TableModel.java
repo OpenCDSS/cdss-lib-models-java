@@ -4,82 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-// ----------------------------------------------------------------------------
-// StateMod_ReservoirRight_TableModel - table model for displaying reservoir 
-//	right data
-// ----------------------------------------------------------------------------
-// Copyright:   See the COPYRIGHT file
-// ----------------------------------------------------------------------------
-// History:
-// 2003-06-09	J. Thomas Sapienza, RTi	Initial version.
-// 2003-06-11	JTS, RTi		Revised so that it displays real data
-//					instead of dummy data for the main
-//					Reservoir display.
-// 2003-06-13	JTS, RTi		* Created code for displaying the
-//					  area cap and climate data
-//					* Added code to handle editing
-//					  data
-// 2003-06-16	JTS, RTi		* Added code for the reservoir account
-//					  data
-//					* Added code for the reservoir right
-//					  data
-// 2003-06-17	JTS, RTi		Revised javadocs.
-// 2003-07-17	JTS, RTi		Constructor now takes a editable flag
-//					to specify whether the data should be
-//					editable or not.
-// 2003-07-29	JTS, RTi		JWorksheet_RowTableModel changed to
-//					JWorksheet_AbstractRowTableModel.
-// 2003-08-16	Steven A. Malers, RTi	Update because of changes in the
-//					StateMod_ReservoirClimate class.
-// 2003-08-22	JTS, RTi		* Changed headings for the rights table.
-//					* Changed headings for the owner account
-//					  table.
-//					* Added code to accomodate tables which
-//					  are now using comboboxes for entering
-//					  data.
-// 2003-08-25	JTS, RTi		Added partner table code for saving
-//					data in the reservoir climate gui.
-// 2003-08-28	SAM, RTi		* Change setRightsVector() call to
-//					  setRights().
-//					* Update for changes in
-//					  StateMod_Reservoir.
-// 2003-09-18	JTS, RTi		Added ID column for reservoir
-//					accounts.
-// 2003-10-10	JTS, RTi		* Removed reference to parent reservoir.
-//					* Added getColumnToolTips().
-// 2004-01-21	JTS, RTi		Removed the row count column and 
-//					changed all the other column numbers.
-// 2004-10-28	SAM, RTi		Split code out of
-//					StateMod_Reservoir_TableModel.
-//					Change setValueAt() to support sort.
-//					Add tool tips.
-// 2005-01-20	JTS, RTi		Added ability to display data for either
-//					one or many reservoirs.
-// 2005-03-28	JTS, RTi		* Changed Struct ID to a String field.
-//					* Adjusted column sizes.
-//					* Added flag to tell whether this 
-//					  is being used in a data JFrame or not.
-// 2006-04-11	JTS, RTi		Corrected the classes returned from
-//					getColumnClass().
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-// ----------------------------------------------------------------------------
 
 package DWR.StateMod;
 
@@ -99,8 +39,7 @@ extends JWorksheet_AbstractRowTableModel<StateMod_ReservoirRight> {
 /**
 Number of columns in the table model.  For table models that display rights 
 for a single reservoir, the tables only have 10 columns.  Table models that
-display rights for 1+ reservoirs have 11.  The variable is modified in the
-constructor.
+display rights for 1+ reservoirs have 11.  The variable is modified in the constructor.
 */
 private int __COLUMNS = 10;
 
@@ -406,11 +345,11 @@ public Object getValueAt(int row, int col) {
 		case COL_RIGHT_NAME:	return rr.getName();
 		case COL_STRUCT_ID:	return rr.getCgoto();
 		case COL_ADMIN_NUM:	return rr.getRtem();
-		case COL_DCR_AMT:	return new Double(rr.getDcrres());
-		case COL_ON_OFF:	return new Integer(rr.getSwitch());
-		case COL_ACCOUNT_DIST:	return new Integer(rr.getIresco());
-		case COL_RIGHT_TYPE:	return new Integer(rr.getItyrstr());
-		case COL_FILL_TYPE:	return new Integer(rr.getN2fill());
+		case COL_DCR_AMT:	return Double.valueOf(rr.getDcrres());
+		case COL_ON_OFF:	return Integer.valueOf(rr.getSwitch());
+		case COL_ACCOUNT_DIST:	return Integer.valueOf(rr.getIresco());
+		case COL_RIGHT_TYPE:	return Integer.valueOf(rr.getItyrstr());
+		case COL_FILL_TYPE:	return Integer.valueOf(rr.getN2fill());
 		case COL_OOP_RIGHT:	return rr.getCopid();
 		default:		return "";
 	}
@@ -487,8 +426,7 @@ public void setValueAt(Object value, int row, int col) {
 			else if (value instanceof String) {
 				String onOff = (String)value;
 				int index = onOff.indexOf(" -");
-				ival = new Integer(onOff.substring(0,
-					index)).intValue();
+				ival = Integer.valueOf(onOff.substring(0, index)).intValue();
 				rr.setSwitch(ival);
 			}
 			break;
@@ -500,8 +438,7 @@ public void setValueAt(Object value, int row, int col) {
 			else if (value instanceof String) {
 				String acct = (String)value;
 				int index = acct.indexOf(" -");
-				ival = new Integer(acct.substring(0,
-					index)).intValue();
+				ival = Integer.valueOf(acct.substring(0, index)).intValue();
 				rr.setIresco(ival);
 			}
 			break;			
@@ -513,8 +450,7 @@ public void setValueAt(Object value, int row, int col) {
 			else if (value instanceof String) {
 				String right = (String)value;
 				int index = right.indexOf(" -");
-				ival = new Integer(right.substring(0,
-					index)).intValue();
+				ival = Integer.valueOf(right.substring(0, index)).intValue();
 				rr.setItyrstr(ival);
 			}	
 			break;			
@@ -526,8 +462,7 @@ public void setValueAt(Object value, int row, int col) {
 			else if (value instanceof String) {
 				String fill = (String)value;
 				int index = fill.indexOf(" -");
-				ival = new Integer(fill.substring(0,
-					index)).intValue();
+				ival = Integer.valueOf(fill.substring(0, index)).intValue();
 				rr.setN2fill(ival);
 			}
 			break;			

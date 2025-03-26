@@ -4,64 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-// ----------------------------------------------------------------------------
-// StateMod_Network_NodeProperties_JDialog -
-// ----------------------------------------------------------------------------
-// Copyright:   See the COPYRIGHT file
-// ----------------------------------------------------------------------------
-// History:
-//
-// 2004-04-15	J. Thomas Sapienza, RTi	Initial version.  
-// 2004-07-09	JTS, RTi		Removed Baseflow and Import type nodes
-//					as they will be specified with the 
-//					import and baseflow properties now.
-// 2004-07-12	JTS, RTi		Added support for XConfluence nodes.
-// 2004-12-20	JTS, RTi		Changed how node labels are numbered
-//					so that Makenet networks display
-//					properly.
-// 2005-06-13	JTS, RTi		Properties now prints out the IDs
-//					of upstream and downstream nodes.
-// 2005-12-07	JTS, RTi		* When showing the properties for
-//					  reservoir nodes, the Reservoir 
-//					  Direction combo box and label was 
-//					  being overwritten by the first 
-//					  Upstream Node line.  Corrected.
-//					* Corrected a bug causing null pointer
-//					  errors when showing the downstream 
-//					  nodes for the End node.
-// 2005-12-20	JTS, RTi		Reservoir direction label problem from
-//					2005-12-07 was only half solved -- nodes
-//					that were not originally reservoirs when
-//					the properties dialog was opened still
-//					had problems.
-// 2006-02-21	JTS, RTi		Fixed a bug that was resulting in 
-//					baseflow and import booleans always 
-//					being set to false if "Cancel" was
-//					pressed.
-// 2006-03-07	JTS, RTi		* If running in StateModGUI, important
-//					  fields are now noneditable.
-//					* Added finalize().
-// 2006-04-18	JTS, RTi		__nodes is no longer finalized in this
-//					class.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-// ----------------------------------------------------------------------------
 
 package DWR.StateMod;
 
@@ -375,12 +333,12 @@ private void applyClicked() {
 		dirty = true;
 	}
 	
-	__nodes[__nodeNum].setX((new Double(x)).doubleValue());
+	__nodes[__nodeNum].setX(Double.valueOf(x).doubleValue());
 	if (!x.equals(__origX)) {
 		dirty = true;
 	}
 		
-	__nodes[__nodeNum].setY((new Double(y)).doubleValue());
+	__nodes[__nodeNum].setY(Double.valueOf(y).doubleValue());
 	if (!y.equals(__origY)) {
 		dirty = true;
 	}
@@ -400,13 +358,12 @@ private void applyClicked() {
 		dirty = true;
 	}
 
-	__nodes[__nodeNum].setPrecip(
-		(new Double(precip)).doubleValue());
+	__nodes[__nodeNum].setPrecip( Double.valueOf(precip).doubleValue());
 	if (!precip.equals(__origPrecipitation)) {
 		dirty = true;
 	}
 
-	__nodes[__nodeNum].setArea((new Double(area)).doubleValue());
+	__nodes[__nodeNum].setArea(Double.valueOf(area).doubleValue());
 	if (!area.equals(__origArea)) {
 		dirty = true;
 	}
@@ -531,8 +488,8 @@ Called when cancel is pressed -- reverts any changes made to the node.
 */
 private void cancelClicked() {
 	__nodes[__nodeNum].setCommonID(__origID);
-	__nodes[__nodeNum].setX((new Double(__origX)).doubleValue());
-	__nodes[__nodeNum].setY((new Double(__origY)).doubleValue());
+	__nodes[__nodeNum].setX(Double.valueOf(__origX).doubleValue());
+	__nodes[__nodeNum].setY(Double.valueOf(__origY).doubleValue());
 	__nodes[__nodeNum].setDescription(__origDesc);
 	__nodes[__nodeNum].setIsNaturalFlow(__origNaturalFlow);
 	__nodes[__nodeNum].setType(__origIType);
@@ -655,41 +612,6 @@ private void checkValidity() {
 		__okButton.setEnabled(true);
 		__applyButton.setEnabled(true);
 	}
-}
-
-/**
-Cleans up member variables.
-*/
-public void finalize()
-throws Throwable {
-	// DO NOT DO THE FOLLOWING:
-	// RTi.Util.IO.IOUtil.nullArray(__nodes);
-	// That will result in the array being nulled in the calling code.
-	__applyButton = null;
-	__okButton = null;
-	__isNaturalFlowCheckBox = null;
-	__isImportCheckBox = null;
-	__reservoirDirectionLabel = null;
-	__descriptionTextField = null;
-	__idTextField = null;
-	__xTextField = null;
-	__yTextField = null;
-	__areaTextField = null;
-	__precipitationTextField = null;
-	__labelPositionComboBox = null;
-	__reservoirDirectionComboBox = null;
-	__typeComboBox = null;
-	__parent = null;
-	__origArea = null;
-	__origDesc = null;
-	__origDir = null;
-	__origID = null;
-	__origPrecipitation = null;
-	__origResDir = null;
-	__origType = null;
-	__origX = null;
-	__origY = null;
-	super.finalize();
 }
 
 /**

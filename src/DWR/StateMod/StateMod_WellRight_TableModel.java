@@ -4,46 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-// ----------------------------------------------------------------------------
-// StateMod_WellRight_TableModel - Table model for displaying data for well
-//	right tables
-// ----------------------------------------------------------------------------
-// Copyright:   See the COPYRIGHT file
-// ----------------------------------------------------------------------------
-// History:
-// 2003-06-09	J. Thomas Sapienza, RTi	Initial version.
-// 2003-06-10	JTS, RTi		* Added 'right' fields.
-//					* Added 'return flow' fields.
-// 2003-07-29	JTS, RTi		JWorksheet_RowTableModel changed to
-//					JWorksheet_AbstractRowTableModel.
-// 2003-08-29	Steven A. Malers, RTi	Update for changes in StateMod_Well.
-// 2003-10-13	JTS, RTi		Removed references to parent well.
-// 2004-01-22	JTS, RTi		Removed the row count column and 
-//					changed all the other column numbers.
-// 2004-10-28	SAM, RTi		Split out code from
-//					StateMod_Well_TableModel.
-// 2004-10-28	SAM, RTi		Change setValueAt() to support sort.
-// 2005-01-20	JTS, RTi		Added ability to display data for either
-//					one or many wells.
-// 2005-03-28	JTS, RTi		Adjusted column sizes.
-// ----------------------------------------------------------------------------
 
 package DWR.StateMod;
 
@@ -421,11 +397,11 @@ public Object getValueAt(int row, int col) {
 		case COL_RIGHT_NAME: return wellr.getName();
 		case COL_STRUCT_ID: return wellr.getCgoto();
 		case COL_ADMIN_NUM: return wellr.getIrtem();
-		case COL_DCR_AMT: return new Double(wellr.getDcrdivw());
-		case COL_ON_OFF: return new Integer(wellr.getSwitch());
-		case COL_PARCEL_YEAR: return new Integer(wellr.getParcelYear());
-		case COL_PARCEL_CLASS: return new Integer(wellr.getParcelMatchClass());
-		case COL_PARCEL_ID: return new Integer(wellr.getParcelID());
+		case COL_DCR_AMT: return Double.valueOf(wellr.getDcrdivw());
+		case COL_ON_OFF: return Integer.valueOf(wellr.getSwitch());
+		case COL_PARCEL_YEAR: return Integer.valueOf(wellr.getParcelYear());
+		case COL_PARCEL_CLASS: return Integer.valueOf(wellr.getParcelMatchClass());
+		case COL_PARCEL_ID: return Integer.valueOf(wellr.getParcelID());
 		case COL_COLLECTION_TYPE: return wellr.getCollectionType();
 		case COL_COLLECTION_PART_TYPE: return wellr.getCollectionPartType();
 		case COL_COLLECTION_PART_ID: return wellr.getCollectionPartId();
@@ -456,7 +432,7 @@ public Object getValueAt(int row, int col) {
 		case COL_X_APEX_CFS: return wellr.getXYieldApexGPM()*.002228;
 		case COL_X_WELL_FRACTION: return wellr.getXFractionYield();
 		case COL_X_DITCH_FRACTION: return wellr.getXDitchFraction();
-		case COL_X_YIELD_PRORATED_GPM: return new Double(wellr.getDcrdivw()/.002228);
+		case COL_X_YIELD_PRORATED_GPM: return Double.valueOf(wellr.getDcrdivw()/.002228);
 		default: return "";
 	}
 }
@@ -526,8 +502,7 @@ public void setValueAt(Object value, int row, int col) {
 			break;
 		case COL_DCR_AMT:
 			if (value instanceof String) {
-				try {	dval = (new Double(
-						(String)value)).doubleValue();
+				try {	dval = Double.valueOf( (String)value).doubleValue();
 				}
 				catch (Exception e) {
 					Message.printWarning(2, "setValue", e);
@@ -546,8 +521,7 @@ public void setValueAt(Object value, int row, int col) {
 			else if (value instanceof String) {
 				String onOff = (String)value;
 				int index = onOff.indexOf(" -");
-				ival = new Integer(
-					onOff.substring(0, index)).intValue();
+				ival = Integer.valueOf( onOff.substring(0, index)).intValue();
 				wellr.setSwitch(ival);
 			}
 			break;				

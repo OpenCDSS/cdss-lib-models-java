@@ -5,46 +5,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-// ----------------------------------------------------------------------------
-// StateMod_ReturnFlow_TableModel - Table model for displaying data in the
-//	return flow tables (for return flows and depletions).
-// ----------------------------------------------------------------------------
-// Copyright:   See the COPYRIGHT file
-// ----------------------------------------------------------------------------
-// History:
-// 2003-06-09	J. Thomas Sapienza, RTi	Initial version.
-// 2003-06-10	JTS, RTi		* Added the right fields
-//					* Added the return flow fields
-// 2003-06-17	JTS, RTi		Return flow data is now displayable
-//					and editable.
-// 2003-07-17	JTS, RTi		Constructor has switch to determine
-//					if data is editable or not.
-// 2003-07-29	JTS, RTi		JWorksheet_RowTableModel changed to
-//					JWorksheet_AbstractRowTableModel.
-// 2003-10-07	JTS, RTi		Changed 'readOnly' to 'editable'.
-// 2004-01-21	JTS, RTi		Removed the row count column and 
-//					changed all the other column numbers.
-// 2004-10-26	SAM, RTi		Split code out of the
-//					StateMod_Diversion_TableModel class.
-// 					Change setValueAt() to support sort.
-// ----------------------------------------------------------------------------
 
 package DWR.StateMod;
 
@@ -53,8 +29,7 @@ import java.util.List;
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 
 /**
-This table model display data in return flow tables for use with return flows
-and depletions.
+This table model display data in return flow tables for use with return flows and depletions.
 */
 @SuppressWarnings("serial")
 public class StateMod_ReturnFlow_TableModel 
@@ -254,8 +229,8 @@ public Object getValueAt(int row, int col) {
 	StateMod_ReturnFlow rf = (StateMod_ReturnFlow)_data.get(row);
 	switch (col) {
 		case COL_RIVER_NODE:	return rf.getCrtnid();
-		case COL_RETURN_PCT:	return new Double(rf.getPcttot());
-		case COL_RETURN_ID:	return new Integer(rf.getIrtndl());
+		case COL_RETURN_PCT:	return Double.valueOf(rf.getPcttot());
+		case COL_RETURN_ID:	return Integer.valueOf(rf.getIrtndl());
 		default:		return "";
 	}
 }

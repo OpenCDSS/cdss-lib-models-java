@@ -4,19 +4,19 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2024 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
@@ -211,21 +211,21 @@ public Object getValueAt(int row, int col) {
 		case COL_ID: return opr.getID();
 		case COL_NAME: return opr.getName();
 		case COL_ADMINISTRATION_NUMBER: return opr.getRtem();
-		case COL_MONTH_STR_SWITCH: return new Integer(opr.getDumx());
-		case COL_ONOFF_SWITCH: return new Integer(opr.getSwitch());
+		case COL_MONTH_STR_SWITCH: return Integer.valueOf(opr.getDumx());
+		case COL_ONOFF_SWITCH: return Integer.valueOf(opr.getSwitch());
 		case COL_DEST: return opr.getCiopde();
 		case COL_DEST_ACCOUNT: return opr.getIopdes();
 		case COL_SOURCE1: return opr.getCiopso1();
 		case COL_SOURCE1_ACCOUNT: return opr.getIopsou1();
 		case COL_SOURCE2: return opr.getCiopso2();
 		case COL_SOURCE2_ACCOUNT: return opr.getIopsou2();
-		case COL_RULE_TYPE: return new Integer(opr.getItyopr());
+		case COL_RULE_TYPE: return Integer.valueOf(opr.getItyopr());
 		case COL_REUSE_PLAN: return opr.getCreuse();
 		case COL_DIVERSION_TYPE: return opr.getCdivtyp();
-		case COL_LOSS: return new Double(opr.getOprLoss());
-		case COL_LIMIT: return new Double(opr.getOprLimit());
-		case COL_START_YEAR: return new Integer(opr.getIoBeg());
-		case COL_END_YEAR: return new Integer(opr.getIoEnd());
+		case COL_LOSS: return Double.valueOf(opr.getOprLoss());
+		case COL_LIMIT: return Double.valueOf(opr.getOprLimit());
+		case COL_START_YEAR: return Integer.valueOf(opr.getIoBeg());
+		case COL_END_YEAR: return Integer.valueOf(opr.getIoEnd());
 		case COL_MONTHLY_SWITCH:
 			int [] imonsw = opr.getImonsw();
 			if ( (imonsw == null) || (imonsw.length == 0) ) {

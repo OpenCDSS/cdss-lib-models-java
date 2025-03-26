@@ -4,60 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-// ----------------------------------------------------------------------------
-// StateMod_Diversion_TableModel - Table model for displaying data in the
-//	diversion station tables.
-// ----------------------------------------------------------------------------
-// Copyright:   See the COPYRIGHT file
-// ----------------------------------------------------------------------------
-// History:
-// 2003-06-09	J. Thomas Sapienza, RTi	Initial version.
-// 2003-06-10	JTS, RTi		* Added the right fields
-//					* Added the return flow fields
-// 2003-06-17	JTS, RTi		Return flow data is now displayable
-//					and editable.
-// 2003-07-17	JTS, RTi		Constructor has switch to determine
-//					if data is editable or not.
-// 2003-07-29	JTS, RTi		JWorksheet_RowTableModel changed to
-//					JWorksheet_AbstractRowTableModel.
-// 2003-10-07	JTS, RTi		Changed 'readOnly' to 'editable'.
-// 2004-01-21	JTS, RTi		Removed the row count column and 
-//					changed all the other column numbers.
-// 2004-10-26	SAM, RTi		Split out the diversion right and
-//					return flow table models into separate
-//					classes.
-// 2004-01-13	JTS, RTi		* Added the boolean 'compactForm' to the
-//					  constructor parameters for specifying
-//					  whether to only display the ID and 
-//					  name or to show all fields.
-//					* Added the soil water content and
-//					  efficiencies fields.
-// 2005-01-17	JTS, RTi		Added new columns for data display in
-//					the StateMod DMI.
-// 2005-01-20	JTS, RTi		Following review:
-//					* Removed some fields.
-//					* Renamed some fields.
-// 2005-03-28	JTS, RTi		Changed the column count to reflect the
-//					actual number of columns in the GUI.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-// ----------------------------------------------------------------------------
 
 package DWR.StateMod;
 
@@ -308,29 +270,29 @@ public Object getValueAt(int row, int col) {
 		case COL_ID:		return smd.getID();
 		case COL_NAME:		return smd.getName();
 		case COL_RIVER_NODE_ID:	return smd.getCgoto();
-		case COL_ON_OFF:	return new Integer(smd.getSwitch());
-		case COL_CAPACITY:	return new Double(smd.getDivcap());
+		case COL_ON_OFF:	return Integer.valueOf(smd.getSwitch());
+		case COL_CAPACITY:	return Double.valueOf(smd.getDivcap());
 		case COL_REPLACE_RES_OPTION:
-					return new Integer(smd.getIreptype());
+					return Integer.valueOf(smd.getIreptype());
 		case COL_DAILY_ID:	return smd.getCdividy();
 		case COL_USER_NAME:	return smd.getUsername();
-		case COL_DEMAND_TYPE:	return new Integer(smd.getIdvcom());
-		case COL_EFF_ANNUAL:	return new Double(smd.getDivefc());
-		case COL_AREA:		return new Double(smd.getArea());
-		case COL_USE_TYPE:	return new Integer(smd.getIrturn());
-		case COL_DEMAND_SOURCE:	return new Integer(smd.getDemsrc());
-		case COL_EFF_01:	return new Double(smd.getDiveff(0));
-		case COL_EFF_02:	return new Double(smd.getDiveff(1));
-		case COL_EFF_03:	return new Double(smd.getDiveff(2));
-		case COL_EFF_04:	return new Double(smd.getDiveff(3));
-		case COL_EFF_05:	return new Double(smd.getDiveff(4));
-		case COL_EFF_06:	return new Double(smd.getDiveff(5));
-		case COL_EFF_07:	return new Double(smd.getDiveff(6));
-		case COL_EFF_08:	return new Double(smd.getDiveff(7));
-		case COL_EFF_09:	return new Double(smd.getDiveff(8));
-		case COL_EFF_10:	return new Double(smd.getDiveff(9));
-		case COL_EFF_11:	return new Double(smd.getDiveff(10));
-		case COL_EFF_12:	return new Double(smd.getDiveff(11));
+		case COL_DEMAND_TYPE:	return Integer.valueOf(smd.getIdvcom());
+		case COL_EFF_ANNUAL:	return Double.valueOf(smd.getDivefc());
+		case COL_AREA:		return Double.valueOf(smd.getArea());
+		case COL_USE_TYPE:	return Integer.valueOf(smd.getIrturn());
+		case COL_DEMAND_SOURCE:	return Integer.valueOf(smd.getDemsrc());
+		case COL_EFF_01:	return Double.valueOf(smd.getDiveff(0));
+		case COL_EFF_02:	return Double.valueOf(smd.getDiveff(1));
+		case COL_EFF_03:	return Double.valueOf(smd.getDiveff(2));
+		case COL_EFF_04:	return Double.valueOf(smd.getDiveff(3));
+		case COL_EFF_05:	return Double.valueOf(smd.getDiveff(4));
+		case COL_EFF_06:	return Double.valueOf(smd.getDiveff(5));
+		case COL_EFF_07:	return Double.valueOf(smd.getDiveff(6));
+		case COL_EFF_08:	return Double.valueOf(smd.getDiveff(7));
+		case COL_EFF_09:	return Double.valueOf(smd.getDiveff(8));
+		case COL_EFF_10:	return Double.valueOf(smd.getDiveff(9));
+		case COL_EFF_11:	return Double.valueOf(smd.getDiveff(10));
+		case COL_EFF_12:	return Double.valueOf(smd.getDiveff(11));
 		default:	return "";
 	}
 }
@@ -426,9 +388,7 @@ public void setValueAt(Object value, int row, int col)
 			else if (value instanceof String) {
 				String onOff = (String)value;
 				index = onOff.indexOf(" -");
-				ival = new Integer(
-					onOff.substring(0,
-					index)).intValue();
+				ival = Integer.valueOf( onOff.substring(0, index)).intValue();
 				smd.setSwitch(ival);
 			}
 			break;
@@ -438,13 +398,12 @@ public void setValueAt(Object value, int row, int col)
 		case COL_REPLACE_RES_OPTION:
 			if (value instanceof Integer) {
 				ival = ((Integer)value).intValue();
-					smd.setIreptype(ival);
+				smd.setIreptype(ival);
 			}
 			else if (value instanceof String) {
 				String ireptyp = (String)value;
 				index = ireptyp.indexOf(" -");
-				ival = new Integer(
-					ireptyp.substring(0, index)).intValue();
+				ival = Integer.valueOf( ireptyp.substring(0, index)).intValue();
 				smd.setIreptype(ival);
 			}
 			break;
@@ -462,8 +421,7 @@ public void setValueAt(Object value, int row, int col)
 			else if (value instanceof String) {
 				String idvcom = (String)value;
 				index = idvcom.indexOf(" -");
-				ival = new Integer(
-					idvcom.substring(0, index)).intValue();
+				ival = Integer.valueOf( idvcom.substring(0, index)).intValue();
 				smd.setIdvcom(ival);
 			}
 			break;
@@ -481,8 +439,7 @@ public void setValueAt(Object value, int row, int col)
 			else if (value instanceof String) {
 				String irturn = (String)value;
 				index = irturn.indexOf(" -");
-				ival = new Integer(
-					irturn.substring(0, index)).intValue();
+				ival = Integer.valueOf( irturn.substring(0, index)).intValue();
 				smd.setIrturn(ival);
 			}
 			break;
@@ -494,8 +451,7 @@ public void setValueAt(Object value, int row, int col)
 			else if (value instanceof String) {
 				String demsrc = (String)value;
 				index = demsrc.indexOf(" -");
-				ival = new Integer(
-					demsrc.substring(0, index)).intValue();
+				ival = Integer.valueOf( demsrc.substring(0, index)).intValue();
 				smd.setDemsrc(ival);
 			}
 			break;

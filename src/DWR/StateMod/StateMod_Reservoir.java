@@ -4,166 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-//------------------------------------------------------------------------------
-// StateMod_Reservoir - class derived from StateMod_Data.  Contains information 
-//	read from the reservoir file.
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-// 
-// 27 Aug 1997	Catherine E.		Created initial version of class.
-//		Nutting-Lane, RTi
-// 21 Dec 1998	CEN, RTi		Added throws IOException to read/write
-//					routines.
-// 25 Oct 1999	CEN, RTi		Adding daily id.
-// 10 Nov 1999	CEN, RTi		Added time series pointers and set/get
-//					routines for ts similar to diversions
-// 19 Feb 2001	Steven A. Malers, RTi	Code review.  Clean up javadoc.  Add
-//					finalize.  Handle nulls and set unused
-//					variables to null.  Alphabetize methods.
-//					Change IO to IOUtil.  Add a switch to
-//					allow printing with or without daily
-//					data.  Update output header.  Change
-//					area capacity output to be printed with
-//					numbers 1... rather than 0...
-// 02 Mar 2001	SAM, RTi		Change reservoir curve number back to
-//					start with zero but make sure the
-//					zero record has zeros all the way
-//					across to allow interpolation.
-//					Add insertAreaCapAt()to allow
-//					insertion.
-// 22 Aug 2001	SAM, RTi		When writing the reservoir area/capacity
-//					file, if the area or capacity is less
-//					than 100, write to 2 decimal points.
-//					Otherwise, write as before.  This
-//					prevents StateMod from complaining.
-//					Print counter for curve to 3 digits.
-// 2001-12-27	SAM, RTi		Update to use new fixedRead()to
-//					improve performance.
-// 2002-09-09	SAM, RTi		Add GeoRecord reference to allow 2-way
-//					connection between spatial and StateMod
-//					data.
-// 2002-09-19	SAM, RTi		Use isDirty() instead of setDirty() to
-//					indicate edits.
-// 2002-11-01	SAM, RTi		Minor revision to add description of
-//					first line to the output header.
-//------------------------------------------------------------------------------
-// 2003-06-04	J. Thomas Sapienza	Renamed from SMReservoir to 
-//					StateMod_Reservoir
-// 2003-06-10	JTS, RTi		* Folded dumpReservoirFile() into
-//					  writeReservoirFile()
-//					* Renamed parseReservoirFile() to
-//					  readReservoirFile()
-// 2003-06-23	JTS, RTi		Renamed writeReservoirFile() to
-//					writeStateModFile()
-// 2003-06-26	JTS, RTi		Renamed readReservoirFile() to
-//					readStateModFile()
-// 2003-07-15	JTS, RTi		Changed to use new dataset design.
-// 2003-08-03	SAM, RTi		Changed isDirty() back to setDirty().
-// 2003-08-15	SAM, RTi		* Changed GeoRecordNoSwing() to
-//					  GeoRecord.
-//					* Change StateMod_Climate to
-//					  StateMod_ReservoirClimate.
-// 2003-08-18	SAM, RTi		* Clean up the data members and method
-//					  names for time series - daily were
-//					  not being properly handled.
-//					* Add hasXXXTS() to indicate whether the
-//					  reservoir has climate data time
-//					  series.
-//					* Add getXXXTS() to get climate time
-//					  series.
-//					* Change so StateMod_ReservoirClimate
-//					  uses the StateMod_Data base class for
-//					  the identifiers.
-// 2003-08-28	SAM, RTi		* Change water rights to be a simple
-//					  Vector, not a linked list.
-//					* Call setDirty() for the individual
-//					  objects as well as the component.
-//					* Remove data members for numbers of
-//					  items - these can be determined from
-//					  the data Vectors as needed.
-//					* Clean up Javadoc.
-//					* Alphabetize the methods.
-//					* Change getRes* setRes* to remove the
-//					  "Res" - it is redundant.
-// 2003-09-18	SAM, RTi		Change reservoir accounts to use the
-//					base class for the name and assign
-//					sequential integers for the account
-//					ID.
-// 2003-10-10	SAM, RTi		Add disconnectRights().
-// 2003-10-15	SAM, RTi		Change some initial values to agree
-//					with the old SMGUI for new instance.
-// 2004-06-05	SAM, RTi		* Add methods to handle collections,
-//					  similar to StateCU locations.
-// 2004-07-02	SAM, RTi		* Overload the constructor to indicate
-//					  whether reasonable defaults should be
-//					  assigned.
-//					* Add getRdateChoices() and
-//					  getRdateDefault() to help provide
-//					  information for GUIs.
-//					* Add getIresswChoices() and
-//					  getIresswDefault() to help provide
-//					  information for GUIs.
-// 2004-07-14	JTS, RTi		* Added acceptChanges().
-//					* Added changed().
-//					* Added clone().
-//					* Added compareTo().
-//					* Added createBackup().
-//					* Added restoreOriginal().
-//					* Now implements Cloneable.
-//					* Now implements Comparable.
-//					* Clone status is checked via _isClone
-//					  when the component is marked as dirty.
-// 2004-09-09	SAM, RTi		When reading and writing, adjust the
-//					file paths using the working directory.
-// 2004-11-12	SAM, RTi		Remove "Fill #" from second line in
-//					output header.
-// 2005-02-01	SAM, RTi		The writeStateModFile() method was
-//					automatically adding a dead storage
-//					account as the last account, if dead
-//					storage was specified, and it was
-//					decrementing the account numbers by the
-//					dead storage value.  Remove this code
-//					and include options in StateDMI -
-//					handling in the write method is
-//					confusing.
-// 2005-03-30	JTS, RTi		* Added getCollectionPartType().
-//					* Added getCollectionYears().
-// 2005-04-18	JTS, RTi		Added writeListFile().
-// 2005-04-19	JTS, RTi		Added writeCollectionListFile().
-// 2005-05-06	SAM, RTi		Correct a couple of typos in StateMod
-//					data set components for writing the
-//					delimited files.
-// 2006-06-13	SAM, RTi		Change the names of secondary list files
-//					to be more appropriate.
-// 2006-08-15	SAM, RTi		Fix so that if target time series file
-//					has one time series for a reservoir,
-//					then assign to the maximum target and
-//					leave the minimum as null.
-// 2007-04-12	Kurt Tometich, RTi		Added checkComponentData() and
-//									getDataHeader() methods for check
-//									file and data check support.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-//------------------------------------------------------------------------------
-// EndHeader
 
 package DWR.StateMod;
 
@@ -2210,8 +2066,8 @@ throws Exception {
 			v.add(res.getID());
 			v.add(res.getName());
 			v.add(res.getCgoto());
-			v.add(new Integer(res.getSwitch()));
-			v.add(new Double(res.getRdate()));
+			v.add(Integer.valueOf(res.getSwitch()));
+			v.add(Double.valueOf(res.getRdate()));
 			if (useDailyData) {
 				v.add(res.getCresdy());
 			}
@@ -2227,14 +2083,14 @@ throws Exception {
 				Message.printDebug(50, routine, "nevap: " + nevap + " nptpx: " + nptpx);
 			}
 			v.clear();
-			v.add(new Double(res.getVolmin()));
-			v.add(new Double(res.getVolmax()));
-			v.add(new Double(res.getFlomax()));
-			v.add(new Double(res.getDeadst()));
-			v.add(new Integer(res.getNowner()));
-			v.add(new Integer(nevap));
-			v.add(new Integer(nptpx));
-			v.add(new Integer(res.getNrange()));
+			v.add(Double.valueOf(res.getVolmin()));
+			v.add(Double.valueOf(res.getVolmax()));
+			v.add(Double.valueOf(res.getFlomax()));
+			v.add(Double.valueOf(res.getDeadst()));
+			v.add(Integer.valueOf(res.getNowner()));
+			v.add(Integer.valueOf(nevap));
+			v.add(Integer.valueOf(nptpx));
+			v.add(Integer.valueOf(res.getNrange()));
 			iline = StringUtil.formatString(v, format_1);
 			out.println(iline);
 	
@@ -2253,10 +2109,10 @@ throws Exception {
 				}
 				v.clear();
 				v.add(desc);
-				v.add(new Double(own.getOwnmax()));
-				v.add(new Double(own.getCurown()));
-				v.add(new Double(own.getPcteva()));
-				v.add(new Integer(own.getN2own()));
+				v.add(Double.valueOf(own.getOwnmax()));
+				v.add(Double.valueOf(own.getCurown()));
+				v.add(Double.valueOf(own.getPcteva()));
+				v.add(Integer.valueOf(own.getN2own()));
 				iline = StringUtil.formatString(v, format_2);
 				out.println(iline);
 			}
@@ -2274,7 +2130,7 @@ throws Exception {
 					v.clear();
 					v.add("Evaporation");
 					v.add(clmt.getID());
-					v.add(new Double(clmt.getWeight()));
+					v.add(Double.valueOf(clmt.getWeight()));
 					iline = StringUtil.formatString(v, format_4);
 					out.println(iline);
 				}
@@ -2291,7 +2147,7 @@ throws Exception {
 					v.clear();
 					v.add("Precipitatn");
 					v.add(clmt.getID());
-					v.add(new Double(clmt.getWeight()));
+					v.add(Double.valueOf(clmt.getWeight()));
 					iline = StringUtil.formatString(v, format_4);
 					out.println(iline);
 				}

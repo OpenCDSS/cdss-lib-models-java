@@ -4,56 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-// ----------------------------------------------------------------------------
-// StateMod_InstreamFlow_TableModel - Table model for displaying data in the
-//	Instream Flow station tables
-// ----------------------------------------------------------------------------
-// Copyright:   See the COPYRIGHT file
-// ----------------------------------------------------------------------------
-// History:
-// 2003-06-09	J. Thomas Sapienza, RTi	Initial version.
-// 2003-06-10	JTS, RTi		Added right fields.
-// 2003-06-19	JTS, RTi		Table model now displays actual data.
-// 2003-07-29	JTS, RTi		JWorksheet_RowTableModel changed to
-//					JWorksheet_AbstractRowTableModel.
-// 2003-08-29	Steven A. Malers, RTi	Change setRightsVector() call to
-//					setRights().
-// 2003-10-13	JTS, RTi		* Added getColumnToolTips().
-//					* Removed reference to the parent
-//					  instream flow.
-// 2004-01-21	JTS, RTi		Removed the row count column and 
-//					changed all the other column numbers.
-// 2004-08-26	JTS, RTi		The on/off field now accepts combo box
-//					values as well as integers.
-// 2004-10-28	SAM, RTi		Remove water rights code since a
-//					separate table model is now used for
-//					rights.
-// 					Change setValueAt() to support sort.
-// 2005-01-18	JTS, RTi		* Added 3 new columns (daily id,
-//					  downstream node, data type).
-//					* Added compactForm option to limit
-//					  how many columns are displayed.
-// 2005-01-20	JTS, RTi		Renamed a field to COL_DEMAND_TYPE.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-// ----------------------------------------------------------------------------
-// EndHeader
 
 package DWR.StateMod;
 
@@ -257,7 +223,7 @@ public Object getValueAt(int row, int col) {
 		case COL_NAME: 		return isf.getName();
 		case COL_DAILY_ID:	return isf.getCifridy();
 		case COL_DOWN_NODE:	return isf.getIfrrdn();
-		case COL_DEMAND_TYPE:	return new Integer(isf.getIifcom());
+		case COL_DEMAND_TYPE:	return Integer.valueOf(isf.getIifcom());
 		default:		return "";
 	}
 }

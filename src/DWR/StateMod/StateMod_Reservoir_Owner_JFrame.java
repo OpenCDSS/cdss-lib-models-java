@@ -4,69 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-//------------------------------------------------------------------------------
-// StateMod_Reservoir_Owner_JFrame - dialog to edit a reservoir's 
-//	ownership information
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-// 
-// 24 Dec 1997	Catherine E.		Created initial version of class
-//		Nutting-Lane, RTi
-// 25 Feb 1998	CEN, RTi		Added header information
-// 01 Apr 2001	Steven A. Malers, RTi	Change GUI to JGUIUtil.  Add finalize().
-//					Remove import *.
-//------------------------------------------------------------------------------
-// 2003-06-09	J. Thomas Sapienza, RTi	Initial swing version from 
-//					SMresOwnersFrame.
-// 2003-06-16	JTS, RTi		Javadoc'd.
-// 2003-07-15	JTS, RTi		* Added status bar.
-//					* Changed to use new dataset design.
-// 2003-07-17	JTS, RTI		Change so that constructor takes a 
-//					boolean that says whether the form's
-//					data can be modified.
-// 2003-07-23	JTS, RTi		Updated JWorksheet code following
-//					JWorksheet revisions.
-// 2003-08-03	SAM, RTi		Changed isDirty() back to setDirty().
-// 2003-08-29	SAM, RTi		Update due to changes in
-//					StateMod_Reservoir.
-// 2003-09-19	JTS, RTi		Account ID is automatically generated
-//					upon adding a new account.
-// 2003-09-23	JTS, RTi		Uses new StateMod_GUIUtil code for
-//					setting titles.
-// 2003-10-13	JTS, RTi		* Worksheet now uses multiple-line
-//					  headers.
-// 					* Added saveData().
-//					* Added checkInput().
-//					* Added apply and cancel buttons.
-// 2004-01-21	JTS, RTi		Updated to use JScrollWorksheet and
-//					the new row headers.
-// 2004-07-15	JTS, RTi		Changed layout of buttons to be
-//					aligned in the lower-right.
-// 2004-10-28	SAM, RTi		Use the table model specific to account
-//					data.
-// 2005-01-21	JTS, RTi		Table model constructor changed.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-//------------------------------------------------------------------------------
-// EndHeader
 
 package DWR.StateMod;
 
@@ -191,11 +144,9 @@ public void actionPerformed(ActionEvent e) {
 			anAccount.setID(1);
 		}
 		else {
-			StateMod_ReservoirAccount lastAccount = 
-				(StateMod_ReservoirAccount)
-				__worksheet.getLastRowData();
+			StateMod_ReservoirAccount lastAccount = (StateMod_ReservoirAccount)__worksheet.getLastRowData();
 			String id = lastAccount.getID();
-			anAccount.setID("" +((new Integer(id)).intValue() + 1));
+			anAccount.setID("" + Integer.valueOf(id).intValue() + 1);
 		}
 		__worksheet.addRow(anAccount);
 		__worksheet.scrollToLastRow();					
@@ -271,10 +222,10 @@ private int checkInput() {
 		id = acct.getID();
 
 		if (i == 0) {
-			lastID = (new Integer(id)).intValue();
+			lastID = Integer.valueOf(id).intValue();
 		}
 		else {
-			currID = (new Integer(id)).intValue();
+			currID = Integer.valueOf(id).intValue();
 			if (currID > (lastID + 1)) {
 				warning += "\nOwner ID values must be "
 					+ "consecutive (row #" + (i) + " is " 
@@ -419,20 +370,6 @@ private String fillN2owns(int n2own) {
 	}
 }
 */
-
-/**
-Clean up before garbage collection.
-*/
-protected void finalize()
-throws Throwable {
-	__currentRes = null;
-	__worksheet = null;
-	__addOwner = null;
-	__deleteOwner = null;
-	__helpJButton = null;
-	__closeJButton = null;
-	super.finalize();
-}
 
 /**
 Responds to key pressed events; does nothing.

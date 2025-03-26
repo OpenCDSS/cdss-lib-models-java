@@ -4,54 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-// ----------------------------------------------------------------------------
-// StateMod_Response_TableModel - table model for displaying the response
-//	table
-// ----------------------------------------------------------------------------
-// Copyright:   See the COPYRIGHT file
-// ----------------------------------------------------------------------------
-// History:
-// 2003-09-10	J. Thomas Sapienza, RTi	Initial version.
-// 2003-09-15	JTS, RTi		Group name is now displayed along with
-//					component name in the table model.
-// 2003-09-18 	JTS, RTi		* Directory information is no longer
-//					  shown in the first row of the model
-//					* Only visible components are shown.
-// 2003-10-13 	Steven A. Malers, RTi	* Modify headers to be more appropriate.
-//					* Don't show the component number -
-//					  the table model now has two columns.
-// 2004-01-21	JTS, RTi		Removed the row count column and 
-//					changed all the other column numbers.
-// 2004-06-22	JTS, RTi		Added new column to show dirty status
-//					of all components.
-// 2004-08-25	JTS, RTi		* Split the first column into two:
-//					  data set group and data set component.
-//					* Modified column now only marks if
-//					  something has changed.
-//					* Browsed-for filenames are converted 
-//					  to relative paths of the main 
-//					  directory.
-// 2004-10-28	SAM, RTi		Change setValueAt() to support sort.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-// ----------------------------------------------------------------------------
-// EndHeader
 
 package DWR.StateMod;
 
@@ -133,7 +101,7 @@ throws Exception {
 			// below because it must always be in the GUI.
 			if (dsc.getComponentType() != StateMod_DataSet.COMP_RESPONSE 
 				&& dsc.isVisible()) {
-				ints.add(new Integer(dsc.getComponentType()));
+				ints.add(Integer.valueOf(dsc.getComponentType()));
 			}
 		}
 	}

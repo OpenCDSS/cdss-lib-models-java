@@ -4,84 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-// ----------------------------------------------------------------------------
-// StateMod_Reservoir_TableModel - table model for displaying reservoir 
-//	station data
-// ----------------------------------------------------------------------------
-// Copyright:   See the COPYRIGHT file
-// ----------------------------------------------------------------------------
-// History:
-// 2003-06-09	J. Thomas Sapienza, RTi	Initial version.
-// 2003-06-11	JTS, RTi		Revised so that it displays real data
-//					instead of dummy data for the main
-//					Reservoir display.
-// 2003-06-13	JTS, RTi		* Created code for displaying the
-//					  area cap and climate data
-//					* Added code to handle editing
-//					  data
-// 2003-06-16	JTS, RTi		* Added code for the reservoir account
-//					  data
-//					* Added code for the reservoir right
-//					  data
-// 2003-06-17	JTS, RTi		Revised javadocs.
-// 2003-07-17	JTS, RTi		Constructor now takes a editable flag
-//					to specify whether the data should be
-//					editable or not.
-// 2003-07-29	JTS, RTi		JWorksheet_RowTableModel changed to
-//					JWorksheet_AbstractRowTableModel.
-// 2003-08-16	Steven A. Malers, RTi	Update because of changes in the
-//					StateMod_ReservoirClimate class.
-// 2003-08-22	JTS, RTi		* Changed headings for the rights table.
-//					* Changed headings for the owner account
-//					  table.
-//					* Added code to accomodate tables which
-//					  are now using comboboxes for entering
-//					  data.
-// 2003-08-25	JTS, RTi		Added partner table code for saving
-//					data in the reservoir climate gui.
-// 2003-08-28	SAM, RTi		* Change setRightsVector() call to
-//					  setRights().
-//					* Update for changes in
-//					  StateMod_Reservoir.
-// 2003-09-18	JTS, RTi		Added ID column for reservoir
-//					accounts.
-// 2003-10-10	JTS, RTi		* Removed reference to parent reservoir.
-//					* Added getColumnToolTips().
-// 2004-01-21	JTS, RTi		Removed the row count column and 
-//					changed all the other column numbers.
-// 2004-10-28	SAM, RTi		Remove code for other than reservoir
-//					stations.
-//					Change setValueAt() to support sort.
-//					Add tool tips.
-// 2005-01-20	JTS, RTi		* Added the compactForm.
-//					* Added some new fields.
-// 2005-03-30	JTS, RTi		Added new fields:
-//					* River Node ID
-//					* Switch
-//					* Num owners
-//					* Num precip stations
-//					* Num evap stations
-//					* Num curve rows
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-// ----------------------------------------------------------------------------
-// EndHeader
 
 package DWR.StateMod;
 
@@ -350,29 +288,27 @@ public Object getValueAt(int row, int col) {
 		case COL_ID:		return r.getID();
 		case COL_NAME:		return r.getName();
 		case COL_NODE_ID:	return r.getCgoto();
-		case COL_SWITCH:	return new Integer(r.getSwitch());
-		case COL_ONE_FILL_DATE:	return new Integer((int)r.getRdate());
-		case COL_MIN_CONTENT:	return new Double(r.getVolmin());
-		case COL_MAX_CONTENT:	return new Double(r.getVolmax());
-		case COL_MAX_RELEASE:	return new Double(r.getFlomax());
-		case COL_DEAD_STORAGE:	return new Double(r.getDeadst());
+		case COL_SWITCH:	return Integer.valueOf(r.getSwitch());
+		case COL_ONE_FILL_DATE:	return Integer.valueOf((int)r.getRdate());
+		case COL_MIN_CONTENT:	return Double.valueOf(r.getVolmin());
+		case COL_MAX_CONTENT:	return Double.valueOf(r.getVolmax());
+		case COL_MAX_RELEASE:	return Double.valueOf(r.getFlomax());
+		case COL_DEAD_STORAGE:	return Double.valueOf(r.getDeadst());
 		case COL_DAILY_ID:	return r.getCresdy();
-		case COL_NUM_OWNERS:	return new Integer(r.getNowner());
+		case COL_NUM_OWNERS:	return Integer.valueOf(r.getNowner());
 		case COL_NUM_PRECIP_STA:
-			int nptpx = StateMod_ReservoirClimate.getNumPrecip(
-				r.getClimates());
-			return new Integer(nptpx);
+			int nptpx = StateMod_ReservoirClimate.getNumPrecip( r.getClimates());
+			return Integer.valueOf(nptpx);
 		case COL_NUM_EVAP_STA:	
-			int nevap = StateMod_ReservoirClimate.getNumEvap(
-				r.getClimates());
-			return new Integer(nevap);
+			int nevap = StateMod_ReservoirClimate.getNumEvap( r.getClimates());
+			return Integer.valueOf(nevap);
 		case COL_NUM_CURVE_ROWS:
 			List<StateMod_ReservoirAreaCap> v = r.getAreaCaps();
 			if (v == null) {
-				return new Integer(0);
+				return Integer.valueOf(0);
 			}
 			else {
-				return new Integer(v.size());
+				return Integer.valueOf(v.size());
 			}
 		default:		return "";
 	}
@@ -421,7 +357,7 @@ public void setValueAt(Object value, int row, int col)
 			else if (value instanceof String) {
 				String onOff = (String)value;
 				int index = onOff.indexOf(" -");
-				ival = new Integer(	onOff.substring(0, index)).intValue();
+				ival = Integer.valueOf ( onOff.substring(0, index)).intValue();
 				smr.setSwitch(ival);
 			}
 			break;

@@ -4,113 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-//------------------------------------------------------------------------------
-// StateMod_OperationalRight - class derived from StateMod_Data.  Contains 
-//	information read from the operational rights file.
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-// 
-// 07 Jan 1998	Catherine E.		Created initial version of class
-//		Nutting-Lane, RTi
-// 23 Feb 1998	CEN, RTi		Added Write routines
-// 21 Dec 1998	CEN, RTi		Added throws IOException to read/write
-//					routines.
-// 23 Nov 1999	CEN, RTi		Added comments for each 
-//					StateMod_OperationalRight
-//					instantiation.
-// 07 Mar 2000	CEN, RTi		Modified read/write methods logic to
-//					work off dumx variable to determine
-//					additional lines for a rule rather than
-//					using rule type.  Also, added rule types
-//					15 and 16.
-// 19 Feb 2001	Steven A. Malers, RTi	Code review.  Clean up javadoc.  Handle
-//					nulls and set unused variables to null.
-//					Add finalize.  Alphabetize methods.
-//					Change IO to IOUtil.  Change some status
-//					messages to debug and remove some debug
-//					messages.
-// 2001-12-27	SAM, RTi		Update to use new fixedRead() to
-//					improve performance (are not using full
-//					optimization here).
-// 2002-09-19	SAM, RTi		Use isDirty() instead of setDirty() to
-//					indicate edits.
-//------------------------------------------------------------------------------
-// 2003-06-04	J. Thomas Sapienza, RTi	Renamed from SMOprits to 
-//					StateMod_OperationalRight
-// 2003-06-10	JTS, RTi		* Folded dumpOperationalRightsFile()
-//					  into writeOperationalRightsFile()
-//					* Renamed parseOperationalRightsFile()
-//					  into readOperationalRightsFile()
-// 2003-06-23	JTS, RTi		Renamed writeOperationalRightsFile()
-//					to writeStateModFile()
-// 2003-06-26	JTS, RTi		Renamed readOperationalRightsFile()
-//					to readStateModFile()
-// 2003-07-15	JTS, RTi		Changed to use new dataset design.
-// 2003-08-03	SAM, RTi		Changed isDirty() back to setDirty().
-// 2003-08-25	SAM, RTi		Changed public oprightsOptions to
-//					TYPES, consistent with other programming
-//					standards.
-// 2003-08-28	SAM, RTi		* Call setDirty() for each object and
-//					  the data component.
-//					* Clean up parameter names and javadoc.
-// 2003-09-15	SAM, RTi		* Update to handle all new operations,
-//					  up through number 23.
-//					* Change some data types from numbers to
-//					  String because of changes in how they
-//					  are used in the FORTRAM (must be doing
-//					  internal type casting in FORTRAN).
-//					* Change StringTokenizer to
-//					  breakStringList() - easier to check
-//					  count of tokens.
-// 2003-09-22	J. Thomas Sapienza, RTi	* Added hasImonsw().
-//					* Added setupImonsw().
-//					* Added getQdebt().
-//					* Added getQdebtx().
-//					* Added getSjmina().
-//					* Added getSjrela().
-// 2003-10-19	SAM, RTi		Change description of types 2 and 3 as
-//					per Ray Bennett 2003-10-18 email.
-// 2004-07-14	JTS, RTi		* Added acceptChanges().
-//					* Added changed().
-//					* Added clone().
-//					* Added compareTo().
-//					* Added createBackup().
-//					* Added restoreOriginal().
-//					* Now implements Cloneable.
-//					* Now implements Comparable.
-//					* Clone status is checked via _isClone
-//					  when the component is marked as dirty.
-// 2004-08-25	JTS, RTi		Revised the clone() code because of
-//					null pointers being thrown if the data
-//					arrays were null.
-// 2004-08-26	JTS, RTi		The array values (_intern and _imonsw)
-//					were not being handled in 
-//					restoreOriginal() or compareTo(), so
-//					they were added.
-// 2006-08-16	SAM, RTi		* Add names of operational rights 24 to
-//					  35.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-//------------------------------------------------------------------------------
-// EndHeader
 
 package DWR.StateMod;
 
@@ -852,31 +761,6 @@ private static int determineFileVersion ( String filename )
 		Message.printWarning(3, "", e );
 		return version;
 	}
-}
-
-/**
-Clean up before garbage collection.
-*/
-protected void finalize()
-throws Throwable {
-	_ciopde = null;
-	_iopdes = null;
-	_ciopso1 = null;
-	_iopsou1 = null;
-	_ciopso2 = null;
-	_iopsou2 = null;
-	_ciopso3 = null;
-	_iopsou3 = null;
-	_ciopso4 = null;
-	_iopsou4 = null;
-	_ciopso5 = null;
-	_iopsou5 = null;
-	_imonsw = null;
-	_intern = null;
-	__commentsBeforeData = null;
-	__creuse = null;
-	__cdivtyp = null;
-	super.finalize();
 }
 
 /**
@@ -3563,15 +3447,15 @@ throws Exception {
 			v.add(opr.getID());
 			v.add(opr.getName());
 			v.add(opr.getCgoto());
-			v.add(new Integer(opr.getDumx()));
-			v.add(new Integer(opr.getSwitch()));
+			v.add(Integer.valueOf(opr.getDumx()));
+			v.add(Integer.valueOf(opr.getSwitch()));
 			v.add(opr.getCiopde());
-			v.add(new Integer(opr.getIopdes()));
+			v.add(Integer.valueOf(opr.getIopdes()));
 			v.add(opr.getCiopso1());
-			v.add(new Integer(opr.getIopsou1()));
+			v.add(Integer.valueOf(opr.getIopsou1()));
 			v.add(opr.getCiopso2());
-			v.add(new Integer(opr.getIopsou2()));
-			v.add(new Integer(opr.getItyopr()));
+			v.add(Integer.valueOf(opr.getIopsou2()));
+			v.add(Integer.valueOf(opr.getItyopr()));
 			iline = StringUtil.formatString(v, format);
 			out.println(iline);
 			dumx = opr.getDumx();
@@ -3583,7 +3467,7 @@ throws Exception {
 				}
 				vS.clear();
 				for (int j = 0; j < 12; j++) {
-					vS.add(new Integer( opr.getImonsw(j)));
+					vS.add(Integer.valueOf( opr.getImonsw(j)));
 				}
 				iline = StringUtil.formatString(vS, formatS);
 				out.println(iline);
@@ -3595,8 +3479,7 @@ throws Exception {
 			}
 			if ((dumx > 0 && dumx <= 10)|| dumx < -12) {
 				if (Message.isDebugOn) {
-					Message.printDebug(50, routine,
-						"in area 2: getDumx = " + opr.getDumx() + "getItyopr = " + opr.getItyopr());
+					Message.printDebug(50, routine, "in area 2: getDumx = " + opr.getDumx() + "getItyopr = " + opr.getItyopr());
 				}
 				vsp.clear();
 				vsp.add(" ");
@@ -3810,21 +3693,21 @@ throws Exception {
 				// Traditionally it has a period in the files (e.g., "12.").  Therefore, force the period here
 				String dumxString = "" + opr.getDumx() + ".";
 				v.add(dumxString);
-				v.add(new Integer(opr.getSwitch()));
+				v.add(Integer.valueOf(opr.getSwitch()));
 				v.add(opr.getCiopde());
 				v.add(opr.getIopdes());
 				v.add(opr.getCiopso1());
 				v.add(opr.getIopsou1());
 				v.add(opr.getCiopso2());
 				v.add(opr.getIopsou2());
-				v.add(new Integer(rightType));
+				v.add(Integer.valueOf(rightType));
 				v.add(opr.getCreuse());
 				v.add(opr.getCdivtyp());
-				v.add(new Double(opr.getOprLoss()));
+				v.add(Double.valueOf(opr.getOprLoss()));
 				oprLimit = opr.getOprLimit();
-				v.add(new Double(oprLimit));
-				v.add(new Integer(opr.getIoBeg()));
-				v.add(new Integer(opr.getIoEnd()));
+				v.add(Double.valueOf(oprLimit));
+				v.add(Integer.valueOf(opr.getIoBeg()));
+				v.add(Integer.valueOf(opr.getIoEnd()));
 				iline = StringUtil.formatString(v, formatLine1);
 				out.println(iline);
 				dumx = opr.getDumx();
@@ -3892,7 +3775,7 @@ throws Exception {
 					if ( nmonsw == 12 ) {
 						vMonthlySwitches.clear();
 						for (int j = 0; j < 12; j++) {
-							vMonthlySwitches.add(new Integer( opr.getImonsw(j)));
+							vMonthlySwitches.add(Integer.valueOf( opr.getImonsw(j)));
 						}
 						iline = StringUtil.formatString(vMonthlySwitches, formatMonthlySwitches);
 						out.println(iline);

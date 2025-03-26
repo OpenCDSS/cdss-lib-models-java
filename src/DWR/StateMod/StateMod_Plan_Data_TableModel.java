@@ -4,19 +4,19 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
@@ -336,14 +336,14 @@ public Object getValueAt(int row, int col) {
 		case COL_ID: return smd.getID();
 		case COL_NAME: return smd.getName();
 		case COL_RIVER_NODE_ID:	return smd.getCgoto();
-		case COL_ON_OFF: return new Integer(smd.getSwitch());
-		case COL_TYPE: return new Integer(smd.getIPlnTyp());
-		case COL_RETURN_TYPE: return new Integer(smd.getIPrf());
-		case COL_FAILURE_SWITCH: return new Integer(smd.getIPfail());
-		case COL_INITIAL_STORAGE: return new Double(smd.getPsto1());
+		case COL_ON_OFF: return Integer.valueOf(smd.getSwitch());
+		case COL_TYPE: return Integer.valueOf(smd.getIPlnTyp());
+		case COL_RETURN_TYPE: return Integer.valueOf(smd.getIPrf());
+		case COL_FAILURE_SWITCH: return Integer.valueOf(smd.getIPfail());
+		case COL_INITIAL_STORAGE: return Double.valueOf(smd.getPsto1());
 		case COL_SOURCE_ID: return smd.getPsource();
 		case COL_SOURCE_ACCOUNT: return smd.getIPAcc();
-		case COL_EFF_FLAG: return new Integer(smd.getPeffFlag());
+		case COL_EFF_FLAG: return Integer.valueOf(smd.getPeffFlag());
 		case COL_EFF_01:
 		case COL_EFF_02:
 		case COL_EFF_03:
@@ -358,7 +358,7 @@ public Object getValueAt(int row, int col) {
 		case COL_EFF_12:
 			int peffFlag = smd.getPeffFlag();
 			if ( peffFlag == 1 ) {
-				return new Double(smd.getPeff(col - COL_EFF_01));
+				return Double.valueOf(smd.getPeff(col - COL_EFF_01));
 			}
 			else {
 				return "";
@@ -413,7 +413,7 @@ public void setValueAt(Object value, int row, int col)
 			else if (value instanceof String) {
 				String onOff = (String)value;
 				index = onOff.indexOf(" -");
-				ival = new Integer(onOff.substring(0,index)).intValue();
+				ival = Integer.valueOf(onOff.substring(0,index)).intValue();
 				smd.setSwitch(ival);
 			}
 			break;

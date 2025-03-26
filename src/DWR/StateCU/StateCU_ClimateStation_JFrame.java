@@ -4,41 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-//------------------------------------------------------------------------------
-// StateCU_ClimateStation_JFrame - dialog to display climate station info
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-//
-// 2003-07-14	J. Thomas Sapienza, RTi	Initial version.
-// 2003-07-22	JTS, RTi		Revised after SAM's review.
-// 2003-08-11	Steven A. Malers, RTi	* Force the title parameter in the
-//					  constructor.
-//					* Enable the time series output.
-// 2004-02-28	SAM, RTi		* Move some utility code from
-//					  StateCU_Data to StateCU_Util.
-// 2005-01-17	JTS, RTi		Changed getOriginalRow() to 
-//					getOriginalRowNumber().
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-//------------------------------------------------------------------------------
 
 package DWR.StateCU;
 
@@ -431,33 +412,6 @@ private void displayTSViewJFrame(String action)
 }
 
 /**
-Clean up before garbage collection.
-*/
-protected void finalize()
-throws Throwable {
-	__searchCriteriaGroup = null;
-	__textUneditables = null;
-	__findNextStation = null;
-	__disables = null;
-	__searchIDJRadioButton = null;
-	__searchNameJRadioButton = null;
-	__textDisables = null;
-	__searchID = null;
-	__searchName = null;
-	__stationIDJTextField = null;
-	__nameJTextField = null;
-	__latitudeJTextField = null;
-	__elevationJTextField = null;
-	__region1JTextField = null;
-	__region2JTextField = null;
-	__worksheet = null;
-	__dataset = null;
-	__stationComponent = null;
-	__stationsVector = null;
-	super.finalize();
-}
-
-/**
 Initializes the Swing Components that should be disabled or enabled when
 stations are selected.  This should be called before the first call to selectTableIndex().
 */
@@ -606,8 +560,8 @@ private void saveInformation(int record) {
 		
 	station.setName(__nameJTextField.getText());
 	station.setID(__stationIDJTextField.getText());
-	station.setLatitude( new Double(__latitudeJTextField.getText()).doubleValue());
-	station.setElevation( new Double(__elevationJTextField.getText()).doubleValue());
+	station.setLatitude( Double.valueOf(__latitudeJTextField.getText()).doubleValue());
+	station.setElevation( Double.valueOf(__elevationJTextField.getText()).doubleValue());
 	station.setRegion1(__region1JTextField.getText());
 	station.setRegion2(__region2JTextField.getText());
 }

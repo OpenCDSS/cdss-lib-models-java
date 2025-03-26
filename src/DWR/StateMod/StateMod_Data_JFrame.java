@@ -4,54 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-// PRINTING CHECKED
-// ----------------------------------------------------------------------------
-// StateMod_Data_JFrame - An abstract class from which all the JFrames that
-//	display tabular StateMod data are built.
-// ----------------------------------------------------------------------------
-// Copyright:   See the COPYRIGHT file
-// ----------------------------------------------------------------------------
-// History:
-// 
-// 2005-01-13	J. Thomas Sapienza, RTi	Initial version.
-// 2005-01-20	JTS, RTi		Following review:
-//					* Updated comments.
-//					* Made JScrollWorksheet private.
-//					* Removed getDataType().
-//					* GUI title is now passed in to this
-//					  class.
-//					* The JFrame now sets its icon.
-// 2005-03-28	JTS, RTi		Overrode setSize() and setVisible().
-// 2005-03-29	JTS, RTi		* formatOutput() puts quotes around the
-//					  column names now.
-//					* formatOutput() puts quotes around 
-//					  String field values.
-//					* The worksheet is now set up to show
-//					  the row number header.
-// 2005-03-30	JTS, RTi		Added the optional top panel.
-// 2004-04-06	JTS, RTi		* Added variables that specify the 
-//					  number of lines to be printed in 
-//					  landscape and portrait modes.
-//					* Added print() method.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-// ----------------------------------------------------------------------------
 
 package DWR.StateMod;
 
@@ -414,19 +382,8 @@ throws Exception {
 }
 
 /**
-Cleans up member variables. 
-*/
-protected void finalize()
-throws Throwable {
-	__scrollWorksheet = null;
-	_worksheet = null;
-	_data = null;
-}
-
-/**
 Formats the data in the worksheet into a list of Strings.  Each field in the
-worksheet will be separated from the next by the specified delimiter, with
-no trailing delimiter.
+worksheet will be separated from the next by the specified delimiter, with no trailing delimiter.
 @param delimiter the character String to use to separate worksheet fields.
 @param quotes if true, then the column names will be surrounded by 
 quotes.  In addition, if the column data has the delimiter in it, it will be

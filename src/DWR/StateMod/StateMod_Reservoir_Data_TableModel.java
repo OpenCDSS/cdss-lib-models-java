@@ -4,36 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-// ----------------------------------------------------------------------------
-// StateMod_Reservoir_Data_TableModel - table model for displaying reservoir 
-//	station data
-// ----------------------------------------------------------------------------
-// Copyright:   See the COPYRIGHT file
-// ----------------------------------------------------------------------------
-// History:
-//
-// 2005-04-04	J. Thomas Sapienza, RTi	Initial version.
-// 2007-04-27	Kurt Tometich, RTi		Added getValidators method for check
-//									file and data check implementation.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-// ----------------------------------------------------------------------------
 
 package DWR.StateMod;
 
@@ -261,10 +247,10 @@ public Validator[] getValidators( int col )
 	Validator[] no_checks = new Validator[] {};
 	// Switch must be 0, 1, 2 or 3.
 	Validator [] data_type = new Validator[] {
-		Validators.isEquals( new Integer( 0 ) ),
-		Validators.isEquals( new Integer( 1 ) ),
-		Validators.isEquals( new Integer( 2 ) ),
-		Validators.isEquals( new Integer( 3 ) ) };
+		Validators.isEquals( Integer.valueOf( 0 ) ),
+		Validators.isEquals( Integer.valueOf( 1 ) ),
+		Validators.isEquals( Integer.valueOf( 2 ) ),
+		Validators.isEquals( Integer.valueOf( 3 ) ) };
 	Validator [] switch_Validators = new Validator[] {
 			Validators.or( data_type ) };
 	Validator [] rdate = new Validator[] {
@@ -306,27 +292,27 @@ public Object getValueAt(int row, int col) {
 		case COL_ID:		return r.getID();
 		case COL_NAME:		return r.getName();
 		case COL_NODE_ID:	return r.getCgoto();
-		case COL_SWITCH:	return new Integer(r.getSwitch());
-		case COL_ONE_FILL_DATE:	return new Integer((int)r.getRdate());
-		case COL_MIN_CONTENT:	return new Double(r.getVolmin());
-		case COL_MAX_CONTENT:	return new Double(r.getVolmax());
-		case COL_MAX_RELEASE:	return new Double(r.getFlomax());
-		case COL_DEAD_STORAGE:	return new Double(r.getDeadst());
+		case COL_SWITCH:	return Integer.valueOf(r.getSwitch());
+		case COL_ONE_FILL_DATE:	return Integer.valueOf((int)r.getRdate());
+		case COL_MIN_CONTENT:	return Double.valueOf(r.getVolmin());
+		case COL_MAX_CONTENT:	return Double.valueOf(r.getVolmax());
+		case COL_MAX_RELEASE:	return Double.valueOf(r.getFlomax());
+		case COL_DEAD_STORAGE:	return Double.valueOf(r.getDeadst());
 		case COL_DAILY_ID:	return r.getCresdy();
-		case COL_NUM_OWNERS:	return new Integer(r.getNowner());
+		case COL_NUM_OWNERS:	return Integer.valueOf(r.getNowner());
 		case COL_NUM_PRECIP_STA:
 			int nptpx = StateMod_ReservoirClimate.getNumPrecip(r.getClimates());
-			return new Integer(nptpx);
+			return Integer.valueOf(nptpx);
 		case COL_NUM_EVAP_STA:	
 			int nevap = StateMod_ReservoirClimate.getNumEvap(r.getClimates());
-			return new Integer(nevap);
+			return Integer.valueOf(nevap);
 		case COL_NUM_CURVE_ROWS:
 			List<StateMod_ReservoirAreaCap> v = r.getAreaCaps();
 			if (v == null) {
-				return new Integer(0);
+				return Integer.valueOf(0);
 			}
 			else {
-				return new Integer(v.size());
+				return Integer.valueOf(v.size());
 			}
 		default:		return "";
 	}
@@ -375,7 +361,7 @@ public void setValueAt(Object value, int row, int col)
 			else if (value instanceof String) {
 				String onOff = (String)value;
 				int index = onOff.indexOf(" -");
-				ival = new Integer(	onOff.substring(0, index)).intValue();
+				ival = Integer.valueOf( onOff.substring(0, index)).intValue();
 				smr.setSwitch(ival);
 			}
 			break;

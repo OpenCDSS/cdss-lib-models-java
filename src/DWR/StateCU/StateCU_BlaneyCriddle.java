@@ -4,66 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-//------------------------------------------------------------------------------
-// StateCU_BlaneyCriddle - class to hold StateCU Blaney-Criddle crop data,
-//			compatible with StateCU KBC file
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-//
-// 2002-12-01	Steven A. Malers, RTi	Copy CUCropCharacteristics class and
-//					update for the KBC file contents.
-// 2003-06-04	SAM, RTi		Rename class from CUBlaneyCriddle to
-//					StateCU_BlaneyCriddle.
-//					Change read/write methods to not use the
-//					file extension in the method name.
-// 2005-01-24	J. Thomas Sapienza, RTi	* Added createBackup().
-//					* Added restoreOriginal().
-// 2005-04-18	JTS, RTi		Added writeListFile().
-// 2005-05-22	SAM, RTi		* When reading an existing file, set the
-//					  crop ID to the name to facilitate
-//					  sorting and other StateCU_Data
-//					  features.  The crop number was
-//					  previously used for the ID but is
-//					  ignored in the model.
-//					* Update the write method accordingly so
-//					  that the resulting StateCU file has a
-//					  -999 if the crop number is not an
-//					  integer - this will hopefully allow
-//					  the model to read the resulting file
-//					  without error.
-//					* Overload writeStateCUFile to take a
-//					  PropList and add the Precision
-//					  parameter.
-// 2007-01-10	Kurt Tometich, RTi
-//						Updated the readStateCUFile and writeVector
-//						methods to support new and old versions.  The
-//						newest version adds another field in the 3rd row
-//						and adds 10 chars to the crop name.  There is also
-//						a new field "ktsw" or "Blaney-Criddle Method."
-// 2007-01-23	SAM, RTi		* Review KAT's code.
-// 2007-03-04	SAM, RTi		Final cleanup before release.
-// 2007-03-19	SAM, RTi		Write crop number as sequential integer.
-//------------------------------------------------------------------------------
-// EndHeader
 
 package DWR.StateCU;
 
@@ -80,8 +36,7 @@ import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 
 /**
-Class to hold StateCU Blaney-Criddle crop data for StateCU/StateDMI, compatible
-with the StateCU KBC file.
+Class to hold StateCU Blaney-Criddle crop data for StateCU/StateDMI, compatible with the StateCU KBC file.
 */
 public class StateCU_BlaneyCriddle extends StateCU_Data
 implements StateCU_ComponentValidator
@@ -200,19 +155,6 @@ public void createBackup() {
 			__nckcp[i] = bc.__nckcp[i];
 		}
 	}	
-}
-
-/**
-Clean up for garbage collection.
-@exception Throwable if there is an error.
-*/
-protected void finalize()
-throws Throwable
-{	__ckca = null;
-	__ckcp = null;
-	__nckca = null;
-	__nckcp = null;
-	super.finalize();
 }
 
 /**

@@ -4,124 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-//------------------------------------------------------------------------------
-// StateMod_RunSmDelta_JFrame - dialog to create templates for graphing
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-// 
-// 24 Dec 1997	Catherine E.		Created initial version of class
-//		Nutting-Lane, RTi
-// 03 Jul 1998	CEN, RTi		Modify to work for graphing
-//					or for the output control edit.
-// 28 Sep 1998	SAM, RTi		Added ability to specify the
-//					period when getting time series
-//					so that graph performs better.
-// 29 Sep 1998	CEN, RTi		Adding radio buttons to toggle
-//					user entered id vs. generated lists.
-// 20 Nov 1998	CEN, RTi		Adding big picture stuff.
-// 21 Dec 1998	CEN, RTi		Added try/catch to IO routines
-// 12 May 1999	CEN, RTi		Changed .att to .txt for big
-//					picture output.
-// 25 Oct 1999	CEN, RTi		Added _template_location
-// 06 Nov 2000	CEN, RTi		Added auto-line copy checkbox preference
-// 01 Apr 2001	Steven A. Malers, RTi	Change GUI to JGUIUtil.  Add finalize().
-//					Remove import *.
-// 04 May 2001	SAM, RTi		Verify TSView usage.  Enable all time
-//					series defined in
-//					TSGraph.GRAPH_TYPE_NAMES.  Remove limit
-//					that only monthly time series can be
-//					displayed.
-// 19 Jul 2001	SAM, RTi		Change so the output file(s)are removed
-//					before each run to make sure that new
-//					data are used.
-// 13 Aug 2001	SAM, RTi		Add wells(xwg).
-// 17 Aug 2001	SAM, RTi		Add argument to RunSMOption to wait
-//					after the run so that the output file is
-//					created.  This may only be necessary on
-//					fast machines.
-// 23 Sep 2001	SAM, RTi		Change Table to DataTable.  Lengthen the
-//					total time in waitForFile()calls to
-//					60 seconds total.
-// 2001-12-11	SAM, RTi		Update to use NoSwing GeoView classes so
-//					parallel Swing development can occur.
-// 2002-03-07	SAM, RTi		Use TSProduct to get the graph types.
-// 2002-06-20	SAM, RTi		Update to pass well information to big
-//					picture grid.
-// 2002-07-26	SAM, RTi		Update to support the new GeoView for
-//					the big picture plot.
-// 2002-08-02	SAM, RTi		Make additional enhancements to
-//					streamline running delplt.
-//					Add __templateLocation to try to avoid
-//					possible side-effects from multiple
-//					windows being open at the same time.
-// 2002-08-07	SAM, RTi		Figure out why the graph was not working
-//					correctly - need to remove old files
-//					each time.  Remove StringTokenizer - for
-//					now do not handle reservoir accounts.
-// 2002-08-26	SAM, RTi		Change constructor to take an integer
-//					for the SMMainGUI interface type.
-//					Change big picture constructor to take
-//					a reference to SMMainGUI to pass
-//					information.
-// 2002-09-12	SAM, RTi		For graphing, add Baseflow as a data
-//					type if the node is a baseflow node with
-//					baseflow time series.
-//					Also add a button to retrieve the time
-//					series before graphing.  This allows
-//					different graphs to be shown without
-//					rereading.
-// 2002-09-19	SAM, RTi		Use isDirty()instead of setDirty()to
-//					indicate edits.  Add a JTextField at the
-//					bottom of the window to indicate the
-//					status of the GUI.
-// 2002-10-11	SAM, RTi		Change ProcessManager* to
-//					ProcessManager1* to be allow transition
-//					to Java 1.4.x.
-// 2002-10-16	SAM, RTi		Move back to ProcessManger since the
-//					updated version seems to work well with
-//					Java 1.18 and 1.4.0.  Use version that
-//					takes command arguments rather than a
-//					single string.
-// 2003-06-26	SAM, RTi		* Change the call to editFile()to use
-//					  local code and start the editor as a
-//					  thread.
-//					* Change graphTS()to extend the period
-//					  by a month on each end if bar graphs
-//					  are used to account for the overlap
-//					  of the bars on the end.
-//------------------------------------------------------------------------------
-// 2003-08-21	J. Thomas Sapienza, RTi	Initial swing version.
-// 2003-08-25	JTS, RTi		Continued work on initial swing version.
-// 2003-09-11	SAM, RTi		Update due to some name changes in the
-//					river station components.
-// 2003-09-23	JTS, RTi		Uses new StateMod_GUIUtil code for
-//					setting titles.
-// 2004-01-22	JTS, RTi		Updated to use JScrollWorksheet and
-//					the new row headers.
-// 2006-03-06	JTS, RTi		Removed the help key from the process
-//					manager dialog so that the help option
-//					no longer displays.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-//------------------------------------------------------------------------------
 
 package DWR.StateMod;
 
@@ -579,15 +477,6 @@ private List<String> fillBPPrelimHelpGUIVector() {
 	helpVector.add( "See additional help through the \"More help\" button below.");
 	helpVector.add( "Note that the additional help may take some time to display.");
 	return helpVector;
-}
-
-/**
-Clean up before garbage collection.
-*/
-protected void finalize()
-throws Throwable {
-	// REVISIT
-	super.finalize();
 }
 
 /**

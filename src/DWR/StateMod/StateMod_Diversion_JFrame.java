@@ -4,217 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-//------------------------------------------------------------------------------
-// StateMod_Diversion_JFrame - dialog to edit the diversion information.
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-// 
-// 20 Aug 1997	Catherine E. 		Created initial version of class.
-//		Nutting-Lane, RTi
-// 14 Feb 1998	CEN, RTi		Bringing up a time series ...
-// 11 May 1998	CEN, RTi		Incremented value sent to
-//					setIdvcom by one.
-// 31 Aug 1998  CEN, RTi		added check for TS
-// 19 Sep 1998  CEN, RTi		Changed list to multilist
-// 25 Oct 1999	CEN, RTi		Added daily id
-// 08 Mar 2000	CEN, RTi		Added radio buttons to search
-// 01 Apr 2001	Steven A. Malers, RTi	Change GUI to JGUIUtil.  Add finalize().
-//					Remove import *.
-// 04 May 2001	SAM, RTi		Enable TSView and associated properties.
-// 15 Aug 2001	SAM, RTi		Add disabled TSP, IWR, PAR buttons.
-// 2002-09-19	SAM, RTi		Use isDirty() instead of setDirty() to
-//					indicate edits.
-//------------------------------------------------------------------------------
-// 2003-06-06	J. Thomas Sapienza, RTi	Began initial swing version.
-// 2003-06-16	JTS, RTi		Began functional swing version.
-// 2003-06-17	JTS, RTi		* Wrangled with getting the layout to
-//					  work.
-//					* Added apply button.
-// 2003-06-19	JTS, RTi		Changed search code to wrap around.
-// 2003-06-20	JTS, RTi		Constructor now takes a data set as
-//					a parameter, instead of a data set
-//					component.
-// 2003-06-23	JTS, RTi		Added code to graph monthly time series.
-// 2003-07-15	JTS, RTi		* Added checkInput() framework for 
-//					  validating user input prior to the 
-//					  values being saved.
-// 					* Added status bar.
-//					* Changed to use new dataset design.
-// 2003-07-16	JTS, RTi		Added constructor to select an initial
-//					diversion from the index.
-// 2003-07-17	JTS, RTI		Change so that constructor takes a 
-//					boolean that says whether the form's
-//					data can be modified.
-// 2003-07-23	JTS, RTi		Updated JWorksheet code following
-//					JWorksheet revisions.
-// 2003-08-03	SAM, RTi		* indexOf() is now in StateMod_Util.
-//					* Force title as a parameter in the
-//					  constructor.
-// 2003-08-16	SAM, RTi		Change the window type to
-//					WINDOW_DIVERSION.
-// 2003-08-26	SAM, RTi		Enable StateMod_DataSet_WindowManager.
-// 2003-08-27	JTS, RTi		Added selectID() to select an ID 
-//					on the worksheet from outside the GUI.
-// 2003-08-28	SAM, RTi		Updated based on changes in
-//					StateMod_Diversion.
-// 2003-09-03	JTS, RTi		* Removed old traces of button-based
-//					  time series selected.
-//					* Added new time series JCheckboxes.
-//					* Cleaned up actionPerformed.
-//					* Added AWC field.
-// 2003-09-04	SAM, RTi		Make sure all time series are
-//					represented and reorder to put
-//					historical time series on top.
-// 		JTS, RTi		* Changed field labels.
-//					* Changed the daily data id field into
-//					  a combo box.
-//					* Removed the logic for the weight 
-//					  factor.
-// 2003-09-05	JTS, RTi		Class is now an item listener in 
-//					order to enable/disable graph buttons
-//					based on selected checkboxes.
-// 2003-09-05	JTS, RTi		Disable graph/table/summary at
-//					creation until item event fires.
-// 2003-09-05	SAM, RTi		* Layouts were not working correctly.
-//					  Rework so that the top parameters are
-//					  in their own panel to be isolated from
-//					  other panels and put the related data
-//					  next to the time series.
-//					* Rename some data to be more consistent
-//					  with other code, in particular the
-//					  time series checkboxes.
-//					* Change itemStateChanged() handling for
-//					  the time series to just check the
-//					  checkboxes.  The previous code was not
-//					  working properly.
-//					* Set __currentDiversionIndex in
-//					  selectTableIndex() - it was not
-//					  getting initialized and was causing
-//					  problems in itemStateChanged().
-// 2003-09-08	JTS, RTI		* Changed the logic for ignoring item
-//					  state change events and added an
-//					  initialized boolean to not worry
-//					  about any itemStateChanges while the 
-//					  GUI is setting up.
-//					* added checkTimeSeriesButtonsStates()
-//					  so the graphing buttons can be 
-//					  set properly when items are selected.
-//					* for the monthly/constant efficiency 
-//					  radio buttons, itemStateChange now
-//					  only performs an action on a
-//					  selection event.
-// 2003-09-09	JTS, RTi		* __currentDiversionIndex no longer set
-//					  in selectTableIndex() because it was
-//					  causing problems with the first
-//					  diversion in the table.  The problem
-//					  this was introduced to fix has been
-//					  removed, so it wasn't necessary
-//					  anymore, anyways.
-// 2003-09-18	SAM, RTi		Add estimated daily time series
-//					checkboxes for historical data and
-//					IWR.
-// 2003-09-23	JTS, RTi		Uses new StateMod_GUIUtil code for
-//					setting titles.
-// 2003-10-01	SAM, RTi		* General review before release for
-//					  State review.
-//					* In general move code around so GUI
-//					  components are created and then added
-//					  in close proximity - it is too
-//					  confusing when things are spread
-//					  around.
-//					* When processing GUI components, list
-//					  from left to right and top to bottom.
-//					* Rename data members to use more recent
-//					  standard to include Swing class name.
-//					* Enable checkInput().
-//					* Change efficiencies to be shown using
-//					  the calendar for the data set.
-//					* Change layout so related data are next
-//					  to efficiencies and spread time series
-//					  over 3 columns to make better use of
-//					  horizontal space.
-//					* Button groups can just be local data.
-//					* River node ID is always uneditable.
-//					* Fix so that a failed checkInput() does
-//					  not allow the next selection to be
-//					  displayed.
-// 2003-10-08	SAM, RTi		Changes after SPDSS progress meeting
-//					demonstration.
-//					* Move daily ID and AWC to bottom and
-//					  disable based on the control data.
-//					* Move demsrc to the bottom and disable
-//					  because GUI users should not need to
-//					  set.
-//					* Implement tool tip help.
-//					* Move all code that modifies the
-//					  diversion into the saveInformation()
-//					  method - previously some data for
-//					  the diversion was getting set before
-//					  apply was executed.
-//					* Show the constant efficiency separate
-//					  from the monthly efficiencies - less
-//					  confusing.
-//					* Change set*Eff() to displayEff() and
-//					  enable/disable text fields
-//					  accordingly.
-//					* Change so that when setting data from
-//					  an object the value being used must
-//					  be recognized.  If not, a default will
-//					  be chosen and the diversion will be
-//					  marked as dirty.  This is easier than
-//					  dealing with unknown data that may
-//					  actually be errors.  The only
-//					  exception is the daily ID.
-//					* Handle all time series, now that flags
-//					  are understood.
-// 2003-10-14	SAM, RTi		* Change Irrigation Water Requirement
-//					  (IWR) to Consumptive Water Requirement
-//					  (CWR) as per Ray Bennett's comments.
-//					* After an apply, refresh the main GUI
-//					  state via the window manager
-//					  checkGUIState().
-//					* Change saveInformation() to saveData()
-//					  to be consistent with other classes.
-// 2003-10-21	SAM, RTi		Change demand override average monthly
-//					to demand average monthly.
-// 2003-10-28	SAM, RTi		* Use the setData() method to populate
-//					  choices, to increase performance.
-//					* Add the water right as an option for
-//					  graphing.
-// 2004-01-21	JTS, RTi		Updated to use JScrollWorksheet and
-//					the new row headers.
-// 2004-06-06	SAM, RTi		* Move the definitions of switches to
-//					  the StateMod_Diversion class and
-//					  handle generically.
-// 2005-01-13	JTS, RTi		Calls to removeColumn() in the worksheet
-//					were removed in favor of using the new
-//					constructor for the table model.
-// 2006-01-19	JTS, RTi		* Now implements JWorksheet_SortListener
-//					* Corrected bug that was corrupting data
-//					  when rights or return flow sub-forms
-//					  were entered.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-//-----------------------------------------------------------------------------
-// EndHeader
 
 package DWR.StateMod;
 
@@ -1157,46 +962,9 @@ public void displayTSViewJFrame(String type)
 }
 
 /**
-Clean up before garbage collection.
-*/
-protected void finalize()
-throws Throwable {
-	__findNextDiv_JButton = null;
-	__waterRights_JButton = null;
-	__returnFlow_JButton = null;
-	__help_JButton = null;
-	__close_JButton = null;
-	__apply_JButton = null;
-	__cancel_JButton = null;
-	__searchID_JRadioButton = null;
-	__searchName_JRadioButton = null;
-	__effConstant_JRadioButton = null;
-	__effMonthly_JRadioButton = null;
-	__searchID_JTextField = null;
-	__searchName_JTextField = null;
-	__diversionStationID_JTextField = null;
-	__diversionDailyID_JComboBox = null;
-	__diversionName_JTextField = null;
-	__riverNodeID_JTextField = null;
-	__diversionCapacity_JTextField = null;
-	__userName_JTextField = null;
-	__replacementReservoirOption_JComboBox = null;
-	__demandSource_JComboBox = null;
-	__useType_JComboBox = null;
-	__irrigatedAcreage_JTextField = null;
-	__effMonthly_JTextField = null;
-	__worksheet = null;
-	__diversionSwitch_JComboBox = null;
-	__demandType_JComboBox = null;
-
-	super.finalize();
-}
-
-/**
 Get the selected diversion, based on the current index in the list.
 */
-private StateMod_Diversion getSelectedDiversion ()
-{
+private StateMod_Diversion getSelectedDiversion () {
 	return __diversionsVector.get(__currentDiversionIndex);
 }
 

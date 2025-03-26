@@ -4,140 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-//------------------------------------------------------------------------------
-// StateMod_Well - Derived from StateMod_Data class
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-// 
-// 01 Feb 1999	Catherine E.		Created initial version of class.
-//		Nutting-Lane, RTi	
-// 10 Feb 1999  CEN, RTi		Implemented changes due to SAM review
-//					of code.
-// 24 Feb 2000	Steven A. Malers, RTi	Added comments to the right of return
-//					flows and depletions as per Ray Bennett.
-// 13 Mar 2000	SAM, RTi		Change some variable names to reflect
-//					more recent StateMod documentation:
-//						cdividwx -> cdividyw
-//						cgoto2 -> idvcow2
-//						diveffw -> divefcw
-// 10 Apr 2000	CEN, RTi		Added "primary" variable
-// 09 Aug 2000	SAM, RTi		Change areaw to a double.
-// 18 Feb 2001	SAM, RTi		Code review.  Clean up javadoc.  Handle
-//					nulls and set unused variables to null.
-//					Alphabetize methods.  Update output
-//					header.
-// 02 Mar 2001	SAM, RTi		Correct problem with 1.7 primary flag
-//					being formatted 11.5 rather than 12.5
-//					as documented.
-// 2001-12-27	SAM, RTi		Update to use new fixedRead()to
-//					improve performance.
-// 2002-09-09	SAM, RTi		Add GeoRecord reference to allow 2-way
-//					connection between spatial and StateMod
-//					data.
-// 2002-09-19	SAM, RTi		Use isDirty() instead of setDirty() to
-//					indicate edits.
-//------------------------------------------------------------------------------
-// 2003-06-04	J. Thomas Sapienza, RTi	Renamed from SMWell to StateMod_Well
-// 2003-06-10	JTS, RTi		* Folded dumpWellFile() into
-//					  writeWellFile()
-//					* Renamed parseWellFile() to 
-//					  readWellFile()
-// 2003-06-23	JTS, RTi		Renamed writeWellFile() to
-//					writeStateModFile()
-// 2003-06-26	JTS, RTi		Renamed readWellFile() to 
-//					readStateModFile()
-// 2003-07-15	JTS, RTi		Changed to use new dataset design.
-// 2003-08-03	SAM, RTi		Change isDirty() back to setDirty().
-// 2003-08-15	SAM, RTi		Change GeoRecordNoSwing to GeoRecord.
-// 2003-08-28	SAM, RTi		* Change rights to use a simple Vector,
-//					  not a linked list.
-//					* Clean up parameter names and Javadoc.
-//					* Call setDirty() on individual objects
-//					  and the data set component.
-//					* Remove unneeded "num" data - get from
-//					  the Vector size.
-//					* Remove redundant "Well" from some
-//					  methods.
-//					* Support all well-related time series
-//					  and clean up names.
-// 2003-10-10	SAM, RTi		Add disconnectRights().
-// 2003-10-16	SAM, RTi		Change innitial efficiency to 60%.
-// 2003-10-21	SAM, RTi		* Add CWR, similar to diversions.
-//					* Default idvcow2 to "N/A".
-// 2004-02-25	SAM, RTi		Add isStateModWellFile().
-// 2004-06-05	SAM, RTi		* Add methods to handle collections,
-//					  similar to StateCU locations.
-// 2004-07-06	SAM, RTi		* Overload the constructor to allow
-//					  initialization to defaults or missing.
-// 2004-07-08	SAM, RTi		* Add getPrimaryChoices() and
-//					  getPrimaryDefault().
-// 2004-08-25	JTS, RTi		* Added acceptChanges().
-//					* Added changed().
-//					* Added clone().
-//					* Added compareTo().
-//					* Added createBackup().
-//					* Added restoreOriginal().
-//					* Now implements Cloneable.
-//					* Now implements Comparable.
-//					* Clone status is checked via _isClone
-//					  when the component is marked as dirty.
-// 2004-08-26	JTS, RTi		compareTo() now handles _idvcow2.
-// 2004-09-16	SAM, RTi		* Change so read and write methods
-//					  adjust the path relative to the
-//					  working directory.
-// 2004-09-29	SAM, RTi		* Add the following for use with
-//					  StateDMI only - no need to check for
-//					  dirty - only set/gets on the entire
-//					  array are enabled:
-//						__cwr_monthly
-//						__ddh_monthly
-//						__calculated_efficiencies
-//						__calculated_efficiency_stddevs
-//						__model_efficiecies
-// 2004-10-07	SAM, RTi		* Add 6 as an option for idvcomw.
-// 2005-04-18	JTS, RTi		* Added writeListFile().
-//					* Added writeCollectionListFile().
-// 2005-08-18	SAM, RTi		* Add static data for part types to
-//					  minimize errors in string use.
-// 2005-10-10	SAM, RTi		* Change some javadoc - was using
-//					  "diversion" instead of "well".
-// 2005-11-16	SAM, RTi		Overload set/get methods for monthly
-//					efficiency to take a year type, to
-//					facilitate handling of non-calendar
-//					year type.
-// 2006-01-30	SAM, RTi		* Add hasAssociatedDiversion() to
-//					  facilitate processing.
-// 2006-04-09	SAM, RTi		Add _parcels_Vector data member and
-//					associated methods, to help with
-//					StateDMI error handling.
-// 2007-04-12	Kurt Tometich, RTi		Added checkComponentData() and
-//									getDataHeader() methods for check
-//									file and data check support.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-//------------------------------------------------------------------------------
-// EndHeader
-// TODO SAM 2006-04-09
-// The _parcel_Vector has minimal support and is not yet considered in
-// copy, clone, equals, etc.
 
 package DWR.StateMod;
 
@@ -3003,23 +2885,23 @@ throws Exception {
 			v.add(well.getID());
 			v.add(well.getName());
 			v.add(well.getCgoto());
-			v.add(new Integer(well.getSwitch()));
-			v.add(new Double (well.getDivcapw()));
+			v.add(Integer.valueOf(well.getSwitch()));
+			v.add(Double.valueOf (well.getDivcapw()));
 			v.add(well.getCdividyw());
-			v.add(new Double(well.getPrimary()));
+			v.add(Double.valueOf(well.getPrimary()));
 			iline = StringUtil.formatString(v, format_1);
 			out.println(iline);
 	
 			// line 2
 			v.clear();
 			v.add(well.getIdvcow2());
-			v.add(new Integer(well.getIdvcomw()));
-			v.add(new Integer(well.getNrtnw()));
-			v.add(new Integer(well.getNrtnw2()));
-			v.add(new Double (well.getDivefcw()));
-			v.add(new Double (well.getAreaw()));
-			v.add(new Integer(well.getIrturnw()));
-			v.add(new Integer(well.getDemsrcw()));
+			v.add(Integer.valueOf(well.getIdvcomw()));
+			v.add(Integer.valueOf(well.getNrtnw()));
+			v.add(Integer.valueOf(well.getNrtnw2()));
+			v.add(Double.valueOf (well.getDivefcw()));
+			v.add(Double.valueOf (well.getAreaw()));
+			v.add(Integer.valueOf(well.getIrturnw()));
+			v.add(Integer.valueOf(well.getDemsrcw()));
 			iline = StringUtil.formatString(v, format_2);
 			out.println(iline);
 	
@@ -3027,7 +2909,7 @@ throws Exception {
 			if (well.getDivefcw()< 0) {
 				for (j = 0; j < 12; j++) {
 					v.clear();
-					v.add(new Double(well.getDiveff(j)));
+					v.add(Double.valueOf(well.getDiveff(j)));
 					iline = StringUtil.formatString(v, " %#5.0F");
 					out.print(iline);
 				}
@@ -3042,8 +2924,8 @@ throws Exception {
 				v.clear();
 				ret = wellReturnFlow.get(j);
 				v.add(ret.getCrtnid());
-				v.add(new Double(ret.getPcttot()));
-				v.add(new Integer(ret.getIrtndl()));
+				v.add(Double.valueOf(ret.getPcttot()));
+				v.add(Integer.valueOf(ret.getIrtndl()));
 				// SAM changed on 2000-02-24 as per Ray Bennett...
 				//iline = StringUtil.formatString(v, format_4);
 				iline = StringUtil.formatString(v, format_4) +" Rtn" + StringUtil.formatString((j+1),"%02d");
@@ -3057,9 +2939,9 @@ throws Exception {
 				v.clear();
 				ret = wellDepletion.get(j);
 				v.add(ret.getCrtnid());
-				v.add(new Double(ret.getPcttot()));
-				v.add(new Integer(ret.getIrtndl()));
-				// SAM changed on 2000-02-24 as per Ray Bennett...
+				v.add(Double.valueOf(ret.getPcttot()));
+				v.add(Integer.valueOf(ret.getIrtndl()));
+				// SAM changed on 2000-02-24 as per Ray Bennett.
 				//iline = StringUtil.formatString(v, format_4);
 				iline = StringUtil.formatString(v, format_4) +" Dep" + StringUtil.formatString((j+1),"%02d");
 				out.println(iline);

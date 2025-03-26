@@ -4,136 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-// ----------------------------------------------------------------------------
-// StateMod_BTS - read/write time series from StateMod binary file(s)
-// ----------------------------------------------------------------------------
-// History:
-//
-// 2003-03-12	Steven A. Malers, RTi	Initial version.  Copy RTi.TS.BinaryTS
-//					and update for the StateMod binary file
-//					format (.b43).
-// 2003-10-20	SAM, RTi		* Rename StateModXTS to Statemod_BTS.
-//					* Change TSDate to DateTime.
-//					* Change TS.INTERVAL* to TimeInterval.
-// 2003-10-28	SAM, RTi		* Convert some messages to debugs to
-//					  improve performance.
-//					* Keep around lists of the various
-//					  station IDs and names from the header
-//					  to use when creating the time series.
-//				 	* Also, since the data are in the order
-//					  of river nodes but the requested TSID
-//					  uses the station ID, the header data
-//					  must be examined to find a match using
-//					  the determineRiverStatino() method.
-// 2003-11-03	SAM, RTi		* Update to new StateMod 10.43 binary
-//					  file format - Ray Bennett has added
-//					  the river node ID next to the station
-//					  ID!  This allows easy lookup of the
-//					  river node to match the station.
-//					  Still keep the header information in
-//					  memory for now but later may optimize
-//					  to jump through the header as needed.
-//					* Use xfrnam instead of ifrnam because
-//					  Ray has indicated the former in the
-//					  documentation.
-//					* Rename some private methods to be
-//					  specific to B43, in anticipation of
-//					  needing to read more files.
-//					* Convert all B43 parameters from CFS to
-//					  ACFT for output.
-//					* Figured out how to read names - just
-//					  read little endian char 1!
-// 2003-11-14	SAM, RTi		* Add support for binary reservoir and
-//					  well files and also all binary daily
-//					  files.
-//					* Get the list of parameters from the
-//					  StateMod_Util class rather than
-//					  duplicating the list here.
-// 2003-11-26	SAM, RTi		* Finalize support for other data types.
-//					* When initializing the object, set the
-//					  __comp_type member data - then when
-//					  processing data, only search arrays
-//					  for the appropriate type of data in
-//					  the file.  For example, for the well
-//					  file, there is no reason to search
-//					  diversion and reservoir identifiers.
-// 2004-02-04	SAM, RTi		* Fix bug where duplicate time series
-//					  were being matched in readTimeSeries()
-//					  because baseflow station IDs are
-//					  sometimes the same as other station
-//					  IDs.
-// 2004-03-15	SAM, RTi		* Add getFileFilter - REVISIT.
-//					* Allow a null TSID pattern to be passed
-//					  to readTimeSeriesList() - treat null
-//					  as "*".
-//					* Fix bug where only one data type could
-//					  be read in readTimeSeriesList().
-// 2004-08-23	SAM, RTi		* Overload readTimeSeries() to have a
-//					  PropList to allow additional
-//					  customization of reads - however, go
-//					  ahead and implement a Hashtable for
-//					  file management to use as the default.
-//					  There does not seem to be a downside
-//					  to this.
-// 2005-12-21	SAM, RTi		* Include support for StateMod 11.0
-//					  file format updates.
-//					* Troubleshoot why reservoir time series
-//					  are not being read properly.
-//					* Remove setVersion() since the version
-//					  really needs to be set in the
-//					  constructor.
-// 2005-12-22	SAM, RTi		* Add __nowner2 that is the number of
-//					  accounts, not cumulative, and
-//					  __nowner2_cum, which is cumulative.
-// 2006-01-03	SAM, RTi		* Resolve final issues with
-//					  new parameter lists and binary
-//					  reservoirs.
-// 2006-01-04	SAM, RTi		* Finalize recent reservoir file
-//					  changes.
-// 2006-01-05	SAM, RTi		* One last change because inactive
-//					  accounts are at the end of the block.
-// 2006-01-15	SAM, RTi		* Add determineFileVersion() to get
-//					  the StateMod version from the file,
-//					  in order to make other decisions.
-//					  This is mainly intented for use
-//					  during transition to the new format
-//					  where more information is in the
-//					  file header.
-//					* Add getParameters() to return the
-//					  list of parameter names, for use in
-//					  displays, etc.
-// 2006-07-06	SAM, RTi		* Fix bug where month data were not
-//					  being properly initialized for
-//					  irrigation year data (Nov-Oct).
-// 2007-01-17	SAM, RTi		* Fix bug where determining the file
-//					  version needed to use different bytes
-//					  because the previous test was failing.
-// 2007-01-18	SAM, RTi		* Allow lookup of station that is of
-//					  type "other" (only in river network
-//					  file *rin) to be looked up.
-//					* Fix so dash in identifier is allowed
-//					  for other than reservoirs (and
-//					  reservoirs use for account).
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-// ----------------------------------------------------------------------------
-// EndHeader
 
 package DWR.StateMod;
 
@@ -751,18 +637,6 @@ throws Exception
 	bts.close();
 	bts = null;
 	return version;
-}
-
-/**
-Finalize before garbage collection.
-*/
-protected void finalize ()
-throws Throwable
-{	__fp.close();
-	__fp = null;
-	__tsfile = null;
-	__tsfileFull = null;
-	super.finalize();
 }
 
 /**

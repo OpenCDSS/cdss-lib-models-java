@@ -4,50 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-// ----------------------------------------------------------------------------
-// StateMod_DiversionRight_TableModel - Table model for displaying data in the
-//	diversion right tables.
-// ----------------------------------------------------------------------------
-// Copyright:   See the COPYRIGHT file
-// ----------------------------------------------------------------------------
-// History:
-// 2003-06-09	J. Thomas Sapienza, RTi	Initial version.
-// 2003-06-10	JTS, RTi		* Added the right fields
-//					* Added the return flow fields
-// 2003-06-17	JTS, RTi		Return flow data is now displayable
-//					and editable.
-// 2003-07-17	JTS, RTi		Constructor has switch to determine
-//					if data is editable.
-// 2003-07-29	JTS, RTi		JWorksheet_RowTableModel changed to
-//					JWorksheet_AbstractRowTableModel.
-// 2003-10-07	JTS, RTi		Changed 'readOnly' to 'editable'.
-// 2004-01-21	JTS, RTi		Removed the row count column and 
-//					changed all the other column numbers.
-// 2004-10-26	SAM, RTi		Split out code from
-//					StateMod_Diversion_TableModel.
-// 2005-01-21	JTS, RTi		Added ability to display data for either
-//					one or many diversions.
-// 2005-01-24	JTS, RTi		* Touched up the javadocs.
-//					* Removed reference to a dataset.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-// ----------------------------------------------------------------------------
 
 package DWR.StateMod;
 
@@ -251,8 +223,8 @@ public Object getValueAt(int row, int col) {
 		case COL_RIGHT_NAME:	return dr.getName();
 		case COL_STRUCT_ID:	return dr.getCgoto();
 		case COL_ADMIN_NUM:	return dr.getIrtem();
-		case COL_DCR_AMT:	return new Double(dr.getDcrdiv());
-		case COL_ON_OFF:	return new Integer(dr.getSwitch());
+		case COL_DCR_AMT:	return Double.valueOf(dr.getDcrdiv());
+		case COL_ON_OFF:	return Integer.valueOf(dr.getSwitch());
 		default:	return "";
 	}
 }
@@ -361,9 +333,7 @@ public void setValueAt(Object value, int row, int col) {
 			else if (value instanceof String) {
 				String onOff = (String)value;
 				index = onOff.indexOf(" -");
-				ival = new Integer(
-					onOff.substring(0,
-					index)).intValue();
+				ival = Integer.valueOf( onOff.substring(0, index)).intValue();
 				dr.setSwitch(ival);
 			}
 			break;

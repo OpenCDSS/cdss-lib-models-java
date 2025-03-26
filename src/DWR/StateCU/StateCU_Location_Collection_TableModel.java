@@ -4,34 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-// ----------------------------------------------------------------------------
-// StateCU_Location_Collection_TableModel - Table model for displaying 
-//	location collection data.
-// ----------------------------------------------------------------------------
-// Copyright:   See the COPYRIGHT file
-// ----------------------------------------------------------------------------
-// History:
-//
-// 2005-03-29	J. Thomas Sapienza, RTi	Initial version.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-// ----------------------------------------------------------------------------
 
 package DWR.StateCU;
 
@@ -272,7 +260,7 @@ private void setupData() {
 	for (int i = 0; i < nculoc; i++) {
 		culoc = _data.get(i);
 		id = culoc.getID();
-		div = new Integer(culoc.getCollectionDiv());
+		div = Integer.valueOf(culoc.getCollectionDiv());
 
 		years = culoc.getCollectionYears();
 		colType = culoc.getCollectionType();
@@ -312,7 +300,7 @@ private void setupData() {
 			for (int k = 0; k < nParts; k++) {
 				__data[__COL_ID].add(id);
 				__data[__COL_DIV].add(div);
-				__data[__COL_YEAR].add(new Integer(years[j]));
+				__data[__COL_YEAR].add(Integer.valueOf(years[j]));
 				if ( colType == null ) {
 					__data[__COL_COL_TYPE].add(null);
 				}

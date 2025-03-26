@@ -4,43 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-// ----------------------------------------------------------------------------
-// StateMod_StreamEstimate_Coefficients_TableModel - table model for displaying 
-//	stream estimate station coefficients data
-// ----------------------------------------------------------------------------
-// Copyright:   See the COPYRIGHT file
-// ----------------------------------------------------------------------------
-// History:
-// 2003-08-20	J. Thomas Sapienza, RTi	Initial version.
-// 2003-09-04	Steven A. Malers, RTi	Make headings multi-row.
-// 2003-09-11	SAM, RTi		Rename class from
-//					StateMod_BaseFlowCoefficents_TableModel
-//					to
-//					StateMod_StreamEstimate_Coefficients_
-//					TableModel.
-// 2004-01-22	JTS, RTi		Removed the row count column and 
-//					changed all the other column numbers.
-// 2004-10-28	SAM, RTi		Change setValueAt() to support sort.
-// 2005-01-21	JTS, RTi		Added the editable flag.
-// ----------------------------------------------------------------------------
-// EndHeader
 
 package DWR.StateMod;
 
@@ -195,8 +174,7 @@ public Object getValueAt(int row, int col) {
 			switch(col) {
 				case COL_STREAM_NAME:
 					if (row < N) {
-						return new Double(
-						      __coeff.getCoefn(row));
+						return Double.valueOf( __coeff.getCoefn(row));
 					}
 					return "";
 				case COL_UPSTREAM_GAGE:
@@ -206,8 +184,7 @@ public Object getValueAt(int row, int col) {
 					return "";
 				case COL_GAIN_TERM_WT:
 					if (row < M) {
-						return new Double(
-						      __coeff.getCoefm(row));
+						return Double.valueOf( __coeff.getCoefm(row));
 					}
 					return "";
 				case COL_GAIN_TERM_GAGE_ID:

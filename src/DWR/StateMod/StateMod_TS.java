@@ -4,87 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-// ----------------------------------------------------------------------------
-// StateMod_TS - class to read/write StateMod format time series
-// ----------------------------------------------------------------------------
-// History:
-//
-// 28 Nov 2000	Steven A. Malers, RTi	Copy and modify DateValueTS to include
-//					getSample().  This class will eventually
-//					combine the StateModMonthTS and
-//					StateModDayTS code, as time allows.
-// 28 Feb 2001	SAM, RTi		Add getFileInterval() to help
-//					automatically determine whether data
-//					are monthly or daily format.
-// 2003-06-19	SAM, RTi		* Rename class from StateModTS to
-//					  StateMod_TS and start to include code
-//					  from legacy StateModMonthTS and
-//					  StateModDayTS classes.
-//					* Update to use new TS package (e.g.,
-//					  use DateTime instead of TSDate and
-//					  TimeInterval instead of TSInterval).
-// 2003-07-08	SAM, RTI		Rename write methods from
-//					writePersistent*() to
-//					writeTimeSeries*().
-// 2003-08-22	SAM, RTI		Enable daily time series read in
-//					readTimeSeriesList().
-// 2003-09-03	SAM, RTI		Fix a bug reading daily data.
-// 2003-10-09	SAM, RTI		Fix a bug reading data other than
-//					calendar year - the year was not
-//					getting set correctly in the read.
-// 2003-11-04	SAM, RTi		Add readTimeSeries() to take a TSID
-//					and file name, to read a requested
-//					time series.
-// 2003-12-11	SAM, RTi		Add readPatternTimeSeriesList() -
-//					from the old StateModMonthTS.
-//					readPatternFile().
-// 2004-01-15	SAM, RTi		* Remove revisits that were limiting
-//					  previous functionality (precision
-//					  formatting, calendar type).
-//					* Change writeTimeSeriesList(,PropList)
-//					  to return void.
-// 2004-01-31	SAM, RTi		* Enable writing of daily files.
-//					  Similar to readTimeSeries() both
-//					  daily and monthly format is supported
-//					  in writeTimeSeries().
-//					* Optimize the writeTimeSeries() code
-//					  some - remove extra loops and checks,
-//					  and add a boolean array to help avoid
-//					  repeated checks for null or bad time
-//					  series.
-// 2005-05-06	SAM, RTi		* Add writePatternTimeSeriesList().
-//					  Copy and modify writeTimeSeriesList to
-//					  implement.  Some additional features
-//					  may be enabled later.
-//					* Clean up some of the old messages that
-//					  were still using "writePersistent".
-// 2005-09-09	SAM, RTi		* Allow comments in the data part of
-//					  monthly and daily files.
-// 2006-01-23	SAM, RTi		* Fix bug where monthly average time
-//					  series were not being read in properly
-//					  for water year.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-// 2007-04-10	SAM, RTi		Change default prevision from 2 to -2 as per
-//						writeStateMod() command docs - this is a better default.
-// ----------------------------------------------------------------------------
-// EndHeader
 
 package DWR.StateMod;
 
@@ -301,15 +236,15 @@ private static Double getLineTotal ( TS ts, boolean standardTS, int nvals, List<
 	// Legacy code where the total sums to the in-memory values
 	if ( count == 0 ) {
 		// Missing
-		return new Double(ts.getMissing());
+		return Double.valueOf(ts.getMissing());
 	}
 	else if ( do_total ) {
 		// Sum of whatever is available
-		return new Double(sum);
+		return Double.valueOf(sum);
 	}
 	else {
 		// Mean of whatever is available
-		return new Double(sum/count);
+		return Double.valueOf(sum/count);
 	}
 }
 
@@ -1614,12 +1549,12 @@ throws Exception
                          ts.getDate1() + " to " + ts.getDate2() + " from \"" + fullFilename + "\"" );
                     ts.setDescription(name);
                     // Be careful renaming the following because they show up in StateMod_TS_TableModel and possibly other classes
-                    ts.setProperty("OprType", new Integer(oprType));
+                    ts.setProperty("OprType", Integer.valueOf(oprType));
                     ts.setProperty("AdminNum", adminNum);
                     ts.setProperty("Source1", source1);
                     ts.setProperty("Destination",dest);
-                    ts.setProperty("YearOn", new Integer(yearOn) );
-                    ts.setProperty("YearOff", new Integer(yearOff) );
+                    ts.setProperty("YearOn", Integer.valueOf(yearOn) );
+                    ts.setProperty("YearOff", Integer.valueOf(yearOff) );
                     if ( readData ) {
                         // Transfer the data that was read
                         ts.allocateDataSpace();
@@ -1923,15 +1858,15 @@ throws Exception
 
 		v.clear();
 		v.add ( cmnt );
-		v.add ( new Integer ( i+1 ));
+		v.add ( Integer.valueOf ( i+1 ));
 		v.add ( tmpid );
 		v.add ( tmptype );
 		v.add ( tmpsource );
 		v.add ( tmpunits );
 		v.add ( TimeUtil.monthAbbreviation(tsptr.getDate1().getMonth()));
-		v.add ( new Integer ( tsptr.getDate1().getYear()));
+		v.add ( Integer.valueOf ( tsptr.getDate1().getYear()));
 		v.add ( TimeUtil.monthAbbreviation(tsptr.getDate2().getMonth()));
-		v.add ( new Integer ( tsptr.getDate2().getYear()));
+		v.add ( Integer.valueOf ( tsptr.getDate2().getYear()));
 		v.add ( tmplocation );
 		v.add ( tmpdesc );
 
@@ -2104,10 +2039,10 @@ throws Exception
 	// Write the header line with the period of record...
 
 	v.clear();
-	v.add ( new Integer ( req_date1.getMonth()));
-	v.add(new Integer (req_date1.getYear()));
-	v.add ( new Integer ( req_date2.getMonth()));
-	v.add(new Integer (req_date2.getYear()));
+	v.add ( Integer.valueOf ( req_date1.getMonth()));
+	v.add(Integer.valueOf (req_date1.getYear()));
+	v.add ( Integer.valueOf ( req_date2.getMonth()));
+	v.add(Integer.valueOf (req_date2.getYear()));
 	v.add ( "" );
 	iline = StringUtil.formatString ( v, format );
 	out.println ( iline );
@@ -2165,7 +2100,7 @@ throws Exception
 				iline_v.clear();
 				iline_format_buffer.setLength(0);
 				iline_format_buffer.append ( initial_format );
-				iline_v.add( new Integer (year));
+				iline_v.add( Integer.valueOf (year));
 				iline_v.add( tsptr.getIdentifier().getLocation());
 	
 				for (mon=0; mon <12; mon++) {
@@ -2387,15 +2322,15 @@ throws Exception
 
 		v.clear();
 		v.add ( cmnt );
-		v.add ( new Integer ( i+1 ));
+		v.add ( Integer.valueOf ( i+1 ));
 		v.add ( tmpid );
 		v.add ( tmptype );
 		v.add ( tmpsource );
 		v.add ( tmpunits );
 		v.add ( TimeUtil.monthAbbreviation(	tsptr.getDate1().getMonth()));
-		v.add ( new Integer ( tsptr.getDate1().getYear()));
+		v.add ( Integer.valueOf ( tsptr.getDate1().getYear()));
 		v.add ( TimeUtil.monthAbbreviation(	tsptr.getDate2().getMonth()));
-		v.add ( new Integer ( tsptr.getDate2().getYear()));
+		v.add ( Integer.valueOf ( tsptr.getDate2().getYear()));
 		v.add ( tmplocation );
 		v.add ( tmpdesc );
 
@@ -2599,13 +2534,13 @@ throws Exception
 	// Write the header line with the period of record...
 
 	v.clear();
-	v.add ( new Integer ( req_date1.getMonth()));
+	v.add ( Integer.valueOf ( req_date1.getMonth()));
 	if ( standard_ts ) {
-		v.add(new Integer (req_date1.getYear()));
+		v.add(Integer.valueOf (req_date1.getYear()));
 	}
-	v.add ( new Integer ( req_date2.getMonth()));
+	v.add ( Integer.valueOf ( req_date2.getMonth()));
 	if ( standard_ts ) {
-		v.add(new Integer (req_date2.getYear()));
+		v.add(Integer.valueOf (req_date2.getYear()));
 	}
 	v.add ( output_units );
 	iline = StringUtil.formatString ( v, format );
@@ -2626,7 +2561,7 @@ throws Exception
 	List<String> iline_format_v = null; // Vector for formats for objects.
 	int	ndays; // Number of days in a month.
 	int	mon, day, j; // counters
-	Double DoubleMissingDV = new Double ( MissingDV );
+	Double DoubleMissingDV = Double.valueOf ( MissingDV );
 
 	if ( req_interval_base == TimeInterval.MONTH ) {
 		iline_v = new Vector<Object>(15,1);
@@ -2707,7 +2642,7 @@ throws Exception
 				iline_format_buffer.setLength(0);
 				iline_format_buffer.append ( initial_format );
 				if ( standard_ts ) {
-					iline_v.add( new Integer (year));
+					iline_v.add( Integer.valueOf (year));
 					iline_format_v.add (year_format);
 				}
 				iline_v.add(tsptr.getIdentifier().getLocation());
@@ -2737,7 +2672,7 @@ throws Exception
 					else {
 						annual_sum += value;
 						++annual_count;
-						iline_v.add (new Double(value));
+						iline_v.add (Double.valueOf(value));
 					}
 					cdate.addMonth(1);
 				}
@@ -2800,9 +2735,9 @@ throws Exception
 				iline_format_v.clear();
 				iline_format_buffer.setLength(0);
 				iline_format_buffer.append ( initial_format );
-				iline_v.add ( new Integer (cdate.getYear()));
+				iline_v.add ( Integer.valueOf (cdate.getYear()));
 				iline_format_v.add(year_format);
-				iline_v.add( new Integer(cdate.getMonth()));
+				iline_v.add( Integer.valueOf(cdate.getMonth()));
 				iline_format_v.add(month_format);
 				iline_v.add(tsptr.getIdentifier().getLocation());
 				iline_format_v.add(id_format);
@@ -2839,7 +2774,7 @@ throws Exception
 						    // Don't add to the count for days outside actual days.
 						    ++monthly_count;
 						}
-						iline_v.add (new Double(value));
+						iline_v.add (Double.valueOf(value));
 					}
 				}
 	

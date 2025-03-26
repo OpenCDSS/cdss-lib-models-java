@@ -4,19 +4,19 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
@@ -270,16 +270,16 @@ private void setupData(List data) {
 		num = dt.getNdly();
 		for (int j = 0; j < num; j++) {
 			__data[COL_PLAN_ID].add(id);
-			__data[COL_RIVER_NODE_ID].add(new Integer(j + 1));
-			__data[COL_PERCENT_RETURN].add( new Double(dt.getRet_val(j)));
+			__data[COL_RIVER_NODE_ID].add(Integer.valueOf(j + 1));
+			__data[COL_PERCENT_RETURN].add( Double.valueOf(dt.getRet_val(j)));
 			total += dt.getRet_val(j);
-			__rowMap.add(new Integer(rowCount));
+			__rowMap.add(Integer.valueOf(rowCount));
 			rowCount++;
 		}
 
 		__data[COL_PLAN_ID].add("TOTAL " + id);
-		__data[COL_RIVER_NODE_ID].add(new Integer(-999));
-		__data[COL_PERCENT_RETURN].add(new Double(total));
+		__data[COL_RIVER_NODE_ID].add(Integer.valueOf(-999));
+		__data[COL_PERCENT_RETURN].add(Double.valueOf(total));
 
 		rowCount++;
 	}

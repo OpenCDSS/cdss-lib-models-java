@@ -4,88 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-//------------------------------------------------------------------------------
-// StateMod_InstreamFlowRight - Derived from SMData class
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-// 
-// 08 Sep 1997	Catherine E.		Created initial version of class.
-//		Nutting-Lane, RTi
-// 21 Dec 1998	CEN, RTi		Added throws IOException to
-//					read/write routines.
-// 15 Feb 2001	Steven A. Malers, RTi	Update header for current documentation.
-//					Update IO to IOUtil.  Add finalize()and
-//					make sure all data are initialized.  Add
-//					more Javadoc.  Alphabetize methods.  Add
-//					checks for null data to prevent errors.
-//					Set unused variables to null.
-// 02 Mar 2001	SAM, RTi		Ray says to use F16.0 for rights and
-//					get rid of the 4x.
-// 2001-12-27	SAM, RTi		Update to use new fixedRead()to
-//					improve performance.
-// 2002-09-19	SAM, RTi		Use isDirty()instead of setDirty()to
-//					indicate edits.
-//------------------------------------------------------------------------------
-// 2003-06-04	J. Thomas Sapienza, RTI	Renamed from StateMod_InstreamFlowRight 
-//					to StateMod_InstreamFlowRight
-// 2003-06-10	JTS, RTi		* Folded dumpInstreaFlowRightsFile()
-//					  into writeInstreamFlowRightsFile()
-//					* Renamed parseInstreamFlowRightsFile()
-//					  to readInstreamFlowRightsFile()
-//					* Renamed writeInstreamFlowRightsFile()
-//					  to writeStateModFile()
-// 2003-06-26	JTS, RTi		Renamed readInstreamFlowRightsFile()
-//					readStateModFile()
-// 2003-08-03	SAM, RTi		Change isDirty() back to setDirty().
-// 2003-08-28	SAM, RTi		* Do not use linked list since
-//					  StateMod_InstreamFlow has a Vector of
-//					  rights.
-//					* Call setDirty() on individual objects
-//					  in addition to the data set component.
-//					* Clean up Javadoc and parameter names.
-// 2003-10-13	JTS, RTi		* Implemented Cloneable.
-//					* Added clone().
-//					* Added equals().
-//					* Implemented Comparable.
-//					* Added compareTo().
-// 					* Added equals(Vector, Vector)
-// 2003-10-15	JTS, RTi		* Revised the clone() code.
-//					* Added toString().
-// 2004-07-08	SAM, RTi		* When writing, adjust paths using
-//					  working directory.
-//					* Overload the constructor to allow
-//					  initializing to default values or
-//					  missing.
-// 2005-03-13	SAM, RTi		* Expand header to explain switch
-//					  better.
-// 2005-03-31	JTS, RTi		Added createBackup().
-// 2005-04-18	JTS, RTi		Added writeListFile().
-// 2007-04-12	Kurt Tometich, RTi		Added checkComponentData() and
-//									getDataHeader() methods for check
-//									file and data check support.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-// 2007-05-16	SAM, RTi		Implement StateMod_Right interface.
-//------------------------------------------------------------------------------
-// EndHeader
 
 package DWR.StateMod;
 
@@ -236,15 +170,6 @@ public boolean equals(StateMod_InstreamFlowRight right) {
 		return true;
 	}
 	return false;
-}
-
-/**
-Free memory before garbage collection.
-*/
-protected void finalize()
-throws Throwable {
-	_irtem = null;
-	super.finalize();
 }
 
 /**
@@ -622,8 +547,8 @@ throws Exception {
 			v.add(right.getName());
 			v.add(right.getCgoto());
 			v.add(right.getIrtem());
-			v.add(new Double(right.getDcrifr()));
-			v.add(new Integer(right.getSwitch()));
+			v.add(Double.valueOf(right.getDcrifr()));
+			v.add(Integer.valueOf(right.getSwitch()));
 			iline = StringUtil.formatString(v, format_0);
 			out.println(iline);
 		}

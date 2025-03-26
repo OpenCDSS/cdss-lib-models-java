@@ -4,39 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-// ----------------------------------------------------------------------------
-// StateCU_BlaneyCriddle_TableModel - Table model for displaying data for 
-//	Blaney Criddle worksheets.
-// ----------------------------------------------------------------------------
-// Copyright:   See the COPYRIGHT file
-// ----------------------------------------------------------------------------
-// History:
-// 2005-01-24	JTS, RTi	Initial version.
-// 2005-03-28	JTS, RTi	Adjusted column sizes.
-// 2007-01-10   Kurt Tometich, RTi
-// 							Fixed the format for the cropName to 
-//							30 chars instead of 20.
-// 2007-01-10	KAT, RTi	Adding new field Blaney-Criddle Method.
-// 2007-03-01	SAM, RTi	Clean up code based on Eclipse feedback.
-// 2007-03-04	SAM, RTi	Change method signature consistent with other code.
-// ----------------------------------------------------------------------------
 
 package DWR.StateCU;
 
@@ -201,11 +184,11 @@ public Validator[] getValidators(int col) {
 	Validator[] no_checks = new Validator[] {};
 	// KTSW must be 0,1,2,3,4 or blank.
 	Validator [] KTSW = new Validator[] {
-		Validators.isEquals( new Integer( 0 ) ),
-		Validators.isEquals( new Integer( 1 ) ),
-		Validators.isEquals( new Integer( 2 ) ),
-		Validators.isEquals( new Integer( 3 ) ),
-		Validators.isEquals( new Integer( 4 ) ),
+		Validators.isEquals( Integer.valueOf( 0 ) ),
+		Validators.isEquals( Integer.valueOf( 1 ) ),
+		Validators.isEquals( Integer.valueOf( 2 ) ),
+		Validators.isEquals( Integer.valueOf( 3 ) ),
+		Validators.isEquals( Integer.valueOf( 4 ) ),
 		Validators.isEquals( "" )};
 		Validator [] ktswValidators = new Validator[] {
 		Validators.or( KTSW ) };
@@ -220,21 +203,20 @@ public Validator[] getValidators(int col) {
 }
 
 /**
-From AbstractTableMode.  Returns the data that should be placed in the JTable
-at the given row and column.
+From AbstractTableMode.  Returns the data that should be placed in the JTable at the given row and column.
 @param row the row for which to return data.
 @param col the column for which to return data.
 @return the data that should be placed in the JTable at the given row and col.
 */
 public Object getValueAt(int row, int col) {
-	// make sure the row numbers are never sorted ...
+	// Make sure the row numbers are never sorted.
 	if (_sortOrder != null) {
 		row = _sortOrder[row];
 	}
 
 	int dataPos = lookupVectorPositionForRow(row);
 
-	StateCU_BlaneyCriddle bc = (StateCU_BlaneyCriddle)_data.get(dataPos);
+	StateCU_BlaneyCriddle bc = _data.get(dataPos);
 	
 	int num = row - __firstRows[dataPos];
 
@@ -243,20 +225,20 @@ public Object getValueAt(int row, int col) {
 			return bc.getName();
 		case __COL_DAY_PCT:
 			if (__day[dataPos]) {
-				return new Integer(bc.getNckcp(num));
+				return Integer.valueOf(bc.getNckcp(num));
 			}
 			else {
-				return new Integer(bc.getNckca(num));
+				return Integer.valueOf(bc.getNckca(num));
 			}
 		case __COL_COEFF:
 			if (__day[dataPos]) {
-				return new Double(bc.getCkcp(num));
+				return Double.valueOf(bc.getCkcp(num));
 			}
 			else {
-				return new Double(bc.getCkca(num));
+				return Double.valueOf(bc.getCkca(num));
 			}
 		case __COL_BCM:
-			return new Integer(bc.getKtsw());
+			return Integer.valueOf(bc.getKtsw());
 	}
 	return "";
 }

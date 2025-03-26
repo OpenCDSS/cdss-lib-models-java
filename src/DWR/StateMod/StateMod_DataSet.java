@@ -4,19 +4,19 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
@@ -2198,15 +2198,6 @@ private static boolean fileIsEmpty ( String filename )
 		return true; // File is empty.
 	}
 	return false; // File might have data.
-}
-
-/**
-Finalize before garbage collection.
-@exception Throwable if an error occurs.
-*/
-protected void finalize()
-throws Throwable {
-	super.finalize();
 }
 
 /**
@@ -4946,9 +4937,10 @@ public void initializeDataFileNames ()
 			comp.setDataFileName ( basename + "." + __component_file_extensions[comp.getComponentType()] );
 			continue;
 		}
-		// FIXME SAM 2011-01-01 What is the following doing?  Does not make sense
-		// Need to add components to the group...
-		List<DataSetComponent> data2 = (List)comp.getData();
+		// FIXME SAM 2011-01-01 What is the following doing?
+		// Does not make sense Need to add components to the group.
+		@SuppressWarnings("unchecked")
+		List<DataSetComponent> data2 = (List<DataSetComponent>)comp.getData();
 		int size2 = 0;
 		if ( data2 != null ) {
 			size2 = data2.size();
@@ -8678,90 +8670,90 @@ throws Exception
 		out.println(dataset.getHeading1());
 		out.println(dataset.getHeading2());
 	
-		v.add(new Integer(dataset.getIystr()));
+		v.add(Integer.valueOf(dataset.getIystr()));
 		iline = StringUtil.formatString(v, formatd);
 		out.println(iline + "     : iystr   Starting year of simulation");
 	
-		v.set(0,new Integer(dataset.getIyend()));
+		v.set(0,Integer.valueOf(dataset.getIyend()));
 		iline = StringUtil.formatString(v, formatd);
 		out.println(iline + "     : iyend   Ending year of simulation");
 	
-		v.set(0,new Integer(dataset.getIresop()));
+		v.set(0,Integer.valueOf(dataset.getIresop()));
 		iline = StringUtil.formatString(v, formatd);
 		out.println(iline + "     : iresop  Output units (1=cfs,2=acft,3=KAF,4=cfs day and acft month,5=cms)");
 	
-		v.set(0,new Integer(dataset.getMoneva()));
+		v.set(0,Integer.valueOf(dataset.getMoneva()));
 		iline = StringUtil.formatString(v, formatd);
 		out.println(iline + "     : moneva  Type of evap/precip data (0=monthly, 1=average)");
 	
-		v.set(0,new Integer(dataset.getIopflo()));
+		v.set(0,Integer.valueOf(dataset.getIopflo()));
 		iline = StringUtil.formatString(v, formatd);
 		out.println(iline + "     : iopflo  Type of stream inflow (1=total, 2=gains)");
 	
-		v.set(0,new Integer(dataset.getNumpre()));
+		v.set(0,Integer.valueOf(dataset.getNumpre()));
 		iline = StringUtil.formatString(v, formatd);
 		out.println(iline + "     : numpre  Number of precipitation stations");
 	
-		v.set(0,new Integer(dataset.getNumeva()));
+		v.set(0,Integer.valueOf(dataset.getNumeva()));
 		iline = StringUtil.formatString(v, formatd);
 		out.println(iline + "     : numeva  Number of evaporation stations");
 	
-		v.set(0,new Integer(dataset.getInterv()));
+		v.set(0,Integer.valueOf(dataset.getInterv()));
 		iline = StringUtil.formatString(v, formatd);
 		out.println(iline + "     : interv  Intervals in delay table (n=fixed, %;-1=var, %; -100=var, fraction)");
 	
-		v.set(0,new Double(dataset.getFactor()));
+		v.set(0,Double.valueOf(dataset.getFactor()));
 		iline = StringUtil.formatString(v, formatf);
 		out.println(iline + "     : factor  Factor to convert cfs to acft/day (1.9835)");
 	
-		v.set(0,new Double(dataset.getRfacto()));
+		v.set(0,Double.valueOf(dataset.getRfacto()));
 		iline = StringUtil.formatString(v, formatf);
 		out.println(iline + "     : rfacto  Divisor for streamflow data (0 for data in cfs, 1.9835 for acft/month)");
 	
-		v.set(0,new Double(dataset.getDfacto()));
+		v.set(0,Double.valueOf(dataset.getDfacto()));
 		iline = StringUtil.formatString(v, formatf);
 		out.println(iline + "     : dfacto  Divisor for diversion data (0 for data in cfs, 1.9835 for acft/month)");
 	
-		v.set(0,new Double(dataset.getFfacto()));
+		v.set(0,Double.valueOf(dataset.getFfacto()));
 		iline = StringUtil.formatString(v, formatf);
 		out.println(iline + "     : ffacto  Divisor for instream flow data (0 for data in cfs, 1.9835 for acft/month)");
 	
-		v.set(0,new Double(dataset.getCfacto()));
+		v.set(0,Double.valueOf(dataset.getCfacto()));
 		iline = StringUtil.formatString(v, formatf);
 		out.println(iline + "     : cfacto  Factor to convert reservoir content to acft");
 	
-		v.set(0,new Double(dataset.getEfacto()));
+		v.set(0,Double.valueOf(dataset.getEfacto()));
 		iline = StringUtil.formatString(v, formatf);
 		out.println(iline + "     : efacto  Factor to convert evaporation data to feet");
 	
-		v.set(0,new Double(dataset.getPfacto()));
+		v.set(0,Double.valueOf(dataset.getPfacto()));
 		iline = StringUtil.formatString(v, formatf);
 		out.println(iline + "     : pfacto  Factor to convert precipitation data to feet");
 	
 		out.println("  " + month_del
 			+ "        : cyr1    Year type (a5, all caps, right justified: CYR, WYR, or IYR)");
 	
-		v.set(0,new Integer(dataset.getIcondem()));
+		v.set(0,Integer.valueOf(dataset.getIcondem()));
 		iline = StringUtil.formatString(v, formatd);
 		out.println(iline + "     : icondem Demand type (1=Historical Demand,2=Historical Sum," +
 			"3=Structure Demand,4=Supply Demand,5=Decreed Demand)");
 	
-		v.set(0,new Integer(dataset.getIchk()));
+		v.set(0,Integer.valueOf(dataset.getIchk()));
 		iline = StringUtil.formatString(v, formatd);
 		out.println(iline + "     : ichk    Detailed print (0=off,1=net,4=calls,5=dem,6=day,7=ret," +
 			"91=well,92=soil,-NodeId,see documentation)");
 	
-		v.set(0,new Integer(dataset.getIreopx()));
+		v.set(0,Integer.valueOf(dataset.getIreopx()));
 		iline = StringUtil.formatString(v, formatd);
 		out.println(iline + "     : ireopx  Re-operation switch (0=re-operate,1=no re-operation," +
 			"-10=reoperate for releases>10 acft/month)");
 	
-		v.set(0,new Integer(dataset.getIreach()));
+		v.set(0,Integer.valueOf(dataset.getIreach()));
 		iline = StringUtil.formatString(v, formatd);
 		out.println(iline + "     : ireach  Instream flow approach (0=no reach,1=reach approach," +
 			"2=0+monthly demands,3=1+monthly demands)");
 	
-		v.set(0,new Integer(dataset.getIcall()));
+		v.set(0,Integer.valueOf(dataset.getIcall()));
 		iline = StringUtil.formatString(v, formatd);
 		out.println(iline + "     : icall   Detailed call data (0=no, 1=yes)");
 	
@@ -8769,37 +8761,37 @@ throws Exception
 		iline = StringUtil.formatString(v, formats12);
 		out.println(iline + " : ccall   Detailed call water right ID (if icall != 0)");
 	
-		v.set(0,new Integer(dataset.getIday()));
+		v.set(0,Integer.valueOf(dataset.getIday()));
 		iline = StringUtil.formatString(v, formatd);
 		out.println(iline + "     : iday    Daily calculations (0=monthly,1=daily)");
 	
-		v.set(0,new Integer(dataset.getIwell()));
+		v.set(0,Integer.valueOf(dataset.getIwell()));
 		iline = StringUtil.formatString(v, formatd);
 		out.println(iline + "     : iwell   Wells (-1=no but files in .rsp,0=no,1=well with no gwmaxrc," +
 			"2=wells with gwmaxrc,3=wells with var gwmaxrc)");
 	
-		v.set(0,new Double(dataset.getGwmaxrc()));
+		v.set(0,Double.valueOf(dataset.getGwmaxrc()));
 		iline = StringUtil.formatString(v, formatf1);
 		out.println(iline + "     : gwmaxrc Maximum recharge limit, cfs (if iwell=2)");
 	
-		v.set(0,new Integer(dataset.getIsjrip()));
+		v.set(0,Integer.valueOf(dataset.getIsjrip()));
 		iline = StringUtil.formatString(v, formatd);
 		out.println(iline + "     : isjrip  (SJRIP) sediment file (-1=no but file in .rsp,0=no,1=yes)");
 	
-		v.set(0,new Integer(dataset.getItsfile()));
+		v.set(0,Integer.valueOf(dataset.getItsfile()));
 		iline = StringUtil.formatString(v, formatd);
 		out.println(iline + "     : itsfile Use *.ipy file (-1=no but file in .rsp,0=no,1=annual GW lim," +
 			"2=annual well cap only,10=all data)");
 	
-		v.set(0,new Integer(dataset.getIeffmax()));
+		v.set(0,Integer.valueOf(dataset.getIeffmax()));
 		iline = StringUtil.formatString(v, formatd);
 		out.println(iline + "     : ieffmax Use consumptive water requirement file (-1=no but file in .rsp,0=no,1=yes,2=see documentation)");
 	
-		v.set(0,new Integer(dataset.getIsprink()));
+		v.set(0,Integer.valueOf(dataset.getIsprink()));
 		iline = StringUtil.formatString(v, formatd);
 		out.println(iline + "     : isprink Use sprinkler area and efficiency data (0=no, 1=yes)");
 	
-		v.set(0,new Double(dataset.getSoild()));
+		v.set(0,Double.valueOf(dataset.getSoild()));
 		if (dataset.getSoild()> 0.0) {
 			iline = StringUtil.formatString(v, formatf1);
 		}
@@ -8808,7 +8800,7 @@ throws Exception
 		}
 		out.println(iline + "     : soild   Soil moist accounting (-1=no but file in .rsp,0=no,+n=soil zone depth in ft)");
 	
-		v.set(0,new Integer(dataset.getIsig()));
+		v.set(0,Integer.valueOf(dataset.getIsig()));
 		iline = StringUtil.formatString(v, formatd);
 		out.println(iline + "     : isig    Digits after decimal point in output (0=none,1=one,2=two)");
 	} 

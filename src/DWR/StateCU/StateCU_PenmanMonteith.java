@@ -4,19 +4,19 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
@@ -109,17 +109,6 @@ public void createBackup() {
 			__kcb[igs][i] = pm.__kcb[igs][i];
 		}
 	}
-}
-
-/**
-Clean up for garbage collection.
-@exception Throwable if there is an error.
-*/
-protected void finalize()
-throws Throwable
-{	__kcb = null;
-	__kcday = null;
-	super.finalize();
 }
 
 /**
@@ -439,11 +428,11 @@ decimal should be printed (default is 3).
 @exception IOException if an error occurs.
 */
 private static void writeVector ( List<StateCU_PenmanMonteith> data_Vector, PrintWriter out, Integer precision )
-throws IOException
-{	String cmnt = "#>";
+throws IOException {
+	String cmnt = "#>";
 	// Missing data are handled by formatting all as strings (blank if necessary).
 	if ( precision == null ) {
-		precision = new Integer(3); // Make this agree with the Blaney-Criddle default
+		precision = Integer.valueOf(3); // Make this agree with the Blaney-Criddle default.
 	}
 	int precision2 = precision.intValue();
 

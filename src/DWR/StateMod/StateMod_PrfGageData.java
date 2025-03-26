@@ -5,44 +5,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-// ----------------------------------------------------------------------------
-// StateMod_PrfGageData - proration factor information, used by StateDMI when
-//				processing StateMod_StreamEstimate_Coefficients
-// ----------------------------------------------------------------------------
-// History:
-//
-// 11 Feb 1999	Steven A. Malers	Code sweep.
-//		Riverside Technology,
-//		inc.
-// ----------------------------------------------------------------------------
-// 2003-10-08	J. Thomas Sapienza, RTi	Upgraded to HydroBaseDMI.
-// 2004-02-04	JTS, RTi		Now extends DMIDataObject.
-// 2004-08-13	SAM, RTi		* Move from HydroBaseDMI package to
-//					  StateMod to support more specific use.
-//					* Move the isSetprfSource() and
-//					  isSetprfTarget() methods from
-//					  HydroBase_NodeNetwork to static
-//					  methods here.  Keep the method names
-//					  the same for now but might rename
-//					  later as code is cleaned up further.
-// ----------------------------------------------------------------------------
 
 package DWR.StateMod;
 
@@ -104,18 +82,6 @@ public StateMod_PrfGageData ( String nodeID, String gageID )
 	__gageNode = null;
 }
 
-/**
-Finalize before garbage collection.
-*/
-protected void finalize()
-throws Throwable {
-	__nodeID = null;
-	__gageID = null;
-	__node = null;
-	__gageNode = null;
-	super.finalize();
-}
-	
 /**
 Returns the gage identifier.
 @return the gage identifier.

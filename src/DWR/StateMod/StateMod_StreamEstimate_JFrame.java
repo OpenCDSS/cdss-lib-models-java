@@ -4,90 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-//------------------------------------------------------------------------------
-// StateMod_StreamEstimate_JFrame - JFrame to edit the stream estimate stations
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-// 
-// 02 Jan 1998	Catherine E.		Created initial version of class.
-//		Nutting-Lane, RTi
-// 17 Feb 1998	CEN, RTi		Move help/close to bottom.
-// 31 Aug 1998	CEN, RTi		added check for areTSRead.
-// 22 Sep 1998	CEN, RTi		Changed list to multilist.
-// 08 Mar 2000	CEN, RTi		Added radio buttons to search.
-// 01 Apr 2001	Steven A. Malers, RTi	Change GUI to JGUIUtil.  Add finalize().
-//					Remove import *.
-// 04 May 2001	SAM, RTi		Change "Baseflow Results" to
-//					"Baseflow Time Series" and change the
-//					MonthTS title to be more friendly.
-// 2002-09-12	SAM, RTi		Move baseflow time series to the .ris
-//					(River Stations)window.  Change the
-//					title to say Baseflow Coefficients.
-//------------------------------------------------------------------------------
-// 2003-08-20	J. Thomas Sapienza, RTi	Initial swing version adapted from 
-//					the old baseflow coefficients window.
-// 2003-08-26	SAM, RTi		Enable StateMod_DataSet_WindowManager.
-// 2003-08-27	JTS, RTi		Added selectID() to select an ID 
-//					on the worksheet from outside the GUI.
-// 2003-09-02	JTS, RTi		* Added a border around the search area
-//					  components.
-//					* TS Graph/Summary/Table selection is
-//					  now done through check boxes.
-// 2003-09-04	JTS, RTi		Added cancel and apply buttons.
-// 2003-09-04	SAM, RTi		Enable graph features.
-// 2003-09-05	JTS, RTi		Class is now an item listener in 
-//					order to enable/disable graph buttons
-//					based on selected checkboxes.
-// 2003-09-06	SAM, RTi		Fix problem with graph sizing.
-// 2003-09-08	JTS, RTi		* Added checkTimeSeriesButtonsStates()
-//					  to enable/disable the time series
-//					  display buttons according to how
-//					  the time series checkboxes are 
-//					  selected.
-//					* Adjusted layout.
-// 2003-09-11	SAM, RTi		* Rename the class from
-//					  StateMod_BaseFlowStation_JFrame to
-//					  StateMod_StreamEstimate_JFrame and
-//					  make changes accordingly.
-//					* Remove findBaseflowCoefficients()
-//					  since StateMod_Util.indexOf() will
-//					  work.
-// 2003-09-23	JTS, RTi		Uses new StateMod_GUIUtil code for
-//					setting titles.
-// 2004-01-22	JTS, RTi		Updated to use JScrollWorksheet and
-//					the new row headers.
-// 2004-07-15	JTS, RTi		* For data changes, enabled the
-//					  Apply and Cancel buttons through new
-//					  methods in the data classes.
-//					* Changed layout of buttons to be
-//					  aligned in the lower-right.
-// 					* windowDeactivated() no longer saves
-//					  data as it was causing problems with
-//					  the cancel code.
-// 2006-01-19	JTS, RTi		* Now implements JWorksheet_SortListener
-//					* Reselects the record that was selected
-//					  when the worksheet is sorted.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-//------------------------------------------------------------------------------
 
 package DWR.StateMod;
 
@@ -643,37 +575,6 @@ private void displayTSViewJFrame(Object o)
 		Message.printWarning(1,routine,"Error displaying time series.");
 		Message.printWarning(2, routine, e);
 	}	
-}
-
-/**
-Clean up before garbage collection.
-*/
-protected void finalize()
-throws Throwable {
-	__searchCriteriaGroup = null;
-	__coefficientsComp = null;
-	__stationsComp = null;
-	__textUneditables = null;
-	__findNextButton = null;
-	__helpJButton = null;
-	__closeJButton = null;
-	__disables = null;
-	__searchIDJRadioButton = null;
-	__searchNameJRadioButton = null;
-	__nameJTextField = null;
-	__idJTextField = null;
-	__prorationFactorJTextField = null;
-	__searchIDJTextField = null;
-	__ts_streamflow_base_monthly_JCheckBox = null;
-	__ts_streamflow_base_daily_JCheckBox = null;
-	__searchNameJTextField = null;
-	__worksheetR = null;
-	__worksheetL = null;
-	__dataset = null;
-	__tableModelR = null;
-	__stationsVector = null;
-	__coefficientsVector = null;
-	super.finalize();
 }
 
 /**

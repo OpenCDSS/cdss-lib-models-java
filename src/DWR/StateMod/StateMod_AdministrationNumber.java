@@ -4,49 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-//------------------------------------------------------------------------------
-// StateMod_AdministrationNumber - class to store and manipulate 
-//				an administration number, as per HydroBase definition
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-//
-// 22 Nov 1998	Steven A. Malers, RTi	Break code out of HBWaterRightNet
-//					because we need a more full-featured
-//					class for use with demandts.
-// 26 Jan 1999	SAM, RTi		Overload constructor to take single
-//					values, integers, etc.
-// 10 Feb 1999	SAM, RTi		Update to have finalize().
-// 24 May 2001	SAM, RTi		Add setAppropriationDate() to be used
-//					when updating an administration number
-//					without allocating a new one.
-// 2003-02-05	J. Thomas Sapienza, RTi	Adapted from HBAdministrationNumber.
-// 2003-04-08	JTS, RTi		Moved TSDates to DateTime.
-// 2004-02-04	JTS, RTi		Now extends DMIDataObject.
-// 2005-02-11	JTS, RTi		No longer extends DMIDataObject.
-// 2007-02-26	SAM, RTi		Clean up code based on Eclipse feedback.
-//------------------------------------------------------------------------------
-// 2007-05-15	SAM, RTi		Copy HydroBase version to allow StateMod code to
-//					have stand-alone version.
-//------------------------------------------------------------------------------
 
 package DWR.StateMod;
 
@@ -182,18 +155,6 @@ public boolean equals ( StateMod_AdministrationNumber a )
 		return true;
 	}
 	return false;
-}
-
-/**
-Finalize before garbage collection.
-@exception Throwable if an error occurs.
-*/
-protected void finalize ()
-throws Throwable
-{
-	_appro_date = null;
-	_padj_date = null;
-	super.finalize();
 }
 
 /**
