@@ -306,9 +306,7 @@ public void setValueAt(Object value, int row, int col) {
 			else if (value instanceof String) {
 				String onOff = (String)value;
 				index = onOff.indexOf(" -");
-				ival = new Integer(
-					onOff.substring(0,
-					index)).intValue();
+				ival = Integer.valueOf( onOff.substring(0, index)).intValue();
 				dr.setSwitch(ival);
 			}
 			break;

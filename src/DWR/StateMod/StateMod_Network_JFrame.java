@@ -112,7 +112,7 @@ private final String __BUTTON_SaveScreenAsImage = "Save Screen as Image";
 /**
 Strings defining the modes the GUI can be put into.
 */
-public final String 
+public final String
 	MODE_INFO = "Info",
 	MODE_PAN = "Pan",
 	MODE_SELECT = "Select";
@@ -120,7 +120,7 @@ public final String
 /**
 Default node and font sizes for populating layout information.
 */
-private final int 
+private final int
 	__DEFAULT_FONT_SIZE = 10,
 	__DEFAULT_NODE_SIZE = 20;
 
@@ -168,10 +168,10 @@ private boolean __isXML = false;
 /**
 Checks used when reading in an XML file that make sure that everything is set properly.
 */
-private boolean 
-	__lxSet = false, 
-	__bySet = false, 
-	__wSet = false, 
+private boolean
+	__lxSet = false,
+	__bySet = false,
+	__wSet = false,
 	__hSet = false;
 
 private boolean __ignoreEvents = false;
@@ -186,10 +186,10 @@ private boolean __saveOnExit = false;
 /**
 Used when reading in an XML file to get the bounds of the network.
 */
-private double 
-	__lx = 0, 
-	__by = 0, 
-	__rx = 0, 
+private double
+	__lx = 0,
+	__by = 0,
+	__rx = 0,
 	__ty = 0;
 
 /**
@@ -238,7 +238,7 @@ private JTextField
 /**
 Textfields for displaying node information.
 */
-private JTextField 
+private JTextField
 	__nodeDescriptionTextField,
 	__nodeTypeTextField,
 	__nodeXYTextField,
@@ -248,14 +248,14 @@ private JTextField
 /**
 Status bars.
 */
-private JTextField 
+private JTextField
 	__locationJTextField,
 	__statusJTextField;
 
 /**
 GUI toggle buttons.
 */
-private JToggleButton 
+private JToggleButton
 	__infoJButton = null,
 	__panJButton = null,
 	__selectJButton = null;
@@ -268,7 +268,7 @@ private JToolBar __toolBar;
 /**
 Toolbar buttons.
 */
-private SimpleJButton 
+private SimpleJButton
 	__printEntireNetworkJButton,
 	__printScreenJButton,
 	__refreshJButton,
@@ -284,7 +284,7 @@ private SimpleJButton
 /**
 Combo boxes for selecting the paper size, node size, and font size.
 */
-private SimpleJComboBox 
+private SimpleJComboBox
 	__layoutComboBox,
 	__nodeSizeComboBox,
 	__orientationComboBox,
@@ -310,7 +310,7 @@ private String __filename = null;
 /**
 Information about the current layout.
 */
-private String 
+private String
 	__orient = null,
 	__paperSize = null;
 
@@ -330,10 +330,10 @@ The panel that includes the list of StateMod_Network_AnnotationData.
 private StateMod_Network_AnnotationDataListJPanel __annotationListJPanel = null;
 
 /**
-Constructor.  
+Constructor.
 @param network the network to display.
 */
-public StateMod_Network_JFrame(StateMod_NodeNetwork network) 
+public StateMod_Network_JFrame(StateMod_NodeNetwork network)
 throws Exception {
 	super();
 	double scale = .5;
@@ -344,7 +344,7 @@ throws Exception {
 	JGUIUtil.setIcon(this, JGUIUtil.getIconImage());
 	String app = JGUIUtil.getAppNameForWindows();
 	if (app == null || app.trim().equals("")) {
-		setTitle("StateMod Network");	
+		setTitle("StateMod Network");
 	}
 	else {
 		setTitle(app + " - StateMod Network");
@@ -356,7 +356,7 @@ throws Exception {
 	if (__layouts == null || __layouts.size() == 0) {
 		createFirstLayout();
 		__layoutComboBox.add(__id);
-	}	
+	}
 
 	setupPaper();
 
@@ -440,7 +440,7 @@ public void actionPerformed(ActionEvent event)
 		}
 	}
 	else if (command.equals(__BUTTON_SET_LAYOUT_NAME)) {
-		String name = new TextResponseJDialog(this, "Enter Page Layout Name", 
+		String name = new TextResponseJDialog(this, "Enter Page Layout Name",
 			"Enter the name for the current page layout:",
 			ResponseJDialog.OK | ResponseJDialog.CANCEL).response();
 		if (name == null) {
@@ -452,7 +452,7 @@ public void actionPerformed(ActionEvent event)
 		}
 
 		int index = __layoutComboBox.getSelectedIndex();
-		PropList p = __layouts.get(index);		
+		PropList p = __layouts.get(index);
 		p.set("ID=\"" + name + "\"");
 		__ignoreEvents = true;
 		__layoutComboBox.removeAt(index);
@@ -501,7 +501,7 @@ public void actionPerformed(ActionEvent event)
 	}
 	else if (command.equals("Zoom In")) {
 		__device.zoomIn();
-	}	
+	}
 	else if (command.equals("1:1")) {
 		__device.zoomOneToOne();
 	}
@@ -592,7 +592,7 @@ Adds a node to the network.
 @param downID the ID of the node downstream from the node to be added.
 @param isNaturalFlow whether the node to be added is a natural flow node.
 */
-public void addNode(String name, int type, String upID, String downID, 
+public void addNode(String name, int type, String upID, String downID,
 boolean isNaturalFlow, boolean isImport) {
 	__device.addNode(name, type, upID, downID, isNaturalFlow, isImport);
 }
@@ -638,7 +638,7 @@ private void buildToolBar() {
 			new ImageIcon(url), buttonLabel, buttonLabel, none, false, this);
 	}
 	else {
-		__printEntireNetworkJButton = new SimpleJButton("Print", buttonLabel, buttonLabel, none, false, this);		
+		__printEntireNetworkJButton = new SimpleJButton("Print", buttonLabel, buttonLabel, none, false, this);
 	}
 	__printEntireNetworkJButton.setToolTipText (
 		"Print the entire network, full-scale (select a page size that matches the network page layout)" );
@@ -652,8 +652,8 @@ private void buildToolBar() {
 	}
 	else {
 		__printScreenJButton = new SimpleJButton( "Print", buttonLabel, buttonLabel, none, false, this);
-	}	
-	// TODO SAM 2011-07-07 Re-enable
+	}
+	// TODO SAM 2011-07-07 Re-enable.
 	__printScreenJButton.setEnabled(false);
 	__printScreenJButton.setToolTipText("Print the network shown in the editor - CURRENTLY DISABLED.");
 	__toolBar.add(__printScreenJButton);
@@ -662,27 +662,27 @@ private void buildToolBar() {
 	buttonLabel = __BUTTON_SaveEntireNetworkAsImage;
 	if (url != null) {
 		__saveEntireNetworkAsImageJButton = new SimpleJButton(new ImageIcon(url),
-			buttonLabel, buttonLabel, none, false, this);	
+			buttonLabel, buttonLabel, none, false, this);
 	}
 	else {
-		__saveEntireNetworkAsImageJButton = new SimpleJButton("Save", buttonLabel, buttonLabel, none, false, this);	
+		__saveEntireNetworkAsImageJButton = new SimpleJButton("Save", buttonLabel, buttonLabel, none, false, this);
 	}
 	__saveEntireNetworkAsImageJButton.setEnabled ( false );
 	__saveEntireNetworkAsImageJButton.setToolTipText (
 		"Save entire network as image file, full-scale - CURRENTLY DISABLED." );
 	__toolBar.add(__saveEntireNetworkAsImageJButton);
-	
+
 	url = this.getClass().getResource( __RESOURCE_PATH + "/icon_saveScreenAsImage.gif");
 	buttonLabel = __BUTTON_SaveScreenAsImage;
 	if (url != null) {
 		__saveScreenAsImageJButton = new SimpleJButton(
-			new ImageIcon(url), buttonLabel, buttonLabel, none, false, this);	
+			new ImageIcon(url), buttonLabel, buttonLabel, none, false, this);
 	}
 	else {
 		__saveScreenAsImageJButton = new SimpleJButton("Save",buttonLabel, buttonLabel, none, false, this);
 	}
 	__saveScreenAsImageJButton.setToolTipText("Save the network shown in the editor to an image file." );
-	__toolBar.add(__saveScreenAsImageJButton);	
+	__toolBar.add(__saveScreenAsImageJButton);
 
 	__toolBar.addSeparator();
 
@@ -692,11 +692,11 @@ private void buildToolBar() {
 			"Save XML", "Save XML Network File", none, false, this);
 	}
 	else {
-		__saveXMLJButton = new SimpleJButton("Save", "Save XML", 
+		__saveXMLJButton = new SimpleJButton("Save", "Save XML",
 			"Save XML Network File", none, false, this);
 	}
 	__saveXMLJButton.setToolTipText("Save the network to an XML file." );
-	__toolBar.add(__saveXMLJButton);	
+	__toolBar.add(__saveXMLJButton);
 
 	__toolBar.addSeparator();
 
@@ -706,11 +706,11 @@ private void buildToolBar() {
 	}
 	else {
 		__refreshJButton = new SimpleJButton("Refresh", "Refresh", "Refresh", none, false, this);
-	}	
+	}
 	__refreshJButton.setActionCommand("Refresh");
 	__refreshJButton.setToolTipText("Refresh (redraw) the network." );
 	__toolBar.add(__refreshJButton);
-	
+
 	url = this.getClass().getResource( __RESOURCE_PATH + "/icon_zoomOut.gif");
 	if (url != null) {
 		__zoomOutJButton = new SimpleJButton(new ImageIcon(url),"Zoom Out", "Zoom Out", none, false, this);
@@ -719,9 +719,9 @@ private void buildToolBar() {
 		__zoomOutJButton = new SimpleJButton("Zoom Out", "Zoom Out", "Zoom Out", none, false, this);
 	}
 	__zoomOutJButton.setToolTipText ( "Zoom out to twice the area.");
-	__zoomOutJButton.setActionCommand("Zoom Out");	
+	__zoomOutJButton.setActionCommand("Zoom Out");
 
-	__zoom1JButton = new SimpleJButton( "1:1", "1:1", "Draw at 1:1 scale for page layout", 
+	__zoom1JButton = new SimpleJButton( "1:1", "1:1", "Draw at 1:1 scale for page layout",
 		none, false, this);
 	__zoom1JButton.setActionCommand("1:1");
 
@@ -731,12 +731,12 @@ private void buildToolBar() {
 	}
 	else {
 		__zoomInJButton = new SimpleJButton("Zoom In", "Zoom In", "Zoom In", none, false, this);
-	}	
+	}
 	__zoomInJButton.setActionCommand("Zoom In");
 	__zoomInJButton.setToolTipText ( "Zoom in to half the area.");
-	__toolBar.add(__zoomOutJButton);	
+	__toolBar.add(__zoomOutJButton);
 	__toolBar.add(__zoom1JButton);
-	__toolBar.add(__zoomInJButton);	
+	__toolBar.add(__zoomInJButton);
 	__toolBar.addSeparator();
 
 	__undoJButton = new SimpleJButton( "Undo", "Undo", "Undo", none, false, this);
@@ -751,7 +751,7 @@ private void buildToolBar() {
 	__redoJButton.setToolTipText ( "Redo the previous move action(s)." );
 	__toolBar.addSeparator();
 	__toolBar.add(__redoJButton);
-	
+
 	url = this.getClass().getResource( __RESOURCE_PATH + "/icon_hand.gif");
 	if (url != null) {
 		__panJButton = new SimpleJToggleButton(new ImageIcon(url),
@@ -765,8 +765,8 @@ private void buildToolBar() {
 	__toolBar.addSeparator();
 	__panJButton.setActionCommand(MODE_PAN);
 	__panJButton.setToolTipText ( "Enter pan mode - network can be scrolled by dragging the mouse." );
-	__toolBar.add(__panJButton);	
-	
+	__toolBar.add(__panJButton);
+
 	url = this.getClass().getResource( __RESOURCE_PATH + "/icon_infoMode.gif");
 	if (url != null) {
 		__infoJButton = new SimpleJToggleButton(new ImageIcon(url),
@@ -775,12 +775,12 @@ private void buildToolBar() {
 	else {
 		__infoJButton = new SimpleJToggleButton("Info Mode",
 			MODE_INFO, "Enter Info Mode", none, false, this, false);
-	}	
+	}
 	__infoJButton.setActionCommand(MODE_INFO);
 	__infoJButton.setToolTipText ( "Enter information mode - CURRENTLY DISABLED." );
 	__infoJButton.setEnabled(false);
-	__toolBar.add(__infoJButton);	
-	
+	__toolBar.add(__infoJButton);
+
 	url = this.getClass().getResource( __RESOURCE_PATH + "/icon_selectMode.gif");
 	if (url != null) {
 		__selectJButton = new SimpleJToggleButton(new ImageIcon(url),
@@ -789,12 +789,12 @@ private void buildToolBar() {
 	else {
 		__selectJButton = new SimpleJToggleButton("Select Mode",
 			MODE_SELECT, "Enter Select Mode", none, false, this, false);
-	}	
+	}
 	__selectJButton.setActionCommand(MODE_SELECT);
 	__selectJButton.setToolTipText ( "Enter select mode - select node and right-click for node properties, " +
 		"or drag node to reposition." );
 	__toolBar.add(__selectJButton);
-	
+
 	__printEntireNetworkJButton.addKeyListener(__device);
 	__printScreenJButton.addKeyListener(__device);
 	__refreshJButton.addKeyListener(__device);
@@ -852,8 +852,7 @@ private void closeClicked( boolean hardClose) {
 }
 
 /**
-Creates the default layout that will be used if a network is read with 
-no layouts defined in it.
+Creates the default layout that will be used if a network is read with no layouts defined in it.
 */
 private void createFirstLayout() {
 	if (__layouts == null) {
@@ -866,7 +865,7 @@ private void createFirstLayout() {
 	main.set("PageOrientation=\"" + __DEFAULT_PAGE_ORIENTATION + "\"");
 	main.set("NodeLabelFontSize=\"" + __DEFAULT_FONT_SIZE + "\"");
 	main.set("NodeSize=\"" + __DEFAULT_NODE_SIZE + "\"");
-	main.set("IsDefault=\"true\"");			
+	main.set("IsDefault=\"true\"");
 	__layouts.add(main);
 	__layoutIndex = 0;
 }
@@ -882,6 +881,7 @@ public void deleteNode(String id) {
 /**
 @deprecated -- use the other one
 */
+@Deprecated
 public void displayNode(HydrologyNode node, int nodeNum) {
 	displayNode(node);
 }
@@ -896,7 +896,7 @@ public void displayNode(HydrologyNode node) {
 	displayNodeXY(node.getX(), node.getY());
 	displayNodeDBXY(node.getDBX(), node.getDBY());
 	__nodeCommonIDTextField.setText(node.getCommonID());
-}	
+}
 
 /**
 Displays the node's x and y values on the screen.
@@ -907,7 +907,7 @@ public void displayNodeXY(double x, double y) {
 	String xs = StringUtil.formatString(x, "%13.6f");
 	String ys = StringUtil.formatString(y, "%13.6f");
 	__nodeXYTextField.setText("" + xs.trim() + ", " + ys.trim());
-}	
+}
 
 /**
 Displays the node's alternate x and y values on the screen.
@@ -918,7 +918,7 @@ public void displayNodeDBXY(double x, double y) {
 	String xs = StringUtil.formatString(x, "%13.6f");
 	String ys = StringUtil.formatString(y, "%13.6f");
 	__nodeDBXYTextField.setText("" + xs.trim() + ", " + ys.trim());
-}	
+}
 
 /**
 Called when OK is pressed in the add node dialog.
@@ -947,9 +947,9 @@ public String getFilename() {
 /**
 Indicate whether the network has unsaved changes.
 */
-public boolean getIsDirty()
-{	// Loop through the network nodes.  If any of them are dirty then the network is dirty.
-	
+public boolean getIsDirty() {
+	// Loop through the network nodes.  If any of them are dirty then the network is dirty.
+
 	return false;
 }
 
@@ -972,37 +972,33 @@ public StateMod_NodeNetwork getNetwork() {
 /**
 Returns the network editor JComponent that displays the network.
 */
-public StateMod_Network_JComponent getNetworkJComponent ()
-{
+public StateMod_Network_JComponent getNetworkJComponent () {
 	return __device;
 }
 
 /**
 Return the selected orientation.
 */
-public String getSelectedOrientation ()
-{
+public String getSelectedOrientation () {
 	return __orientationComboBox.getSelected();
 }
 
 /**
 Return the selected page layout.
 */
-public String getSelectedPageLayout ()
-{
+public String getSelectedPageLayout () {
 	return __layoutComboBox.getSelected();
 }
 
 /**
 Return the selected paper size.
 */
-public String getSelectedPaperSize ()
-{
+public String getSelectedPaperSize () {
 	return __paperSizeComboBox.getSelected();
 }
 
 /**
-Initializes class settings for a network in a net file.  
+Initializes class settings for a network in a net file.
 @param nodeDataProvider the data provider to use for communicating with the database.
 @param filename the file from which the network will be read.
 @throws Exception if an error occurs when initializing.
@@ -1021,12 +1017,12 @@ throws Exception {
 	}
 	else {
 		__isXML = true;
-	}	
+	}
 
 	JGUIUtil.setIcon(this, JGUIUtil.getIconImage());
 	String app = JGUIUtil.getAppNameForWindows();
 	if (app == null || app.trim().equals("")) {
-		setTitle("StateMod Network");	
+		setTitle("StateMod Network");
 	}
 	else {
 		setTitle(app + " - StateMod Network");
@@ -1037,10 +1033,9 @@ throws Exception {
 	if (__isXML) {
 		readXML(filename);
 	}
-	// Display the coordinate limits
+	// Display the coordinate limits.
 	StateMod_NodeNetwork network = getNetwork();
-	updateNetworkLayoutExtents(network.getLX(), network.getBY(), network.getRX(), network.getTY(), 
-		network.getEdgeBuffer());
+	updateNetworkLayoutExtents(network.getLX(), network.getBY(), network.getRX(), network.getTY(), network.getEdgeBuffer());
 
 	setVisible(true);
 
@@ -1053,7 +1048,7 @@ throws Exception {
 
 		__device.forceRepaint();
 		__device.setPaperSize(__paperSize);
-		__device.setOrientation(__orient);	
+		__device.setOrientation(__orient);
 		__device.setPrintNodeSize(__nodeSize);
 		__device.setPrintFontSize(__fontSize);
 
@@ -1061,7 +1056,7 @@ throws Exception {
 		__orientationComboBox.select(__orient);
 		__paperSizeComboBox.setSelectedPrefixItem(__paperSize + " -");
 		__printedFontSizeComboBox.select("" + __fontSize);
-	}	
+	}
 	else {
 		createFirstLayout();
 		__layoutComboBox.add(__id);
@@ -1087,7 +1082,7 @@ throws Exception {
 	JGUIUtil.setIcon(this, JGUIUtil.getIconImage());
 	String app = JGUIUtil.getAppNameForWindows();
 	if (app == null || app.trim().equals("")) {
-		setTitle("StateMod Network");	
+		setTitle("StateMod Network");
 	}
 	else {
 		setTitle(app + " - StateMod Network");
@@ -1109,10 +1104,10 @@ throws Exception {
 
 	__device.setXMLDataLimits(__lx, __by, __rx - __lx, __ty - __by);
 	__reference.setNewDataLimits(new GRLimits(__lx, __by, __rx, __ty));
-	// Display the coordinate limits
+	// Display the coordinate limits.
 	updateNetworkLayoutExtents(network.getLX(), network.getRX(), network.getTY(), network.getBY(),
 		network.getEdgeBuffer());
-	
+
 	setVisible(true);
 
 	createFirstLayout();
@@ -1157,8 +1152,8 @@ public boolean isDirty() {
 Responds to item state change events, such as those that change page layout information.
 @param event the ItemEvent that happened.
 */
-public void itemStateChanged(ItemEvent event)
-{	String routine = "StateMod_Network_JFrame.itemStateChanged";
+public void itemStateChanged(ItemEvent event) {
+	String routine = "StateMod_Network_JFrame.itemStateChanged";
 	if (__ignoreEvents) {
 		return;
 	}
@@ -1173,7 +1168,7 @@ public void itemStateChanged(ItemEvent event)
 		PropList p = __layouts.get(index);
 		p.set("PaperSize=\"" + value + "\"");
 	}
-	else if (event.getSource() == __printedFontSizeComboBox) {	
+	else if (event.getSource() == __printedFontSizeComboBox) {
 		int index = __layoutComboBox.getSelectedIndex();
 		String value = __printedFontSizeComboBox.getSelected();
 		PropList p = __layouts.get(index);
@@ -1199,7 +1194,7 @@ public void itemStateChanged(ItemEvent event)
 		orientationComboBoxSelected();
 	}
 	else if (event.getSource() == __layoutComboBox) {
-		int index = __layoutComboBox.getSelectedIndex();	
+		int index = __layoutComboBox.getSelectedIndex();
 		PropList p = __layouts.get(index);
 		String paperFormat = p.getValue("PaperSize");
 		Message.printStatus ( 2, routine, "Selected layout has paper size \"" + paperFormat + "\"" );
@@ -1221,7 +1216,7 @@ public void itemStateChanged(ItemEvent event)
 			nodeSize = (Integer.decode(sNodeSize)).intValue();
 			__nodeSizeComboBox.select("" + nodeSize);
 		}
-		catch (Exception e) {}	
+		catch (Exception e) {}
 		/*
 		Message.printStatus(1, "", ""
 			+ "Index: " + index + "\n"
@@ -1280,7 +1275,7 @@ throws Exception {
 				for (int i = 0; i < len; i++) {
 					node = children.item(i);
 					elementName = node.getNodeName();
-					// Evaluate the nodes attributes...
+					// Evaluate the nodes attributes.
 					if (elementName.equalsIgnoreCase("PageLayout")) {
 						processLayoutNode(node);
 					}
@@ -1299,7 +1294,7 @@ private void processLayoutNode(Node node) {
 	Node attributeNode;
 	String name = null;
 	String value = null;
-	
+
 	attributes = node.getAttributes();
 	int nattributes = attributes.getLength();
 
@@ -1325,7 +1320,7 @@ private void processLayoutNode(Node node) {
 		}
 		if (name.equalsIgnoreCase("PageOrientation")) {
 			p.set("PageOrientation=\"" + value + "\"");
-		}		
+		}
 		if (name.equalsIgnoreCase("NodeLabelFontSize")) {
 			p.set("NodeLabelFontSize=\"" + value + "\"");
 		}
@@ -1340,16 +1335,16 @@ private void processLayoutNode(Node node) {
 Called by the readXML code when processing a StateMod_Network node.
 @param node the XML node being read.
 */
-private void processStateMod_NetworkNode(Node node) 
+private void processStateMod_NetworkNode(Node node)
 throws Exception {
 	NamedNodeMap attributes;
 	Node attributeNode;
 	String name = null;
 	String value = null;
-	
+
 	attributes = node.getAttributes();
 	int nattributes = attributes.getLength();
-	
+
 	for (int i = 0; i < nattributes; i++) {
 		attributeNode = attributes.item(i);
 		name = attributeNode.getNodeName();
@@ -1381,20 +1376,20 @@ throws Exception {
 Reads a network from an XML file.
 @param filename the name of the XML file to read.
 */
-public void readXML(String filename) 
+public void readXML(String filename)
 throws Exception {
 	String routine = "StateMod_Network_JFRame.readXML";
 
 	// Java 8.
 	//DOMParser parser = null;
-	
+
 	// Java 11.
 	Document doc = null;
-	try {	
+	try {
 		// Java 8.
 		//parser = new DOMParser();
 		//parser.parse(filename);
-		
+
 		// Java 11.
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder builder = factory.newDocumentBuilder();
@@ -1407,11 +1402,11 @@ throws Exception {
 		throw new Exception("Error reading StateCU Data set \"" + filename + "\"");
 	}
 
-	// Now get information from the document.  For now don't hold the document as a data member...
+	// Now get information from the document.  For now don't hold the document as a data member.
 	// Java 8.
 	//Document doc = parser.getDocument();
 
-	// Loop through and process the document nodes, starting with the root node...
+	// Loop through and process the document nodes, starting with the root node.
 
 	__layouts = new ArrayList<>();
 	processDocumentNodeForRead(doc);
@@ -1448,13 +1443,13 @@ throws Exception {
 
 	int index = 0;
 	if (size == 0) {
-		Message.printWarning(2, routine, 
+		Message.printWarning(2, routine,
 			"No layouts were defined in this file.  Page layout "
 			+ "values will be set to defaults.");
 		createFirstLayout();
 		index = 0;
 	}
-	
+
 	PropList p = null;
 	String s = null;
 	List<String> ids = new ArrayList<>();
@@ -1467,7 +1462,7 @@ throws Exception {
 		}
 		ids.add(p.getValue("ID"));
 	}
-	
+
 	if (main == null) {
 		Message.printWarning(2, routine,
 			"No layout was marked as the main layout.  Values "
@@ -1495,7 +1490,7 @@ throws Exception {
 	catch (Exception e) {
 		nodeSize = __DEFAULT_NODE_SIZE;
 	}
-	
+
 	__orient = orient;
 	__paperSize = paperSize;
 	__nodeSize = nodeSize;
@@ -1513,8 +1508,8 @@ throws Exception {
 }
 
 /**
-Sets the bounds for the paper based on the network.  This is only done for 
-pre-existing networks (i.e., not those read from a net file).
+Sets the bounds for the paper based on the network.
+This is only done for pre-existing networks (i.e., not those read from a net file).
 @param network the network to use for determining paper bounds.
 */
 private void setBoundsFromNetwork(StateMod_NodeNetwork network) {
@@ -1523,8 +1518,7 @@ private void setBoundsFromNetwork(StateMod_NodeNetwork network) {
 	__lx = network.getLX();
 	__by = network.getBY();
 
-	if (__rx != -999.0 && __ty != -999.0 && __lx != -999.0 
-	    && __by != -999.0) {
+	if (__rx != -999.0 && __ty != -999.0 && __lx != -999.0 && __by != -999.0) {
 		__device.setXMLDataLimits(__lx, __by, __rx - __lx, __ty - __by);
 		__reference.setNewDataLimits(new GRLimits(__lx, __by, __rx, __ty));
 	}
@@ -1542,9 +1536,9 @@ public void setInStateModGUI(boolean inStateModGUI) {
 Sets the location shown in the status bar.
 */
 public void setLocation(double x, double y) {
-	__locationJTextField.setText("" 
+	__locationJTextField.setText(""
 		+ StringUtil.formatString(x, "%13.6f").trim()
-		+ ", " 
+		+ ", "
 		+ StringUtil.formatString(y, "%13.6f").trim());
 }
 
@@ -1552,8 +1546,8 @@ public void setLocation(double x, double y) {
 Sets the network to draw.
 @param dirty whether the network should be marked dirty or not.
 @param doAll whether the drawing component should do a re-initialization of
-other data members when the dirty is set or not.  This should only be true
-if setting the network for the first time.
+other data members when the dirty is set or not.
+This should only be true if setting the network for the first time.
 */
 protected void setNetwork(StateMod_NodeNetwork network, boolean dirty,
 boolean doAll) {
@@ -1594,65 +1588,65 @@ private void setupGUI() {
 
 	double scale = .5;
 	try {
-		
-	// read in the pageformat from the network here!
-		
+
+	// Read in the pageformat from the network here.
+
 	PageFormat pageFormat = PrintUtil.getPageFormat(__DEFAULT_PAPER_SIZE);
 	PrintUtil.setPageFormatOrientation(pageFormat, PageFormat.LANDSCAPE);
-	PrintUtil.setPageFormatMargins(pageFormat, .75, .75, .75, .75);	
+	PrintUtil.setPageFormatMargins(pageFormat, .75, .75, .75, .75);
 	__device.setPageFormat(pageFormat);
 
 	int hPixels = (int)(pageFormat.getWidth() / scale);
-	int vPixels = (int)(pageFormat.getHeight() / scale);	
+	int vPixels = (int)(pageFormat.getHeight() / scale);
 
 	GRAspectType aspect = GRAspectType.TRUE;
 
 	int leftMargin = (int)(pageFormat.getImageableX() / scale);
-	int rightMargin = (int)((pageFormat.getWidth() 
-		- (pageFormat.getImageableWidth() 
+	int rightMargin = (int)((pageFormat.getWidth()
+		- (pageFormat.getImageableWidth()
 		+ pageFormat.getImageableX())) / scale);
 	int topMargin = (int)(pageFormat.getImageableY() / scale);
-	int bottomMargin = (int)((pageFormat.getHeight() 
-		- (pageFormat.getImageableHeight() 
-		+ pageFormat.getImageableY())) / scale);	
+	int bottomMargin = (int)((pageFormat.getHeight()
+		- (pageFormat.getImageableHeight()
+		+ pageFormat.getImageableY())) / scale);
 	__device.setTotalSize(hPixels, vPixels);
 	GRLimits drawingLimits = new GRLimits(0.0, 0.0, 1000, 1000);
 	GRJComponentDrawingArea drawingArea = new GRJComponentDrawingArea(
-		__device, "StateMod_Network DrawingArea", GRAspectType.TRUE, 
-		drawingLimits, GRUnits.DEVICE, GRLimits.DEVICE, drawingLimits);	
+		__device, "StateMod_Network DrawingArea", GRAspectType.TRUE,
+		drawingLimits, GRUnits.DEVICE, GRLimits.DEVICE, drawingLimits);
 
 	__reference = new StateMod_NetworkReference_JComponent(this);
 	__reference.setPreferredSize(new Dimension(200, 200));
 
 	if (!__isXML) {
 		__reference.setNetwork(__device.getNetwork());
-		__reference.setNodesArray(__device.getNodesArray());		
+		__reference.setNodesArray(__device.getNodesArray());
 	}
 	GRLimits refLimits = new GRLimits(0, 0, 200, 200);
 	GRJComponentDrawingArea refDrawingArea = new GRJComponentDrawingArea(
-		__reference, "StateMod_NetworkReference DrawingArea", 
-		aspect, refLimits, GRUnits.DEVICE, 
-		GRLimits.DEVICE, refLimits);	
+		__reference, "StateMod_NetworkReference DrawingArea",
+		aspect, refLimits, GRUnits.DEVICE,
+		GRLimits.DEVICE, refLimits);
 
-	// Find the maximum and minimum coordinates to be plotted, considering the nodes...
+	// Find the maximum and minimum coordinates to be plotted, considering the nodes.
 	double xmax, xmin, ymax, ymin;
 
 	xmin = ymin = 10000000.0;
 	xmax = ymax = -10000000.0;
 
 	if (!__isXML) {
-		// Don't have limits in legacy network so need to compute
+		// Don't have limits in legacy network so need to compute.
 		StateMod_NodeNetwork network = __device.getNetwork();
 
 		HydrologyNode node = null;
 		HydrologyNode nodeTop = network.getMostUpstreamNode();
-	
+
 		if (Message.isDebugOn) {
 			Message.printDebug(dl, routine, "Start with node \"" + nodeTop.getCommonID() + "\"");
 		}
 		for (node = nodeTop; node != null;
 		    node = StateMod_NodeNetwork.getDownstreamNode(node, StateMod_NodeNetwork.POSITION_COMPUTATIONAL)) {
-			try {	
+			try {
 				xmin = MathUtil.min(xmin, node.getX());
 				xmax = MathUtil.max(xmax, node.getX());
 				ymin = MathUtil.min(ymin, node.getY());
@@ -1662,8 +1656,8 @@ private void setupGUI() {
 				Message.printWarning(2, routine, "Unknown error:");
 				Message.printWarning(2, routine, e);
 			}
-			
-			// Break if we are at the end of the list...
+
+			// Break if we are at the end of the list.
 			if (node.getType() == HydrologyNode.NODE_TYPE_END) {
 				break;
 			}
@@ -1671,25 +1665,24 @@ private void setupGUI() {
 
 		double dataWidth = xmax - xmin;
 		double dataHeight = ymax - ymin;
-	
+
 		double yAdd = dataHeight * .05;
 		double xAdd = dataWidth * .05;
 
 		xmin -= (leftMargin + xAdd);
 		xmax += (rightMargin + xAdd);
-	
+
 		ymin -= (bottomMargin + yAdd);
 		ymax += (topMargin + yAdd);
 
-		// Now set the data limits for the drawing area...
+		// Now set the data limits for the drawing area.
 
-		Message.printStatus(2, routine,
-			"Limits for plot data are " + xmin + "," + ymin + " to " + xmax + "," + ymax);
-	
+		Message.printStatus(2, routine, "Limits for plot data are " + xmin + "," + ymin + " to " + xmax + "," + ymax);
+
 		GRLimits grlimits = new GRLimits(xmin, ymin, xmax, ymax);
 		drawingArea.setDataLimits(grlimits);
 	}
-	
+
 	__device.setDrawingArea(drawingArea);
 	__device.calculateDataLimits();
 	refDrawingArea.setDataLimits(__device.getDataLimits());
@@ -1699,7 +1692,7 @@ private void setupGUI() {
 	__reference.setNetworkJComponent(__device);
 
 	JGUIUtil.addComponent(centerPanel, __device,
-		0, 1, 2, 1, 1, 1, 
+		0, 1, 2, 1, 1, 1,
 		GridBagConstraints.BOTH, GridBagConstraints.WEST);
 
 	JPanel southPanel = new JPanel();
@@ -1709,7 +1702,7 @@ private void setupGUI() {
 	__reference.setBorder(BorderFactory.createTitledBorder( "Network Reference"));
 
 	JGUIUtil.addComponent(centerPanel, __reference,
-		0, 2, 1, 1, 0, 0, 
+		0, 2, 1, 1, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 
 	JPanel panel = new JPanel();
@@ -1738,12 +1731,12 @@ private void setupGUI() {
 	button5.addKeyListener(__device);
 	button6.addKeyListener(__device);
 	button7.addKeyListener(__device);
-	
+
 	__layoutComboBox = new SimpleJComboBox();
 	__layoutComboBox.addItemListener(this);
 	__layoutComboBox.setToolTipText("Page layout name (e.g., \"11x17 Landscape\")." );
-	
-	__printedFontSizeComboBox = new SimpleJComboBox(false); // Do not allow text edits
+
+	__printedFontSizeComboBox = new SimpleJComboBox(false); // Do not allow text edits.
 	__printedFontSizeComboBox.add("3");
 	__printedFontSizeComboBox.add("4");
 	__printedFontSizeComboBox.add("5");
@@ -1772,8 +1765,7 @@ private void setupGUI() {
 	__printedFontSizeComboBox.add("28");
 	__printedFontSizeComboBox.add("29");
 	__printedFontSizeComboBox.add("30");
-	__printedFontSizeComboBox.setToolTipText("Node label size in points for the printed network, " +
-			"for the specified page layout." );
+	__printedFontSizeComboBox.setToolTipText("Node label size in points for the printed network, for the specified page layout." );
 	__printedFontSizeComboBox.select("" + __DEFAULT_FONT_SIZE);
 	__printedFontSizeComboBox.addKeyListener(__device);
 	__printedFontSizeComboBox.addItemListener(this);
@@ -1781,13 +1773,12 @@ private void setupGUI() {
 	__orientationComboBox = new SimpleJComboBox();
 	__orientationComboBox.add("Landscape");
 	__orientationComboBox.add("Portrait");
-	__orientationComboBox.setToolTipText("Page orientation (screen and printed network), " +
-			"for the specified page layout.");
+	__orientationComboBox.setToolTipText("Page orientation (screen and printed network), for the specified page layout.");
 	__orientationComboBox.select(__DEFAULT_PAGE_ORIENTATION);
 	__orientationComboBox.addKeyListener(__device);
 	__orientationComboBox.addItemListener(this);
-	
-	__nodeSizeComboBox = new SimpleJComboBox(false); // Do not allow text edits
+
+	__nodeSizeComboBox = new SimpleJComboBox(false); // Do not allow text edits.
 	__nodeSizeComboBox.add("3");
 	__nodeSizeComboBox.add("4");
 	__nodeSizeComboBox.add("5");
@@ -1808,8 +1799,7 @@ private void setupGUI() {
 	__nodeSizeComboBox.add("28");
 	__nodeSizeComboBox.add("30");
 	__nodeSizeComboBox.add("48");
-	__nodeSizeComboBox.setToolTipText("Node symbol size in points for the printed network, " +
-			"for the specified page layout." );
+	__nodeSizeComboBox.setToolTipText("Node symbol size in points for the printed network, for the specified page layout." );
 	__nodeSizeComboBox.select("" + __DEFAULT_NODE_SIZE);
 	__nodeSizeComboBox.addKeyListener(__device);
 	__nodeSizeComboBox.addItemListener(this);
@@ -1830,8 +1820,7 @@ private void setupGUI() {
 	__paperSizeComboBox.addItemListener(this);
 
 	__defaultLayoutCheckBox = new JCheckBox();
-	__defaultLayoutCheckBox.setToolTipText(
-		"Indicate whether the current layout should be shown when the network is loaded." );
+	__defaultLayoutCheckBox.setToolTipText( "Indicate whether the current layout should be shown when the network is loaded." );
 	__defaultLayoutCheckBox.setSelected(true);
 	__defaultLayoutCheckBox.addItemListener(this);
 
@@ -1860,7 +1849,7 @@ private void setupGUI() {
 		0, y, 1, 1, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	JGUIUtil.addComponent(pagePanel, __defaultLayoutCheckBox,
-		1, y, 9, 1, 0, 0, 
+		1, y, 9, 1, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
 	y++;
 
@@ -1938,15 +1927,15 @@ private void setupGUI() {
 	__nodeXYTextField.addKeyListener(__device);
 	__nodeDBXYTextField.addKeyListener(__device);
 	__nodeCommonIDTextField.addKeyListener(__device);
-	
-	// Vertical separator
-	
+
+	// Vertical separator.
+
 	JGUIUtil.addComponent(pagePanel, new JSeparator(JSeparator.VERTICAL),
 		11, 0, 1, 8, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
-	
-	// Right column of network properties. x=11 for label, x=12-21 for data field
-	
+
+	// Right column of network properties. x=11 for label, x=12-21 for data field.
+
 	y = 0;
 	int xLabel = 12;
 	int xData = 13;
@@ -1959,22 +1948,22 @@ private void setupGUI() {
 	JGUIUtil.addComponent(pagePanel, __xminJTextField,
 		xData, y, 9, 1, 1, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
-	
+
 	JGUIUtil.addComponent(pagePanel, new JLabel("Ymin: "),
 		xLabel, ++y, 1, 1, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__yminJTextField = new JTextField ( 10 );
-	__yminJTextField.setEnabled(false); // Display only
+	__yminJTextField.setEnabled(false); // Display only.
 	__yminJTextField.setToolTipText ( "Minimum y-coordinate calculated from node positions" );
 	JGUIUtil.addComponent(pagePanel, __yminJTextField,
 		xData, y, 9, 1, 1, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
-	
+
 	JGUIUtil.addComponent(pagePanel, new JLabel("Xmax: "),
 		xLabel, ++y, 1, 1, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__xmaxJTextField = new JTextField ( 10 );
-	__xmaxJTextField.setEnabled(false); // Display only
+	__xmaxJTextField.setEnabled(false); // Display only.
 	__xmaxJTextField.setToolTipText ( "Maximum x-coordinate calculated from node positions" );
 	JGUIUtil.addComponent(pagePanel, __xmaxJTextField,
 		xData, y, 9, 1, 1, 1,
@@ -1984,53 +1973,53 @@ private void setupGUI() {
 		xLabel, ++y, 1, 1, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__ymaxJTextField = new JTextField ( 10 );
-	__ymaxJTextField.setEnabled(false); // Display only
+	__ymaxJTextField.setEnabled(false); // Display only.
 	__ymaxJTextField.setToolTipText ( "Maximum y-coordinate calculated from node positions" );
 	JGUIUtil.addComponent(pagePanel, __ymaxJTextField,
 		xData, y, 9, 1, 1, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
-	
+
 	JGUIUtil.addComponent(pagePanel, new JLabel("Left edge buffer: "),
 		xLabel, ++y, 1, 1, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__edgeBufferLeftJTextField = new JTextField ( 10 );
-	__edgeBufferLeftJTextField.setEnabled(false); // Display only
+	__edgeBufferLeftJTextField.setEnabled(false); // Display only.
 	__edgeBufferLeftJTextField.setToolTipText ( "Additional width added to left of Xmin" );
 	JGUIUtil.addComponent(pagePanel, __edgeBufferLeftJTextField,
 		xData, y, 9, 1, 1, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
-	
+
 	JGUIUtil.addComponent(pagePanel, new JLabel("Right edge buffer: "),
 		xLabel, ++y, 1, 1, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__edgeBufferRightJTextField = new JTextField ( 10 );
-	__edgeBufferRightJTextField.setEnabled(false); // Display only
+	__edgeBufferRightJTextField.setEnabled(false); // Display only.
 	__edgeBufferRightJTextField.setToolTipText ( "Additional width added to right of Xmax" );
 	JGUIUtil.addComponent(pagePanel, __edgeBufferRightJTextField,
 		xData, y, 9, 1, 1, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
-	
+
 	JGUIUtil.addComponent(pagePanel, new JLabel("Top edge buffer: "),
 		xLabel, ++y, 1, 1, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__edgeBufferTopJTextField = new JTextField ( 10 );
-	__edgeBufferTopJTextField.setEnabled(false); // Display only
+	__edgeBufferTopJTextField.setEnabled(false); // Display only.
 	__edgeBufferTopJTextField.setToolTipText ( "Additional height added to top of Ymax" );
 	JGUIUtil.addComponent(pagePanel, __edgeBufferTopJTextField,
 		xData, y, 9, 1, 1, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
-		
+
 	JGUIUtil.addComponent(pagePanel, new JLabel("Bottom edge buffer: "),
 		xLabel, ++y, 1, 1, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__edgeBufferBottomJTextField = new JTextField ( 10 );
-	__edgeBufferBottomJTextField.setEnabled(false); // Display only
+	__edgeBufferBottomJTextField.setEnabled(false); // Display only.
 	__edgeBufferBottomJTextField.setToolTipText ( "Additional height added to bottom of Ymin" );
 	JGUIUtil.addComponent(pagePanel, __edgeBufferBottomJTextField,
 		xData, y, 9, 1, 1, 1,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
-	
-	// Node properties...
+
+	// Node properties.
 
 	nodePanel.setLayout(new GridBagLayout());
 	JGUIUtil.addComponent(nodePanel, new JLabel("Type: "),
@@ -2039,7 +2028,7 @@ private void setupGUI() {
 	JGUIUtil.addComponent(nodePanel, __nodeTypeTextField,
 		1, 0, 1, 1, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
-	
+
 	JGUIUtil.addComponent(nodePanel, new JLabel("Description: "),
 		0, 1, 1, 1, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -2067,7 +2056,7 @@ private void setupGUI() {
 	JGUIUtil.addComponent(nodePanel, __nodeDBXYTextField,
 		1, 4, 1, 1, 0, 0,
 		GridBagConstraints.NONE, GridBagConstraints.WEST);
-	
+
 	__annotationListJPanel = new StateMod_Network_AnnotationDataListJPanel (
 		__device.getAnnotationData(), __device, true );
 	__annotationListJPanel.setMinimumSize(new Dimension(175, 150));
@@ -2077,7 +2066,7 @@ private void setupGUI() {
 		GridBagConstraints.BOTH, GridBagConstraints.CENTER);
 
 	JGUIUtil.addComponent(centerPanel, panel,
-		1, 2, 1, 1, 0, 0, 
+		1, 2, 1, 1, 0, 0,
 		GridBagConstraints.BOTH, GridBagConstraints.CENTER);
 
 	buildMenuBar();
@@ -2090,7 +2079,7 @@ private void setupGUI() {
 	__statusJTextField.setEditable(false);
 	__locationJTextField = new JTextField(20);
 	__locationJTextField.setEditable(false);
-	
+
 	JGUIUtil.addComponent(statusBar, __statusJTextField,
 		0, 0, 1, 1, 1, 1,
 		GridBagConstraints.BOTH, GridBagConstraints.EAST);
@@ -2099,7 +2088,7 @@ private void setupGUI() {
 		GridBagConstraints.NONE, GridBagConstraints.EAST);
 
 	getContentPane().add(statusBar, "South");
-	
+
 	pack();
 	setSize(900, 700);
 	JGUIUtil.center(this);
@@ -2111,8 +2100,7 @@ private void setupGUI() {
 }
 
 /**
-Sets up the paper information when this class is instantiated with a 
-pre-existing network (i.e., not one read from a net file).
+Sets up the paper information when this class is instantiated with a pre-existing network (i.e., not one read from a net file).
 */
 private void setupPaper() {
 	String routine = "StateMod_Network_JFrame.setupPaper()";
@@ -2131,11 +2119,10 @@ private void setupPaper() {
 		}
 		ids.add(p.getValue("ID"));
 	}
-	
+
 	if (main == null) {
 		Message.printWarning(2, routine,
-			"No layout was marked as the main layout.  Values "
-			+ "from the first layout will be used, instead.");
+			"No layout was marked as the main layout.  Values from the first layout will be used, instead.");
 		main = __layouts.get(0);
 	}
 
@@ -2158,7 +2145,7 @@ private void setupPaper() {
 	catch (Exception e) {
 		nodeSize = __DEFAULT_NODE_SIZE;
 	}
-	
+
 	__orient = orient;
 	__paperSize = paperSize;
 	__nodeSize = nodeSize;
@@ -2176,7 +2163,7 @@ private void setupPaper() {
 
 	__device.forceRepaint();
 	__device.setPaperSize(__paperSize);
-	__device.setOrientation(__orient);	
+	__device.setOrientation(__orient);
 	__device.setPrintNodeSize(__nodeSize);
 	__device.setPrintFontSize(__fontSize);
 
@@ -2200,8 +2187,8 @@ public void setZoomedOneToOne(boolean zoomed) {
 }
 
 /**
-Checks to see if a string contains a dash, and if so, strips off the text
-before the dash and returns it.  Otherwise just returns the string.
+Checks to see if a string contains a dash, and if so, strips off the text before the dash and returns it.
+Otherwise just returns the string.
 @param s the String to check.
 @return the entire String if it does not contain a dash, otherwise return what comes before the dash.
 */
@@ -2216,12 +2203,9 @@ public String shorten(String s) {
 
 /**
 Update the network display information (Xmin, etc., and edgeBuffer).
-Only the limits should be changed external to this interface but update all to allow initialization from
-the network.
+Only the limits should be changed external to this interface but update all to allow initialization from the network.
 */
-public void updateNetworkLayoutExtents ( double xmin, double ymin, double xmax, double ymax,
-	double [] edgeBuffer )
-{
+public void updateNetworkLayoutExtents ( double xmin, double ymin, double xmax, double ymax, double [] edgeBuffer ) {
 	if ( !Double.isNaN(xmin) ) {
 		this.__xminJTextField.setText ( StringUtil.formatString(xmin,"%0.6f") );
 	}
@@ -2264,7 +2248,7 @@ Responds to window closing events and calls closeClicked().
 */
 public void windowClosing(WindowEvent event) {
 //	Message.printStatus(1, "", "WindowClosing:\n"
-//		+ "SaveOnExit: " + __saveOnExit 
+//		+ "SaveOnExit: " + __saveOnExit
 //		+ "\nNewNetwork: " + __newNetwork
 //		+ "\nDirty: " + __device.isDirty());
 	if (__saveOnExit) {
@@ -2280,7 +2264,7 @@ public void windowClosing(WindowEvent event) {
 	}
 	if (event.getSource() == this) {
 		// TODO SAM 2011-07-07 What is the rationale?  To speed up redisplay of windows in StateDMI?
-		// Event was generated from within this class - do not dispose
+		// Event was generated from within this class - do not dispose.
 		closeClicked( false );
 	}
 }
@@ -2308,49 +2292,45 @@ public void windowOpened(WindowEvent event) {}
 /**
 Zoom to the annotations and redraw.  This is generally called after adding a new annotation,
 so the user will see what was highlighted on the map.
-@param zoomBuffer The percent (1.0 is 100%) to expand the visible area in
-both directions for the selected shapes.  For example, specifying a value of
-1.0 would result in a viewable area that is 50% bigger than selected shapes on each edge.
-@param zoomBuffer2 If the selected shapes result in a region that is a single
-point, then zoomBuffer2 can be applied similar to zoomBuffer but using the
-dimension of the main view as the reference region.
+@param zoomBuffer The percent (1.0 is 100%) to expand the visible area in both directions for the selected shapes.
+For example, specifying a value of 1.0 would result in a viewable area that is 50% bigger than selected shapes on each edge.
+@param zoomBuffer2 If the selected shapes result in a region that is a single point,
+then zoomBuffer2 can be applied similar to zoomBuffer but using the dimension of the main view as the reference region.
 */
-public void zoomToAnnotations ( double zoomBuffer, double zoomBuffer2 )
-{
+public void zoomToAnnotations ( double zoomBuffer, double zoomBuffer2 ) {
 	StateMod_Network_JComponent networkJComponent = __device;
 	List<StateMod_Network_AnnotationData> annotationDataList = networkJComponent.getAnnotationData();
-	GRLimits dataLimits = null; 
+	GRLimits dataLimits = null;
 	for ( StateMod_Network_AnnotationData annotationData: annotationDataList ) {
-		// Have to check for zero because some shapes
-		// don't have coordinates...  For now check only the max...
+		// Have to check for zero because some shapes don't have coordinates...  For now check only the max.
 		GRLimits annotationDataLimits = annotationData.getLimits();
 		if ( dataLimits == null) {
 			dataLimits = new GRLimits( annotationDataLimits );
 		}
-		else {	
+		else {
 			dataLimits = dataLimits.max( annotationDataLimits );
 		}
 	}
-	// Increase the limits...
+	// Increase the limits.
 	double xincrease = 0.0, yincrease = 0.0;
 	if (dataLimits.getMinX() == dataLimits.getMaxX()) {
 		xincrease = networkJComponent.getDataLimitsMax().getWidth()*zoomBuffer2;
 	}
-	else {	
+	else {
 		xincrease = dataLimits.getWidth()*zoomBuffer;
 	}
 	if (dataLimits.getMinY() == dataLimits.getMaxY()) {
 		yincrease = networkJComponent.getDataLimitsMax().getHeight()*zoomBuffer2;
 	}
-	else {	
+	else {
 		yincrease = dataLimits.getHeight()*zoomBuffer;
 	}
 	dataLimits.increase(xincrease, yincrease);
-	// Center the reference network zoom on the given limits and reposition the main map..
+	// Center the reference network zoom on the given limits and reposition the main map.
 	networkJComponent.centerOn(dataLimits);
 }
 
-// TODO (JTS - 2005-04-19) necessary anymore??
+// TODO (JTS - 2005-04-19) necessary anymore?
 public void setSaveOnExit(boolean saveOnExit) {
 	__saveOnExit = saveOnExit;
 }
@@ -2359,15 +2339,15 @@ public void orientationComboBoxSelected() {
 	int index = __layoutComboBox.getSelectedIndex();
 	String value = __orientationComboBox.getSelected();
 	/*
-System.out.println("DL1: " + __device.getDataLimits());		
-System.out.println("DL1: " + __device.getTotalDataLimits());		
+System.out.println("DL1: " + __device.getDataLimits());
+System.out.println("DL1: " + __device.getTotalDataLimits());
 System.out.println("TW/TH: " + __device.getTotalWidth() + "  "
 + __device.getTotalHeight());
 */
 	__device.setOrientation(__orientationComboBox.getSelected());
 	/*
-System.out.println("DL2: " + __device.getDataLimits());		
-System.out.println("DL2: " + __device.getTotalDataLimits());		
+System.out.println("DL2: " + __device.getDataLimits());
+System.out.println("DL2: " + __device.getTotalDataLimits());
 System.out.println("TW/TH: " + __device.getTotalWidth() + "  "
 + __device.getTotalHeight());
 */
@@ -2380,5 +2360,5 @@ System.out.println("TW/TH: " + __device.getTotalWidth() + "  "
 }
 
 // TODO (JTS - 2004-08-17)
-// the box in the reference window does not follow the mouse cursor exactly.
-// the more you move to the up and right, the more "off" the box becomes.
+// The box in the reference window does not follow the mouse cursor exactly.
+// The more you move to the up and right, the more "off" the box becomes.
