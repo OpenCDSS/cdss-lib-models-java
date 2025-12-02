@@ -4,62 +4,27 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
 
-//------------------------------------------------------------------------------
-// StateMod_GUIUtil - GUI-related utility functions
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-//
-// 2003-06-09	J. Thomas Sapienza, RTi	Initial version.
-// 2003-07-07	JTS, RTi		Added code for displaying graphs.
-// 2003-07-17	JTS, RTi		Added nothingSelected() and 
-//					somethingSelected()
-// 2003-08-03	Steven A. Malers, RTi	* Constants that were in
-//					  StateMod_Control are now in
-//					  StateMod_DataSet.
-//					* Add READ_START for process listener.
-// 2003-08-13	SAM, RTi		* Change ProcessListeners to be more
-//					  consistent with StateDMI command
-//					  processing and verify that process
-//					  listener is working.
-//					* Remove map layers window.
-//					* Handle basin summary like other
-//					  windows.
-//					* Remove diagnostics window from the
-//					  list of managed windows - it manages
-//					  itself.
-//					* Clean up the names of the windows to
-//					  be consistent with data set
-//					  components.
-// 2003-08-26	SAM, RTi		Split window manager code into
-//					StateMod_DataSet_WindowManager and
-//					remove from here.
-// 2003-09-24	SAM, RTi		Overload setTitle() to take a JDialog.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-//------------------------------------------------------------------------------
-
 package DWR.StateMod;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -79,12 +44,11 @@ import RTi.Util.Time.TimeInterval;
 import RTi.Util.Time.YearType;
 
 /**
-This class provides static data and methods for user interface methods associated with StateMod, mainly
-the StateMod GUI.  This class is part of the StateMod package
+This class provides static data and methods for user interface methods associated with StateMod, mainly the StateMod GUI.
+This class is part of the StateMod package
 (rather than StateModGUI) because all of the windows for displaying StateMod
 data set components are in the StateMod package).
-In the future, this class may be made non-static if it is necessary that a GUI
-display more than one data set.
+In the future, this class may be made non-static if it is necessary that a GUI display more than one data set.
 */
 public class StateMod_GUIUtil
 {
@@ -95,22 +59,20 @@ protected static String _editorPreference = "NotePad";
 Settings for use in relaying data back to the calling application via ProcessListener calls.
 */
 public final static int 
-	STATUS_READ_START = 20, // Start reading a data file
-	STATUS_READ_COMPLETE = 22, // End reading a data file
-	STATUS_READ_GVP_START = 50, // Start reading the GVP file
-	STATUS_READ_GVP_END = 51; // End reading the GVP file;
+	STATUS_READ_START = 20, // Start reading a data file.
+	STATUS_READ_COMPLETE = 22, // End reading a data file.
+	STATUS_READ_GVP_START = 50, // Start reading the GVP file.
+	STATUS_READ_GVP_END = 51; // End reading the GVP file.
 
 /**
-Add filename filters to the file chooser for time series files.  A general ".stm" entry is added as well
-as well rights.
+Add filename filters to the file chooser for time series files.  A general ".stm" entry is added as well as well rights.
 @param fc File chooser.
 @param timeInterval the TimeInterval for choices (TimeInterval.DAY, TimeInterval.MONTH,
 or TimeInterval.UNKNOWN for all).
 @param addRightFiles indicate whether water right files should be added.
 */
-public static void addTimeSeriesFilenameFilters ( JFileChooser fc, int timeInterval, boolean addRightFiles )
-{
-    // Interleave the entries because TimeInterval.UKNOWN will want a complete list
+public static void addTimeSeriesFilenameFilters ( JFileChooser fc, int timeInterval, boolean addRightFiles ) {
+    // Interleave the entries because TimeInterval.UKNOWN will want a complete list.
     if ( (timeInterval == TimeInterval.DAY) || (timeInterval == TimeInterval.UNKNOWN) ) {
         SimpleFileFilter sff = new SimpleFileFilter( "ddd", "StateMod Diversion Demands (Daily)");
         fc.addChoosableFileFilter(sff);
@@ -242,9 +204,9 @@ public static void addTimeSeriesFilenameFilters ( JFileChooser fc, int timeInter
 }
 
 /**
-Used to set a numeric value in a JTextField.  This method will check the value
-and see if it is missing, and if so, will set the JTextField to "".  Otherwise
-the text field will be filled with the value of the specified int.
+Used to set a numeric value in a JTextField.
+This method will check the value and see if it is missing, and if so, will set the JTextField to "".
+Otherwise the text field will be filled with the value of the specified int.
 @param i the int to check and possibly put in the text field.
 @param textField the JTextField to put the value in.
 */
@@ -258,9 +220,9 @@ public static void checkAndSet(int i, JTextField textField) {
 }
 
 /**
-Used to set a numeric value in a JTextField.  This method will check the value
-and see if it is missing, and if so, will set the JTextField to "".  Otherwise
-the text field will be filled with the value of the specified double.
+Used to set a numeric value in a JTextField.
+This method will check the value and see if it is missing, and if so, will set the JTextField to "".
+Otherwise the text field will be filled with the value of the specified double.
 @param d the double to check and possibly put in the text field.
 @param textField the JTextField to put the value in.
 */
@@ -281,12 +243,11 @@ Displays a graph for a time series.
 */
 public static void displayGraphForTS (TS ts, String title, 
 StateMod_DataSet dataset)
-throws Exception
-{
-	List<TS> v = new Vector<TS>();
+throws Exception {
+	List<TS> v = new ArrayList<>();
 	v.add(ts);
 
-	// add title to proplist
+	// Add title to proplist.
 	PropList props = new PropList("displayGraphForTSProps");
 	props.set("titlestring", title);
 
@@ -301,9 +262,8 @@ Displays a graph for a time series.
 */
 public static void displayGraphForTS ( TS ts, PropList props,
 StateMod_DataSet dataset)
-throws Exception
-{
-	List<TS> v = new Vector<TS>();
+throws Exception {
+	List<TS> v = new ArrayList<>();
 	v.add(ts);
 	displayGraphForTS(v, props, dataset);
 }
@@ -315,9 +275,8 @@ Displays a graph for a time series.
 @param dataset the dataset in which the ts data exists
 */
 public static void displayGraphForTS ( List<TS> tslist, String title, StateMod_DataSet dataset)
-throws Exception
-{
-	// add title to proplist
+throws Exception {
+	// add title to proplist.
 	PropList props = new PropList("displayGraphForTSProps");
 	props.set("titlestring", title);
 	displayGraphForTS(tslist, props, dataset);
@@ -332,18 +291,17 @@ The properties may contain valid TSViewGraphGUI properies or
 may not, in which case defaults will be used.
 If some important properties are not set, they are set using the same PropList.
 */
-public static void displayGraphForTS(List<TS> tslist, PropList props, StateMod_DataSet dataset)
-{
+public static void displayGraphForTS(List<TS> tslist, PropList props, StateMod_DataSet dataset) {
 	PropList proplist = null;
 	if (props == null) {
-		// Create a new one...
+		// Create a new one.
 		proplist = new PropList("SMGUIApp");
 	}
 	else {	
-		// Use what was passed in...
+		// Use what was passed in.
 		proplist = props;
 	}
-	// Make sure some important properties are set...
+	// Make sure some important properties are set.
 
 	if (proplist.getValue("InitialView") == null) {
 		proplist.set("InitialView", "Graph");
@@ -363,13 +321,13 @@ public static void displayGraphForTS(List<TS> tslist, PropList props, StateMod_D
 	if (proplist.getValue("PageLength") == null) {
 		proplist.set("PageLength", "100");
 	}
-	// Use titlestring now but Title may be passed in as property
+	// Use titlestring now but Title may be passed in as property.
 	String title = props.getValue("Title");
 	if ((title != null) && (proplist.getValue("titlestring") == null)) {
 		proplist.set("TitleString", title);
 	}
 
-	// CalendarType: Wateryear, IrrigationYear, CalendarYear
+	// CalendarType: Wateryear, IrrigationYear, CalendarYear.
 
 	if (dataset.getCyrl() == YearType.CALENDAR) {
 		proplist.set("CalendarType", "CalendarYear");
@@ -392,8 +350,7 @@ public static void displayGraphForTS(List<TS> tslist, PropList props, StateMod_D
 }
 
 public static void editFile(String filename) 
-throws Exception
-{
+throws Exception {
 	String [] command_array = new String[2];
 	command_array[0] = _editorPreference;
 	command_array[1] = filename;
@@ -407,45 +364,41 @@ throws Exception
 Return the editor preference (default is "NotePad"), for use in viewing/editing files.
 @return the editor preference.
 */
-public static String getEditorPreference ()
-{	return _editorPreference;
+public static String getEditorPreference () {
+	return _editorPreference;
 }
 
 /**
 Called by JFrames when nothing is selected from the table of ids and names.
 This disables all the JComponents on the form that are only relevant if a data object is selected
-@param components an array of all the JComponents on the form which can be
-disabled when nothing is selected.
+@param components an array of all the JComponents on the form which can be disabled when nothing is selected.
 @deprecated Use JGUIUtil.disableComponents
 */
-public static void nothingSelected(JComponent[] components)
-{	JGUIUtil.disableComponents ( components, true );
+@Deprecated
+public static void nothingSelected(JComponent[] components) {
+	JGUIUtil.disableComponents ( components, true );
 }
 
 /**
 Set the program to be used for editing/viewing files.
-@param editor The editor program to use, as a full path, or the name of a
-program in the PATH environment variable (or current directory).
+@param editor The editor program to use, as a full path,
+or the name of a program in the PATH environment variable (or current directory).
 */
-public static void setEditorPreference ( String editor )
-{	_editorPreference = editor;
+public static void setEditorPreference ( String editor ) {
+	_editorPreference = editor;
 }
 
 /**
 Sets the title in a uniform fashion, as determined by the values passed in.
-The general pattern of the title will be 
-"AppName - DataSet Base Name - Window Name (status)"
+The general pattern of the title will be "AppName - DataSet Base Name - Window Name (status)"
 @param frame the frame on which to set the title.  Cannot be null.
-@param dataset the dataset from which to get the base dataset name.   The 
-basename can be null or "", in which case it won't be included in the title.
+@param dataset the dataset from which to get the base dataset name.
+The basename can be null or "", in which case it won't be included in the title.
 The dataset can be null.
-@param window_title the title of the window.  Can be null or "", in which 
-case it won't be included in the title.
-@param status the status of the window.  Can be null or "", in which case 
-it won't be included in the title.
+@param window_title the title of the window.  Can be null or "", in which case it won't be included in the title.
+@param status the status of the window.  Can be null or "", in which case it won't be included in the title.
 */
-public static void setTitle(JFrame frame, DataSet dataset, String window_title, String status)
-{
+public static void setTitle(JFrame frame, DataSet dataset, String window_title, String status) {
 	String title = "";
 	int count = 0;
 	
@@ -486,19 +439,15 @@ public static void setTitle(JFrame frame, DataSet dataset, String window_title, 
 
 /**
 Sets the title in a uniform fashion, as determined by the values passed in.
-The general pattern of the title will be 
-"AppName - DataSet Base Name - Window Name (status)"
+The general pattern of the title will be "AppName - DataSet Base Name - Window Name (status)"
 @param dialog the dialog on which to set the title.  Cannot be null.
-@param dataset the dataset from which to get the base dataset name.   The 
-basename can be null or "", in which case it won't be included in the title.
+@param dataset the dataset from which to get the base dataset name.
+The basename can be null or "", in which case it won't be included in the title.
 The dataset can be null.
-@param window_title the title of the window.  Can be null or "", in which 
-case it won't be included in the title.
-@param status the status of the window.  Can be null or "", in which case 
-it won't be included in the title.
+@param window_title the title of the window.  Can be null or "", in which case it won't be included in the title.
+@param status the status of the window.  Can be null or "", in which case it won't be included in the title.
 */
-public static void setTitle(JDialog dialog, StateMod_DataSet dataset, String window_title, String status)
-{
+public static void setTitle(JDialog dialog, StateMod_DataSet dataset, String window_title, String status) {
 	String title = "";
 	int count = 0;
 	
@@ -538,16 +487,15 @@ public static void setTitle(JDialog dialog, StateMod_DataSet dataset, String win
 }
 
 /**
-Called by JFrames when a data object is selected from the table of names and
-ids.  This enables what needs to be enabled properly.
-@param components an array of all the JComponents on the form which can be
-enabled when something is selected.
+Called by JFrames when a data object is selected from the table of names and ids.
+This enables what needs to be enabled properly.
+@param components an array of all the JComponents on the form which can be enabled when something is selected.
 @param textUneditables an array of the elements in disables[] that should never be editable.
 @param editable whether the form is editable or not.
 @deprecated Use JGUIUtil.enableComponents
 */
-public static void somethingSelected(JComponent[] components, int[] textUneditables, boolean editable)
-{
+@Deprecated
+public static void somethingSelected(JComponent[] components, int[] textUneditables, boolean editable) {
 	JGUIUtil.enableComponents ( components, textUneditables, editable );
 }
 

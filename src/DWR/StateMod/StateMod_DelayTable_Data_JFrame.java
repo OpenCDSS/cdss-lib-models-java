@@ -4,49 +4,22 @@
 
 CDSS Models Java Library
 CDSS Models Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Models Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Models Java Library is distributed in the hope that it will be useful,
+CDSS Models Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Models Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-// PRINTING CHECKED
-// ----------------------------------------------------------------------------
-// StateMod_DelayTable_Data_JFrame - This is a JFrame that displays DelayTable
-//	data in a tabular format.
-// ----------------------------------------------------------------------------
-// Copyright:   See the COPYRIGHT file
-// ----------------------------------------------------------------------------
-// History:
-// 
-// 2005-01-17	J. Thomas Sapienza, RTi	Initial version.
-// 2005-01-20	JTS, RTi		Following review:
-//					* Improved some loop performance.
-//					* Removed getDataType().
-//					* Title string is now passed to the
-//					  super constructor.
-//					* Editability of data in the worksheet
-//					  is now passed in via the constructor.
-// 2005-03-28	JTS, RTi		Adjusted GUI size.
-// 2005-03-29	JTS, RTi		* Now uses the new Data Table Models and
-//					  Cell Renderers.
-//					* Values are only displayed in percents
-//					  now, no fractions.
-// 2005-03-31	JTS, RTi		Added the checkbox for displaying 
-//					(or hiding) totals lines in the table.
-// 2007-03-01	SAM, RTi		Clean up code based on Eclipse feedback.
-// ----------------------------------------------------------------------------
 
 package DWR.StateMod;
 
@@ -64,8 +37,8 @@ import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.JScrollWorksheet;
 
 /**
-This class is a JFrame for displaying a list of StateMod_DelayTable data in
-a worksheet.  The worksheet data can be exported to a file or printed.
+This class is a JFrame for displaying a list of StateMod_DelayTable data in a worksheet.
+The worksheet data can be exported to a file or printed.
 */
 @SuppressWarnings("serial")
 public class StateMod_DelayTable_Data_JFrame 
@@ -88,17 +61,16 @@ private StateMod_DelayTable_Data_TableModel __tableModel = null;
 
 /**
 Constructor. 
-@param data the data to display in the worksheet.  Can be null or empty, in 
-which case an empty worksheet is shown.
+@param data the data to display in the worksheet.  Can be null or empty, in which case an empty worksheet is shown.
 @param titleString the String to display as the GUI title.
-@param monthlyData if true, the delay tables are showing monthly data.  If
-false, they are showing daily data.
+@param monthlyData if true, the delay tables are showing monthly data.  If false, they are showing daily data.
 @param returnIsPercent whether the return amounts are in percents (true) or fractions (false).
 @param editable whether the data in the JFrame can be edited or not.  If true
 the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 @deprecated use the other one without returnIsPercent.
 */
+@Deprecated
 //public StateMod_DelayTable_Data_JFrame(List<StateMod_DelayTable> data, String titleString,
 //boolean monthlyData, boolean returnIsPercent, boolean editable)
 //throws Exception {
@@ -107,13 +79,10 @@ the data can be edited, if false they can not.
 
 /**
 Constructor. 
-@param data the data to display in the worksheet.  Can be null or empty, in 
-which case an empty worksheet is shown.
+@param data the data to display in the worksheet.  Can be null or empty, in which case an empty worksheet is shown.
 @param titleString the String to display as the GUI title.
-@param monthlyData if true, the delay tables are showing monthly data.  If
-false, they are showing daily data.
-@param editable whether the data in the JFrame can be edited or not.  If true
-the data can be edited, if false they can not.
+@param monthlyData if true, the delay tables are showing monthly data.  If false, they are showing daily data.
+@param editable whether the data in the JFrame can be edited or not.  If true the data can be edited, if false they can not.
 @throws Exception if there is an error building the worksheet.
 */
 public StateMod_DelayTable_Data_JFrame(JFrame parent, List<StateMod_DelayTable> data, String titleString, boolean monthlyData, boolean editable)
@@ -179,14 +148,12 @@ throws Exception {
 		= new StateMod_DelayTable_Data_CellRenderer(tableModel);
 
 	// Note (JTS - 2005-03-31)
-	// while it would seem the right thing to do would be to here assign
-	// the table model to __tableModel, JTS found that in practice for
-	// some reason once the constructor was returned to (in order to finish
-	// building the GUI with checkbox) that the table model was then 
-	// null!  JTS didn't understand why it was happening but didn't
-	// want to spend too long investigating.
+	// While it would seem the right thing to do would be to here assign the table model to __tableModel,
+	// JTS found that in practice for some reason once the constructor was returned to
+	// (in order to finish building the GUI with checkbox) that the table model was then null).
+	// JTS didn't understand why it was happening but didn't want to spend too long investigating.
 
-	// _props is defined in the super class
+	// _props is defined in the super class.
 	return new JScrollWorksheet(cellRenderer, tableModel, _props);
 }
 
