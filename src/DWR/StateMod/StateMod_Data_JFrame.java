@@ -362,9 +362,6 @@ throws Exception {
 		
 	try {
 		// Write each element of the strings Vector to a file.
-		// For some reason, when just using println in an
-		// applet, the cr-nl pair is not output like it should
-		// be on Windows95.  Java Bug???
 		String linesep = System.getProperty("line.separator");
 		int size = strings.size();
 		for (int i = 0; i < size; i++) {
